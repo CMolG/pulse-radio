@@ -98,6 +98,7 @@ export default function Sidebar({
         <div className="flex-row-2 px-3 py-2.5 rounded-xl panel-2">
           <Search size={15} className="text-dim flex-shrink-0" />
           <input type="text" placeholder="Search stations…" value={query} onChange={e => setQuery(e.target.value)}
+            aria-label="Search stations"
             className="bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none w-full"/>
         </div></form>
 

@@ -554,6 +554,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             <div className="flex items-center gap-3 px-4 pt-3 pb-2">
               <button
                 onClick={() => setMobileDrawer((d) => !d)}
+                aria-label={mobileDrawer ? 'Close menu' : 'Open menu'}
                 className="w-10 h-10 flex-center-row rounded-xl bg-surface-2 hover:bg-surface-5 text-secondary active:scale-95 transition-transform flex-shrink-0"
               >
                 {mobileDrawer ? <X size={20} /> : <Menu size={20} />}
@@ -567,6 +568,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               {radio.station && (
                 <button
                   onClick={radio.station ? handleToggleFav : undefined}
+                  aria-label={radio.station && favs.has(radio.station.stationuuid) ? 'Remove from favorites' : 'Add to favorites'}
                   className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
                 >
                   <Star size={20} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
@@ -582,6 +584,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   placeholder="Search stations..."
                   value={mobileSearchQuery}
                   onChange={(e) => setMobileSearchQuery(e.target.value)}
+                  aria-label="Search stations"
                   className="bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none w-full"
                   data-radio-search
                 />

@@ -210,6 +210,7 @@ export default function NowPlayingBar({
         <button
           onClick={onTogglePlay}
           disabled={!station}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >
           {isLoading ? (
@@ -280,6 +281,7 @@ export default function NowPlayingBar({
         )}
         <button
           onClick={onToggleEq}
+          aria-label="Toggle equalizer"
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         >
           <SlidersHorizontal size={14} />
@@ -290,6 +292,7 @@ export default function NowPlayingBar({
       <div className="flex-row-1 w-24 min-w-0 flex-shrink-0 overflow-hidden ml-2">
         <button
           onClick={onToggleMute}
+          aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           className="p-1 text-muted hover:text-white/60 transition-colors flex-shrink-0"
         >
           {muted || volume === 0 ? (
@@ -305,6 +308,7 @@ export default function NowPlayingBar({
           step={0.01}
           value={muted ? 0 : volume}
           onChange={(e) => onSetVolume(parseFloat(e.target.value))}
+          aria-label="Volume"
           className="flex-fill h-[3px] appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
       </div>
