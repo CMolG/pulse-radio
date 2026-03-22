@@ -42,9 +42,7 @@ export function useFavorites(): UseFavoritesReturn {
   const add = useCallback((station: Station) => {
     setFavorites(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
-      const next = [station, ...prev];
-      if (next.length > MAX_FAVORITES) next.length = MAX_FAVORITES;
-      return next;
+      return [station, ...prev].slice(0, MAX_FAVORITES);
     });
   }, []);
 
@@ -56,9 +54,7 @@ export function useFavorites(): UseFavoritesReturn {
     setFavorites(prev => {
       const exists = prev.some(s => s.stationuuid === station.stationuuid);
       if (exists) return prev.filter(s => s.stationuuid !== station.stationuuid);
-      const next = [station, ...prev];
-      if (next.length > MAX_FAVORITES) next.length = MAX_FAVORITES;
-      return next;
+      return [station, ...prev].slice(0, MAX_FAVORITES);
     });
   }, []);
 
