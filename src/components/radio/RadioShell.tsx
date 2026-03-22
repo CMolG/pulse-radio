@@ -792,6 +792,29 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           />
         )}
 
+        {/* Toast notification */}
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              key={toast.key}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.18 }}
+              className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+              style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+            >
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
+                {toast.icon === "star"
+                  ? <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
+                  : <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
+                }
+                <span className="truncate">{toast.msg}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Bottom bar */}
         <div className="relative z-20">
           <NowPlayingBar
@@ -1017,6 +1040,28 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           onClose={() => setShowEq(false)}
         />
       )}
+
+      {/* Toast notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            key={toast.key}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.18 }}
+            className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+          >
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
+              {toast.icon === "star"
+                ? <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
+                : <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
+              }
+              <span className="truncate">{toast.msg}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom bar */}
       <div className="relative z-10">

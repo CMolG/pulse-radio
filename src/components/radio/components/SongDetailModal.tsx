@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -66,6 +66,41 @@ export default function SongDetailModal({ song, onClose }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [song, onClose]);
 
+  // Focus trap: keep Tab cycling within the modal
+  const modalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!song || !modalRef.current) return;
+    const modal = modalRef.current;
+    const prev = document.activeElement as HTMLElement | null;
+    // Focus first focusable element
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusable[0]?.focus();
+
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const nodes = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener('keydown', onTab);
+    return () => {
+      window.removeEventListener('keydown', onTab);
+      prev?.focus();
+    };
+  }, [song]);
+
   return (
     <AnimatePresence>
       {song && (
@@ -79,6 +114,7 @@ export default function SongDetailModal({ song, onClose }: Props) {
         >
           <motion.div
             key="song-detail-modal"
+            ref={modalRef}
             initial={{ y: 30, opacity: 0, scale: 0.96 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 30, opacity: 0, scale: 0.96 }}
