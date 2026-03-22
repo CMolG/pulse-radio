@@ -15,6 +15,12 @@ function proxyUrl(raw: string): string {
   return `/api/proxy-stream?url=${encodeURIComponent(raw)}`;
 }
 
+function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export type UseRadioReturn = {
   station: Station | null;
   status: PlaybackStatus;
@@ -36,6 +42,8 @@ export function useRadio(): UseRadioReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const proxyFallbackUrlsRef = useRef<Set<string>>(new Set());
+  const [preferDirectStream] = useState(() => isIOSDevice());
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() => {
@@ -53,11 +61,39 @@ export function useRadio(): UseRadioReturn {
   const getAudio = useCallback(() => {
     if (!audioRef.current) {
       const audio = new Audio();
-      audio.crossOrigin = 'anonymous';
       audioRef.current = audio;
     }
     return audioRef.current;
   }, []);
+
+  const startPlayback = useCallback(
+    (
+      audio: HTMLAudioElement,
+      streamUrl: string,
+      onError: () => void,
+    ) => {
+      const shouldUseProxy =
+        !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl);
+
+      const setSourceAndPlay = (useProxy: boolean) => {
+        audio.crossOrigin = useProxy ? 'anonymous' : null;
+        audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
+        return audio.play();
+      };
+
+      setSourceAndPlay(shouldUseProxy).catch(() => {
+        // On iOS we prefer direct stream for stable background playback,
+        // but fall back to proxy if a station rejects direct playback.
+        if (!shouldUseProxy && preferDirectStream) {
+          proxyFallbackUrlsRef.current.add(streamUrl);
+          setSourceAndPlay(true).catch(onError);
+          return;
+        }
+        onError();
+      });
+    },
+    [preferDirectStream],
+  );
 
   useEffect(() => {
     const audio = getAudio();
@@ -103,8 +139,7 @@ export function useRadio(): UseRadioReturn {
       clearReconnectTimer();
       reconnectTimerRef.current = setTimeout(() => {
         if (userPausedRef.current) return;
-        audio.src = proxyUrl(station.url_resolved);
-        audio.play().catch(() => setStatus('error'));
+        startPlayback(audio, station.url_resolved, () => setStatus('error'));
       }, delay);
     };
 
@@ -141,10 +176,7 @@ export function useRadio(): UseRadioReturn {
       if (audio.paused || audio.readyState < 2) {
         setStatus('loading');
         retryRef.current = 0;
-        audio.play().catch(() => {
-          audio.src = proxyUrl(station.url_resolved);
-          audio.play().catch(() => setStatus('error'));
-        });
+        audio.play().catch(() => startPlayback(audio, station.url_resolved, () => setStatus('error')));
       }
     };
 
@@ -154,11 +186,7 @@ export function useRadio(): UseRadioReturn {
         if (audio.paused || audio.readyState < 2) {
           setStatus('loading');
           retryRef.current = 0;
-          audio.play().catch(() => {
-            // Stream likely timed out while in background — reconnect
-            audio.src = proxyUrl(station.url_resolved);
-            audio.play().catch(() => setStatus('error'));
-          });
+          audio.play().catch(() => startPlayback(audio, station.url_resolved, () => setStatus('error')));
         }
       }
     };
@@ -188,8 +216,7 @@ export function useRadio(): UseRadioReturn {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pageshow', onPageShow);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [station]);
+  }, [station, getAudio, startPlayback]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.VOLUME, String(volume));
@@ -201,6 +228,7 @@ export function useRadio(): UseRadioReturn {
     const audio = getAudio();
     retryRef.current = 0;
     userPausedRef.current = false;
+    proxyFallbackUrlsRef.current.delete(s.url_resolved);
     setStation(s);
     setStatus('loading');
 
@@ -216,18 +244,15 @@ export function useRadio(): UseRadioReturn {
         audio.volume = Math.max(0, startVol * (1 - step / steps));
         if (step >= steps) {
           clearInterval(fadeTimer);
-          audio.src = proxyUrl(s.url_resolved);
           audio.volume = targetVol;
-          audio.play().catch(() => setStatus('error'));
+          startPlayback(audio, s.url_resolved, () => setStatus('error'));
         }
       }, interval);
     } else {
-      audio.src = proxyUrl(s.url_resolved);
       audio.volume = muted ? 0 : volume;
-      audio.play().catch(() => setStatus('error'));
+      startPlayback(audio, s.url_resolved, () => setStatus('error'));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getAudio, muted, volume]);
+  }, [getAudio, muted, volume, startPlayback]);
 
   const pause = useCallback(() => {
     userPausedRef.current = true;

@@ -78,7 +78,13 @@ export function useEqualizer(): UseEqualizerReturn {
       filters[filters.length - 1].connect(ctx.destination);
 
       filtersRef.current = filters;
-    } catch { /* Web Audio not available */ }
+    } catch {
+      // Keep playback alive when WebAudio graph creation fails (observed on
+      // some iOS background/resume paths for cross-origin streams).
+      sourceRef.current = null;
+      filtersRef.current = [];
+      connectedAudioRef.current = audio;
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

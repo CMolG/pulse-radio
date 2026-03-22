@@ -35,30 +35,39 @@ export function useAudioAnalyser(
   const connectAudio = useCallback(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
+      try {
+        const { ctx, source } = getOrCreateAudioSource(audio);
+        connectedRef.current = audio;
 
-      const { ctx, source } = getOrCreateAudioSource(audio);
-      connectedRef.current = audio;
+        if (!analyserRef.current) {
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = fftSize;
+          analyser.smoothingTimeConstant = smoothingTimeConstant;
+          source.connect(analyser);
+          analyserRef.current = analyser;
+        }
 
-      if (!analyserRef.current) {
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = fftSize;
-        analyser.smoothingTimeConstant = smoothingTimeConstant;
-        source.connect(analyser);
-        analyserRef.current = analyser;
-      }
+        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+        const timeArray = new Uint8Array(analyserRef.current.fftSize);
+        setIsActive(true);
 
-      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-      const timeArray = new Uint8Array(analyserRef.current.fftSize);
-      setIsActive(true);
-
-      const tick = () => {
-        analyserRef.current?.getByteFrequencyData(dataArray);
-        analyserRef.current?.getByteTimeDomainData(timeArray);
-        setFrequencyData(new Uint8Array(dataArray));
-        setWaveData(new Uint8Array(timeArray));
+        const tick = () => {
+          analyserRef.current?.getByteFrequencyData(dataArray);
+          analyserRef.current?.getByteTimeDomainData(timeArray);
+          setFrequencyData(new Uint8Array(dataArray));
+          setWaveData(new Uint8Array(timeArray));
+          rafRef.current = requestAnimationFrame(tick);
+        };
         rafRef.current = requestAnimationFrame(tick);
-      };
-      rafRef.current = requestAnimationFrame(tick);
+      } catch {
+        // Some mobile browsers (notably iOS in background paths) can reject
+        // WebAudio graph connections for cross-origin streams. Keep playback
+        // alive and just disable analyser updates.
+        cancelAnimationFrame(rafRef.current);
+        setIsActive(false);
+        setFrequencyData(null);
+        setWaveData(null);
+      }
     },
     [fftSize, smoothingTimeConstant],
   );
