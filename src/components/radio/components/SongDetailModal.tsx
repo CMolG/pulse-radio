@@ -25,6 +25,7 @@ import type { SongDetailData } from '../types';
 import { useArtistInfo } from '../hooks/useArtistInfo';
 import { useLyrics } from '../hooks/useLyrics';
 import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
+import { useAlbumArt } from '@/lib/audio-visualizer';
 
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 
@@ -40,12 +41,29 @@ type Props = {
 
 export default function SongDetailModal({ song, onClose }: Props) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
+  const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
+  const resolvedArtworkUrl = song?.artworkUrl ?? albumMeta.artworkUrl ?? undefined;
+  const resolvedAlbum = song?.album ?? albumMeta.albumName ?? undefined;
+  const resolvedItunesUrl = song?.itunesUrl ?? albumMeta.itunesUrl ?? undefined;
+  const resolvedDurationMs = song?.durationMs ?? albumMeta.durationMs ?? null;
+  const resolvedGenre = song?.genre ?? albumMeta.genre ?? null;
+  const resolvedReleaseDate = song?.releaseDate ?? albumMeta.releaseDate ?? null;
+  const resolvedTrackNumber = song?.trackNumber ?? albumMeta.trackNumber ?? null;
+  const resolvedTrackCount = song?.trackCount ?? albumMeta.trackCount ?? null;
+  const showMetaHydration = Boolean(
+    song &&
+    (song.durationMs == null ||
+      song.genre == null ||
+      song.releaseDate == null ||
+      song.trackNumber == null ||
+      song.trackCount == null),
+  ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
     song
       ? {
           title: song.title,
           artist: song.artist,
-          album: song.album,
+          album: resolvedAlbum,
         }
       : null,
     song?.stationName ?? null,
@@ -145,9 +163,9 @@ export default function SongDetailModal({ song, onClose }: Props) {
               <div className="px-5 -mt-2">
                 {/* Artwork */}
                 <div className="w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
-                  {song.artworkUrl ? (
+                  {resolvedArtworkUrl ? (
                     <img
-                      src={song.artworkUrl}
+                      src={resolvedArtworkUrl}
                       alt={`Album art for ${song.title} by ${song.artist}`}
                       className="size-full object-cover"
                     />
@@ -166,37 +184,52 @@ export default function SongDetailModal({ song, onClose }: Props) {
                   <p className="text-[14px] text-secondary mt-1">
                     {song.artist}
                   </p>
-                  {song.album && (
-                    <p className="text-[12px] text-dim mt-0.5">{song.album}</p>
+                  {resolvedAlbum && (
+                    <p className="text-[12px] text-dim mt-0.5">{resolvedAlbum}</p>
                   )}
 
-                  {/* Track metadata badges */}
-                  {(song.genre || song.durationMs || song.releaseDate || song.trackNumber != null) && (
-                    <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-                      {song.genre && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
-                          <Tag size={9} />
-                          {song.genre}
-                        </span>
+                  {/* Extended metadata: corner-style row + release line + context badges */}
+                  {(resolvedDurationMs || resolvedTrackNumber != null || resolvedReleaseDate || resolvedGenre) && (
+                    <div className="mt-2 space-y-1.5">
+                      <div className="grid grid-cols-2 items-start">
+                        <div className="justify-self-start">
+                          {resolvedDurationMs && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.08] border border-white/10 text-[10px] font-mono text-white/70">
+                              <Clock size={9} />
+                              {formatDuration(resolvedDurationMs)}
+                            </span>
+                          )}
+                        </div>
+                        <div className="justify-self-end">
+                          {resolvedTrackNumber != null && resolvedTrackCount != null && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.08] border border-white/10 text-[10px] text-white/70">
+                              <Disc3 size={9} />
+                              #{resolvedTrackNumber}/{resolvedTrackCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {resolvedReleaseDate && (
+                        <p className="text-[10px] text-white/50">
+                          Released on: {formatReleaseDate(resolvedReleaseDate)}
+                        </p>
                       )}
-                      {song.durationMs && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
+
+                      <div className="flex flex-wrap justify-center gap-1.5">
+                        {resolvedGenre && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
+                            <Tag size={9} />
+                            {resolvedGenre}
+                          </span>
+                        )}
+                      {showMetaHydration && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/40 animate-pulse">
                           <Clock size={9} />
-                          {formatDuration(song.durationMs)}
+                          Fetching metadata…
                         </span>
                       )}
-                      {song.releaseDate && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
-                          <Calendar size={9} />
-                          {formatReleaseDate(song.releaseDate)}
-                        </span>
-                      )}
-                      {song.trackNumber != null && song.trackCount != null && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
-                          <Disc3 size={9} />
-                          #{song.trackNumber}/{song.trackCount}
-                        </span>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -204,7 +237,7 @@ export default function SongDetailModal({ song, onClose }: Props) {
                 {/* Apple Music button */}
                 <a
                   href={
-                    song.itunesUrl ||
+                    resolvedItunesUrl ||
                     itunesSearchUrl(song.title, song.artist)
                   }
                   target="_blank"
