@@ -35,21 +35,20 @@ export function useHistory(
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
   }, [history]);
 
-  // Reset track key when station changes to avoid duplicating stale metadata
+  // Add entry when track changes; handles station transitions in a single effect
+  // to prevent the race between station-reset and track-add
   useEffect(() => {
+    if (!track?.title || !stationUuid || !stationName) return;
+
+    // Station just changed — skip this render's potentially stale metadata
     if (stationUuid !== lastStationRef.current) {
       lastStationRef.current = stationUuid;
       lastTrackRef.current = '';
+      return;
     }
-  }, [stationUuid]);
 
-  // Add entry when track changes
-  useEffect(() => {
-    if (!track?.title || !stationUuid || !stationName) return;
     const key = `${stationUuid}::${track.artist}::${track.title}`;
     if (key === lastTrackRef.current) return;
-    // Only add if station hasn't just changed (wait for fresh metadata)
-    if (stationUuid !== lastStationRef.current) return;
     lastTrackRef.current = key;
 
     const entry: HistoryEntry = {
