@@ -128,7 +128,11 @@ export default function TheaterView({
   useEffect(() => {
     if (!artworkUrl || artworkUrl === lastUrlRef.current) return;
     lastUrlRef.current = artworkUrl;
-    extractColors(artworkUrl).then(setColors);
+    let cancelled = false;
+    extractColors(artworkUrl).then(c => {
+      if (!cancelled) setColors(c);
+    });
+    return () => { cancelled = true; };
   }, [artworkUrl]);
 
   const [color1, color2, color3] = colors;
