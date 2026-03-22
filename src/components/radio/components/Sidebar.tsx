@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Search, ChevronRight, ChevronDown, Radio } from 'lucide-react';
 import type { BrowseCategory } from '../types';
 import { GENRE_CATEGORIES } from '../constants';
@@ -27,11 +27,12 @@ export default function Sidebar({
   );
 
   const toggleCollapse = useCallback((key: string) => {
-    setCollapsed(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      saveToStorage('radio-sidebar-collapsed', next)
-      return next;});
+    setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   }, []);
+
+  useEffect(() => {
+    saveToStorage('radio-sidebar-collapsed', collapsed);
+  }, [collapsed]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
