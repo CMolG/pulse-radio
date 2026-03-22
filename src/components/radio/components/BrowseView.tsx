@@ -142,17 +142,54 @@ export default function BrowseView({
   });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
+  const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
   const [genreFilter, setGenreFilter] = useState<string | null>(null);
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setGenreFilter(null);
     setCountryFilter(null);
   }, [view]);
+
+  const loadCategory = useCallback(async (catId: string, cancelled?: boolean) => {
+    const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
+    if (!cat) return;
+    try {
+      let result: Station[];
+      if (cat.id === "trending") {
+        result = await trendingStations(15);
+      } else if (cat.id === "local") {
+        result = await localStations(15);
+      } else if (cat.tag) {
+        result = await stationsByTag(cat.tag, 15);
+      } else {
+        return;
+      }
+      if (!cancelled) {
+        setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
+        setFailedCategories((prev) => {
+          if (!prev.has(catId)) return prev;
+          const next = new Set(prev);
+          next.delete(catId);
+          return next;
+        });
+      }
+    } catch {
+      if (!cancelled) {
+        setFailedCategories((prev) => {
+          if (prev.has(catId)) return prev;
+          const next = new Set(prev);
+          next.add(catId);
+          return next;
+        });
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -189,37 +226,18 @@ export default function BrowseView({
       // Top view — progressively load ALL genre categories
       setLoading(false);
       setCategorySections({});
+      setFailedCategories(new Set());
 
       for (const catId of BROWSE_ORDER) {
-        const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
-        if (!cat) continue;
-
-        (async () => {
-          try {
-            let result: Station[];
-            if (cat.id === "trending") {
-              result = await trendingStations(15);
-            } else if (cat.id === "local") {
-              result = await localStations(15);
-            } else if (cat.tag) {
-              result = await stationsByTag(cat.tag, 15);
-            } else {
-              return;
-            }
-            if (!cancelled) {
-              setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
-            }
-          } catch {
-            // Skip failed categories silently
-          }
-        })();
+        loadCategory(catId, cancelled);
       }
     }
 
     return () => {
       cancelled = true;
     };
-  }, [view]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, retryKey]);
 
   const filteredStations = useMemo(() => {
     let list = stations;
@@ -344,9 +362,15 @@ export default function BrowseView({
         )}
 
         {error && (
-          <div className="flex-center-col py-16">
-            <Radio size={32} className="text-muted mb-2" />
+          <div className="flex-center-col gap-3 py-16">
+            <Radio size={32} className="text-muted" />
             <p className="text-[13px] text-secondary">{error}</p>
+            <button
+              onClick={() => setRetryKey((k) => k + 1)}
+              className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
+            >
+              Retry
+            </button>
           </div>
         )}
 
@@ -380,6 +404,33 @@ export default function BrowseView({
                             countryFilter.toLowerCase(),
                         )
                       : catStations;
+
+                  // Failed to load — show retry button
+                  if (!catStations && failedCategories.has(catId)) {
+                    return (
+                      <ScrollRow
+                        key={catId}
+                        title={cat.label}
+                        icon={
+                          CATEGORY_ICONS[catId] ?? (
+                            <Music size={14} className="text-dim" />
+                          )
+                        }
+                        isMobile={isMobile}
+                      >
+                        <div className={`snap-start flex-shrink-0 ${itemWidth} h-[180px] rounded-xl bg-surface-2 flex-center-col gap-2`}>
+                          <Radio size={18} className="text-muted" />
+                          <p className="text-[11px] text-muted">Failed to load</p>
+                          <button
+                            onClick={() => loadCategory(catId)}
+                            className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      </ScrollRow>
+                    );
+                  }
 
                   // Still loading — show skeleton placeholders
                   if (!catStations) {
