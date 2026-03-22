@@ -71,7 +71,8 @@ export function VisualizerCanvas({
         const barWidth = width / barCount;
         const gap = barWidth * 0.2;
         for (let i = 0; i < barCount; i++) {
-          const value = frequencyData[i * step] / 255;
+          const idx = Math.min(i * step, frequencyData.length - 1);
+          const value = frequencyData[idx] / 255;
           const barHeight = value * height * 0.8;
           const gradient = ctx.createLinearGradient(
             0,
