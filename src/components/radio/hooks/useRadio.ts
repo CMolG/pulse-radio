@@ -281,7 +281,10 @@ export function useRadio(): UseRadioReturn {
   const toggleMute = useCallback(() => setMuted(m => !m), []);
 
   const seek = useCallback((t: number) => {
-    if (audioRef.current) audioRef.current.currentTime = t;
+    const audio = audioRef.current;
+    if (!audio || !isFinite(t)) return;
+    const duration = audio.duration || 0;
+    audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
 
   return {
