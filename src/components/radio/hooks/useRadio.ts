@@ -66,6 +66,15 @@ export function useRadio(): UseRadioReturn {
       if (userPausedRef.current) {
         userPausedRef.current = false;
         setStatus('paused');
+      } else if (station) {
+        // OS/browser interrupted playback (screen lock, phone call, etc.)
+        // Attempt automatic resume after a brief delay
+        setStatus('loading');
+        setTimeout(() => {
+          if (!userPausedRef.current && audio.paused) {
+            audio.play().catch(() => {});
+          }
+        }, 300);
       }
     };
     const onWaiting = () => setStatus('loading');
@@ -110,6 +119,21 @@ export function useRadio(): UseRadioReturn {
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
 
+    // Resume playback when page returns from background (screen unlock, tab switch)
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && station && !userPausedRef.current) {
+        if (audio.paused || audio.readyState < 2) {
+          setStatus('loading');
+          retryRef.current = 0;
+          audio.play().catch(() => {
+            // Stream likely timed out while in background — reconnect
+            audio.src = proxyUrl(station.url_resolved);
+            audio.play().catch(() => setStatus('error'));
+          });
+        }
+      }
+    };
+
     audio.addEventListener('playing', onPlaying);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('waiting', onWaiting);
@@ -117,6 +141,7 @@ export function useRadio(): UseRadioReturn {
     audio.addEventListener('stalled', onStalled);
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('timeupdate', onTimeUpdate);
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       if (stallTimer) clearTimeout(stallTimer);
@@ -127,6 +152,7 @@ export function useRadio(): UseRadioReturn {
       audio.removeEventListener('stalled', onStalled);
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('timeupdate', onTimeUpdate);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [station]);

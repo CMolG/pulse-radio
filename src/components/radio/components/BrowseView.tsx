@@ -13,12 +13,11 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState } from "../types";
 import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, countryFlag } from "../constants";
 import {
-  topStations,
   searchStations,
   stationsByTag,
   stationsByCountry,
@@ -26,6 +25,18 @@ import {
   localStations,
 } from "../services/radioApi";
 import StationCard from "./StationCard";
+
+/** Order in which category sections appear on the home screen */
+const BROWSE_ORDER = [
+  'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
+  'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin',
+  'metal', 'local', 'world',
+] as const;
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  trending: <Zap size={14} className="text-amber-400/70" />,
+  local: <MapPin size={14} className="text-emerald-400/70" />,
+};
 
 type Props = {
   view: ViewState;
@@ -130,8 +141,7 @@ export default function BrowseView({
     initializeWithValue: false,
   });
   const [stations, setStations] = useState<Station[]>([]);
-  const [trendingList, setTrendingList] = useState<Station[]>([]);
-  const [localList, setLocalList] = useState<Station[]>([]);
+  const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
@@ -146,46 +156,64 @@ export default function BrowseView({
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     setError(null);
 
-    const load = async () => {
-      try {
-        let result: Station[];
-        switch (view.mode) {
-          case "search":
-            result = await searchStations(view.query);
-            break;
-          case "genre":
-            result = await stationsByTag(view.tag);
-            break;
-          case "country":
-            result = await stationsByCountry(view.country);
-            break;
-          default:
-            result = await topStations();
+    if (view.mode !== "top") {
+      // Search, genre, country modes — single list as before
+      setLoading(true);
+      const load = async () => {
+        try {
+          let result: Station[];
+          switch (view.mode) {
+            case "search":
+              result = await searchStations(view.query);
+              break;
+            case "genre":
+              result = await stationsByTag(view.tag);
+              break;
+            case "country":
+              result = await stationsByCountry(view.country);
+              break;
+            default:
+              result = [];
+          }
+          if (!cancelled) setStations(result);
+        } catch {
+          if (!cancelled) setError("Failed to load stations");
+        } finally {
+          if (!cancelled) setLoading(false);
         }
-        if (!cancelled) setStations(result);
-      } catch {
-        if (!cancelled) setError("Failed to load stations");
-      } finally {
-        if (!cancelled) setLoading(false);
+      };
+      load();
+    } else {
+      // Top view — progressively load ALL genre categories
+      setLoading(false);
+      setCategorySections({});
+
+      for (const catId of BROWSE_ORDER) {
+        const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
+        if (!cat) continue;
+
+        (async () => {
+          try {
+            let result: Station[];
+            if (cat.id === "trending") {
+              result = await trendingStations(15);
+            } else if (cat.id === "local") {
+              result = await localStations(15);
+            } else if (cat.tag) {
+              result = await stationsByTag(cat.tag, 15);
+            } else {
+              return;
+            }
+            if (!cancelled) {
+              setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
+            }
+          } catch {
+            // Skip failed categories silently
+          }
+        })();
       }
-    };
-
-    load();
-
-    if (view.mode === "top") {
-      trendingStations(10)
-        .then((r) => {
-          if (!cancelled) setTrendingList(r);
-        })
-        .catch(() => {});
-      localStations(10)
-        .then((r) => {
-          if (!cancelled) setLocalList(r);
-        })
-        .catch(() => {});
     }
 
     return () => {
@@ -208,19 +236,26 @@ export default function BrowseView({
     return list;
   }, [stations, genreFilter, countryFilter]);
 
+  // All loaded category stations for discovery mode & station count in top view
+  const allCategoryStations = useMemo(() => {
+    return Object.values(categorySections).flat();
+  }, [categorySections]);
+
+  const displayCount = view.mode === "top" ? allCategoryStations.length : filteredStations.length;
+
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
-    if (discoveryMode && filteredStations.length > 0) {
+    const pool = view.mode === "top" ? allCategoryStations : filteredStations;
+    if (discoveryMode && pool.length > 0) {
       discoveryRef.current = setInterval(() => {
-        const random =
-          filteredStations[Math.floor(Math.random() * filteredStations.length)];
+        const random = pool[Math.floor(Math.random() * pool.length)];
         if (random) onPlay(random);
       }, 30_000);
     }
     return () => {
       if (discoveryRef.current) clearInterval(discoveryRef.current);
     };
-  }, [discoveryMode, filteredStations, onPlay]);
+  }, [discoveryMode, filteredStations, allCategoryStations, view.mode, onPlay]);
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
 
@@ -237,7 +272,7 @@ export default function BrowseView({
             {view.label}
           </h2>
           <p className="text-[12px] text-muted mt-0.5">
-            {loading ? "Loading…" : `${filteredStations.length} stations`}
+            {loading ? "Loading…" : `${displayCount} stations`}
           </p>
         </div>
         <button
@@ -315,7 +350,7 @@ export default function BrowseView({
           </div>
         )}
 
-        {!loading && !error && filteredStations.length === 0 && (
+        {!loading && !error && view.mode !== "top" && filteredStations.length === 0 && (
           <div className="flex-center-col py-16">
             <Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">No stations found</p>
@@ -324,38 +359,119 @@ export default function BrowseView({
 
         {!loading && !error && (
           <>
-            {/* Trending & Local sections for top view */}
-            {view.mode === "top" && !genreFilter && !countryFilter && (
+            {/* Category rows for top view */}
+            {view.mode === "top" && (
               <>
-                <ScrollRow title="Trending" icon={<Zap size={14} className="text-amber-400/70" />} isMobile={isMobile}>
-                  {trendingList.map((s) => (
-                    <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
-                      <StationCard station={s} isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid} isCurrent={currentStation?.stationuuid === s.stationuuid} isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} />
-                    </div>
-                  ))}
-                </ScrollRow>
-                <ScrollRow title="Near You" icon={<Radio size={14} className="text-sys-orange/70" />} isMobile={isMobile}>
-                  {localList.map((s) => (
-                    <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
-                      <StationCard station={s} isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid} isCurrent={currentStation?.stationuuid === s.stationuuid} isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} />
-                    </div>
-                  ))}
-                </ScrollRow>
-                {(trendingList.length > 0 || localList.length > 0) && (
-                  <div className={`flex-row-1.5 mb-2 mt-2 ${isMobile ? "px-4" : ""}`}>
-                    <Radio size={14} className="text-dim" />
-                    <h3 className="text-[13px] font-semibold text-soft">Top Stations</h3>
-                  </div>
-                )}
+                {BROWSE_ORDER.map((catId) => {
+                  const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
+                  if (!cat) return null;
+
+                  // Genre filter: only show the matching category
+                  if (genreFilter && cat.tag !== genreFilter) return null;
+
+                  const catStations = categorySections[catId];
+
+                  // Filter by country within each category
+                  const displayStations =
+                    catStations && countryFilter
+                      ? catStations.filter(
+                          (s) =>
+                            s.country?.toLowerCase() ===
+                            countryFilter.toLowerCase(),
+                        )
+                      : catStations;
+
+                  // Still loading — show skeleton placeholders
+                  if (!catStations) {
+                    return (
+                      <ScrollRow
+                        key={catId}
+                        title={cat.label}
+                        icon={
+                          CATEGORY_ICONS[catId] ?? (
+                            <Music size={14} className="text-dim" />
+                          )
+                        }
+                        isMobile={isMobile}
+                      >
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={`snap-start flex-shrink-0 ${itemWidth} h-[180px] rounded-xl bg-surface-2 animate-pulse`}
+                          />
+                        ))}
+                      </ScrollRow>
+                    );
+                  }
+
+                  // No stations after filtering
+                  if (!displayStations || displayStations.length === 0)
+                    return null;
+
+                  return (
+                    <ScrollRow
+                      key={catId}
+                      title={cat.label}
+                      icon={
+                        CATEGORY_ICONS[catId] ?? (
+                          <span
+                            className={`inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-r ${cat.gradient}`}
+                          />
+                        )
+                      }
+                      isMobile={isMobile}
+                    >
+                      {displayStations.map((s) => (
+                        <div
+                          key={s.stationuuid}
+                          className={`snap-start flex-shrink-0 ${itemWidth}`}
+                        >
+                          <StationCard
+                            station={s}
+                            isPlaying={
+                              isPlaying &&
+                              currentStation?.stationuuid === s.stationuuid
+                            }
+                            isCurrent={
+                              currentStation?.stationuuid === s.stationuuid
+                            }
+                            isFavorite={isFavorite(s.stationuuid)}
+                            onPlay={() => onPlay(s)}
+                            onToggleFav={() => onToggleFav(s)}
+                          />
+                        </div>
+                      ))}
+                    </ScrollRow>
+                  );
+                })}
               </>
             )}
-            <ScrollRow isMobile={isMobile}>
-              {filteredStations.map((s) => (
-                <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
-                  <StationCard station={s} isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid} isCurrent={currentStation?.stationuuid === s.stationuuid} isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} />
-                </div>
-              ))}
-            </ScrollRow>
+
+            {/* Flat list for search / genre / country views */}
+            {view.mode !== "top" && (
+              <ScrollRow isMobile={isMobile}>
+                {filteredStations.map((s) => (
+                  <div
+                    key={s.stationuuid}
+                    className={`snap-start flex-shrink-0 ${itemWidth}`}
+                  >
+                    <StationCard
+                      station={s}
+                      isPlaying={
+                        isPlaying &&
+                        currentStation?.stationuuid === s.stationuuid
+                      }
+                      isCurrent={
+                        currentStation?.stationuuid === s.stationuuid
+                      }
+                      isFavorite={isFavorite(s.stationuuid)}
+                      onPlay={() => onPlay(s)}
+                      onToggleFav={() => onToggleFav(s)}
+                    />
+                  </div>
+                ))}
+              </ScrollRow>
+            )}
           </>
         )}
       </div>
