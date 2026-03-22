@@ -44,6 +44,7 @@ import { useFavoriteSongs } from "./hooks/useFavoriteSongs";
 import { useRecent } from "./hooks/useRecent";
 import { useMediaSession } from "./hooks/useMediaSession";
 import { useHistory } from "./hooks/useHistory";
+import { useSleepTimer } from "./hooks/useSleepTimer";
 import { useAudioAnalyser, useAlbumArt } from "@/lib/audio-visualizer";
 import { usePlaybackStore } from "@/lib/playbackStore";
 import Sidebar from "./components/Sidebar";
@@ -96,6 +97,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const favs = useFavorites();
   const favSongs = useFavoriteSongs();
   const recent = useRecent();
+  const sleepTimer = useSleepTimer(radio.pause);
   const analyser = useAudioAnalyser({
     fftSize: 2048,
     smoothingTimeConstant: 0.8,
@@ -395,11 +397,15 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             });
           }
           break;
+        case "z":
+        case "Z":           // Z: cycle sleep timer
+          sleepTimer.cycle();
+          break;
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong, sleepTimer]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
@@ -559,6 +565,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           onToggleEq={() => {}}
           showEq={false}
           theaterMode={true}
+          sleepTimerMin={sleepTimer.remainingMin}
+          onCycleSleepTimer={sleepTimer.cycle}
           compact
         />
         {songDetailModal}
@@ -787,6 +795,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             eqPresetActive={eqPreset !== null}
             showEq={showEq}
             theaterMode={theaterMode}
+            sleepTimerMin={sleepTimer.remainingMin}
+            onCycleSleepTimer={sleepTimer.cycle}
             compact
           />
         </div>
@@ -1019,6 +1029,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           eqPresetActive={eqPreset !== null}
           showEq={showEq}
           theaterMode={theaterMode}
+          sleepTimerMin={sleepTimer.remainingMin}
+          onCycleSleepTimer={sleepTimer.cycle}
         />
       </div>
       {songDetailModal}

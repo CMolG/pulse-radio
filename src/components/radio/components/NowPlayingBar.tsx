@@ -17,6 +17,7 @@ import {
   Maximize2,
   Star,
   Heart,
+  Clock,
 } from "lucide-react";
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
 import AnimatedBars from "./AnimatedBars";
@@ -51,6 +52,8 @@ type Props = {
   showEq: boolean;
   theaterMode?: boolean;
   compact?: boolean;
+  sleepTimerMin?: number | null;
+  onCycleSleepTimer?: () => void;
 };
 
 export default function NowPlayingBar({
@@ -74,6 +77,8 @@ export default function NowPlayingBar({
   showEq,
   theaterMode,
   compact,
+  sleepTimerMin,
+  onCycleSleepTimer,
 }: Props) {
   const isPlaying = status === "playing";
   const isLoading = status === "loading";
@@ -277,6 +282,20 @@ export default function NowPlayingBar({
             title="Me gusta canción"
           >
             <Heart size={14} className={songLiked ? "fill-pink-400" : ""} />
+          </button>
+        )}
+        {onCycleSleepTimer && (
+          <button
+            onClick={onCycleSleepTimer}
+            className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
+            title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
+          >
+            <Clock size={14} />
+            {sleepTimerMin != null && (
+              <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
+                {sleepTimerMin}
+              </span>
+            )}
           </button>
         )}
         <button
