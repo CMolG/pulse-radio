@@ -193,6 +193,7 @@ export default function TheaterView({
           <button
             onClick={onBack}
             className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
+            aria-label="Exit theater mode"
           >
             <ArrowLeft size={16} />
           </button>
@@ -201,7 +202,8 @@ export default function TheaterView({
               <button
                 onClick={onToggleFav}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
-                title="Favorite station"
+                aria-label="Favorite station"
+                aria-pressed={!!isFavorite}
               >
                 <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
               </button>
@@ -210,7 +212,8 @@ export default function TheaterView({
               <button
                 onClick={onFavSong}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
-                title="Favorite song"
+                aria-label="Favorite song"
+                aria-pressed={!!isSongLiked}
               >
                 <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
               </button>
