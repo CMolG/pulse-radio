@@ -317,6 +317,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         if (!allowed.has(e.key)) return;
       }
 
+      // When song detail modal is open, only allow Escape to close it
+      if (selectedSong) {
+        if (e.key !== 'Escape') return;
+      }
+
       switch (e.key) {
         case " ":
           e.preventDefault();
@@ -394,7 +399,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
