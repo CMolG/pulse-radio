@@ -24,9 +24,16 @@ export type UseFavoritesReturn = {
 const MAX_FAVORITES = 500;
 
 export function useFavorites(): UseFavoritesReturn {
-  const [favorites, setFavorites] = useState<Station[]>(() =>
-    loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, [])
-  );
+  const [favorites, setFavorites] = useState<Station[]>(() => {
+    const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []);
+    // Dedup on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(s => {
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false;
+      seen.add(s.stationuuid);
+      return true;
+    });
+  });
 
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
