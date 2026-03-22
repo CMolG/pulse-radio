@@ -8,6 +8,10 @@
 
 import dynamic from 'next/dynamic';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { STORAGE_KEYS } from './constants';
+import { ensureStorageVersion } from '@/lib/storageUtils';
+
+ensureStorageVersion(Object.values(STORAGE_KEYS));
 
 const RadioShell = dynamic(() => import('./RadioShell'), { ssr: false });
 
