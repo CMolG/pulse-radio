@@ -842,7 +842,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             ) : !miniMode ? (
               <React.Fragment key="browse">
                 {/* ── Pulse branding header ── */}
-                <div className="flex-shrink-0 px-5 pt-3 pb-0">
+                <div className="shrink-0 px-5 py-3">
                   <button
                     onClick={handleGoHome}
                     className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"

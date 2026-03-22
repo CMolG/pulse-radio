@@ -69,12 +69,6 @@ export default function NowPlayingHero({
         fallbackUrl={station.favicon || undefined}
         overlayClass="bg-black/60"
       >
-        <VisualizerCanvas
-          frequencyDataRef={frequencyDataRef}
-          barCount={64}
-          opacity={0.15}
-          className="abs-fill"
-        />
       </ParallaxAlbumBackground>
 
       {onTheater && (
