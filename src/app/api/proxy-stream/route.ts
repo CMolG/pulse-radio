@@ -40,10 +40,10 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), MAX_DURATION_MS);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), MAX_DURATION_MS);
 
+  try {
     const upstream = await fetch(parsed.toString(), {
       headers: {
         'User-Agent': 'JavadabaRadio/1.0',
@@ -73,6 +73,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
+    clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.includes('abort')) {
       return new Response(JSON.stringify({ error: 'Stream timed out' }), {

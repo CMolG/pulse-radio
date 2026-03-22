@@ -18,10 +18,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing term parameter', results: [] }, { status: 400 });
   }
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8_000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8_000);
 
+  try {
     const url = `https://itunes.apple.com/search?${new URLSearchParams({
       term,
       media: 'music',
@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
     });
   } catch (e) {
+    clearTimeout(timeout);
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : 'Internal error', results: [] },

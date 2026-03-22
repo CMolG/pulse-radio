@@ -28,10 +28,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
+  try {
     const res = await fetch(streamUrl, {
       headers: { 'Icy-MetaData': '1' },
       signal: controller.signal,
@@ -103,6 +103,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
+    clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.includes('abort')) {
       return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
