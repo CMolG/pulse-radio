@@ -16,9 +16,9 @@ interface UseAudioAnalyserOptions {
 interface UseAudioAnalyserReturn {
   connectAudio: (audio: HTMLAudioElement) => void;
   /** Stable ref whose .current is updated in-place every frame — zero allocations */
-  frequencyDataRef: React.RefObject<Uint8Array | null>;
+  frequencyDataRef: React.RefObject<Uint8Array<ArrayBuffer> | null>;
   /** Stable ref whose .current is updated in-place every frame — zero allocations */
-  waveDataRef: React.RefObject<Uint8Array | null>;
+  waveDataRef: React.RefObject<Uint8Array<ArrayBuffer> | null>;
   isActive: boolean;
   disconnect: () => void;
 }
@@ -30,8 +30,8 @@ export function useAudioAnalyser(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0);
   const connectedRef = useRef<HTMLAudioElement | null>(null);
-  const frequencyDataRef = useRef<Uint8Array | null>(null);
-  const waveDataRef = useRef<Uint8Array | null>(null);
+  const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const [isActive, setIsActive] = useState(false);
 
   const connectAudio = useCallback(
