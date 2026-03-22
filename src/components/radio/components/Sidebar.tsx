@@ -9,7 +9,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Search, ChevronRight, ChevronDown, Radio } from 'lucide-react';
 import type { BrowseCategory } from '../types';
-import { GENRE_CATEGORIES } from '../constants';
+import { GENRE_CATEGORIES, STORAGE_KEYS } from '../constants';
 import { saveToStorage, loadFromStorage } from '@/lib/storageUtils';
 
 type Props = {
@@ -23,7 +23,7 @@ export default function Sidebar({
 }: Props) {
   const [query, setQuery] = useState('');
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() =>
-    loadFromStorage('radio-sidebar-collapsed', {})
+    loadFromStorage(STORAGE_KEYS.SIDEBAR_COLLAPSED, {})
   );
 
   const toggleCollapse = useCallback((key: string) => {
@@ -31,7 +31,7 @@ export default function Sidebar({
   }, []);
 
   useEffect(() => {
-    saveToStorage('radio-sidebar-collapsed', collapsed);
+    saveToStorage(STORAGE_KEYS.SIDEBAR_COLLAPSED, collapsed);
   }, [collapsed]);
 
   const handleSubmit = (e: React.FormEvent) => {

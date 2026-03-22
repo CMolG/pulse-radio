@@ -92,7 +92,7 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-3 px-3 h-14 glass-blur border-t border-border-default flex-shrink-0 safe-bottom">
+      <div className="flex items-center gap-3 px-3 min-h-[3.5rem] glass-blur border-t border-border-default flex-shrink-0 safe-bottom safe-x">
         {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}
@@ -163,7 +163,7 @@ export default function NowPlayingBar({
   const showFallback = !coverUrl || imgError;
 
   return (
-    <div className="flex-row-3 px-4 h-14 glass-blur border-t border-border-default flex-shrink-0">
+    <div className="flex-row-3 px-4 min-h-[3.5rem] glass-blur border-t border-border-default flex-shrink-0 safe-bottom safe-x">
       {/* Station info */}
       <div className="flex-row-2.5 min-w-[160px]">
         <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-surface-2 flex-center-row">

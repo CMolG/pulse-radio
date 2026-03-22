@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
   HISTORY: 'radio-history',
   FAVORITE_SONGS: 'radio-favorite-songs',
+  SIDEBAR_COLLAPSED: 'radio-sidebar-collapsed',
 } as const;
 
 export const MAX_RECENT = 15;
