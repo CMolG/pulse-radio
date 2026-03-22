@@ -85,31 +85,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // HTTP headers are case-insensitive per RFC 7230
     const contentType =
-      (upstream.headers.get('content-type') || 'audio/mpeg').toLowerCase();
+      upstream.headers.get('content-type') || 'audio/mpeg';
 
-    // Reject non-audio responses (e.g. HTML redirect pages, JSON errors)
-    if (
-      !contentType.startsWith('audio/') &&
-      !contentType.startsWith('application/ogg') &&
-      contentType !== 'application/octet-stream'
-    ) {
-      clearTimeout(timeout);
-      upstream.body.cancel().catch(() => {});
-      return new Response(JSON.stringify({ error: 'Upstream returned non-audio content' }), {
-        status: 502,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Wrap the upstream body so we can clear the timeout when the stream
-    // ends naturally (client disconnect or upstream close) instead of
-    // leaving a 60-minute timer running per connection.
-    const { readable, writable } = new TransformStream();
-    upstream.body.pipeTo(writable).catch(() => {}).finally(() => clearTimeout(timeout));
-
-    return new Response(readable, {
+    return new Response(upstream.body, {
       status: 200,
       headers: {
         'Content-Type': contentType,
