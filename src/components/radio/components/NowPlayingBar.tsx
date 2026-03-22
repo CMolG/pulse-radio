@@ -141,6 +141,8 @@ export default function NowPlayingBar({
           {onFavSong && (
             <button
               onClick={onFavSong}
+              aria-label={songLiked ? 'Unlike song' : 'Like song'}
+              aria-pressed={!!songLiked}
               className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 ${songLiked ? "text-pink-400" : "text-white/30 hover:text-white/50"}`}
               title="Favorite song"
             >
@@ -218,6 +220,7 @@ export default function NowPlayingBar({
           onClick={onTogglePlay}
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
+          aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >
           {isLoading ? (
@@ -271,6 +274,8 @@ export default function NowPlayingBar({
         {onToggleFav && (
           <button
             onClick={onToggleFav}
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"
           >
@@ -280,6 +285,8 @@ export default function NowPlayingBar({
         {onFavSong && (
           <button
             onClick={onFavSong}
+            aria-label={songLiked ? 'Unlike song' : 'Like song'}
+            aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
             title="Me gusta canción"
           >
@@ -314,6 +321,7 @@ export default function NowPlayingBar({
         <button
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+          aria-pressed={muted || volume === 0}
           className="p-1 text-muted hover:text-white/60 transition-colors flex-shrink-0"
         >
           {muted || volume === 0 ? (
