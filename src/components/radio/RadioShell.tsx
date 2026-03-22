@@ -47,7 +47,6 @@ import { usePlaybackStore } from "@/lib/playbackStore";
 import BrowseView from "./components/BrowseView";
 import NowPlayingHero from "./components/NowPlayingHero";
 import NowPlayingBar from "./components/NowPlayingBar";
-import MobileLyricsReel from "./components/MobileLyricsReel";
 import EqPanel from "./components/EqPanel";
 import ParallaxBackground from "./components/ParallaxBackground";
 import TheaterView from "./components/TheaterView";
@@ -651,15 +650,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   artworkUrl={albumArt.artworkUrl}
                   icyBitrate={icyBitrate}
                   onTheater={() => setTheaterMode(true)}
-                />
-              )}
-              {radio.station && (
-                <MobileLyricsReel
                   lyrics={lyrics}
-                  loading={lyricsLoading}
+                  lyricsLoading={lyricsLoading}
                   currentTime={radio.currentTime}
-                  artworkUrl={albumArt.artworkUrl}
-                  fallbackUrl={radio.station.favicon}
                 />
               )}
               {/* ── Mobile top nav tabs + search ── */}
