@@ -38,6 +38,9 @@ export function useAudioAnalyser(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
 
+      // Cancel any existing animation loop before starting a new one
+      cancelAnimationFrame(rafRef.current);
+
       const { ctx, source } = getOrCreateAudioSource(audio);
       connectedRef.current = audio;
 
