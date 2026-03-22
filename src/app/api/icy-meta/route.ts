@@ -15,8 +15,8 @@ export const runtime = 'nodejs';
  */
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
-  if (!streamUrl) {
-    return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
+  if (!streamUrl || streamUrl.length > 2048) {
+    return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 });
   }
 
   try {

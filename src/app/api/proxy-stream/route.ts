@@ -17,8 +17,8 @@ const MAX_DURATION_MS = 60 * 60 * 1000; // 60 min max per proxy connection
  */
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
-  if (!streamUrl) {
-    return new Response(JSON.stringify({ error: 'Missing url parameter' }), {
+  if (!streamUrl || streamUrl.length > 2048) {
+    return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
