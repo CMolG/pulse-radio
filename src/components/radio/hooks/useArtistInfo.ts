@@ -65,7 +65,9 @@ export function useArtistInfo(artist: string | null): {
           setInfo(data);
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) setInfo(null);
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
