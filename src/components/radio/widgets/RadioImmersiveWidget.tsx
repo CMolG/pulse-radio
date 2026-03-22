@@ -46,14 +46,20 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
   }, [preview]);
 
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) {
-      const top = await topStations(8);
-      setResults(top);
-    } else {
-      const found = await searchStations(query.trim(), 8);
-      setResults(found);
+    try {
+      if (!query.trim()) {
+        const top = await topStations(8);
+        setResults(top);
+      } else {
+        const found = await searchStations(query.trim(), 8);
+        setResults(found);
+      }
+      setShowResults(true);
+    } catch {
+      // Network failure — keep existing results or show empty
+      setResults([]);
+      setShowResults(true);
     }
-    setShowResults(true);
   }, [query]);
 
   const handleVolumeChange = useCallback((v: number) => {
