@@ -20,7 +20,10 @@ async function fetchCached(url: string, key: string): Promise<Station[]> {
   }
 
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Radio API ${res.status}`);
+  if (!res.ok) {
+    await res.text().catch(() => {}); // drain body to release connection
+    throw new Error(`Radio API ${res.status}`);
+  }
   const data: Station[] = await res.json();
   const filtered = data.filter(s => s.url_resolved);
   cache.set(key, { data: filtered, ts: Date.now() });
