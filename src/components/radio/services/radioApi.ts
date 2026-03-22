@@ -76,13 +76,13 @@ export async function trendingStations(limit = 20): Promise<Station[]> {
 }
 
 export async function localStations(limit = 20): Promise<Station[]> {
-  const locale =
+  const countryCode =
     typeof navigator !== 'undefined'
-      ? navigator.language?.split('-')[1] || ''
+      ? navigator.language?.split('-')[1]?.toUpperCase() || ''
       : '';
-  if (!locale) return topStations(limit);
+  if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit);
   return fetchCached(
-    `${BASE}/stations/bycountryexact/${encodeURIComponent(locale)}?limit=${limit}&order=votes&reverse=true`,
-    `local-${locale}-${limit}`,
+    `${BASE}/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`,
+    `local-${countryCode}-${limit}`,
   );
 }
