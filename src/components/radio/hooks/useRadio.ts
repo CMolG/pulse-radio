@@ -102,6 +102,8 @@ export function useRadio(): UseRadioReturn {
     // Auto-reconnect helper: used by error, stalled, and ended handlers
     const reconnect = (delay: number) => {
       if (!station || userPausedRef.current) return;
+      // Don't retry when browser is offline — onOnline will resume
+      if (typeof navigator !== 'undefined' && !navigator.onLine) return;
       if (retryRef.current >= 10) {
         setStatus('error');
         return;
@@ -164,6 +166,20 @@ export function useRadio(): UseRadioReturn {
       }
     };
 
+    // Network status: pause retries when offline, auto-reconnect when back online
+    const onOffline = () => {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+    };
+    const onOnline = () => {
+      if (station && !userPausedRef.current && (audio.paused || audio.readyState < 2)) {
+        retryRef.current = 0;
+        reconnect(500);
+      }
+    };
+
     // Periodic health check: detects silent stream drops that don't fire stalled/error/ended.
     // Common on iOS PWA after 10+ minutes — the proxy TCP connection closes silently.
     const healthCheckInterval = setInterval(() => {
@@ -182,6 +198,8 @@ export function useRadio(): UseRadioReturn {
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('timeupdate', onTimeUpdate);
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
 
     return () => {
       clearInterval(healthCheckInterval);
@@ -196,6 +214,8 @@ export function useRadio(): UseRadioReturn {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [station]);

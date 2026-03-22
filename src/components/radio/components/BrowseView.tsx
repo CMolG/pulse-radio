@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, COUNTRY_DISPLAY, countryFlag } from "../constants";
@@ -24,6 +24,7 @@ import {
   trendingStations,
   localStations,
 } from "../services/radioApi";
+import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
 import StationCard from "./StationCard";
 
 /** Order in which category sections appear on the home screen */
@@ -161,6 +162,13 @@ export default function BrowseView({
   const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Live track scanning
+  type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
+  const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({});
+  const [scanEnabled, setScanEnabled] = useState(false);
+  const [songFilter, setSongFilter] = useState("");
+  const scanGenRef = useRef(0);
+
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
     if (!cat) return;
@@ -198,7 +206,39 @@ export default function BrowseView({
 
   useEffect(() => {
     setPage(0);
+    setLiveData({});
+    setScanEnabled(false);
+    setSongFilter("");
+    scanGenRef.current++;
   }, [view]);
+
+  // Batch-fetch ICY metadata for a list of stations (max 3 concurrent)
+  const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
+    const queue = [...stationsToScan];
+    const CONCURRENCY = 3;
+    const worker = async () => {
+      while (queue.length > 0) {
+        if (scanGenRef.current !== gen) return;
+        const s = queue.shift()!;
+        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
+        const result = await fetchIcyMeta(s.url_resolved);
+        if (scanGenRef.current !== gen) return;
+        const raw = result.streamTitle;
+        const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
+        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
+      }
+    };
+    await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  }, []);
+
+  // Manual single-station peek
+  const peekStation = useCallback(async (station: Station) => {
+    setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loading', track: null } }));
+    const result = await fetchIcyMeta(station.url_resolved);
+    const raw = result.streamTitle;
+    const track = raw ? (parseTrack(raw, station.name) ?? null) : null;
+    setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loaded', track } }));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

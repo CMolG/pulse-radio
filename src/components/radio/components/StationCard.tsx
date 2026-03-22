@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, Heart, Radio } from 'lucide-react';
+import { Play, Pause, Heart, Radio, Music2, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Station } from '../types';
 import { countryFlag } from '../constants';
@@ -19,11 +19,14 @@ type Props = {
   isFavorite: boolean;
   onPlay: () => void;
   onToggleFav: () => void;
+  liveStatus?: 'loading' | 'loaded' | 'error';
+  liveTrack?: { title: string; artist: string } | null;
+  onPeek?: () => void;
 };
 
 function stationInitials(name: string) { return name.split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join(''); }
 
-export default function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav }: Props) {
+export default function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek }: Props) {
   const [imgError, setImgError] = useState(false);
   const showFallback = !station.favicon || imgError;
 
@@ -84,5 +87,37 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
         {station.countrycode && (
           <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>
         )}
-      </div></div>);
+      </div>
+
+      {/* Live track preview */}
+      {liveStatus === 'loading' && (
+        <div className="flex items-center gap-1 mt-1.5">
+          <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />
+          <span className="text-[9px] text-dim">Checking…</span>
+        </div>
+      )}
+      {liveStatus === 'loaded' && (
+        <div className="flex items-center gap-1 mt-1.5 min-w-0">
+          {liveTrack ? (
+            <>
+              <Music2 size={9} className="text-sys-orange flex-shrink-0" />
+              <span className="text-[9px] text-white/60 truncate leading-tight">
+                {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}
+              </span>
+            </>
+          ) : (
+            <span className="text-[9px] text-white/20">No track info</span>
+          )}
+        </div>
+      )}
+      {onPeek && !liveStatus && (
+        <button
+          onClick={e => { e.stopPropagation(); onPeek(); }}
+          className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors"
+        >
+          <Music2 size={9} />
+          Check track
+        </button>
+      )}
+    </div>);
 }

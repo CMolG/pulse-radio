@@ -23,7 +23,7 @@ function isAdContent(text: string): boolean {
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues
-async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+export async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
   const onParentAbort = () => controller.abort();
@@ -46,7 +46,7 @@ async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ 
   }
 }
 
-function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
+export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
 
   // Common separators: " - ", " — ", " – "
