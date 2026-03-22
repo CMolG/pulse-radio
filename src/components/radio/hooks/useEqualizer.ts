@@ -56,6 +56,17 @@ export function useEqualizer(): UseEqualizerReturn {
   const connectSource = useCallback((audio: HTMLAudioElement) => {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
 
+    // Disconnect any existing chain before building a new one
+    if (connectedAudioRef.current) {
+      try {
+        sourceRef.current?.disconnect();
+        filtersRef.current.forEach(f => f.disconnect());
+        limiterRef.current?.disconnect();
+      } catch { /* ok */ }
+      filtersRef.current = [];
+      limiterRef.current = null;
+    }
+
     try {
       const { ctx, source } = getOrCreateAudioSource(audio);
       ctxRef.current = ctx;
