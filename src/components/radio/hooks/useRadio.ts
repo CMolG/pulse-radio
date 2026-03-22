@@ -38,6 +38,7 @@ export function useRadio(): UseRadioReturn {
   const retryRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() =>
@@ -92,7 +93,9 @@ export function useRadio(): UseRadioReturn {
       }
       retryRef.current++;
       setStatus('loading');
-      setTimeout(() => {
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = setTimeout(() => {
+        reconnectTimerRef.current = null;
         if (userPausedRef.current) return;
         audio.src = proxyUrl(station.url_resolved);
         audio.play().catch(() => setStatus('error'));
@@ -150,6 +153,7 @@ export function useRadio(): UseRadioReturn {
     return () => {
       if (stallTimer) clearTimeout(stallTimer);
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
