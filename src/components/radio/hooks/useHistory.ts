@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { NowPlayingTrack, HistoryEntry } from '../types';
 import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseHistoryReturn = {
   history: HistoryEntry[];
@@ -21,18 +22,15 @@ export function useHistory(
   stationUuid: string | undefined,
   track: NowPlayingTrack | null,
 ): UseHistoryReturn {
-  const [history, setHistory] = useState<HistoryEntry[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.HISTORY);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  });
+  const [history, setHistory] = useState<HistoryEntry[]>(() =>
+    loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, [])
+  );
 
   const lastTrackRef = useRef<string>('');
   const lastStationRef = useRef<string | undefined>(stationUuid);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+    saveToStorage(STORAGE_KEYS.HISTORY, history);
   }, [history]);
 
   // Add entry when track changes; handles station transitions in a single effect

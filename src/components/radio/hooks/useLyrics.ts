@@ -10,22 +10,18 @@ import { useState, useRef, useEffect } from 'react';
 import type { NowPlayingTrack, LyricsData } from '../types';
 import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const MAX_CACHE = 50;
 
 type CacheEntry = { key: string; data: LyricsData };
 
 function loadCache(): CacheEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+  return loadFromStorage<CacheEntry[]>(STORAGE_KEYS.LYRICS_CACHE, []);
 }
 
 function saveCache(entries: CacheEntry[]) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.LYRICS_CACHE, JSON.stringify(entries.slice(0, MAX_CACHE)));
-  } catch { /* storage full */ }
+  saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE));
 }
 
 export type UseLyricsReturn = {

@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Station } from '../types';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseFavoritesReturn = {
   favorites: Station[];
@@ -21,15 +22,12 @@ export type UseFavoritesReturn = {
 };
 
 export function useFavorites(): UseFavoritesReturn {
-  const [favorites, setFavorites] = useState<Station[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  });
+  const [favorites, setFavorites] = useState<Station[]>(() =>
+    loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, [])
+  );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+    saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
   }, [favorites]);
 
   const add = useCallback((station: Station) => {

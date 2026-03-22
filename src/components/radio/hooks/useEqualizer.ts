@@ -10,6 +10,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import type { EqBand, EqPreset } from '../types';
 import { EQ_BANDS, STORAGE_KEYS } from '../constants';
 import { getOrCreateAudioSource } from '@/lib/audio-visualizer';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseEqualizerReturn = {
   bands: EqBand[];
@@ -25,20 +26,13 @@ export type UseEqualizerReturn = {
 };
 
 export function useEqualizer(): UseEqualizerReturn {
-  const [bands, setBands] = useState<EqBand[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.EQ_BANDS);
-      if (saved) return JSON.parse(saved);
-    } catch { /* use defaults */ }
-    return EQ_BANDS.map(b => ({ ...b }));
-  });
+  const [bands, setBands] = useState<EqBand[]>(() =>
+    loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, EQ_BANDS.map(b => ({ ...b })))
+  );
   const [enabled, setEnabled] = useState(true);
-  const [customPresets, setCustomPresets] = useState<EqPreset[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.CUSTOM_EQ_PRESETS);
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  const [customPresets, setCustomPresets] = useState<EqPreset[]>(() =>
+    loadFromStorage<EqPreset[]>(STORAGE_KEYS.CUSTOM_EQ_PRESETS, [])
+  );
 
   const ctxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -47,7 +41,7 @@ export function useEqualizer(): UseEqualizerReturn {
   const connectedAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.EQ_BANDS, JSON.stringify(bands));
+    saveToStorage(STORAGE_KEYS.EQ_BANDS, bands);
     filtersRef.current.forEach((f, i) => {
       if (bands[i]) f.gain.value = enabled ? bands[i].gain : 0;
     });
@@ -136,7 +130,7 @@ export function useEqualizer(): UseEqualizerReturn {
     const preset: EqPreset = { name, gains: bands.map(b => b.gain) };
     setCustomPresets(prev => {
       const next = [...prev.filter(p => p.name !== name), preset];
-      localStorage.setItem(STORAGE_KEYS.CUSTOM_EQ_PRESETS, JSON.stringify(next));
+      saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next);
       return next;
     });
   }, [bands]);
@@ -144,7 +138,7 @@ export function useEqualizer(): UseEqualizerReturn {
   const removeCustomPreset = useCallback((name: string) => {
     setCustomPresets(prev => {
       const next = prev.filter(p => p.name !== name);
-      localStorage.setItem(STORAGE_KEYS.CUSTOM_EQ_PRESETS, JSON.stringify(next));
+      saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next);
       return next;
     });
   }, []);

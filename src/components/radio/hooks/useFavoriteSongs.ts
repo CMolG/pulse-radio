@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FavoriteSong } from '../types';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseFavoriteSongsReturn = {
   songs: FavoriteSong[];
@@ -26,15 +27,12 @@ function songKey(title: string, artist: string) {
 export function useFavoriteSongs(): UseFavoriteSongsReturn {
   const MAX_SONGS = 500;
 
-  const [songs, setSongs] = useState<FavoriteSong[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.FAVORITE_SONGS);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  });
+  const [songs, setSongs] = useState<FavoriteSong[]>(() =>
+    loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, [])
+  );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FAVORITE_SONGS, JSON.stringify(songs));
+    saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
   }, [songs]);
 
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {

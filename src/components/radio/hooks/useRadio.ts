@@ -9,6 +9,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Station, PlaybackStatus } from '../types';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
 function proxyUrl(raw: string): string {
@@ -38,12 +39,9 @@ export function useRadio(): UseRadioReturn {
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
-  const [volume, setVolumeState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.VOLUME);
-      return saved ? parseFloat(saved) : 0.8;
-    } catch { return 0.8; }
-  });
+  const [volume, setVolumeState] = useState(() =>
+    loadFromStorage<number>(STORAGE_KEYS.VOLUME, 0.8)
+  );
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -162,7 +160,7 @@ export function useRadio(): UseRadioReturn {
   }, [station]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.VOLUME, String(volume));
+    saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
     if (audio) audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
