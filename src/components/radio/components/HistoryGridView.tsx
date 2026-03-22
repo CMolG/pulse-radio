@@ -66,6 +66,9 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.03, 0.5) }}
             className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label={`${entry.title} by ${entry.artist}`}
             onClick={() => onSelect?.({
               title: entry.title,
               artist: entry.artist,
@@ -87,6 +90,8 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               {onToggleFavSong && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onToggleFavSong(entry); }}
+                  aria-label={isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song'}
+                  aria-pressed={!!isSongFavorite?.(entry.title, entry.artist)}
                   className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${isSongFavorite?.(entry.title, entry.artist) ? "bg-pink-500/20 text-pink-400" : "bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400"}`}
                   title="Favorite song"
                 >
@@ -95,6 +100,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(entry.id); }}
+                aria-label="Remove from history"
                 className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Remove"
               >
