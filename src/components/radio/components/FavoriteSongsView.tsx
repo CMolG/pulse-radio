@@ -64,6 +64,9 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.03, 0.5) }}
             className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label={`${song.title} by ${song.artist}`}
             onClick={() => onSelect?.({
               title: song.title,
               artist: song.artist,
@@ -84,6 +87,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
+                aria-label="Remove from favorites"
                 className="absolute top-2 left-2 p-1.5 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-all"
                 title="Remove from favorites"
               >
@@ -91,6 +95,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
+                aria-label="Delete song"
                 className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Remove"
               >
