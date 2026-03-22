@@ -19,7 +19,7 @@ async function fetchCached(url: string, key: string): Promise<Station[]> {
     return hit.data;
   }
 
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
     await res.text().catch(() => {}); // drain body to release connection
     throw new Error(`Radio API ${res.status}`);
