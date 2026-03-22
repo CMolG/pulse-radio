@@ -65,6 +65,26 @@ export function useRadio(): UseRadioReturn {
   // Tracks whether the user explicitly requested a pause (vs stall/src-change pauses)
   const userPausedRef = useRef(false);
 
+  // Cross-tab coordination: pause this tab when another tab starts playing
+  const bcRef = useRef<BroadcastChannel | null>(null);
+  const tabIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const bc = new BroadcastChannel('pulse-radio-playback');
+    bcRef.current = bc;
+    bc.onmessage = (e: MessageEvent) => {
+      if (e.data?.type === 'playing' && e.data?.tabId !== tabIdRef.current) {
+        const audio = audioRef.current;
+        if (audio && !audio.paused) {
+          userPausedRef.current = true;
+          audio.pause();
+        }
+      }
+    };
+    return () => { bc.close(); bcRef.current = null; };
+  }, []);
+
   const getAudio = useCallback(() => {
     if (!audioRef.current) {
       const audio = new Audio();
@@ -77,7 +97,12 @@ export function useRadio(): UseRadioReturn {
   useEffect(() => {
     const audio = getAudio();
 
-    const onPlaying = () => { setStatus('playing'); retryRef.current = 0; userPausedRef.current = false; };
+    const onPlaying = () => {
+      setStatus('playing');
+      retryRef.current = 0;
+      userPausedRef.current = false;
+      bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current });
+    };
     const onPause = () => {
       if (userPausedRef.current) {
         userPausedRef.current = false;

@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 
 interface FerrofluidRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>;
