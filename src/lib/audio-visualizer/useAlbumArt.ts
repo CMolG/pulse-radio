@@ -28,6 +28,8 @@ function appendReferrer(url: string): string {
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) {
   const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onerror = () => { img.src = ''; }; // release failed load
   img.src = url;
 }
 
