@@ -26,9 +26,12 @@ export type UseEqualizerReturn = {
 };
 
 export function useEqualizer(): UseEqualizerReturn {
-  const [bands, setBands] = useState<EqBand[]>(() =>
-    loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, EQ_BANDS.map(b => ({ ...b })))
-  );
+  const [bands, setBands] = useState<EqBand[]>(() => {
+    const defaults = EQ_BANDS.map(b => ({ ...b }));
+    const saved = loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, defaults);
+    // If stored band count doesn't match current config, reset to defaults
+    return saved.length === defaults.length ? saved : defaults;
+  });
   const [enabled, setEnabled] = useState(true);
   const [customPresets, setCustomPresets] = useState<EqPreset[]>(() =>
     loadFromStorage<EqPreset[]>(STORAGE_KEYS.CUSTOM_EQ_PRESETS, [])

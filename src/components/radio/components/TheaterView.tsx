@@ -184,36 +184,39 @@ export default function TheaterView({
         }}
       />
 
-      {/* ── Back button ── */}
+      {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}
       {!compact && (
-        <button
-          onClick={onBack}
-          className="absolute top-4 left-4 z-20 flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
+        <div
+          className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
+          style={{ top: "env(safe-area-inset-top, 0px)" }}
         >
-          <ArrowLeft size={16} />
-        </button>
-      )}
-
-      {/* ── Favorite station button (top right) ── */}
-      {!compact && onToggleFav && (
-        <button
-          onClick={onToggleFav}
-          className={`absolute top-4 right-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
-          title="Favorite station"
-        >
-          <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
-        </button>
-      )}
-
-      {/* ── Favorite song button (top right, below star) ── */}
-      {!compact && onFavSong && track && (
-        <button
-          onClick={onFavSong}
-          className={`absolute ${onToggleFav ? "top-14" : "top-4"} right-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
-          title="Favorite song"
-        >
-          <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
-        </button>
+          <button
+            onClick={onBack}
+            className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div className="flex flex-col gap-2">
+            {onToggleFav && (
+              <button
+                onClick={onToggleFav}
+                className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
+                title="Favorite station"
+              >
+                <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
+              </button>
+            )}
+            {onFavSong && track && (
+              <button
+                onClick={onFavSong}
+                className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
+                title="Favorite song"
+              >
+                <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
