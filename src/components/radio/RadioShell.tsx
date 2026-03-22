@@ -236,15 +236,22 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     onSeekForward: () => radio.seek(radio.currentTime + 10),
   });
 
+  const widgetSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    const state: WidgetPlaybackState = {
-      station: radio.station,
-      status: radio.status,
-      track: enrichedTrack,
-      volume: radio.volume,
-      updatedAt: Date.now(),
+    if (widgetSaveTimerRef.current) clearTimeout(widgetSaveTimerRef.current);
+    widgetSaveTimerRef.current = setTimeout(() => {
+      const state: WidgetPlaybackState = {
+        station: radio.station,
+        status: radio.status,
+        track: enrichedTrack,
+        volume: radio.volume,
+        updatedAt: Date.now(),
+      };
+      saveToStorage(STORAGE_KEYS.PLAYBACK, state);
+    }, 500);
+    return () => {
+      if (widgetSaveTimerRef.current) clearTimeout(widgetSaveTimerRef.current);
     };
-    saveToStorage(STORAGE_KEYS.PLAYBACK, state);
   }, [radio.station, radio.status, enrichedTrack, radio.volume]);
 
   useEffect(() => {
