@@ -58,7 +58,6 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
 
   const handleVolumeChange = useCallback((v: number) => {
     setWidgetVolume(v);
-    sendCommand('setVolume');
     window.dispatchEvent(new CustomEvent('radio-command', { detail: { action: 'setVolume', volume: v } }));
   }, []);
 
