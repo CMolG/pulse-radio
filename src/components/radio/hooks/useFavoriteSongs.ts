@@ -24,6 +24,8 @@ function songKey(title: string, artist: string) {
 }
 
 export function useFavoriteSongs(): UseFavoriteSongsReturn {
+  const MAX_SONGS = 500;
+
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.FAVORITE_SONGS);
@@ -44,7 +46,8 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         timestamp: Date.now(),
       };
-      return [entry, ...prev];
+      const next = [entry, ...prev];
+      return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
     });
   }, []);
 
@@ -62,7 +65,8 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         timestamp: Date.now(),
       };
-      return [entry, ...prev];
+      const next = [entry, ...prev];
+      return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
     });
   }, []);
 
