@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
 
     if (!upstream.ok || !upstream.body) {
       clearTimeout(timeout);
+      upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },

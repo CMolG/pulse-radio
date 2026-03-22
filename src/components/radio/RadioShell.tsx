@@ -376,7 +376,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         }
         case "s":
         case "S":
-          if (radio.station) favs.toggle(radio.station);
+          if (radio.station) {
+            const wasFav = favs.has(radio.station.stationuuid);
+            favs.toggle(radio.station);
+            showToast(wasFav ? "Removed from favorites" : radio.station.name, "star");
+          }
           break;
         case "Escape":
           setShowEq(false);
@@ -394,6 +398,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         case "l":
         case "L":
           if (enrichedTrack?.title) {
+            const wasLiked = favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? '');
             favSongs.toggle({
               title: enrichedTrack.title,
               artist: enrichedTrack.artist ?? '',
@@ -403,6 +408,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               stationName: radio.station?.name ?? '',
               stationUuid: radio.station?.stationuuid ?? '',
             });
+            showToast(wasLiked ? "Song removed" : enrichedTrack.title, "heart");
           }
           break;
         case "z":
@@ -413,7 +419,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong, sleepTimer]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong, sleepTimer, showToast]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
