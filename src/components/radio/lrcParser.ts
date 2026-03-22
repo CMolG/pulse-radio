@@ -11,15 +11,25 @@ export interface LyricLine {
 
 export function parseLrc(lrcText: string): LyricLine[] {
   const lines: LyricLine[] = [];
-  const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]\s*(.*)/g;
-  let match;
-  while ((match = regex.exec(lrcText)) !== null) {
-    const minutes = parseInt(match[1], 10);
-    const seconds = parseInt(match[2], 10);
-    const centiseconds = parseInt(match[3].padEnd(3, '0'), 10);
-    const time = minutes * 60 + seconds + centiseconds / 1000;
-    const text = match[4].trim();
-    if (text) lines.push({ time, text });
+  const tsRegex = /\[(\d{2,3}):(\d{2})\.(\d{2,3})\]/g;
+  for (const raw of lrcText.split('\n')) {
+    const timestamps: number[] = [];
+    let lastIndex = 0;
+    let m;
+    tsRegex.lastIndex = 0;
+    while ((m = tsRegex.exec(raw)) !== null) {
+      const minutes = parseInt(m[1], 10);
+      const seconds = parseInt(m[2], 10);
+      const centiseconds = parseInt(m[3].padEnd(3, '0'), 10);
+      timestamps.push(minutes * 60 + seconds + centiseconds / 1000);
+      lastIndex = tsRegex.lastIndex;
+    }
+    if (timestamps.length === 0) continue;
+    const text = raw.slice(lastIndex).trim();
+    if (!text) continue;
+    for (const time of timestamps) {
+      lines.push({ time, text });
+    }
   }
   return lines.sort((a, b) => a.time - b.time);
 }
