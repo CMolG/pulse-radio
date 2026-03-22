@@ -22,6 +22,7 @@ import {
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 function stationInitials(name: string) {
   return name
@@ -238,6 +239,7 @@ export default function NowPlayingBar({
         {station && isPlaying && (
           <>
             <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
+              <ErrorBoundary fallback={null}>
               <FerrofluidRenderer
                 frequencyDataRef={frequencyDataRef}
                 className="size-full"
@@ -248,6 +250,7 @@ export default function NowPlayingBar({
                 sensitivity={1.0}
                 demo
               />
+              </ErrorBoundary>
             </div>
             <div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />

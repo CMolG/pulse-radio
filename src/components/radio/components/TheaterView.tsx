@@ -13,6 +13,7 @@ import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 function stationInitials(name: string) {
   return name
@@ -163,6 +164,7 @@ export default function TheaterView({
 
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none">
+        <ErrorBoundary fallback={null}>
         <SpiralRenderer
           frequencyDataRef={frequencyDataRef}
           className="size-full"
@@ -172,6 +174,7 @@ export default function TheaterView({
           sensitivity={compact ? 0.8 : 1.2}
           demo
         />
+        </ErrorBoundary>
       </div>
 
       {/* ── Layer 3: fractal noise overlay (mix-blend-mode overlay, same as reference HTML) ── */}
