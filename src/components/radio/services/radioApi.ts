@@ -9,16 +9,25 @@ import type { Station } from '../types';
 const BASE = 'https://de1.api.radio-browser.info/json';
 const cache = new Map<string, { data: Station[]; ts: number }>();
 const TTL = 60_000;
+const MAX_CACHE = 100;
 
 async function fetchCached(url: string, key: string): Promise<Station[]> {
   const hit = cache.get(key);
-  if (hit && Date.now() - hit.ts < TTL) return hit.data;
+  if (hit && Date.now() - hit.ts < TTL) {
+    cache.delete(key);
+    cache.set(key, hit);
+    return hit.data;
+  }
 
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Radio API ${res.status}`);
   const data: Station[] = await res.json();
   const filtered = data.filter(s => s.url_resolved);
   cache.set(key, { data: filtered, ts: Date.now() });
+  if (cache.size > MAX_CACHE) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
   return filtered;
 }
 
