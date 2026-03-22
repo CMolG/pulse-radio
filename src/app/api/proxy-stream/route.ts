@@ -75,8 +75,9 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // HTTP headers are case-insensitive per RFC 7230
     const contentType =
-      upstream.headers.get('content-type') || 'audio/mpeg';
+      (upstream.headers.get('content-type') || 'audio/mpeg').toLowerCase();
 
     // Reject non-audio responses (e.g. HTML redirect pages, JSON errors)
     if (
