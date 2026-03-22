@@ -54,10 +54,11 @@ export function useArtistInfo(artist: string | null): {
     }
 
     let cancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setInfo(null);
 
-    fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`)
+    fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data: ArtistInfo) => {
         if (!cancelled) {
@@ -74,6 +75,7 @@ export function useArtistInfo(artist: string | null): {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [artist]);
 
