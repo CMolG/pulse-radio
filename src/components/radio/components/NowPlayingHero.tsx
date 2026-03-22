@@ -7,14 +7,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Radio, Maximize2, Clock } from "lucide-react";
+import { Radio, Maximize2 } from "lucide-react";
 import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import MobileLyricsReel from "./MobileLyricsReel";
 import {
   ParallaxAlbumBackground,
 } from "@/lib/audio-visualizer";
-import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
 
 function stationInitials(name: string) {
   return name
@@ -128,21 +127,6 @@ export default function NowPlayingHero({
           )}
           {track?.album && (
             <p className="text-[11px] text-dim truncate">{track.album}</p>
-          )}
-          {track?.title && (track?.genre || track?.durationMs || track?.releaseDate) && (
-            <p className="text-[10px] text-dim truncate mt-0.5 flex items-center gap-1.5">
-              {track.genre && <span>{track.genre}</span>}
-              {track.durationMs && (
-                <span className="inline-flex items-center gap-0.5">
-                  <Clock size={9} className="opacity-60" />
-                  {formatDuration(track.durationMs)}
-                </span>
-              )}
-              {track.releaseDate && <span>{formatReleaseDate(track.releaseDate)}</span>}
-              {track.trackNumber != null && track.trackCount != null && (
-                <span>#{track.trackNumber}/{track.trackCount}</span>
-              )}
-            </p>
           )}
           {isPlaying && (
             <div className="flex-row-1.5 mt-1">

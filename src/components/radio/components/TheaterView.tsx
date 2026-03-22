@@ -238,30 +238,45 @@ export default function TheaterView({
             boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
           }}
         >
-          {/* Cover art */}
-          <div
-            className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} overflow-hidden flex-center-row flex-shrink-0`}
-            style={{
-              boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`,
-            }}
-          >
-            {showFallback ? (
-              <div className="size-full dawn-gradient flex-center-row">
-                <span
-                  className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-                >
-                  {stationInitials(station.name) || (
-                    <Radio size={compact ? 24 : 52} className="text-white/60" />
-                  )}
-                </span>
-              </div>
-            ) : (
-              <img
-                src={coverUrl}
-                alt=""
-                className="size-full object-cover"
-                onError={() => setImgError(true)}
-              />
+          {/* Cover art + corner metadata badges */}
+          <div className="relative">
+            <div
+              className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} overflow-hidden flex-center-row flex-shrink-0`}
+              style={{
+                boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`,
+              }}
+            >
+              {showFallback ? (
+                <div className="size-full dawn-gradient flex-center-row">
+                  <span
+                    className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
+                  >
+                    {stationInitials(station.name) || (
+                      <Radio size={compact ? 24 : 52} className="text-white/60" />
+                    )}
+                  </span>
+                </div>
+              ) : (
+                <img
+                  src={coverUrl}
+                  alt=""
+                  className="size-full object-cover"
+                  onError={() => setImgError(true)}
+                />
+              )}
+            </div>
+
+            {!compact && track?.durationMs && (
+              <span className="absolute -top-2 -left-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
+                <Clock size={10} />
+                {formatDuration(track.durationMs)}
+              </span>
+            )}
+
+            {!compact && track?.trackNumber != null && track?.trackCount != null && (
+              <span className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
+                #{track.trackNumber}/{track.trackCount}
+              </span>
             )}
           </div>
 
@@ -295,20 +310,9 @@ export default function TheaterView({
             </p>
           )}
 
-          {/* Track metadata: genre, duration, release date, track# */}
-          {track?.title && !compact && (track?.genre || track?.durationMs || track?.releaseDate || track?.trackNumber != null) && (
-            <p className="text-[10px] text-white/30 text-center flex items-center justify-center gap-2 mt-0.5">
-              {track.genre && <span>{track.genre}</span>}
-              {track.durationMs && (
-                <span className="inline-flex items-center gap-0.5">
-                  <Clock size={9} className="opacity-60" />
-                  {formatDuration(track.durationMs)}
-                </span>
-              )}
-              {track.releaseDate && <span>{formatReleaseDate(track.releaseDate)}</span>}
-              {track.trackNumber != null && track.trackCount != null && (
-                <span>#{track.trackNumber}/{track.trackCount}</span>
-              )}
+          {!compact && track?.releaseDate && (
+            <p className="text-[10px] text-white/40 text-center -mt-1">
+              Released on: {formatReleaseDate(track.releaseDate)}
             </p>
           )}
 
@@ -341,6 +345,11 @@ export default function TheaterView({
               {station.country && (
                 <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
                   {station.country}
+                </span>
+              )}
+              {track?.genre && (
+                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
+                  {track.genre}
                 </span>
               )}
             </div>
