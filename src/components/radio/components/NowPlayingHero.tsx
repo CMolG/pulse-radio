@@ -8,8 +8,9 @@
 
 import React, { useState } from "react";
 import { Radio, Maximize2 } from "lucide-react";
-import type { Station, NowPlayingTrack } from "../types";
+import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
+import MobileLyricsReel from "./MobileLyricsReel";
 import {
   ParallaxAlbumBackground,
   VisualizerCanvas,
@@ -31,6 +32,10 @@ type Props = {
   artworkUrl?: string | null;
   icyBitrate?: string | null;
   onTheater?: () => void;
+  lyrics?: LyricsData | null;
+  lyricsLoading?: boolean;
+  currentTime?: number;
+  lyricsVariant?: "mobile" | "desktop";
 };
 
 export default function NowPlayingHero({
@@ -41,6 +46,10 @@ export default function NowPlayingHero({
   artworkUrl,
   icyBitrate,
   onTheater,
+  lyrics,
+  lyricsLoading,
+  currentTime,
+  lyricsVariant = "mobile",
 }: Props) {
   const [imgError, setImgError] = useState(false);
   const coverUrl = artworkUrl ?? station.favicon;
@@ -54,7 +63,7 @@ export default function NowPlayingHero({
   }
 
   return (
-    <div className="relative flex-row-4 px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
+    <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
       <ParallaxAlbumBackground
         imageUrl={artworkUrl ?? null}
         fallbackUrl={station.favicon || undefined}
@@ -98,7 +107,7 @@ export default function NowPlayingHero({
             />
           )}
         </div>
-        <div className="flex-fill">
+        <div className="flex-fill pr-20">
           <h3 className="text-[15px] font-semibold text-white truncate">
             {station.name}
           </h3>
@@ -131,6 +140,16 @@ export default function NowPlayingHero({
           )}
         </div>
       </div>
+      {(lyricsLoading || (lyrics && lyrics.lines.length > 0)) && (
+        <div className="relative z-10 -mx-5 mt-1">
+          <MobileLyricsReel
+            lyrics={lyrics ?? null}
+            loading={!!lyricsLoading}
+            currentTime={currentTime}
+            variant={lyricsVariant}
+          />
+        </div>
+      )}
     </div>
   );
 }

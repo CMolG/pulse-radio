@@ -600,8 +600,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         {!theaterMode && (
           <div className="relative z-20 flex-shrink-0 safe-top">
             <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-              <button onClick={handleGoHome} className="flex items-center gap-1.5">
-                <RadioIcon size={16} className="text-sys-orange flex-shrink-0" />
+              <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                <img src="/favicon-32x32.png" alt="Pulse" className="w-5 h-5 object-contain flex-shrink-0" />
                 <span className="text-[15px] font-semibold text-white">Pulse</span>
               </button>
               <div className="flex-1" />
@@ -848,6 +848,16 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               </motion.div>
             ) : !miniMode ? (
               <React.Fragment key="browse">
+                {/* ── Pulse branding header ── */}
+                <div className="flex-shrink-0 px-5 pt-3 pb-0">
+                  <button
+                    onClick={handleGoHome}
+                    className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                  >
+                    <img src="/favicon-32x32.png" alt="Pulse" className="w-5 h-5 object-contain" />
+                    <span className="text-[15px] font-semibold text-white">Pulse</span>
+                  </button>
+                </div>
                 {radio.station && (
                   <NowPlayingHero
                     station={radio.station}
@@ -857,28 +867,14 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     artworkUrl={albumArt.artworkUrl}
                     icyBitrate={icyBitrate}
                     onTheater={() => setTheaterMode(true)}
-                  />
-                )}
-                {radio.station && (
-                  <MobileLyricsReel
                     lyrics={lyrics}
-                    loading={lyricsLoading}
+                    lyricsLoading={lyricsLoading}
                     currentTime={radio.currentTime}
-                    artworkUrl={albumArt.artworkUrl}
-                    fallbackUrl={radio.station.favicon}
-                    variant="desktop"
+                    lyricsVariant="desktop"
                   />
                 )}
-                {/* ── Top nav: Pulse + tabs + search ── */}
+                {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
-                  {/* Pulse logo button */}
-                  <button
-                    onClick={handleGoHome}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold text-white/80 hover:text-white hover:bg-surface-2 transition-colors mr-1 flex-shrink-0"
-                  >
-                    <RadioIcon size={13} className="text-sys-orange" />
-                    Pulse
-                  </button>
                   {([
                     { id: "discover" as const, label: "Discover", icon: <RadioIcon size={13} /> },
                     { id: "history" as const, label: "History", icon: <Clock size={13} /> },
