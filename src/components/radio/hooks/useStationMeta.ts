@@ -97,6 +97,8 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
       if (icyBr) setIcyBitrate(icyBr);
       if (streamTitle && streamTitle !== lastTitleRef.current) {
         if (isAdContent(streamTitle)) {
+          lastTitleRef.current = streamTitle;
+          setTrack(null);
           return;
         }
         lastTitleRef.current = streamTitle;
@@ -104,6 +106,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
         // Only reject if the title looks like an ad. Artist-only ad matches
         // cause false positives (e.g. "will.i.am", bands with TLD-like names).
         if (parsed && isAdContent(parsed.title)) {
+          setTrack(null);
           return;
         }
         setTrack(parsed);

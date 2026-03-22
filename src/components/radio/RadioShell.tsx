@@ -588,7 +588,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
         {/* Mobile header */}
         {!theaterMode && (
-          <div className="relative z-20 flex-shrink-0">
+          <div className="relative z-20 flex-shrink-0 safe-top">
             {/* Top row: menu + title + actions */}
             <div className="flex items-center gap-3 px-4 pt-3 pb-2">
               <button
