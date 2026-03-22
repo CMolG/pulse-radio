@@ -302,6 +302,15 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         target.isContentEditable
       )
         return;
+
+      // When EQ panel is open, suppress single-letter shortcuts that could
+      // trigger unintended actions (theater, favorites, search, etc.).
+      // Allow Escape, E (to close EQ), space, arrows, and M (volume).
+      if (showEq) {
+        const allowed = new Set([' ', 'Escape', 'e', 'E', 'ArrowUp', 'ArrowDown', 'm', 'M']);
+        if (!allowed.has(e.key)) return;
+      }
+
       switch (e.key) {
         case " ":
           e.preventDefault();
@@ -379,7 +388,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
