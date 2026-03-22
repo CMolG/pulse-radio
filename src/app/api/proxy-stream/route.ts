@@ -33,6 +33,20 @@ export async function GET(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    // Block self-referential/localhost URLs to prevent infinite proxy loops
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '::1' ||
+      host === '0.0.0.0' ||
+      host.endsWith('.localhost')
+    ) {
+      return new Response(JSON.stringify({ error: 'Loopback URLs not allowed' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400,
