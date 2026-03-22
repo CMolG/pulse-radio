@@ -15,8 +15,8 @@ import React, {
 } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
-import type { Station, ViewState } from "../types";
-import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, countryFlag } from "../constants";
+import type { Station, ViewState, BrowseCategory } from "../types";
+import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, COUNTRY_DISPLAY, countryFlag } from "../constants";
 import {
   searchStations,
   stationsByTag,
@@ -47,6 +47,9 @@ type Props = {
   onToggleFav: (station: Station) => void;
   favorites?: Station[];
   recent?: Station[];
+  onSelectGenre?: (cat: BrowseCategory) => void;
+  onSelectCountry?: (countryName: string) => void;
+  onGoHome?: () => void;
 };
 
 const SCROLL_CLASS =
@@ -140,6 +143,9 @@ export default function BrowseView({
   onToggleFav,
   favorites,
   recent,
+  onSelectGenre,
+  onSelectCountry,
+  onGoHome,
 }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
@@ -150,15 +156,8 @@ export default function BrowseView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
-  const [genreFilter, setGenreFilter] = useState<string | null>(null);
-  const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    setGenreFilter(null);
-    setCountryFilter(null);
-  }, [view]);
 
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
@@ -201,7 +200,7 @@ export default function BrowseView({
     setError(null);
 
     if (view.mode !== "top") {
-      // Search, genre, country modes — single list as before
+      // Search, genre, country modes — single list
       setLoading(true);
       const load = async () => {
         try {
@@ -252,31 +251,16 @@ export default function BrowseView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
 
-  const filteredStations = useMemo(() => {
-    let list = stations;
-    if (genreFilter) {
-      list = list.filter((s) =>
-        s.tags?.toLowerCase().includes(genreFilter.toLowerCase()),
-      );
-    }
-    if (countryFilter) {
-      list = list.filter((s) =>
-        s.country?.toLowerCase() === countryFilter.toLowerCase(),
-      );
-    }
-    return list;
-  }, [stations, genreFilter, countryFilter]);
-
   // All loaded category stations for discovery mode & station count in top view
   const allCategoryStations = useMemo(() => {
     return Object.values(categorySections).flat();
   }, [categorySections]);
 
-  const displayCount = view.mode === "top" ? allCategoryStations.length : filteredStations.length;
+  const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
 
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
-    const pool = view.mode === "top" ? allCategoryStations : filteredStations;
+    const pool = view.mode === "top" ? allCategoryStations : stations;
     if (discoveryMode && pool.length > 0) {
       discoveryRef.current = setInterval(() => {
         const random = pool[Math.floor(Math.random() * pool.length)];
@@ -286,9 +270,13 @@ export default function BrowseView({
     return () => {
       if (discoveryRef.current) clearInterval(discoveryRef.current);
     };
-  }, [discoveryMode, filteredStations, allCategoryStations, view.mode, onPlay]);
+  }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
+
+  // Chip active states based on current view (chips trigger view changes, not local filters)
+  const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
+  const countryChipActive = (name: string) => view.mode === "country" && view.country === name;
 
   return (
     <div className="col-fill min-w-0 h-full">
@@ -317,23 +305,19 @@ export default function BrowseView({
       </div>
 
       {/* Genre filter bar */}
-      <div className={`pb-2 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
-        <div className={`flex gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
+      <div className="pb-2 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        <div className={`flex items-center gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
           <button
-            onClick={() => setGenreFilter(null)}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${!genreFilter ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            onClick={() => onGoHome?.()}
+            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
             All
           </button>
           {GENRE_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
-              onClick={() =>
-                setGenreFilter((prev) =>
-                  prev === cat.tag ? null : (cat.tag ?? null),
-                )
-              }
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${genreFilter === cat.tag ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+              onClick={() => onSelectGenre?.(cat)}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
             >
               {cat.label}
             </button>
@@ -343,24 +327,21 @@ export default function BrowseView({
 
       {/* Country filter bar */}
       <div className="pb-3 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-        <div className={`flex gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
+        <div className={`flex items-center gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
           <button
-            onClick={() => setCountryFilter(null)}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${!countryFilter ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            onClick={() => onGoHome?.()}
+            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
             🌐 All
           </button>
           {COUNTRY_CATEGORIES.map((c) => (
             <button
               key={c.code}
-              onClick={() =>
-                setCountryFilter((prev) =>
-                  prev === c.name ? null : c.name,
-                )
-              }
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${countryFilter === c.name ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+              onClick={() => onSelectCountry?.(c.name)}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors flex items-center gap-1 ${countryChipActive(c.name) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
             >
-              {countryFlag(c.code)} {c.name}
+              <span>{countryFlag(c.code)}</span>
+              <span>{COUNTRY_DISPLAY[c.code] ?? c.name}</span>
             </button>
           ))}
         </div>
@@ -387,7 +368,7 @@ export default function BrowseView({
           </div>
         )}
 
-        {!loading && !error && view.mode !== "top" && filteredStations.length === 0 && (
+        {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16">
             <Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">No stations found</p>
@@ -400,7 +381,7 @@ export default function BrowseView({
             {view.mode === "top" && (
               <>
                 {/* Favorites row */}
-                {favorites && favorites.length > 0 && !genreFilter && !countryFilter && (
+                {favorites && favorites.length > 0 && (
                   <ScrollRow
                     title="Favorites"
                     icon={<Heart size={14} className="text-pink-400/70" />}
@@ -422,7 +403,7 @@ export default function BrowseView({
                 )}
 
                 {/* Recent stations row */}
-                {recent && recent.length > 0 && !genreFilter && !countryFilter && (
+                {recent && recent.length > 0 && (
                   <ScrollRow
                     title="Recent"
                     icon={<Clock size={14} className="text-blue-400/70" />}
@@ -447,20 +428,7 @@ export default function BrowseView({
                   const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
                   if (!cat) return null;
 
-                  // Genre filter: only show the matching category
-                  if (genreFilter && cat.tag !== genreFilter) return null;
-
                   const catStations = categorySections[catId];
-
-                  // Filter by country within each category
-                  const displayStations =
-                    catStations && countryFilter
-                      ? catStations.filter(
-                          (s) =>
-                            s.country?.toLowerCase() ===
-                            countryFilter.toLowerCase(),
-                        )
-                      : catStations;
 
                   // Failed to load — show retry button
                   if (!catStations && failedCategories.has(catId)) {
@@ -512,9 +480,8 @@ export default function BrowseView({
                     );
                   }
 
-                  // No stations after filtering
-                  if (!displayStations || displayStations.length === 0)
-                    return null;
+                  // No stations in this category
+                  if (!catStations || catStations.length === 0) return null;
 
                   return (
                     <ScrollRow
@@ -529,7 +496,7 @@ export default function BrowseView({
                       }
                       isMobile={isMobile}
                     >
-                      {displayStations.map((s) => (
+                      {catStations.map((s) => (
                         <div
                           key={s.stationuuid}
                           className={`snap-start flex-shrink-0 ${itemWidth}`}
@@ -555,30 +522,26 @@ export default function BrowseView({
               </>
             )}
 
-            {/* Flat list for search / genre / country views */}
-            {view.mode !== "top" && (
-              <ScrollRow isMobile={isMobile}>
-                {filteredStations.map((s) => (
-                  <div
+            {/* Grid column for search / genre / country views */}
+            {view.mode !== "top" && stations.length > 0 && (
+              <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-3 px-0"} pb-4`}>
+                {stations.map((s) => (
+                  <StationCard
                     key={s.stationuuid}
-                    className={`snap-start flex-shrink-0 ${itemWidth}`}
-                  >
-                    <StationCard
-                      station={s}
-                      isPlaying={
-                        isPlaying &&
-                        currentStation?.stationuuid === s.stationuuid
-                      }
-                      isCurrent={
-                        currentStation?.stationuuid === s.stationuuid
-                      }
-                      isFavorite={isFavorite(s.stationuuid)}
-                      onPlay={() => onPlay(s)}
-                      onToggleFav={() => onToggleFav(s)}
-                    />
-                  </div>
+                    station={s}
+                    isPlaying={
+                      isPlaying &&
+                      currentStation?.stationuuid === s.stationuuid
+                    }
+                    isCurrent={
+                      currentStation?.stationuuid === s.stationuuid
+                    }
+                    isFavorite={isFavorite(s.stationuuid)}
+                    onPlay={() => onPlay(s)}
+                    onToggleFav={() => onToggleFav(s)}
+                  />
                 ))}
-              </ScrollRow>
+              </div>
             )}
           </>
         )}

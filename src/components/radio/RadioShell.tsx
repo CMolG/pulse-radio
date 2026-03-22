@@ -17,10 +17,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Minimize2,
   Maximize2,
-  Menu,
-  X,
   Radio as RadioIcon,
-  Music,
   Search,
   Clock,
   Heart,
@@ -47,7 +44,6 @@ import { useHistory } from "./hooks/useHistory";
 import { useSleepTimer } from "./hooks/useSleepTimer";
 import { useAudioAnalyser, useAlbumArt } from "@/lib/audio-visualizer";
 import { usePlaybackStore } from "@/lib/playbackStore";
-import Sidebar from "./components/Sidebar";
 import BrowseView from "./components/BrowseView";
 import NowPlayingHero from "./components/NowPlayingHero";
 import NowPlayingBar from "./components/NowPlayingBar";
@@ -133,7 +129,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   }, []);
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
-  const [mobileDrawer, setMobileDrawer] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(
     null,
   );
@@ -145,14 +141,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     label: "Top Stations",
   });
 
-  // Close drawer / reset compact state on layout change
+  // Reset compact state on layout change
   useEffect(() => {
     if (layout === "pip") {
-      setMobileDrawer(false);
       setMiniMode(false);
-    }
-    if (layout === "mobile") {
-      setMobileDrawer(false);
     }
   }, [layout]);
 
@@ -203,10 +195,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       radio.play(station);
       recent.add(station);
       setTheaterMode(true);
-      if (layout === "mobile") setMobileDrawer(false);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [radio.play, recent.add, layout],
+    [radio.play, recent.add],
   );
 
   const handleSkipNext = useCallback(() => {
@@ -385,7 +376,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           break;
         case "Escape":
           setShowEq(false);
-          setMobileDrawer(false);
           if (theaterMode) setTheaterMode(false);
           break;
         case "t":
@@ -468,9 +458,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       country: "",
       label: `Search: "${query}"`,
     });
+    setActiveTab("discover");
     setTheaterMode(false);
-    setMobileDrawer(false);
-    setMobileSearchOpen(false);
   }, []);
 
   const handleGoHome = useCallback(() => {
@@ -483,22 +472,19 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     });
     setActiveTab("discover");
     setTheaterMode(false);
-    setMobileDrawer(false);
+    setSearchQuery("");
   }, []);
 
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const [mobileSearchQuery, setMobileSearchQuery] = useState("");
-
-  const handleMobileSearchSubmit = useCallback(
+  const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (mobileSearchQuery.trim()) {
-        handleSearch(mobileSearchQuery.trim());
+      if (searchQuery.trim()) {
+        handleSearch(searchQuery.trim());
       } else {
         handleGoHome();
       }
     },
-    [mobileSearchQuery, handleSearch, handleGoHome],
+    [searchQuery, handleSearch, handleGoHome],
   );
 
   const handleSelectGenre = useCallback((cat: BrowseCategory) => {
@@ -510,18 +496,22 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       label: cat.label,
     });
     setTheaterMode(false);
-    setMobileDrawer(false);
+    setSearchQuery("");
+  }, []);
+
+  const handleSelectCountry = useCallback((countryName: string) => {
+    setView({
+      mode: "country",
+      query: "",
+      tag: "",
+      country: countryName,
+      label: countryName,
+    });
+    setTheaterMode(false);
+    setSearchQuery("");
   }, []);
 
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.country}`;
-
-  const sidebarEl = (
-    <Sidebar
-      onSearch={handleSearch}
-      onSelectGenre={handleSelectGenre}
-      onGoHome={handleGoHome}
-    />
-  );
 
   const songDetailModal = (
     <SongDetailModal
@@ -609,74 +599,24 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         {/* Mobile header */}
         {!theaterMode && (
           <div className="relative z-20 flex-shrink-0 safe-top">
-            {/* Top row: menu + title + actions */}
-            <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-              <button
-                onClick={() => setMobileDrawer((d) => !d)}
-                aria-label={mobileDrawer ? 'Close menu' : 'Open menu'}
-                className="w-10 h-10 flex-center-row rounded-xl bg-surface-2 hover:bg-surface-5 text-secondary active:scale-95 transition-transform flex-shrink-0"
-              >
-                {mobileDrawer ? <X size={20} /> : <Menu size={20} />}
+            <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+              <button onClick={handleGoHome} className="flex items-center gap-1.5">
+                <RadioIcon size={16} className="text-sys-orange flex-shrink-0" />
+                <span className="text-[15px] font-semibold text-white">Pulse</span>
               </button>
-              <div className="flex-1 min-w-0" onClick={handleGoHome}>
-                <div className="flex items-center gap-1.5">
-                  <RadioIcon size={16} className="text-sys-orange flex-shrink-0" />
-                  <span className="text-[15px] font-semibold text-white">Pulse</span>
-                </div>
-              </div>
+              <div className="flex-1" />
               {radio.station && (
                 <button
                   onClick={radio.station ? handleToggleFav : undefined}
                   aria-label={radio.station && favs.has(radio.station.stationuuid) ? 'Remove from favorites' : 'Add to favorites'}
-                  className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
+                  className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
                 >
-                  <Star size={20} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
+                  <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
                 </button>
               )}
             </div>
-            {/* Search bar */}
-            <form onSubmit={handleMobileSearchSubmit} className="px-4 pb-2">
-              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/[0.06] border border-white/[0.06]">
-                <Search size={16} className="text-white/30 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search stations..."
-                  value={mobileSearchQuery}
-                  onChange={(e) => setMobileSearchQuery(e.target.value)}
-                  aria-label="Search stations"
-                  className="bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none w-full"
-                  data-radio-search
-                />
-              </div>
-            </form>
           </div>
         )}
-
-        {/* Drawer overlay */}
-        <AnimatePresence>
-          {mobileDrawer && (
-            <>
-              <motion.div
-                key="backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/50 z-30"
-                onClick={() => setMobileDrawer(false)}
-              />
-              <motion.div
-                key="drawer"
-                initial={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "-100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="absolute left-0 top-0 bottom-0 z-40 w-[280px] max-w-[75vw] bg-[#0a0f1a] border-r border-border-default shadow-2xl overflow-y-auto"
-              >
-                {sidebarEl}
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
 
         {/* Main content */}
         <div className="flex-1 min-h-0 relative z-10 overflow-y-auto">
@@ -722,8 +662,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   fallbackUrl={radio.station.favicon}
                 />
               )}
-              {/* ── Mobile top nav tabs ── */}
-              <div className="flex-shrink-0 px-4 pt-2 pb-2 flex gap-2">
+              {/* ── Mobile top nav tabs + search ── */}
+              <div className="flex-shrink-0 px-4 pt-2 pb-2 flex items-center gap-2">
                 {([
                   { id: "discover" as const, label: "Discover", icon: <RadioIcon size={14} /> },
                   { id: "history" as const, label: "History", icon: <Clock size={14} /> },
@@ -732,12 +672,26 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium transition-all active:scale-95 ${activeTab === tab.id ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}
                   >
                     {tab.icon}
                     {tab.label}
                   </button>
                 ))}
+                <form onSubmit={handleSearchSubmit} className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
+                    <Search size={13} className="text-white/30 flex-shrink-0" />
+                    <input
+                      type="search"
+                      placeholder="Search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      aria-label="Search stations"
+                      className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                      data-radio-search
+                    />
+                  </div>
+                </form>
               </div>
               <div className="flex-1 min-h-0">
                 {activeTab === "discover" ? (
@@ -750,6 +704,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     onToggleFav={favs.toggle}
                     favorites={favs.favorites}
                     recent={recent.recent}
+                    onSelectGenre={handleSelectGenre}
+                    onSelectCountry={handleSelectCountry}
+                    onGoHome={handleGoHome}
                   />
                 ) : activeTab === "history" ? (
                   <div className="overflow-y-auto h-full">
@@ -859,11 +816,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
       />
       <div className="flex flex-1 min-h-0 relative z-10">
-        {/* Sidebar - hidden in mini mode and theater mode */}
-        {!miniMode && !theaterMode && (
-          <div style={{ width: 200, flexShrink: 0 }}>{sidebarEl}</div>
-        )}
-
         {/* Main content */}
         <div className="col-fill min-w-0">
           <AnimatePresence mode="wait">
@@ -917,8 +869,16 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     variant="desktop"
                   />
                 )}
-                {/* ── Top nav tabs ── */}
-                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex gap-1">
+                {/* ── Top nav: Pulse + tabs + search ── */}
+                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
+                  {/* Pulse logo button */}
+                  <button
+                    onClick={handleGoHome}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-semibold text-white/80 hover:text-white hover:bg-surface-2 transition-colors mr-1 flex-shrink-0"
+                  >
+                    <RadioIcon size={13} className="text-sys-orange" />
+                    Pulse
+                  </button>
                   {([
                     { id: "discover" as const, label: "Discover", icon: <RadioIcon size={13} /> },
                     { id: "history" as const, label: "History", icon: <Clock size={13} /> },
@@ -927,7 +887,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors flex-shrink-0 ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
                     >
                       {tab.icon}
                       {tab.label}
@@ -939,6 +899,21 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                       )}
                     </button>
                   ))}
+                  {/* Search input — fills remaining space */}
+                  <form onSubmit={handleSearchSubmit} className="flex-1 min-w-0 ml-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.05]">
+                      <Search size={12} className="text-dim flex-shrink-0" />
+                      <input
+                        type="search"
+                        placeholder="Search stations…"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        aria-label="Search stations"
+                        className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                        data-radio-search
+                      />
+                    </div>
+                  </form>
                 </div>
                 {/* ── Tab content ── */}
                 <AnimatePresence mode="wait">
@@ -960,6 +935,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                         onToggleFav={favs.toggle}
                         favorites={favs.favorites}
                         recent={recent.recent}
+                        onSelectGenre={handleSelectGenre}
+                        onSelectCountry={handleSelectCountry}
+                        onGoHome={handleGoHome}
                       />
                     </motion.div>
                   ) : activeTab === "history" ? (

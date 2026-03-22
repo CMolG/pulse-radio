@@ -59,7 +59,10 @@ export function useArtistInfo(artist: string | null): {
     setInfo(null);
 
     fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data: ArtistInfo) => {
         if (!cancelled) {
           cacheSet(key, data);
