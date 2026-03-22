@@ -21,6 +21,8 @@ export type UseFavoritesReturn = {
   playPrev: (currentUuid: string) => Station | null;
 };
 
+const MAX_FAVORITES = 500;
+
 export function useFavorites(): UseFavoritesReturn {
   const [favorites, setFavorites] = useState<Station[]>(() =>
     loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, [])
@@ -33,7 +35,9 @@ export function useFavorites(): UseFavoritesReturn {
   const add = useCallback((station: Station) => {
     setFavorites(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
-      return [station, ...prev];
+      const next = [station, ...prev];
+      if (next.length > MAX_FAVORITES) next.length = MAX_FAVORITES;
+      return next;
     });
   }, []);
 
@@ -44,9 +48,10 @@ export function useFavorites(): UseFavoritesReturn {
   const toggle = useCallback((station: Station) => {
     setFavorites(prev => {
       const exists = prev.some(s => s.stationuuid === station.stationuuid);
-      return exists
-        ? prev.filter(s => s.stationuuid !== station.stationuuid)
-        : [station, ...prev];
+      if (exists) return prev.filter(s => s.stationuuid !== station.stationuuid);
+      const next = [station, ...prev];
+      if (next.length > MAX_FAVORITES) next.length = MAX_FAVORITES;
+      return next;
     });
   }, []);
 
