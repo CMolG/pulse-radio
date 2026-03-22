@@ -101,7 +101,9 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
         }
         lastTitleRef.current = streamTitle;
         const parsed = parseTrack(streamTitle, station.name);
-        if (parsed && (isAdContent(parsed.title) || isAdContent(parsed.artist))) {
+        // Only reject if the title looks like an ad. Artist-only ad matches
+        // cause false positives (e.g. "will.i.am", bands with TLD-like names).
+        if (parsed && isAdContent(parsed.title)) {
           return;
         }
         setTrack(parsed);
