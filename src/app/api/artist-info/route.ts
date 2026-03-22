@@ -22,7 +22,10 @@ async function searchMusicBrainz(artist: string) {
       headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
       signal: AbortSignal.timeout(8_000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      await res.text().catch(() => {}); // drain body to release connection
+      return null;
+    }
     const data = await res.json();
     return data.artists?.[0] ?? null;
   } catch {
@@ -37,7 +40,10 @@ async function fetchWikiSummary(title: string) {
       headers: { 'User-Agent': USER_AGENT },
       signal: AbortSignal.timeout(8_000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      await res.text().catch(() => {}); // drain body to release connection
+      return null;
+    }
     const data = await res.json();
     if (data.type === 'disambiguation') return null;
     return data;
@@ -48,8 +54,8 @@ async function fetchWikiSummary(title: string) {
 
 export async function GET(req: NextRequest) {
   const artist = req.nextUrl.searchParams.get('artist');
-  if (!artist) {
-    return NextResponse.json({ error: 'Missing artist parameter' }, { status: 400 });
+  if (!artist || artist.length > 200) {
+    return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
   }
 
   try {
