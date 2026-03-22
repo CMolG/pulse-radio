@@ -111,3 +111,11 @@ export const COUNTRY_CATEGORIES = [
   { code: 'PL', name: 'Poland' },
   { code: 'TR', name: 'Türkiye' },
 ] as const;
+
+export const COUNTRY_DISPLAY: Record<string, string> = {
+  US: 'USA', GB: 'UK', DE: 'Germany', FR: 'France', ES: 'Spain',
+  IT: 'Italy', BR: 'Brazil', MX: 'Mexico', AR: 'Argentina', JP: 'Japan',
+  KR: 'Korea', IN: 'India', AU: 'Australia', CA: 'Canada', NL: 'Netherlands',
+  PT: 'Portugal', SE: 'Sweden', RU: 'Russia', CO: 'Colombia', CL: 'Chile',
+  PL: 'Poland', TR: 'Türkiye',
+};

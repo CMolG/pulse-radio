@@ -115,6 +115,9 @@ export default function SongDetailModal({ song, onClose }: Props) {
           <motion.div
             key="song-detail-modal"
             ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Song details: ${song.title} by ${song.artist}`}
             initial={{ y: 30, opacity: 0, scale: 0.96 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 30, opacity: 0, scale: 0.96 }}
@@ -127,6 +130,7 @@ export default function SongDetailModal({ song, onClose }: Props) {
               <div className="sticky top-0 z-10 flex justify-end p-3">
                 <button
                   onClick={onClose}
+                  aria-label="Close song details"
                   className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
                 >
                   <X size={16} />
@@ -140,7 +144,7 @@ export default function SongDetailModal({ song, onClose }: Props) {
                   {song.artworkUrl ? (
                     <img
                       src={song.artworkUrl}
-                      alt=""
+                      alt={`Album art for ${song.title} by ${song.artist}`}
                       className="size-full object-cover"
                     />
                   ) : (
