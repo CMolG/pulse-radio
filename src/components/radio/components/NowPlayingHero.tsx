@@ -69,8 +69,9 @@ export default function NowPlayingHero({
         fallbackUrl={station.favicon || undefined}
         overlayClass="bg-black/60"
       >
+        {/* TODO scroll no funciona aquí dentro, revisar como podemos propagarlo para que funcione */}
         {(lyricsLoading || (lyrics && lyrics.lines.length > 0)) && (
-            <div className="relative z-10 -mx-5 mt-1">
+            <div className="relative z-10 -mx-5 mb-15">
               <MobileLyricsReel
                   lyrics={lyrics ?? null}
                   loading={!!lyricsLoading}
