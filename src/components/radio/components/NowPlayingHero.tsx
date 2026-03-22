@@ -13,7 +13,6 @@ import AnimatedBars from "./AnimatedBars";
 import MobileLyricsReel from "./MobileLyricsReel";
 import {
   ParallaxAlbumBackground,
-  VisualizerCanvas,
 } from "@/lib/audio-visualizer";
 
 function stationInitials(name: string) {
@@ -42,7 +41,6 @@ export default function NowPlayingHero({
   station,
   track,
   isPlaying,
-  frequencyDataRef,
   artworkUrl,
   icyBitrate,
   onTheater,
@@ -70,6 +68,7 @@ export default function NowPlayingHero({
         overlayClass="bg-black/60"
       >
         {/* TODO scroll no funciona aquí dentro, revisar como podemos propagarlo para que funcione */}
+        {/* TODO hay que limitarlo a 3 entradas, la anterior, la activa y la siguiente y tienen que salir las tres, tenemos que poder reducir un poco el tamaño de fuente aquí */}
         {(lyricsLoading || (lyrics && lyrics.lines.length > 0)) && (
             <div className="relative z-10 -mx-5 mb-15">
               <MobileLyricsReel
@@ -94,7 +93,7 @@ export default function NowPlayingHero({
       )}
 
       <div className="relative z-10 flex-row-4 w-full">
-        <div className="w-16 h-16 rounded-xl bg-surface-2 flex-center-row flex-shrink-0 overflow-hidden">
+        <div className="w-16 h-16 rounded-xl bg-surface-2 flex-center-row shrink-0 overflow-hidden">
           {showFallback ? (
             <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">

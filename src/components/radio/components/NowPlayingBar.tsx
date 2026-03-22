@@ -298,6 +298,7 @@ export default function NowPlayingBar({
             onClick={onCycleSleepTimer}
             className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
+            aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}
           >
             <Clock size={14} />
             {sleepTimerMin != null && (
