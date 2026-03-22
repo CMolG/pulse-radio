@@ -92,7 +92,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const radio = useRadio();
   const eq = useEqualizer();
   const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
-  const { lyrics, loading: lyricsLoading } = useLyrics(track, radio.station?.name);
+  const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(track, radio.station?.name);
   const favs = useFavorites();
   const favSongs = useFavoriteSongs();
   const recent = useRecent();

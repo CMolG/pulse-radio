@@ -36,7 +36,7 @@ type Props = {
 
 export default function SongDetailModal({ song, onClose }: Props) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
-  const { lyrics, loading: lyricsLoading } = useLyrics(
+  const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
     song
       ? {
           title: song.title,
@@ -300,7 +300,14 @@ export default function SongDetailModal({ song, onClose }: Props) {
                 )}
 
                 {!lyricsLoading && !plainLyrics && (
-                  <p className="text-[12px] text-dim">No lyrics available</p>
+                  <div>
+                    <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
+                    {lyricsError && (
+                      <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
+                        Retry
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -350,7 +357,14 @@ export default function SongDetailModal({ song, onClose }: Props) {
                 )}
 
                 {!lyricsLoading && !plainLyrics && (
-                  <p className="text-[12px] text-dim">No lyrics available</p>
+                  <div>
+                    <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
+                    {lyricsError && (
+                      <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
+                        Retry
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
