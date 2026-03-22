@@ -35,6 +35,7 @@ export type UseRadioReturn = {
 export function useRadio(): UseRadioReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() => {
@@ -174,17 +175,22 @@ export function useRadio(): UseRadioReturn {
     setStatus('loading');
 
     // Crossfade: fade out current audio before switching
+    if (fadeTimerRef.current) {
+      clearInterval(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
     if (!audio.paused && audio.src) {
       const targetVol = muted ? 0 : volume;
       const steps = 6;
       const interval = 50; // 300ms total
       let step = 0;
       const startVol = audio.volume;
-      const fadeTimer = setInterval(() => {
+      fadeTimerRef.current = setInterval(() => {
         step++;
         audio.volume = Math.max(0, startVol * (1 - step / steps));
         if (step >= steps) {
-          clearInterval(fadeTimer);
+          clearInterval(fadeTimerRef.current!);
+          fadeTimerRef.current = null;
           audio.src = proxyUrl(s.url_resolved);
           audio.volume = targetVol;
           audio.play().catch(() => setStatus('error'));
