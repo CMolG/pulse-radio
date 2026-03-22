@@ -46,6 +46,7 @@ export function useLyrics(
   const MAX_RETRIES = 2;
 
   const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
+    if (controller.signal.aborted) return;
     if (!track?.title) return;
     setLoading(true);
     setError(false);
