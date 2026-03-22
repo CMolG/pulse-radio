@@ -28,8 +28,12 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
   const showFallback = !station.favicon || imgError;
 
   return (<div
+      role="button"
+      tabIndex={0}
+      aria-label={`${station.name}${isCurrent && isPlaying ? ' (playing)' : ''}`}
       className={`group cursor-pointer rounded-xl p-2 transition-all duration-150 ${isCurrent ? 'bg-surface-3 ring-1 ring-border-strong' : 'hover:bg-surface-2' }`}
-      onClick={onPlay}>
+      onClick={onPlay}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPlay(); } }}>
       {/* Artwork */}
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
         {showFallback ? (
@@ -41,6 +45,7 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
 
         {/* Play overlay */}
         <motion.button
+          aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ scale: 1.1 }}
           className={`app-overlay-center bg-black/40 transition-opacity duration-200 ${isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
@@ -52,6 +57,8 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
 
         {/* Favorite badge */}
         <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          aria-pressed={isFavorite}
           className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50' }`}
         >
  <Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} />
