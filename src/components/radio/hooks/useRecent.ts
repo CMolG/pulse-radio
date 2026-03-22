@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Station } from '../types';
 import { STORAGE_KEYS, MAX_RECENT } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseRecentReturn = {
   recent: Station[];
@@ -19,14 +20,18 @@ export type UseRecentReturn = {
 
 export function useRecent(): UseRecentReturn {
   const [recent, setRecent] = useState<Station[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.RECENT);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+    const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, []);
+    // Dedup by stationuuid on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(s => {
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false;
+      seen.add(s.stationuuid);
+      return true;
+    });
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RECENT, JSON.stringify(recent));
+    saveToStorage(STORAGE_KEYS.RECENT, recent);
   }, [recent]);
 
   const add = useCallback((station: Station) => {

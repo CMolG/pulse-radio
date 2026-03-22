@@ -22,9 +22,15 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
 
   useEffect(() => {
     if (preview) return;
+    const MAX_STALE_MS = 30_000;
     const read = () => {
       try {
-        setState(loadFromStorage(STORAGE_KEYS.PLAYBACK, null))
+        const parsed = loadFromStorage<WidgetPlaybackState | null>(STORAGE_KEYS.PLAYBACK, null);
+        if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+          setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+        } else {
+          setState(parsed);
+        }
       } catch { /* ok */ }
       try {
         setFavorites(loadFromStorage(STORAGE_KEYS.FAVORITES, []))
@@ -64,6 +70,7 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
           <div className="flex-center-row gap-1 mb-1.5 flex-wrap">
             {favorites.slice(0, 3).map(s => (
  <button key={s.stationuuid} onClick={() => sendCommand('play', s)}
+                aria-label={`Play ${s.name}`}
                 className="flex-row-1 pad-sm-full bg-surface-2 hover-4">
                 <Heart size={7} className="text-pink-400/60" fill="currentColor" />
                 <span className="text-[9px] text-dim truncate max-w-[60px]">{s.name}</span>
@@ -74,10 +81,12 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
 
         <div className="flex-center-row gap-3 mt-1">
           <button onClick={() => sendCommand('togglePlay')}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
             className="dot-7 bg-surface-4 hover:bg-surface-7 flex-center-row text-white transition-colors">
             {isPlaying ? <Pause size={13} /> : <Play size={13} className="ml-0.5" />}
           </button>
           <button onClick={() => sendCommand('skipNext')}
+            aria-label="Next station"
             className="text-muted hover:text-white transition-colors">
             <SkipForward size={14} />
           </button></div></div></div>);

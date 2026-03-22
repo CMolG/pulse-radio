@@ -5,7 +5,7 @@
  */
 
 'use client';
-import { useRef, useCallback, useEffect, useState } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { getOrCreateAudioSource } from './audioSourceCache';
 
 interface UseAudioAnalyserOptions {
@@ -15,8 +15,10 @@ interface UseAudioAnalyserOptions {
 
 interface UseAudioAnalyserReturn {
   connectAudio: (audio: HTMLAudioElement) => void;
-  frequencyData: Uint8Array | null;
-  waveData: Uint8Array | null;
+  /** Stable ref whose .current is updated in-place every frame — zero allocations */
+  frequencyDataRef: React.RefObject<Uint8Array | null>;
+  /** Stable ref whose .current is updated in-place every frame — zero allocations */
+  waveDataRef: React.RefObject<Uint8Array | null>;
   isActive: boolean;
   disconnect: () => void;
 }
@@ -28,13 +30,17 @@ export function useAudioAnalyser(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0);
   const connectedRef = useRef<HTMLAudioElement | null>(null);
-  const [frequencyData, setFrequencyData] = useState<Uint8Array | null>(null);
-  const [waveData, setWaveData] = useState<Uint8Array | null>(null);
+  const frequencyDataRef = useRef<Uint8Array | null>(null);
+  const waveDataRef = useRef<Uint8Array | null>(null);
   const [isActive, setIsActive] = useState(false);
 
   const connectAudio = useCallback(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
+
+      // Cancel any existing animation loop before starting a new one
+      cancelAnimationFrame(rafRef.current);
+
       try {
         const { ctx, source } = getOrCreateAudioSource(audio);
         connectedRef.current = audio;
@@ -47,15 +53,18 @@ export function useAudioAnalyser(
           analyserRef.current = analyser;
         }
 
-        const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-        const timeArray = new Uint8Array(analyserRef.current.fftSize);
+        // Allocate buffers once — reused across all frames (zero per-frame allocation)
+        frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
+        waveDataRef.current = new Uint8Array(analyserRef.current.fftSize);
         setIsActive(true);
 
         const tick = () => {
-          analyserRef.current?.getByteFrequencyData(dataArray);
-          analyserRef.current?.getByteTimeDomainData(timeArray);
-          setFrequencyData(new Uint8Array(dataArray));
-          setWaveData(new Uint8Array(timeArray));
+          if (frequencyDataRef.current) {
+            analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
+          }
+          if (waveDataRef.current) {
+            analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
+          }
           rafRef.current = requestAnimationFrame(tick);
         };
         rafRef.current = requestAnimationFrame(tick);
@@ -65,8 +74,8 @@ export function useAudioAnalyser(
         // alive and just disable analyser updates.
         cancelAnimationFrame(rafRef.current);
         setIsActive(false);
-        setFrequencyData(null);
-        setWaveData(null);
+        frequencyDataRef.current = null;
+        waveDataRef.current = null;
       }
     },
     [fftSize, smoothingTimeConstant],
@@ -75,8 +84,8 @@ export function useAudioAnalyser(
   const disconnect = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
     setIsActive(false);
-    setFrequencyData(null);
-    setWaveData(null);
+    frequencyDataRef.current = null;
+    waveDataRef.current = null;
   }, []);
 
   useEffect(
@@ -86,5 +95,5 @@ export function useAudioAnalyser(
     [],
   );
 
-  return { connectAudio, frequencyData, waveData, isActive, disconnect };
+  return { connectAudio, frequencyDataRef, waveDataRef, isActive, disconnect };
 }

@@ -10,6 +10,7 @@ import React from "react";
 import { Music, Radio, Clock, Trash2, Heart, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
 import type { HistoryEntry, SongDetailData } from "../types";
+import { formatDuration } from "../utils/formatDuration";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -66,19 +67,27 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.03, 0.5) }}
             className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label={`${entry.title} by ${entry.artist}`}
             onClick={() => onSelect?.({
               title: entry.title,
               artist: entry.artist,
               album: entry.album,
               artworkUrl: entry.artworkUrl,
               itunesUrl: entry.itunesUrl,
+              durationMs: entry.durationMs,
+              genre: entry.genre,
+              releaseDate: entry.releaseDate,
+              trackNumber: entry.trackNumber,
+              trackCount: entry.trackCount,
               stationName: entry.stationName,
             })}
           >
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
               {entry.artworkUrl ? (
-                <img src={entry.artworkUrl} alt="" className="size-full object-cover" />
+                <img src={entry.artworkUrl} alt="" loading="lazy" className="size-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               ) : (
                 <div className="size-full flex items-center justify-center">
                   <Music size={32} className="text-dim" />
@@ -87,6 +96,8 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               {onToggleFavSong && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onToggleFavSong(entry); }}
+                  aria-label={isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song'}
+                  aria-pressed={!!isSongFavorite?.(entry.title, entry.artist)}
                   className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${isSongFavorite?.(entry.title, entry.artist) ? "bg-pink-500/20 text-pink-400" : "bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400"}`}
                   title="Favorite song"
                 >
@@ -95,6 +106,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(entry.id); }}
+                aria-label="Remove from history"
                 className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Remove"
               >
@@ -107,6 +119,17 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               <p className="text-[12px] text-secondary line-clamp-1">{entry.artist}</p>
               {entry.album && (
                 <p className="text-[11px] text-dim line-clamp-1">{entry.album}</p>
+              )}
+              {(entry.genre || entry.durationMs) && (
+                <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
+                  {entry.genre && <span>{entry.genre}</span>}
+                  {entry.durationMs && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <Clock size={8} className="opacity-60" />
+                      {formatDuration(entry.durationMs)}
+                    </span>
+                  )}
+                </p>
               )}
             </div>
             {/* Apple Music + Footer */}

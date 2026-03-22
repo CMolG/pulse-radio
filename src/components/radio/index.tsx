@@ -7,7 +7,18 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { STORAGE_KEYS } from './constants';
+import { ensureStorageVersion } from '@/lib/storageUtils';
+
+ensureStorageVersion(Object.values(STORAGE_KEYS));
 
 const RadioShell = dynamic(() => import('./RadioShell'), { ssr: false });
 
-export default function RadioApp({ isPip }: { isPip?: boolean }) { return <RadioShell isPip={isPip} />; }
+export default function RadioApp({ isPip }: { isPip?: boolean }) {
+  return (
+    <ErrorBoundary>
+      <RadioShell isPip={isPip} />
+    </ErrorBoundary>
+  );
+}

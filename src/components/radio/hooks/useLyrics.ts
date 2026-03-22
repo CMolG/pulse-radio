@@ -10,27 +10,28 @@ import { useState, useRef, useEffect } from 'react';
 import type { NowPlayingTrack, LyricsData } from '../types';
 import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const MAX_CACHE = 50;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-type CacheEntry = { key: string; data: LyricsData };
+type CacheEntry = { key: string; data: LyricsData; ts: number };
 
 function loadCache(): CacheEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+  const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
+  // Backfill ts=0 for old entries so they expire on next TTL check
+  return raw.map(e => ({ ...e, ts: e.ts ?? 0 }));
 }
 
 function saveCache(entries: CacheEntry[]) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.LYRICS_CACHE, JSON.stringify(entries.slice(0, MAX_CACHE)));
-  } catch { /* storage full */ }
+  saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE));
 }
 
 export type UseLyricsReturn = {
   lyrics: LyricsData | null;
   loading: boolean;
+  error: boolean;
+  retry: () => void;
 };
 
 export function useLyrics(
@@ -39,38 +40,19 @@ export function useLyrics(
 ): UseLyricsReturn {
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const lastKeyRef = useRef('');
   const abortRef = useRef<AbortController | null>(null);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    // Cancel any in-flight request
-    if (abortRef.current) abortRef.current.abort();
+  const MAX_RETRIES = 2;
 
-    if (!track || !track.title) {
-      setLoading(false);
-      setLyrics(null);
-      lastKeyRef.current = '';
-      return;
-    }
-
-    const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}:${track.title}`.toLowerCase();
-    if (key === lastKeyRef.current) return;
-    lastKeyRef.current = key;
-
-    // Check localStorage cache
-    const cached = loadCache();
-    const hit = cached.find(e => e.key === key);
-    if (hit) {
-      setLoading(false);
-      setLyrics(hit.data);
-      return;
-    }
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
+  const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
+    if (controller.signal.aborted) return;
+    if (!track?.title) return;
     setLoading(true);
+    setError(false);
     fetchLyricsApi(
       track.artist || stationName || '',
       track.title,
@@ -80,23 +62,82 @@ export function useLyrics(
     )
       .then(result => {
         if (controller.signal.aborted) return;
+        retryCountRef.current = 0;
         if (result) {
           setLyrics(result);
-          const updated = [{ key, data: result }, ...cached.filter(e => e.key !== key)];
+          const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
         } else {
           setLyrics(null);
         }
       })
       .catch(() => {
-        if (!controller.signal.aborted) setLyrics(null);
+        if (controller.signal.aborted) return;
+        if (retryCountRef.current < MAX_RETRIES) {
+          retryCountRef.current++;
+          const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
+          retryTimerRef.current = setTimeout(() => doFetch(key, cached, controller), delay);
+        } else {
+          setLyrics(null);
+          setError(true);
+          retryCountRef.current = 0;
+        }
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false);
       });
+  };
 
-    return () => controller.abort();
+  useEffect(() => {
+    if (abortRef.current) abortRef.current.abort();
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    retryCountRef.current = 0;
+
+    if (!track || !track.title) {
+      setLoading(false);
+      setLyrics(null);
+      setError(false);
+      lastKeyRef.current = '';
+      return;
+    }
+
+    const artistSeed = (track.artist || stationName || 'unknown').trim();
+    const key = `${artistSeed}:${track.title}`.toLowerCase();
+    if (key === lastKeyRef.current) return;
+    lastKeyRef.current = key;
+
+    const cached = loadCache();
+    const hit = cached.find(e => e.key === key);
+    if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
+      setLoading(false);
+      setLyrics(hit.data);
+      setError(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+    doFetch(key, cached, controller);
+
+    return () => {
+      controller.abort();
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.artist, track?.title, track?.album, stationName]);
 
-  return { lyrics, loading };
+  const retry = () => {
+    if (!track?.title) return;
+    const artistSeed = (track.artist || stationName || 'unknown').trim();
+    const key = `${artistSeed}:${track.title}`.toLowerCase();
+    const cached = loadCache();
+    if (abortRef.current) abortRef.current.abort();
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    retryCountRef.current = 0;
+    const controller = new AbortController();
+    abortRef.current = controller;
+    doFetch(key, cached, controller);
+  };
+
+  return { lyrics, loading, error, retry };
 }

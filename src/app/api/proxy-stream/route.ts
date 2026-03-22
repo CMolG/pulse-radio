@@ -5,6 +5,7 @@
  */
 
 import { NextRequest } from 'next/server';
+import { isPrivateHost } from '@/lib/urlSecurity';
 
 export const runtime = 'nodejs';
 
@@ -17,8 +18,8 @@ const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinit
  */
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
-  if (!streamUrl) {
-    return new Response(JSON.stringify({ error: 'Missing url parameter' }), {
+  if (!streamUrl || streamUrl.length > 2048) {
+    return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -33,6 +34,14 @@ export async function GET(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    // Block loopback and private/internal IPs to prevent SSRF
+    const host = parsed.hostname.toLowerCase();
+    if (isPrivateHost(host)) {
+      return new Response(JSON.stringify({ error: 'Private/internal URLs not allowed' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400,
@@ -40,12 +49,12 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  try {
-    const controller = new AbortController();
-    const timeout = MAX_DURATION_MS > 0
-      ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
-      : null;
+  const controller = new AbortController();
+  const timeout = MAX_DURATION_MS > 0
+    ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
+    : null;
 
+  try {
     const upstream = await fetch(parsed.toString(), {
       headers: {
         'User-Agent': 'JavadabaRadio/1.0',
@@ -54,18 +63,35 @@ export async function GET(req: NextRequest) {
       signal: controller.signal,
     });
 
+    // Validate the final URL after redirects to prevent SSRF via redirect
+    if (upstream.url) {
+      try {
+        const finalUrl = new URL(upstream.url);
+        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+          if (timeout) clearTimeout(timeout);
+          upstream.body?.cancel().catch(() => {});
+          return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+      } catch {
+        // URL parse failed — continue with original validation
+      }
+    }
+
     if (!upstream.ok || !upstream.body) {
       if (timeout) clearTimeout(timeout);
+      upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const contentType =
-      upstream.headers.get('content-type') || 'audio/mpeg';
+    const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
 
-    const response = new Response(upstream.body, {
+    return new Response(upstream.body, {
       status: 200,
       headers: {
         'Content-Type': contentType,
@@ -74,11 +100,8 @@ export async function GET(req: NextRequest) {
         'Transfer-Encoding': 'chunked',
       },
     });
-    if (timeout) {
-      response.headers.set('X-Proxy-Timeout-Ms', String(MAX_DURATION_MS));
-    }
-    return response;
   } catch (err) {
+    if (timeout) clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.includes('abort')) {
       return new Response(JSON.stringify({ error: 'Stream timed out' }), {

@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Play, Pause, Heart, Radio } from 'lucide-react';
+import { Play, Pause, Heart, Radio, Music2, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Station } from '../types';
 import { countryFlag } from '../constants';
@@ -19,28 +19,36 @@ type Props = {
   isFavorite: boolean;
   onPlay: () => void;
   onToggleFav: () => void;
+  liveStatus?: 'loading' | 'loaded' | 'error';
+  liveTrack?: { title: string; artist: string } | null;
+  onPeek?: () => void;
 };
 
 function stationInitials(name: string) { return name.split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join(''); }
 
-export default function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav }: Props) {
+export default function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek }: Props) {
   const [imgError, setImgError] = useState(false);
   const showFallback = !station.favicon || imgError;
 
   return (<div
+      role="button"
+      tabIndex={0}
+      aria-label={`${station.name}${isCurrent && isPlaying ? ' (playing)' : ''}`}
       className={`group cursor-pointer rounded-xl p-2 transition-all duration-150 ${isCurrent ? 'bg-surface-3 ring-1 ring-border-strong' : 'hover:bg-surface-2' }`}
-      onClick={onPlay}>
+      onClick={onPlay}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPlay(); } }}>
       {/* Artwork */}
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
         {showFallback ? (
           <div className="size-full dawn-gradient flex-center-row">
             <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{stationInitials(station.name) || <Radio size={20} className="text-white/60" />}</span></div>
         ) : (
- <img src={station.favicon} alt="" className="size-full object-cover" onError={() => setImgError(true)}/>
+ <img src={station.favicon} alt="" loading="lazy" className="size-full object-cover" onError={() => setImgError(true)}/>
         )}
 
         {/* Play overlay */}
         <motion.button
+          aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ scale: 1.1 }}
           className={`app-overlay-center bg-black/40 transition-opacity duration-200 ${isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
@@ -52,6 +60,8 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
 
         {/* Favorite badge */}
         <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          aria-pressed={isFavorite}
           className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50' }`}
         >
  <Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} />
@@ -77,5 +87,37 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
         {station.countrycode && (
           <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>
         )}
-      </div></div>);
+      </div>
+
+      {/* Live track preview */}
+      {liveStatus === 'loading' && (
+        <div className="flex items-center gap-1 mt-1.5">
+          <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />
+          <span className="text-[9px] text-dim">Checking…</span>
+        </div>
+      )}
+      {liveStatus === 'loaded' && (
+        <div className="flex items-center gap-1 mt-1.5 min-w-0">
+          {liveTrack ? (
+            <>
+              <Music2 size={9} className="text-sys-orange flex-shrink-0" />
+              <span className="text-[9px] text-white/60 truncate leading-tight">
+                {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}
+              </span>
+            </>
+          ) : (
+            <span className="text-[9px] text-white/20">No track info</span>
+          )}
+        </div>
+      )}
+      {onPeek && !liveStatus && (
+        <button
+          onClick={e => { e.stopPropagation(); onPeek(); }}
+          className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors"
+        >
+          <Music2 size={9} />
+          Check track
+        </button>
+      )}
+    </div>);
 }

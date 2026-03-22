@@ -13,19 +13,32 @@ export type RenderableLyricLine = {
   text: string;
 };
 
+/**
+ * Binary search for the last lyric line whose time ≤ currentTime.
+ * Lines are sorted ascending by time, so binary search is O(log n) vs O(n).
+ */
 export function getActiveLyricIndex(
   lyrics: LyricsData | null,
   currentTime?: number,
 ) {
   if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1;
 
-  let idx = -1;
-  for (let i = 0; i < lyrics.lines.length; i++) {
-    if (lyrics.lines[i].time <= currentTime) idx = i;
-    else break;
+  const lines = lyrics.lines;
+  let lo = 0;
+  let hi = lines.length - 1;
+  let result = -1;
+
+  while (lo <= hi) {
+    const mid = (lo + hi) >>> 1;
+    if (lines[mid].time <= currentTime) {
+      result = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
   }
 
-  return idx;
+  return result;
 }
 
 export function getRenderableLyricLines(

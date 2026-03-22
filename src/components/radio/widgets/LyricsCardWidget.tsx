@@ -18,15 +18,21 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
 
   useEffect(() => {
     if (preview) return;
+    const MAX_STALE_MS = 30_000;
     const read = () => {
       try {
-        setState(loadFromStorage(STORAGE_KEYS.PLAYBACK, null))
+        const parsed = loadFromStorage<WidgetPlaybackState | null>(STORAGE_KEYS.PLAYBACK, null);
+        if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+          setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+        } else {
+          setState(parsed);
+        }
       } catch { /* ignore */ }
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE);
         if (raw) {
           const cache: { key: string; data: LyricsData }[] = JSON.parse(raw);
-          if (cache.length > 0) setLyrics(cache[cache.length - 1].data);
+          if (cache.length > 0) setLyrics(cache[0].data);
         }
       } catch { /* ignore */ }
     };

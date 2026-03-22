@@ -17,10 +17,12 @@ import {
   Maximize2,
   Star,
   Heart,
+  Clock,
 } from "lucide-react";
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 function stationInitials(name: string) {
   return name
@@ -36,7 +38,7 @@ type Props = {
   status: PlaybackStatus;
   volume: number;
   muted: boolean;
-  frequencyData?: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   icyBitrate?: string | null;
   onTogglePlay: () => void;
   onSetVolume: (v: number) => void;
@@ -51,6 +53,8 @@ type Props = {
   showEq: boolean;
   theaterMode?: boolean;
   compact?: boolean;
+  sleepTimerMin?: number | null;
+  onCycleSleepTimer?: () => void;
 };
 
 export default function NowPlayingBar({
@@ -59,7 +63,7 @@ export default function NowPlayingBar({
   status,
   volume,
   muted,
-  frequencyData,
+  frequencyDataRef,
   icyBitrate,
   onTogglePlay,
   onSetVolume,
@@ -74,25 +78,29 @@ export default function NowPlayingBar({
   showEq,
   theaterMode,
   compact,
+  sleepTimerMin,
+  onCycleSleepTimer,
 }: Props) {
   const isPlaying = status === "playing";
   const isLoading = status === "loading";
   const [imgError, setImgError] = useState(false);
   const coverUrlForReset = track?.artworkUrl ?? station?.favicon;
   const lastBarCoverRef = React.useRef(coverUrlForReset);
-  if (coverUrlForReset !== lastBarCoverRef.current) {
-    lastBarCoverRef.current = coverUrlForReset;
-    if (imgError) setImgError(false);
-  }
+  React.useEffect(() => {
+    if (coverUrlForReset !== lastBarCoverRef.current) {
+      lastBarCoverRef.current = coverUrlForReset;
+      setImgError(false);
+    }
+  }, [coverUrlForReset]);
 
   if (compact) {
     return (
-      <div className="flex items-center gap-3 px-3 h-14 glass-blur border-t border-border-default flex-shrink-0 safe-bottom">
+      <div className="flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0">
         {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}
           disabled={!station}
-          className="w-11 h-11 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 flex-shrink-0 active:scale-95"
+          className="w-11 h-11 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -113,8 +121,8 @@ export default function NowPlayingBar({
               <div className="flex items-center gap-1.5 mt-0.5">
                 {isPlaying && (
                   <>
-                    <span className="dot-1.5 bg-red-500 animate-pulse flex-shrink-0" />
-                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 flex-shrink-0">
+                    <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
+                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
                       LIVE
                     </span>
                   </>
@@ -130,10 +138,12 @@ export default function NowPlayingBar({
         </div>
 
         {/* Action buttons — 44px touch targets */}
-        <div className="flex items-center gap-0.5 flex-shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0">
           {onFavSong && (
             <button
               onClick={onFavSong}
+              aria-label={songLiked ? 'Unlike song' : 'Like song'}
+              aria-pressed={!!songLiked}
               className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 ${songLiked ? "text-pink-400" : "text-white/30 hover:text-white/50"}`}
               title="Favorite song"
             >
@@ -158,10 +168,10 @@ export default function NowPlayingBar({
   const showFallback = !coverUrl || imgError;
 
   return (
-    <div className="flex-row-3 px-4 h-14 glass-blur border-t border-border-default flex-shrink-0">
+    <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
       {/* Station info */}
-      <div className="flex-row-2.5 min-w-[160px]">
-        <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 bg-surface-2 flex-center-row">
+      <div className="flex-row-2.5 min-w-40">
+        <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
           {showFallback ? (
             <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
@@ -183,6 +193,7 @@ export default function NowPlayingBar({
             />
           )}
         </div>
+        {/* TODO replace upper img with next image */}
         <div className="min-w-0">
           <p className="text-[12px] font-medium text-white truncate">
             {station?.name || "Not Playing"}
@@ -199,7 +210,7 @@ export default function NowPlayingBar({
           )}
         </div>
         {icyBitrate && (
-          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 flex-shrink-0 self-center">
+          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
             {icyBitrate}kbps
           </span>
         )}
@@ -210,6 +221,8 @@ export default function NowPlayingBar({
         <button
           onClick={onTogglePlay}
           disabled={!station}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
+          aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >
           {isLoading ? (
@@ -227,16 +240,18 @@ export default function NowPlayingBar({
         {station && isPlaying && (
           <>
             <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
+              <ErrorBoundary fallback={null}>
               <FerrofluidRenderer
-                frequencyData={frequencyData ?? null}
+                frequencyDataRef={frequencyDataRef}
                 className="size-full"
                 blobCount={6}
                 colorPrimary="#1a1a2e"
                 colorSecondary="#16213e"
                 colorAccent="#0f3460"
                 sensitivity={1.0}
-                demo={!frequencyData}
+                demo
               />
+              </ErrorBoundary>
             </div>
             <div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />
@@ -263,6 +278,8 @@ export default function NowPlayingBar({
         {onToggleFav && (
           <button
             onClick={onToggleFav}
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"
           >
@@ -272,14 +289,32 @@ export default function NowPlayingBar({
         {onFavSong && (
           <button
             onClick={onFavSong}
+            aria-label={songLiked ? 'Unlike song' : 'Like song'}
+            aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
             title="Me gusta canción"
           >
             <Heart size={14} className={songLiked ? "fill-pink-400" : ""} />
           </button>
         )}
+        {onCycleSleepTimer && (
+          <button
+            onClick={onCycleSleepTimer}
+            className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
+            title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
+            aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}
+          >
+            <Clock size={14} />
+            {sleepTimerMin != null && (
+              <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
+                {sleepTimerMin}
+              </span>
+            )}
+          </button>
+        )}
         <button
           onClick={onToggleEq}
+          aria-label="Toggle equalizer"
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         >
           <SlidersHorizontal size={14} />
@@ -287,10 +322,12 @@ export default function NowPlayingBar({
       </div>
 
       {/* Volume */}
-      <div className="flex-row-1 w-24 min-w-0 flex-shrink-0 overflow-hidden ml-2">
+      <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
         <button
           onClick={onToggleMute}
-          className="p-1 text-muted hover:text-white/60 transition-colors flex-shrink-0"
+          aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+          aria-pressed={muted || volume === 0}
+          className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"
         >
           {muted || volume === 0 ? (
             <VolumeX size={14} />
@@ -303,9 +340,14 @@ export default function NowPlayingBar({
           min={0}
           max={1}
           step={0.01}
-          value={muted ? 0 : volume}
-          onChange={(e) => onSetVolume(parseFloat(e.target.value))}
-          className="flex-fill h-[3px] appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
+          value={volume}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            onSetVolume(v);
+            if (muted && v > 0) onToggleMute();
+          }}
+          aria-label="Volume"
+          className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
       </div>
     </div>

@@ -6,10 +6,10 @@
 
 'use client';
 
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 
 interface FerrofluidRendererProps {
-  frequencyData: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   className?: string;
   blobCount?: number;
   colorPrimary?: string;
@@ -23,11 +23,10 @@ interface FerrofluidRendererProps {
 /* ─── helpers ─── */
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '');
-  return [
-    parseInt(h.substring(0, 2), 16),
-    parseInt(h.substring(2, 4), 16),
-    parseInt(h.substring(4, 6), 16),
-  ];
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return [r || 0, g || 0, b || 0];
 }
 
 function lerp(a: number, b: number, t: number) {
@@ -97,7 +96,10 @@ function drawMetaballs(
   const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
   if (!offCtx) return;
 
-  const smallImg = offCtx.createImageData(sw, sh);
+  let smallImg: ImageData;
+  try {
+    smallImg = offCtx.createImageData(sw, sh);
+  } catch { return; }
   const sd = smallImg.data;
 
   for (let py = 0; py < sh; py++) {
@@ -159,16 +161,18 @@ function drawMetaballs(
 
   // Put image data into offscreen canvas, then draw upscaled with
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
-  offCtx.putImageData(smallImg, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(offscreen, 0, 0, sw, sh, 0, 0, w, h);
+  try {
+    offCtx.putImageData(smallImg, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(offscreen, 0, 0, sw, sh, 0, 0, w, h);
+  } catch { /* skip frame on canvas error */ }
 }
 
 /* ─── component ─── */
 
 export function FerrofluidRenderer({
-  frequencyData,
+  frequencyDataRef,
   className = '',
   blobCount = 12,
   colorPrimary = '#1a1a2e',
@@ -236,6 +240,7 @@ export function FerrofluidRenderer({
 
     // compute overall energy
     let energy = 0;
+    const frequencyData = frequencyDataRef?.current ?? null;
     if (frequencyData) {
       let sum = 0;
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
@@ -294,7 +299,7 @@ export function FerrofluidRenderer({
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
 
     frameRef.current = requestAnimationFrame(render);
-  }, [frequencyData, blobCount, sensitivity, demo]);
+  }, [blobCount, sensitivity, demo]);
 
   useEffect(() => {
     frameRef.current = requestAnimationFrame(render);

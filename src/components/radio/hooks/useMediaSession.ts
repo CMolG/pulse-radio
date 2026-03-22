@@ -28,12 +28,20 @@ export function useMediaSession(config: MediaSessionConfig): void {
 
   const { station, track, isPlaying } = config;
 
+  const lastMetaRef = useRef('');
+
   useEffect(() => {
     if (!('mediaSession' in navigator) || !station) return;
 
     const trackTitle = track?.title || station.name;
     const trackArtist = track?.artist || 'Internet Radio';
     const artSrc = track?.artworkUrl || station.favicon;
+    const album = station.tags?.split(',')[0] || 'Live';
+
+    const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
+    if (metaKey === lastMetaRef.current) return;
+    lastMetaRef.current = metaKey;
+
     const artwork = artSrc
       ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }]
       : [];
@@ -41,7 +49,7 @@ export function useMediaSession(config: MediaSessionConfig): void {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: trackTitle,
       artist: trackArtist,
-      album: station.tags?.split(',')[0] || 'Live',
+      album,
       artwork,
     });
   }, [station, track]);
