@@ -26,6 +26,11 @@ function isValidStreamUrl(url: string | undefined): url is string {
   }
 }
 
+/** Browser blocked autoplay — treat as paused, not error */
+function isAutoplayBlocked(err: unknown): boolean {
+  return err instanceof DOMException && err.name === 'NotAllowedError';
+}
+
 export type UseRadioReturn = {
   station: Station | null;
   status: PlaybackStatus;
@@ -108,7 +113,7 @@ export function useRadio(): UseRadioReturn {
         reconnectTimerRef.current = null;
         if (userPausedRef.current) return;
         audio.src = proxyUrl(station.url_resolved);
-        audio.play().catch(() => setStatus('error'));
+        audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
       }, delay);
     };
 
@@ -153,7 +158,7 @@ export function useRadio(): UseRadioReturn {
           audio.play().catch(() => {
             // Stream likely timed out while in background — reconnect
             audio.src = proxyUrl(station.url_resolved);
-            audio.play().catch(() => setStatus('error'));
+            audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
           });
         }
       }
@@ -234,13 +239,13 @@ export function useRadio(): UseRadioReturn {
           fadeTimerRef.current = null;
           audio.src = proxyUrl(s.url_resolved);
           audio.volume = targetVol;
-          audio.play().catch(() => setStatus('error'));
+          audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
         }
       }, interval);
     } else {
       audio.src = proxyUrl(s.url_resolved);
       audio.volume = muted ? 0 : volume;
-      audio.play().catch(() => setStatus('error'));
+      audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getAudio, muted, volume]);
