@@ -14,8 +14,8 @@ export const runtime = 'nodejs';
  */
 export async function GET(req: NextRequest) {
   const term = req.nextUrl.searchParams.get('term');
-  if (!term) {
-    return NextResponse.json({ error: 'Missing term parameter', results: [] }, { status: 400 });
+  if (!term || term.length > 200) {
+    return NextResponse.json({ error: 'Missing or invalid term parameter', results: [] }, { status: 400 });
   }
 
   const controller = new AbortController();
