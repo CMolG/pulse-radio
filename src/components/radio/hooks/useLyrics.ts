@@ -13,8 +13,9 @@ import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const MAX_CACHE = 50;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-type CacheEntry = { key: string; data: LyricsData };
+type CacheEntry = { key: string; data: LyricsData; ts?: number };
 
 function loadCache(): CacheEntry[] {
   return loadFromStorage<CacheEntry[]>(STORAGE_KEYS.LYRICS_CACHE, []);
@@ -62,7 +63,7 @@ export function useLyrics(
         retryCountRef.current = 0;
         if (result) {
           setLyrics(result);
-          const updated = [{ key, data: result }, ...cached.filter(e => e.key !== key)];
+          const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
         } else {
           setLyrics(null);
@@ -105,7 +106,7 @@ export function useLyrics(
 
     const cached = loadCache();
     const hit = cached.find(e => e.key === key);
-    if (hit) {
+    if (hit && hit.ts && Date.now() - hit.ts < CACHE_TTL_MS) {
       setLoading(false);
       setLyrics(hit.data);
       setError(false);
