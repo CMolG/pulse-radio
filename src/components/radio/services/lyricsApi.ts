@@ -69,6 +69,8 @@ async function fetchLyricsForArtist(
       const data: LrcLibResponse = await res.json();
       const lyrics = transform(data, artist, title);
       if (lyrics) return lyrics;
+    } else {
+      await res.text().catch(() => {}); // drain body to release connection
     }
   } catch (err) {
     if (isTransientError(err)) throw err;
@@ -86,6 +88,8 @@ async function fetchLyricsForArtist(
         const lyrics = transform(results[0], artist, title);
         if (lyrics) return lyrics;
       }
+    } else {
+      await res.text().catch(() => {}); // drain body to release connection
     }
   } catch (err) {
     if (isTransientError(err)) throw err;
