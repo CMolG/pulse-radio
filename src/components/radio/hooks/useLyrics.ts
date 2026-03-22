@@ -15,10 +15,12 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 const MAX_CACHE = 50;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-type CacheEntry = { key: string; data: LyricsData; ts?: number };
+type CacheEntry = { key: string; data: LyricsData; ts: number };
 
 function loadCache(): CacheEntry[] {
-  return loadFromStorage<CacheEntry[]>(STORAGE_KEYS.LYRICS_CACHE, []);
+  const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
+  // Backfill ts=0 for old entries so they expire on next TTL check
+  return raw.map(e => ({ ...e, ts: e.ts ?? 0 }));
 }
 
 function saveCache(entries: CacheEntry[]) {
@@ -106,7 +108,7 @@ export function useLyrics(
 
     const cached = loadCache();
     const hit = cached.find(e => e.key === key);
-    if (hit && hit.ts && Date.now() - hit.ts < CACHE_TTL_MS) {
+    if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
       setLoading(false);
       setLyrics(hit.data);
       setError(false);

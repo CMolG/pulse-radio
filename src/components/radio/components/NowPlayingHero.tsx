@@ -69,6 +69,16 @@ export default function NowPlayingHero({
         fallbackUrl={station.favicon || undefined}
         overlayClass="bg-black/60"
       >
+        {(lyricsLoading || (lyrics && lyrics.lines.length > 0)) && (
+            <div className="relative z-10 -mx-5 mt-1">
+              <MobileLyricsReel
+                  lyrics={lyrics ?? null}
+                  loading={!!lyricsLoading}
+                  currentTime={currentTime}
+                  variant={lyricsVariant}
+              />
+            </div>
+        )}
       </ParallaxAlbumBackground>
 
       {onTheater && (
@@ -134,16 +144,6 @@ export default function NowPlayingHero({
           )}
         </div>
       </div>
-      {(lyricsLoading || (lyrics && lyrics.lines.length > 0)) && (
-        <div className="relative z-10 -mx-5 mt-1">
-          <MobileLyricsReel
-            lyrics={lyrics ?? null}
-            loading={!!lyricsLoading}
-            currentTime={currentTime}
-            variant={lyricsVariant}
-          />
-        </div>
-      )}
     </div>
   );
 }
