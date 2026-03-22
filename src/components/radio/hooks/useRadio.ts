@@ -37,6 +37,7 @@ export function useRadio(): UseRadioReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() =>
@@ -69,7 +70,8 @@ export function useRadio(): UseRadioReturn {
         // OS/browser interrupted playback (screen lock, phone call, etc.)
         // Attempt automatic resume after a brief delay
         setStatus('loading');
-        setTimeout(() => {
+        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = setTimeout(() => {
           if (!userPausedRef.current && audio.paused) {
             audio.play().catch(() => {
               // Direct resume failed — reconnect with fresh source
@@ -147,6 +149,7 @@ export function useRadio(): UseRadioReturn {
 
     return () => {
       if (stallTimer) clearTimeout(stallTimer);
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
