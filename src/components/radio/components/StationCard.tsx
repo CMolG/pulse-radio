@@ -36,7 +36,7 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
           <div className="size-full dawn-gradient flex-center-row">
             <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{stationInitials(station.name) || <Radio size={20} className="text-white/60" />}</span></div>
         ) : (
- <img src={station.favicon} alt="" className="size-full object-cover" onError={() => setImgError(true)}/>
+ <img src={station.favicon} alt="" loading="lazy" className="size-full object-cover" onError={() => setImgError(true)}/>
         )}
 
         {/* Play overlay */}
