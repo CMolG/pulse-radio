@@ -24,26 +24,25 @@ function isAdContent(text: string): boolean {
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues
 async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  const onParentAbort = () => controller.abort();
+  signal?.addEventListener('abort', onParentAbort);
+
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
-
-    // Abort if parent signal fires
-    const onParentAbort = () => controller.abort();
-    signal?.addEventListener('abort', onParentAbort);
-
     const res = await fetch(
       `/api/icy-meta?url=${encodeURIComponent(streamUrl)}`,
       { signal: controller.signal },
     );
-    clearTimeout(timeout);
-    signal?.removeEventListener('abort', onParentAbort);
 
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch {
     return { streamTitle: null, icyBr: null };
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort', onParentAbort);
   }
 }
 
