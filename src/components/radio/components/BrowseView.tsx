@@ -320,6 +320,35 @@ export default function BrowseView({
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
 
+  // Compute page stations here so they can be used in the scan effect
+  const pageStations = useMemo(() => {
+    return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  }, [stations, page, PAGE_SIZE]);
+
+  // Trigger scan when enabled or page changes (non-top modes only)
+  useEffect(() => {
+    if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return;
+    const gen = ++scanGenRef.current;
+    startScan(pageStations, gen);
+    return () => { scanGenRef.current++; };
+  }, [scanEnabled, pageStations, view.mode, startScan]);
+
+  // Derived scan stats
+  const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length;
+  const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
+
+  // Filter grid by song/artist when songFilter is active
+  const songFilteredStations = useMemo(() => {
+    if (!songFilter.trim()) return pageStations;
+    const q = songFilter.toLowerCase();
+    return pageStations.filter(s => {
+      const live = liveData[s.stationuuid];
+      if (!live?.track) return false;
+      const { title = '', artist = '' } = live.track;
+      return title.toLowerCase().includes(q) || artist.toLowerCase().includes(q);
+    });
+  }, [pageStations, songFilter, liveData]);
+
   // Chip active states based on current view (chips trigger view changes, not local filters)
   const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
   const countryChipActive = (name: string) => view.mode === "country" && view.country === name;
@@ -571,23 +600,74 @@ export default function BrowseView({
             {/* Grid column for search / genre / country views — paginated */}
             {view.mode !== "top" && stations.length > 0 && (() => {
               const totalPages = Math.ceil(stations.length / PAGE_SIZE);
-              const pageStations = stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
               return (
                 <>
-                  <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
-                    {pageStations.map((s) => (
-                      <StationCard
-                        key={s.stationuuid}
-                        station={s}
-                        isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
-                        isCurrent={currentStation?.stationuuid === s.stationuuid}
-                        isFavorite={isFavorite(s.stationuuid)}
-                        onPlay={() => onPlay(s)}
-                        onToggleFav={() => onToggleFav(s)}
-                      />
-                    ))}
+                  {/* Scan now-playing bar */}
+                  <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}>
+                    <button
+                      onClick={() => setScanEnabled(v => !v)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors flex-shrink-0 ${
+                        scanEnabled
+                          ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
+                          : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
+                      }`}
+                      title="Check what's currently playing on each station"
+                    >
+                      <ScanSearch size={12} />
+                      {isScanning
+                        ? `Scanning ${scannedCount}/${pageStations.length}…`
+                        : scannedCount > 0
+                          ? `Now playing (${scannedCount}/${pageStations.length})`
+                          : "Scan now playing"}
+                    </button>
+
+                    {scanEnabled && (
+                      <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/[0.05] min-w-0">
+                        <Music2 size={11} className="text-dim flex-shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="Filter by song or artist…"
+                          value={songFilter}
+                          onChange={e => setSongFilter(e.target.value)}
+                          className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                        />
+                        {songFilter && (
+                          <button onClick={() => setSongFilter("")} className="text-dim hover:text-white flex-shrink-0">
+                            <X size={11} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {scanEnabled && songFilter && (
+                      <span className="text-[11px] text-dim flex-shrink-0">
+                        {songFilteredStations.length} match{songFilteredStations.length !== 1 ? "es" : ""}
+                      </span>
+                    )}
                   </div>
-                  {totalPages > 1 && (
+
+                  {/* Station grid */}
+                  <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
+                    {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
+                      const live = liveData[s.stationuuid];
+                      return (
+                        <StationCard
+                          key={s.stationuuid}
+                          station={s}
+                          isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
+                          isCurrent={currentStation?.stationuuid === s.stationuuid}
+                          isFavorite={isFavorite(s.stationuuid)}
+                          onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)}
+                          liveStatus={live?.status}
+                          liveTrack={live?.track}
+                          onPeek={!scanEnabled ? () => peekStation(s) : undefined}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && !songFilter.trim() && (
                     <div className="flex items-center justify-center gap-3 pt-2 pb-6">
                       <button
                         onClick={() => setPage((p) => Math.max(0, p - 1))}

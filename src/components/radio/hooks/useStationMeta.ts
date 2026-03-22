@@ -46,8 +46,11 @@ export async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Pro
   }
 }
 
+const MAX_TITLE_LENGTH = 500;
+
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
-  if (!raw || raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
+  if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
+  if (raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
 
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
