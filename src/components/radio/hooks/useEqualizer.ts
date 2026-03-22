@@ -70,10 +70,11 @@ export function useEqualizer(): UseEqualizerReturn {
       sourceRef.current = source;
       connectedAudioRef.current = audio;
 
+      const nyquist = ctx.sampleRate / 2;
       const filters = bands.map(band => {
         const filter = ctx.createBiquadFilter();
         filter.type = band.type;
-        filter.frequency.value = band.frequency;
+        filter.frequency.value = Math.max(20, Math.min(nyquist - 1, band.frequency));
         filter.gain.value = enabled ? band.gain : 0;
         if (band.type === 'peaking') filter.Q.value = 1.0;
         return filter;
