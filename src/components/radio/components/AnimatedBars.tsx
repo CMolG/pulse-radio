@@ -22,6 +22,9 @@ export default function AnimatedBars({ size = 'default' }: { size?: 'small' | 'd
           50% { height: ${h}px; }
         }
         .animate-eq-bar { animation: eq-bar 0.8s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-eq-bar { animation: none; height: ${h * 0.5}px; }
+        }
       `}</style>
     </span>);
 }
