@@ -92,6 +92,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
     const poll = async () => {
       if (abortController.signal.aborted) return;
+      if (document.hidden) return; // skip polling when tab is hidden
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
       if (abortController.signal.aborted) return;
       if (icyBr) setIcyBitrate(icyBr);
