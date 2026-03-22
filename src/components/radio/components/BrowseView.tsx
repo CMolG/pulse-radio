@@ -156,7 +156,7 @@ export default function BrowseView({
     setCountryFilter(null);
   }, [view]);
 
-  const loadCategory = useCallback(async (catId: string, cancelled?: boolean) => {
+  const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
     if (!cat) return;
     try {
@@ -170,7 +170,7 @@ export default function BrowseView({
       } else {
         return;
       }
-      if (!cancelled) {
+      if (!flags?.cancelled) {
         setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {
           if (!prev.has(catId)) return prev;
@@ -180,7 +180,7 @@ export default function BrowseView({
         });
       }
     } catch {
-      if (!cancelled) {
+      if (!flags?.cancelled) {
         setFailedCategories((prev) => {
           if (prev.has(catId)) return prev;
           const next = new Set(prev);
@@ -193,6 +193,7 @@ export default function BrowseView({
 
   useEffect(() => {
     let cancelled = false;
+    const flags = { cancelled: false };
     setError(null);
 
     if (view.mode !== "top") {
@@ -223,18 +224,26 @@ export default function BrowseView({
       };
       load();
     } else {
-      // Top view — progressively load ALL genre categories
+      // Top view — progressively load categories (3 concurrent max)
       setLoading(false);
       setCategorySections({});
       setFailedCategories(new Set());
 
-      for (const catId of BROWSE_ORDER) {
-        loadCategory(catId, cancelled);
-      }
+      const CONCURRENCY = 3;
+      const queue = [...BROWSE_ORDER];
+
+      const runBatch = async () => {
+        while (queue.length > 0 && !flags.cancelled) {
+          const batch = queue.splice(0, CONCURRENCY);
+          await Promise.allSettled(batch.map(catId => loadCategory(catId, flags)));
+        }
+      };
+      runBatch();
     }
 
     return () => {
       cancelled = true;
+      flags.cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
