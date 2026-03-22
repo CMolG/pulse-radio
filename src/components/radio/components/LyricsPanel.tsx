@@ -14,11 +14,13 @@ import { getActiveLyricIndex } from "../lyricsUtils";
 type Props = {
   lyrics: LyricsData | null;
   loading: boolean;
+  error?: boolean;
+  onRetry?: () => void;
   currentTime?: number;
   onClose: () => void;
 };
 
-export default function LyricsPanel({ lyrics, loading, currentTime, onClose }: Props) {
+export default function LyricsPanel({ lyrics, loading, error, onRetry, currentTime, onClose }: Props) {
   const activeIdx = useMemo(
     () => getActiveLyricIndex(lyrics, currentTime),
     [lyrics, currentTime],
@@ -47,7 +49,24 @@ export default function LyricsPanel({ lyrics, loading, currentTime, onClose }: P
           </div>
         )}
 
-        {!loading && !lyrics && (
+        {!loading && error && (
+          <div className="flex-center-col py-16">
+            <Mic2 size={28} className="text-red-400 mb-2" />
+            <p className="text-[12px] text-secondary text-center mb-3">
+              Failed to load lyrics.
+            </p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="px-3 py-1.5 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        )}
+
+        {!loading && !error && !lyrics && (
           <div className="flex-center-col py-16">
             <Mic2 size={28} className="text-muted mb-2" />
             <p className="text-[12px] text-secondary text-center">

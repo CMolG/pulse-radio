@@ -55,8 +55,8 @@ export default function EqPanel({ bands, enabled, customPresets = [], onSetGain,
       <div className="flex-between mb-4">
         <div className="flex-row-2">
           <span className="text-[13px] font-semibold text-white">Equalizer</span>
- <button onClick={onToggleEnabled} className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`} ><Power size={13} /></button></div>
-        <button onClick={onClose} className="p-1 text-subtle-hover"><X size={14} /></button></div>
+ <button onClick={onToggleEnabled} aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'} className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`} ><Power size={13} /></button></div>
+        <button onClick={onClose} aria-label="Close equalizer" className="p-1 text-subtle-hover"><X size={14} /></button></div>
 
       {/* Presets */}
       <div className="flex-wrap-1.5 mb-2">
@@ -74,6 +74,7 @@ export default function EqPanel({ bands, enabled, customPresets = [], onSetGain,
             </button>
             {onRemoveCustomPreset && (
               <button onClick={() => onRemoveCustomPreset(preset.name)}
+                aria-label={`Delete ${preset.name} preset`}
                 className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors">
                 <X size={8} />
               </button>
@@ -90,10 +91,12 @@ export default function EqPanel({ bands, enabled, customPresets = [], onSetGain,
  <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }}
                 placeholder="Preset name…"
+                aria-label="Preset name"
                 className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/30 outline-none focus:border-sys-orange/50"
                 autoFocus/>
- <button onClick={handleSave} className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors" ><Save size={10} /></button>
+ <button onClick={handleSave} aria-label="Save preset" className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors" ><Save size={10} /></button>
               <button onClick={() => setShowSaveInput(false)}
+                aria-label="Cancel"
                 className="p-1 rounded-md bg-surface-2 text-subtle-hover">
                 <X size={10} />
               </button></div>
@@ -112,9 +115,10 @@ export default function EqPanel({ bands, enabled, customPresets = [], onSetGain,
         {bands.map(band => (
           <div key={band.id} className="col-center gap-1">
             <span className="text-[9px] text-dim tabular-nums">{band.gain > 0 ? `+${band.gain}` : band.gain}</span>
- <input type="range" min={-12} max={12} step={1} value={band.gain} onChange={e => handleSetGain(band.id, parseInt(e.target.value))}
+ <input type="range" min={-12} max={12} step={1} value={band.gain} onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))}
               disabled={!enabled}
-              className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+              aria-label={`${band.label} gain`}
+              className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />
             <span className="text-[9px] text-secondary">{band.label}</span>
           </div>

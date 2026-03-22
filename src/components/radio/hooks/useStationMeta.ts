@@ -23,26 +23,34 @@ function isAdContent(text: string): boolean {
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues
-async function fetchIcyMeta(streamUrl: string): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+export async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10_000);
+  const onParentAbort = () => controller.abort();
+  signal?.addEventListener('abort', onParentAbort);
+
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
     const res = await fetch(
       `/api/icy-meta?url=${encodeURIComponent(streamUrl)}`,
       { signal: controller.signal },
     );
-    clearTimeout(timeout);
 
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch {
     return { streamTitle: null, icyBr: null };
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort', onParentAbort);
   }
 }
 
-function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
-  if (!raw || raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
+const MAX_TITLE_LENGTH = 500;
+
+export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
+  if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
+  if (raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
 
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
@@ -64,11 +72,13 @@ export type UseStationMetaReturn = {
   icyBitrate: string | null;
 };
 
-export function useStationMeta(station: Station | null, isPlaying: boolean): UseStationMetaReturn {
+export function useStationMeta(station: Station | null, isPlaying: boolean, knownDurationMs?: number): UseStationMetaReturn {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastTitleRef = useRef<string>('');
+  // When we detect a new song and know its duration, record when it should end
+  const songEndTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (intervalRef.current) {
@@ -80,21 +90,40 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
       setTrack(null);
       setIcyBitrate(null);
       lastTitleRef.current = '';
+      songEndTimeRef.current = 0;
       return;
     }
 
+    const abortController = new AbortController();
+
     const poll = async () => {
-      const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved);
+      if (abortController.signal.aborted) return;
+      if (document.hidden) return; // skip polling when tab is hidden
+
+      // Smart polling: if we know the song's duration and it hasn't ended yet, skip the poll
+      if (songEndTimeRef.current > 0 && Date.now() < songEndTimeRef.current) return;
+
+      const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
+      if (abortController.signal.aborted) return;
       if (icyBr) setIcyBitrate(icyBr);
       if (streamTitle && streamTitle !== lastTitleRef.current) {
         if (isAdContent(streamTitle)) {
+          lastTitleRef.current = streamTitle;
+          songEndTimeRef.current = 0;
+          setTrack(null);
           return;
         }
         lastTitleRef.current = streamTitle;
         const parsed = parseTrack(streamTitle, station.name);
-        if (parsed && (isAdContent(parsed.title) || isAdContent(parsed.artist))) {
+        // Only reject if the title looks like an ad. Artist-only ad matches
+        // cause false positives (e.g. "will.i.am", bands with TLD-like names).
+        if (parsed && isAdContent(parsed.title)) {
+          songEndTimeRef.current = 0;
+          setTrack(null);
           return;
         }
+        // New song detected — will set songEndTime once duration is known
+        songEndTimeRef.current = 0;
         setTrack(parsed);
         return;
       }
@@ -111,8 +140,16 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      abortController.abort();
     };
   }, [station, isPlaying]);
+
+  // When duration becomes known for the current song, set the expected end time
+  useEffect(() => {
+    if (knownDurationMs && knownDurationMs > 0 && track) {
+      songEndTimeRef.current = Date.now() + knownDurationMs;
+    }
+  }, [knownDurationMs, track?.title, track?.artist]);
 
   return { track, icyBitrate };
 }

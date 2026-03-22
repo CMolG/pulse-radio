@@ -7,12 +7,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Radio, Star, Heart, ExternalLink } from "lucide-react";
+import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
 
 function stationInitials(name: string) {
   return name
@@ -29,7 +31,7 @@ type Props = {
   station: Station;
   track: NowPlayingTrack | null;
   isPlaying: boolean;
-  frequencyData?: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null;
   icyBitrate?: string | null;
   onBack: () => void;
@@ -97,7 +99,7 @@ export default function TheaterView({
   station,
   track,
   isPlaying,
-  frequencyData,
+  frequencyDataRef,
   artworkUrl,
   icyBitrate,
   onBack,
@@ -128,7 +130,11 @@ export default function TheaterView({
   useEffect(() => {
     if (!artworkUrl || artworkUrl === lastUrlRef.current) return;
     lastUrlRef.current = artworkUrl;
-    extractColors(artworkUrl).then(setColors);
+    let cancelled = false;
+    extractColors(artworkUrl).then(c => {
+      if (!cancelled) setColors(c);
+    });
+    return () => { cancelled = true; };
   }, [artworkUrl]);
 
   const [color1, color2, color3] = colors;
@@ -159,15 +165,17 @@ export default function TheaterView({
 
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none">
+        <ErrorBoundary fallback={null}>
         <SpiralRenderer
-          frequencyData={frequencyData ?? null}
+          frequencyDataRef={frequencyDataRef}
           className="size-full"
           color1={color1}
           color2={color2}
           color3={color3}
           sensitivity={compact ? 0.8 : 1.2}
-          demo={!frequencyData}
+          demo
         />
+        </ErrorBoundary>
       </div>
 
       {/* ── Layer 3: fractal noise overlay (mix-blend-mode overlay, same as reference HTML) ── */}
@@ -180,36 +188,42 @@ export default function TheaterView({
         }}
       />
 
-      {/* ── Back button ── */}
+      {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}
       {!compact && (
-        <button
-          onClick={onBack}
-          className="absolute top-4 left-4 z-20 flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
+        <div
+          className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
+          style={{ top: "env(safe-area-inset-top, 0px)" }}
         >
-          <ArrowLeft size={16} />
-        </button>
-      )}
-
-      {/* ── Favorite station button (top right) ── */}
-      {!compact && onToggleFav && (
-        <button
-          onClick={onToggleFav}
-          className={`absolute top-4 right-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
-          title="Favorite station"
-        >
-          <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
-        </button>
-      )}
-
-      {/* ── Favorite song button (top right, below star) ── */}
-      {!compact && onFavSong && track && (
-        <button
-          onClick={onFavSong}
-          className={`absolute ${onToggleFav ? "top-14" : "top-4"} right-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
-          title="Favorite song"
-        >
-          <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
-        </button>
+          <button
+            onClick={onBack}
+            className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
+            aria-label="Exit theater mode"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div className="flex flex-col gap-2">
+            {onToggleFav && (
+              <button
+                onClick={onToggleFav}
+                className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
+                aria-label="Favorite station"
+                aria-pressed={!!isFavorite}
+              >
+                <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
+              </button>
+            )}
+            {onFavSong && track && (
+              <button
+                onClick={onFavSong}
+                className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
+                aria-label="Favorite song"
+                aria-pressed={!!isSongLiked}
+              >
+                <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
@@ -224,6 +238,27 @@ export default function TheaterView({
             boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
           }}
         >
+          {/* Corner metadata badges (panel corners, never over album art) */}
+          {!compact && (
+            <div className="w-full grid grid-cols-2 items-start">
+              <div className="justify-self-start">
+                {track?.durationMs && (
+                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
+                    <Clock size={10} />
+                    {formatDuration(track.durationMs)}
+                  </span>
+                )}
+              </div>
+              <div className="justify-self-end">
+                {track?.trackNumber != null && track?.trackCount != null && (
+                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
+                    #{track.trackNumber}/{track.trackCount}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Cover art */}
           <div
             className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} overflow-hidden flex-center-row flex-shrink-0`}
@@ -281,6 +316,12 @@ export default function TheaterView({
             </p>
           )}
 
+          {!compact && track?.releaseDate && (
+            <p className="text-[10px] text-white/40 text-center -mt-1">
+              Released on: {formatReleaseDate(track.releaseDate)}
+            </p>
+          )}
+
           {/* LIVE badge */}
           {isPlaying && (
             <div className={`flex-row-2 ${compact ? "mt-0" : "mt-1"}`}>
@@ -310,6 +351,11 @@ export default function TheaterView({
               {station.country && (
                 <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
                   {station.country}
+                </span>
+              )}
+              {track?.genre && (
+                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
+                  {track.genre}
                 </span>
               )}
             </div>

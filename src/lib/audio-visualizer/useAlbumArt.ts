@@ -13,9 +13,24 @@ interface AlbumInfo {
   albumName: string | null;
   releaseDate: string | null;
   itunesUrl: string | null;
+  durationMs: number | null;
+  genre: string | null;
+  trackNumber: number | null;
+  trackCount: number | null;
 }
 
 const CACHE = new Map<string, AlbumInfo>();
+const MAX_CACHE = 200;
+
+function cacheSet(key: string, value: AlbumInfo) {
+  CACHE.delete(key);
+  CACHE.set(key, value);
+  while (CACHE.size > MAX_CACHE) {
+    const oldest = CACHE.keys().next().value;
+    if (oldest !== undefined) CACHE.delete(oldest);
+    else break;
+  }
+}
 
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 
@@ -28,6 +43,8 @@ function appendReferrer(url: string): string {
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) {
   const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onerror = () => { img.src = ''; }; // release failed load
   img.src = url;
 }
 
@@ -36,6 +53,10 @@ export interface UseAlbumArtReturn {
   albumName: string | null;
   releaseDate: string | null;
   itunesUrl: string | null;
+  durationMs: number | null;
+  genre: string | null;
+  trackNumber: number | null;
+  trackCount: number | null;
   isLoading: boolean;
 }
 
@@ -43,14 +64,14 @@ export function useAlbumArt(
   title: string | null,
   artist: string | null,
 ): UseAlbumArtReturn {
-  const [info, setInfo] = useState<AlbumInfo>({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null });
+  const [info, setInfo] = useState<AlbumInfo>({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null });
   const [isLoading, setIsLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     // Need at least a title to search
     if (!title) {
-      setInfo({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null });
+      setInfo({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null });
       return;
     }
 
@@ -73,7 +94,10 @@ export function useAlbumArt(
       `/api/itunes?term=${encodeURIComponent(term)}`,
       { signal: controller.signal },
     )
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         if (controller.signal.aborted) return;
         const result = data.results?.[0];
@@ -82,17 +106,21 @@ export function useAlbumArt(
         const albumInfo: AlbumInfo = {
           artworkUrl,
           albumName: result?.collectionName ?? null,
-          releaseDate: result?.releaseDate?.slice(0, 4) ?? null,
+          releaseDate: result?.releaseDate ?? null,
           itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
+          durationMs: typeof result?.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
+          genre: result?.primaryGenreName ?? null,
+          trackNumber: typeof result?.trackNumber === 'number' ? result.trackNumber : null,
+          trackCount: typeof result?.trackCount === 'number' ? result.trackCount : null,
         };
-        CACHE.set(cacheKey, albumInfo);
+        cacheSet(cacheKey, albumInfo);
         if (artworkUrl) preloadImage(artworkUrl);
         setInfo(albumInfo);
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          const empty: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null };
-          CACHE.set(cacheKey, empty);
+          const empty: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null };
+          cacheSet(cacheKey, empty);
           setInfo(empty);
         }
       })

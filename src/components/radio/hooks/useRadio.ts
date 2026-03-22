@@ -9,10 +9,26 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Station, PlaybackStatus } from '../types';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
 function proxyUrl(raw: string): string {
   return `/api/proxy-stream?url=${encodeURIComponent(raw)}`;
+}
+
+function isValidStreamUrl(url: string | undefined): url is string {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/** Browser blocked autoplay — treat as paused, not error */
+function isAutoplayBlocked(err: unknown): boolean {
+  return err instanceof DOMException && err.name === 'NotAllowedError';
 }
 
 export type UseRadioReturn = {
@@ -35,19 +51,39 @@ export type UseRadioReturn = {
 export function useRadio(): UseRadioReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
-  const [volume, setVolumeState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.VOLUME);
-      return saved ? parseFloat(saved) : 0.8;
-    } catch { return 0.8; }
-  });
+  const [volume, setVolumeState] = useState(() =>
+    loadFromStorage<number>(STORAGE_KEYS.VOLUME, 0.8)
+  );
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
 
   // Tracks whether the user explicitly requested a pause (vs stall/src-change pauses)
   const userPausedRef = useRef(false);
+
+  // Cross-tab coordination: pause this tab when another tab starts playing
+  const bcRef = useRef<BroadcastChannel | null>(null);
+  const tabIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const bc = new BroadcastChannel('pulse-radio-playback');
+    bcRef.current = bc;
+    bc.onmessage = (e: MessageEvent) => {
+      if (e.data?.type === 'playing' && e.data?.tabId !== tabIdRef.current) {
+        const audio = audioRef.current;
+        if (audio && !audio.paused) {
+          userPausedRef.current = true;
+          audio.pause();
+        }
+      }
+    };
+    return () => { bc.close(); bcRef.current = null; };
+  }, []);
 
   const getAudio = useCallback(() => {
     if (!audioRef.current) {
@@ -61,7 +97,12 @@ export function useRadio(): UseRadioReturn {
   useEffect(() => {
     const audio = getAudio();
 
-    const onPlaying = () => { setStatus('playing'); retryRef.current = 0; userPausedRef.current = false; };
+    const onPlaying = () => {
+      setStatus('playing');
+      retryRef.current = 0;
+      userPausedRef.current = false;
+      bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current });
+    };
     const onPause = () => {
       if (userPausedRef.current) {
         userPausedRef.current = false;
@@ -70,7 +111,8 @@ export function useRadio(): UseRadioReturn {
         // OS/browser interrupted playback (screen lock, phone call, etc.)
         // Attempt automatic resume after a brief delay
         setStatus('loading');
-        setTimeout(() => {
+        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = setTimeout(() => {
           if (!userPausedRef.current && audio.paused) {
             audio.play().catch(() => {
               // Direct resume failed — reconnect with fresh source
@@ -85,20 +127,32 @@ export function useRadio(): UseRadioReturn {
     // Auto-reconnect helper: used by error, stalled, and ended handlers
     const reconnect = (delay: number) => {
       if (!station || userPausedRef.current) return;
+      // Don't retry when browser is offline — onOnline will resume
+      if (typeof navigator !== 'undefined' && !navigator.onLine) return;
       if (retryRef.current >= 10) {
         setStatus('error');
         return;
       }
       retryRef.current++;
       setStatus('loading');
-      setTimeout(() => {
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = setTimeout(() => {
+        reconnectTimerRef.current = null;
         if (userPausedRef.current) return;
         audio.src = proxyUrl(station.url_resolved);
-        audio.play().catch(() => setStatus('error'));
+        audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
       }, delay);
     };
 
-    const onError = () => reconnect(1000 * Math.min(retryRef.current + 1, 5));
+    const onError = () => {
+      const err = audio.error;
+      // Permanent failures: don't retry when source is unsupported or codec fails
+      if (err && (err.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || err.code === MediaError.MEDIA_ERR_DECODE)) {
+        setStatus('error');
+        return;
+      }
+      reconnect(1000 * Math.min(retryRef.current + 1, 5));
+    };
 
     // Stalled: the browser stopped receiving data but hasn't errored
     // Use a debounce — some stall events resolve on their own
@@ -131,9 +185,23 @@ export function useRadio(): UseRadioReturn {
           audio.play().catch(() => {
             // Stream likely timed out while in background — reconnect
             audio.src = proxyUrl(station.url_resolved);
-            audio.play().catch(() => setStatus('error'));
+            audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
           });
         }
+      }
+    };
+
+    // Network status: pause retries when offline, auto-reconnect when back online
+    const onOffline = () => {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+    };
+    const onOnline = () => {
+      if (station && !userPausedRef.current && (audio.paused || audio.readyState < 2)) {
+        retryRef.current = 0;
+        reconnect(500);
       }
     };
 
@@ -145,9 +213,13 @@ export function useRadio(): UseRadioReturn {
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('timeupdate', onTimeUpdate);
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
 
     return () => {
       if (stallTimer) clearTimeout(stallTimer);
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
@@ -156,44 +228,58 @@ export function useRadio(): UseRadioReturn {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [station]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.VOLUME, String(volume));
+    saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
     if (audio) audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
   const play = useCallback((s: Station) => {
+    if (!isValidStreamUrl(s.url_resolved)) {
+      setStatus('error');
+      return;
+    }
     const audio = getAudio();
     retryRef.current = 0;
     userPausedRef.current = false;
     setStation(s);
     setStatus('loading');
 
-    // Crossfade: fade out current audio before switching
+    // Crossfade: fade out with ease-out curve before switching
+    if (fadeTimerRef.current) {
+      clearInterval(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
     if (!audio.paused && audio.src) {
       const targetVol = muted ? 0 : volume;
-      const steps = 6;
-      const interval = 50; // 300ms total
+      const steps = 8;
+      const interval = 40; // 320ms total
       let step = 0;
       const startVol = audio.volume;
-      const fadeTimer = setInterval(() => {
+      fadeTimerRef.current = setInterval(() => {
         step++;
-        audio.volume = Math.max(0, startVol * (1 - step / steps));
+        // Ease-out cubic: rapid initial drop, gentle tail
+        const t = step / steps;
+        const eased = 1 - (1 - t) * (1 - t) * (1 - t);
+        audio.volume = Math.max(0, startVol * (1 - eased));
         if (step >= steps) {
-          clearInterval(fadeTimer);
+          clearInterval(fadeTimerRef.current!);
+          fadeTimerRef.current = null;
           audio.src = proxyUrl(s.url_resolved);
           audio.volume = targetVol;
-          audio.play().catch(() => setStatus('error'));
+          audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
         }
       }, interval);
     } else {
       audio.src = proxyUrl(s.url_resolved);
       audio.volume = muted ? 0 : volume;
-      audio.play().catch(() => setStatus('error'));
+      audio.play().catch((e) => setStatus(isAutoplayBlocked(e) ? 'paused' : 'error'));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getAudio, muted, volume]);
@@ -234,7 +320,10 @@ export function useRadio(): UseRadioReturn {
   const toggleMute = useCallback(() => setMuted(m => !m), []);
 
   const seek = useCallback((t: number) => {
-    if (audioRef.current) audioRef.current.currentTime = t;
+    const audio = audioRef.current;
+    if (!audio || !isFinite(t)) return;
+    const duration = audio.duration || 0;
+    audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
 
   return {

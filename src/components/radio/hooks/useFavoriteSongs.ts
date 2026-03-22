@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FavoriteSong } from '../types';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseFavoriteSongsReturn = {
   songs: FavoriteSong[];
@@ -24,17 +25,36 @@ function songKey(title: string, artist: string) {
 }
 
 export function useFavoriteSongs(): UseFavoriteSongsReturn {
+  const MAX_SONGS = 500;
+
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.FAVORITE_SONGS);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+    const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
+    // Dedup on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(s => {
+      const key = songKey(s.title, s.artist);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FAVORITE_SONGS, JSON.stringify(songs));
+    saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
   }, [songs]);
 
+  // Sync favorite songs across tabs via storage events
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEYS.FAVORITE_SONGS || e.newValue == null) return;
+      try {
+        const parsed = JSON.parse(e.newValue) as FavoriteSong[];
+        if (Array.isArray(parsed)) setSongs(parsed);
+      } catch { /* ignore malformed */ }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => {
       const key = songKey(song.title, song.artist);
@@ -44,7 +64,8 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         timestamp: Date.now(),
       };
-      return [entry, ...prev];
+      const next = [entry, ...prev];
+      return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
     });
   }, []);
 
@@ -62,7 +83,8 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         timestamp: Date.now(),
       };
-      return [entry, ...prev];
+      const next = [entry, ...prev];
+      return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
     });
   }, []);
 

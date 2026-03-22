@@ -1,0 +1,18 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
+/** Format milliseconds to mm:ss */
+export function formatDuration(ms: number): string {
+  const totalSeconds = Math.round(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+/** Format an ISO date string to a readable year */
+export function formatReleaseDate(isoDate: string): string {
+  return isoDate.slice(0, 4);
+}

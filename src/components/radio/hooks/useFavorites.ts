@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Station } from '../types';
 import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 export type UseFavoritesReturn = {
   favorites: Station[];
@@ -20,22 +21,41 @@ export type UseFavoritesReturn = {
   playPrev: (currentUuid: string) => Station | null;
 };
 
+const MAX_FAVORITES = 500;
+
 export function useFavorites(): UseFavoritesReturn {
   const [favorites, setFavorites] = useState<Station[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.FAVORITES);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
+    const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []);
+    // Dedup on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(s => {
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false;
+      seen.add(s.stationuuid);
+      return true;
+    });
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+    saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
   }, [favorites]);
+
+  // Sync favorites across tabs via storage events
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEYS.FAVORITES || e.newValue == null) return;
+      try {
+        const parsed = JSON.parse(e.newValue) as Station[];
+        if (Array.isArray(parsed)) setFavorites(parsed);
+      } catch { /* ignore malformed */ }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const add = useCallback((station: Station) => {
     setFavorites(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
-      return [station, ...prev];
+      return [station, ...prev].slice(0, MAX_FAVORITES);
     });
   }, []);
 
@@ -46,9 +66,8 @@ export function useFavorites(): UseFavoritesReturn {
   const toggle = useCallback((station: Station) => {
     setFavorites(prev => {
       const exists = prev.some(s => s.stationuuid === station.stationuuid);
-      return exists
-        ? prev.filter(s => s.stationuuid !== station.stationuuid)
-        : [station, ...prev];
+      if (exists) return prev.filter(s => s.stationuuid !== station.stationuuid);
+      return [station, ...prev].slice(0, MAX_FAVORITES);
     });
   }, []);
 

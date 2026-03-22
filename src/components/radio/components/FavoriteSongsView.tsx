@@ -7,9 +7,10 @@
 "use client";
 
 import React from "react";
-import { Music, Radio, Heart, Trash2, ExternalLink } from "lucide-react";
+import { Music, Radio, Heart, Trash2, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { FavoriteSong, SongDetailData } from "../types";
+import { formatDuration } from "../utils/formatDuration";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -64,19 +65,27 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.03, 0.5) }}
             className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+            role="button"
+            tabIndex={0}
+            aria-label={`${song.title} by ${song.artist}`}
             onClick={() => onSelect?.({
               title: song.title,
               artist: song.artist,
               album: song.album,
               artworkUrl: song.artworkUrl,
               itunesUrl: song.itunesUrl,
+              durationMs: song.durationMs,
+              genre: song.genre,
+              releaseDate: song.releaseDate,
+              trackNumber: song.trackNumber,
+              trackCount: song.trackCount,
               stationName: song.stationName,
             })}
           >
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
               {song.artworkUrl ? (
-                <img src={song.artworkUrl} alt="" className="size-full object-cover" />
+                <img src={song.artworkUrl} alt="" loading="lazy" className="size-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               ) : (
                 <div className="size-full flex items-center justify-center">
                   <Music size={32} className="text-dim" />
@@ -84,6 +93,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
+                aria-label="Remove from favorites"
                 className="absolute top-2 left-2 p-1.5 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-all"
                 title="Remove from favorites"
               >
@@ -91,6 +101,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
+                aria-label="Delete song"
                 className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Remove"
               >
@@ -103,6 +114,17 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               <p className="text-[12px] text-secondary line-clamp-1">{song.artist}</p>
               {song.album && (
                 <p className="text-[11px] text-dim line-clamp-1">{song.album}</p>
+              )}
+              {(song.genre || song.durationMs) && (
+                <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
+                  {song.genre && <span>{song.genre}</span>}
+                  {song.durationMs && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <Clock size={8} className="opacity-60" />
+                      {formatDuration(song.durationMs)}
+                    </span>
+                  )}
+                </p>
               )}
             </div>
             {/* Apple Music + Footer */}

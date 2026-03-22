@@ -13,10 +13,10 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
-import type { Station, ViewState } from "../types";
-import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, countryFlag } from "../constants";
+import type { Station, ViewState, BrowseCategory } from "../types";
+import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, COUNTRY_DISPLAY, countryFlag } from "../constants";
 import {
   searchStations,
   stationsByTag,
@@ -24,6 +24,7 @@ import {
   trendingStations,
   localStations,
 } from "../services/radioApi";
+import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
 import StationCard from "./StationCard";
 
 /** Order in which category sections appear on the home screen */
@@ -45,6 +46,11 @@ type Props = {
   isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void;
   onToggleFav: (station: Station) => void;
+  favorites?: Station[];
+  recent?: Station[];
+  onSelectGenre?: (cat: BrowseCategory) => void;
+  onSelectCountry?: (countryName: string) => void;
+  onGoHome?: () => void;
 };
 
 const SCROLL_CLASS =
@@ -136,30 +142,111 @@ export default function BrowseView({
   isFavorite,
   onPlay,
   onToggleFav,
+  favorites,
+  recent,
+  onSelectGenre,
+  onSelectCountry,
+  onGoHome,
 }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
   });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
+  const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
-  const [genreFilter, setGenreFilter] = useState<string | null>(null);
-  const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Live track scanning
+  type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
+  const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({});
+  const [scanEnabled, setScanEnabled] = useState(false);
+  const [songFilter, setSongFilter] = useState("");
+  const scanGenRef = useRef(0);
+
+  const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
+    const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
+    if (!cat) return;
+    try {
+      let result: Station[];
+      if (cat.id === "trending") {
+        result = await trendingStations(15);
+      } else if (cat.id === "local") {
+        result = await localStations(15);
+      } else if (cat.tag) {
+        result = await stationsByTag(cat.tag, 15);
+      } else {
+        return;
+      }
+      if (!flags?.cancelled) {
+        setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
+        setFailedCategories((prev) => {
+          if (!prev.has(catId)) return prev;
+          const next = new Set(prev);
+          next.delete(catId);
+          return next;
+        });
+      }
+    } catch {
+      if (!flags?.cancelled) {
+        setFailedCategories((prev) => {
+          if (prev.has(catId)) return prev;
+          const next = new Set(prev);
+          next.add(catId);
+          return next;
+        });
+      }
+    }
+  }, []);
+
   useEffect(() => {
-    setGenreFilter(null);
-    setCountryFilter(null);
+    setPage(0);
+    setLiveData({});
+    setScanEnabled(false);
+    setSongFilter("");
+    scanGenRef.current++;
   }, [view]);
+
+  // Batch-fetch ICY metadata for a list of stations (max 3 concurrent)
+  const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
+    const queue = [...stationsToScan];
+    const CONCURRENCY = 3;
+    const worker = async () => {
+      while (queue.length > 0) {
+        if (scanGenRef.current !== gen) return;
+        const s = queue.shift()!;
+        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
+        const result = await fetchIcyMeta(s.url_resolved);
+        if (scanGenRef.current !== gen) return;
+        const raw = result.streamTitle;
+        const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
+        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
+      }
+    };
+    await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  }, []);
+
+  // Manual single-station peek
+  const peekStation = useCallback(async (station: Station) => {
+    setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loading', track: null } }));
+    const result = await fetchIcyMeta(station.url_resolved);
+    const raw = result.streamTitle;
+    const track = raw ? (parseTrack(raw, station.name) ?? null) : null;
+    setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loaded', track } }));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
+    const flags = { cancelled: false };
     setError(null);
 
     if (view.mode !== "top") {
-      // Search, genre, country modes — single list as before
+      // Search, genre, country modes — single list
       setLoading(true);
       const load = async () => {
         try {
@@ -186,66 +273,40 @@ export default function BrowseView({
       };
       load();
     } else {
-      // Top view — progressively load ALL genre categories
+      // Top view — progressively load categories (3 concurrent max)
       setLoading(false);
       setCategorySections({});
+      setFailedCategories(new Set());
 
-      for (const catId of BROWSE_ORDER) {
-        const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
-        if (!cat) continue;
+      const CONCURRENCY = 3;
+      const queue = [...BROWSE_ORDER];
 
-        (async () => {
-          try {
-            let result: Station[];
-            if (cat.id === "trending") {
-              result = await trendingStations(15);
-            } else if (cat.id === "local") {
-              result = await localStations(15);
-            } else if (cat.tag) {
-              result = await stationsByTag(cat.tag, 15);
-            } else {
-              return;
-            }
-            if (!cancelled) {
-              setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
-            }
-          } catch {
-            // Skip failed categories silently
-          }
-        })();
-      }
+      const runBatch = async () => {
+        while (queue.length > 0 && !flags.cancelled) {
+          const batch = queue.splice(0, CONCURRENCY);
+          await Promise.allSettled(batch.map(catId => loadCategory(catId, flags)));
+        }
+      };
+      runBatch();
     }
 
     return () => {
       cancelled = true;
+      flags.cancelled = true;
     };
-  }, [view]);
-
-  const filteredStations = useMemo(() => {
-    let list = stations;
-    if (genreFilter) {
-      list = list.filter((s) =>
-        s.tags?.toLowerCase().includes(genreFilter.toLowerCase()),
-      );
-    }
-    if (countryFilter) {
-      list = list.filter((s) =>
-        s.country?.toLowerCase() === countryFilter.toLowerCase(),
-      );
-    }
-    return list;
-  }, [stations, genreFilter, countryFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, retryKey]);
 
   // All loaded category stations for discovery mode & station count in top view
   const allCategoryStations = useMemo(() => {
     return Object.values(categorySections).flat();
   }, [categorySections]);
 
-  const displayCount = view.mode === "top" ? allCategoryStations.length : filteredStations.length;
+  const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
 
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
-    const pool = view.mode === "top" ? allCategoryStations : filteredStations;
+    const pool = view.mode === "top" ? allCategoryStations : stations;
     if (discoveryMode && pool.length > 0) {
       discoveryRef.current = setInterval(() => {
         const random = pool[Math.floor(Math.random() * pool.length)];
@@ -255,15 +316,49 @@ export default function BrowseView({
     return () => {
       if (discoveryRef.current) clearInterval(discoveryRef.current);
     };
-  }, [discoveryMode, filteredStations, allCategoryStations, view.mode, onPlay]);
+  }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
+
+  // Compute page stations here so they can be used in the scan effect
+  const pageStations = useMemo(() => {
+    return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  }, [stations, page, PAGE_SIZE]);
+
+  // Trigger scan when enabled or page changes (non-top modes only)
+  useEffect(() => {
+    if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return;
+    const gen = ++scanGenRef.current;
+    startScan(pageStations, gen);
+    return () => { scanGenRef.current++; };
+  }, [scanEnabled, pageStations, view.mode, startScan]);
+
+  // Derived scan stats
+  const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length;
+  const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
+
+  // Filter grid by song/artist when songFilter is active
+  const songFilteredStations = useMemo(() => {
+    if (!songFilter.trim()) return pageStations;
+    const q = songFilter.toLowerCase();
+    // Filter from ALL stations, not just the current page
+    return stations.filter(s => {
+      const live = liveData[s.stationuuid];
+      if (!live?.track) return false;
+      const { title = '', artist = '' } = live.track;
+      return title.toLowerCase().includes(q) || artist.toLowerCase().includes(q);
+    });
+  }, [stations, pageStations, songFilter, liveData]);
+
+  // Chip active states based on current view (chips trigger view changes, not local filters)
+  const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
+  const countryChipActive = (name: string) => view.mode === "country" && view.country === name;
 
   return (
     <div className="col-fill min-w-0 h-full">
       {/* Header */}
       <div
-        className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 flex-shrink-0 flex-between`}
+        className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}
       >
         <div>
           <h2
@@ -279,60 +374,53 @@ export default function BrowseView({
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
           title="Auto-play a random station every 30 seconds"
+          aria-pressed={discoveryMode}
+          aria-label="Discovery mode"
         >
           <Sparkles size={12} />
           Discovery{discoveryMode ? " ON" : ""}
         </button>
       </div>
 
-      {/* Genre filter bar */}
-      <div className={`pb-2 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
-        <div className={`flex gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
+      {/* Genre chips — wrapping */}
+      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
+        <button
+          onClick={() => onGoHome?.()}
+          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+        >
+          All
+        </button>
+        {GENRE_CATEGORIES.map((cat) => (
           <button
-            onClick={() => setGenreFilter(null)}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${!genreFilter ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            key={cat.id}
+            onClick={() => onSelectGenre?.(cat)}
+            aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
+            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
-            All
+            {cat.label}
           </button>
-          {GENRE_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() =>
-                setGenreFilter((prev) =>
-                  prev === cat.tag ? null : (cat.tag ?? null),
-                )
-              }
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${genreFilter === cat.tag ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
-      {/* Country filter bar */}
-      <div className="pb-3 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-        <div className={`flex gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
+      {/* Country chips — wrapping */}
+      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
+        <button
+          onClick={() => onGoHome?.()}
+          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+        >
+          🌐 All
+        </button>
+        {COUNTRY_CATEGORIES.map((c) => (
           <button
-            onClick={() => setCountryFilter(null)}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${!countryFilter ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            key={c.code}
+            onClick={() => onSelectCountry?.(c.name)}
+            aria-current={countryChipActive(c.name) || undefined}
+            className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.name) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
-            🌐 All
+            <span>{countryFlag(c.code)}</span>
+            <span>{COUNTRY_DISPLAY[c.code] ?? c.name}</span>
           </button>
-          {COUNTRY_CATEGORIES.map((c) => (
-            <button
-              key={c.code}
-              onClick={() =>
-                setCountryFilter((prev) =>
-                  prev === c.name ? null : c.name,
-                )
-              }
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${countryFilter === c.name ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >
-              {countryFlag(c.code)} {c.name}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Content */}
@@ -344,13 +432,19 @@ export default function BrowseView({
         )}
 
         {error && (
-          <div className="flex-center-col py-16">
-            <Radio size={32} className="text-muted mb-2" />
+          <div className="flex-center-col gap-3 py-16">
+            <Radio size={32} className="text-muted" />
             <p className="text-[13px] text-secondary">{error}</p>
+            <button
+              onClick={() => setRetryKey((k) => k + 1)}
+              className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
+            >
+              Retry
+            </button>
           </div>
         )}
 
-        {!loading && !error && view.mode !== "top" && filteredStations.length === 0 && (
+        {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16">
             <Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">No stations found</p>
@@ -362,24 +456,82 @@ export default function BrowseView({
             {/* Category rows for top view */}
             {view.mode === "top" && (
               <>
+                {/* Favorites row */}
+                {favorites && favorites.length > 0 && (
+                  <ScrollRow
+                    title="Favorites"
+                    icon={<Heart size={14} className="text-pink-400/70" />}
+                    isMobile={isMobile}
+                  >
+                    {favorites.map((s) => (
+                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
+                        <StationCard
+                          station={s}
+                          isCurrent={s.stationuuid === currentStation?.stationuuid}
+                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
+                          isFavorite={isFavorite(s.stationuuid)}
+                          onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)}
+                        />
+                      </div>
+                    ))}
+                  </ScrollRow>
+                )}
+
+                {/* Recent stations row */}
+                {recent && recent.length > 0 && (
+                  <ScrollRow
+                    title="Recent"
+                    icon={<Clock size={14} className="text-blue-400/70" />}
+                    isMobile={isMobile}
+                  >
+                    {recent.map((s) => (
+                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
+                        <StationCard
+                          station={s}
+                          isCurrent={s.stationuuid === currentStation?.stationuuid}
+                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
+                          isFavorite={isFavorite(s.stationuuid)}
+                          onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)}
+                        />
+                      </div>
+                    ))}
+                  </ScrollRow>
+                )}
+
                 {BROWSE_ORDER.map((catId) => {
                   const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
                   if (!cat) return null;
 
-                  // Genre filter: only show the matching category
-                  if (genreFilter && cat.tag !== genreFilter) return null;
-
                   const catStations = categorySections[catId];
 
-                  // Filter by country within each category
-                  const displayStations =
-                    catStations && countryFilter
-                      ? catStations.filter(
-                          (s) =>
-                            s.country?.toLowerCase() ===
-                            countryFilter.toLowerCase(),
-                        )
-                      : catStations;
+                  // Failed to load — show retry button
+                  if (!catStations && failedCategories.has(catId)) {
+                    return (
+                      <ScrollRow
+                        key={catId}
+                        title={cat.label}
+                        icon={
+                          CATEGORY_ICONS[catId] ?? (
+                            <Music size={14} className="text-dim" />
+                          )
+                        }
+                        isMobile={isMobile}
+                      >
+                        <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
+                          <Radio size={18} className="text-muted" />
+                          <p className="text-[11px] text-muted">Failed to load</p>
+                          <button
+                            onClick={() => loadCategory(catId)}
+                            className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      </ScrollRow>
+                    );
+                  }
 
                   // Still loading — show skeleton placeholders
                   if (!catStations) {
@@ -397,16 +549,15 @@ export default function BrowseView({
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div
                             key={i}
-                            className={`snap-start flex-shrink-0 ${itemWidth} h-[180px] rounded-xl bg-surface-2 animate-pulse`}
+                            className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`}
                           />
                         ))}
                       </ScrollRow>
                     );
                   }
 
-                  // No stations after filtering
-                  if (!displayStations || displayStations.length === 0)
-                    return null;
+                  // No stations in this category
+                  if (!catStations || catStations.length === 0) return null;
 
                   return (
                     <ScrollRow
@@ -415,16 +566,16 @@ export default function BrowseView({
                       icon={
                         CATEGORY_ICONS[catId] ?? (
                           <span
-                            className={`inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-r ${cat.gradient}`}
+                            className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`}
                           />
                         )
                       }
                       isMobile={isMobile}
                     >
-                      {displayStations.map((s) => (
+                      {catStations.map((s) => (
                         <div
                           key={s.stationuuid}
-                          className={`snap-start flex-shrink-0 ${itemWidth}`}
+                          className={`snap-start shrink-0 ${itemWidth}`}
                         >
                           <StationCard
                             station={s}
@@ -447,31 +598,102 @@ export default function BrowseView({
               </>
             )}
 
-            {/* Flat list for search / genre / country views */}
-            {view.mode !== "top" && (
-              <ScrollRow isMobile={isMobile}>
-                {filteredStations.map((s) => (
-                  <div
-                    key={s.stationuuid}
-                    className={`snap-start flex-shrink-0 ${itemWidth}`}
-                  >
-                    <StationCard
-                      station={s}
-                      isPlaying={
-                        isPlaying &&
-                        currentStation?.stationuuid === s.stationuuid
-                      }
-                      isCurrent={
-                        currentStation?.stationuuid === s.stationuuid
-                      }
-                      isFavorite={isFavorite(s.stationuuid)}
-                      onPlay={() => onPlay(s)}
-                      onToggleFav={() => onToggleFav(s)}
-                    />
+            {/* Grid column for search / genre / country views — paginated */}
+            {view.mode !== "top" && stations.length > 0 && (() => {
+              const totalPages = Math.ceil(stations.length / PAGE_SIZE);
+              return (
+                <>
+                  {/* Scan now-playing bar */}
+                  <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}>
+                    <button
+                      onClick={() => setScanEnabled(v => !v)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${
+                        scanEnabled
+                          ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
+                          : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
+                      }`}
+                      title="Check what's currently playing on each station"
+                    >
+                      <ScanSearch size={12} />
+                      {isScanning
+                        ? `Scanning ${scannedCount}/${pageStations.length}…`
+                        : scannedCount > 0
+                          ? `Now playing (${scannedCount}/${pageStations.length})`
+                          : "Scan now playing"}
+                    </button>
+
+                    {scanEnabled && (
+                      <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
+                        <Music2 size={11} className="text-dim shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="Filter by song or artist…"
+                          value={songFilter}
+                          onChange={e => setSongFilter(e.target.value)}
+                          className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                        />
+                        {songFilter && (
+                          <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
+                            <X size={11} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {scanEnabled && songFilter && (
+                      <span className="text-[11px] text-dim shrink-0">
+                        {songFilteredStations.length} match{songFilteredStations.length !== 1 ? "es" : ""}
+                      </span>
+                    )}
                   </div>
-                ))}
-              </ScrollRow>
-            )}
+
+                  {/* Station grid */}
+                  <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
+                    {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
+                      const live = liveData[s.stationuuid];
+                      return (
+                        <StationCard
+                          key={s.stationuuid}
+                          station={s}
+                          isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
+                          isCurrent={currentStation?.stationuuid === s.stationuuid}
+                          isFavorite={isFavorite(s.stationuuid)}
+                          onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)}
+                          liveStatus={live?.status}
+                          liveTrack={live?.track}
+                          onPeek={!scanEnabled ? () => peekStation(s) : undefined}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && !songFilter.trim() && (
+                    <div className="flex items-center justify-center gap-3 pt-2 pb-6">
+                      <button
+                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
+                      >
+                        <ChevronLeft size={14} />
+                        Prev
+                      </button>
+                      <span className="text-[12px] text-dim tabular-nums">
+                        {page + 1} / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={page === totalPages - 1}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
+                      >
+                        Next
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </>
         )}
       </div>

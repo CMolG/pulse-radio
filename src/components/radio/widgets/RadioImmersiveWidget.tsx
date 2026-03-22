@@ -27,12 +27,18 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
 
   useEffect(() => {
     if (preview) return;
+    const MAX_STALE_MS = 30_000;
     const read = () => {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.PLAYBACK);
         if (raw) {
           const parsed = JSON.parse(raw);
-          setState(parsed);
+          // Treat data older than 30s as stale — main app likely inactive
+          if (parsed.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          } else {
+            setState(parsed);
+          }
           if (typeof parsed.volume === 'number') setWidgetVolume(parsed.volume);
         }
       } catch { /* ok */ }
@@ -46,19 +52,24 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
   }, [preview]);
 
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) {
-      const top = await topStations(8);
-      setResults(top);
-    } else {
-      const found = await searchStations(query.trim(), 8);
-      setResults(found);
+    try {
+      if (!query.trim()) {
+        const top = await topStations(8);
+        setResults(top);
+      } else {
+        const found = await searchStations(query.trim(), 8);
+        setResults(found);
+      }
+      setShowResults(true);
+    } catch {
+      // Network failure — keep existing results or show empty
+      setResults([]);
+      setShowResults(true);
     }
-    setShowResults(true);
   }, [query]);
 
   const handleVolumeChange = useCallback((v: number) => {
     setWidgetVolume(v);
-    sendCommand('setVolume');
     window.dispatchEvent(new CustomEvent('radio-command', { detail: { action: 'setVolume', volume: v } }));
   }, []);
 
@@ -94,6 +105,7 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
           className="flex-row-1.5 px-2 py-1.5 rounded-lg panel-2 mb-2">
           <Search size={12} className="text-subtle flex-shrink-0" />
  <input type="text" placeholder="Search stations…" value={query} onChange={e => setQuery(e.target.value)}
+            aria-label="Search stations"
             className="bg-transparent text-[11px] text-white placeholder:text-white/25 outline-none w-full"/>
         </form>
 
@@ -134,6 +146,7 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
                 <div className="flex-wrap-1 px-1">
                   {favorites.slice(0, 6).map(s => (
  <button key={s.stationuuid} onClick={() => sendCommand('play', s)}
+                      aria-label={`Play ${s.name}`}
                       className="flex-row-1 pad-sm-full bg-surface-2 hover-4">
                       <Heart size={9} className="text-pink-400/60" fill="currentColor" />
                       <span className="text-[10px] text-secondary truncate max-w-[80px]">{s.name}</span>
@@ -149,18 +162,20 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
         <div className="flex-row-2 mt-2 px-1">
           <Volume2 size={12} className="text-subtle flex-shrink-0" />
  <input type="range" min="0" max="1" step="0.01" value={widgetVolume} onChange={e => handleVolumeChange(parseFloat(e.target.value))}
+            aria-label="Volume"
             className="flex-1 h-1 bg-surface-3 rounded-full accent-[#34c759] cursor-pointer"/>
           <span className="text-[9px] text-subtle w-6 text-right tabular-nums">{Math.round(widgetVolume * 100)}</span>
         </div>
 
         {/* Controls */}
         <div className="flex-center-row gap-3 mt-2 pt-2 bdr-t">
-          <button onClick={() => sendCommand('skipPrev')} className="text-muted hover:text-white transition-colors"><SkipBack size={14} /></button>
+          <button onClick={() => sendCommand('skipPrev')} aria-label="Previous station" className="text-muted hover:text-white transition-colors"><SkipBack size={14} /></button>
           <button onClick={() => sendCommand('togglePlay')}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
             className="dot-8 bg-surface-4 hover:bg-surface-7 flex-center-row text-white transition-colors">
             {isPlaying ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
           </button>
-          <button onClick={() => sendCommand('skipNext')} className="text-muted hover:text-white transition-colors">
+          <button onClick={() => sendCommand('skipNext')} aria-label="Next station" className="text-muted hover:text-white transition-colors">
             <SkipForward size={14} />
           </button></div></div></div>);
 }

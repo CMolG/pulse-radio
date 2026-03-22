@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
   HISTORY: 'radio-history',
   FAVORITE_SONGS: 'radio-favorite-songs',
+  SIDEBAR_COLLAPSED: 'radio-sidebar-collapsed',
 } as const;
 
 export const MAX_RECENT = 15;
@@ -79,8 +80,10 @@ export const EQ_PRESETS: EqPreset[] = [
 
 export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐';
+  const upper = code.toUpperCase();
+  if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
   return String.fromCodePoint(
-    ...code.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+    ...upper.split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
   );
 }
 
@@ -108,3 +111,11 @@ export const COUNTRY_CATEGORIES = [
   { code: 'PL', name: 'Poland' },
   { code: 'TR', name: 'Türkiye' },
 ] as const;
+
+export const COUNTRY_DISPLAY: Record<string, string> = {
+  US: 'USA', GB: 'UK', DE: 'Germany', FR: 'France', ES: 'Spain',
+  IT: 'Italy', BR: 'Brazil', MX: 'Mexico', AR: 'Argentina', JP: 'Japan',
+  KR: 'Korea', IN: 'India', AU: 'Australia', CA: 'Canada', NL: 'Netherlands',
+  PT: 'Portugal', SE: 'Sweden', RU: 'Russia', CO: 'Colombia', CL: 'Chile',
+  PL: 'Poland', TR: 'Türkiye',
+};

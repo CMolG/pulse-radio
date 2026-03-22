@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isPrivateHost } from '@/lib/urlSecurity';
 
 export const runtime = 'nodejs';
 
@@ -15,8 +16,8 @@ export const runtime = 'nodejs';
  */
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
-  if (!streamUrl) {
-    return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
+  if (!streamUrl || streamUrl.length > 2048) {
+    return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 });
   }
 
   try {
@@ -24,19 +25,39 @@ export async function GET(req: NextRequest) {
     if (!['http:', 'https:'].includes(url.protocol)) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
     }
+    const host = url.hostname.toLowerCase();
+    if (isPrivateHost(host)) {
+      return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
+    }
   } catch {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
+  try {
     const res = await fetch(streamUrl, {
       headers: { 'Icy-MetaData': '1' },
       signal: controller.signal,
     });
     clearTimeout(timeout);
+
+    // Validate the final URL after redirects to prevent SSRF via redirect
+    if (res.url) {
+      try {
+        const finalUrl = new URL(res.url);
+        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+          res.body?.cancel().catch(() => {});
+          return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 });
+        }
+      } catch { /* URL parse failed — continue */ }
+    }
+
+    if (!res.ok) {
+      res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
+    }
 
     const icyMetaint = res.headers.get('icy-metaint');
     const icyName = res.headers.get('icy-name');
@@ -55,7 +76,9 @@ export async function GET(req: NextRequest) {
     }
 
     const metaint = parseInt(icyMetaint, 10);
-    if (isNaN(metaint) || metaint <= 0) {
+    // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
+    const MAX_METAINT = 131072;
+    if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       res.body.cancel().catch(() => {});
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
@@ -103,6 +126,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
+    clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.includes('abort')) {
       return NextResponse.json({ error: 'Request timed out' }, { status: 504 });

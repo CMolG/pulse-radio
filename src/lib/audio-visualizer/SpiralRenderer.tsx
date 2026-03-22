@@ -9,7 +9,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
 interface SpiralRendererProps {
-  frequencyData: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   className?: string;
   color1?: string;
   color2?: string;
@@ -23,7 +23,7 @@ const CYCLES = 4;
 const SMOOTH_PASSES = 3;
 
 export function SpiralRenderer({
-  frequencyData,
+  frequencyDataRef,
   className = "",
   color1 = "#ff4b1f",
   color2 = "#ff9068",
@@ -36,6 +36,8 @@ export function SpiralRenderer({
   const rotationRef = useRef(0);
   const dataArrayRef = useRef(new Float64Array(NUM_BARS));
   const targetArrayRef = useRef(new Float64Array(NUM_BARS));
+  const smoothedRef = useRef(new Float64Array(NUM_BARS));
+  const tempRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 });
 
   useEffect(() => {
@@ -69,11 +71,15 @@ export function SpiralRenderer({
     // Update mock/frequency data
     const data = dataArrayRef.current;
     const target = targetArrayRef.current;
+    const frequencyData = frequencyDataRef?.current ?? null;
 
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
       for (let i = 0; i < NUM_BARS; i++) {
-        const srcIdx = Math.floor((i / NUM_BARS) * frequencyData.length);
+        const srcIdx = Math.min(
+          Math.floor((i / NUM_BARS) * frequencyData.length),
+          frequencyData.length - 1,
+        );
         target[i] = (frequencyData[srcIdx] / 255) * sensitivity;
         data[i] += (target[i] - data[i]) * 0.15;
       }
@@ -95,10 +101,11 @@ export function SpiralRenderer({
     }
 
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
-    const smoothed = new Float64Array(NUM_BARS);
+    const smoothed = smoothedRef.current;
+    const temp = tempRef.current;
     smoothed.set(data);
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
-      const temp = new Float64Array(smoothed);
+      temp.set(smoothed);
       for (let i = 0; i < NUM_BARS; i++) {
         const prev = temp[i > 0 ? i - 1 : 0];
         const next = temp[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
@@ -120,15 +127,19 @@ export function SpiralRenderer({
 
     // Gradient
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current;
-    const gradient = ctx.createLinearGradient(
-      centerX - maxRadius,
-      centerY - maxRadius,
-      centerX + maxRadius,
-      centerY + maxRadius,
-    );
-    gradient.addColorStop(0, c1);
-    gradient.addColorStop(0.5, c2);
-    gradient.addColorStop(1, c3);
+    let fillStyle: string | CanvasGradient = c1;
+    try {
+      const gradient = ctx.createLinearGradient(
+        centerX - maxRadius,
+        centerY - maxRadius,
+        centerX + maxRadius,
+        centerY + maxRadius,
+      );
+      gradient.addColorStop(0, c1);
+      gradient.addColorStop(0.5, c2);
+      gradient.addColorStop(1, c3);
+      fillStyle = gradient;
+    } catch { /* fallback to solid color */ }
 
     // Build points
     const outerPoints: { x: number; y: number }[] = [];
@@ -157,7 +168,7 @@ export function SpiralRenderer({
     }
 
     // Draw slime shapes per cycle
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = fillStyle;
     ctx.shadowBlur = 20;
     ctx.shadowColor = `${c1}66`;
     ctx.globalAlpha = 0.85;
@@ -209,7 +220,7 @@ export function SpiralRenderer({
     ctx.globalAlpha = 1.0;
 
     frameRef.current = requestAnimationFrame(render);
-  }, [frequencyData, sensitivity, demo]);
+  }, [sensitivity, demo]);
 
   useEffect(() => {
     frameRef.current = requestAnimationFrame(render);
@@ -217,11 +228,14 @@ export function SpiralRenderer({
   }, [render]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div
+      className={`relative overflow-hidden ${className}`}
+      style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}
+    >
       <canvas
         ref={canvasRef}
-        className="size-full"
-        style={{ imageRendering: "auto", filter: "blur(6px)", transform: "scale(1.05)" }}
+        className="absolute inset-0 size-full"
+        style={{ imageRendering: "auto", transform: "scale(1.12)" }}
       />
     </div>
   );
