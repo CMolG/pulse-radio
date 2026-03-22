@@ -39,6 +39,19 @@ export function useFavorites(): UseFavoritesReturn {
     saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
   }, [favorites]);
 
+  // Sync favorites across tabs via storage events
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEYS.FAVORITES || e.newValue == null) return;
+      try {
+        const parsed = JSON.parse(e.newValue) as Station[];
+        if (Array.isArray(parsed)) setFavorites(parsed);
+      } catch { /* ignore malformed */ }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const add = useCallback((station: Station) => {
     setFavorites(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;

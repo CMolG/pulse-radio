@@ -43,6 +43,18 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
     saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
   }, [songs]);
 
+  // Sync favorite songs across tabs via storage events
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEYS.FAVORITE_SONGS || e.newValue == null) return;
+      try {
+        const parsed = JSON.parse(e.newValue) as FavoriteSong[];
+        if (Array.isArray(parsed)) setSongs(parsed);
+      } catch { /* ignore malformed */ }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => {
       const key = songKey(song.title, song.artist);
