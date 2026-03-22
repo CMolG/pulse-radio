@@ -29,7 +29,7 @@ type Props = {
   station: Station;
   track: NowPlayingTrack | null;
   isPlaying: boolean;
-  frequencyData?: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null;
   icyBitrate?: string | null;
   onBack: () => void;
@@ -97,7 +97,7 @@ export default function TheaterView({
   station,
   track,
   isPlaying,
-  frequencyData,
+  frequencyDataRef,
   artworkUrl,
   icyBitrate,
   onBack,
@@ -160,13 +160,13 @@ export default function TheaterView({
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none">
         <SpiralRenderer
-          frequencyData={frequencyData ?? null}
+          frequencyDataRef={frequencyDataRef}
           className="size-full"
           color1={color1}
           color2={color2}
           color3={color3}
           sensitivity={compact ? 0.8 : 1.2}
-          demo={!frequencyData}
+          demo
         />
       </div>
 

@@ -9,7 +9,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 interface FerrofluidRendererProps {
-  frequencyData: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   className?: string;
   blobCount?: number;
   colorPrimary?: string;
@@ -168,7 +168,7 @@ function drawMetaballs(
 /* ─── component ─── */
 
 export function FerrofluidRenderer({
-  frequencyData,
+  frequencyDataRef,
   className = '',
   blobCount = 12,
   colorPrimary = '#1a1a2e',
@@ -236,6 +236,7 @@ export function FerrofluidRenderer({
 
     // compute overall energy
     let energy = 0;
+    const frequencyData = frequencyDataRef?.current ?? null;
     if (frequencyData) {
       let sum = 0;
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
@@ -294,7 +295,7 @@ export function FerrofluidRenderer({
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
 
     frameRef.current = requestAnimationFrame(render);
-  }, [frequencyData, blobCount, sensitivity, demo]);
+  }, [blobCount, sensitivity, demo]);
 
   useEffect(() => {
     frameRef.current = requestAnimationFrame(render);

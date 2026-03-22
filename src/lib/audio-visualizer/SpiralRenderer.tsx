@@ -9,7 +9,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
 interface SpiralRendererProps {
-  frequencyData: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   className?: string;
   color1?: string;
   color2?: string;
@@ -23,7 +23,7 @@ const CYCLES = 4;
 const SMOOTH_PASSES = 3;
 
 export function SpiralRenderer({
-  frequencyData,
+  frequencyDataRef,
   className = "",
   color1 = "#ff4b1f",
   color2 = "#ff9068",
@@ -69,6 +69,7 @@ export function SpiralRenderer({
     // Update mock/frequency data
     const data = dataArrayRef.current;
     const target = targetArrayRef.current;
+    const frequencyData = frequencyDataRef?.current ?? null;
 
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
@@ -209,7 +210,7 @@ export function SpiralRenderer({
     ctx.globalAlpha = 1.0;
 
     frameRef.current = requestAnimationFrame(render);
-  }, [frequencyData, sensitivity, demo]);
+  }, [sensitivity, demo]);
 
   useEffect(() => {
     frameRef.current = requestAnimationFrame(render);

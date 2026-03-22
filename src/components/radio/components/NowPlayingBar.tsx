@@ -36,7 +36,7 @@ type Props = {
   status: PlaybackStatus;
   volume: number;
   muted: boolean;
-  frequencyData?: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   icyBitrate?: string | null;
   onTogglePlay: () => void;
   onSetVolume: (v: number) => void;
@@ -59,7 +59,7 @@ export default function NowPlayingBar({
   status,
   volume,
   muted,
-  frequencyData,
+  frequencyDataRef,
   icyBitrate,
   onTogglePlay,
   onSetVolume,
@@ -228,14 +228,14 @@ export default function NowPlayingBar({
           <>
             <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
               <FerrofluidRenderer
-                frequencyData={frequencyData ?? null}
+                frequencyDataRef={frequencyDataRef}
                 className="size-full"
                 blobCount={6}
                 colorPrimary="#1a1a2e"
                 colorSecondary="#16213e"
                 colorAccent="#0f3460"
                 sensitivity={1.0}
-                demo={!frequencyData}
+                demo
               />
             </div>
             <div className="flex-row-1.5 relative z-10">

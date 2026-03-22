@@ -502,7 +502,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             }
             track={enrichedTrack}
             isPlaying={radio.status === "playing"}
-            frequencyData={analyser.frequencyData}
+            frequencyDataRef={analyser.frequencyDataRef}
             artworkUrl={albumArt.artworkUrl}
             icyBitrate={icyBitrate}
             onBack={() => {}}
@@ -520,7 +520,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           status={radio.status}
           volume={radio.volume}
           muted={radio.muted}
-          frequencyData={analyser.frequencyData}
+          frequencyDataRef={analyser.frequencyDataRef}
           icyBitrate={icyBitrate}
           onTogglePlay={radio.togglePlay}
           onSetVolume={radio.setVolume}
@@ -624,7 +624,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 station={radio.station}
                 track={enrichedTrack}
                 isPlaying={radio.status === "playing"}
-                frequencyData={analyser.frequencyData}
+                frequencyDataRef={analyser.frequencyDataRef}
                 artworkUrl={albumArt.artworkUrl}
                 icyBitrate={icyBitrate}
                 onBack={() => setTheaterMode(false)}
@@ -645,7 +645,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   station={radio.station}
                   track={enrichedTrack}
                   isPlaying={radio.status === "playing"}
-                  frequencyData={analyser.frequencyData}
+                  frequencyDataRef={analyser.frequencyDataRef}
                   artworkUrl={albumArt.artworkUrl}
                   icyBitrate={icyBitrate}
                   onTheater={() => setTheaterMode(true)}
@@ -737,7 +737,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             status={radio.status}
             volume={radio.volume}
             muted={radio.muted}
-            frequencyData={analyser.frequencyData}
+            frequencyDataRef={analyser.frequencyDataRef}
             icyBitrate={icyBitrate}
             onTogglePlay={radio.togglePlay}
             onSetVolume={radio.setVolume}
@@ -791,7 +791,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   station={radio.station}
                   track={enrichedTrack}
                   isPlaying={radio.status === "playing"}
-                  frequencyData={analyser.frequencyData}
+                  frequencyDataRef={analyser.frequencyDataRef}
                   artworkUrl={albumArt.artworkUrl}
                   icyBitrate={icyBitrate}
                   onBack={() => setTheaterMode(false)}
@@ -812,7 +812,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     station={radio.station}
                     track={enrichedTrack}
                     isPlaying={radio.status === "playing"}
-                    frequencyData={analyser.frequencyData}
+                    frequencyDataRef={analyser.frequencyDataRef}
                     artworkUrl={albumArt.artworkUrl}
                     icyBitrate={icyBitrate}
                     onTheater={() => setTheaterMode(true)}
@@ -967,7 +967,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           status={radio.status}
           volume={radio.volume}
           muted={radio.muted}
-          frequencyData={analyser.frequencyData}
+          frequencyDataRef={analyser.frequencyDataRef}
           icyBitrate={icyBitrate}
           onTogglePlay={radio.togglePlay}
           onSetVolume={radio.setVolume}

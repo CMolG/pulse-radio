@@ -9,7 +9,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
 interface CircularRendererProps {
-  frequencyData: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   className?: string;
   color1?: string;
   color2?: string;
@@ -28,7 +28,7 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 export function CircularRenderer({
-  frequencyData,
+  frequencyDataRef,
   className = "",
   color1 = "#ff6b35",
   color2 = "#d4145a",
@@ -85,7 +85,7 @@ export function CircularRenderer({
     const { c1, c2 } = colorsRef.current;
 
     // Build or use demo data
-    let dataArray: Uint8Array | null = frequencyData;
+    let dataArray: Uint8Array | null = frequencyDataRef?.current ?? null;
     let bufLen: number;
 
     if (dataArray) {
@@ -132,7 +132,7 @@ export function CircularRenderer({
     ctx.stroke();
 
     frameRef.current = requestAnimationFrame(render);
-  }, [frequencyData, sensitivity, demo]);
+  }, [sensitivity, demo]);
 
   useEffect(() => {
     frameRef.current = requestAnimationFrame(render);

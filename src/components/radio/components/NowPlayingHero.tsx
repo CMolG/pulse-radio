@@ -27,7 +27,7 @@ type Props = {
   station: Station;
   track: NowPlayingTrack | null;
   isPlaying: boolean;
-  frequencyData?: Uint8Array | null;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null;
   icyBitrate?: string | null;
   onTheater?: () => void;
@@ -37,7 +37,7 @@ export default function NowPlayingHero({
   station,
   track,
   isPlaying,
-  frequencyData,
+  frequencyDataRef,
   artworkUrl,
   icyBitrate,
   onTheater,
@@ -61,7 +61,7 @@ export default function NowPlayingHero({
         overlayClass="bg-black/60"
       >
         <VisualizerCanvas
-          frequencyData={frequencyData ?? null}
+          frequencyDataRef={frequencyDataRef}
           barCount={64}
           opacity={0.15}
           className="abs-fill"
