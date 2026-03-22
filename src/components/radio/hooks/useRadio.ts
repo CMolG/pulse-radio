@@ -102,7 +102,15 @@ export function useRadio(): UseRadioReturn {
       }, delay);
     };
 
-    const onError = () => reconnect(1000 * Math.min(retryRef.current + 1, 5));
+    const onError = () => {
+      const err = audio.error;
+      // Permanent failures: don't retry when source is unsupported or codec fails
+      if (err && (err.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || err.code === MediaError.MEDIA_ERR_DECODE)) {
+        setStatus('error');
+        return;
+      }
+      reconnect(1000 * Math.min(retryRef.current + 1, 5));
+    };
 
     // Stalled: the browser stopped receiving data but hasn't errored
     // Use a debounce — some stall events resolve on their own
