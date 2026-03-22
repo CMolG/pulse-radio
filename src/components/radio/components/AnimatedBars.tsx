@@ -1,0 +1,21 @@
+'use client';
+
+import React from 'react';
+
+export default function AnimatedBars({ size = 'default' }: { size?: 'small' | 'default' }) {
+  const h = size === 'small' ? 10 : 16;
+  const w = size === 'small' ? 2 : 3;
+
+  return (<span className="inline-flex items-end" style={{ height: h, gap: size === 'small' ? 1 : 1.5 }}>
+      {[0, 1, 2].map(i => (
+ <span key={i} className="bg-sys-orange rounded-full animate-eq-bar" style={{ width: w, height: h * 0.5, animationDelay: `${i * 0.15}s`, }} />
+      ))}
+      <style jsx>{`
+        @keyframes eq-bar {
+          0%, 100% { height: ${h * 0.2}px; }
+          50% { height: ${h}px; }
+        }
+        .animate-eq-bar { animation: eq-bar 0.8s ease-in-out infinite; }
+      `}</style>
+    </span>);
+}

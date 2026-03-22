@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript" alt="TypeScript 5" />
   <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind CSS 4" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=flat-square" alt="Apache 2.0 License" />
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome" />
 </p>
 
@@ -69,7 +69,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/pulse-radio.git
+git clone https://github.com/CMolG/pulse-radio.git
 cd pulse-radio
 
 # Install dependencies
@@ -207,15 +207,13 @@ Look for issues labeled [`good first issue`](../../labels/good%20first%20issue) 
 - [ ] Sleep timer
 - [ ] Keyboard shortcuts
 - [ ] Chromecast / AirPlay support
-- [ ] PWA with offline favorites
-- [ ] Station submission form
 - [ ] Podcast support
 - [ ] Shared playlists
 - [ ] i18n / localization
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ---
 

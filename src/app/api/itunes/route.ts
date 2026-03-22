@@ -1,0 +1,40 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
+
+/**
+ * Server-side proxy for iTunes Search API.
+ * Avoids any browser-side CORS/CSP issues and allows server caching.
+ */
+export async function GET(req: NextRequest) {
+  const term = req.nextUrl.searchParams.get('term');
+  if (!term) {
+    return NextResponse.json({ results: [] }, { status: 400 });
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8_000);
+
+    const url = `https://itunes.apple.com/search?${new URLSearchParams({
+      term,
+      media: 'music',
+      entity: 'song',
+      limit: '3',
+    })}`;
+
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      return NextResponse.json({ results: [] });
+    }
+
+    const data = await res.json();
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
+    });
+  } catch {
+    return NextResponse.json({ results: [] });
+  }
+}

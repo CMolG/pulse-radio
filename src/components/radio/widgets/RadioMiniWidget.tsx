@@ -1,0 +1,78 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Radio, Play, Pause, SkipForward, Heart } from 'lucide-react';
+import type { Station, WidgetPlaybackState } from '../types';
+import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage } from '@/lib/storageUtils';
+
+function sendCommand(action: string, station?: Station) {
+  window.dispatchEvent(new CustomEvent('radio-command', { detail: { action, station } }));
+}
+
+export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
+  const [state, setState] = useState<WidgetPlaybackState | null>(null);
+  const [favorites, setFavorites] = useState<Station[]>([]);
+
+  useEffect(() => {
+    if (preview) return;
+    const read = () => {
+      try {
+        setState(loadFromStorage(STORAGE_KEYS.PLAYBACK, null))
+      } catch { /* ok */ }
+      try {
+        setFavorites(loadFromStorage(STORAGE_KEYS.FAVORITES, []))
+      } catch { /* ok */ }
+    };
+    read();
+    const iv = setInterval(read, 3000);
+    return () => clearInterval(iv);
+  }, [preview]);
+
+  const isPlaying = state?.status === 'playing';
+  const station = state?.station;
+  const track = state?.track;
+
+  return (<div className="col-full bg-sys-surface/80 backdrop-blur-xl card-lg p-3 select-none overflow-hidden relative">
+      {/* Blurred art bg */}
+      {station?.favicon && (
+        <img
+          src={station.favicon}
+          alt=""
+          className="abs-fill size-full object-cover blur-2xl opacity-15 pointer-events-none"
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
+      )}
+
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex-row-1.5 mb-1">
+          <Radio size={12} className="text-sys-orange" />
+          <span className="text-[9px] text-muted caps font-semibold">Radio</span>
+          {isPlaying && <span className="text-[9px] text-sys-orange ml-auto">● LIVE</span>}
+        </div>
+
+        <div className="flex-1 flex-center-row min-h-0">
+          <p className="text-[12px] font-medium text-white text-center truncate px-1">{track?.title || station?.name || 'No station'}</p></div>
+
+        {/* Favorite station pills */}
+        {favorites.length > 0 && (
+          <div className="flex-center-row gap-1 mb-1.5 flex-wrap">
+            {favorites.slice(0, 3).map(s => (
+ <button key={s.stationuuid} onClick={() => sendCommand('play', s)}
+                className="flex-row-1 pad-sm-full bg-surface-2 hover-4">
+                <Heart size={7} className="text-pink-400/60" fill="currentColor" />
+                <span className="text-[9px] text-dim truncate max-w-[60px]">{s.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex-center-row gap-3 mt-1">
+          <button onClick={() => sendCommand('togglePlay')}
+            className="dot-7 bg-surface-4 hover:bg-surface-7 flex-center-row text-white transition-colors">
+            {isPlaying ? <Pause size={13} /> : <Play size={13} className="ml-0.5" />}
+          </button>
+          <button onClick={() => sendCommand('skipNext')}
+            className="text-muted hover:text-white transition-colors">
+            <SkipForward size={14} />
+          </button></div></div></div>);
+}

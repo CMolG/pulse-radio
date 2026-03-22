@@ -4,16 +4,25 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "npm run cache:purge:deep && NEXT_DEV_DISABLE_TURBOPACK_FS_CACHE=1 next dev",
+    "cache:purge:deep": "rm -rf .next node_modules/.cache",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.1",
     "next": "16.2.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "motion": "^12.4.7",
+    "lucide-react": "^0.475.0",
+    "zustand": "^5.0.3",
+    "usehooks-ts": "^3.1.0",
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -23,5 +32,11 @@
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 0.5%",
+    "not dead",
+    "not ie 11"
+  ]
 }
