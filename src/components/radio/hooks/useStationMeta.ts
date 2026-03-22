@@ -23,15 +23,21 @@ function isAdContent(text: string): boolean {
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues
-async function fetchIcyMeta(streamUrl: string): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
+
+    // Abort if parent signal fires
+    const onParentAbort = () => controller.abort();
+    signal?.addEventListener('abort', onParentAbort);
+
     const res = await fetch(
       `/api/icy-meta?url=${encodeURIComponent(streamUrl)}`,
       { signal: controller.signal },
     );
     clearTimeout(timeout);
+    signal?.removeEventListener('abort', onParentAbort);
 
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
@@ -83,8 +89,12 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
       return;
     }
 
+    const abortController = new AbortController();
+
     const poll = async () => {
-      const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved);
+      if (abortController.signal.aborted) return;
+      const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
+      if (abortController.signal.aborted) return;
       if (icyBr) setIcyBitrate(icyBr);
       if (streamTitle && streamTitle !== lastTitleRef.current) {
         if (isAdContent(streamTitle)) {
@@ -111,6 +121,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      abortController.abort();
     };
   }, [station, isPlaying]);
 
