@@ -13,6 +13,10 @@ interface AlbumInfo {
   albumName: string | null;
   releaseDate: string | null;
   itunesUrl: string | null;
+  durationMs: number | null;
+  genre: string | null;
+  trackNumber: number | null;
+  trackCount: number | null;
 }
 
 const CACHE = new Map<string, AlbumInfo>();
@@ -49,6 +53,10 @@ export interface UseAlbumArtReturn {
   albumName: string | null;
   releaseDate: string | null;
   itunesUrl: string | null;
+  durationMs: number | null;
+  genre: string | null;
+  trackNumber: number | null;
+  trackCount: number | null;
   isLoading: boolean;
 }
 
@@ -56,14 +64,14 @@ export function useAlbumArt(
   title: string | null,
   artist: string | null,
 ): UseAlbumArtReturn {
-  const [info, setInfo] = useState<AlbumInfo>({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null });
+  const [info, setInfo] = useState<AlbumInfo>({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null });
   const [isLoading, setIsLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     // Need at least a title to search
     if (!title) {
-      setInfo({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null });
+      setInfo({ artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null });
       return;
     }
 
@@ -98,8 +106,12 @@ export function useAlbumArt(
         const albumInfo: AlbumInfo = {
           artworkUrl,
           albumName: result?.collectionName ?? null,
-          releaseDate: result?.releaseDate?.slice(0, 4) ?? null,
+          releaseDate: result?.releaseDate ?? null,
           itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
+          durationMs: typeof result?.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
+          genre: result?.primaryGenreName ?? null,
+          trackNumber: typeof result?.trackNumber === 'number' ? result.trackNumber : null,
+          trackCount: typeof result?.trackCount === 'number' ? result.trackCount : null,
         };
         cacheSet(cacheKey, albumInfo);
         if (artworkUrl) preloadImage(artworkUrl);
@@ -107,7 +119,7 @@ export function useAlbumArt(
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          const empty: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null };
+          const empty: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null };
           cacheSet(cacheKey, empty);
           setInfo(empty);
         }

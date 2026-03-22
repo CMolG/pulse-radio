@@ -17,10 +17,14 @@ import {
   Music,
   User,
   Users,
+  Clock,
+  Disc3,
+  Tag,
 } from 'lucide-react';
 import type { SongDetailData } from '../types';
 import { useArtistInfo } from '../hooks/useArtistInfo';
 import { useLyrics } from '../hooks/useLyrics';
+import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
 
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 
@@ -164,6 +168,36 @@ export default function SongDetailModal({ song, onClose }: Props) {
                   </p>
                   {song.album && (
                     <p className="text-[12px] text-dim mt-0.5">{song.album}</p>
+                  )}
+
+                  {/* Track metadata badges */}
+                  {(song.genre || song.durationMs || song.releaseDate || song.trackNumber != null) && (
+                    <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                      {song.genre && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
+                          <Tag size={9} />
+                          {song.genre}
+                        </span>
+                      )}
+                      {song.durationMs && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
+                          <Clock size={9} />
+                          {formatDuration(song.durationMs)}
+                        </span>
+                      )}
+                      {song.releaseDate && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
+                          <Calendar size={9} />
+                          {formatReleaseDate(song.releaseDate)}
+                        </span>
+                      )}
+                      {song.trackNumber != null && song.trackCount != null && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
+                          <Disc3 size={9} />
+                          #{song.trackNumber}/{song.trackCount}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
 

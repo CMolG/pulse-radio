@@ -25,6 +25,11 @@ export type NowPlayingTrack = {
   album?: string;
   artworkUrl?: string;
   itunesUrl?: string;
+  durationMs?: number;
+  genre?: string;
+  releaseDate?: string;
+  trackNumber?: number;
+  trackCount?: number;
 };
 
 export type LyricLine = {
@@ -108,6 +113,11 @@ export type HistoryEntry = {
   album?: string;
   artworkUrl?: string;
   itunesUrl?: string;
+  durationMs?: number;
+  genre?: string;
+  releaseDate?: string;
+  trackNumber?: number;
+  trackCount?: number;
   timestamp: number;
 };
 
@@ -126,6 +136,11 @@ export type FavoriteSong = {
   album?: string;
   artworkUrl?: string;
   itunesUrl?: string;
+  durationMs?: number;
+  genre?: string;
+  releaseDate?: string;
+  trackNumber?: number;
+  trackCount?: number;
   stationName: string;
   stationUuid: string;
   timestamp: number;
@@ -137,6 +152,11 @@ export type SongDetailData = {
   album?: string;
   artworkUrl?: string;
   itunesUrl?: string;
+  durationMs?: number;
+  genre?: string;
+  releaseDate?: string;
+  trackNumber?: number;
+  trackCount?: number;
   stationName: string;
 };
 

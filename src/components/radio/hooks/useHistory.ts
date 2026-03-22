@@ -78,6 +78,11 @@ export function useHistory(
       album: track.album,
       artworkUrl: track.artworkUrl,
       itunesUrl: track.itunesUrl,
+      durationMs: track.durationMs,
+      genre: track.genre,
+      releaseDate: track.releaseDate,
+      trackNumber: track.trackNumber,
+      trackCount: track.trackCount,
       timestamp: Date.now(),
     };
 
@@ -92,13 +97,18 @@ export function useHistory(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.title, track?.artist, stationUuid, stationName]);
 
-  // Update the latest history entry when artwork/album/itunesUrl arrives late
+  // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
   useEffect(() => {
     if (!track?.title || !stationUuid) return;
     const artworkUrl = track.artworkUrl;
     const album = track.album;
     const itunesUrl = track.itunesUrl;
-    if (!artworkUrl && !album && !itunesUrl) return;
+    const durationMs = track.durationMs;
+    const genre = track.genre;
+    const releaseDate = track.releaseDate;
+    const trackNumber = track.trackNumber;
+    const trackCount = track.trackCount;
+    if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null) return;
 
     setHistory(prev => {
       const head = prev[0];
@@ -107,13 +117,15 @@ export function useHistory(
         head.stationUuid === stationUuid &&
         head.title === track.title &&
         head.artist === track.artist &&
-        (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl)
+        (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl ||
+         head.durationMs !== durationMs || head.genre !== genre || head.releaseDate !== releaseDate ||
+         head.trackNumber !== trackNumber || head.trackCount !== trackCount)
       ) {
-        return [{ ...head, artworkUrl, album, itunesUrl }, ...prev.slice(1)];
+        return [{ ...head, artworkUrl, album, itunesUrl, durationMs, genre, releaseDate, trackNumber, trackCount }, ...prev.slice(1)];
       }
       return prev;
     });
-  }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.title, track?.artist, stationUuid]);
+  }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
 
   const remove = useCallback((id: string) => {
     setHistory(prev => prev.filter(e => e.id !== id));

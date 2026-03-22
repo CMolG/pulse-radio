@@ -23,6 +23,7 @@ import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { formatDuration } from "../utils/formatDuration";
 
 function stationInitials(name: string) {
   return name
@@ -207,6 +208,13 @@ export default function NowPlayingBar({
           </p>
           {track?.album && (
             <p className="text-[9px] text-dim truncate">{track.album}</p>
+          )}
+          {track?.durationMs && (
+            <p className="text-[9px] text-dim truncate inline-flex items-center gap-0.5">
+              <Clock size={8} className="opacity-60" />
+              {formatDuration(track.durationMs)}
+              {track.genre && <span className="ml-1">· {track.genre}</span>}
+            </p>
           )}
         </div>
         {icyBitrate && (

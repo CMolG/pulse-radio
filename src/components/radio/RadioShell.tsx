@@ -89,7 +89,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
   const radio = useRadio();
   const eq = useEqualizer();
-  const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
+  const [smartDurationMs, setSmartDurationMs] = useState<number | undefined>(undefined);
+  const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing", smartDurationMs);
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(track, radio.station?.name);
   const favs = useFavorites();
   const favSongs = useFavoriteSongs();
@@ -101,6 +102,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   });
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
 
+  // Feed iTunes duration back to smart ICY polling
+  useEffect(() => {
+    setSmartDurationMs(albumArt.durationMs ?? undefined);
+  }, [albumArt.durationMs]);
+
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
     return {
@@ -108,8 +114,13 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       album: track.album || albumArt.albumName || undefined,
       artworkUrl: track.artworkUrl || albumArt.artworkUrl || undefined,
       itunesUrl: albumArt.itunesUrl || undefined,
+      durationMs: albumArt.durationMs || undefined,
+      genre: albumArt.genre || undefined,
+      releaseDate: albumArt.releaseDate || undefined,
+      trackNumber: albumArt.trackNumber || undefined,
+      trackCount: albumArt.trackCount || undefined,
     };
-  }, [track, albumArt.albumName, albumArt.artworkUrl, albumArt.itunesUrl]);
+  }, [track, albumArt.albumName, albumArt.artworkUrl, albumArt.itunesUrl, albumArt.durationMs, albumArt.genre, albumArt.releaseDate, albumArt.trackNumber, albumArt.trackCount]);
 
   const songHistory = useHistory(
     radio.station?.name,
@@ -413,6 +424,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               album: enrichedTrack.album,
               artworkUrl: enrichedTrack.artworkUrl,
               itunesUrl: enrichedTrack.itunesUrl,
+              durationMs: enrichedTrack.durationMs,
+              genre: enrichedTrack.genre,
+              releaseDate: enrichedTrack.releaseDate,
+              trackNumber: enrichedTrack.trackNumber,
+              trackCount: enrichedTrack.trackCount,
               stationName: radio.station?.name ?? '',
               stationUuid: radio.station?.stationuuid ?? '',
             });
@@ -452,6 +468,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       album: enrichedTrack.album,
       artworkUrl: enrichedTrack.artworkUrl,
       itunesUrl: enrichedTrack.itunesUrl,
+      durationMs: enrichedTrack.durationMs,
+      genre: enrichedTrack.genre,
+      releaseDate: enrichedTrack.releaseDate,
+      trackNumber: enrichedTrack.trackNumber,
+      trackCount: enrichedTrack.trackCount,
       stationName: radio.station.name,
       stationUuid: radio.station.stationuuid,
     });
@@ -465,6 +486,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       album: entry.album,
       artworkUrl: entry.artworkUrl,
       itunesUrl: entry.itunesUrl,
+      durationMs: entry.durationMs,
+      genre: entry.genre,
+      releaseDate: entry.releaseDate,
+      trackNumber: entry.trackNumber,
+      trackCount: entry.trackCount,
       stationName: entry.stationName,
       stationUuid: entry.stationUuid,
     });

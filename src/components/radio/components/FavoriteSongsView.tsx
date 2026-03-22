@@ -7,9 +7,10 @@
 "use client";
 
 import React from "react";
-import { Music, Radio, Heart, Trash2, ExternalLink } from "lucide-react";
+import { Music, Radio, Heart, Trash2, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { FavoriteSong, SongDetailData } from "../types";
+import { formatDuration } from "../utils/formatDuration";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -73,6 +74,11 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               album: song.album,
               artworkUrl: song.artworkUrl,
               itunesUrl: song.itunesUrl,
+              durationMs: song.durationMs,
+              genre: song.genre,
+              releaseDate: song.releaseDate,
+              trackNumber: song.trackNumber,
+              trackCount: song.trackCount,
               stationName: song.stationName,
             })}
           >
@@ -108,6 +114,17 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               <p className="text-[12px] text-secondary line-clamp-1">{song.artist}</p>
               {song.album && (
                 <p className="text-[11px] text-dim line-clamp-1">{song.album}</p>
+              )}
+              {(song.genre || song.durationMs) && (
+                <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
+                  {song.genre && <span>{song.genre}</span>}
+                  {song.durationMs && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <Clock size={8} className="opacity-60" />
+                      {formatDuration(song.durationMs)}
+                    </span>
+                  )}
+                </p>
               )}
             </div>
             {/* Apple Music + Footer */}

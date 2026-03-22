@@ -10,6 +10,7 @@ import React from "react";
 import { Music, Radio, Clock, Trash2, Heart, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
 import type { HistoryEntry, SongDetailData } from "../types";
+import { formatDuration } from "../utils/formatDuration";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -75,6 +76,11 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               album: entry.album,
               artworkUrl: entry.artworkUrl,
               itunesUrl: entry.itunesUrl,
+              durationMs: entry.durationMs,
+              genre: entry.genre,
+              releaseDate: entry.releaseDate,
+              trackNumber: entry.trackNumber,
+              trackCount: entry.trackCount,
               stationName: entry.stationName,
             })}
           >
@@ -113,6 +119,17 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               <p className="text-[12px] text-secondary line-clamp-1">{entry.artist}</p>
               {entry.album && (
                 <p className="text-[11px] text-dim line-clamp-1">{entry.album}</p>
+              )}
+              {(entry.genre || entry.durationMs) && (
+                <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
+                  {entry.genre && <span>{entry.genre}</span>}
+                  {entry.durationMs && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <Clock size={8} className="opacity-60" />
+                      {formatDuration(entry.durationMs)}
+                    </span>
+                  )}
+                </p>
               )}
             </div>
             {/* Apple Music + Footer */}

@@ -7,13 +7,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Radio, Star, Heart, ExternalLink } from "lucide-react";
+import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
 
 function stationInitials(name: string) {
   return name
@@ -291,6 +292,23 @@ export default function TheaterView({
               className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}
             >
               {track.album}
+            </p>
+          )}
+
+          {/* Track metadata: genre, duration, release date, track# */}
+          {track?.title && !compact && (track?.genre || track?.durationMs || track?.releaseDate || track?.trackNumber != null) && (
+            <p className="text-[10px] text-white/30 text-center flex items-center justify-center gap-2 mt-0.5">
+              {track.genre && <span>{track.genre}</span>}
+              {track.durationMs && (
+                <span className="inline-flex items-center gap-0.5">
+                  <Clock size={9} className="opacity-60" />
+                  {formatDuration(track.durationMs)}
+                </span>
+              )}
+              {track.releaseDate && <span>{formatReleaseDate(track.releaseDate)}</span>}
+              {track.trackNumber != null && track.trackCount != null && (
+                <span>#{track.trackNumber}/{track.trackCount}</span>
+              )}
             </p>
           )}
 
