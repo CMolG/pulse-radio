@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 @import "tailwindcss";
 
 :root {
@@ -104,6 +110,17 @@ textarea,
 .custom-scrollbar {
   overscroll-behavior: contain;
   scroll-behavior: smooth;
+}
+
+.lyrics-reel {
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lyrics-reel::-webkit-scrollbar {
+  display: none;
 }
 
 /* Range slider - macOS style */
@@ -1104,8 +1121,6 @@ input[type="color"]:hover {
 
 /* ── Mobile responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Safe area insets handled on the main container in page.tsx */
-
   /* Prevent pull-to-refresh / bounce on mobile */
   html,
   body {
@@ -1121,10 +1136,9 @@ input[type="color"]:hover {
     -webkit-touch-callout: none;
   }
 
-  /* Ensure tap targets are large enough (44px minimum) */
-  [role="menubar"] button {
-    min-height: 28px;
-    min-width: 28px;
+  /* Safe area padding for devices with notches/home indicators */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 

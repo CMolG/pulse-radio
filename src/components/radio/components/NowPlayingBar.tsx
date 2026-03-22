@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 "use client";
 
 import React, { useState } from "react";
@@ -7,7 +13,6 @@ import {
   Volume2,
   VolumeX,
   Radio,
-  Mic2,
   SlidersHorizontal,
   Maximize2,
   Star,
@@ -36,7 +41,6 @@ type Props = {
   onTogglePlay: () => void;
   onSetVolume: (v: number) => void;
   onToggleMute: () => void;
-  onToggleLyrics: () => void;
   onToggleEq: () => void;
   onToggleTheater?: () => void;
   onToggleFav?: () => void;
@@ -44,7 +48,6 @@ type Props = {
   isFavorite?: boolean;
   songLiked?: boolean;
   eqPresetActive?: boolean;
-  showLyrics: boolean;
   showEq: boolean;
   theaterMode?: boolean;
   compact?: boolean;
@@ -61,7 +64,6 @@ export default function NowPlayingBar({
   onTogglePlay,
   onSetVolume,
   onToggleMute,
-  onToggleLyrics,
   onToggleEq,
   onToggleTheater,
   onToggleFav,
@@ -69,7 +71,6 @@ export default function NowPlayingBar({
   isFavorite,
   songLiked,
   eqPresetActive,
-  showLyrics,
   showEq,
   theaterMode,
   compact,
@@ -86,112 +87,68 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="flex-row-2 px-3 h-12 glass-blur border-t border-border-default flex-shrink-0">
-        {/* Play/Pause */}
+      <div className="flex items-center gap-3 px-3 h-14 glass-blur border-t border-border-default flex-shrink-0 safe-bottom">
+        {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}
           disabled={!station}
-          className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 flex-shrink-0"
+          className="w-11 h-11 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 flex-shrink-0 active:scale-95"
         >
           {isLoading ? (
-            <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
-            <Pause size={14} />
+            <Pause size={18} />
           ) : (
-            <Play size={14} className="ml-0.5" />
+            <Play size={18} className="ml-0.5" />
           )}
         </button>
 
-        {/* Ferrofluid + LIVE */}
-        <div className="flex-1 min-w-0 relative flex items-center">
-          {station && isPlaying && (
+        {/* Track info + LIVE indicator */}
+        <div className="flex-1 min-w-0">
+          {station ? (
             <>
-              <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-30">
-                <FerrofluidRenderer
-                  frequencyData={frequencyData ?? null}
-                  className="size-full"
-                  blobCount={4}
-                  colorPrimary="#1a1a2e"
-                  colorSecondary="#16213e"
-                  colorAccent="#0f3460"
-                  sensitivity={1.0}
-                  demo={!frequencyData}
-                />
-              </div>
-              <div className="flex-row-1 relative z-10">
-                <span className="dot-1.5 bg-red-500 animate-pulse" />
-                <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500">
-                  LIVE
+              <p className="text-[13px] font-medium text-white truncate leading-tight">
+                {track?.title || station.name}
+              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                {isPlaying && (
+                  <>
+                    <span className="dot-1.5 bg-red-500 animate-pulse flex-shrink-0" />
+                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 flex-shrink-0">
+                      LIVE
+                    </span>
+                  </>
+                )}
+                <span className="text-[11px] text-secondary truncate">
+                  {track?.artist || station.tags?.split(",").slice(0, 2).join(" · ") || ""}
                 </span>
               </div>
             </>
+          ) : (
+            <p className="text-[13px] text-dim">No station selected</p>
           )}
         </div>
 
-        {/* Toggles */}
-        <div className="flex-row-0.5 flex-shrink-0">
-          {station && !theaterMode && (
-            <button
-              onClick={onToggleTheater}
-              className="p-1 rounded-md text-subtle hover:text-white/50"
-              title="Theater"
-            >
-              <Maximize2 size={13} />
-            </button>
-          )}
-          {onToggleFav && (
-            <button
-              onClick={onToggleFav}
-              className={`p-1 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
-              title="Favorita"
-            >
-              <Star size={13} className={isFavorite ? "fill-sys-orange" : ""} />
-            </button>
-          )}
+        {/* Action buttons — 44px touch targets */}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
           {onFavSong && (
             <button
               onClick={onFavSong}
-              className={`p-1 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
-              title="Me gusta canción"
+              className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 ${songLiked ? "text-pink-400" : "text-white/30 hover:text-white/50"}`}
+              title="Favorite song"
             >
-              <Heart size={13} className={songLiked ? "fill-pink-400" : ""} />
+              <Heart size={18} className={songLiked ? "fill-pink-400" : ""} />
             </button>
           )}
-          <button
-            onClick={onToggleLyrics}
-            className={`p-1 rounded-md transition-colors ${showLyrics ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
-          >
-            <Mic2 size={13} />
-          </button>
-          <button
-            onClick={onToggleEq}
-            className={`p-1 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
-          >
-            <SlidersHorizontal size={13} />
-          </button>
-        </div>
-
-        {/* Volume */}
-        <div className="flex-row-1 w-24 min-w-0 flex-shrink-0 overflow-hidden">
-          <button
-            onClick={onToggleMute}
-            className="p-1 text-muted hover:text-white/60 transition-colors flex-shrink-0"
-          >
-            {muted || volume === 0 ? (
-              <VolumeX size={13} />
-            ) : (
-              <Volume2 size={13} />
-            )}
-          </button>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={muted ? 0 : volume}
-            onChange={(e) => onSetVolume(parseFloat(e.target.value))}
-            className="flex-fill h-[3px] appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
-          />
+          {station && !theaterMode && (
+            <button
+              onClick={onToggleTheater}
+              className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
+              title="Theater"
+            >
+              <Maximize2 size={18} />
+            </button>
+          )}
         </div>
       </div>
     );
@@ -321,12 +278,6 @@ export default function NowPlayingBar({
             <Heart size={14} className={songLiked ? "fill-pink-400" : ""} />
           </button>
         )}
-        <button
-          onClick={onToggleLyrics}
-          className={`p-1.5 rounded-md transition-colors ${showLyrics ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
-        >
-          <Mic2 size={14} />
-        </button>
         <button
           onClick={onToggleEq}
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}

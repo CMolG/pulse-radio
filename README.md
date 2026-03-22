@@ -1,3 +1,9 @@
+<!--
+  Copyright (c) 2026 Carlos Molina Galindo.
+  Open source project: Pulse Radio.
+  Created by Carlos Molina Galindo (CMolG on GitHub).
+-->
+
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19" />

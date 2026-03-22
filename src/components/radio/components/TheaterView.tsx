@@ -1,10 +1,17 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Radio, Star, Heart, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
-import type { Station, NowPlayingTrack } from "../types";
+import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
+import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
 
 function stationInitials(name: string) {
@@ -30,6 +37,10 @@ type Props = {
   isFavorite?: boolean;
   onFavSong?: () => void;
   isSongLiked?: boolean;
+  lyrics?: LyricsData | null;
+  lyricsLoading?: boolean;
+  currentTime?: number;
+  lyricsVariant?: "mobile" | "desktop";
   compact?: boolean;
 };
 
@@ -94,6 +105,10 @@ export default function TheaterView({
   isFavorite,
   onFavSong,
   isSongLiked,
+  lyrics,
+  lyricsLoading,
+  currentTime,
+  lyricsVariant = "mobile",
   compact,
 }: Props) {
   const [imgError, setImgError] = useState(false);
@@ -300,7 +315,7 @@ export default function TheaterView({
             </div>
           )}
 
-          {/* Listen on iTunes */}
+          {/* Listen on Apple Music */}
           {!compact && track && (
             <a
               href={track.itunesUrl || `https://music.apple.com/search?term=${encodeURIComponent(`${track.artist} ${track.title}`.trim())}&pt=pulse-radio&ct=www.pulse-radio.online`}
@@ -309,11 +324,29 @@ export default function TheaterView({
               className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
             >
               <ExternalLink size={11} />
-              Listen on iTunes
+              Listen on Apple Music
             </a>
           )}
         </div>
       </div>
+
+      {/* ── Lyrics reel in theater mode ── */}
+      {!compact && (
+        <div
+          className={`relative z-10 ${
+            lyricsVariant === "desktop" ? "px-6 pb-4" : "px-3 pb-3"
+          }`}
+        >
+          <LyricsReel
+            lyrics={lyrics ?? null}
+            loading={Boolean(lyricsLoading)}
+            currentTime={currentTime}
+            artworkUrl={artworkUrl ?? null}
+            fallbackUrl={station.favicon}
+            variant={lyricsVariant}
+          />
+        </div>
+      )}
     </motion.div>
   );
 }

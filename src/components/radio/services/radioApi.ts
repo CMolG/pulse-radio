@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 import type { Station } from '../types';
 
 const BASE = 'https://de1.api.radio-browser.info/json';

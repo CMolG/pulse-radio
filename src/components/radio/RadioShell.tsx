@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 "use client";
 
 import React, {
@@ -18,6 +24,7 @@ import {
   Search,
   Clock,
   Heart,
+  Star,
 } from "lucide-react";
 import type {
   Station,
@@ -42,7 +49,7 @@ import Sidebar from "./components/Sidebar";
 import BrowseView from "./components/BrowseView";
 import NowPlayingHero from "./components/NowPlayingHero";
 import NowPlayingBar from "./components/NowPlayingBar";
-import LyricsPanel from "./components/LyricsPanel";
+import MobileLyricsReel from "./components/MobileLyricsReel";
 import EqPanel from "./components/EqPanel";
 import ParallaxBackground from "./components/ParallaxBackground";
 import TheaterView from "./components/TheaterView";
@@ -83,7 +90,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const radio = useRadio();
   const eq = useEqualizer();
   const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
-  const { lyrics, loading: lyricsLoading } = useLyrics(track);
+  const { lyrics, loading: lyricsLoading } = useLyrics(track, radio.station?.name);
   const favs = useFavorites();
   const favSongs = useFavoriteSongs();
   const recent = useRecent();
@@ -109,7 +116,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     enrichedTrack,
   );
 
-  const [showLyrics, setShowLyrics] = useState(false);
   const [showEq, setShowEq] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
@@ -127,10 +133,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     label: "Top Stations",
   });
 
-  // Close drawer/lyrics on layout change
+  // Close drawer / reset compact state on layout change
   useEffect(() => {
     if (layout === "pip") {
-      setShowLyrics(false);
       setMobileDrawer(false);
       setMiniMode(false);
     }
@@ -313,10 +318,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         case "M":
           radio.toggleMute();
           break;
-        case "l":
-        case "L":
-          setShowLyrics((s) => !s);
-          break;
         case "n":
         case "N":
           handleSkipNext();
@@ -339,7 +340,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           if (radio.station) favs.toggle(radio.station);
           break;
         case "Escape":
-          setShowLyrics(false);
           setShowEq(false);
           setMobileDrawer(false);
           break;
@@ -558,6 +558,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             onBack={() => {}}
             onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
             isSongLiked={isSongLiked}
+            lyrics={lyrics}
+            lyricsLoading={lyricsLoading}
+            currentTime={radio.currentTime}
             compact
           />
         </div>
@@ -572,9 +575,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           onTogglePlay={radio.togglePlay}
           onSetVolume={radio.setVolume}
           onToggleMute={radio.toggleMute}
-          onToggleLyrics={() => {}}
           onToggleEq={() => {}}
-          showLyrics={false}
           showEq={false}
           theaterMode={true}
           compact
@@ -596,54 +597,42 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
         />
 
-        {/* Mobile header with search bar */}
+        {/* Mobile header */}
         {!theaterMode && (
           <div className="relative z-20 flex-shrink-0">
             {/* Top row: menu + title + actions */}
-            <div className="flex-row-2 px-3 pt-2 pb-1">
+            <div className="flex items-center gap-3 px-4 pt-3 pb-2">
               <button
                 onClick={() => setMobileDrawer((d) => !d)}
-                className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-secondary"
+                className="w-10 h-10 flex-center-row rounded-xl bg-surface-2 hover:bg-surface-5 text-secondary active:scale-95 transition-transform flex-shrink-0"
               >
-                {mobileDrawer ? <X size={16} /> : <Menu size={16} />}
+                {mobileDrawer ? <X size={20} /> : <Menu size={20} />}
               </button>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-white truncate">
-                  {enrichedTrack?.title || radio.station?.name || "Radio"}
-                </p>
-                <p className="text-[10px] text-secondary truncate">
-                  {enrichedTrack?.artist || ""}
-                </p>
+              <div className="flex-1 min-w-0" onClick={handleGoHome}>
+                <div className="flex items-center gap-1.5">
+                  <RadioIcon size={16} className="text-sys-orange flex-shrink-0" />
+                  <span className="text-[15px] font-semibold text-white">Pulse</span>
+                </div>
               </div>
-              {!miniMode && (
+              {radio.station && (
                 <button
-                  onClick={() => setMiniMode((m) => !m)}
-                  className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-secondary"
-                  title="Minimize"
+                  onClick={radio.station ? handleToggleFav : undefined}
+                  className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
                 >
-                  <Minimize2 size={14} />
-                </button>
-              )}
-              {miniMode && (
-                <button
-                  onClick={() => setMiniMode(false)}
-                  className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-secondary"
-                  title="Expand"
-                >
-                  <Maximize2 size={14} />
+                  <Star size={20} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
                 </button>
               )}
             </div>
             {/* Search bar */}
-            <form onSubmit={handleMobileSearchSubmit} className="px-3 pb-2">
-              <div className="flex-row-1.5 px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.06]">
-                <Search size={14} className="text-white/30 flex-shrink-0" />
+            <form onSubmit={handleMobileSearchSubmit} className="px-4 pb-2">
+              <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/[0.06] border border-white/[0.06]">
+                <Search size={16} className="text-white/30 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search stations..."
                   value={mobileSearchQuery}
                   onChange={(e) => setMobileSearchQuery(e.target.value)}
-                  className="bg-transparent text-[13px] text-white placeholder:text-white/25 outline-none w-full"
+                  className="bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none w-full"
                   data-radio-search
                 />
               </div>
@@ -669,7 +658,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="absolute left-0 top-0 bottom-0 z-40 w-[260px] bg-[#0a0f1a] border-r border-border-default shadow-2xl overflow-y-auto"
+                className="absolute left-0 top-0 bottom-0 z-40 w-[280px] max-w-[75vw] bg-[#0a0f1a] border-r border-border-default shadow-2xl overflow-y-auto"
               >
                 {sidebarEl}
               </motion.div>
@@ -693,9 +682,13 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
                 onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
                 isSongLiked={isSongLiked}
+                lyrics={lyrics}
+                lyricsLoading={lyricsLoading}
+                currentTime={radio.currentTime}
+                lyricsVariant="mobile"
               />
             </div>
-          ) : !miniMode ? (
+          ) : (
             <div className="flex flex-col min-h-full">
               {radio.station && (
                 <NowPlayingHero
@@ -708,17 +701,26 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   onTheater={() => setTheaterMode(true)}
                 />
               )}
+              {radio.station && (
+                <MobileLyricsReel
+                  lyrics={lyrics}
+                  loading={lyricsLoading}
+                  currentTime={radio.currentTime}
+                  artworkUrl={albumArt.artworkUrl}
+                  fallbackUrl={radio.station.favicon}
+                />
+              )}
               {/* ── Mobile top nav tabs ── */}
-              <div className="flex-shrink-0 px-3 pt-1 pb-1 flex gap-1">
+              <div className="flex-shrink-0 px-4 pt-2 pb-2 flex gap-2">
                 {([
-                  { id: "discover" as const, label: "Discover", icon: <RadioIcon size={12} /> },
-                  { id: "history" as const, label: "History", icon: <Clock size={12} /> },
-                  { id: "favorites" as const, label: "Favorites", icon: <Heart size={12} /> },
+                  { id: "discover" as const, label: "Discover", icon: <RadioIcon size={14} /> },
+                  { id: "history" as const, label: "History", icon: <Clock size={14} /> },
+                  { id: "favorites" as const, label: "Favorites", icon: <Heart size={14} /> },
                 ]).map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium transition-all active:scale-95 ${activeTab === tab.id ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}
                   >
                     {tab.icon}
                     {tab.label}
@@ -756,47 +758,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 )}
               </div>
             </div>
-          ) : radio.station ? (
-            <div className="flex-row-3 px-4 py-3 flex-1">
-              {albumArt.artworkUrl && (
-                <img
-                  src={albumArt.artworkUrl}
-                  alt=""
-                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-medium text-white truncate">
-                  {enrichedTrack?.title || radio.station.name}
-                </p>
-                <p className="text-[11px] text-muted truncate">
-                  {enrichedTrack?.artist || "Internet Radio"}
-                </p>
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        {/* Lyrics overlay (full width on mobile) */}
-        <AnimatePresence>
-          {showLyrics && (
-            <motion.div
-              key="lyrics-overlay"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute inset-0 z-30 bg-[#0a0f1a]"
-            >
-              <LyricsPanel
-                lyrics={lyrics}
-                loading={lyricsLoading}
-                currentTime={radio.currentTime}
-                onClose={() => setShowLyrics(false)}
-              />
-            </motion.div>
           )}
-        </AnimatePresence>
+        </div>
 
         {/* EQ panel overlay */}
         {showEq && (
@@ -827,7 +790,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             onTogglePlay={radio.togglePlay}
             onSetVolume={radio.setVolume}
             onToggleMute={radio.toggleMute}
-            onToggleLyrics={() => setShowLyrics((s) => !s)}
             onToggleEq={() => setShowEq((s) => !s)}
             onToggleTheater={() => setTheaterMode(true)}
             onToggleFav={radio.station ? handleToggleFav : undefined}
@@ -835,7 +797,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
             songLiked={isSongLiked}
             eqPresetActive={eqPreset !== null}
-            showLyrics={showLyrics}
             showEq={showEq}
             theaterMode={theaterMode}
             compact
@@ -886,6 +847,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
                   onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
                   isSongLiked={isSongLiked}
+                  lyrics={lyrics}
+                  lyricsLoading={lyricsLoading}
+                  currentTime={radio.currentTime}
+                  lyricsVariant="desktop"
                 />
               </motion.div>
             ) : !miniMode ? (
@@ -899,6 +864,16 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     artworkUrl={albumArt.artworkUrl}
                     icyBitrate={icyBitrate}
                     onTheater={() => setTheaterMode(true)}
+                  />
+                )}
+                {radio.station && (
+                  <MobileLyricsReel
+                    lyrics={lyrics}
+                    loading={lyricsLoading}
+                    currentTime={radio.currentTime}
+                    artworkUrl={albumArt.artworkUrl}
+                    fallbackUrl={radio.station.favicon}
+                    variant="desktop"
                   />
                 )}
                 {/* ── Top nav tabs ── */}
@@ -1005,17 +980,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           </AnimatePresence>
         </div>
 
-        {/* Lyrics panel */}
-        {showLyrics && !miniMode && (
-          <div style={{ width: 300, flexShrink: 0 }}>
-            <LyricsPanel
-              lyrics={lyrics}
-              loading={lyricsLoading}
-              currentTime={radio.currentTime}
-              onClose={() => setShowLyrics(false)}
-            />
-          </div>
-        )}
       </div>
 
       {/* EQ panel overlay */}
@@ -1054,7 +1018,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           onTogglePlay={radio.togglePlay}
           onSetVolume={radio.setVolume}
           onToggleMute={radio.toggleMute}
-          onToggleLyrics={() => setShowLyrics((s) => !s)}
           onToggleEq={() => setShowEq((s) => !s)}
           onToggleTheater={() => setTheaterMode(true)}
           onToggleFav={radio.station ? handleToggleFav : undefined}
@@ -1062,7 +1025,6 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
           songLiked={isSongLiked}
           eqPresetActive={eqPreset !== null}
-          showLyrics={showLyrics}
           showEq={showEq}
           theaterMode={theaterMode}
         />

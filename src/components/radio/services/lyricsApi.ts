@@ -1,9 +1,40 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 import type { LyricsData, LrcLibResponse } from '../types';
 import { parseLrc } from '../lrcParser';
 
 const LRCLIB_BASE = 'https://lrclib.net/api';
 
 export async function fetchLyrics(
+  artist: string,
+  title: string,
+  album?: string,
+  duration?: number,
+  fallbackArtist?: string,
+): Promise<LyricsData | null> {
+  const artistCandidates = Array.from(
+    new Set(
+      [artist, fallbackArtist]
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value && value.length > 0)),
+    ),
+  );
+
+  if (!artistCandidates.length || !title?.trim()) return null;
+
+  for (const artistCandidate of artistCandidates) {
+    const match = await fetchLyricsForArtist(artistCandidate, title, album, duration);
+    if (match) return match;
+  }
+
+  return null;
+}
+
+async function fetchLyricsForArtist(
   artist: string,
   title: string,
   album?: string,

@@ -1,8 +1,13 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, Star, ChevronRight, ChevronDown, Radio } from 'lucide-react';
-import { useMediaQuery } from 'usehooks-ts';
 import type { Station, BrowseCategory } from '../types';
 import { GENRE_CATEGORIES } from '../constants';
 import { saveToStorage, loadFromStorage } from '@/lib/storageUtils';
@@ -31,7 +36,6 @@ export default function Sidebar({
   favorites, recent, onSearch, onSelectGenre,
   onPlayStation, onShowFavorites, onRemoveRecent, currentUuid, onRemoveFavorite, onGoHome,
 }: Props) {
-  const isMobile = useMediaQuery('(max-width: 768px)', { initializeWithValue: false });
   const [query, setQuery] = useState('');
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
     try {
@@ -73,8 +77,6 @@ export default function Sidebar({
     };
   }, [ctxMenu]);
 
-  if (isMobile) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
@@ -86,26 +88,26 @@ export default function Sidebar({
 
   return (<div className="flex flex-col h-full w-full bg-surface-1 bdr-r select-none relative" style={{ flexShrink: 0 }}>
       {/* Header */}
-      <button onClick={onGoHome} className="flex-row-2 px-3 pt-3 pb-2 cursor-pointer hover:opacity-80 transition-opacity">
-        <Radio size={18} className="text-sys-orange" />
-        <span className="text-[13px] font-semibold text-white tracking-tight">Pulse</span>
+      <button onClick={onGoHome} className="flex-row-2 px-4 pt-4 pb-3 cursor-pointer hover:opacity-80 transition-opacity">
+        <Radio size={20} className="text-sys-orange" />
+        <span className="text-[15px] font-semibold text-white tracking-tight">Pulse</span>
       </button>
 
       {/* Search */}
-      <form onSubmit={handleSubmit} className="px-2 pb-2">
-        <div className="flex-row-1.5 px-2 py-1.5 rounded-lg panel-2">
-          <Search size={13} className="text-dim flex-shrink-0" />
- <input type="text" placeholder="Search stations…" value={query} onChange={e => setQuery(e.target.value)}
-            className="bg-transparent text-[12px] text-white placeholder:text-white/25 outline-none w-full"/>
+      <form onSubmit={handleSubmit} className="px-3 pb-3">
+        <div className="flex-row-2 px-3 py-2.5 rounded-xl panel-2">
+          <Search size={15} className="text-dim flex-shrink-0" />
+          <input type="text" placeholder="Search stations…" value={query} onChange={e => setQuery(e.target.value)}
+            className="bg-transparent text-[14px] text-white placeholder:text-white/25 outline-none w-full"/>
         </div></form>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-2 space-y-3 pb-2">
+      <div className="flex-1 overflow-y-auto px-2 space-y-4 pb-4">
         {/* Favorites */}
         {favorites.length > 0 && (
-          <Section label="FAVORITES" collapsed={!!collapsed['favorites']} onToggle={() => toggleCollapse('favorites')} action={<button onClick={onShowFavorites} className="text-[9px] text-subtle hover:text-white/50">All</button>}>
+          <Section label="FAVORITES" collapsed={!!collapsed['favorites']} onToggle={() => toggleCollapse('favorites')} action={<button onClick={onShowFavorites} className="text-[10px] text-subtle hover:text-white/50 px-2 py-1">All</button>}>
             {favorites.slice(0, 5).map(s => (
- <SidebarStation key={s.stationuuid} station={s} isCurrent={s.stationuuid === currentUuid} onClick={() => onPlayStation(s)}
+  <SidebarStation key={s.stationuuid} station={s} isCurrent={s.stationuuid === currentUuid} onClick={() => onPlayStation(s)}
                 onContextMenu={e => handleContextMenu(e, 'favorite', s.stationuuid)}/>
             ))}
           </Section>
@@ -113,9 +115,9 @@ export default function Sidebar({
 
         {/* Recent */}
         {recent.length > 0 && (
- <Section label="RECENT" collapsed={!!collapsed['recent']} onToggle={() => toggleCollapse('recent')}>
+  <Section label="RECENT" collapsed={!!collapsed['recent']} onToggle={() => toggleCollapse('recent')}>
             {recent.slice(0, 5).map(s => (
- <SidebarStation key={s.stationuuid} station={s} isCurrent={s.stationuuid === currentUuid} onClick={() => onPlayStation(s)}
+  <SidebarStation key={s.stationuuid} station={s} isCurrent={s.stationuuid === currentUuid} onClick={() => onPlayStation(s)}
                 onContextMenu={e => handleContextMenu(e, 'recent', s.stationuuid)}/>
             ))}
           </Section>
@@ -124,11 +126,11 @@ export default function Sidebar({
         {/* Browse Genres */}
         <Section label="BROWSE" collapsed={!!collapsed['browse']} onToggle={() => toggleCollapse('browse')}>
           {GENRE_CATEGORIES.map(cat => (
- <button key={cat.id} onClick={() => onSelectGenre(cat)}
-              className="w-full flex-row-2 px-2 py-1.5 rounded-lg text-left hover-1 group">
-              <div className={`icon-lg rounded bg-gradient-to-br ${cat.gradient} flex-shrink-0`} />
-              <span className="text-[12px] text-secondary group-hover:text-white/80 truncate flex-1">{cat.label}</span>
-              <ChevronRight size={11} className="text-muted group-hover:text-white/50" />
+  <button key={cat.id} onClick={() => onSelectGenre(cat)}
+              className="w-full flex-row-2 px-2.5 py-2.5 rounded-xl text-left hover-1 group active:scale-[0.98] transition-transform">
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${cat.gradient} flex-shrink-0`} />
+              <span className="text-[13px] text-secondary group-hover:text-white/80 truncate flex-1">{cat.label}</span>
+              <ChevronRight size={14} className="text-muted group-hover:text-white/50" />
             </button>
           ))}
         </Section></div>
@@ -154,9 +156,9 @@ export default function Sidebar({
 
 function Section({ label, action, children, collapsed, onToggle }: { label: string; action?: React.ReactNode; children: React.ReactNode; collapsed: boolean; onToggle: () => void }) {
   return (<div>
-      <div className="flex-between px-2 mb-1">
-        <button onClick={onToggle} className="flex-row-1 text-[9px] tracking-widest uppercase text-dim font-semibold hover:text-white/60 transition-colors">
-          {collapsed ? <ChevronRight size={10} /> : <ChevronDown size={10} />}
+      <div className="flex-between px-2.5 mb-1.5">
+        <button onClick={onToggle} className="flex-row-1.5 text-[10px] tracking-widest uppercase text-dim font-semibold hover:text-white/60 transition-colors py-1">
+          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           {label}
         </button>
         {!collapsed && action}
@@ -169,9 +171,9 @@ function SidebarStation({ station, isCurrent, onClick, onContextMenu }: { statio
   return (<button
       onClick={onClick}
       onContextMenu={onContextMenu}
-      className={`w-full flex-row-2 px-2 py-1.5 rounded-lg text-left transition-colors group/station ${isCurrent ? 'bg-surface-3 text-white' : 'text-secondary hover:bg-surface-1 hover:text-white/80'}`}
+      className={`w-full flex-row-2 px-2.5 py-2.5 rounded-xl text-left transition-colors group/station active:scale-[0.98] ${isCurrent ? 'bg-surface-3 text-white' : 'text-secondary hover:bg-surface-1 hover:text-white/80'}`}
     >
-      {isCurrent ? <span className="dot-1.5 bg-sys-orange flex-shrink-0" /> : <Star size={10} className="text-muted flex-shrink-0" />}
-      <span className="text-[11px] truncate flex-1">{station.name}</span>
+      {isCurrent ? <span className="dot-2 bg-sys-orange flex-shrink-0" /> : <Star size={12} className="text-muted flex-shrink-0" />}
+      <span className="text-[13px] truncate flex-1">{station.name}</span>
     </button>);
 }

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -27,7 +33,10 @@ export type UseLyricsReturn = {
   loading: boolean;
 };
 
-export function useLyrics(track: NowPlayingTrack | null): UseLyricsReturn {
+export function useLyrics(
+  track: NowPlayingTrack | null,
+  stationName?: string | null,
+): UseLyricsReturn {
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
   const [loading, setLoading] = useState(false);
   const lastKeyRef = useRef('');
@@ -37,13 +46,15 @@ export function useLyrics(track: NowPlayingTrack | null): UseLyricsReturn {
     // Cancel any in-flight request
     if (abortRef.current) abortRef.current.abort();
 
-    if (!track || !track.artist || !track.title) {
+    if (!track || !track.title) {
+      setLoading(false);
       setLyrics(null);
       lastKeyRef.current = '';
       return;
     }
 
-    const key = `${track.artist}:${track.title}`.toLowerCase();
+    const artistSeed = (track.artist || stationName || 'unknown').trim();
+    const key = `${artistSeed}:${track.title}`.toLowerCase();
     if (key === lastKeyRef.current) return;
     lastKeyRef.current = key;
 
@@ -51,6 +62,7 @@ export function useLyrics(track: NowPlayingTrack | null): UseLyricsReturn {
     const cached = loadCache();
     const hit = cached.find(e => e.key === key);
     if (hit) {
+      setLoading(false);
       setLyrics(hit.data);
       return;
     }
@@ -59,7 +71,13 @@ export function useLyrics(track: NowPlayingTrack | null): UseLyricsReturn {
     abortRef.current = controller;
 
     setLoading(true);
-    fetchLyricsApi(track.artist, track.title)
+    fetchLyricsApi(
+      track.artist || stationName || '',
+      track.title,
+      track.album,
+      undefined,
+      stationName ?? undefined,
+    )
       .then(result => {
         if (controller.signal.aborted) return;
         if (result) {
@@ -78,7 +96,7 @@ export function useLyrics(track: NowPlayingTrack | null): UseLyricsReturn {
       });
 
     return () => controller.abort();
-  }, [track?.artist, track?.title]);
+  }, [track?.artist, track?.title, track?.album, stationName]);
 
   return { lyrics, loading };
 }

@@ -1,8 +1,15 @@
-'use client';
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
 
-import React, { useMemo } from 'react';
-import { X, Mic2, Loader2 } from 'lucide-react';
-import type { LyricsData } from '../types';
+"use client";
+
+import React, { useMemo } from "react";
+import { X, Mic2, Loader2 } from "lucide-react";
+import type { LyricsData } from "../types";
+import { getActiveLyricIndex } from "../lyricsUtils";
 
 type Props = {
   lyrics: LyricsData | null;
@@ -12,15 +19,10 @@ type Props = {
 };
 
 export default function LyricsPanel({ lyrics, loading, currentTime, onClose }: Props) {
-  const activeIdx = useMemo(() => {
-    if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1;
-    let idx = -1;
-    for (let i = 0; i < lyrics.lines.length; i++) {
-      if (lyrics.lines[i].time <= currentTime) idx = i;
-      else break;
-    }
-    return idx;
-  }, [lyrics, currentTime]);
+  const activeIdx = useMemo(
+    () => getActiveLyricIndex(lyrics, currentTime),
+    [lyrics, currentTime],
+  );
 
   return (
     <div className="flex flex-col h-full w-full bg-surface-1 bdr-l">
@@ -72,16 +74,16 @@ export default function LyricsPanel({ lyrics, loading, currentTime, onClose }: P
                     key={i}
                     className={`text-[13px] leading-relaxed transition-all duration-200 ${
                       isActive
-                        ? 'text-white font-semibold border-l-2 border-sys-orange pl-2'
+                        ? "text-white font-semibold border-l-2 border-sys-orange pl-2"
                         : i < activeIdx
-                          ? 'text-white/30 pl-2.5'
-                          : 'text-secondary pl-2.5'
-                    }`}
-                  >
-                    {line.text || '♪'}
-                  </p>
-                );
-              })
+                          ? "text-white/30 pl-2.5"
+                          : "text-secondary pl-2.5"
+                     }`}
+                   >
+                     {line.text || "♪"}
+                   </p>
+                 );
+               })
             ) : lyrics.plainText ? (
               <p className="text-[13px] text-secondary leading-relaxed whitespace-pre-wrap">
                 {lyrics.plainText}

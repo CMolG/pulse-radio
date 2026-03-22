@@ -41,3 +41,5 @@ yarn-error.log*
 next-env.d.ts
 /program.md
 /.idea/
+/.superpowers/
+/verify-lyrics-ui.mjs

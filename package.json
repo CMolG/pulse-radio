@@ -12,14 +12,14 @@
   },
   "dependencies": {
     "@next/third-parties": "^16.2.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "motion": "^12.4.7",
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "motion": "^12.4.7",
-    "lucide-react": "^0.475.0",
-    "zustand": "^5.0.3",
     "usehooks-ts": "^3.1.0",
-    "clsx": "^2.1.1"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.1",
@@ -30,6 +30,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

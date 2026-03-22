@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
 "use client";
 
 import React from "react";
@@ -94,7 +100,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
                 <p className="text-[11px] text-dim line-clamp-1">{entry.album}</p>
               )}
             </div>
-            {/* iTunes + Footer */}
+            {/* Apple Music + Footer */}
             <div className="px-3 pb-2.5 space-y-1.5">
               <a
                 href={entry.itunesUrl || itunesSearchUrl(entry.title, entry.artist)}
@@ -103,7 +109,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
                 className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
               >
                 <ExternalLink size={10} />
-                Listen on iTunes
+                Listen on Apple Music
               </a>
               <div className="flex items-center gap-1.5">
                 <Radio size={9} className="text-dim flex-shrink-0" />
