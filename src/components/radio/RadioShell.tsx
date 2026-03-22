@@ -53,6 +53,7 @@ import TheaterView from "./components/TheaterView";
 import HistoryGridView from "./components/HistoryGridView";
 import FavoriteSongsView from "./components/FavoriteSongsView";
 import SongDetailModal from "./components/SongDetailModal";
+import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import { saveToStorage } from "@/lib/storageUtils";
 
 type LayoutMode = "desktop" | "mobile" | "pip";
@@ -119,6 +120,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const [showEq, setShowEq] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [toast, setToast] = useState<{ msg: string; icon: "star" | "heart"; key: number } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback((msg: string, icon: "star" | "heart") => {
@@ -375,6 +377,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           break;
         case "Escape":
           setShowEq(false);
+          setShowShortcuts(false);
           if (theaterMode) setTheaterMode(false);
           break;
         case "t":
@@ -404,6 +407,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         case "z":
         case "Z":           // Z: cycle sleep timer
           sleepTimer.cycle();
+          break;
+        case "?":
+          setShowShortcuts(prev => !prev);
           break;
       }
     };
@@ -519,6 +525,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     />
   );
 
+  const shortcutsOverlay = showShortcuts ? (
+    <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />
+  ) : null;
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -579,6 +589,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           compact
         />
         {songDetailModal}
+        {shortcutsOverlay}
       </div>
     );
   }
@@ -794,6 +805,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           />
         </div>
         {songDetailModal}
+        {shortcutsOverlay}
       </div>
     );
   }
@@ -1066,6 +1078,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         />
       </div>
       {songDetailModal}
+      {shortcutsOverlay}
     </div>
   );
 }
