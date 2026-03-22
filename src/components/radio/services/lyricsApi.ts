@@ -9,6 +9,8 @@ import { parseLrc } from '../lrcParser';
 
 const LRCLIB_BASE = 'https://lrclib.net/api';
 
+const FETCH_TIMEOUT_MS = 8_000;
+
 export async function fetchLyrics(
   artist: string,
   title: string,
@@ -49,7 +51,9 @@ async function fetchLyricsForArtist(
 
   // Exact match
   try {
-    const res = await fetch(`${LRCLIB_BASE}/get?${params}`);
+    const res = await fetch(`${LRCLIB_BASE}/get?${params}`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (res.ok) {
       const data: LrcLibResponse = await res.json();
       const lyrics = transform(data, artist, title);
@@ -60,7 +64,8 @@ async function fetchLyricsForArtist(
   // Search fallback
   try {
     const res = await fetch(
-      `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`
+      `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+      { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) },
     );
     if (res.ok) {
       const results: LrcLibResponse[] = await res.json();
