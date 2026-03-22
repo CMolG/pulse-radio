@@ -11,6 +11,12 @@ const LRCLIB_BASE = 'https://lrclib.net/api';
 
 const FETCH_TIMEOUT_MS = 8_000;
 
+function isTransientError(err: unknown): boolean {
+  if (err instanceof DOMException && err.name === 'TimeoutError') return true;
+  if (err instanceof TypeError) return true; // fetch network failure
+  return false;
+}
+
 export async function fetchLyrics(
   artist: string,
   title: string,
@@ -29,8 +35,13 @@ export async function fetchLyrics(
   if (!artistCandidates.length || !title?.trim()) return null;
 
   for (const artistCandidate of artistCandidates) {
-    const match = await fetchLyricsForArtist(artistCandidate, title, album, duration);
-    if (match) return match;
+    try {
+      const match = await fetchLyricsForArtist(artistCandidate, title, album, duration);
+      if (match) return match;
+    } catch (err) {
+      // Re-throw transient errors so useLyrics can retry
+      if (isTransientError(err)) throw err;
+    }
   }
 
   return null;
@@ -59,7 +70,9 @@ async function fetchLyricsForArtist(
       const lyrics = transform(data, artist, title);
       if (lyrics) return lyrics;
     }
-  } catch { /* fall through */ }
+  } catch (err) {
+    if (isTransientError(err)) throw err;
+  }
 
   // Search fallback
   try {
@@ -74,7 +87,9 @@ async function fetchLyricsForArtist(
         if (lyrics) return lyrics;
       }
     }
-  } catch { /* no lyrics */ }
+  } catch (err) {
+    if (isTransientError(err)) throw err;
+  }
 
   return null;
 }
