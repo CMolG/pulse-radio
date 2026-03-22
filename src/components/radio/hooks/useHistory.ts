@@ -22,9 +22,16 @@ export function useHistory(
   stationUuid: string | undefined,
   track: NowPlayingTrack | null,
 ): UseHistoryReturn {
-  const [history, setHistory] = useState<HistoryEntry[]>(() =>
-    loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, [])
-  );
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
+    // Dedup by id on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(e => {
+      if (!e.id || seen.has(e.id)) return false;
+      seen.add(e.id);
+      return true;
+    });
+  });
 
   const lastTrackRef = useRef<string>('');
   const lastStationRef = useRef<string | undefined>(stationUuid);
