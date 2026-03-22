@@ -298,6 +298,8 @@ export default function BrowseView({
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
           title="Auto-play a random station every 30 seconds"
+          aria-pressed={discoveryMode}
+          aria-label="Discovery mode"
         >
           <Sparkles size={12} />
           Discovery{discoveryMode ? " ON" : ""}
@@ -317,6 +319,7 @@ export default function BrowseView({
             <button
               key={cat.id}
               onClick={() => onSelectGenre?.(cat)}
+              aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
             >
               {cat.label}
@@ -338,6 +341,7 @@ export default function BrowseView({
             <button
               key={c.code}
               onClick={() => onSelectCountry?.(c.name)}
+              aria-current={countryChipActive(c.name) || undefined}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors flex items-center gap-1 ${countryChipActive(c.name) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
             >
               <span>{countryFlag(c.code)}</span>
