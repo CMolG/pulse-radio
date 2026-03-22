@@ -36,6 +36,8 @@ export function SpiralRenderer({
   const rotationRef = useRef(0);
   const dataArrayRef = useRef(new Float64Array(NUM_BARS));
   const targetArrayRef = useRef(new Float64Array(NUM_BARS));
+  const smoothedRef = useRef(new Float64Array(NUM_BARS));
+  const tempRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 });
 
   useEffect(() => {
@@ -96,10 +98,11 @@ export function SpiralRenderer({
     }
 
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
-    const smoothed = new Float64Array(NUM_BARS);
+    const smoothed = smoothedRef.current;
+    const temp = tempRef.current;
     smoothed.set(data);
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
-      const temp = new Float64Array(smoothed);
+      temp.set(smoothed);
       for (let i = 0; i < NUM_BARS; i++) {
         const prev = temp[i > 0 ? i - 1 : 0];
         const next = temp[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
