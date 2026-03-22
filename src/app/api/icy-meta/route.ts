@@ -55,7 +55,9 @@ export async function GET(req: NextRequest) {
     }
 
     const metaint = parseInt(icyMetaint, 10);
-    if (isNaN(metaint) || metaint <= 0) {
+    // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
+    const MAX_METAINT = 131072;
+    if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       res.body.cancel().catch(() => {});
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
