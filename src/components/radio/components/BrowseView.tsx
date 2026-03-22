@@ -157,6 +157,8 @@ export default function BrowseView({
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
@@ -193,6 +195,10 @@ export default function BrowseView({
       }
     }
   }, []);
+
+  useEffect(() => {
+    setPage(0);
+  }, [view]);
 
   useEffect(() => {
     let cancelled = false;
@@ -306,49 +312,45 @@ export default function BrowseView({
         </button>
       </div>
 
-      {/* Genre filter bar */}
-      <div className="pb-2 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-        <div className={`flex items-center gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
+      {/* Genre chips — wrapping */}
+      <div className={`flex-shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
+        <button
+          onClick={() => onGoHome?.()}
+          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+        >
+          All
+        </button>
+        {GENRE_CATEGORIES.map((cat) => (
           <button
-            onClick={() => onGoHome?.()}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            key={cat.id}
+            onClick={() => onSelectGenre?.(cat)}
+            aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
+            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
-            All
+            {cat.label}
           </button>
-          {GENRE_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => onSelectGenre?.(cat)}
-              aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
-      {/* Country filter bar */}
-      <div className="pb-3 flex-shrink-0 overflow-x-auto overflow-y-hidden snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-        <div className={`flex items-center gap-1.5 w-max ${isMobile ? "px-3" : "px-4"}`}>
+      {/* Country chips — wrapping */}
+      <div className={`flex-shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
+        <button
+          onClick={() => onGoHome?.()}
+          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+        >
+          🌐 All
+        </button>
+        {COUNTRY_CATEGORIES.map((c) => (
           <button
-            onClick={() => onGoHome?.()}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            key={c.code}
+            onClick={() => onSelectCountry?.(c.name)}
+            aria-current={countryChipActive(c.name) || undefined}
+            className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.name) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
-            🌐 All
+            <span>{countryFlag(c.code)}</span>
+            <span>{COUNTRY_DISPLAY[c.code] ?? c.name}</span>
           </button>
-          {COUNTRY_CATEGORIES.map((c) => (
-            <button
-              key={c.code}
-              onClick={() => onSelectCountry?.(c.name)}
-              aria-current={countryChipActive(c.name) || undefined}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap flex-shrink-0 snap-start transition-colors flex items-center gap-1 ${countryChipActive(c.name) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >
-              <span>{countryFlag(c.code)}</span>
-              <span>{COUNTRY_DISPLAY[c.code] ?? c.name}</span>
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Content */}
@@ -526,27 +528,51 @@ export default function BrowseView({
               </>
             )}
 
-            {/* Grid column for search / genre / country views */}
-            {view.mode !== "top" && stations.length > 0 && (
-              <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-3 px-0"} pb-4`}>
-                {stations.map((s) => (
-                  <StationCard
-                    key={s.stationuuid}
-                    station={s}
-                    isPlaying={
-                      isPlaying &&
-                      currentStation?.stationuuid === s.stationuuid
-                    }
-                    isCurrent={
-                      currentStation?.stationuuid === s.stationuuid
-                    }
-                    isFavorite={isFavorite(s.stationuuid)}
-                    onPlay={() => onPlay(s)}
-                    onToggleFav={() => onToggleFav(s)}
-                  />
-                ))}
-              </div>
-            )}
+            {/* Grid column for search / genre / country views — paginated */}
+            {view.mode !== "top" && stations.length > 0 && (() => {
+              const totalPages = Math.ceil(stations.length / PAGE_SIZE);
+              const pageStations = stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+              return (
+                <>
+                  <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
+                    {pageStations.map((s) => (
+                      <StationCard
+                        key={s.stationuuid}
+                        station={s}
+                        isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
+                        isCurrent={currentStation?.stationuuid === s.stationuuid}
+                        isFavorite={isFavorite(s.stationuuid)}
+                        onPlay={() => onPlay(s)}
+                        onToggleFav={() => onToggleFav(s)}
+                      />
+                    ))}
+                  </div>
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-3 pt-2 pb-6">
+                      <button
+                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
+                      >
+                        <ChevronLeft size={14} />
+                        Prev
+                      </button>
+                      <span className="text-[12px] text-dim tabular-nums">
+                        {page + 1} / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={page === totalPages - 1}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
+                      >
+                        Next
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </>
         )}
       </div>

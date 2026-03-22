@@ -5,6 +5,7 @@
  */
 
 import { NextRequest } from 'next/server';
+import { isPrivateHost } from '@/lib/urlSecurity';
 
 export const runtime = 'nodejs';
 
@@ -33,16 +34,10 @@ export async function GET(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
-    // Block self-referential/localhost URLs to prevent infinite proxy loops
+    // Block loopback and private/internal IPs to prevent SSRF
     const host = parsed.hostname.toLowerCase();
-    if (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === '::1' ||
-      host === '0.0.0.0' ||
-      host.endsWith('.localhost')
-    ) {
-      return new Response(JSON.stringify({ error: 'Loopback URLs not allowed' }), {
+    if (isPrivateHost(host)) {
+      return new Response(JSON.stringify({ error: 'Private/internal URLs not allowed' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });

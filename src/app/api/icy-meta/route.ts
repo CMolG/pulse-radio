@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isPrivateHost } from '@/lib/urlSecurity';
 
 export const runtime = 'nodejs';
 
@@ -25,14 +26,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
     }
     const host = url.hostname.toLowerCase();
-    if (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === '::1' ||
-      host === '0.0.0.0' ||
-      host.endsWith('.localhost')
-    ) {
-      return NextResponse.json({ error: 'Loopback URLs not allowed' }, { status: 400 });
+    if (isPrivateHost(host)) {
+      return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
     }
   } catch {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
