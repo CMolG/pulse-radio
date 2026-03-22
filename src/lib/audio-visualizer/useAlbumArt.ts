@@ -16,6 +16,17 @@ interface AlbumInfo {
 }
 
 const CACHE = new Map<string, AlbumInfo>();
+const MAX_CACHE = 200;
+
+function cacheSet(key: string, value: AlbumInfo) {
+  CACHE.delete(key);
+  CACHE.set(key, value);
+  while (CACHE.size > MAX_CACHE) {
+    const oldest = CACHE.keys().next().value;
+    if (oldest !== undefined) CACHE.delete(oldest);
+    else break;
+  }
+}
 
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 
@@ -75,7 +86,10 @@ export function useAlbumArt(
       `/api/itunes?term=${encodeURIComponent(term)}`,
       { signal: controller.signal },
     )
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         if (controller.signal.aborted) return;
         const result = data.results?.[0];
@@ -87,14 +101,14 @@ export function useAlbumArt(
           releaseDate: result?.releaseDate?.slice(0, 4) ?? null,
           itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
         };
-        CACHE.set(cacheKey, albumInfo);
+        cacheSet(cacheKey, albumInfo);
         if (artworkUrl) preloadImage(artworkUrl);
         setInfo(albumInfo);
       })
       .catch(() => {
         if (!controller.signal.aborted) {
           const empty: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null };
-          CACHE.set(cacheKey, empty);
+          cacheSet(cacheKey, empty);
           setInfo(empty);
         }
       })
