@@ -27,9 +27,17 @@ function songKey(title: string, artist: string) {
 export function useFavoriteSongs(): UseFavoriteSongsReturn {
   const MAX_SONGS = 500;
 
-  const [songs, setSongs] = useState<FavoriteSong[]>(() =>
-    loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, [])
-  );
+  const [songs, setSongs] = useState<FavoriteSong[]>(() => {
+    const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
+    // Dedup on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(s => {
+      const key = songKey(s.title, s.artist);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  });
 
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
