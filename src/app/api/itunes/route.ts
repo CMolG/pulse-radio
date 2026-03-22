@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) {
   const term = req.nextUrl.searchParams.get('term');
   if (!term) {
-    return NextResponse.json({ results: [] }, { status: 400 });
+    return NextResponse.json({ error: 'Missing term parameter', results: [] }, { status: 400 });
   }
 
   try {
@@ -33,14 +33,18 @@ export async function GET(req: NextRequest) {
     clearTimeout(timeout);
 
     if (!res.ok) {
-      return NextResponse.json({ results: [] });
+      return NextResponse.json({ error: 'iTunes API error', results: [] }, { status: 502 });
     }
 
     const data = await res.json();
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
     });
-  } catch {
-    return NextResponse.json({ results: [] });
+  } catch (e) {
+    const isTimeout = e instanceof DOMException && e.name === 'AbortError';
+    return NextResponse.json(
+      { error: isTimeout ? 'Request timed out' : 'Internal error', results: [] },
+      { status: isTimeout ? 504 : 500 },
+    );
   }
 }
