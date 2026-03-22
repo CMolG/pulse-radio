@@ -32,6 +32,7 @@ import type {
   BrowseCategory,
   WidgetPlaybackState,
   HistoryEntry,
+  SongDetailData,
 } from "./types";
 import { STORAGE_KEYS } from "./constants";
 import { useRadio } from "./hooks/useRadio";
@@ -55,6 +56,7 @@ import ParallaxBackground from "./components/ParallaxBackground";
 import TheaterView from "./components/TheaterView";
 import HistoryGridView from "./components/HistoryGridView";
 import FavoriteSongsView from "./components/FavoriteSongsView";
+import SongDetailModal from "./components/SongDetailModal";
 import { saveToStorage } from "@/lib/storageUtils";
 
 type LayoutMode = "desktop" | "mobile" | "pip";
@@ -122,7 +124,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
   const [mobileDrawer, setMobileDrawer] = useState(false);
-  const [selectedHistory, setSelectedHistory] = useState<HistoryEntry | null>(
+  const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(
     null,
   );
   const [view, setView] = useState<ViewState>({
@@ -464,63 +466,11 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     />
   );
 
-  const historyModal = selectedHistory && (
-    <AnimatePresence>
-      <motion.div
-        key="history-modal-backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={() => setSelectedHistory(null)}
-      >
-        <motion.div
-          key="history-modal"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl max-w-[280px] w-full mx-4 overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Artwork */}
-          <div className="w-full aspect-square bg-surface-3 relative">
-            {selectedHistory.artworkUrl ? (
-              <img
-                src={selectedHistory.artworkUrl}
-                alt=""
-                className="size-full object-cover"
-              />
-            ) : (
-              <div className="size-full flex items-center justify-center">
-                <Music size={48} className="text-dim" />
-              </div>
-            )}
-          </div>
-          {/* Info */}
-          <div className="p-4 space-y-1">
-            <p className="text-[14px] font-semibold text-white line-clamp-2">
-              {selectedHistory.title}
-            </p>
-            <p className="text-[13px] text-secondary line-clamp-1">
-              {selectedHistory.artist}
-            </p>
-            {selectedHistory.album && (
-              <p className="text-[11px] text-dim line-clamp-1">
-                {selectedHistory.album}
-              </p>
-            )}
-          </div>
-          {/* Footer */}
-          <div className="px-4 pb-3 flex items-center gap-1.5">
-            <RadioIcon size={10} className="text-dim flex-shrink-0" />
-            <p className="text-[10px] text-dim truncate">
-              Emitido por {selectedHistory.stationName}
-            </p>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+  const songDetailModal = (
+    <SongDetailModal
+      song={selectedSong}
+      onClose={() => setSelectedSong(null)}
+    />
   );
 
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
@@ -580,7 +530,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           theaterMode={true}
           compact
         />
-        {historyModal}
+        {songDetailModal}
       </div>
     );
   }
@@ -745,6 +695,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                       onClear={songHistory.clear}
                       onToggleFavSong={handleFavSongFromHistory}
                       isSongFavorite={favSongs.has}
+                      onSelect={setSelectedSong}
                     />
                   </div>
                 ) : (
@@ -753,6 +704,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                       songs={favSongs.songs}
                       onRemove={favSongs.remove}
                       onClear={favSongs.clear}
+                      onSelect={setSelectedSong}
                     />
                   </div>
                 )}
@@ -802,7 +754,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             compact
           />
         </div>
-        {historyModal}
+        {songDetailModal}
       </div>
     );
   }
@@ -934,6 +886,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                         onClear={songHistory.clear}
                         onToggleFavSong={handleFavSongFromHistory}
                         isSongFavorite={favSongs.has}
+                        onSelect={setSelectedSong}
                       />
                     </motion.div>
                   ) : (
@@ -949,6 +902,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                         songs={favSongs.songs}
                         onRemove={favSongs.remove}
                         onClear={favSongs.clear}
+                        onSelect={setSelectedSong}
                       />
                     </motion.div>
                   )}
@@ -1029,7 +983,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           theaterMode={theaterMode}
         />
       </div>
-      {historyModal}
+      {songDetailModal}
     </div>
   );
 }

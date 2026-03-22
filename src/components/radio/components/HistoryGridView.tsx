@@ -9,7 +9,7 @@
 import React from "react";
 import { Music, Radio, Clock, Trash2, Heart, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
-import type { HistoryEntry } from "../types";
+import type { HistoryEntry, SongDetailData } from "../types";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -32,9 +32,10 @@ type Props = {
   onClear: () => void;
   onToggleFavSong?: (entry: HistoryEntry) => void;
   isSongFavorite?: (title: string, artist: string) => boolean;
+  onSelect?: (song: SongDetailData) => void;
 };
 
-export default function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite }: Props) {
+export default function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
   if (history.length === 0) {
     return (
       <div className="flex-center-col py-20 px-4">
@@ -64,7 +65,15 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.03, 0.5) }}
-            className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors"
+            className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+            onClick={() => onSelect?.({
+              title: entry.title,
+              artist: entry.artist,
+              album: entry.album,
+              artworkUrl: entry.artworkUrl,
+              itunesUrl: entry.itunesUrl,
+              stationName: entry.stationName,
+            })}
           >
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
@@ -77,7 +86,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
               )}
               {onToggleFavSong && (
                 <button
-                  onClick={() => onToggleFavSong(entry)}
+                  onClick={(e) => { e.stopPropagation(); onToggleFavSong(entry); }}
                   className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${isSongFavorite?.(entry.title, entry.artist) ? "bg-pink-500/20 text-pink-400" : "bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400"}`}
                   title="Favorite song"
                 >
@@ -85,7 +94,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
                 </button>
               )}
               <button
-                onClick={() => onRemove(entry.id)}
+                onClick={(e) => { e.stopPropagation(); onRemove(entry.id); }}
                 className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Remove"
               >
@@ -106,6 +115,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
                 href={entry.itunesUrl || itunesSearchUrl(entry.title, entry.artist)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
               >
                 <ExternalLink size={10} />

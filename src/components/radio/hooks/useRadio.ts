@@ -72,7 +72,10 @@ export function useRadio(): UseRadioReturn {
         setStatus('loading');
         setTimeout(() => {
           if (!userPausedRef.current && audio.paused) {
-            audio.play().catch(() => {});
+            audio.play().catch(() => {
+              // Direct resume failed — reconnect with fresh source
+              reconnect(500);
+            });
           }
         }, 300);
       }

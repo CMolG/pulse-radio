@@ -9,7 +9,7 @@
 import React from "react";
 import { Music, Radio, Heart, Trash2, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
-import type { FavoriteSong } from "../types";
+import type { FavoriteSong, SongDetailData } from "../types";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -30,9 +30,10 @@ type Props = {
   songs: FavoriteSong[];
   onRemove: (id: string) => void;
   onClear: () => void;
+  onSelect?: (song: SongDetailData) => void;
 };
 
-export default function FavoriteSongsView({ songs, onRemove, onClear }: Props) {
+export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
   if (songs.length === 0) {
     return (
       <div className="flex-center-col py-20 px-4">
@@ -62,7 +63,15 @@ export default function FavoriteSongsView({ songs, onRemove, onClear }: Props) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.03, 0.5) }}
-            className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors"
+            className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+            onClick={() => onSelect?.({
+              title: song.title,
+              artist: song.artist,
+              album: song.album,
+              artworkUrl: song.artworkUrl,
+              itunesUrl: song.itunesUrl,
+              stationName: song.stationName,
+            })}
           >
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
@@ -74,14 +83,14 @@ export default function FavoriteSongsView({ songs, onRemove, onClear }: Props) {
                 </div>
               )}
               <button
-                onClick={() => onRemove(song.id)}
+                onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
                 className="absolute top-2 left-2 p-1.5 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-all"
                 title="Remove from favorites"
               >
                 <Heart size={12} className="fill-pink-400" />
               </button>
               <button
-                onClick={() => onRemove(song.id)}
+                onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
                 className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
                 title="Remove"
               >
@@ -102,6 +111,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear }: Props) {
                 href={song.itunesUrl || itunesSearchUrl(song.title, song.artist)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
                 className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
               >
                 <ExternalLink size={10} />

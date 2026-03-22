@@ -130,3 +130,25 @@ export type FavoriteSong = {
   stationUuid: string;
   timestamp: number;
 };
+
+export type SongDetailData = {
+  title: string;
+  artist: string;
+  album?: string;
+  artworkUrl?: string;
+  itunesUrl?: string;
+  stationName: string;
+};
+
+export type ArtistInfo = {
+  name: string;
+  disambiguation: string | null;
+  type: string | null;
+  country: string | null;
+  beginArea: string | null;
+  lifeSpan: { begin: string | null; end: string | null; ended: boolean } | null;
+  tags: string[];
+  bio: string | null;
+  imageUrl: string | null;
+  wikipediaUrl: string | null;
+};
