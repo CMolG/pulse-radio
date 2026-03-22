@@ -63,7 +63,13 @@ export async function GET(req: NextRequest) {
     const contentType =
       upstream.headers.get('content-type') || 'audio/mpeg';
 
-    return new Response(upstream.body, {
+    // Wrap the upstream body so we can clear the timeout when the stream
+    // ends naturally (client disconnect or upstream close) instead of
+    // leaving a 60-minute timer running per connection.
+    const { readable, writable } = new TransformStream();
+    upstream.body.pipeTo(writable).catch(() => {}).finally(() => clearTimeout(timeout));
+
+    return new Response(readable, {
       status: 200,
       headers: {
         'Content-Type': contentType,
