@@ -149,6 +149,16 @@ export function useRadio(): UseRadioReturn {
       }
     };
 
+    // Periodic health check: detects silent stream drops that don't fire stalled/error/ended.
+    // Common on iOS PWA after 10+ minutes — the proxy TCP connection closes silently.
+    const healthCheckInterval = setInterval(() => {
+      if (!station || userPausedRef.current || audio.paused) return;
+      // NETWORK_IDLE (1) while playing means the browser stopped fetching — stream dropped.
+      if (audio.networkState === HTMLMediaElement.NETWORK_IDLE) {
+        reconnect(1000);
+      }
+    }, 15_000);
+
     audio.addEventListener('playing', onPlaying);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('waiting', onWaiting);
@@ -159,6 +169,7 @@ export function useRadio(): UseRadioReturn {
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
+      clearInterval(healthCheckInterval);
       if (stallTimer) clearTimeout(stallTimer);
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);

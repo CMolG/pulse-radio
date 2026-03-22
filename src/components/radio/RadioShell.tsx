@@ -123,6 +123,13 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const [showEq, setShowEq] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; icon: "star" | "heart"; key: number } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = useCallback((msg: string, icon: "star" | "heart") => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ msg, icon, key: Date.now() });
+    toastTimerRef.current = setTimeout(() => setToast(null), 2500);
+  }, []);
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
   const [mobileDrawer, setMobileDrawer] = useState(false);
