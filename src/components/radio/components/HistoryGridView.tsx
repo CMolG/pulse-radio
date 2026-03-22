@@ -81,7 +81,7 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
               {entry.artworkUrl ? (
-                <img src={entry.artworkUrl} alt="" loading="lazy" className="size-full object-cover" />
+                <img src={entry.artworkUrl} alt="" loading="lazy" className="size-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               ) : (
                 <div className="size-full flex items-center justify-center">
                   <Music size={32} className="text-dim" />

@@ -79,7 +79,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
               {song.artworkUrl ? (
-                <img src={song.artworkUrl} alt="" loading="lazy" className="size-full object-cover" />
+                <img src={song.artworkUrl} alt="" loading="lazy" className="size-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
               ) : (
                 <div className="size-full flex items-center justify-center">
                   <Music size={32} className="text-dim" />
