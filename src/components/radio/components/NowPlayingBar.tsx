@@ -85,10 +85,12 @@ export default function NowPlayingBar({
   const [imgError, setImgError] = useState(false);
   const coverUrlForReset = track?.artworkUrl ?? station?.favicon;
   const lastBarCoverRef = React.useRef(coverUrlForReset);
-  if (coverUrlForReset !== lastBarCoverRef.current) {
-    lastBarCoverRef.current = coverUrlForReset;
-    if (imgError) setImgError(false);
-  }
+  React.useEffect(() => {
+    if (coverUrlForReset !== lastBarCoverRef.current) {
+      lastBarCoverRef.current = coverUrlForReset;
+      setImgError(false);
+    }
+  }, [coverUrlForReset]);
 
   if (compact) {
     return (
