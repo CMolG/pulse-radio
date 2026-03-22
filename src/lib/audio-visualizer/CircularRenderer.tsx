@@ -50,6 +50,7 @@ export function CircularRenderer({
     };
   }, [color1, color2]);
 
+  {/* TODO duplicated code fragment */}
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

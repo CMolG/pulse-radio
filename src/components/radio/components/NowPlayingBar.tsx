@@ -95,12 +95,12 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-3 px-3 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
+      <div className="flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0">
         {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}
           disabled={!station}
-          className="w-11 h-11 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 flex-shrink-0 active:scale-95"
+          className="w-11 h-11 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -121,8 +121,8 @@ export default function NowPlayingBar({
               <div className="flex items-center gap-1.5 mt-0.5">
                 {isPlaying && (
                   <>
-                    <span className="dot-1.5 bg-red-500 animate-pulse flex-shrink-0" />
-                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 flex-shrink-0">
+                    <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
+                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
                       LIVE
                     </span>
                   </>
@@ -193,6 +193,7 @@ export default function NowPlayingBar({
             />
           )}
         </div>
+        {/* TODO replace upper img with next image */}
         <div className="min-w-0">
           <p className="text-[12px] font-medium text-white truncate">
             {station?.name || "Not Playing"}
@@ -209,7 +210,7 @@ export default function NowPlayingBar({
           )}
         </div>
         {icyBitrate && (
-          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 flex-shrink-0 self-center">
+          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
             {icyBitrate}kbps
           </span>
         )}
@@ -321,12 +322,12 @@ export default function NowPlayingBar({
       </div>
 
       {/* Volume */}
-      <div className="flex-row-1 w-24 min-w-0 flex-shrink-0 overflow-hidden ml-2">
+      <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
         <button
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
-          className="p-1 text-muted hover:text-white/60 transition-colors flex-shrink-0"
+          className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"
         >
           {muted || volume === 0 ? (
             <VolumeX size={14} />
@@ -346,7 +347,7 @@ export default function NowPlayingBar({
             if (muted && v > 0) onToggleMute();
           }}
           aria-label="Volume"
-          className="flex-fill h-[3px] appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
+          className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
       </div>
     </div>

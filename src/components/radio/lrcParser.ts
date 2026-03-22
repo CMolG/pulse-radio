@@ -11,7 +11,7 @@ export interface LyricLine {
 
 export function parseLrc(lrcText: string): LyricLine[] {
   const lines: LyricLine[] = [];
-  const tsRegex = /\[(\d{1,3}):(\d{2})\.(\d{2,3})\]/g;
+  const tsRegex = /\[(\d{1,3}):(\d{2})\.(\d{2,3})]/g;
   for (const raw of lrcText.split('\n')) {
     const timestamps: number[] = [];
     let lastIndex = 0;

@@ -121,6 +121,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
   const [toast, setToast] = useState<{ msg: string; icon: "star" | "heart"; key: number } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback((msg: string, icon: "star" | "heart") => {
@@ -148,6 +151,18 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       setMiniMode(false);
     }
   }, [layout]);
+
+  // Track network connectivity for offline indicator
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, []);
 
   // Sync to shared playback store
   const pbStore = usePlaybackStore;
@@ -529,6 +544,12 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />
   ) : null;
 
+  const offlineBanner = !isOnline ? (
+    <div className="fixed top-0 inset-x-0 z-[250] bg-yellow-600 text-white text-center text-[12px] font-medium py-1 select-none" role="alert">
+      You are offline — playback may be interrupted
+    </div>
+  ) : null;
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -590,6 +611,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         />
         {songDetailModal}
         {shortcutsOverlay}
+        {offlineBanner}
       </div>
     );
   }
@@ -806,6 +828,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         </div>
         {songDetailModal}
         {shortcutsOverlay}
+        {offlineBanner}
       </div>
     );
   }
@@ -1079,6 +1102,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       </div>
       {songDetailModal}
       {shortcutsOverlay}
+      {offlineBanner}
     </div>
   );
 }
