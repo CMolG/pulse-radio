@@ -100,7 +100,9 @@ export default function LyricsReel({
       return () => cancelAnimationFrame(frame);
     }
 
-    const targetIdx = activeIdx >= 0 ? activeIdx : 0;
+    const targetIdx = activeIdx >= 0
+      ? Math.min(activeIdx, renderableLines.length - 1)
+      : 0;
 
     const frame = requestAnimationFrame(() => {
       setFocusedIdx((prev) => (prev === targetIdx ? prev : targetIdx));
