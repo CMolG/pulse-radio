@@ -72,6 +72,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
+      if (width <= 0 || height <= 0) return; // ignore detached/hidden elements
       setSize({ w: Math.round(width), h: Math.round(height) });
     });
     ro.observe(el);
@@ -419,11 +420,15 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     : false;
 
   const handleToggleFav = useCallback(() => {
-    if (radio.station) favs.toggle(radio.station);
-  }, [radio.station, favs]);
+    if (!radio.station) return;
+    const wasFav = favs.has(radio.station.stationuuid);
+    favs.toggle(radio.station);
+    showToast(wasFav ? "Removed from favorites" : radio.station.name, "star");
+  }, [radio.station, favs, showToast]);
 
   const handleFavSong = useCallback(() => {
     if (!enrichedTrack?.title || !radio.station) return;
+    const wasLiked = favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "");
     favSongs.toggle({
       title: enrichedTrack.title,
       artist: enrichedTrack.artist ?? "",
@@ -433,7 +438,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       stationName: radio.station.name,
       stationUuid: radio.station.stationuuid,
     });
-  }, [enrichedTrack, radio.station, favSongs]);
+    showToast(wasLiked ? "Song removed" : enrichedTrack.title, "heart");
+  }, [enrichedTrack, radio.station, favSongs, showToast]);
 
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
     favSongs.toggle({
