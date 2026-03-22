@@ -286,6 +286,12 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           if (detail.stationuuid) favs.remove(detail.stationuuid);
           break;
         }
+        case "setVolume": {
+          if (typeof detail.volume === 'number') {
+            radio.setVolume(detail.volume);
+          }
+          break;
+        }
       }
     };
     window.addEventListener("radio-command", handler);
