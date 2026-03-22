@@ -26,7 +26,7 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
         const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE);
         if (raw) {
           const cache: { key: string; data: LyricsData }[] = JSON.parse(raw);
-          if (cache.length > 0) setLyrics(cache[cache.length - 1].data);
+          if (cache.length > 0) setLyrics(cache[0].data);
         }
       } catch { /* ignore */ }
     };
