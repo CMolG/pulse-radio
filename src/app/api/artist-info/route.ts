@@ -103,7 +103,8 @@ export async function GET(req: NextRequest) {
         },
       },
     );
-  } catch {
+  } catch (err) {
+    console.error('[Pulse Radio] Artist info fetch error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
