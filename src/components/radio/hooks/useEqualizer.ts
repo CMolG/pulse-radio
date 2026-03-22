@@ -43,6 +43,7 @@ export function useEqualizer(): UseEqualizerReturn {
   const ctxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]);
+  const limiterRef = useRef<DynamicsCompressorNode | null>(null);
   const connectedAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -70,12 +71,22 @@ export function useEqualizer(): UseEqualizerReturn {
         return filter;
       });
 
-      // Chain: source → filter[0] → filter[1] → ... → destination
+      // Chain: source → filter[0] → ... → limiter → destination
       source.connect(filters[0]);
       for (let i = 0; i < filters.length - 1; i++) {
         filters[i].connect(filters[i + 1]);
       }
-      filters[filters.length - 1].connect(ctx.destination);
+
+      // Safety limiter to prevent digital clipping from cumulative EQ gains
+      const limiter = ctx.createDynamicsCompressor();
+      limiter.threshold.value = -3;   // engage at -3dBFS
+      limiter.knee.value = 6;         // soft knee
+      limiter.ratio.value = 20;       // near-brick-wall limiting
+      limiter.attack.value = 0.001;   // fast attack
+      limiter.release.value = 0.1;    // moderate release
+      filters[filters.length - 1].connect(limiter);
+      limiter.connect(ctx.destination);
+      limiterRef.current = limiter;
 
       filtersRef.current = filters;
     } catch { /* Web Audio not available */ }
@@ -86,18 +97,26 @@ export function useEqualizer(): UseEqualizerReturn {
     try {
       sourceRef.current?.disconnect();
       filtersRef.current.forEach(f => f.disconnect());
+      limiterRef.current?.disconnect();
     } catch { /* ok */ }
     sourceRef.current = null;
     filtersRef.current = [];
+    limiterRef.current = null;
     connectedAudioRef.current = null;
   }, []);
 
+  const MAX_GAIN_DB = 12;
+
   const setBandGain = useCallback((id: string, gain: number) => {
-    setBands(prev => prev.map(b => b.id === id ? { ...b, gain } : b));
+    const clamped = Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gain));
+    setBands(prev => prev.map(b => b.id === id ? { ...b, gain: clamped } : b));
   }, []);
 
   const applyPreset = useCallback((gains: number[]) => {
-    setBands(prev => prev.map((b, i) => ({ ...b, gain: gains[i] ?? 0 })));
+    setBands(prev => prev.map((b, i) => ({
+      ...b,
+      gain: Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gains[i] ?? 0)),
+    })));
   }, []);
 
   const toggleEnabled = useCallback(() => setEnabled(e => !e), []);
