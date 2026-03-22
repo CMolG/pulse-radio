@@ -97,7 +97,10 @@ function drawMetaballs(
   const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
   if (!offCtx) return;
 
-  const smallImg = offCtx.createImageData(sw, sh);
+  let smallImg: ImageData;
+  try {
+    smallImg = offCtx.createImageData(sw, sh);
+  } catch { return; }
   const sd = smallImg.data;
 
   for (let py = 0; py < sh; py++) {
@@ -159,10 +162,12 @@ function drawMetaballs(
 
   // Put image data into offscreen canvas, then draw upscaled with
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
-  offCtx.putImageData(smallImg, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(offscreen, 0, 0, sw, sh, 0, 0, w, h);
+  try {
+    offCtx.putImageData(smallImg, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(offscreen, 0, 0, sw, sh, 0, 0, w, h);
+  } catch { /* skip frame on canvas error */ }
 }
 
 /* ─── component ─── */

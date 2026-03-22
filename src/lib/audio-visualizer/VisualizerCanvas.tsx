@@ -74,24 +74,27 @@ export function VisualizerCanvas({
           const idx = Math.min(i * step, frequencyData.length - 1);
           const value = frequencyData[idx] / 255;
           const barHeight = value * height * 0.8;
-          const gradient = ctx.createLinearGradient(
-            0,
-            height,
-            0,
-            height - barHeight,
-          );
-          gradient.addColorStop(0, resolvedColor);
-          gradient.addColorStop(1, 'transparent');
-          ctx.fillStyle = gradient;
+          let fillStyle: string | CanvasGradient = resolvedColor;
+          try {
+            const gradient = ctx.createLinearGradient(0, height, 0, height - barHeight);
+            gradient.addColorStop(0, resolvedColor);
+            gradient.addColorStop(1, 'transparent');
+            fillStyle = gradient;
+          } catch { /* fallback to solid color */ }
+          ctx.fillStyle = fillStyle;
           ctx.beginPath();
-          ctx.roundRect(
-            i * barWidth + gap / 2,
-            height - barHeight,
-            barWidth - gap,
-            barHeight,
-            [barWidth * 0.3, barWidth * 0.3, 0, 0],
-          );
-          ctx.fill();
+          try {
+            ctx.roundRect(
+              i * barWidth + gap / 2,
+              height - barHeight,
+              barWidth - gap,
+              barHeight,
+              [barWidth * 0.3, barWidth * 0.3, 0, 0],
+            );
+            ctx.fill();
+          } catch {
+            ctx.fillRect(i * barWidth + gap / 2, height - barHeight, barWidth - gap, barHeight);
+          }
         }
       } else {
         const step = width / frequencyData.length;

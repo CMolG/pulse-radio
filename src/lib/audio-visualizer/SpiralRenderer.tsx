@@ -127,15 +127,19 @@ export function SpiralRenderer({
 
     // Gradient
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current;
-    const gradient = ctx.createLinearGradient(
-      centerX - maxRadius,
-      centerY - maxRadius,
-      centerX + maxRadius,
-      centerY + maxRadius,
-    );
-    gradient.addColorStop(0, c1);
-    gradient.addColorStop(0.5, c2);
-    gradient.addColorStop(1, c3);
+    let fillStyle: string | CanvasGradient = c1;
+    try {
+      const gradient = ctx.createLinearGradient(
+        centerX - maxRadius,
+        centerY - maxRadius,
+        centerX + maxRadius,
+        centerY + maxRadius,
+      );
+      gradient.addColorStop(0, c1);
+      gradient.addColorStop(0.5, c2);
+      gradient.addColorStop(1, c3);
+      fillStyle = gradient;
+    } catch { /* fallback to solid color */ }
 
     // Build points
     const outerPoints: { x: number; y: number }[] = [];
@@ -164,7 +168,7 @@ export function SpiralRenderer({
     }
 
     // Draw slime shapes per cycle
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = fillStyle;
     ctx.shadowBlur = 20;
     ctx.shadowColor = `${c1}66`;
     ctx.globalAlpha = 0.85;
