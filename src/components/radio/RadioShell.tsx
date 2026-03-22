@@ -344,12 +344,35 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         case "Escape":
           setShowEq(false);
           setMobileDrawer(false);
+          if (theaterMode) setTheaterMode(false);
+          break;
+        case "t":
+        case "T":
+          setTheaterMode(prev => !prev);
+          break;
+        case "e":
+        case "E":
+          setShowEq(prev => !prev);
+          break;
+        case "l":
+        case "L":
+          if (enrichedTrack?.title) {
+            favSongs.toggle({
+              title: enrichedTrack.title,
+              artist: enrichedTrack.artist ?? '',
+              album: enrichedTrack.album,
+              artworkUrl: enrichedTrack.artworkUrl,
+              itunesUrl: enrichedTrack.itunesUrl,
+              stationName: radio.station?.name ?? '',
+              stationUuid: radio.station?.stationuuid ?? '',
+            });
+          }
           break;
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")

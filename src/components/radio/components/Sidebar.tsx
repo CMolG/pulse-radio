@@ -158,7 +158,7 @@ export default function Sidebar({
 function Section({ label, action, children, collapsed, onToggle }: { label: string; action?: React.ReactNode; children: React.ReactNode; collapsed: boolean; onToggle: () => void }) {
   return (<div>
       <div className="flex-between px-2.5 mb-1.5">
-        <button onClick={onToggle} className="flex-row-1.5 text-[10px] tracking-widest uppercase text-dim font-semibold hover:text-white/60 transition-colors py-1">
+        <button onClick={onToggle} aria-expanded={!collapsed} className="flex-row-1.5 text-[10px] tracking-widest uppercase text-dim font-semibold hover:text-white/60 transition-colors py-1">
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           {label}
         </button>
