@@ -61,6 +61,21 @@ export async function GET(req: NextRequest) {
       signal: controller.signal,
     });
 
+    // Validate the final URL after redirects to prevent SSRF via redirect
+    if (upstream.url) {
+      try {
+        const finalUrl = new URL(upstream.url);
+        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+          clearTimeout(timeout);
+          upstream.body?.cancel().catch(() => {});
+          return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+      } catch { /* URL parse failed — continue with original validation */ }
+    }
+
     if (!upstream.ok || !upstream.body) {
       clearTimeout(timeout);
       upstream.body?.cancel().catch(() => {}); // release connection

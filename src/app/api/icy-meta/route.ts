@@ -43,6 +43,17 @@ export async function GET(req: NextRequest) {
     });
     clearTimeout(timeout);
 
+    // Validate the final URL after redirects to prevent SSRF via redirect
+    if (res.url) {
+      try {
+        const finalUrl = new URL(res.url);
+        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+          res.body?.cancel().catch(() => {});
+          return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 });
+        }
+      } catch { /* URL parse failed — continue */ }
+    }
+
     if (!res.ok) {
       res.body?.cancel().catch(() => {});
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
