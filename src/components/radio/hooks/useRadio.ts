@@ -16,6 +16,16 @@ function proxyUrl(raw: string): string {
   return `/api/proxy-stream?url=${encodeURIComponent(raw)}`;
 }
 
+function isValidStreamUrl(url: string | undefined): url is string {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export type UseRadioReturn = {
   station: Station | null;
   status: PlaybackStatus;
@@ -192,6 +202,10 @@ export function useRadio(): UseRadioReturn {
   }, [volume, muted]);
 
   const play = useCallback((s: Station) => {
+    if (!isValidStreamUrl(s.url_resolved)) {
+      setStatus('error');
+      return;
+    }
     const audio = getAudio();
     retryRef.current = 0;
     userPausedRef.current = false;
