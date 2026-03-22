@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState } from "../types";
 import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, countryFlag } from "../constants";
@@ -45,6 +45,8 @@ type Props = {
   isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void;
   onToggleFav: (station: Station) => void;
+  favorites?: Station[];
+  recent?: Station[];
 };
 
 const SCROLL_CLASS =
@@ -136,6 +138,8 @@ export default function BrowseView({
   isFavorite,
   onPlay,
   onToggleFav,
+  favorites,
+  recent,
 }: Props) {
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
@@ -395,6 +399,50 @@ export default function BrowseView({
             {/* Category rows for top view */}
             {view.mode === "top" && (
               <>
+                {/* Favorites row */}
+                {favorites && favorites.length > 0 && !genreFilter && !countryFilter && (
+                  <ScrollRow
+                    title="Favorites"
+                    icon={<Heart size={14} className="text-pink-400/70" />}
+                    isMobile={isMobile}
+                  >
+                    {favorites.map((s) => (
+                      <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
+                        <StationCard
+                          station={s}
+                          isCurrent={s.stationuuid === currentStation?.stationuuid}
+                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
+                          isFavorite={isFavorite(s.stationuuid)}
+                          onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)}
+                        />
+                      </div>
+                    ))}
+                  </ScrollRow>
+                )}
+
+                {/* Recent stations row */}
+                {recent && recent.length > 0 && !genreFilter && !countryFilter && (
+                  <ScrollRow
+                    title="Recent"
+                    icon={<Clock size={14} className="text-blue-400/70" />}
+                    isMobile={isMobile}
+                  >
+                    {recent.map((s) => (
+                      <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
+                        <StationCard
+                          station={s}
+                          isCurrent={s.stationuuid === currentStation?.stationuuid}
+                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
+                          isFavorite={isFavorite(s.stationuuid)}
+                          onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)}
+                        />
+                      </div>
+                    ))}
+                  </ScrollRow>
+                )}
+
                 {BROWSE_ORDER.map((catId) => {
                   const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
                   if (!cat) return null;

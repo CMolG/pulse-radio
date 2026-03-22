@@ -467,31 +467,12 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     setMobileDrawer(false);
   }, []);
 
-  const handleShowFavorites = useCallback(() => {
-    setView({
-      mode: "top",
-      query: "",
-      tag: "",
-      country: "",
-      label: "Favorites",
-    });
-    setTheaterMode(false);
-    setMobileDrawer(false);
-  }, []);
-
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.country}`;
 
   const sidebarEl = (
     <Sidebar
-      favorites={favs.favorites}
-      recent={recent.recent}
       onSearch={handleSearch}
       onSelectGenre={handleSelectGenre}
-      onPlayStation={handlePlay}
-      onShowFavorites={handleShowFavorites}
-      onRemoveRecent={recent.remove}
-      onRemoveFavorite={favs.remove}
-      currentUuid={radio.station?.stationuuid || null}
       onGoHome={handleGoHome}
     />
   );
@@ -719,6 +700,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     isFavorite={favs.has}
                     onPlay={handlePlay}
                     onToggleFav={favs.toggle}
+                    favorites={favs.favorites}
+                    recent={recent.recent}
                   />
                 ) : activeTab === "history" ? (
                   <div className="overflow-y-auto h-full">
@@ -902,6 +885,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                         isFavorite={favs.has}
                         onPlay={handlePlay}
                         onToggleFav={favs.toggle}
+                        favorites={favs.favorites}
+                        recent={recent.recent}
                       />
                     </motion.div>
                   ) : activeTab === "history" ? (
