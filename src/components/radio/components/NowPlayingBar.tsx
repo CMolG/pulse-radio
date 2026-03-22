@@ -306,8 +306,12 @@ export default function NowPlayingBar({
           min={0}
           max={1}
           step={0.01}
-          value={muted ? 0 : volume}
-          onChange={(e) => onSetVolume(parseFloat(e.target.value))}
+          value={volume}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            onSetVolume(v);
+            if (muted && v > 0) onToggleMute();
+          }}
           aria-label="Volume"
           className="flex-fill h-[3px] appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
