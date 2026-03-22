@@ -38,6 +38,11 @@ export async function GET(req: NextRequest) {
     });
     clearTimeout(timeout);
 
+    if (!res.ok) {
+      res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
+    }
+
     const icyMetaint = res.headers.get('icy-metaint');
     const icyName = res.headers.get('icy-name');
     const icyGenre = res.headers.get('icy-genre');
