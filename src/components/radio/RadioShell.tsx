@@ -312,12 +312,13 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      if (
+      const isInput =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      )
-        return;
+        target.isContentEditable;
+
+      // Allow Escape even from inputs (to close panels/modals)
+      if (isInput && e.key !== "Escape") return;
 
       // When EQ panel is open, suppress single-letter shortcuts that could
       // trigger unintended actions (theater, favorites, search, etc.).
