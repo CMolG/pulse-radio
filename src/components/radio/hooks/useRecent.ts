@@ -19,9 +19,16 @@ export type UseRecentReturn = {
 };
 
 export function useRecent(): UseRecentReturn {
-  const [recent, setRecent] = useState<Station[]>(() =>
-    loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, [])
-  );
+  const [recent, setRecent] = useState<Station[]>(() => {
+    const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, []);
+    // Dedup by stationuuid on load in case of corrupted storage
+    const seen = new Set<string>();
+    return loaded.filter(s => {
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false;
+      seen.add(s.stationuuid);
+      return true;
+    });
+  });
 
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.RECENT, recent);
