@@ -358,7 +358,7 @@ export default function BrowseView({
     <div className="col-fill min-w-0 h-full">
       {/* Header */}
       <div
-        className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 flex-shrink-0 flex-between`}
+        className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}
       >
         <div>
           <h2
@@ -383,7 +383,7 @@ export default function BrowseView({
       </div>
 
       {/* Genre chips — wrapping */}
-      <div className={`flex-shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
+      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
         <button
           onClick={() => onGoHome?.()}
           className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
@@ -395,7 +395,7 @@ export default function BrowseView({
             key={cat.id}
             onClick={() => onSelectGenre?.(cat)}
             aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-gradient-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
             {cat.label}
           </button>
@@ -403,7 +403,7 @@ export default function BrowseView({
       </div>
 
       {/* Country chips — wrapping */}
-      <div className={`flex-shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
+      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
         <button
           onClick={() => onGoHome?.()}
           className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
@@ -464,7 +464,7 @@ export default function BrowseView({
                     isMobile={isMobile}
                   >
                     {favorites.map((s) => (
-                      <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
+                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
                         <StationCard
                           station={s}
                           isCurrent={s.stationuuid === currentStation?.stationuuid}
@@ -486,7 +486,7 @@ export default function BrowseView({
                     isMobile={isMobile}
                   >
                     {recent.map((s) => (
-                      <div key={s.stationuuid} className={`snap-start flex-shrink-0 ${itemWidth}`}>
+                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
                         <StationCard
                           station={s}
                           isCurrent={s.stationuuid === currentStation?.stationuuid}
@@ -519,7 +519,7 @@ export default function BrowseView({
                         }
                         isMobile={isMobile}
                       >
-                        <div className={`snap-start flex-shrink-0 ${itemWidth} h-[180px] rounded-xl bg-surface-2 flex-center-col gap-2`}>
+                        <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
                           <Radio size={18} className="text-muted" />
                           <p className="text-[11px] text-muted">Failed to load</p>
                           <button
@@ -549,7 +549,7 @@ export default function BrowseView({
                         {Array.from({ length: 5 }).map((_, i) => (
                           <div
                             key={i}
-                            className={`snap-start flex-shrink-0 ${itemWidth} h-[180px] rounded-xl bg-surface-2 animate-pulse`}
+                            className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`}
                           />
                         ))}
                       </ScrollRow>
@@ -566,7 +566,7 @@ export default function BrowseView({
                       icon={
                         CATEGORY_ICONS[catId] ?? (
                           <span
-                            className={`inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-r ${cat.gradient}`}
+                            className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`}
                           />
                         )
                       }
@@ -575,7 +575,7 @@ export default function BrowseView({
                       {catStations.map((s) => (
                         <div
                           key={s.stationuuid}
-                          className={`snap-start flex-shrink-0 ${itemWidth}`}
+                          className={`snap-start shrink-0 ${itemWidth}`}
                         >
                           <StationCard
                             station={s}
@@ -607,7 +607,7 @@ export default function BrowseView({
                   <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}>
                     <button
                       onClick={() => setScanEnabled(v => !v)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors flex-shrink-0 ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${
                         scanEnabled
                           ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
                           : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
@@ -623,8 +623,8 @@ export default function BrowseView({
                     </button>
 
                     {scanEnabled && (
-                      <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/[0.05] min-w-0">
-                        <Music2 size={11} className="text-dim flex-shrink-0" />
+                      <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
+                        <Music2 size={11} className="text-dim shrink-0" />
                         <input
                           type="text"
                           placeholder="Filter by song or artist…"
@@ -633,14 +633,14 @@ export default function BrowseView({
                           className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
                         />
                         {songFilter && (
-                          <button onClick={() => setSongFilter("")} className="text-dim hover:text-white flex-shrink-0">
+                          <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
                             <X size={11} />
                           </button>
                         )}
                       </div>
                     )}
                     {scanEnabled && songFilter && (
-                      <span className="text-[11px] text-dim flex-shrink-0">
+                      <span className="text-[11px] text-dim shrink-0">
                         {songFilteredStations.length} match{songFilteredStations.length !== 1 ? "es" : ""}
                       </span>
                     )}

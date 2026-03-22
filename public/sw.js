@@ -72,19 +72,25 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // Static assets: stale-while-revalidate (serve cached, refresh in background)
   if (
     url.origin === self.location.origin &&
     ["image", "style", "script", "font"].includes(req.destination)
   ) {
     event.respondWith(
       (async () => {
-        const cached = await caches.match(req);
-        if (cached) return cached;
-        const res = await fetch(req);
         const cache = await caches.open(CACHE);
-        cache.put(req, res.clone());
-        return res;
+        const cached = await cache.match(req);
+        const fetchPromise = fetch(req).then((res) => {
+          if (res.ok) cache.put(req, res.clone());
+          return res;
+        }).catch(() => null);
+        if (cached) {
+          fetchPromise; // refresh in background
+          return cached;
+        }
+        const fresh = await fetchPromise;
+        return fresh || new Response("Offline", { status: 503 });
       })(),
     );
   }
