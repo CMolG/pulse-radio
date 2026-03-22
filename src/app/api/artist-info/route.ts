@@ -84,6 +84,11 @@ export async function GET(req: NextRequest) {
         ?.slice(0, 8)
         ?.map((t: { name: string }) => t.name) ?? [];
 
+    const hasData = !!(mb || wiki?.extract);
+    const cacheHeader = hasData
+      ? 'public, max-age=86400, stale-while-revalidate=604800'
+      : 'public, max-age=3600, stale-while-revalidate=7200';
+
     return NextResponse.json(
       {
         name: mb?.name ?? artist,
@@ -99,7 +104,7 @@ export async function GET(req: NextRequest) {
       },
       {
         headers: {
-          'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+          'Cache-Control': cacheHeader,
         },
       },
     );
