@@ -20,6 +20,7 @@ export function parseLrc(lrcText: string): LyricLine[] {
     while ((m = tsRegex.exec(raw)) !== null) {
       const minutes = parseInt(m[1], 10);
       const seconds = parseInt(m[2], 10);
+      if (seconds >= 60) continue; // invalid timestamp
       const centiseconds = parseInt(m[3].padEnd(3, '0'), 10);
       timestamps.push(minutes * 60 + seconds + centiseconds / 1000);
       lastIndex = tsRegex.lastIndex;
