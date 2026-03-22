@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
     clearTimeout(timeout);
 
     if (!res.ok) {
+      await res.text().catch(() => {}); // drain body to release connection
       return NextResponse.json({ error: 'iTunes API error', results: [] }, { status: 502 });
     }
 
