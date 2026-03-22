@@ -9,7 +9,7 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
-const MAX_DURATION_MS = 60 * 60 * 1000; // 60 min max per proxy connection
+const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
 
 /**
  * Proxies an internet radio stream, adding CORS headers so the browser
@@ -42,7 +42,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), MAX_DURATION_MS);
+    const timeout = MAX_DURATION_MS > 0
+      ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
+      : null;
 
     const upstream = await fetch(parsed.toString(), {
       headers: {
@@ -53,7 +55,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!upstream.ok || !upstream.body) {
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
@@ -63,7 +65,7 @@ export async function GET(req: NextRequest) {
     const contentType =
       upstream.headers.get('content-type') || 'audio/mpeg';
 
-    return new Response(upstream.body, {
+    const response = new Response(upstream.body, {
       status: 200,
       headers: {
         'Content-Type': contentType,
@@ -72,6 +74,10 @@ export async function GET(req: NextRequest) {
         'Transfer-Encoding': 'chunked',
       },
     });
+    if (timeout) {
+      response.headers.set('X-Proxy-Timeout-Ms', String(MAX_DURATION_MS));
+    }
+    return response;
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.includes('abort')) {

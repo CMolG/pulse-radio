@@ -35,6 +35,7 @@ export type UseRadioReturn = {
 export function useRadio(): UseRadioReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() => {
@@ -62,15 +63,23 @@ export function useRadio(): UseRadioReturn {
     const audio = getAudio();
 
     const onPlaying = () => { setStatus('playing'); retryRef.current = 0; userPausedRef.current = false; };
+    const clearReconnectTimer = () => {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+    };
+
     const onPause = () => {
       if (userPausedRef.current) {
         userPausedRef.current = false;
         setStatus('paused');
       } else if (station) {
         // OS/browser interrupted playback (screen lock, phone call, etc.)
-        // Attempt automatic resume after a brief delay
+        // Attempt automatic resume after a brief delay.
         setStatus('loading');
-        setTimeout(() => {
+        clearReconnectTimer();
+        reconnectTimerRef.current = setTimeout(() => {
           if (!userPausedRef.current && audio.paused) {
             audio.play().catch(() => {
               // Direct resume failed — reconnect with fresh source
@@ -91,7 +100,8 @@ export function useRadio(): UseRadioReturn {
       }
       retryRef.current++;
       setStatus('loading');
-      setTimeout(() => {
+      clearReconnectTimer();
+      reconnectTimerRef.current = setTimeout(() => {
         if (userPausedRef.current) return;
         audio.src = proxyUrl(station.url_resolved);
         audio.play().catch(() => setStatus('error'));
@@ -121,6 +131,22 @@ export function useRadio(): UseRadioReturn {
     };
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onCanPlay = () => {
+      if (!userPausedRef.current && station && audio.paused) {
+        audio.play().catch(() => {});
+      }
+    };
+    const onPageShow = () => {
+      if (!station || userPausedRef.current) return;
+      if (audio.paused || audio.readyState < 2) {
+        setStatus('loading');
+        retryRef.current = 0;
+        audio.play().catch(() => {
+          audio.src = proxyUrl(station.url_resolved);
+          audio.play().catch(() => setStatus('error'));
+        });
+      }
+    };
 
     // Resume playback when page returns from background (screen unlock, tab switch)
     const onVisibilityChange = () => {
@@ -144,10 +170,13 @@ export function useRadio(): UseRadioReturn {
     audio.addEventListener('stalled', onStalled);
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('canplay', onCanPlay);
     document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pageshow', onPageShow);
 
     return () => {
       if (stallTimer) clearTimeout(stallTimer);
+      clearReconnectTimer();
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
@@ -155,7 +184,9 @@ export function useRadio(): UseRadioReturn {
       audio.removeEventListener('stalled', onStalled);
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('canplay', onCanPlay);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('pageshow', onPageShow);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [station]);

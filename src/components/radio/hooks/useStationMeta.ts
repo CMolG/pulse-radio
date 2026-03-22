@@ -22,27 +22,70 @@ function isAdContent(text: string): boolean {
   return AD_PATTERNS.some(re => re.test(text));
 }
 
-// Fetch ICY metadata via server-side proxy to avoid CORS issues
-async function fetchIcyMeta(streamUrl: string): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+const FETCH_TIMEOUT_MS = 10_000;
+const MAX_TITLE_LENGTH = 500;
+
+// Fetch ICY metadata via server-side proxy to avoid CORS issues.
+async function fetchIcyMeta(
+  streamUrl: string,
+  signal?: AbortSignal,
+): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const onParentAbort = () => controller.abort();
+  signal?.addEventListener('abort', onParentAbort);
+
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
     const res = await fetch(
       `/api/icy-meta?url=${encodeURIComponent(streamUrl)}`,
       { signal: controller.signal },
     );
-    clearTimeout(timeout);
-
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch {
     return { streamTitle: null, icyBr: null };
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort', onParentAbort);
+  }
+}
+
+// Look up song duration from iTunes. Used only after we have an anchored start
+// (second song onward) to reduce unnecessary ICY polling.
+async function fetchTrackDurationMs(
+  title: string,
+  artist: string,
+  signal?: AbortSignal,
+): Promise<number | null> {
+  const term = `${artist} ${title}`.trim();
+  if (!term) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const onParentAbort = () => controller.abort();
+  signal?.addEventListener('abort', onParentAbort);
+
+  try {
+    const res = await fetch(`/api/itunes?term=${encodeURIComponent(term)}`, {
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const result = data?.results?.[0];
+    const duration = result?.trackTimeMillis;
+    return typeof duration === 'number' && duration > 0 ? duration : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort', onParentAbort);
   }
 }
 
 function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
-  if (!raw || raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
+  if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
+  if (raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
 
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
@@ -69,33 +112,108 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastTitleRef = useRef<string>('');
+  const currentTrackKeyRef = useRef<string>('');
+  const trackStartedAtRef = useRef<number>(0);
+  const skipUntilRef = useRef<number>(0);
+  const hasAnchoredStartRef = useRef<boolean>(false);
+  const durationAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    durationAbortRef.current?.abort();
+    durationAbortRef.current = null;
 
     if (!station || !isPlaying) {
       setTrack(null);
       setIcyBitrate(null);
       lastTitleRef.current = '';
+      currentTrackKeyRef.current = '';
+      trackStartedAtRef.current = 0;
+      skipUntilRef.current = 0;
+      hasAnchoredStartRef.current = false;
       return;
     }
 
+    const abortController = new AbortController();
+
     const poll = async () => {
-      const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved);
+      if (abortController.signal.aborted) return;
+      if (skipUntilRef.current > Date.now()) return;
+
+      const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
+      if (abortController.signal.aborted) return;
       if (icyBr) setIcyBitrate(icyBr);
+
       if (streamTitle && streamTitle !== lastTitleRef.current) {
+        const previousTitle = lastTitleRef.current;
+
         if (isAdContent(streamTitle)) {
+          lastTitleRef.current = streamTitle;
+          currentTrackKeyRef.current = '';
+          trackStartedAtRef.current = 0;
+          skipUntilRef.current = 0;
+          durationAbortRef.current?.abort();
+          setTrack(null);
           return;
         }
+
         lastTitleRef.current = streamTitle;
         const parsed = parseTrack(streamTitle, station.name);
-        if (parsed && (isAdContent(parsed.title) || isAdContent(parsed.artist))) {
+        // Artist-only ad patterns produce false positives for valid names like
+        // "will.i.am", so only evaluate title text here.
+        if (parsed && isAdContent(parsed.title)) {
+          currentTrackKeyRef.current = '';
+          trackStartedAtRef.current = 0;
+          skipUntilRef.current = 0;
+          durationAbortRef.current?.abort();
+          setTrack(null);
           return;
         }
+
+        if (!parsed) {
+          currentTrackKeyRef.current = '';
+          trackStartedAtRef.current = 0;
+          skipUntilRef.current = 0;
+          durationAbortRef.current?.abort();
+          setTrack(null);
+          return;
+        }
+
+        if (previousTitle) {
+          hasAnchoredStartRef.current = true;
+        }
+
+        const key = `${parsed.artist}::${parsed.title}`.toLowerCase();
+        currentTrackKeyRef.current = key;
+        trackStartedAtRef.current = Date.now();
+        skipUntilRef.current = 0;
         setTrack(parsed);
+
+        // Smart polling starts only when we know the exact song start time.
+        // First detected song after tune-in has unknown start, so we keep
+        // normal ICY polling until the first transition occurs.
+        if (hasAnchoredStartRef.current) {
+          durationAbortRef.current?.abort();
+          const durationController = new AbortController();
+          durationAbortRef.current = durationController;
+
+          const durationMs = await fetchTrackDurationMs(
+            parsed.title,
+            parsed.artist,
+            durationController.signal,
+          );
+          if (durationController.signal.aborted) return;
+          if (!durationMs || durationMs <= 0) return;
+          if (currentTrackKeyRef.current !== key) return;
+
+          const expectedEnd = trackStartedAtRef.current + durationMs;
+          if (expectedEnd > Date.now()) {
+            skipUntilRef.current = expectedEnd;
+          }
+        }
         return;
       }
 
@@ -111,6 +229,9 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      abortController.abort();
+      durationAbortRef.current?.abort();
+      durationAbortRef.current = null;
     };
   }, [station, isPlaying]);
 
