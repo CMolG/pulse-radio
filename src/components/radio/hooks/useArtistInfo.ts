@@ -9,7 +9,29 @@
 import { useState, useEffect } from 'react';
 import type { ArtistInfo } from '../types';
 
+const MAX_CACHE = 200;
 const cache = new Map<string, ArtistInfo>();
+
+function cacheGet(key: string): ArtistInfo | undefined {
+  const val = cache.get(key);
+  if (val !== undefined) {
+    // Move to end (most recently used)
+    cache.delete(key);
+    cache.set(key, val);
+  }
+  return val;
+}
+
+function cacheSet(key: string, val: ArtistInfo) {
+  cache.delete(key); // ensure fresh insertion order
+  cache.set(key, val);
+  // Evict oldest entries beyond capacity
+  while (cache.size > MAX_CACHE) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+    else break;
+  }
+}
 
 export function useArtistInfo(artist: string | null): {
   info: ArtistInfo | null;
@@ -25,7 +47,7 @@ export function useArtistInfo(artist: string | null): {
     }
 
     const key = artist.toLowerCase().trim();
-    const cached = cache.get(key);
+    const cached = cacheGet(key);
     if (cached) {
       setInfo(cached);
       return;
@@ -39,7 +61,7 @@ export function useArtistInfo(artist: string | null): {
       .then((r) => r.json())
       .then((data: ArtistInfo) => {
         if (!cancelled) {
-          cache.set(key, data);
+          cacheSet(key, data);
           setInfo(data);
         }
       })
