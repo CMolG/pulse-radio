@@ -54,6 +54,15 @@ export async function GET(req: NextRequest) {
     ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
     : null;
 
+  // Propagate client disconnect to upstream so we don't leak connections
+  if (req.signal) {
+    if (req.signal.aborted) {
+      controller.abort();
+    } else {
+      req.signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+  }
+
   try {
     const upstream = await fetch(parsed.toString(), {
       headers: {

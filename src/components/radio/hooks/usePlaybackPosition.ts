@@ -87,8 +87,8 @@ export function usePlaybackPosition(): UsePlaybackPositionReturn {
     trackingRef.current = { url, audio };
 
     intervalRef.current = setInterval(() => {
-      if (audio.paused || !isFinite(audio.currentTime)) return;
-      savePosition(url, audio.currentTime, audio.duration || 0);
+      if (audio.paused || !isFinite(audio.currentTime) || !isFinite(audio.duration)) return;
+      savePosition(url, audio.currentTime, audio.duration);
     }, SAVE_INTERVAL_MS);
   }, [stopTracking, savePosition]);
 
