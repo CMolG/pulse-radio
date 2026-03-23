@@ -162,6 +162,16 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   return best ?? null;
 }
 
+function cacheGet(key: string): AlbumInfo | undefined {
+  const val = CACHE.get(key);
+  if (val !== undefined) {
+    // Move to end for LRU ordering
+    CACHE.delete(key);
+    CACHE.set(key, val);
+  }
+  return val;
+}
+
 function cacheSet(key: string, value: AlbumInfo) {
   CACHE.delete(key);
   CACHE.set(key, value);
@@ -211,7 +221,7 @@ export function useAlbumArt(
   );
   const cachedInfo = useMemo(() => {
     if (!cacheKey) return null;
-    return CACHE.get(cacheKey) ?? null;
+    return cacheGet(cacheKey) ?? null;
   }, [cacheKey]);
   const [fetched, setFetched] = useState<{ key: string; info: AlbumInfo } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
