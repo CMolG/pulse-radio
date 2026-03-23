@@ -383,7 +383,7 @@ export default function TheaterView({
       {!compact && (
         <div
           className={`relative z-10 ${
-            lyricsVariant === "desktop" ? "px-6 pb-4" : "px-3 pb-3"
+            lyricsVariant === "desktop" ? "px-6 pb-4" : "px-3 pb-3 mt-4"
           }`}
         >
           <LyricsReel
