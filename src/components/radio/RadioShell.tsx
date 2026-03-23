@@ -89,10 +89,10 @@ const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
 };
 
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
-  const [size, setSize] = useState<{ w: number; h: number }>({
-    w: 800,
-    h: 600,
-  });
+  const [size, setSize] = useState<{ w: number; h: number }>(() => ({
+    w: typeof window !== 'undefined' ? window.innerWidth : 800,
+    h: typeof window !== 'undefined' ? window.innerHeight : 600,
+  }));
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -882,7 +882,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           )}
 
           {theaterMode && radio.station ? (
-            <div className="min-h-full pb-24">
+            <div className="h-full flex flex-col">
+              <div className="flex-1 min-h-0">
               <TheaterView
                 station={radio.station}
                 track={enrichedTrack}
@@ -903,6 +904,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                 lyricsVariant="mobile"
               />
+              </div>
+              {/* Spacer for absolute bottom bar */}
+              <div className="h-20 shrink-0" />
             </div>
           ) : (
             <div className="flex flex-col min-h-full pb-24">
