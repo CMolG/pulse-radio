@@ -46,3 +46,7 @@ next-env.d.ts
 *.tsv
 /.tech_proposals/
 /docs/
+
+# Playwright
+test-results/
+playwright-report/

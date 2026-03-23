@@ -831,7 +831,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return (
       <div
         ref={containerRef}
-        className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
+        className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none"
       >
         <ParallaxBackground
           faviconUrl={radio.station?.favicon}
@@ -840,39 +840,39 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           landingMode={isLandingNavigation}
         />
 
-        {/* Mobile header — glassmorphism */}
-        {!theaterMode && (
-          <div className="relative z-20 flex-shrink-0 safe-top border-b border-white/[0.08]" style={{ background: 'rgba(10, 15, 26, 0.82)', backdropFilter: 'blur(24px) saturate(1.5)', WebkitBackdropFilter: 'blur(24px) saturate(1.5)' }}>
-              <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-              <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-                <div className="relative w-5 h-5 flex-shrink-0">
-                  <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
-                </div>
-                <span className="text-[15px] font-semibold text-white">Pulse</span>
-              </button>
-                <div className="flex-1" />
-                      <LanguageSelector />
-                {radio.station && (
-                <button
-                  onClick={radio.station ? handleToggleFav : undefined}
-                  aria-label={
-                    radio.station && favs.has(radio.station.stationuuid)
-                      ? t("removeFromFavorites")
-                      : t("addToFavorites")
-                  }
-                  className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
-                >
-                  <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
+        {/* Single scrollable area — content scrolls behind sticky header */}
+        <div className="h-full overflow-y-auto relative z-10">
+          {/* Sticky header — glassmorphism (content scrolls underneath) */}
+          {!theaterMode && (
+            <div data-testid="mobile-header" className="sticky top-0 z-30 safe-top border-b border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
+                <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+                <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                  <div className="relative w-5 h-5 flex-shrink-0">
+                    <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
+                  </div>
+                  <span className="text-[15px] font-semibold text-white">Pulse</span>
                 </button>
-              )}
+                  <div className="flex-1" />
+                        <LanguageSelector />
+                  {radio.station && (
+                  <button
+                    onClick={radio.station ? handleToggleFav : undefined}
+                    aria-label={
+                      radio.station && favs.has(radio.station.stationuuid)
+                        ? t("removeFromFavorites")
+                        : t("addToFavorites")
+                    }
+                    className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
+                  >
+                    <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Main content */}
-        <div className="flex-1 min-h-0 relative z-10 overflow-y-auto">
           {theaterMode && radio.station ? (
-            <div className="h-full">
+            <div className="min-h-full pb-24">
               <TheaterView
                 station={radio.station}
                 track={enrichedTrack}
@@ -895,7 +895,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               />
             </div>
           ) : (
-            <div className="flex flex-col min-h-full">
+            <div className="flex flex-col min-h-full pb-24">
               {radio.station && (
                 <NowPlayingHero
                   station={radio.station}
@@ -957,25 +957,21 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     onGoHome={handleGoHome}
                   />
                 ) : activeTab === "history" ? (
-                  <div className="overflow-y-auto h-full">
-                    <HistoryGridView
-                      history={songHistory.history}
-                      onRemove={songHistory.remove}
-                      onClear={songHistory.clear}
-                      onToggleFavSong={handleFavSongFromHistory}
-                      isSongFavorite={favSongs.has}
-                      onSelect={setSelectedSong}
-                    />
-                  </div>
+                  <HistoryGridView
+                    history={songHistory.history}
+                    onRemove={songHistory.remove}
+                    onClear={songHistory.clear}
+                    onToggleFavSong={handleFavSongFromHistory}
+                    isSongFavorite={favSongs.has}
+                    onSelect={setSelectedSong}
+                  />
                 ) : (
-                  <div className="overflow-y-auto h-full">
-                    <FavoriteSongsView
-                      songs={favSongs.songs}
-                      onRemove={favSongs.remove}
-                      onClear={favSongs.clear}
-                      onSelect={setSelectedSong}
-                    />
-                  </div>
+                  <FavoriteSongsView
+                    songs={favSongs.songs}
+                    onRemove={favSongs.remove}
+                    onClear={favSongs.clear}
+                    onSelect={setSelectedSong}
+                  />
                 )}
               </div>
             </div>
@@ -1033,8 +1029,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           )}
         </AnimatePresence>
 
-        {/* Bottom bar — glassmorphism */}
-        <div className="relative z-20 border-t border-white/[0.08]" style={{ background: 'rgba(10, 15, 26, 0.82)', backdropFilter: 'blur(24px) saturate(1.5)', WebkitBackdropFilter: 'blur(24px) saturate(1.5)' }}>
+        {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
+        <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
           {theaterAudioBadges.length > 0 && (
             <div className="px-4 pt-2 pb-1 overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-1.5 text-[10px] flex-nowrap">
