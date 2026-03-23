@@ -321,30 +321,20 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // Sync to shared playback store
   const pbStore = usePlaybackStore;
   useEffect(() => {
-    pbStore.getState().setSource("radio");
-    pbStore.getState().setPlaying(radio.status === "playing");
-  }, [radio.status, pbStore]);
-
-  useEffect(() => {
-    pbStore.getState().setVolume(radio.volume);
-    pbStore.getState().setMuted(radio.muted);
-  }, [radio.volume, radio.muted, pbStore]);
-
-  useEffect(() => {
+    const state = pbStore.getState();
+    state.setSource("radio");
+    state.setPlaying(radio.status === "playing");
+    state.setVolume(radio.volume);
+    state.setMuted(radio.muted);
+    state.setCurrentTime(radio.currentTime);
     if (enrichedTrack) {
-      pbStore
-        .getState()
-        .setTrackInfo(
-          enrichedTrack.title,
-          enrichedTrack.artist,
-          enrichedTrack.artworkUrl ?? albumArt.artworkUrl,
-        );
+      state.setTrackInfo(
+        enrichedTrack.title,
+        enrichedTrack.artist,
+        enrichedTrack.artworkUrl ?? albumArt.artworkUrl,
+      );
     }
-  }, [enrichedTrack, albumArt.artworkUrl, pbStore]);
-
-  useEffect(() => {
-    pbStore.getState().setCurrentTime(radio.currentTime);
-  }, [radio.currentTime, pbStore]);
+  }, [radio.status, radio.volume, radio.muted, radio.currentTime, enrichedTrack, albumArt.artworkUrl, pbStore]);
 
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {

@@ -80,7 +80,9 @@ function PWAStep() {
 
   const handleInstall = async () => {
     if (deferredPrompt) {
-      await deferredPrompt.prompt();
+      try {
+        await deferredPrompt.prompt();
+      } catch { /* user dismissed install prompt */ }
       setDeferredPrompt(null);
     }
   };
