@@ -48,6 +48,7 @@ import { useSleepTimer } from "./hooks/useSleepTimer";
 import { useStationQueue } from "./hooks/useStationQueue";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { useAudioReactiveBackground } from "./hooks/useAudioReactiveBackground";
+import { useStats } from "./hooks/useStats";
 import { useAudioAnalyser, useAlbumArt } from "@/lib/audio-visualizer";
 import { usePlaybackStore } from "@/lib/playbackStore";
 import BrowseView from "./components/BrowseView";
@@ -62,6 +63,7 @@ import SongDetailModal from "./components/SongDetailModal";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import LanguageSelector from "./components/LanguageSelector";
 import MobileSettingsPanel from "./components/MobileSettingsPanel";
+import OnboardingModal from "./components/OnboardingModal";
 import { saveToStorage } from "@/lib/storageUtils";
 import { useLocale } from "@/context/LocaleContext";
 import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
@@ -150,6 +152,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   });
   const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === "playing");
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
+  const usageStats = useStats();
 
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
@@ -171,6 +174,40 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     radio.station?.stationuuid,
     enrichedTrack,
   );
+
+  // Track listen time for stats (every 5 seconds while playing)
+  const lastTickRef = useRef(Date.now());
+  useEffect(() => {
+    if (radio.status !== 'playing' || !radio.station) {
+      lastTickRef.current = Date.now();
+      return;
+    }
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const delta = now - lastTickRef.current;
+      lastTickRef.current = now;
+      if (radio.station) {
+        usageStats.tickListenTime(radio.station.stationuuid, radio.station.name, delta);
+      }
+    }, 5000);
+    lastTickRef.current = Date.now();
+    return () => clearInterval(interval);
+  }, [radio.status, radio.station, usageStats]);
+
+  // Record song play when a new track starts
+  const lastRecordedTrackRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!enrichedTrack?.title || !enrichedTrack?.artist) return;
+    const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`;
+    if (key === lastRecordedTrackRef.current) return;
+    lastRecordedTrackRef.current = key;
+    usageStats.recordSongPlay(
+      enrichedTrack.title,
+      enrichedTrack.artist,
+      enrichedTrack.genre,
+      enrichedTrack.artworkUrl,
+    );
+  }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, usageStats]);
 
   const [showEq, setShowEq] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
@@ -825,6 +862,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {songDetailModal}
         {shortcutsOverlay}
         {offlineBanner}
+        <OnboardingModal />
       </div>
     );
   }
@@ -969,6 +1007,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     onSelectGenre={handleSelectGenre}
                     onSelectCountry={handleSelectCountry}
                     onGoHome={handleGoHome}
+                    userGenreOrder={usageStats.genreOrder()}
                   />
                 ) : activeTab === "history" ? (
                   <HistoryGridView
@@ -1027,6 +1066,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               onClose={() => setShowMobileSettings(false)}
               eq={eq}
               onPresetChange={setEqPreset}
+              statsData={{
+                topStations: usageStats.topStations(),
+                topSongs: usageStats.topSongs(),
+                topArtists: usageStats.topArtists(),
+                topGenres: usageStats.topGenres(),
+                totalListenMs: usageStats.stats.totalListenMs,
+              }}
             />
           )}
         </AnimatePresence>
@@ -1085,6 +1131,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {songDetailModal}
         {shortcutsOverlay}
         {offlineBanner}
+        <OnboardingModal />
       </div>
     );
   }
@@ -1226,6 +1273,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         onSelectGenre={handleSelectGenre}
                         onSelectCountry={handleSelectCountry}
                         onGoHome={handleGoHome}
+                        userGenreOrder={usageStats.genreOrder()}
                       />
                     </motion.div>
                   ) : activeTab === "history" ? (
@@ -1399,6 +1447,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {songDetailModal}
       {shortcutsOverlay}
       {offlineBanner}
+      <OnboardingModal />
     </div>
   );
 }

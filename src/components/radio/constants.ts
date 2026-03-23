@@ -25,6 +25,8 @@ export const STORAGE_KEYS = {
   NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
   REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled',
   LOCALE: 'radio-locale',
+  USAGE_STATS: 'radio-usage-stats',
+  ONBOARDING_DONE: 'radio-onboarding-done',
 } as const;
 
 export const MAX_RECENT = 15;

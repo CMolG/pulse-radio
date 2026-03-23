@@ -73,6 +73,7 @@ type Props = {
   onSelectGenre?: (cat: BrowseCategory) => void;
   onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
   onGoHome?: () => void;
+  userGenreOrder?: string[];
 };
 
 const SCROLL_CLASS =
@@ -170,6 +171,7 @@ export default function BrowseView({
   onSelectGenre,
   onSelectCountry,
   onGoHome,
+  userGenreOrder,
 }: Props) {
   const { t, locale } = useLocale();
   const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
@@ -181,6 +183,37 @@ export default function BrowseView({
       }),
     [t],
   );
+
+  // Reorder browse sections based on user listening stats
+  const effectiveBrowseOrder = useMemo(() => {
+    if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
+    const defaultOrder = [...BROWSE_ORDER];
+    // Map genre stats to category IDs (handle partial matches: "hip hop" → "hiphop")
+    const GENRE_TO_CAT: Record<string, string> = {
+      'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi',
+    };
+    const boostedIds = new Set<string>();
+    const ordered: string[] = [];
+
+    // Always keep trending first
+    ordered.push('trending');
+    boostedIds.add('trending');
+
+    for (const genre of userGenreOrder) {
+      const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
+      if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
+        ordered.push(catId);
+        boostedIds.add(catId);
+      }
+    }
+
+    // Append remaining in default order
+    for (const id of defaultOrder) {
+      if (!boostedIds.has(id)) ordered.push(id);
+    }
+    return ordered;
+  }, [userGenreOrder]);
+
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
   });
@@ -314,7 +347,7 @@ export default function BrowseView({
       setFailedCategories(new Set());
 
       const CONCURRENCY = 3;
-      const queue = [...BROWSE_ORDER];
+      const queue = [...effectiveBrowseOrder];
 
       const runBatch = async () => {
         while (queue.length > 0 && !flags.cancelled) {
@@ -572,7 +605,7 @@ export default function BrowseView({
                   </ScrollRow>
                 )}
 
-                {BROWSE_ORDER.map((catId) => {
+                {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId);
                   if (!cat) return null;
 
