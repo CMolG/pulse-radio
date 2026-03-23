@@ -153,6 +153,13 @@ export default function NowPlayingBar({
             </button>
           )}
         </div>
+
+        {/* Fill iPhone safe-area inset below the bar without adding layout height */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
+          style={{ height: "env(safe-area-inset-bottom, 0px)" }}
+        />
       </div>
     );
   }
