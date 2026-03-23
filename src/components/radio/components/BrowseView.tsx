@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES } from "../constants";

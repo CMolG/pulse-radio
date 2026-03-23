@@ -132,7 +132,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
   const {
     lyrics,
-    loading: lyricsLoading,
     effectiveCurrentTime,
     realtime: realtimeLyrics,
   } = useLyrics(track, radio.station?.name, {
@@ -832,7 +831,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
             isSongLiked={isSongLiked}
             lyrics={lyrics}
-            lyricsLoading={lyricsLoading}
             currentTime={effectiveCurrentTime}
             activeLineOverride={realtimeLyrics?.activeLineIndex}
             syncConfidence={realtimeLyrics?.confidence}
@@ -935,7 +933,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
                 isSongLiked={isSongLiked}
                 lyrics={lyrics}
-                lyricsLoading={lyricsLoading}
                 currentTime={effectiveCurrentTime}
                 activeLineOverride={realtimeLyrics?.activeLineIndex}
                 syncConfidence={realtimeLyrics?.confidence}
@@ -1174,7 +1171,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
                   isSongLiked={isSongLiked}
                   lyrics={lyrics}
-                  lyricsLoading={lyricsLoading}
                   currentTime={effectiveCurrentTime}
                   activeLineOverride={realtimeLyrics?.activeLineIndex}
                   syncConfidence={realtimeLyrics?.confidence}

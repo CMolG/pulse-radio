@@ -15,7 +15,6 @@ import {
 
 type Props = {
   lyrics: LyricsData | null;
-  loading: boolean;
   currentTime?: number;
    activeLineOverride?: number;
    syncConfidence?: number;
@@ -25,7 +24,6 @@ type Props = {
 
 export default function LyricsReel({
   lyrics,
-  loading,
   currentTime,
   activeLineOverride,
   variant = "mobile",

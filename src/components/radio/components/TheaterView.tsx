@@ -41,7 +41,6 @@ type Props = {
   onFavSong?: () => void;
   isSongLiked?: boolean;
   lyrics?: LyricsData | null;
-  lyricsLoading?: boolean;
   currentTime?: number;
   activeLineOverride?: number;
   syncConfidence?: number;
@@ -112,7 +111,6 @@ export default function TheaterView({
   onFavSong,
   isSongLiked,
   lyrics,
-  lyricsLoading,
   currentTime,
   activeLineOverride,
   syncConfidence,
@@ -400,7 +398,6 @@ export default function TheaterView({
             >
               <LyricsReel
                 lyrics={lyrics ?? null}
-                loading={Boolean(lyricsLoading)}
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
                 syncConfidence={syncConfidence}

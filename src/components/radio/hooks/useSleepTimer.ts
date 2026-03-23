@@ -22,12 +22,6 @@ export type UseSleepTimerReturn = {
   cancel: () => void;
 };
 
-type SleepTimerOptions = {
-  onExpire: () => void;
-  /** If provided, volume will gradually fade to 0 over the last 30 seconds */
-  audioRef?: React.RefObject<HTMLAudioElement | null>;
-};
-
 export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>): UseSleepTimerReturn {
   const [remainingMin, setRemainingMin] = useState<number | null>(null);
   const [isFading, setIsFading] = useState(false);
