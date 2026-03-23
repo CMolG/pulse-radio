@@ -86,7 +86,7 @@ self.addEventListener("fetch", (event) => {
           return res;
         }).catch(() => null);
         if (cached) {
-          fetchPromise; // refresh in background
+          void fetchPromise; // refresh in background
           return cached;
         }
         const fresh = await fetchPromise;

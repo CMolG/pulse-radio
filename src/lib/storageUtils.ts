@@ -27,6 +27,30 @@ export function saveToStorage<T>(key: string, value: T): boolean {
   }
 }
 
+/** Load a plain string value from localStorage with fallback */
+export function loadStringFromStorage(key: string, defaultValue = ""): string {
+  if (typeof window === "undefined") return defaultValue;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ?? defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+/** Save a plain string value to localStorage. Returns false if quota is exceeded. */
+export function saveStringToStorage(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
+      console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
+    }
+    return false;
+  }
+}
+
 /**
  * Storage schema version. Bump this when data structures change in a
  * backwards-incompatible way. On mismatch, stale keys are cleared so

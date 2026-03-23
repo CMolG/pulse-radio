@@ -10,7 +10,7 @@ import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';
 
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
-const MAX_DURATION_MS = 60 * 60 * 1000; // 60 min max per proxy connection
+const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
 
 /**
  * Proxies an internet radio stream, adding CORS headers so the browser
@@ -50,7 +50,9 @@ export async function GET(req: NextRequest) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), MAX_DURATION_MS);
+  const timeout = MAX_DURATION_MS > 0
+    ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
+    : null;
 
   try {
     const upstream = await fetch(parsed.toString(), {
@@ -66,39 +68,53 @@ export async function GET(req: NextRequest) {
       try {
         const finalUrl = new URL(upstream.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
-          clearTimeout(timeout);
+          if (timeout) clearTimeout(timeout);
           upstream.body?.cancel().catch(() => {});
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403,
             headers: { 'Content-Type': 'application/json' },
           });
         }
-      } catch { /* URL parse failed — continue with original validation */ }
+      } catch {
+        // URL parse failed — continue with original validation
+      }
     }
 
     if (!upstream.ok || !upstream.body) {
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Retry-After': '3' },
       });
     }
 
-    const contentType =
-      upstream.headers.get('content-type') || 'audio/mpeg';
+    const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
+    const icyBr = upstream.headers.get('icy-br');
+    const icyName = upstream.headers.get('icy-name');
+
+    const responseHeaders: Record<string, string> = {
+      'Content-Type': contentType,
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache, no-store',
+      'Transfer-Encoding': 'chunked',
+    };
+    if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr;
+    if (icyName) responseHeaders['X-Stream-Name'] = icyName;
+
+    // HEAD requests: return headers only (for prefetch / codec sniffing)
+    if (req.method === 'HEAD') {
+      if (timeout) clearTimeout(timeout);
+      upstream.body?.cancel().catch(() => {});
+      return new Response(null, { status: 200, headers: responseHeaders });
+    }
 
     return new Response(upstream.body, {
       status: 200,
-      headers: {
-        'Content-Type': contentType,
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache, no-store',
-        'Transfer-Encoding': 'chunked',
-      },
+      headers: responseHeaders,
     });
   } catch (err) {
-    clearTimeout(timeout);
+    if (timeout) clearTimeout(timeout);
     const message = err instanceof Error ? err.message : 'Unknown error';
     if (message.includes('abort')) {
       return new Response(JSON.stringify({ error: 'Stream timed out' }), {
@@ -108,7 +124,7 @@ export async function GET(req: NextRequest) {
     }
     return new Response(JSON.stringify({ error: message }), {
       status: 502,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },
     });
   }
 }

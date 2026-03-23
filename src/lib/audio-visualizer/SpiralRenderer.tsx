@@ -34,6 +34,8 @@ export function SpiralRenderer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
   const rotationRef = useRef(0);
+  const renderRef = useRef<() => void>(() => {});
+  const frequencyDataRefRef = useRef(frequencyDataRef);
   const dataArrayRef = useRef(new Float64Array(NUM_BARS));
   const targetArrayRef = useRef(new Float64Array(NUM_BARS));
   const smoothedRef = useRef(new Float64Array(NUM_BARS));
@@ -43,6 +45,10 @@ export function SpiralRenderer({
   useEffect(() => {
     colorsRef.current = { color1, color2, color3 };
   }, [color1, color2, color3]);
+
+  useEffect(() => {
+    frequencyDataRefRef.current = frequencyDataRef;
+  }, [frequencyDataRef]);
 
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -56,7 +62,7 @@ export function SpiralRenderer({
     const h = Math.round(rect.height * dpr);
 
     if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(render);
+      frameRef.current = requestAnimationFrame(renderRef.current);
       return;
     }
 
@@ -71,7 +77,7 @@ export function SpiralRenderer({
     // Update mock/frequency data
     const data = dataArrayRef.current;
     const target = targetArrayRef.current;
-    const frequencyData = frequencyDataRef?.current ?? null;
+    const frequencyData = frequencyDataRefRef.current?.current ?? null;
 
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
@@ -85,7 +91,6 @@ export function SpiralRenderer({
       }
     } else if (demo) {
       // Demo mode: organic simulated audio
-      const t = performance.now() * 0.001;
       for (let i = 0; i < NUM_BARS; i++) {
         if (Math.random() < 0.08) {
           const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6;
@@ -219,13 +224,17 @@ export function SpiralRenderer({
 
     ctx.globalAlpha = 1.0;
 
-    frameRef.current = requestAnimationFrame(render);
+    frameRef.current = requestAnimationFrame(renderRef.current);
   }, [sensitivity, demo]);
 
   useEffect(() => {
-    frameRef.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(frameRef.current);
+    renderRef.current = render;
   }, [render]);
+
+  useEffect(() => {
+    frameRef.current = requestAnimationFrame(renderRef.current);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, []);
 
   return (
     <div

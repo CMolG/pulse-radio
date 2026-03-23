@@ -37,6 +37,8 @@ export function CircularRenderer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
   const timeRef = useRef(0);
+  const renderRef = useRef<() => void>(() => {});
+  const frequencyDataRefRef = useRef(frequencyDataRef);
 
   const colorsRef = useRef({
     c1: hexToRgb(color1),
@@ -50,7 +52,10 @@ export function CircularRenderer({
     };
   }, [color1, color2]);
 
-  {/* TODO duplicated code fragment */}
+  useEffect(() => {
+    frequencyDataRefRef.current = frequencyDataRef;
+  }, [frequencyDataRef]);
+
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -63,7 +68,7 @@ export function CircularRenderer({
     const h = Math.round(rect.height * dpr);
 
     if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(render);
+      frameRef.current = requestAnimationFrame(renderRef.current);
       return;
     }
 
@@ -85,7 +90,7 @@ export function CircularRenderer({
     const { c1, c2 } = colorsRef.current;
 
     // Build or use demo data
-    let dataArray: Uint8Array | null = frequencyDataRef?.current ?? null;
+    let dataArray: Uint8Array | null = frequencyDataRefRef.current?.current ?? null;
     let bufLen: number;
 
     if (dataArray) {
@@ -101,7 +106,7 @@ export function CircularRenderer({
       }
       dataArray = demoData;
     } else {
-      frameRef.current = requestAnimationFrame(render);
+      frameRef.current = requestAnimationFrame(renderRef.current);
       return;
     }
 
@@ -131,13 +136,17 @@ export function CircularRenderer({
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    frameRef.current = requestAnimationFrame(render);
+    frameRef.current = requestAnimationFrame(renderRef.current);
   }, [sensitivity, demo]);
 
   useEffect(() => {
-    frameRef.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(frameRef.current);
+    renderRef.current = render;
   }, [render]);
+
+  useEffect(() => {
+    frameRef.current = requestAnimationFrame(renderRef.current);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, []);
 
   return (
     <div className={`relative ${className}`}>

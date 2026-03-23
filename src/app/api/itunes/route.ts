@@ -18,15 +18,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid term parameter', results: [] }, { status: 400 });
   }
 
+  // Support podcast search via ?media=podcast (defaults to music for backward compat)
+  const media = req.nextUrl.searchParams.get('media') === 'podcast' ? 'podcast' : 'music';
+  const entity = media === 'podcast' ? 'podcast' : 'song';
+  const limit = media === 'podcast' ? '20' : '3';
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8_000);
 
   try {
     const url = `https://itunes.apple.com/search?${new URLSearchParams({
       term,
-      media: 'music',
-      entity: 'song',
-      limit: '3',
+      media,
+      entity,
+      limit,
     })}`;
 
     const res = await fetch(url, { signal: controller.signal });

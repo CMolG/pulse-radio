@@ -26,6 +26,7 @@ import { useArtistInfo } from '../hooks/useArtistInfo';
 import { useLyrics } from '../hooks/useLyrics';
 import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
 import { useAlbumArt } from '@/lib/audio-visualizer';
+import UiImage from '@/components/common/UiImage';
 
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 
@@ -162,12 +163,14 @@ export default function SongDetailModal({ song, onClose }: Props) {
               {/* ── Song Info ── */}
               <div className="px-5 -mt-2">
                 {/* Artwork */}
-                <div className="w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
+                <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
                   {resolvedArtworkUrl ? (
-                    <img
+                    <UiImage
                       src={resolvedArtworkUrl}
                       alt={`Album art for ${song.title} by ${song.artist}`}
-                      className="size-full object-cover"
+                      className="object-cover"
+                      sizes="240px"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="size-full flex items-center justify-center">
@@ -282,11 +285,15 @@ export default function SongDetailModal({ song, onClose }: Props) {
                     {/* Artist header with image */}
                     <div className="flex gap-3">
                       {info.imageUrl ? (
-                        <img
-                          src={info.imageUrl}
-                          alt={info.name}
-                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 bg-surface-3"
-                        />
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                          <UiImage
+                            src={info.imageUrl}
+                            alt={info.name}
+                            className="object-cover bg-surface-3"
+                            sizes="64px"
+                            loading="lazy"
+                          />
+                        </div>
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">
                           {info.type === 'Group' ? (

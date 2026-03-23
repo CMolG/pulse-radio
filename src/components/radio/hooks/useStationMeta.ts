@@ -18,14 +18,21 @@ const AD_PATTERNS = [
   /\b(www\.)/i,
 ];
 
+const FETCH_TIMEOUT_MS = 10_000;
+const POLL_INTERVAL_MS = 5_000;
+const MAX_TITLE_LENGTH = 500;
+
 function isAdContent(text: string): boolean {
   return AD_PATTERNS.some(re => re.test(text));
 }
 
-// Fetch ICY metadata via server-side proxy to avoid CORS issues
-export async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+// Fetch ICY metadata via server-side proxy to avoid CORS issues.
+export async function fetchIcyMeta(
+  streamUrl: string,
+  signal?: AbortSignal,
+): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   const onParentAbort = () => controller.abort();
   signal?.addEventListener('abort', onParentAbort);
 
@@ -45,8 +52,6 @@ export async function fetchIcyMeta(streamUrl: string, signal?: AbortSignal): Pro
     signal?.removeEventListener('abort', onParentAbort);
   }
 }
-
-const MAX_TITLE_LENGTH = 500;
 
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
@@ -70,15 +75,19 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
 export type UseStationMetaReturn = {
   track: NowPlayingTrack | null;
   icyBitrate: string | null;
+  streamCodec: string | null;
 };
 
-export function useStationMeta(station: Station | null, isPlaying: boolean, knownDurationMs?: number): UseStationMetaReturn {
+export function useStationMeta(
+  station: Station | null,
+  isPlaying: boolean,
+): UseStationMetaReturn {
+  const isActive = Boolean(station && isPlaying);
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
+  const [streamCodec, setStreamCodec] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastTitleRef = useRef<string>('');
-  // When we detect a new song and know its duration, record when it should end
-  const songEndTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (intervalRef.current) {
@@ -86,11 +95,8 @@ export function useStationMeta(station: Station | null, isPlaying: boolean, know
       intervalRef.current = null;
     }
 
-    if (!station || !isPlaying) {
-      setTrack(null);
-      setIcyBitrate(null);
+    if (!isActive || !station) {
       lastTitleRef.current = '';
-      songEndTimeRef.current = 0;
       return;
     }
 
@@ -98,32 +104,37 @@ export function useStationMeta(station: Station | null, isPlaying: boolean, know
 
     const poll = async () => {
       if (abortController.signal.aborted) return;
-      if (document.hidden) return; // skip polling when tab is hidden
-
-      // Smart polling: if we know the song's duration and it hasn't ended yet, skip the poll
-      if (songEndTimeRef.current > 0 && Date.now() < songEndTimeRef.current) return;
+      if (document.hidden) return;
 
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
       if (abortController.signal.aborted) return;
+
       if (icyBr) setIcyBitrate(icyBr);
+
+      // Derive codec from station data for display
+      if (station.codec) {
+        const c = station.codec.toUpperCase();
+        const friendly = c === 'MP3' ? 'MP3' : c === 'AAC' || c === 'AAC+' ? 'AAC' :
+          c === 'OGG' || c === 'VORBIS' ? 'OGG' : c === 'OPUS' ? 'Opus' :
+          c === 'FLAC' ? 'FLAC' : c === 'WMA' ? 'WMA' : c;
+        setStreamCodec(friendly);
+      }
+
       if (streamTitle && streamTitle !== lastTitleRef.current) {
-        if (isAdContent(streamTitle)) {
-          lastTitleRef.current = streamTitle;
-          songEndTimeRef.current = 0;
-          setTrack(null);
-          return;
-        }
         lastTitleRef.current = streamTitle;
-        const parsed = parseTrack(streamTitle, station.name);
-        // Only reject if the title looks like an ad. Artist-only ad matches
-        // cause false positives (e.g. "will.i.am", bands with TLD-like names).
-        if (parsed && isAdContent(parsed.title)) {
-          songEndTimeRef.current = 0;
+
+        if (isAdContent(streamTitle)) {
           setTrack(null);
           return;
         }
-        // New song detected — will set songEndTime once duration is known
-        songEndTimeRef.current = 0;
+
+        const parsed = parseTrack(streamTitle, station.name);
+        // Only reject if title looks like ad content. Artist names can look like domains.
+        if (!parsed || isAdContent(parsed.title)) {
+          setTrack(null);
+          return;
+        }
+
         setTrack(parsed);
         return;
       }
@@ -136,20 +147,17 @@ export function useStationMeta(station: Station | null, isPlaying: boolean, know
     };
 
     poll();
-    intervalRef.current = setInterval(poll, 8_000);
+    intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       abortController.abort();
     };
-  }, [station, isPlaying]);
+  }, [station, isActive]);
 
-  // When duration becomes known for the current song, set the expected end time
-  useEffect(() => {
-    if (knownDurationMs && knownDurationMs > 0 && track) {
-      songEndTimeRef.current = Date.now() + knownDurationMs;
-    }
-  }, [knownDurationMs, track?.title, track?.artist]);
-
-  return { track, icyBitrate };
+  return {
+    track: isActive ? track : null,
+    icyBitrate: isActive ? icyBitrate : null,
+    streamCodec: isActive ? streamCodec : null,
+  };
 }

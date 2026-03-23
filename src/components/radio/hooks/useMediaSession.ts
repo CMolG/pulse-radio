@@ -24,7 +24,9 @@ type MediaSessionConfig = {
 
 export function useMediaSession(config: MediaSessionConfig): void {
   const configRef = useRef(config);
-  configRef.current = config;
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
 
   const { station, track, isPlaying } = config;
 

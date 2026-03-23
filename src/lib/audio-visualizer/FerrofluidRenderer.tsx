@@ -186,6 +186,8 @@ export function FerrofluidRenderer({
   const frameRef = useRef(0);
   const timeRef = useRef(0);
   const sizeRef = useRef({ w: 0, h: 0 });
+  const renderRef = useRef<() => void>(() => {});
+  const frequencyDataRefRef = useRef(frequencyDataRef);
 
   const colors = useRef({
     primary: hexToRgb(colorPrimary),
@@ -201,6 +203,10 @@ export function FerrofluidRenderer({
     };
   }, [colorPrimary, colorSecondary, colorAccent]);
 
+  useEffect(() => {
+    frequencyDataRefRef.current = frequencyDataRef;
+  }, [frequencyDataRef]);
+
   const render = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -213,7 +219,7 @@ export function FerrofluidRenderer({
     const h = Math.round(rect.height * dpr * 0.5);
 
     if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(render);
+      frameRef.current = requestAnimationFrame(renderRef.current);
       return;
     }
 
@@ -240,7 +246,7 @@ export function FerrofluidRenderer({
 
     // compute overall energy
     let energy = 0;
-    const frequencyData = frequencyDataRef?.current ?? null;
+    const frequencyData = frequencyDataRefRef.current?.current ?? null;
     if (frequencyData) {
       let sum = 0;
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
@@ -298,13 +304,17 @@ export function FerrofluidRenderer({
     // draw metaballs
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
 
-    frameRef.current = requestAnimationFrame(render);
+    frameRef.current = requestAnimationFrame(renderRef.current);
   }, [blobCount, sensitivity, demo]);
 
   useEffect(() => {
-    frameRef.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(frameRef.current);
+    renderRef.current = render;
   }, [render]);
+
+  useEffect(() => {
+    frameRef.current = requestAnimationFrame(renderRef.current);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, []);
 
   return (
     <div className={`relative ${className}`}>

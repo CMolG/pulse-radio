@@ -44,3 +44,5 @@ next-env.d.ts
 /.superpowers/
 /verify-lyrics-ui.mjs
 *.tsv
+/.tech_proposals/
+/docs/

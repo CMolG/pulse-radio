@@ -11,6 +11,7 @@ import { Radio, Maximize2 } from "lucide-react";
 import type { Station, NowPlayingTrack, LyricsData } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import MobileLyricsReel from "./MobileLyricsReel";
+import UiImage from "@/components/common/UiImage";
 import {
   ParallaxAlbumBackground,
 } from "@/lib/audio-visualizer";
@@ -34,6 +35,9 @@ type Props = {
   lyrics?: LyricsData | null;
   lyricsLoading?: boolean;
   currentTime?: number;
+  activeLineOverride?: number;
+  syncConfidence?: number;
+  syncMode?: "time" | "realtime";
   lyricsVariant?: "mobile" | "desktop";
 };
 
@@ -47,6 +51,9 @@ export default function NowPlayingHero({
   lyrics,
   lyricsLoading,
   currentTime,
+  activeLineOverride,
+  syncConfidence,
+  syncMode,
   lyricsVariant = "mobile",
 }: Props) {
   const [imgError, setImgError] = useState(false);
@@ -55,10 +62,12 @@ export default function NowPlayingHero({
 
   // Reset error state when image URL changes
   const lastCoverRef = React.useRef(coverUrl);
-  if (coverUrl !== lastCoverRef.current) {
-    lastCoverRef.current = coverUrl;
-    if (imgError) setImgError(false);
-  }
+  React.useEffect(() => {
+    if (coverUrl !== lastCoverRef.current) {
+      lastCoverRef.current = coverUrl;
+      setImgError(false);
+    }
+  }, [coverUrl]);
 
   return (
     <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
@@ -75,6 +84,9 @@ export default function NowPlayingHero({
                   lyrics={lyrics ?? null}
                   loading={!!lyricsLoading}
                   currentTime={currentTime}
+                  activeLineOverride={activeLineOverride}
+                  syncConfidence={syncConfidence}
+                  syncMode={syncMode}
                   variant={lyricsVariant}
               />
             </div>
@@ -93,7 +105,7 @@ export default function NowPlayingHero({
       )}
 
       <div className="relative z-10 flex-row-4 w-full">
-        <div className="w-16 h-16 rounded-xl bg-surface-2 flex-center-row shrink-0 overflow-hidden">
+        <div className="relative w-16 h-16 rounded-xl bg-surface-2 flex-center-row shrink-0 overflow-hidden">
           {showFallback ? (
             <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
@@ -103,10 +115,12 @@ export default function NowPlayingHero({
               </span>
             </div>
           ) : (
-            <img
+            <UiImage
               src={coverUrl}
               alt=""
-              className="size-full object-cover"
+              className="object-cover"
+              sizes="64px"
+              loading="lazy"
               onError={() => setImgError(true)}
             />
           )}

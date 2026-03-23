@@ -11,6 +11,7 @@ import { Radio, Play, Pause, SkipForward, Heart } from 'lucide-react';
 import type { Station, WidgetPlaybackState } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage } from '@/lib/storageUtils';
+import UiImage from '@/components/common/UiImage';
 
 function sendCommand(action: string, station?: Station) {
   window.dispatchEvent(new CustomEvent('radio-command', { detail: { action, station } }));
@@ -48,11 +49,12 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
   return (<div className="col-full bg-sys-surface/80 backdrop-blur-xl card-lg p-3 select-none overflow-hidden relative">
       {/* Blurred art bg */}
       {station?.favicon && (
-        <img
+        <UiImage
           src={station.favicon}
           alt=""
-          className="abs-fill size-full object-cover blur-2xl opacity-15 pointer-events-none"
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
+          className="object-cover blur-2xl opacity-15 pointer-events-none"
+          sizes="300px"
+        />
       )}
 
       <div className="relative z-10 flex flex-col h-full">

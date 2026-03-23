@@ -11,20 +11,34 @@ import { X, Power, Plus, Save } from 'lucide-react';
 import type { EqBand, EqPreset } from '../types';
 import { EQ_PRESETS } from '../constants';
 
+type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';
+
 type Props = {
   bands: EqBand[];
   enabled: boolean;
+  normalizerEnabled: boolean;
+  stereoWidth: number;
+  bassEnhance: number;
+  compressorEnabled: boolean;
+  compressorAmount: number;
+  noiseReductionMode: NoiseReductionMode;
   customPresets?: EqPreset[];
   onSetGain: (id: string, gain: number) => void;
   onApplyPreset: (gains: number[]) => void;
   onToggleEnabled: () => void;
+  onToggleNormalizer: () => void;
+  onSetStereoWidth: (w: number) => void;
+  onSetBassEnhance: (v: number) => void;
+  onToggleCompressor: () => void;
+  onSetCompressorAmount: (v: number) => void;
+  onSetNoiseReductionMode: (mode: NoiseReductionMode) => void;
   onClose: () => void;
   onSaveCustomPreset?: (name: string) => void;
   onRemoveCustomPreset?: (name: string) => void;
   onPresetChange?: (name: string | null) => void;
 };
 
-export default function EqPanel({ bands, enabled, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
+export default function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -55,7 +69,8 @@ export default function EqPanel({ bands, enabled, customPresets = [], onSetGain,
       <div className="flex-between mb-4">
         <div className="flex-row-2">
           <span className="text-[13px] font-semibold text-white">Equalizer</span>
- <button onClick={onToggleEnabled} aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'} className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`} ><Power size={13} /></button></div>
+ <button onClick={onToggleEnabled} aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'} className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`} ><Power size={13} /></button>
+ <button onClick={onToggleNormalizer} aria-label={normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'} title="Loudness Normalizer" className={`px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}>NORM</button></div>
         <button onClick={onClose} aria-label="Close equalizer" className="p-1 text-subtle-hover"><X size={14} /></button></div>
 
       {/* Presets */}
@@ -123,5 +138,56 @@ export default function EqPanel({ bands, enabled, customPresets = [], onSetGain,
             <span className="text-[9px] text-secondary">{band.label}</span>
           </div>
         ))}
+      </div>
+
+      {/* Stereo width */}
+      <div className="mt-3 pt-3 border-t border-white/10">
+        <div className="mb-2">
+          <div className="text-[10px] text-secondary mb-1">Noise Reduction</div>
+          <div className="flex-wrap-1.5">
+            {(['off', 'low', 'medium', 'high'] as const).map(mode => (
+              <button
+                key={mode}
+                onClick={() => onSetNoiseReductionMode(mode)}
+                className={`px-2 py-1 text-[10px] rounded-md transition-colors ${
+                  noiseReductionMode === mode
+                    ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40'
+                    : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'
+                }`}
+                aria-label={`Noise reduction ${mode}`}
+              >
+                {mode.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-secondary shrink-0 w-12">Width</span>
+          <input type="range" min={0} max={200} step={5} value={Math.round(stereoWidth * 100)}
+            onChange={e => onSetStereoWidth(parseInt(e.target.value, 10) / 100)}
+            aria-label="Stereo width"
+            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+          />
+          <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(stereoWidth * 100)}%</span>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="text-[10px] text-secondary shrink-0 w-12">Bass+</span>
+          <input type="range" min={0} max={100} step={5} value={Math.round(bassEnhance * 100)}
+            onChange={e => onSetBassEnhance(parseInt(e.target.value, 10) / 100)}
+            aria-label="Bass enhance"
+            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+          />
+          <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(bassEnhance * 100)}%</span>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <button onClick={onToggleCompressor} aria-label={compressorEnabled ? 'Disable compressor' : 'Enable compressor'} title="Multiband Compressor" className={`text-[10px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}>Comp</button>
+          <input type="range" min={0} max={100} step={5} value={Math.round(compressorAmount * 100)}
+            onChange={e => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)}
+            disabled={!compressorEnabled}
+            aria-label="Compressor amount"
+            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+          />
+          <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(compressorAmount * 100)}%</span>
+        </div>
       </div></div>);
 }

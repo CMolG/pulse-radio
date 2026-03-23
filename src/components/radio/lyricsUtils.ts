@@ -41,6 +41,18 @@ export function getActiveLyricIndex(
   return result;
 }
 
+export function getEffectiveActiveLyricIndex(
+  lyrics: LyricsData | null,
+  currentTime: number | undefined,
+  activeLineOverride?: number,
+) {
+  if (typeof activeLineOverride === 'number' && activeLineOverride >= 0) {
+    if (!lyrics?.synced || !lyrics.lines.length) return -1;
+    return Math.min(activeLineOverride, lyrics.lines.length - 1);
+  }
+  return getActiveLyricIndex(lyrics, currentTime);
+}
+
 export function getRenderableLyricLines(
   lyrics: LyricsData | null,
 ): RenderableLyricLine[] {

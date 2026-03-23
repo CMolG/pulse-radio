@@ -16,7 +16,7 @@ import React, {
 import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
-import { GENRE_CATEGORIES, COUNTRY_CATEGORIES, COUNTRY_DISPLAY, countryFlag } from "../constants";
+import { GENRE_CATEGORIES } from "../constants";
 import {
   searchStations,
   stationsByTag,
@@ -26,6 +26,9 @@ import {
 } from "../services/radioApi";
 import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
 import StationCard from "./StationCard";
+import { useLocale } from "@/context/LocaleContext";
+import type { MessageKey } from "@/lib/i18n/messages";
+import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 
 /** Order in which category sections appear on the home screen */
 const BROWSE_ORDER = [
@@ -39,6 +42,24 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   local: <MapPin size={14} className="text-emerald-400/70" />,
 };
 
+const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
+  trending: "genreTrending",
+  pop: "genrePop",
+  rock: "genreRock",
+  jazz: "genreJazz",
+  classical: "genreClassical",
+  electronic: "genreElectronic",
+  hiphop: "genreHiphop",
+  country: "genreCountry",
+  ambient: "genreAmbient",
+  lofi: "genreLofi",
+  news: "genreNews",
+  latin: "genreLatin",
+  metal: "genreMetal",
+  local: "genreLocal",
+  world: "genreWorld",
+};
+
 type Props = {
   view: ViewState;
   currentStation: Station | null;
@@ -46,10 +67,11 @@ type Props = {
   isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void;
   onToggleFav: (station: Station) => void;
+  onPrefetch?: (streamUrl: string) => void;
   favorites?: Station[];
   recent?: Station[];
   onSelectGenre?: (cat: BrowseCategory) => void;
-  onSelectCountry?: (countryName: string) => void;
+  onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
   onGoHome?: () => void;
 };
 
@@ -142,12 +164,23 @@ export default function BrowseView({
   isFavorite,
   onPlay,
   onToggleFav,
+  onPrefetch,
   favorites,
   recent,
   onSelectGenre,
   onSelectCountry,
   onGoHome,
 }: Props) {
+  const { t, locale } = useLocale();
+  const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
+  const translatedGenreCategories = useMemo(
+    () =>
+      GENRE_CATEGORIES.map((category) => {
+        const key = GENRE_LABEL_KEYS[category.id];
+        return key ? { ...category, label: t(key) } : category;
+      }),
+    [t],
+  );
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
   });
@@ -170,7 +203,7 @@ export default function BrowseView({
   const scanGenRef = useRef(0);
 
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
-    const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
+    const cat = translatedGenreCategories.find((c) => c.id === catId);
     if (!cat) return;
     try {
       let result: Station[];
@@ -202,7 +235,7 @@ export default function BrowseView({
         });
       }
     }
-  }, []);
+  }, [translatedGenreCategories]);
 
   useEffect(() => {
     setPage(0);
@@ -259,7 +292,7 @@ export default function BrowseView({
               result = await stationsByTag(view.tag);
               break;
             case "country":
-              result = await stationsByCountry(view.country);
+              result = await stationsByCountry(view.countryQueryName);
               break;
             default:
               result = [];
@@ -328,9 +361,14 @@ export default function BrowseView({
   // Trigger scan when enabled or page changes (non-top modes only)
   useEffect(() => {
     if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return;
-    const gen = ++scanGenRef.current;
+    const gen = scanGenRef.current + 1;
+    scanGenRef.current = gen;
     startScan(pageStations, gen);
-    return () => { scanGenRef.current++; };
+    return () => {
+      if (scanGenRef.current === gen) {
+        scanGenRef.current++;
+      }
+    };
   }, [scanEnabled, pageStations, view.mode, startScan]);
 
   // Derived scan stats
@@ -352,7 +390,7 @@ export default function BrowseView({
 
   // Chip active states based on current view (chips trigger view changes, not local filters)
   const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
-  const countryChipActive = (name: string) => view.mode === "country" && view.country === name;
+  const countryChipActive = (countryCode: string) => view.mode === "country" && view.countryCode === countryCode;
 
   return (
     <div className="col-fill min-w-0 h-full">
@@ -367,18 +405,18 @@ export default function BrowseView({
             {view.label}
           </h2>
           <p className="text-[12px] text-muted mt-0.5">
-            {loading ? "Loading…" : `${displayCount} stations`}
+            {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}
           </p>
         </div>
         <button
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
-          title="Auto-play a random station every 30 seconds"
+          title={t("discoveryModeTitle")}
           aria-pressed={discoveryMode}
-          aria-label="Discovery mode"
+          aria-label={t("discoveryModeAria")}
         >
           <Sparkles size={12} />
-          Discovery{discoveryMode ? " ON" : ""}
+          {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}
         </button>
       </div>
 
@@ -388,9 +426,9 @@ export default function BrowseView({
           onClick={() => onGoHome?.()}
           className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
         >
-          All
+          {t("all")}
         </button>
-        {GENRE_CATEGORIES.map((cat) => (
+        {translatedGenreCategories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => onSelectGenre?.(cat)}
@@ -408,17 +446,17 @@ export default function BrowseView({
           onClick={() => onGoHome?.()}
           className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
         >
-          🌐 All
+          {`🌐 ${t("allCountries")}`}
         </button>
-        {COUNTRY_CATEGORIES.map((c) => (
+        {countryChips.map((c) => (
           <button
             key={c.code}
-            onClick={() => onSelectCountry?.(c.name)}
-            aria-current={countryChipActive(c.name) || undefined}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.name) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
+            aria-current={countryChipActive(c.code) || undefined}
+            className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
           >
-            <span>{countryFlag(c.code)}</span>
-            <span>{COUNTRY_DISPLAY[c.code] ?? c.name}</span>
+            <span>{c.flag}</span>
+            <span>{c.displayName}</span>
           </button>
         ))}
       </div>
@@ -434,12 +472,12 @@ export default function BrowseView({
         {error && (
           <div className="flex-center-col gap-3 py-16">
             <Radio size={32} className="text-muted" />
-            <p className="text-[13px] text-secondary">{error}</p>
+            <p className="text-[13px] text-secondary">{t("failedToLoad")}</p>
             <button
               onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
             >
-              Retry
+              {t("retry")}
             </button>
           </div>
         )}
@@ -447,7 +485,7 @@ export default function BrowseView({
         {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16">
             <Radio size={32} className="text-muted mb-2" />
-            <p className="text-[13px] text-secondary">No stations found</p>
+            <p className="text-[13px] text-secondary">{t("noStationsFound")}</p>
           </div>
         )}
 
@@ -458,11 +496,11 @@ export default function BrowseView({
               <>
                 {/* Favorites row */}
                 {favorites && favorites.length > 0 && (
-                  <ScrollRow
-                    title="Favorites"
-                    icon={<Heart size={14} className="text-pink-400/70" />}
-                    isMobile={isMobile}
-                  >
+                    <ScrollRow
+                      title={t("favorites")}
+                      icon={<Heart size={14} className="text-pink-400/70" />}
+                      isMobile={isMobile}
+                    >
                     {favorites.map((s) => (
                       <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
                         <StationCard
@@ -472,6 +510,7 @@ export default function BrowseView({
                           isFavorite={isFavorite(s.stationuuid)}
                           onPlay={() => onPlay(s)}
                           onToggleFav={() => onToggleFav(s)}
+                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
                         />
                       </div>
                     ))}
@@ -480,11 +519,11 @@ export default function BrowseView({
 
                 {/* Recent stations row */}
                 {recent && recent.length > 0 && (
-                  <ScrollRow
-                    title="Recent"
-                    icon={<Clock size={14} className="text-blue-400/70" />}
-                    isMobile={isMobile}
-                  >
+                    <ScrollRow
+                      title={t("recent")}
+                      icon={<Clock size={14} className="text-blue-400/70" />}
+                      isMobile={isMobile}
+                    >
                     {recent.map((s) => (
                       <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
                         <StationCard
@@ -494,6 +533,7 @@ export default function BrowseView({
                           isFavorite={isFavorite(s.stationuuid)}
                           onPlay={() => onPlay(s)}
                           onToggleFav={() => onToggleFav(s)}
+                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
                         />
                       </div>
                     ))}
@@ -501,7 +541,7 @@ export default function BrowseView({
                 )}
 
                 {BROWSE_ORDER.map((catId) => {
-                  const cat = GENRE_CATEGORIES.find((c) => c.id === catId);
+                  const cat = translatedGenreCategories.find((c) => c.id === catId);
                   if (!cat) return null;
 
                   const catStations = categorySections[catId];
@@ -521,12 +561,12 @@ export default function BrowseView({
                       >
                         <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
                           <Radio size={18} className="text-muted" />
-                          <p className="text-[11px] text-muted">Failed to load</p>
+                          <p className="text-[11px] text-muted">{t("failedToLoadStations")}</p>
                           <button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
                           >
-                            Retry
+                            {t("retry")}
                           </button>
                         </div>
                       </ScrollRow>
@@ -589,6 +629,7 @@ export default function BrowseView({
                             isFavorite={isFavorite(s.stationuuid)}
                             onPlay={() => onPlay(s)}
                             onToggleFav={() => onToggleFav(s)}
+                            onPrefetch={() => onPrefetch?.(s.url_resolved)}
                           />
                         </div>
                       ))}
@@ -612,22 +653,22 @@ export default function BrowseView({
                           ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
                           : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
                       }`}
-                      title="Check what's currently playing on each station"
-                    >
-                      <ScanSearch size={12} />
-                      {isScanning
-                        ? `Scanning ${scannedCount}/${pageStations.length}…`
-                        : scannedCount > 0
-                          ? `Now playing (${scannedCount}/${pageStations.length})`
-                          : "Scan now playing"}
-                    </button>
+                        title={t("scanNowPlaying")}
+                      >
+                        <ScanSearch size={12} />
+                        {isScanning
+                          ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
+                          : scannedCount > 0
+                            ? t("nowPlayingProgress", { current: scannedCount, total: pageStations.length })
+                            : t("scanNowPlaying")}
+                      </button>
 
                     {scanEnabled && (
                       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                         <Music2 size={11} className="text-dim shrink-0" />
                         <input
                           type="text"
-                          placeholder="Filter by song or artist…"
+                          placeholder={t("filterBySong")}
                           value={songFilter}
                           onChange={e => setSongFilter(e.target.value)}
                           className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
@@ -641,7 +682,7 @@ export default function BrowseView({
                     )}
                     {scanEnabled && songFilter && (
                       <span className="text-[11px] text-dim shrink-0">
-                        {songFilteredStations.length} match{songFilteredStations.length !== 1 ? "es" : ""}
+                        {t("stationCount", { count: songFilteredStations.length })}
                       </span>
                     )}
                   </div>
@@ -659,6 +700,7 @@ export default function BrowseView({
                           isFavorite={isFavorite(s.stationuuid)}
                           onPlay={() => onPlay(s)}
                           onToggleFav={() => onToggleFav(s)}
+                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
                           liveStatus={live?.status}
                           liveTrack={live?.track}
                           onPeek={!scanEnabled ? () => peekStation(s) : undefined}
@@ -676,17 +718,17 @@ export default function BrowseView({
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       >
                         <ChevronLeft size={14} />
-                        Prev
+                        {t("previous")}
                       </button>
                       <span className="text-[12px] text-dim tabular-nums">
-                        {page + 1} / {totalPages}
+                        {t("pageFraction", { current: page + 1, total: totalPages })}
                       </span>
                       <button
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page === totalPages - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       >
-                        Next
+                        {t("next")}
                         <ChevronRight size={14} />
                       </button>
                     </div>

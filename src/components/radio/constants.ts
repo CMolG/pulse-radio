@@ -17,6 +17,14 @@ export const STORAGE_KEYS = {
   HISTORY: 'radio-history',
   FAVORITE_SONGS: 'radio-favorite-songs',
   SIDEBAR_COLLAPSED: 'radio-sidebar-collapsed',
+  NORMALIZER_ENABLED: 'radio-normalizer-enabled',
+  STEREO_WIDTH: 'radio-stereo-width',
+  BASS_ENHANCE: 'radio-bass-enhance',
+  COMPRESSOR_ENABLED: 'radio-compressor-enabled',
+  COMPRESSOR_AMOUNT: 'radio-compressor-amount',
+  NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
+  REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled',
+  LOCALE: 'radio-locale',
 } as const;
 
 export const MAX_RECENT = 15;
@@ -86,36 +94,3 @@ export function countryFlag(code: string): string {
     ...upper.split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
   );
 }
-
-export const COUNTRY_CATEGORIES = [
-  { code: 'US', name: 'The United States Of America' },
-  { code: 'GB', name: 'The United Kingdom Of Great Britain And Northern Ireland' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'FR', name: 'France' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'BR', name: 'Brazil' },
-  { code: 'MX', name: 'Mexico' },
-  { code: 'AR', name: 'Argentina' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'KR', name: 'The Republic Of Korea' },
-  { code: 'IN', name: 'India' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'NL', name: 'The Netherlands' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'RU', name: 'The Russian Federation' },
-  { code: 'CO', name: 'Colombia' },
-  { code: 'CL', name: 'Chile' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'TR', name: 'Türkiye' },
-] as const;
-
-export const COUNTRY_DISPLAY: Record<string, string> = {
-  US: 'USA', GB: 'UK', DE: 'Germany', FR: 'France', ES: 'Spain',
-  IT: 'Italy', BR: 'Brazil', MX: 'Mexico', AR: 'Argentina', JP: 'Japan',
-  KR: 'Korea', IN: 'India', AU: 'Australia', CA: 'Canada', NL: 'Netherlands',
-  PT: 'Portugal', SE: 'Sweden', RU: 'Russia', CO: 'Colombia', CL: 'Chile',
-  PL: 'Poland', TR: 'Türkiye',
-};

@@ -10,15 +10,18 @@ import dynamic from 'next/dynamic';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { STORAGE_KEYS } from './constants';
 import { ensureStorageVersion } from '@/lib/storageUtils';
+import { LocaleProvider } from '@/context/LocaleContext';
 
 ensureStorageVersion(Object.values(STORAGE_KEYS));
 
 const RadioShell = dynamic(() => import('./RadioShell'), { ssr: false });
 
-export default function RadioApp({ isPip }: { isPip?: boolean }) {
+export default function RadioApp({ isPip, initialCountryCode }: { isPip?: boolean; initialCountryCode?: string }) {
   return (
     <ErrorBoundary>
-      <RadioShell isPip={isPip} />
+      <LocaleProvider countryCode={initialCountryCode}>
+        <RadioShell isPip={isPip} initialCountryCode={initialCountryCode} />
+      </LocaleProvider>
     </ErrorBoundary>
   );
 }

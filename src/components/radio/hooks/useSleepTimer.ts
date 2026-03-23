@@ -9,34 +9,84 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
 const PRESETS_MIN = [15, 30, 60] as const;
+const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
 
 export type UseSleepTimerReturn = {
   /** Minutes remaining (null = inactive) */
   remainingMin: number | null;
+  /** Whether the volume is currently fading out */
+  isFading: boolean;
   /** Cycle through presets: off → 15 → 30 → 60 → off */
   cycle: () => void;
   /** Cancel active timer */
   cancel: () => void;
 };
 
-export function useSleepTimer(onExpire: () => void): UseSleepTimerReturn {
+type SleepTimerOptions = {
+  onExpire: () => void;
+  /** If provided, volume will gradually fade to 0 over the last 30 seconds */
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
+};
+
+export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>): UseSleepTimerReturn {
   const [remainingMin, setRemainingMin] = useState<number | null>(null);
+  const [isFading, setIsFading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const endTimeRef = useRef<number>(0);
+  const savedVolumeRef = useRef<number | null>(null);
   const onExpireRef = useRef(onExpire);
-  onExpireRef.current = onExpire;
+  useEffect(() => {
+    onExpireRef.current = onExpire;
+  }, [onExpire]);
+
+  const stopFade = useCallback(() => {
+    if (fadeTimerRef.current) {
+      clearInterval(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
+    // Restore original volume if we saved it
+    if (savedVolumeRef.current !== null && audioRef?.current) {
+      audioRef.current.volume = savedVolumeRef.current;
+      savedVolumeRef.current = null;
+    }
+    setIsFading(false);
+  }, [audioRef]);
 
   const clear = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    stopFade();
     endTimeRef.current = 0;
     setRemainingMin(null);
-  }, []);
+  }, [stopFade]);
+
+  const startFade = useCallback(() => {
+    if (!audioRef?.current || fadeTimerRef.current) return;
+    const audio = audioRef.current;
+    savedVolumeRef.current = audio.volume;
+    setIsFading(true);
+
+    const fadeStart = Date.now();
+    const startVol = audio.volume;
+    fadeTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - fadeStart;
+      const progress = Math.min(1, elapsed / FADE_DURATION_MS);
+      // Ease-out quadratic for gentle fade
+      const factor = 1 - progress * progress;
+      audio.volume = Math.max(0, startVol * factor);
+      if (progress >= 1) {
+        clearInterval(fadeTimerRef.current!);
+        fadeTimerRef.current = null;
+      }
+    }, 200);
+  }, [audioRef]);
 
   const start = useCallback((minutes: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
+    stopFade();
     endTimeRef.current = Date.now() + minutes * 60_000;
     setRemainingMin(minutes);
 
@@ -48,9 +98,13 @@ export function useSleepTimer(onExpire: () => void): UseSleepTimerReturn {
         onExpireRef.current();
       } else {
         setRemainingMin(mins);
+        // Start fading volume when less than FADE_DURATION_MS remains
+        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) {
+          startFade();
+        }
       }
-    }, 10_000); // update every 10s
-  }, [clear]);
+    }, 1000); // check every second for smooth fade timing
+  }, [clear, stopFade, startFade, audioRef]);
 
   const cycle = useCallback(() => {
     if (remainingMin === null) {
@@ -67,7 +121,10 @@ export function useSleepTimer(onExpire: () => void): UseSleepTimerReturn {
   }, [remainingMin, start, clear]);
 
   // Cleanup on unmount
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+  }, []);
 
-  return { remainingMin, cycle, cancel: clear };
+  return { remainingMin, isFading, cycle, cancel: clear };
 }
