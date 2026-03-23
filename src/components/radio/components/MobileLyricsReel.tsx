@@ -130,7 +130,7 @@ export default function LyricsReel({
     };
   }, [renderableLines.length, updateFocusedIdx]);
 
-  if (!loading && renderableLines.length === 0) return null;
+  if (renderableLines.length === 0) return null;
 
   return (
     <div

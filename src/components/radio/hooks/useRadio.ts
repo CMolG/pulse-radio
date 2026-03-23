@@ -115,7 +115,7 @@ export function useRadio(): UseRadioReturn {
     };
   }, []);
 
-  // Stop audio and clean up all timers on unmount to prevent orphaned playback
+  // Clean up timers on unmount to prevent orphaned intervals
   useEffect(() => {
     return () => {
       if (fadeTimerRef.current) {
@@ -133,11 +133,6 @@ export function useRadio(): UseRadioReturn {
       if (bufferCheckRef.current) {
         clearInterval(bufferCheckRef.current);
         bufferCheckRef.current = null;
-      }
-      const audio = audioRef.current;
-      if (audio) {
-        audio.pause();
-        audio.src = '';
       }
     };
   }, []);
@@ -555,6 +550,7 @@ export function useRadio(): UseRadioReturn {
     if (!audio || !audio.src) return;
     if (audio.paused) {
       userPausedRef.current = false;
+      resumeAudioContext(audio);
       audio.play().catch(() => {});
     } else {
       userPausedRef.current = true;

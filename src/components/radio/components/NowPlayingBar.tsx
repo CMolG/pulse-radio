@@ -99,7 +99,7 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="relative flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
+      <div className="relative flex items-center justify-between gap-3 px-6 pb-2 min-h-20 shrink-0 safe-bottom safe-x">
         {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}

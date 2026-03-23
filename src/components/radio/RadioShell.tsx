@@ -842,7 +842,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
         {/* Mobile header — glassmorphism */}
         {!theaterMode && (
-          <div className="relative z-20 flex-shrink-0 safe-top border-b border-white/[0.06]" style={{ background: 'rgba(10, 15, 26, 0.7)', backdropFilter: 'blur(20px) saturate(1.4)', WebkitBackdropFilter: 'blur(20px) saturate(1.4)' }}>
+          <div className="relative z-20 flex-shrink-0 safe-top border-b border-white/[0.08]" style={{ background: 'rgba(10, 15, 26, 0.82)', backdropFilter: 'blur(24px) saturate(1.5)', WebkitBackdropFilter: 'blur(24px) saturate(1.5)' }}>
               <div className="flex items-center gap-2 px-4 pt-3 pb-2">
               <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                 <div className="relative w-5 h-5 flex-shrink-0">
@@ -1033,10 +1033,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           )}
         </AnimatePresence>
 
-        {/* Bottom bar */}
-        <div className="relative z-20">
+        {/* Bottom bar — glassmorphism */}
+        <div className="relative z-20 border-t border-white/[0.08]" style={{ background: 'rgba(10, 15, 26, 0.82)', backdropFilter: 'blur(24px) saturate(1.5)', WebkitBackdropFilter: 'blur(24px) saturate(1.5)' }}>
           {theaterAudioBadges.length > 0 && (
-            <div className="px-4 pb-2 overflow-x-auto no-scrollbar">
+            <div className="px-4 pt-2 pb-1 overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-1.5 text-[10px] flex-nowrap">
                 {theaterAudioBadges.map(label => (
                   <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
@@ -1342,16 +1342,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           <div className="min-w-0 flex flex-col items-start gap-1.5 text-[10px] overflow-hidden">
             {theaterAudioBadges.length > 0 && (
-              <>
+              <div className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(10, 15, 26, 0.7)', backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <span className="text-white/70 shrink-0">{t("autoAudioEnhancements")}</span>
-                <div className="min-w-0 flex items-center gap-1.5 text-[10px] overflow-hidden">
-                  {theaterAudioBadges.map(label => (
-                    <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
-                      {label}
-                    </span>
-                  ))}
-                </div>
-              </>
+                {theaterAudioBadges.map(label => (
+                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
+                    {label}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
           <button

@@ -423,65 +423,75 @@ export default function BrowseView({
       </div>
 
       {/* Genre chips — wrapping, limited on mobile */}
-      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2 ${isMobile && !genreChipsExpanded ? "max-h-[4.25rem] overflow-hidden" : ""} relative`}>
-        <button
-          onClick={() => onGoHome?.()}
-          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-        >
-          {t("all")}
-        </button>
-        {translatedGenreCategories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => onSelectGenre?.(cat)}
-            aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-      {isMobile && !genreChipsExpanded && (
-        <div className="px-3 pb-1">
-          <button
-            onClick={() => setGenreChipsExpanded(true)}
-            className="px-3 py-1 rounded-full text-[11px] font-medium text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-          >
-            {t("seeMore")}
-          </button>
-        </div>
-      )}
+      {(() => {
+        const MOBILE_LIMIT = 7;
+        const collapsed = isMobile && !genreChipsExpanded;
+        const visibleGenres = collapsed ? translatedGenreCategories.slice(0, MOBILE_LIMIT) : translatedGenreCategories;
+        return (
+          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
+            <button
+              onClick={() => onGoHome?.()}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            >
+              {t("all")}
+            </button>
+            {visibleGenres.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => onSelectGenre?.(cat)}
+                aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
+                className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+              >
+                {cat.label}
+              </button>
+            ))}
+            {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
+              <button
+                onClick={() => setGenreChipsExpanded(true)}
+                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+              >
+                {t("seeMore")}
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Country chips — wrapping, limited on mobile */}
-      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3 ${isMobile && !countryChipsExpanded ? "max-h-[4.25rem] overflow-hidden" : ""} relative`}>
-        <button
-          onClick={() => onGoHome?.()}
-          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-        >
-          {`🌐 ${t("allCountries")}`}
-        </button>
-        {countryChips.map((c) => (
-          <button
-            key={c.code}
-            onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
-            aria-current={countryChipActive(c.code) || undefined}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-          >
-            <span>{c.flag}</span>
-            <span>{c.displayName}</span>
-          </button>
-        ))}
-      </div>
-      {isMobile && !countryChipsExpanded && (
-        <div className="px-3 pb-2">
-          <button
-            onClick={() => setCountryChipsExpanded(true)}
-            className="px-3 py-1 rounded-full text-[11px] font-medium text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-          >
-            {t("seeMore")}
-          </button>
-        </div>
-      )}
+      {(() => {
+        const MOBILE_LIMIT = 7;
+        const collapsed = isMobile && !countryChipsExpanded;
+        const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
+        return (
+          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
+            <button
+              onClick={() => onGoHome?.()}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            >
+              {`🌐 ${t("allCountries")}`}
+            </button>
+            {visibleCountries.map((c) => (
+              <button
+                key={c.code}
+                onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
+                aria-current={countryChipActive(c.code) || undefined}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+              >
+                <span>{c.flag}</span>
+                <span>{c.displayName}</span>
+              </button>
+            ))}
+            {collapsed && countryChips.length > MOBILE_LIMIT && (
+              <button
+                onClick={() => setCountryChipsExpanded(true)}
+                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+              >
+                {t("seeMore")}
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Content */}
       <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
