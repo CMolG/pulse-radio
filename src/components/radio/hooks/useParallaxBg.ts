@@ -16,6 +16,9 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   const pointerOffsetRef = useRef({ x: 0, y: 0 });
   const audioOffsetRef = useRef({ x: 0, y: 0 });
   const tickRafRef = useRef(0);
+  // Ref avoids re-running the effect (and tearing down RAF + listener) on every amplitude change
+  const audioAmplitudeRef = useRef(audioAmplitude);
+  audioAmplitudeRef.current = audioAmplitude;
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const el = containerRef.current;
@@ -35,7 +38,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   useEffect(() => {
     const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.
-      const a = Math.max(0, Math.min(1, audioAmplitude));
+      const a = Math.max(0, Math.min(1, audioAmplitudeRef.current));
       audioOffsetRef.current = {
         x: a * 2.2,
         y: -a * 6.5,
@@ -54,7 +57,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
       cancelAnimationFrame(rafRef.current);
       cancelAnimationFrame(tickRafRef.current);
     };
-  }, [audioAmplitude, handleMouseMove]);
+  }, [handleMouseMove]);
 
   const gradient = genre
     ? GENRE_GRADIENTS[genre.toLowerCase()] || GENRE_GRADIENTS.default
