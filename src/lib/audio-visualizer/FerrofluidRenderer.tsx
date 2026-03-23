@@ -38,6 +38,8 @@ interface Blob {
   x: number;
   y: number;
   baseRadius: number;
+  /** Per-blob random size factor (0–1), assigned once at creation */
+  sizeFactor: number;
   targetX: number;
   targetY: number;
   vx: number;
@@ -58,6 +60,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
       x: cx + Math.cos(angle) * dist,
       y: cy + Math.sin(angle) * dist,
       baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06),
+      sizeFactor: Math.random(),
       targetX: cx,
       targetY: cy,
       vx: 0,
@@ -294,7 +297,7 @@ export function FerrofluidRenderer({
           ? 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3
           : 0.3;
       blob.baseRadius =
-        Math.min(w, h) * (0.04 + Math.random() * 0.01) +
+        Math.min(w, h) * (0.04 + blob.sizeFactor * 0.01) +
         bandVal * Math.min(w, h) * 0.06 * sensitivity;
     }
 
