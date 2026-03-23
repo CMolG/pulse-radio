@@ -16,6 +16,7 @@ type UiImageProps = {
   priority?: boolean;
   loading?: "lazy" | "eager";
   onError?: () => void;
+  style?: React.CSSProperties;
 };
 
 export default function UiImage({
@@ -26,6 +27,7 @@ export default function UiImage({
   priority,
   loading,
   onError,
+  style,
 }: UiImageProps) {
   return (
     <Image
@@ -38,6 +40,7 @@ export default function UiImage({
       priority={priority}
       loading={loading}
       onError={onError}
+      style={style}
     />
   );
 }

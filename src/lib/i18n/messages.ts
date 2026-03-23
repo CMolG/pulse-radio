@@ -63,6 +63,7 @@ const BASE_MESSAGES = {
   genreMetal: "Metal",
   genreLocal: "Local",
   genreWorld: "World",
+  seeMore: "See more",
 } as const;
 
 export type MessageKey = keyof typeof BASE_MESSAGES;
@@ -104,6 +105,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     genreLocal: "Local",
     minimize: "Minimizar",
     expand: "Expandir",
+    seeMore: "Ver más",
   },
   fr: {
     loadingStations: "Chargement…",

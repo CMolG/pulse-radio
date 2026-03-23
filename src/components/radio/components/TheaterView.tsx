@@ -202,7 +202,7 @@ export default function TheaterView({
           >
             <ArrowLeft size={16} />
           </button>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 sm:flex-col">
             {onToggleFav && (
               <button
                 onClick={onToggleFav}

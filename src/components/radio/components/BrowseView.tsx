@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock, Music2, ScanSearch, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES } from "../constants";
@@ -201,6 +201,8 @@ export default function BrowseView({
   const [scanEnabled, setScanEnabled] = useState(false);
   const [songFilter, setSongFilter] = useState("");
   const scanGenRef = useRef(0);
+  const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
+  const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
 
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = translatedGenreCategories.find((c) => c.id === catId);
@@ -420,8 +422,8 @@ export default function BrowseView({
         </button>
       </div>
 
-      {/* Genre chips — wrapping */}
-      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
+      {/* Genre chips — wrapping, limited on mobile */}
+      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2 ${isMobile && !genreChipsExpanded ? "max-h-[4.25rem] overflow-hidden" : ""} relative`}>
         <button
           onClick={() => onGoHome?.()}
           className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
@@ -439,9 +441,19 @@ export default function BrowseView({
           </button>
         ))}
       </div>
+      {isMobile && !genreChipsExpanded && (
+        <div className="px-3 pb-1">
+          <button
+            onClick={() => setGenreChipsExpanded(true)}
+            className="px-3 py-1 rounded-full text-[11px] font-medium text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+          >
+            {t("seeMore")}
+          </button>
+        </div>
+      )}
 
-      {/* Country chips — wrapping */}
-      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
+      {/* Country chips — wrapping, limited on mobile */}
+      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3 ${isMobile && !countryChipsExpanded ? "max-h-[4.25rem] overflow-hidden" : ""} relative`}>
         <button
           onClick={() => onGoHome?.()}
           className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
@@ -460,6 +472,16 @@ export default function BrowseView({
           </button>
         ))}
       </div>
+      {isMobile && !countryChipsExpanded && (
+        <div className="px-3 pb-2">
+          <button
+            onClick={() => setCountryChipsExpanded(true)}
+            className="px-3 py-1 rounded-full text-[11px] font-medium text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+          >
+            {t("seeMore")}
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
@@ -498,7 +520,7 @@ export default function BrowseView({
                 {favorites && favorites.length > 0 && (
                     <ScrollRow
                       title={t("favorites")}
-                      icon={<Heart size={14} className="text-pink-400/70" />}
+                      icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}
                     >
                     {favorites.map((s) => (

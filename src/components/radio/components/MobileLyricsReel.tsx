@@ -7,7 +7,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import type { LyricsData } from "../types";
 import {
   getEffectiveActiveLyricIndex,
@@ -156,11 +155,7 @@ export default function LyricsReel({
               "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}
         >
-          {loading ? (
-            <div className="flex h-full items-center justify-center py-12">
-              <Loader2 size={22} className="animate-spin text-white/45" />
-            </div>
-          ) : (
+          {renderableLines.length === 0 ? null : (
             <div className="flex min-h-full flex-col justify-center py-14">
               {renderableLines.map((line, index) => {
                 const distanceFromFocus = Math.abs(index - focusedIdx);

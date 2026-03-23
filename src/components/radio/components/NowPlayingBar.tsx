@@ -99,7 +99,7 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="relative flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0">
+      <div className="relative flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
         {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}
@@ -164,13 +164,6 @@ export default function NowPlayingBar({
             </button>
           )}
         </div>
-
-        {/* Fill iPhone safe-area inset below the bar without adding layout height */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
-          style={{ height: "env(safe-area-inset-bottom, 0px)" }}
-        />
       </div>
     );
   }

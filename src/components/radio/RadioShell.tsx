@@ -327,6 +327,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handlePlay = useCallback(
     (station: Station) => {
       radio.play(station);
+      // Connect EQ and analyser within user gesture context so AudioContext
+      // is created/resumed from a tap — required by mobile browsers.
+      if (radio.audioRef.current) {
+        eq.connectSource(radio.audioRef.current);
+        analyser.connectAudio(radio.audioRef.current);
+      }
       recent.add(station);
       stationQueue.setPlaying(station.stationuuid);
       setTheaterMode(true);
@@ -336,7 +342,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         radio.prefetchStream(stationQueue.queue[nextIdx].url_resolved);
       }
     },
-    [radio, recent, stationQueue],
+    [radio, recent, stationQueue, eq, analyser],
   );
 
   // Auto-advance to next queued station on error, or failover to similar station
@@ -834,9 +840,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           landingMode={isLandingNavigation}
         />
 
-        {/* Mobile header */}
+        {/* Mobile header — glassmorphism */}
         {!theaterMode && (
-          <div className="relative z-20 flex-shrink-0 safe-top">
+          <div className="relative z-20 flex-shrink-0 safe-top border-b border-white/[0.06]" style={{ background: 'rgba(10, 15, 26, 0.7)', backdropFilter: 'blur(20px) saturate(1.4)', WebkitBackdropFilter: 'blur(20px) saturate(1.4)' }}>
               <div className="flex items-center gap-2 px-4 pt-3 pb-2">
               <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                 <div className="relative w-5 h-5 flex-shrink-0">
@@ -899,16 +905,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   artworkUrl={albumArt.artworkUrl}
                   icyBitrate={icyBitrate}
                   onTheater={() => setTheaterMode(true)}
-                  lyrics={lyrics}
-                  lyricsLoading={lyricsLoading}
-                  currentTime={effectiveCurrentTime}
-                  activeLineOverride={realtimeLyrics?.activeLineIndex}
-                  syncConfidence={realtimeLyrics?.confidence}
-                  syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                 />
               )}
               {/* ── Mobile top nav tabs + search ── */}
-              <div className="flex-shrink-0 px-4 pt-2 pb-2 flex items-center gap-2">
+              <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
                 {([
                   { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={14} /> },
                   { id: "history" as const, label: t("history"), icon: <Clock size={14} /> },
@@ -923,7 +923,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {tab.label}
                   </button>
                 ))}
-                <form onSubmit={handleSearchSubmit} className="flex-1 min-w-0">
+              </div>
+              <div className="flex-shrink-0 px-4 pb-2">
+                <form onSubmit={handleSearchSubmit}>
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     <Search size={13} className="text-white/30 flex-shrink-0" />
                     <input
@@ -932,7 +934,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t("searchStationsAria")}
-                      className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                      className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
                       data-radio-search
                     />
                   </div>
@@ -1034,11 +1036,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {/* Bottom bar */}
         <div className="relative z-20">
           {theaterAudioBadges.length > 0 && (
-            <div className="px-4 pb-2">
-              <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-                <span className="text-white/70">{t("autoAudioEnhancements")}</span>
+            <div className="px-4 pb-2 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 text-[10px] flex-nowrap">
                 {theaterAudioBadges.map(label => (
-                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium">
+                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
                     {label}
                   </span>
                 ))}
@@ -1151,13 +1152,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     artworkUrl={albumArt.artworkUrl}
                     icyBitrate={icyBitrate}
                     onTheater={() => setTheaterMode(true)}
-                    lyrics={lyrics}
-                    lyricsLoading={lyricsLoading}
-                    currentTime={effectiveCurrentTime}
-                    activeLineOverride={realtimeLyrics?.activeLineIndex}
-                    syncConfidence={realtimeLyrics?.confidence}
-                    syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
-                    lyricsVariant="desktop"
                   />
                 )}
                 {/* ── Top nav: tabs + search ── */}

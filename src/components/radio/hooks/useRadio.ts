@@ -10,6 +10,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Station, PlaybackStatus } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { resumeAudioContext } from '@/lib/audio-visualizer';
 
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
 function proxyUrl(raw: string): string {
@@ -114,10 +115,39 @@ export function useRadio(): UseRadioReturn {
     };
   }, []);
 
+  // Stop audio and clean up all timers on unmount to prevent orphaned playback
+  useEffect(() => {
+    return () => {
+      if (fadeTimerRef.current) {
+        clearInterval(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+      }
+      if (pauseTimerRef.current) {
+        clearTimeout(pauseTimerRef.current);
+        pauseTimerRef.current = null;
+      }
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+      if (bufferCheckRef.current) {
+        clearInterval(bufferCheckRef.current);
+        bufferCheckRef.current = null;
+      }
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+      }
+    };
+  }, []);
+
   const getAudio = useCallback(() => {
     if (!audioRef.current) {
       const audio = new Audio();
       audio.crossOrigin = 'anonymous';
+      audio.setAttribute('playsinline', '');
+      audio.preload = 'none';
       audioRef.current = audio;
     }
     return audioRef.current;
@@ -467,6 +497,8 @@ export function useRadio(): UseRadioReturn {
     }
 
     const audio = getAudio();
+    // Resume Web Audio context from user gesture (required on mobile)
+    resumeAudioContext(audio);
     playSessionRef.current++;
     retryRef.current = 0;
     userPausedRef.current = false;
@@ -513,7 +545,9 @@ export function useRadio(): UseRadioReturn {
 
   const resume = useCallback(() => {
     userPausedRef.current = false;
-    audioRef.current?.play().catch(() => {});
+    const audio = audioRef.current;
+    if (audio) resumeAudioContext(audio);
+    audio?.play().catch(() => {});
   }, []);
 
   const togglePlay = useCallback(() => {
