@@ -289,11 +289,16 @@ export default function BrowseView({
         if (scanGenRef.current !== gen) return;
         const s = queue.shift()!;
         setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
-        const result = await fetchIcyMeta(s.url_resolved);
-        if (scanGenRef.current !== gen) return;
-        const raw = result.streamTitle;
-        const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
-        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
+        try {
+          const result = await fetchIcyMeta(s.url_resolved);
+          if (scanGenRef.current !== gen) return;
+          const raw = result.streamTitle;
+          const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
+          setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
+        } catch {
+          if (scanGenRef.current !== gen) return;
+          setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
+        }
       }
     };
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
