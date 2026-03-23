@@ -70,13 +70,21 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     setIsFading(true);
 
     const fadeStart = Date.now();
-    const startVol = audio.volume;
+    let baseVol = audio.volume;
+    let lastSetVol = audio.volume;
     fadeTimerRef.current = setInterval(() => {
+      // Detect external volume changes (user adjusted volume during fade)
+      if (audio.volume > lastSetVol + 0.01) {
+        baseVol = audio.volume;
+        savedVolumeRef.current = baseVol;
+      }
       const elapsed = Date.now() - fadeStart;
       const progress = Math.min(1, elapsed / FADE_DURATION_MS);
       // Ease-out quadratic for gentle fade
       const factor = 1 - progress * progress;
-      audio.volume = Math.max(0, startVol * factor);
+      const target = Math.max(0, baseVol * factor);
+      audio.volume = target;
+      lastSetVol = target;
       if (progress >= 1) {
         clearInterval(fadeTimerRef.current!);
         fadeTimerRef.current = null;
