@@ -24,6 +24,7 @@ import {
   Clock,
   Heart,
   Star,
+  Settings,
 } from "lucide-react";
 import type {
   Station,
@@ -60,6 +61,7 @@ import FavoriteSongsView from "./components/FavoriteSongsView";
 import SongDetailModal from "./components/SongDetailModal";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import LanguageSelector from "./components/LanguageSelector";
+import MobileSettingsPanel from "./components/MobileSettingsPanel";
 import { saveToStorage } from "@/lib/storageUtils";
 import { useLocale } from "@/context/LocaleContext";
 import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
@@ -171,6 +173,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   );
 
   const [showEq, setShowEq] = useState(false);
+  const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -853,7 +856,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   <span className="text-[15px] font-semibold text-white">Pulse</span>
                 </button>
                   <div className="flex-1" />
-                        <LanguageSelector />
+                  <button
+                    onClick={() => setShowMobileSettings(true)}
+                    className="w-9 h-9 flex-center-row rounded-xl text-white/40 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
+                    title="Settings"
+                    data-testid="mobile-settings-btn"
+                  >
+                    <Settings size={18} />
+                  </button>
                   {radio.station && (
                   <button
                     onClick={radio.station ? handleToggleFav : undefined}
@@ -1006,6 +1016,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           />
         )}
 
+        {/* Mobile settings panel */}
+        <AnimatePresence>
+          {showMobileSettings && (
+            <MobileSettingsPanel
+              onClose={() => setShowMobileSettings(false)}
+              eq={eq}
+              onPresetChange={setEqPreset}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Toast notification */}
         <AnimatePresence>
           {toast && (
@@ -1031,17 +1052,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
-          {theaterAudioBadges.length > 0 && (
-            <div className="px-4 pt-2 pb-1 overflow-x-auto no-scrollbar">
-              <div className="flex items-center gap-1.5 text-[10px] flex-nowrap">
-                {theaterAudioBadges.map(label => (
-                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
           <NowPlayingBar
             station={radio.station}
             track={enrichedTrack}
