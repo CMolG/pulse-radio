@@ -11,6 +11,9 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'radio-usage-stats';
 const SAVE_INTERVAL_MS = 10_000;
+const MAX_SONGS = 500;
+const MAX_ARTISTS = 200;
+const MAX_GENRES = 100;
 
 export interface StationListenTime {
   name: string;
@@ -56,6 +59,22 @@ function primaryArtist(artist: string): string {
   return artist.split(/[,;&]|feat\.|ft\.|featuring|vs\.?/i)[0].trim();
 }
 
+/** Keep only the top N entries by count, dropping the least-played */
+function pruneByCount<T extends { count: number }>(
+  map: Record<string, T>,
+  max: number,
+): Record<string, T> {
+  const keys = Object.keys(map);
+  if (keys.length <= max) return map;
+  const sorted = keys
+    .map(k => ({ k, c: map[k].count }))
+    .sort((a, b) => b.c - a.c)
+    .slice(0, max);
+  const pruned: Record<string, T> = {};
+  for (const { k } of sorted) pruned[k] = map[k];
+  return pruned;
+}
+
 export function useStats() {
   const [stats, setStats] = useState<UsageStats>(() =>
     loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
@@ -70,7 +89,21 @@ export function useStats() {
 
   const persist = useCallback(() => {
     if (dirtyRef.current) {
-      saveToStorage(STORAGE_KEY, statsRef.current);
+      const current = statsRef.current;
+      const pSongs = pruneByCount(current.songPlayCounts, MAX_SONGS);
+      const pArtists = pruneByCount(current.artistPlayCounts, MAX_ARTISTS);
+      const pGenres = pruneByCount(current.genrePlayCounts, MAX_GENRES);
+      const didPrune =
+        pSongs !== current.songPlayCounts ||
+        pArtists !== current.artistPlayCounts ||
+        pGenres !== current.genrePlayCounts;
+      if (didPrune) {
+        const pruned: UsageStats = { ...current, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };
+        setStats(pruned);
+        saveToStorage(STORAGE_KEY, pruned);
+      } else {
+        saveToStorage(STORAGE_KEY, current);
+      }
       dirtyRef.current = false;
     }
   }, []);
