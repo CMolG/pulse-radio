@@ -41,7 +41,9 @@ export async function searchArchiveAudio(
   const params = new URLSearchParams({ q: query, limit: String(limit) });
   if (collection) params.set('collection', collection);
 
-  const res = await fetch(`/api/archive-audio?${params}`);
+  const res = await fetch(`/api/archive-audio?${params}`, {
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!res.ok) throw new Error(`Archive search failed: ${res.status}`);
   return res.json();
 }

@@ -26,6 +26,7 @@ export async function searchAudiobooks(
   if (!query.trim()) return [];
   const res = await fetch(
     `/api/librivox?q=${encodeURIComponent(query)}&limit=${limit}`,
+    { signal: AbortSignal.timeout(10_000) },
   );
   if (!res.ok) return [];
   const data = await res.json();
