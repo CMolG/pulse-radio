@@ -933,6 +933,10 @@ input[type="color"]:hover {
   @apply bg-sys-surface/80 backdrop-blur-xl backdrop-saturate-150;
 }
 
+/* ── Hide scrollbar but keep scroll ── */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* ── Interactive text hover states ── */
 .text-muted-hover {
   @apply text-white/40 hover:text-white/70 transition-colors;

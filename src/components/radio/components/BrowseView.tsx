@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Clock, Music2, ScanSearch, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES } from "../constants";
@@ -73,6 +73,7 @@ type Props = {
   onSelectGenre?: (cat: BrowseCategory) => void;
   onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
   onGoHome?: () => void;
+  userGenreOrder?: string[];
 };
 
 const SCROLL_CLASS =
@@ -170,6 +171,7 @@ export default function BrowseView({
   onSelectGenre,
   onSelectCountry,
   onGoHome,
+  userGenreOrder,
 }: Props) {
   const { t, locale } = useLocale();
   const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
@@ -181,6 +183,37 @@ export default function BrowseView({
       }),
     [t],
   );
+
+  // Reorder browse sections based on user listening stats
+  const effectiveBrowseOrder = useMemo(() => {
+    if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
+    const defaultOrder = [...BROWSE_ORDER];
+    // Map genre stats to category IDs (handle partial matches: "hip hop" → "hiphop")
+    const GENRE_TO_CAT: Record<string, string> = {
+      'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi',
+    };
+    const boostedIds = new Set<string>();
+    const ordered: string[] = [];
+
+    // Always keep trending first
+    ordered.push('trending');
+    boostedIds.add('trending');
+
+    for (const genre of userGenreOrder) {
+      const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
+      if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
+        ordered.push(catId);
+        boostedIds.add(catId);
+      }
+    }
+
+    // Append remaining in default order
+    for (const id of defaultOrder) {
+      if (!boostedIds.has(id)) ordered.push(id);
+    }
+    return ordered;
+  }, [userGenreOrder]);
+
   const isMobile = useMediaQuery("(max-width: 768px)", {
     initializeWithValue: false,
   });
@@ -201,6 +234,8 @@ export default function BrowseView({
   const [scanEnabled, setScanEnabled] = useState(false);
   const [songFilter, setSongFilter] = useState("");
   const scanGenRef = useRef(0);
+  const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
+  const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
 
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = translatedGenreCategories.find((c) => c.id === catId);
@@ -312,7 +347,7 @@ export default function BrowseView({
       setFailedCategories(new Set());
 
       const CONCURRENCY = 3;
-      const queue = [...BROWSE_ORDER];
+      const queue = [...effectiveBrowseOrder];
 
       const runBatch = async () => {
         while (queue.length > 0 && !flags.cancelled) {
@@ -420,46 +455,76 @@ export default function BrowseView({
         </button>
       </div>
 
-      {/* Genre chips — wrapping */}
-      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
-        <button
-          onClick={() => onGoHome?.()}
-          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-        >
-          {t("all")}
-        </button>
-        {translatedGenreCategories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => onSelectGenre?.(cat)}
-            aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-            className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
+      {/* Genre chips — wrapping, limited on mobile */}
+      {(() => {
+        const MOBILE_LIMIT = 7;
+        const collapsed = isMobile && !genreChipsExpanded;
+        const visibleGenres = collapsed ? translatedGenreCategories.slice(0, MOBILE_LIMIT) : translatedGenreCategories;
+        return (
+          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
+            <button
+              onClick={() => onGoHome?.()}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            >
+              {t("all")}
+            </button>
+            {visibleGenres.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => onSelectGenre?.(cat)}
+                aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
+                className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+              >
+                {cat.label}
+              </button>
+            ))}
+            {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
+              <button
+                onClick={() => setGenreChipsExpanded(true)}
+                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+              >
+                {t("seeMore")}
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
-      {/* Country chips — wrapping */}
-      <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
-        <button
-          onClick={() => onGoHome?.()}
-          className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-        >
-          {`🌐 ${t("allCountries")}`}
-        </button>
-        {countryChips.map((c) => (
-          <button
-            key={c.code}
-            onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
-            aria-current={countryChipActive(c.code) || undefined}
-            className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-          >
-            <span>{c.flag}</span>
-            <span>{c.displayName}</span>
-          </button>
-        ))}
-      </div>
+      {/* Country chips — wrapping, limited on mobile */}
+      {(() => {
+        const MOBILE_LIMIT = 7;
+        const collapsed = isMobile && !countryChipsExpanded;
+        const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
+        return (
+          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
+            <button
+              onClick={() => onGoHome?.()}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+            >
+              {`🌐 ${t("allCountries")}`}
+            </button>
+            {visibleCountries.map((c) => (
+              <button
+                key={c.code}
+                onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
+                aria-current={countryChipActive(c.code) || undefined}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
+              >
+                <span>{c.flag}</span>
+                <span>{c.displayName}</span>
+              </button>
+            ))}
+            {collapsed && countryChips.length > MOBILE_LIMIT && (
+              <button
+                onClick={() => setCountryChipsExpanded(true)}
+                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+              >
+                {t("seeMore")}
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Content */}
       <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
@@ -498,7 +563,7 @@ export default function BrowseView({
                 {favorites && favorites.length > 0 && (
                     <ScrollRow
                       title={t("favorites")}
-                      icon={<Heart size={14} className="text-pink-400/70" />}
+                      icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}
                     >
                     {favorites.map((s) => (
@@ -540,7 +605,7 @@ export default function BrowseView({
                   </ScrollRow>
                 )}
 
-                {BROWSE_ORDER.map((catId) => {
+                {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId);
                   if (!cat) return null;
 

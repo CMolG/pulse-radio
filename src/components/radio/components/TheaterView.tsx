@@ -179,13 +179,27 @@ export default function TheaterView({
         </ErrorBoundary>
       </div>
 
-      {/* ── Layer 3: fractal noise overlay (mix-blend-mode overlay, same as reference HTML) ── */}
+      {/* ── Layer 3: CRT scanlines + vignette overlay ── */}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          mixBlendMode: "overlay",
-          opacity: 0.15,
+          background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+          backgroundSize: '100% 4px, 6px 100%',
+          mixBlendMode: 'overlay',
+          opacity: 0.6,
+        }}
+      />
+      <div
+        className="absolute inset-0 z-6 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
+          boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
+        }}
+      />
+      <div
+        className="absolute inset-0 z-6 pointer-events-none"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
         }}
       />
 
@@ -202,7 +216,7 @@ export default function TheaterView({
           >
             <ArrowLeft size={16} />
           </button>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 sm:flex-col">
             {onToggleFav && (
               <button
                 onClick={onToggleFav}
@@ -230,7 +244,7 @@ export default function TheaterView({
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
       <div className="flex-1 flex items-center justify-center relative z-10 px-4">
         <div
-          className={`flex flex-col items-center ${compact ? "gap-2 px-4 py-3" : "gap-4 px-8 py-8"} rounded-3xl max-w-sm w-full`}
+          className={`flex flex-col items-center ${compact ? "gap-2 px-4 py-3" : "gap-3 px-6 py-5"} rounded-3xl max-w-sm w-full`}
           style={{
             background: "rgba(0, 0, 0, 0.35)",
             backdropFilter: "blur(24px) saturate(1.4)",
@@ -376,27 +390,27 @@ export default function TheaterView({
               Listen on Apple Music
             </a>
           )}
+
+          {/* ── Lyrics reel inside glass panel ── */}
+          {!compact && (
+            <div
+              className={`w-full ${
+                lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"
+              }`}
+            >
+              <LyricsReel
+                lyrics={lyrics ?? null}
+                loading={Boolean(lyricsLoading)}
+                currentTime={currentTime}
+                activeLineOverride={activeLineOverride}
+                syncConfidence={syncConfidence}
+                syncMode={syncMode}
+                variant={lyricsVariant}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* ── Lyrics reel in theater mode ── */}
-      {!compact && (
-        <div
-          className={`relative z-10 ${
-            lyricsVariant === "desktop" ? "px-6 pb-4" : "px-3 pb-3"
-          }`}
-        >
-          <LyricsReel
-            lyrics={lyrics ?? null}
-            loading={Boolean(lyricsLoading)}
-            currentTime={currentTime}
-            activeLineOverride={activeLineOverride}
-            syncConfidence={syncConfidence}
-            syncMode={syncMode}
-            variant={lyricsVariant}
-          />
-        </div>
-      )}
     </motion.div>
   );
 }

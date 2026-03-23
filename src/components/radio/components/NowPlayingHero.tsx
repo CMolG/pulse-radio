@@ -8,9 +8,8 @@
 
 import React, { useState } from "react";
 import { Radio, Maximize2 } from "lucide-react";
-import type { Station, NowPlayingTrack, LyricsData } from "../types";
+import type { Station, NowPlayingTrack } from "../types";
 import AnimatedBars from "./AnimatedBars";
-import MobileLyricsReel from "./MobileLyricsReel";
 import UiImage from "@/components/common/UiImage";
 import {
   ParallaxAlbumBackground,
@@ -32,13 +31,6 @@ type Props = {
   artworkUrl?: string | null;
   icyBitrate?: string | null;
   onTheater?: () => void;
-  lyrics?: LyricsData | null;
-  lyricsLoading?: boolean;
-  currentTime?: number;
-  activeLineOverride?: number;
-  syncConfidence?: number;
-  syncMode?: "time" | "realtime";
-  lyricsVariant?: "mobile" | "desktop";
 };
 
 export default function NowPlayingHero({
@@ -48,13 +40,6 @@ export default function NowPlayingHero({
   artworkUrl,
   icyBitrate,
   onTheater,
-  lyrics,
-  lyricsLoading,
-  currentTime,
-  activeLineOverride,
-  syncConfidence,
-  syncMode,
-  lyricsVariant = "mobile",
 }: Props) {
   const [imgError, setImgError] = useState(false);
   const coverUrl = artworkUrl ?? station.favicon;
@@ -75,23 +60,7 @@ export default function NowPlayingHero({
         imageUrl={artworkUrl ?? null}
         fallbackUrl={station.favicon || undefined}
         overlayClass="bg-black/60"
-      >
-        {/* TODO scroll no funciona aquí dentro, revisar como podemos propagarlo para que funcione */}
-        {/* TODO hay que limitarlo a 3 entradas, la anterior, la activa y la siguiente y tienen que salir las tres, tenemos que poder reducir un poco el tamaño de fuente aquí */}
-        {(lyricsLoading || (lyrics && lyrics.lines.length > 0)) && (
-            <div className="relative z-10 -mx-5 mb-15">
-              <MobileLyricsReel
-                  lyrics={lyrics ?? null}
-                  loading={!!lyricsLoading}
-                  currentTime={currentTime}
-                  activeLineOverride={activeLineOverride}
-                  syncConfidence={syncConfidence}
-                  syncMode={syncMode}
-                  variant={lyricsVariant}
-              />
-            </div>
-        )}
-      </ParallaxAlbumBackground>
+      />
 
       {onTheater && (
         <button

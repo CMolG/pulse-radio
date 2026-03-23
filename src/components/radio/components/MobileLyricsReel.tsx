@@ -7,7 +7,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
 import type { LyricsData } from "../types";
 import {
   getEffectiveActiveLyricIndex,
@@ -131,12 +130,12 @@ export default function LyricsReel({
     };
   }, [renderableLines.length, updateFocusedIdx]);
 
-  if (!loading && renderableLines.length === 0) return null;
+  if (renderableLines.length === 0) return null;
 
   return (
     <div
       className={`relative flex-shrink-0 ${
-        isDesktop ? "h-[256px] lg:h-[272px]" : "h-[228px]"
+        isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"
       }`}
     >
       <div
@@ -156,11 +155,7 @@ export default function LyricsReel({
               "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}
         >
-          {loading ? (
-            <div className="flex h-full items-center justify-center py-12">
-              <Loader2 size={22} className="animate-spin text-white/45" />
-            </div>
-          ) : (
+          {renderableLines.length === 0 ? null : (
             <div className="flex min-h-full flex-col justify-center py-14">
               {renderableLines.map((line, index) => {
                 const distanceFromFocus = Math.abs(index - focusedIdx);
@@ -168,22 +163,22 @@ export default function LyricsReel({
                 const emphasisClass = isActive
                   ? isDesktop
                     ? "text-white text-[28px] font-bold opacity-100 scale-100"
-                    : "text-white text-[25px] font-bold opacity-100 scale-100"
+                    : "text-white text-[22px] font-bold opacity-100 scale-100"
                   : distanceFromFocus === 0
                     ? isDesktop
                       ? "text-white/82 text-[23px] font-semibold opacity-100 scale-[0.985]"
-                      : "text-white/82 text-[20px] font-semibold opacity-100 scale-[0.985]"
+                      : "text-white/82 text-[18px] font-semibold opacity-100 scale-[0.985]"
                     : distanceFromFocus === 1
                       ? isDesktop
                         ? "text-white/50 text-[19px] font-medium opacity-100 scale-95"
-                        : "text-white/50 text-[17px] font-medium opacity-100 scale-95"
+                        : "text-white/50 text-[15px] font-medium opacity-100 scale-95"
                       : distanceFromFocus === 2
                         ? isDesktop
                           ? "text-white/26 text-[17px] font-medium opacity-100 scale-[0.92]"
-                          : "text-white/26 text-[15px] font-medium opacity-100 scale-[0.92]"
+                          : "text-white/26 text-[13px] font-medium opacity-100 scale-[0.92]"
                         : isDesktop
                           ? "text-white/14 text-[16px] font-medium opacity-100 scale-[0.88]"
-                          : "text-white/14 text-[14px] font-medium opacity-100 scale-[0.88]";
+                          : "text-white/14 text-[12px] font-medium opacity-100 scale-[0.88]";
 
                 return (
                   <button

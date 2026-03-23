@@ -24,6 +24,7 @@ import {
   Clock,
   Heart,
   Star,
+  Settings,
 } from "lucide-react";
 import type {
   Station,
@@ -47,6 +48,7 @@ import { useSleepTimer } from "./hooks/useSleepTimer";
 import { useStationQueue } from "./hooks/useStationQueue";
 import { useWakeLock } from "./hooks/useWakeLock";
 import { useAudioReactiveBackground } from "./hooks/useAudioReactiveBackground";
+import { useStats } from "./hooks/useStats";
 import { useAudioAnalyser, useAlbumArt } from "@/lib/audio-visualizer";
 import { usePlaybackStore } from "@/lib/playbackStore";
 import BrowseView from "./components/BrowseView";
@@ -60,6 +62,8 @@ import FavoriteSongsView from "./components/FavoriteSongsView";
 import SongDetailModal from "./components/SongDetailModal";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import LanguageSelector from "./components/LanguageSelector";
+import MobileSettingsPanel from "./components/MobileSettingsPanel";
+import OnboardingModal from "./components/OnboardingModal";
 import { saveToStorage } from "@/lib/storageUtils";
 import { useLocale } from "@/context/LocaleContext";
 import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
@@ -87,10 +91,10 @@ const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
 };
 
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
-  const [size, setSize] = useState<{ w: number; h: number }>({
-    w: 800,
-    h: 600,
-  });
+  const [size, setSize] = useState<{ w: number; h: number }>(() => ({
+    w: typeof window !== 'undefined' ? window.innerWidth : 800,
+    h: typeof window !== 'undefined' ? window.innerHeight : 600,
+  }));
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -148,6 +152,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   });
   const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === "playing");
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
+  const usageStats = useStats();
 
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
@@ -170,7 +175,42 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     enrichedTrack,
   );
 
+  // Track listen time for stats (every 5 seconds while playing)
+  const lastTickRef = useRef(Date.now());
+  useEffect(() => {
+    if (radio.status !== 'playing' || !radio.station) {
+      lastTickRef.current = Date.now();
+      return;
+    }
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const delta = now - lastTickRef.current;
+      lastTickRef.current = now;
+      if (radio.station) {
+        usageStats.tickListenTime(radio.station.stationuuid, radio.station.name, delta);
+      }
+    }, 5000);
+    lastTickRef.current = Date.now();
+    return () => clearInterval(interval);
+  }, [radio.status, radio.station, usageStats]);
+
+  // Record song play when a new track starts
+  const lastRecordedTrackRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!enrichedTrack?.title || !enrichedTrack?.artist) return;
+    const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`;
+    if (key === lastRecordedTrackRef.current) return;
+    lastRecordedTrackRef.current = key;
+    usageStats.recordSongPlay(
+      enrichedTrack.title,
+      enrichedTrack.artist,
+      enrichedTrack.genre,
+      enrichedTrack.artworkUrl,
+    );
+  }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, usageStats]);
+
   const [showEq, setShowEq] = useState(false);
+  const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -327,6 +367,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handlePlay = useCallback(
     (station: Station) => {
       radio.play(station);
+      // Connect EQ and analyser within user gesture context so AudioContext
+      // is created/resumed from a tap — required by mobile browsers.
+      if (radio.audioRef.current) {
+        eq.connectSource(radio.audioRef.current);
+        analyser.connectAudio(radio.audioRef.current);
+      }
       recent.add(station);
       stationQueue.setPlaying(station.stationuuid);
       setTheaterMode(true);
@@ -336,7 +382,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         radio.prefetchStream(stationQueue.queue[nextIdx].url_resolved);
       }
     },
-    [radio, recent, stationQueue],
+    [radio, recent, stationQueue, eq, analyser],
   );
 
   // Auto-advance to next queued station on error, or failover to similar station
@@ -816,6 +862,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {songDetailModal}
         {shortcutsOverlay}
         {offlineBanner}
+        <OnboardingModal />
       </div>
     );
   }
@@ -825,7 +872,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return (
       <div
         ref={containerRef}
-        className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
+        className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none"
       >
         <ParallaxBackground
           faviconUrl={radio.station?.favicon}
@@ -834,39 +881,47 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           landingMode={isLandingNavigation}
         />
 
-        {/* Mobile header */}
-        {!theaterMode && (
-          <div className="relative z-20 flex-shrink-0 safe-top">
-              <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-              <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-                <div className="relative w-5 h-5 flex-shrink-0">
-                  <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
-                </div>
-                <span className="text-[15px] font-semibold text-white">Pulse</span>
-              </button>
-                <div className="flex-1" />
-                      <LanguageSelector />
-                {radio.station && (
-                <button
-                  onClick={radio.station ? handleToggleFav : undefined}
-                  aria-label={
-                    radio.station && favs.has(radio.station.stationuuid)
-                      ? t("removeFromFavorites")
-                      : t("addToFavorites")
-                  }
-                  className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
-                >
-                  <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
+        {/* Single scrollable area — content scrolls behind sticky header */}
+        <div className="h-full overflow-y-auto relative z-10">
+          {/* Sticky header — glassmorphism (content scrolls underneath) */}
+          {!theaterMode && (
+            <div data-testid="mobile-header" className="sticky top-0 z-30 safe-top border-b border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
+                <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+                <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                  <div className="relative w-5 h-5 flex-shrink-0">
+                    <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
+                  </div>
+                  <span className="text-[15px] font-semibold text-white">Pulse</span>
                 </button>
-              )}
+                  <div className="flex-1" />
+                  <button
+                    onClick={() => setShowMobileSettings(true)}
+                    className="w-9 h-9 flex-center-row rounded-xl text-white/40 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
+                    title="Settings"
+                    data-testid="mobile-settings-btn"
+                  >
+                    <Settings size={18} />
+                  </button>
+                  {radio.station && (
+                  <button
+                    onClick={radio.station ? handleToggleFav : undefined}
+                    aria-label={
+                      radio.station && favs.has(radio.station.stationuuid)
+                        ? t("removeFromFavorites")
+                        : t("addToFavorites")
+                    }
+                    className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
+                  >
+                    <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Main content */}
-        <div className="flex-1 min-h-0 relative z-10 overflow-y-auto">
           {theaterMode && radio.station ? (
-            <div className="h-full">
+            <div className="h-full flex flex-col">
+              <div className="flex-1 min-h-0">
               <TheaterView
                 station={radio.station}
                 track={enrichedTrack}
@@ -887,9 +942,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                 lyricsVariant="mobile"
               />
+              </div>
+              {/* Spacer for absolute bottom bar */}
+              <div className="h-20 shrink-0" />
             </div>
           ) : (
-            <div className="flex flex-col min-h-full">
+            <div className="flex flex-col min-h-full pb-24">
               {radio.station && (
                 <NowPlayingHero
                   station={radio.station}
@@ -899,16 +957,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   artworkUrl={albumArt.artworkUrl}
                   icyBitrate={icyBitrate}
                   onTheater={() => setTheaterMode(true)}
-                  lyrics={lyrics}
-                  lyricsLoading={lyricsLoading}
-                  currentTime={effectiveCurrentTime}
-                  activeLineOverride={realtimeLyrics?.activeLineIndex}
-                  syncConfidence={realtimeLyrics?.confidence}
-                  syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                 />
               )}
               {/* ── Mobile top nav tabs + search ── */}
-              <div className="flex-shrink-0 px-4 pt-2 pb-2 flex items-center gap-2">
+              <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
                 {([
                   { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={14} /> },
                   { id: "history" as const, label: t("history"), icon: <Clock size={14} /> },
@@ -923,7 +975,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {tab.label}
                   </button>
                 ))}
-                <form onSubmit={handleSearchSubmit} className="flex-1 min-w-0">
+              </div>
+              <div className="flex-shrink-0 px-4 pb-2">
+                <form onSubmit={handleSearchSubmit}>
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     <Search size={13} className="text-white/30 flex-shrink-0" />
                     <input
@@ -932,7 +986,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t("searchStationsAria")}
-                      className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                      className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
                       data-radio-search
                     />
                   </div>
@@ -953,27 +1007,24 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     onSelectGenre={handleSelectGenre}
                     onSelectCountry={handleSelectCountry}
                     onGoHome={handleGoHome}
+                    userGenreOrder={usageStats.genreOrder()}
                   />
                 ) : activeTab === "history" ? (
-                  <div className="overflow-y-auto h-full">
-                    <HistoryGridView
-                      history={songHistory.history}
-                      onRemove={songHistory.remove}
-                      onClear={songHistory.clear}
-                      onToggleFavSong={handleFavSongFromHistory}
-                      isSongFavorite={favSongs.has}
-                      onSelect={setSelectedSong}
-                    />
-                  </div>
+                  <HistoryGridView
+                    history={songHistory.history}
+                    onRemove={songHistory.remove}
+                    onClear={songHistory.clear}
+                    onToggleFavSong={handleFavSongFromHistory}
+                    isSongFavorite={favSongs.has}
+                    onSelect={setSelectedSong}
+                  />
                 ) : (
-                  <div className="overflow-y-auto h-full">
-                    <FavoriteSongsView
-                      songs={favSongs.songs}
-                      onRemove={favSongs.remove}
-                      onClear={favSongs.clear}
-                      onSelect={setSelectedSong}
-                    />
-                  </div>
+                  <FavoriteSongsView
+                    songs={favSongs.songs}
+                    onRemove={favSongs.remove}
+                    onClear={favSongs.clear}
+                    onSelect={setSelectedSong}
+                  />
                 )}
               </div>
             </div>
@@ -1008,6 +1059,24 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           />
         )}
 
+        {/* Mobile settings panel */}
+        <AnimatePresence>
+          {showMobileSettings && (
+            <MobileSettingsPanel
+              onClose={() => setShowMobileSettings(false)}
+              eq={eq}
+              onPresetChange={setEqPreset}
+              statsData={{
+                topStations: usageStats.topStations(),
+                topSongs: usageStats.topSongs(),
+                topArtists: usageStats.topArtists(),
+                topGenres: usageStats.topGenres(),
+                totalListenMs: usageStats.stats.totalListenMs,
+              }}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Toast notification */}
         <AnimatePresence>
           {toast && (
@@ -1031,20 +1100,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           )}
         </AnimatePresence>
 
-        {/* Bottom bar */}
-        <div className="relative z-20">
-          {theaterAudioBadges.length > 0 && (
-            <div className="px-4 pb-2">
-              <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-                <span className="text-white/70">{t("autoAudioEnhancements")}</span>
-                {theaterAudioBadges.map(label => (
-                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium">
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
+        <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
           <NowPlayingBar
             station={radio.station}
             track={enrichedTrack}
@@ -1074,6 +1131,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {songDetailModal}
         {shortcutsOverlay}
         {offlineBanner}
+        <OnboardingModal />
       </div>
     );
   }
@@ -1151,13 +1209,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     artworkUrl={albumArt.artworkUrl}
                     icyBitrate={icyBitrate}
                     onTheater={() => setTheaterMode(true)}
-                    lyrics={lyrics}
-                    lyricsLoading={lyricsLoading}
-                    currentTime={effectiveCurrentTime}
-                    activeLineOverride={realtimeLyrics?.activeLineIndex}
-                    syncConfidence={realtimeLyrics?.confidence}
-                    syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
-                    lyricsVariant="desktop"
                   />
                 )}
                 {/* ── Top nav: tabs + search ── */}
@@ -1222,6 +1273,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         onSelectGenre={handleSelectGenre}
                         onSelectCountry={handleSelectCountry}
                         onGoHome={handleGoHome}
+                        userGenreOrder={usageStats.genreOrder()}
                       />
                     </motion.div>
                   ) : activeTab === "history" ? (
@@ -1348,16 +1400,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           <div className="min-w-0 flex flex-col items-start gap-1.5 text-[10px] overflow-hidden">
             {theaterAudioBadges.length > 0 && (
-              <>
+              <div className="pointer-events-auto flex items-center gap-1.5 px-3 py-2 rounded-full" style={{ background: 'rgba(10, 15, 26, 0.7)', backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <span className="text-white/70 shrink-0">{t("autoAudioEnhancements")}</span>
-                <div className="min-w-0 flex items-center gap-1.5 text-[10px] overflow-hidden">
-                  {theaterAudioBadges.map(label => (
-                    <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
-                      {label}
-                    </span>
-                  ))}
-                </div>
-              </>
+                {theaterAudioBadges.map(label => (
+                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
+                    {label}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
           <button
@@ -1397,6 +1447,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {songDetailModal}
       {shortcutsOverlay}
       {offlineBanner}
+      <OnboardingModal />
     </div>
   );
 }

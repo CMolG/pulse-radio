@@ -7,7 +7,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { X, Mic2, Loader2 } from "lucide-react";
+import { X, Mic2 } from "lucide-react";
 import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex } from "../lyricsUtils";
 import type { RealtimeSyncStatus } from "../services/realtimeLyricsTypes";
@@ -75,12 +75,6 @@ export default function LyricsPanel({
 
       {/* Content */}
       <div className="app-body px-4 pb-4">
-        {loading && (
-          <div className="flex-center-row py-16">
-            <Loader2 size={20} className="text-dim animate-spin" />
-          </div>
-        )}
-
         {!loading && error && (
           <div className="flex-center-col py-16">
             <Mic2 size={28} className="text-red-400 mb-2" />

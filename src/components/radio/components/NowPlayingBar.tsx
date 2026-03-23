@@ -99,12 +99,12 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="relative flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0">
-        {/* Play/Pause — 44px touch target */}
+      <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={{ paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' }}>
+        {/* Play/Pause — 48px touch target */}
         <button
           onClick={onTogglePlay}
           disabled={!station}
-          className="w-11 h-11 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
+          className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -143,17 +143,6 @@ export default function NowPlayingBar({
 
         {/* Action buttons — 44px touch targets */}
         <div className="flex items-center gap-0.5 shrink-0">
-          {onFavSong && (
-            <button
-              onClick={onFavSong}
-              aria-label={songLiked ? 'Unlike song' : 'Like song'}
-              aria-pressed={!!songLiked}
-              className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 ${songLiked ? "text-pink-400" : "text-white/30 hover:text-white/50"}`}
-              title="Favorite song"
-            >
-              <Heart size={18} className={songLiked ? "fill-pink-400" : ""} />
-            </button>
-          )}
           {station && !theaterMode && (
             <button
               onClick={onToggleTheater}

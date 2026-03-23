@@ -28,9 +28,11 @@ export default function ParallaxBackground({ faviconUrl, genre, audioAmplitude =
       <div
         className="absolute inset-[-40px] transition-transform duration-300 ease-out"
         style={{
-          transform: `translate(${offset.x}px, ${offset.y}px)`,
+          transform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
+          WebkitTransform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
           background: baseGradient,
           opacity: landingMode ? 0.85 : 0.15,
+          willChange: 'transform',
         }}/>
       {landingMode && (
         <div
@@ -44,14 +46,25 @@ export default function ParallaxBackground({ faviconUrl, genre, audioAmplitude =
         <div
           className="absolute inset-[-40px] transition-transform duration-300 ease-out"
           style={{
-            transform: `translate(${offset.x * 1.5}px, ${offset.y * 1.5}px)`,
+            transform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`,
+            WebkitTransform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`,
+            willChange: 'transform',
           }}>
-          <UiImage
-            src={faviconUrl}
-            alt=""
-            className={`object-cover blur-3xl ${landingMode ? 'opacity-10' : 'opacity-20'}`}
-            sizes="100vw"
-          />
+          {/* Separate blur layer for iOS GPU compositing */}
+          <div className="absolute inset-0" style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}>
+            <UiImage
+              src={faviconUrl}
+              alt=""
+              className={`object-cover ${landingMode ? 'opacity-10' : 'opacity-20'}`}
+              sizes="100vw"
+              style={{
+                filter: 'blur(64px)',
+                WebkitFilter: 'blur(64px)',
+                transform: 'translate3d(0,0,0)',
+                WebkitTransform: 'translate3d(0,0,0)',
+              }}
+            />
+          </div>
         </div>
       )}
     </div>);
