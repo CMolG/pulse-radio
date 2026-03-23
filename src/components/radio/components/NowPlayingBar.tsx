@@ -99,12 +99,12 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="relative flex items-center justify-between gap-3 px-4 pb-2 min-h-20 shrink-0 safe-bottom safe-x">
+      <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={{ paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' }}>
         {/* Play/Pause — 48px touch target */}
         <button
           onClick={onTogglePlay}
           disabled={!station}
-          className="ml-1 w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
+          className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

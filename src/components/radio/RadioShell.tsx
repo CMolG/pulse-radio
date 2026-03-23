@@ -1348,7 +1348,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           <div className="min-w-0 flex flex-col items-start gap-1.5 text-[10px] overflow-hidden">
             {theaterAudioBadges.length > 0 && (
-              <div className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(10, 15, 26, 0.7)', backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="pointer-events-auto flex items-center gap-1.5 px-3 py-2 rounded-full" style={{ background: 'rgba(10, 15, 26, 0.7)', backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <span className="text-white/70 shrink-0">{t("autoAudioEnhancements")}</span>
                 {theaterAudioBadges.map(label => (
                   <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">

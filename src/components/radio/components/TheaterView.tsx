@@ -230,7 +230,7 @@ export default function TheaterView({
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
       <div className="flex-1 flex items-center justify-center relative z-10 px-4">
         <div
-          className={`flex flex-col items-center ${compact ? "gap-2 px-4 py-3" : "gap-4 px-8 py-8"} rounded-3xl max-w-sm w-full`}
+          className={`flex flex-col items-center ${compact ? "gap-2 px-4 py-3" : "gap-3 px-6 py-5"} rounded-3xl max-w-sm w-full`}
           style={{
             background: "rgba(0, 0, 0, 0.35)",
             backdropFilter: "blur(24px) saturate(1.4)",
@@ -376,27 +376,27 @@ export default function TheaterView({
               Listen on Apple Music
             </a>
           )}
+
+          {/* ── Lyrics reel inside glass panel ── */}
+          {!compact && (
+            <div
+              className={`w-full ${
+                lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"
+              }`}
+            >
+              <LyricsReel
+                lyrics={lyrics ?? null}
+                loading={Boolean(lyricsLoading)}
+                currentTime={currentTime}
+                activeLineOverride={activeLineOverride}
+                syncConfidence={syncConfidence}
+                syncMode={syncMode}
+                variant={lyricsVariant}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* ── Lyrics reel in theater mode ── */}
-      {!compact && (
-        <div
-          className={`relative z-10 ${
-            lyricsVariant === "desktop" ? "px-6 pb-4" : "px-3 pb-2"
-          }`}
-        >
-          <LyricsReel
-            lyrics={lyrics ?? null}
-            loading={Boolean(lyricsLoading)}
-            currentTime={currentTime}
-            activeLineOverride={activeLineOverride}
-            syncConfidence={syncConfidence}
-            syncMode={syncMode}
-            variant={lyricsVariant}
-          />
-        </div>
-      )}
     </motion.div>
   );
 }

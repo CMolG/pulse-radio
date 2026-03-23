@@ -6,11 +6,11 @@
 
 "use client";
 
-import React from "react";
-import { X, Languages, Sliders } from "lucide-react";
+import React, { useState } from "react";
+import { X, Languages, Sliders, Power, ChevronDown, ChevronUp, Plus, Save } from "lucide-react";
 import { motion } from "motion/react";
 import { useLocale } from "@/context/LocaleContext";
-import EqPanel from "./EqPanel";
+import { EQ_PRESETS } from "../constants";
 import type { EqBand, EqPreset } from "../types";
 
 type NoiseReductionMode = "off" | "low" | "medium" | "high";
@@ -44,7 +44,31 @@ type Props = {
 
 export default function MobileSettingsPanel({ onClose, eq, onPresetChange }: Props) {
   const { locale, setLocale, locales } = useLocale();
-  const [showEq, setShowEq] = React.useState(false);
+  const [showEq, setShowEq] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [presetName, setPresetName] = useState("");
+
+  const handleSelectPreset = (name: string, gains: number[]) => {
+    setSelectedPreset(name);
+    eq.applyPreset(gains);
+    onPresetChange(name);
+  };
+
+  const handleSetGain = (id: string, gain: number) => {
+    setSelectedPreset(null);
+    onPresetChange(null);
+    eq.setBandGain(id, gain);
+  };
+
+  const handleSave = () => {
+    const name = presetName.trim();
+    if (name) {
+      eq.saveCustomPreset(name);
+      setPresetName("");
+      setShowSaveInput(false);
+    }
+  };
 
   return (
     <motion.div
@@ -114,7 +138,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange }: Pro
 
         <div className="border-t border-white/8" />
 
-        {/* Equalizer section */}
+        {/* Equalizer section — fully inline */}
         <div className="px-5 py-4">
           <button
             onClick={() => setShowEq((s) => !s)}
@@ -124,39 +148,133 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange }: Pro
               <Sliders size={16} className="text-white/60" />
               <span className="text-[14px] font-medium text-white/80">Equalizer</span>
             </div>
-            <div className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${
-              eq.enabled ? "bg-sys-orange/20 text-sys-orange" : "bg-white/5 text-white/40"
-            }`}>
-              {eq.enabled ? "ON" : "OFF"}
+            <div className="flex items-center gap-2">
+              <span className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${
+                eq.enabled ? "bg-sys-orange/20 text-sys-orange" : "bg-white/5 text-white/40"
+              }`}>
+                {eq.enabled ? "ON" : "OFF"}
+              </span>
+              {showEq ? <ChevronUp size={14} className="text-white/40" /> : <ChevronDown size={14} className="text-white/40" />}
             </div>
           </button>
 
           {showEq && (
-            <div className="mt-3 relative min-h-[360px]">
-              <EqPanel
-                bands={eq.bands}
-                enabled={eq.enabled}
-                normalizerEnabled={eq.normalizerEnabled}
-                stereoWidth={eq.stereoWidth}
-                bassEnhance={eq.bassEnhance}
-                compressorEnabled={eq.compressorEnabled}
-                compressorAmount={eq.compressorAmount}
-                noiseReductionMode={eq.noiseReductionMode}
-                customPresets={eq.customPresets}
-                onSetGain={eq.setBandGain}
-                onApplyPreset={eq.applyPreset}
-                onToggleEnabled={eq.toggleEnabled}
-                onToggleNormalizer={eq.toggleNormalizer}
-                onSetStereoWidth={eq.setStereoWidth}
-                onSetBassEnhance={eq.setBassEnhance}
-                onToggleCompressor={eq.toggleCompressor}
-                onSetCompressorAmount={eq.setCompressorAmount}
-                onSetNoiseReductionMode={eq.setNoiseReductionMode}
-                onSaveCustomPreset={eq.saveCustomPreset}
-                onRemoveCustomPreset={eq.removeCustomPreset}
-                onPresetChange={onPresetChange}
-                onClose={() => setShowEq(false)}
-              />
+            <div className="mt-4 space-y-4">
+              {/* Power + Normalizer toggles */}
+              <div className="flex items-center gap-2">
+                <button onClick={eq.toggleEnabled} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 text-white/40 border border-white/8"}`}>
+                  <Power size={12} />
+                  {eq.enabled ? "Enabled" : "Disabled"}
+                </button>
+                <button onClick={eq.toggleNormalizer} className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 text-white/40 border border-white/8"}`}>
+                  NORM
+                </button>
+              </div>
+
+              {/* Presets */}
+              <div>
+                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Presets</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {EQ_PRESETS.map(preset => (
+                    <button key={preset.name} onClick={() => handleSelectPreset(preset.name, preset.gains)}
+                      className={`px-2.5 py-1.5 text-[11px] rounded-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 border border-white/8 text-white/50 hover:text-white/80"}`}>
+                      {preset.name}
+                    </button>
+                  ))}
+                  {eq.customPresets.map(preset => (
+                    <div key={`custom-${preset.name}`} className="flex">
+                      <button onClick={() => handleSelectPreset(preset.name, preset.gains)}
+                        className={`px-2.5 py-1.5 text-[11px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40" : "bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8"}`}>
+                        {preset.name}
+                      </button>
+                      <button onClick={() => eq.removeCustomPreset(preset.name)}
+                        className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors">
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {/* Save custom */}
+                <div className="mt-2">
+                  {showSaveInput ? (
+                    <div className="flex items-center gap-1.5">
+                      <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setShowSaveInput(false); }}
+                        placeholder="Preset name…"
+                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/25 outline-none focus:border-sys-orange/50"
+                        autoFocus />
+                      <button onClick={handleSave} className="p-1.5 rounded-lg bg-sys-orange/20 text-sys-orange"><Save size={12} /></button>
+                      <button onClick={() => setShowSaveInput(false)} className="p-1.5 rounded-lg bg-white/5 text-white/40"><X size={12} /></button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setShowSaveInput(true)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/40 hover:text-white/60 transition-colors">
+                      <Plus size={10} /> Save Custom
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Band sliders — horizontal scroll */}
+              <div>
+                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Bands</span>
+                <div className="flex items-end justify-between gap-1.5 px-1">
+                  {eq.bands.map(band => (
+                    <div key={band.id} className="flex flex-col items-center gap-1">
+                      <span className="text-[9px] text-white/40 tabular-nums">{band.gain > 0 ? `+${band.gain}` : band.gain}</span>
+                      <input type="range" min={-12} max={12} step={1} value={band.gain}
+                        onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))}
+                        disabled={!eq.enabled}
+                        className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                      />
+                      <span className="text-[8px] text-white/40">{band.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Noise Reduction */}
+              <div>
+                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Noise Reduction</span>
+                <div className="flex gap-1.5">
+                  {(["off", "low", "medium", "high"] as const).map(mode => (
+                    <button key={mode} onClick={() => eq.setNoiseReductionMode(mode)}
+                      className={`flex-1 py-1.5 text-[11px] rounded-lg font-medium transition-colors ${
+                        eq.noiseReductionMode === mode
+                          ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40"
+                          : "bg-white/5 border border-white/8 text-white/50"
+                      }`}>
+                      {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sliders: Width, Bass, Compressor */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-white/50 w-10 shrink-0">Width</span>
+                  <input type="range" min={0} max={200} step={5} value={Math.round(eq.stereoWidth * 100)}
+                    onChange={e => eq.setStereoWidth(parseInt(e.target.value, 10) / 100)}
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
+                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.stereoWidth * 100)}%</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-white/50 w-10 shrink-0">Bass+</span>
+                  <input type="range" min={0} max={100} step={5} value={Math.round(eq.bassEnhance * 100)}
+                    onChange={e => eq.setBassEnhance(parseInt(e.target.value, 10) / 100)}
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
+                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.bassEnhance * 100)}%</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button onClick={eq.toggleCompressor} className={`text-[11px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? "text-sys-orange" : "text-white/50"}`}>Comp</button>
+                  <input type="range" min={0} max={100} step={5} value={Math.round(eq.compressorAmount * 100)}
+                    onChange={e => eq.setCompressorAmount(parseInt(e.target.value, 10) / 100)}
+                    disabled={!eq.compressorEnabled}
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
+                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.compressorAmount * 100)}%</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
