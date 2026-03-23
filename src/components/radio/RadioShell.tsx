@@ -445,22 +445,32 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   });
 
   const widgetSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveWidgetState = useCallback(() => {
+    const state: WidgetPlaybackState = {
+      station: radio.station,
+      status: radio.status,
+      track: enrichedTrack,
+      volume: radio.volume,
+      updatedAt: Date.now(),
+    };
+    saveToStorage(STORAGE_KEYS.PLAYBACK, state);
+  }, [radio.station, radio.status, enrichedTrack, radio.volume]);
+
   useEffect(() => {
     if (widgetSaveTimerRef.current) clearTimeout(widgetSaveTimerRef.current);
-    widgetSaveTimerRef.current = setTimeout(() => {
-      const state: WidgetPlaybackState = {
-        station: radio.station,
-        status: radio.status,
-        track: enrichedTrack,
-        volume: radio.volume,
-        updatedAt: Date.now(),
-      };
-      saveToStorage(STORAGE_KEYS.PLAYBACK, state);
-    }, 500);
+    widgetSaveTimerRef.current = setTimeout(saveWidgetState, 500);
     return () => {
       if (widgetSaveTimerRef.current) clearTimeout(widgetSaveTimerRef.current);
     };
-  }, [radio.station, radio.status, enrichedTrack, radio.volume]);
+  }, [saveWidgetState]);
+
+  // Heartbeat: refresh updatedAt every 15s during playback so widgets
+  // don't mark the state as stale during uninterrupted streams
+  useEffect(() => {
+    if (radio.status !== 'playing') return;
+    const iv = setInterval(saveWidgetState, 15_000);
+    return () => clearInterval(iv);
+  }, [radio.status, saveWidgetState]);
 
   useEffect(() => {
     const handler = (e: Event) => {
