@@ -1,7 +1,7 @@
 <!--
-  Copyright (c) 2026 Carlos Molina Galindo.
-  Open source project: Pulse Radio.
-  Created by Carlos Molina Galindo (CMolG on GitHub).
+     Copyright (c) 2026 Carlos Molina Galindo.
+     Open source project: Pulse Radio.
+     Created by Carlos Molina Galindo (CMolG on GitHub).
 -->
 
 <p align="center">
@@ -15,7 +15,7 @@
 
 # 📻 Pulse Radio
 
-> A modern, feature-rich internet radio player built with Next.js 16 and React 19. Stream 40,000+ stations with real-time lyrics, audio visualizers, and a 5-band equalizer — all in your browser.
+> A modern, feature-rich internet radio player built with Next.js 16 and React 19. Stream 40,000+ stations with real-time lyrics, audio visualizers, a 5-band equalizer, podcast support, and audiobooks — all in your browser.
 
 <p align="center">
   <strong>
@@ -34,12 +34,22 @@
 ### 🎵 Core Playback
 - **40,000+ stations** from [Radio Browser API](https://www.radio-browser.info/) — browse by genre, country, trending, or local
 - **ICY metadata extraction** — real-time "Now Playing" track info from stream headers
+- **Station queue** — queue up stations and move between them seamlessly
 - **Stall recovery** — automatic retry logic when streams buffer or drop
 - **Media Session API** — OS-level controls (lock screen, headphone buttons, media keys)
+- **Wake Lock** — prevents screen from sleeping during playback
+- **Sleep timer** — auto-stop playback after a configurable duration
+
+### 🎙️ Podcasts & Audiobooks
+- **Podcast search & playback** — browse and stream podcasts via RSS feeds
+- **LibriVox audiobooks** — free public domain audiobooks streamed in-browser
+- **Internet Archive audio** — access the vast archive.org audio collection
+- **Open Library integration** — book metadata for audiobook content
 
 ### 🎨 Visual Experience
-- **Album artwork** — automatic lookup via iTunes Search API
+- **Album artwork** — automatic lookup via iTunes Search API with strict Jaro-distance matching and graceful fallback
 - **Audio visualizers** — ferrofluid, spiral, and circular renderers using Web Audio FFT analysis
+- **Audio-reactive background** — dynamic background that pulses with the music
 - **Theater mode** — immersive full-screen playback with parallax album art background
 - **Glassmorphism UI** — macOS-inspired dark theme with frosted glass surfaces
 
@@ -52,17 +62,25 @@
 ### 📝 Lyrics
 - **Synced lyrics** (LRC format) with auto-scrolling and highlighted current line
 - **Plain text lyrics** fallback when synced version unavailable
+- **Realtime STT lyrics sync** — on-device speech recognition aligns lyrics in real time when timestamps are unavailable
 - **Local caching** for instant re-display on revisit
 - Powered by [LrcLib API](https://lrclib.net/)
 
+### 🌍 Internationalization
+- **Multi-language UI** — locale-aware routing via `[countryCode]` segments
+- **Language selector** — switch UI language in-app
+- **Country-based defaults** — auto-detects preferred stations and language from locale
+
 ### 📚 Library Management
 - **Favorites** — star stations for quick access
+- **Favorite songs** — bookmark tracks you love
 - **Recent stations** — last 15 played stations
 - **Play history** — up to 100 entries with artist, track, and artwork
 
 ### 📱 Responsive Design
 - Adapts from desktop (sidebar + main) to tablet and mobile layouts
 - Touch-friendly controls throughout
+- **Mobile lyrics reel** — swipeable lyrics experience on small screens
 
 ## 🚀 Getting Started
 
@@ -99,12 +117,25 @@ npm start
 ```
 src/
 ├── app/                          # Next.js App Router
+│   ├── [countryCode]/            # Locale-aware routing
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── head.tsx
+│   │   └── not-found.tsx
 │   ├── api/
 │   │   ├── proxy-stream/         # CORS proxy for audio streams
 │   │   ├── icy-meta/             # ICY metadata extraction endpoint
-│   │   └── itunes/               # Album artwork lookup proxy
+│   │   ├── itunes/               # Album artwork lookup proxy
+│   │   ├── artist-info/          # Artist biography/info proxy
+│   │   ├── archive-audio/        # Internet Archive audio proxy
+│   │   ├── librivox/             # LibriVox API proxy
+│   │   ├── open-library/         # Open Library metadata proxy
+│   │   ├── podcast-feed/         # Podcast RSS feed proxy
+│   │   └── podcast-search/       # Podcast search proxy
 │   ├── layout.tsx                # Root layout (fonts, metadata)
 │   ├── page.tsx                  # Home page → <Radio />
+│   ├── sitemap.ts                # Dynamic sitemap generation
+│   ├── ServiceWorkerRegistrar.tsx
 │   └── globals.css               # Tailwind + theme variables
 │
 ├── components/radio/             # Main radio player
@@ -116,6 +147,9 @@ src/
 │   │   ├── BrowseView.tsx        # Genre/country browser
 │   │   ├── EqPanel.tsx           # Equalizer interface
 │   │   ├── LyricsPanel.tsx       # Lyrics display
+│   │   ├── MobileLyricsReel.tsx  # Mobile lyrics experience
+│   │   ├── LanguageSelector.tsx  # UI language switcher
+│   │   ├── KeyboardShortcutsHelp.tsx
 │   │   ├── Sidebar.tsx           # Navigation sidebar
 │   │   └── TheaterView.tsx       # Full-screen theater mode
 │   ├── hooks/                    # Custom React hooks
@@ -123,24 +157,51 @@ src/
 │   │   ├── useEqualizer.ts       # Web Audio API EQ chain
 │   │   ├── useStationMeta.ts     # ICY metadata polling
 │   │   ├── useLyrics.ts          # Lyrics fetching & caching
+│   │   ├── useRealtimeLyricsSync.ts  # STT-based realtime lyrics sync
 │   │   ├── useFavorites.ts       # Favorite stations (localStorage)
+│   │   ├── useFavoriteSongs.ts   # Favorite songs (localStorage)
 │   │   ├── useRecent.ts          # Recent stations
 │   │   ├── useHistory.ts         # Play history tracker
-│   │   └── useMediaSession.ts    # Browser media session
+│   │   ├── useMediaSession.ts    # Browser media session
+│   │   ├── useStationQueue.ts    # Station queue management
+│   │   ├── useSleepTimer.ts      # Auto-stop sleep timer
+│   │   ├── useWakeLock.ts        # Screen wake lock
+│   │   ├── usePlaybackPosition.ts
+│   │   ├── useArtistInfo.ts      # Artist biography lookup
+│   │   ├── useAudioReactiveBackground.ts
+│   │   └── useParallaxBg.ts
 │   ├── services/                 # External API clients
 │   │   ├── radioApi.ts           # Radio Browser API
 │   │   ├── lyricsApi.ts          # LrcLib API
-│   │   └── genreApi.ts           # Genre description API
+│   │   ├── lyricsAligner.ts      # Incremental lyrics alignment
+│   │   ├── realtimeSpeechRecognition.ts  # STT engine wrapper
+│   │   ├── realtimeLyricsTypes.ts
+│   │   ├── archiveApi.ts         # Internet Archive API
+│   │   ├── librivoxApi.ts        # LibriVox API
+│   │   └── podcastApi.ts         # Podcast RSS parsing
 │   ├── types.ts                  # TypeScript type definitions
 │   ├── constants.ts              # Genres, EQ presets, storage keys
-│   └── lrcParser.ts              # LRC lyrics format parser
+│   ├── lrcParser.ts              # LRC lyrics format parser
+│   └── lyricsUtils.ts            # Lyrics utility functions
+│
+├── context/
+│   └── LocaleContext.tsx         # i18n locale provider
 │
 └── lib/                          # Shared utilities
     ├── audio-visualizer/         # Canvas-based visualizations
     │   ├── useAudioAnalyser.ts   # FFT frequency analysis hook
+    │   ├── useAlbumArt.ts        # iTunes artwork with Jaro-distance matching
     │   ├── FerrofluidRenderer.tsx
     │   ├── SpiralRenderer.tsx
     │   └── CircularRenderer.tsx
+    ├── i18n/                     # Internationalization
+    │   ├── locales.ts            # Supported locales
+    │   ├── messages.ts           # Translation strings
+    │   ├── countries.ts          # Country metadata
+    │   ├── countryChips.ts       # Country filter chips
+    │   ├── countryDefaults.ts    # Per-country defaults
+    │   ├── languageMap.ts        # Language → locale mapping
+    │   └── localeStorage.ts      # Locale persistence
     ├── playbackStore.ts          # Zustand global state
     └── storageUtils.ts           # localStorage helpers
 ```
@@ -155,6 +216,7 @@ src/
 | State | Zustand 5 |
 | Animation | Motion (Framer Motion) 12 |
 | Audio | Web Audio API (biquad filters, FFT analysis) |
+| Speech | Web Speech API (SpeechRecognition) |
 | Icons | Lucide React |
 
 ### External APIs
@@ -164,7 +226,9 @@ src/
 | [Radio Browser](https://www.radio-browser.info/) | Station discovery (40K+ stations) |
 | [LrcLib](https://lrclib.net/) | Synced & plain text lyrics |
 | [iTunes Search](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/) | Album artwork lookup |
-| [BinaryJazz](https://binaryjazz.us/genrenator-api/) | Random genre descriptions |
+| [LibriVox](https://librivox.org/api/info) | Free public domain audiobooks |
+| [Internet Archive](https://archive.org/advancedsearch.php) | Open audio collection |
+| [Open Library](https://openlibrary.org/developers/api) | Book metadata |
 
 ## 🤝 Contributing
 
@@ -206,16 +270,20 @@ Look for issues labeled [`good first issue`](../../labels/good%20first%20issue) 
 - ICY metadata is extracted server-side since browsers can't read ICY headers directly
 - The equalizer uses a chain of `BiquadFilterNode`s in a Web Audio graph
 - Lyrics are cached in `localStorage` to avoid redundant API calls
+- The realtime STT engine resets its restart counter on every successful recognition result; `MAX_RESTARTS` means consecutive failures, not total restarts
 
 ## 🗺️ Roadmap
 
+- [x] Sleep timer
+- [x] Keyboard shortcuts
+- [x] i18n / localization
+- [x] Podcast support
+- [x] Audiobook support (LibriVox + Internet Archive)
+- [x] Realtime STT lyrics sync
+- [x] Station queue
 - [ ] Station search with fuzzy matching
-- [ ] Sleep timer
-- [ ] Keyboard shortcuts
 - [ ] Chromecast / AirPlay support
-- [ ] Podcast support
 - [ ] Shared playlists
-- [ ] i18n / localization
 
 ## 📄 License
 

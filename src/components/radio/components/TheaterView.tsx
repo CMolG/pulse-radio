@@ -15,6 +15,7 @@ import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
+import UiImage from "@/components/common/UiImage";
 
 function stationInitials(name: string) {
   return name
@@ -42,6 +43,9 @@ type Props = {
   lyrics?: LyricsData | null;
   lyricsLoading?: boolean;
   currentTime?: number;
+  activeLineOverride?: number;
+  syncConfidence?: number;
+  syncMode?: "time" | "realtime";
   lyricsVariant?: "mobile" | "desktop";
   compact?: boolean;
 };
@@ -110,22 +114,18 @@ export default function TheaterView({
   lyrics,
   lyricsLoading,
   currentTime,
+  activeLineOverride,
+  syncConfidence,
+  syncMode,
   lyricsVariant = "mobile",
   compact,
 }: Props) {
-  const [imgError, setImgError] = useState(false);
+  const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
   const [colors, setColors] = useState<[string, string, string]>(FALLBACK_COLORS);
   const lastUrlRef = useRef<string | null>(null);
 
   const coverUrl = artworkUrl ?? station.favicon;
-  const showFallback = !coverUrl || imgError;
-
-  // Reset error state when image URL changes
-  const lastCoverRef = useRef(coverUrl);
-  if (coverUrl !== lastCoverRef.current) {
-    lastCoverRef.current = coverUrl;
-    if (imgError) setImgError(false);
-  }
+  const showFallback = !coverUrl || failedCoverUrl === coverUrl;
 
   useEffect(() => {
     if (!artworkUrl || artworkUrl === lastUrlRef.current) return;
@@ -151,13 +151,14 @@ export default function TheaterView({
       <div className="absolute inset-0 bg-[#0f172a]" />
 
       {/* ── Layer 1.5: album art background with ambient drift ── */}
-      {coverUrl && !imgError && (
+      {coverUrl && failedCoverUrl !== coverUrl && (
         <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden">
-          <img
+          <UiImage
             src={coverUrl}
             alt=""
-            className="size-full object-cover animate-ambient-drift blur-lg opacity-25"
-            onError={() => setImgError(true)}
+            className="object-cover animate-ambient-drift blur-lg opacity-25"
+            sizes="100vw"
+            onError={() => setFailedCoverUrl(coverUrl)}
           />
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" />
         </div>
@@ -261,7 +262,7 @@ export default function TheaterView({
 
           {/* Cover art */}
           <div
-            className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} overflow-hidden flex-center-row flex-shrink-0`}
+            className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} relative overflow-hidden flex-center-row flex-shrink-0`}
             style={{
               boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`,
             }}
@@ -277,11 +278,13 @@ export default function TheaterView({
                 </span>
               </div>
             ) : (
-              <img
+              <UiImage
                 src={coverUrl}
                 alt=""
-                className="size-full object-cover"
-                onError={() => setImgError(true)}
+                className="object-cover"
+                sizes={compact ? "56px" : "176px"}
+                loading="lazy"
+                onError={() => setFailedCoverUrl(coverUrl)}
               />
             )}
           </div>
@@ -387,8 +390,9 @@ export default function TheaterView({
             lyrics={lyrics ?? null}
             loading={Boolean(lyricsLoading)}
             currentTime={currentTime}
-            artworkUrl={artworkUrl ?? null}
-            fallbackUrl={station.favicon}
+            activeLineOverride={activeLineOverride}
+            syncConfidence={syncConfidence}
+            syncMode={syncMode}
             variant={lyricsVariant}
           />
         </div>

@@ -11,6 +11,11 @@ import type { NowPlayingTrack, LyricsData } from '../types';
 import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useRealtimeLyricsSync } from './useRealtimeLyricsSync';
+import type {
+  RealtimeSyncDiagnostics,
+  RealtimeSyncStatus,
+} from '../services/realtimeLyricsTypes';
 
 const MAX_CACHE = 50;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -32,11 +37,27 @@ export type UseLyricsReturn = {
   loading: boolean;
   error: boolean;
   retry: () => void;
+  effectiveCurrentTime: number | undefined;
+  realtime?: {
+    enabled: boolean;
+    supported: boolean;
+    status: RealtimeSyncStatus;
+    activeLineIndex: number;
+    candidateLineIndex: number;
+    confidence: number;
+    diagnostics: RealtimeSyncDiagnostics;
+    toggle: () => void;
+  };
 };
 
 export function useLyrics(
   track: NowPlayingTrack | null,
   stationName?: string | null,
+  options?: {
+    currentTime?: number;
+    enableRealtime?: boolean;
+    languageHint?: 'en' | 'es';
+  },
 ): UseLyricsReturn {
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,6 +68,7 @@ export function useLyrics(
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const MAX_RETRIES = 2;
+  const enableRealtime = Boolean(options?.enableRealtime && track?.title);
 
   const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
     if (controller.signal.aborted) return;
@@ -139,5 +161,31 @@ export function useLyrics(
     doFetch(key, cached, controller);
   };
 
-  return { lyrics, loading, error, retry };
+  const realtimeSync = useRealtimeLyricsSync({
+    lyrics,
+    enabled: enableRealtime,
+    languageHint: options?.languageHint ?? 'en',
+  });
+
+  return {
+    lyrics,
+    loading,
+    error,
+    retry,
+    effectiveCurrentTime: enableRealtime
+      ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
+      : options?.currentTime,
+    realtime: enableRealtime
+      ? {
+          enabled: realtimeSync.enabled,
+          supported: realtimeSync.supported,
+          status: realtimeSync.status,
+          activeLineIndex: realtimeSync.activeLineIndex,
+          candidateLineIndex: realtimeSync.candidateLineIndex,
+          confidence: realtimeSync.confidence,
+          diagnostics: realtimeSync.diagnostics,
+          toggle: realtimeSync.toggle,
+        }
+      : undefined,
+  };
 }

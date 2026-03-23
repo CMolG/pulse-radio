@@ -12,6 +12,7 @@ import type { Station, WidgetPlaybackState } from '../types';
 import { STORAGE_KEYS, countryFlag } from '../constants';
 import { searchStations, topStations } from '../services/radioApi';
 import { loadFromStorage } from '@/lib/storageUtils';
+import UiImage from '@/components/common/UiImage';
 
 function sendCommand(action: string, station?: Station) {
   window.dispatchEvent(new CustomEvent('radio-command', { detail: { action, station } }));
@@ -80,11 +81,12 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
   return (<div className="col-full bg-sys-surface/80 backdrop-blur-xl card-lg p-3 select-none overflow-hidden relative">
       {/* Blurred art bg */}
       {station?.favicon && (
-        <img
+        <UiImage
           src={station.favicon}
           alt=""
-          className="abs-fill size-full object-cover blur-3xl opacity-15 pointer-events-none"
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
+          className="object-cover blur-3xl opacity-15 pointer-events-none"
+          sizes="500px"
+        />
       )}
 
       <div className="relative z-10 flex flex-col h-full">
@@ -126,9 +128,15 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
               {/* Now playing info */}
               {station && (
                 <div className="flex-row-2 mb-2 px-1">
-                  <div className="w-10 h-10 rounded-lg bg-surface-2 flex-center-row flex-shrink-0 overflow-hidden">
+                  <div className="relative w-10 h-10 rounded-lg bg-surface-2 flex-center-row flex-shrink-0 overflow-hidden">
                     {station.favicon ? (
- <img src={station.favicon} alt="" className="size-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}/>
+                      <UiImage
+                        src={station.favicon}
+                        alt=""
+                        className="object-cover"
+                        sizes="40px"
+                        loading="lazy"
+                      />
                     ) : (
                       <Radio size={14} className="text-faint" />
                     )}

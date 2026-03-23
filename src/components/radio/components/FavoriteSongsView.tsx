@@ -11,6 +11,7 @@ import { Music, Radio, Heart, Trash2, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { FavoriteSong, SongDetailData } from "../types";
 import { formatDuration } from "../utils/formatDuration";
+import UiImage from "@/components/common/UiImage";
 
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -85,7 +86,13 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             {/* Artwork */}
             <div className="w-full aspect-square bg-surface-3 relative">
               {song.artworkUrl ? (
-                <img src={song.artworkUrl} alt="" loading="lazy" className="size-full object-cover" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                <UiImage
+                  src={song.artworkUrl}
+                  alt=""
+                  className="object-cover"
+                  sizes="300px"
+                  loading="lazy"
+                />
               ) : (
                 <div className="size-full flex items-center justify-center">
                   <Music size={32} className="text-dim" />

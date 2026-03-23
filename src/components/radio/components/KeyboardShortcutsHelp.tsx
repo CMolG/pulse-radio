@@ -19,6 +19,7 @@ const SHORTCUTS = [
   { key: "F", desc: "Focus search" },
   { key: "S", desc: "Favorite station" },
   { key: "L", desc: "Like current song" },
+  { key: "R", desc: "Toggle realtime lyrics sync" },
   { key: "T", desc: "Theater mode" },
   { key: "E", desc: "Equalizer" },
   { key: "Z", desc: "Cycle sleep timer" },

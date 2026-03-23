@@ -13,6 +13,8 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import UiImage from "@/components/common/UiImage";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Minimize2,
@@ -42,6 +44,9 @@ import { useRecent } from "./hooks/useRecent";
 import { useMediaSession } from "./hooks/useMediaSession";
 import { useHistory } from "./hooks/useHistory";
 import { useSleepTimer } from "./hooks/useSleepTimer";
+import { useStationQueue } from "./hooks/useStationQueue";
+import { useWakeLock } from "./hooks/useWakeLock";
+import { useAudioReactiveBackground } from "./hooks/useAudioReactiveBackground";
 import { useAudioAnalyser, useAlbumArt } from "@/lib/audio-visualizer";
 import { usePlaybackStore } from "@/lib/playbackStore";
 import BrowseView from "./components/BrowseView";
@@ -54,9 +59,32 @@ import HistoryGridView from "./components/HistoryGridView";
 import FavoriteSongsView from "./components/FavoriteSongsView";
 import SongDetailModal from "./components/SongDetailModal";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
+import LanguageSelector from "./components/LanguageSelector";
 import { saveToStorage } from "@/lib/storageUtils";
+import { useLocale } from "@/context/LocaleContext";
+import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
+import { getCountryDisplayName } from "@/lib/i18n/countryChips";
+import type { MessageKey } from "@/lib/i18n/messages";
 
 type LayoutMode = "desktop" | "mobile" | "pip";
+
+const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
+  trending: "genreTrending",
+  pop: "genrePop",
+  rock: "genreRock",
+  jazz: "genreJazz",
+  classical: "genreClassical",
+  electronic: "genreElectronic",
+  hiphop: "genreHiphop",
+  country: "genreCountry",
+  ambient: "genreAmbient",
+  lofi: "genreLofi",
+  news: "genreNews",
+  latin: "genreLatin",
+  metal: "genreMetal",
+  local: "genreLocal",
+  world: "genreWorld",
+};
 
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>({
@@ -77,9 +105,17 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
-export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
+type RadioShellProps = {
+  isPip?: boolean;
+  initialCountryCode?: string;
+};
+
+export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const containerSize = useContainerSize(containerRef);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { t, locale } = useLocale();
 
   const layout: LayoutMode = isPipProp
     ? "pip"
@@ -89,23 +125,29 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
   const radio = useRadio();
   const eq = useEqualizer();
-  const [smartDurationMs, setSmartDurationMs] = useState<number | undefined>(undefined);
-  const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing", smartDurationMs);
-  const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(track, radio.station?.name);
+  const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
+  const {
+    lyrics,
+    loading: lyricsLoading,
+    effectiveCurrentTime,
+    realtime: realtimeLyrics,
+  } = useLyrics(track, radio.station?.name, {
+    currentTime: radio.currentTime,
+    enableRealtime: Boolean(track?.title),
+    languageHint: locale === 'es' ? 'es' : 'en',
+  });
   const favs = useFavorites();
   const favSongs = useFavoriteSongs();
   const recent = useRecent();
-  const sleepTimer = useSleepTimer(radio.pause);
+  const sleepTimer = useSleepTimer(radio.pause, radio.audioRef);
+  const stationQueue = useStationQueue();
+  useWakeLock(radio.status === "playing");
   const analyser = useAudioAnalyser({
     fftSize: 2048,
     smoothingTimeConstant: 0.8,
   });
+  const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === "playing");
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
-
-  // Feed iTunes duration back to smart ICY polling
-  useEffect(() => {
-    setSmartDurationMs(albumArt.durationMs ?? undefined);
-  }, [albumArt.durationMs]);
 
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
@@ -140,21 +182,82 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   const showToast = useCallback((msg: string, icon: "star" | "heart") => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast({ msg, icon, key: Date.now() });
+    // Brief audio duck: lower volume for 400ms then restore
+    const audio = radio.audioRef.current;
+    if (audio && !audio.paused) {
+      const origVol = audio.volume;
+      audio.volume = origVol * 0.4;
+      setTimeout(() => { if (audio) audio.volume = origVol; }, 400);
+    }
     toastTimerRef.current = setTimeout(() => setToast(null), 2500);
-  }, []);
+  }, [radio.audioRef]);
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(
     null,
   );
-  const [view, setView] = useState<ViewState>({
-    mode: "top",
-    query: "",
-    tag: "",
-    country: "",
-    label: "Top Stations",
+  const [view, setView] = useState<ViewState>(() => {
+    const code = (initialCountryCode ?? "").toUpperCase();
+    if (isSovereignCountryCode(code)) {
+      const country = COUNTRY_BY_CODE[code];
+      return {
+        mode: "country",
+        query: "",
+        tag: "",
+        countryCode: code,
+        countryQueryName: country.name,
+      label: getCountryDisplayName(locale, code),
+      };
+    }
+    return {
+      mode: "top",
+      query: "",
+      tag: "",
+      countryCode: "",
+      countryQueryName: "",
+      label: t("topStations"),
+    };
   });
+
+  useEffect(() => {
+    if (view.mode === "top" && view.label !== t("topStations")) {
+      setView((prev) => ({
+        ...prev,
+        label: t("topStations"),
+      }));
+    }
+
+    if (view.mode === "country" && view.countryCode) {
+      const localized = getCountryDisplayName(locale, view.countryCode);
+      if (localized && localized !== view.label) {
+        setView((prev) => ({
+          ...prev,
+          label: localized,
+        }));
+      }
+    }
+  }, [locale, t, view.countryCode, view.label, view.mode]);
+
+  useEffect(() => {
+    const code = (initialCountryCode ?? "").toUpperCase();
+    if (!isSovereignCountryCode(code)) return;
+    if (view.mode === "country" && view.countryCode === code) return;
+    const country = COUNTRY_BY_CODE[code];
+    if (!country) return;
+
+    setView({
+      mode: "country",
+      query: "",
+      tag: "",
+      countryCode: code,
+      countryQueryName: country.name,
+      label: getCountryDisplayName(locale, code),
+    });
+    setActiveTab("discover");
+    setTheaterMode(false);
+    setSearchQuery("");
+  }, [initialCountryCode, locale, view.countryCode, view.mode]);
 
   // Reset compact state on layout change
   useEffect(() => {
@@ -211,6 +314,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   }, [radio.station]);
 
   useEffect(() => {
+    eq.setOutputVolume(radio.volume, radio.muted);
+  }, [eq, radio.muted, radio.volume]);
+
+  useEffect(() => {
     if (radio.station && radio.audioRef.current) {
       analyser.connectAudio(radio.audioRef.current);
     }
@@ -221,25 +328,62 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     (station: Station) => {
       radio.play(station);
       recent.add(station);
+      stationQueue.setPlaying(station.stationuuid);
       setTheaterMode(true);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // Prefetch next station in queue for seamless transition
+      const nextIdx = stationQueue.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
+      if (nextIdx > 0 && nextIdx < stationQueue.queue.length) {
+        radio.prefetchStream(stationQueue.queue[nextIdx].url_resolved);
+      }
     },
-    [radio.play, recent.add],
+    [radio, recent, stationQueue],
   );
 
+  // Auto-advance to next queued station on error, or failover to similar station
+  useEffect(() => {
+    if (radio.status === 'error') {
+      if (stationQueue.hasNext) {
+        const next = stationQueue.skipToNext();
+        if (next) {
+          radio.play(next);
+          recent.add(next);
+        }
+      } else if (radio.station) {
+        // No queue entries — find a similar station by genre tag
+        import('./services/radioApi').then(({ similarStations }) => {
+          similarStations(radio.station!, 3).then(alts => {
+            if (alts.length > 0 && radio.status === 'error') {
+              handlePlay(alts[0]);
+            }
+          }).catch(() => {});
+        });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [radio.status]);
+
   const handleSkipNext = useCallback(() => {
+    // Prefer queue if it has entries
+    if (stationQueue.hasNext) {
+      const next = stationQueue.skipToNext();
+      if (next) { handlePlay(next); return; }
+    }
     if (radio.station) {
       const next = favs.playNext(radio.station.stationuuid);
       if (next) handlePlay(next);
     }
-  }, [radio.station, favs, handlePlay]);
+  }, [radio.station, favs, stationQueue, handlePlay]);
 
   const handleSkipPrev = useCallback(() => {
+    if (stationQueue.hasPrev) {
+      const prev = stationQueue.skipToPrev();
+      if (prev) { handlePlay(prev); return; }
+    }
     if (radio.station) {
       const prev = favs.playPrev(radio.station.stationuuid);
       if (prev) handlePlay(prev);
     }
-  }, [radio.station, favs, handlePlay]);
+  }, [radio.station, favs, stationQueue, handlePlay]);
 
   useMediaSession({
     station: radio.station,
@@ -340,9 +484,9 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
       // When EQ panel is open, suppress single-letter shortcuts that could
       // trigger unintended actions (theater, favorites, search, etc.).
-      // Allow Escape, E (to close EQ), space, arrows, and M (volume).
+      // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
       if (showEq) {
-        const allowed = new Set([' ', 'Escape', 'e', 'E', 'ArrowUp', 'ArrowDown', 'm', 'M']);
+        const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
         if (!allowed.has(e.key)) return;
       }
 
@@ -435,6 +579,12 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             showToast(wasLiked ? "Song removed" : enrichedTrack.title, "heart");
           }
           break;
+        case "r":
+        case "R":
+          if (realtimeLyrics) {
+            realtimeLyrics.toggle();
+          }
+          break;
         case "z":
         case "Z":           // Z: cycle sleep timer
           sleepTimer.cycle();
@@ -446,7 +596,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong, sleepTimer, showToast]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong, sleepTimer, showToast, realtimeLyrics]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
@@ -497,29 +647,35 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   }, [favSongs]);
 
   const handleSearch = useCallback((query: string) => {
+    const sanitized = query.trim();
     setView({
       mode: "search",
-      query,
+      query: sanitized,
       tag: "",
-      country: "",
-      label: `Search: "${query}"`,
+      countryCode: "",
+      countryQueryName: "",
+      label: t("searchResultLabel", { query: sanitized }),
     });
     setActiveTab("discover");
     setTheaterMode(false);
-  }, []);
+  }, [t]);
 
   const handleGoHome = useCallback(() => {
     setView({
       mode: "top",
       query: "",
       tag: "",
-      country: "",
-      label: "Top Stations",
+      countryCode: "",
+      countryQueryName: "",
+      label: t("topStations"),
     });
     setActiveTab("discover");
     setTheaterMode(false);
     setSearchQuery("");
-  }, []);
+    if (pathname !== "/") {
+      router.push("/");
+    }
+  }, [pathname, router, t]);
 
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -534,30 +690,47 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
   );
 
   const handleSelectGenre = useCallback((cat: BrowseCategory) => {
+    const key = GENRE_LABEL_KEYS[cat.id];
     setView({
       mode: "genre",
       query: "",
       tag: cat.tag || cat.id,
-      country: "",
-      label: cat.label,
+      countryCode: "",
+      countryQueryName: "",
+      label: key ? t(key) : cat.label,
     });
     setTheaterMode(false);
     setSearchQuery("");
-  }, []);
+  }, [t]);
 
-  const handleSelectCountry = useCallback((countryName: string) => {
+  const handleSelectCountry = useCallback((countryCode: string, countryQueryName: string, countryDisplayName: string) => {
     setView({
       mode: "country",
       query: "",
       tag: "",
-      country: countryName,
-      label: countryName,
+      countryCode,
+      countryQueryName,
+      label: countryDisplayName,
     });
     setTheaterMode(false);
     setSearchQuery("");
-  }, []);
+    if (pathname !== `/${countryCode}`) {
+      router.push(`/${countryCode}`);
+    }
+  }, [pathname, router]);
 
-  const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.country}`;
+  const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
+  const isLandingNavigation = !theaterMode;
+  const theaterAudioBadges = useMemo(() => {
+    if (!theaterMode || !radio.station) return [] as string[];
+
+    const badges: string[] = [];
+      if (eq.noiseReductionMode !== 'off') badges.push(t("noiseReduction"));
+      if (eq.normalizerEnabled) badges.push(t("audioNormalizer"));
+      if (eq.enabled) badges.push(t("equalizer"));
+      if (eq.enabled && eqPreset) badges.push(t("presetLabel", { name: eqPreset }));
+      return badges;
+  }, [eq.enabled, eq.noiseReductionMode, eq.normalizerEnabled, eqPreset, radio.station, theaterMode, t]);
 
   const songDetailModal = (
     <SongDetailModal
@@ -572,7 +745,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
   const offlineBanner = !isOnline ? (
     <div className="fixed top-0 inset-x-0 z-[250] bg-yellow-600 text-white text-center text-[12px] font-medium py-1 select-none" role="alert">
-      You are offline — playback may be interrupted
+      {t("offlineBanner")}
     </div>
   ) : null;
 
@@ -586,12 +759,13 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         <ParallaxBackground
           faviconUrl={radio.station?.favicon}
           genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
+          audioAmplitude={bgAudio.amplitude}
         />
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
           <TheaterView
             station={
               radio.station ?? {
-                name: "Radio",
+                name: t("discover"),
                 url_resolved: "",
                 stationuuid: "",
                 favicon: "",
@@ -613,7 +787,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             isSongLiked={isSongLiked}
             lyrics={lyrics}
             lyricsLoading={lyricsLoading}
-            currentTime={radio.currentTime}
+            currentTime={effectiveCurrentTime}
+            activeLineOverride={realtimeLyrics?.activeLineIndex}
+            syncConfidence={realtimeLyrics?.confidence}
+            syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
             compact
           />
         </div>
@@ -625,6 +802,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           muted={radio.muted}
           frequencyDataRef={analyser.frequencyDataRef}
           icyBitrate={icyBitrate}
+          streamQuality={radio.streamQuality}
           onTogglePlay={radio.togglePlay}
           onSetVolume={radio.setVolume}
           onToggleMute={radio.toggleMute}
@@ -652,21 +830,30 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         <ParallaxBackground
           faviconUrl={radio.station?.favicon}
           genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
+          audioAmplitude={bgAudio.amplitude}
+          landingMode={isLandingNavigation}
         />
 
         {/* Mobile header */}
         {!theaterMode && (
           <div className="relative z-20 flex-shrink-0 safe-top">
-            <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+              <div className="flex items-center gap-2 px-4 pt-3 pb-2">
               <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-                <img src="/favicon-32x32.png" alt="Pulse" className="w-5 h-5 object-contain flex-shrink-0" />
+                <div className="relative w-5 h-5 flex-shrink-0">
+                  <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
+                </div>
                 <span className="text-[15px] font-semibold text-white">Pulse</span>
               </button>
-              <div className="flex-1" />
-              {radio.station && (
+                <div className="flex-1" />
+                      <LanguageSelector />
+                {radio.station && (
                 <button
                   onClick={radio.station ? handleToggleFav : undefined}
-                  aria-label={radio.station && favs.has(radio.station.stationuuid) ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-label={
+                    radio.station && favs.has(radio.station.stationuuid)
+                      ? t("removeFromFavorites")
+                      : t("addToFavorites")
+                  }
                   className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
                 >
                   <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
@@ -694,7 +881,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 isSongLiked={isSongLiked}
                 lyrics={lyrics}
                 lyricsLoading={lyricsLoading}
-                currentTime={radio.currentTime}
+                currentTime={effectiveCurrentTime}
+                activeLineOverride={realtimeLyrics?.activeLineIndex}
+                syncConfidence={realtimeLyrics?.confidence}
+                syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                 lyricsVariant="mobile"
               />
             </div>
@@ -711,15 +901,18 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   onTheater={() => setTheaterMode(true)}
                   lyrics={lyrics}
                   lyricsLoading={lyricsLoading}
-                  currentTime={radio.currentTime}
+                  currentTime={effectiveCurrentTime}
+                  activeLineOverride={realtimeLyrics?.activeLineIndex}
+                  syncConfidence={realtimeLyrics?.confidence}
+                  syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                 />
               )}
               {/* ── Mobile top nav tabs + search ── */}
               <div className="flex-shrink-0 px-4 pt-2 pb-2 flex items-center gap-2">
                 {([
-                  { id: "discover" as const, label: "Discover", icon: <RadioIcon size={14} /> },
-                  { id: "history" as const, label: "History", icon: <Clock size={14} /> },
-                  { id: "favorites" as const, label: "Favorites", icon: <Heart size={14} /> },
+                  { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={14} /> },
+                  { id: "history" as const, label: t("history"), icon: <Clock size={14} /> },
+                  { id: "favorites" as const, label: t("favorites"), icon: <Heart size={14} /> },
                 ]).map((tab) => (
                   <button
                     key={tab.id}
@@ -735,10 +928,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     <Search size={13} className="text-white/30 flex-shrink-0" />
                     <input
                       type="search"
-                      placeholder="Search..."
+                      placeholder={t("searchStations")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      aria-label="Search stations"
+                      aria-label={t("searchStationsAria")}
                       className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
                       data-radio-search
                     />
@@ -754,6 +947,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     isFavorite={favs.has}
                     onPlay={handlePlay}
                     onToggleFav={favs.toggle}
+                    onPrefetch={radio.prefetchStream}
                     favorites={favs.favorites}
                     recent={recent.recent}
                     onSelectGenre={handleSelectGenre}
@@ -791,10 +985,22 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           <EqPanel
             bands={eq.bands}
             enabled={eq.enabled}
+            normalizerEnabled={eq.normalizerEnabled}
+            stereoWidth={eq.stereoWidth}
+            bassEnhance={eq.bassEnhance}
+            compressorEnabled={eq.compressorEnabled}
+            compressorAmount={eq.compressorAmount}
+            noiseReductionMode={eq.noiseReductionMode}
             customPresets={eq.customPresets}
             onSetGain={eq.setBandGain}
             onApplyPreset={eq.applyPreset}
             onToggleEnabled={eq.toggleEnabled}
+            onToggleNormalizer={eq.toggleNormalizer}
+            onSetStereoWidth={eq.setStereoWidth}
+            onSetBassEnhance={eq.setBassEnhance}
+            onToggleCompressor={eq.toggleCompressor}
+            onSetCompressorAmount={eq.setCompressorAmount}
+            onSetNoiseReductionMode={eq.setNoiseReductionMode}
             onSaveCustomPreset={eq.saveCustomPreset}
             onRemoveCustomPreset={eq.removeCustomPreset}
             onPresetChange={setEqPreset}
@@ -827,6 +1033,18 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
         {/* Bottom bar */}
         <div className="relative z-20">
+          {theaterAudioBadges.length > 0 && (
+            <div className="px-4 pb-2">
+              <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                <span className="text-white/70">{t("autoAudioEnhancements")}</span>
+                {theaterAudioBadges.map(label => (
+                  <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium">
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           <NowPlayingBar
             station={radio.station}
             track={enrichedTrack}
@@ -835,6 +1053,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             muted={radio.muted}
             frequencyDataRef={analyser.frequencyDataRef}
             icyBitrate={icyBitrate}
+            streamQuality={radio.streamQuality}
             onTogglePlay={radio.togglePlay}
             onSetVolume={radio.setVolume}
             onToggleMute={radio.toggleMute}
@@ -868,6 +1087,8 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       <ParallaxBackground
         faviconUrl={radio.station?.favicon}
         genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
+        audioAmplitude={bgAudio.amplitude}
+        landingMode={isLandingNavigation}
       />
       <div className="flex flex-1 min-h-0 relative z-10">
         {/* Main content */}
@@ -896,7 +1117,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   isSongLiked={isSongLiked}
                   lyrics={lyrics}
                   lyricsLoading={lyricsLoading}
-                  currentTime={radio.currentTime}
+                  currentTime={effectiveCurrentTime}
+                  activeLineOverride={realtimeLyrics?.activeLineIndex}
+                  syncConfidence={realtimeLyrics?.confidence}
+                  syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                   lyricsVariant="desktop"
                 />
               </motion.div>
@@ -904,13 +1128,19 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               <React.Fragment key="browse">
                 {/* ── Pulse branding header ── */}
                 <div className="shrink-0 px-5 py-3">
-                  <button
-                    onClick={handleGoHome}
-                    className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
-                  >
-                    <img src="/favicon-32x32.png" alt="Pulse" className="w-5 h-5 object-contain" />
-                    <span className="text-[15px] font-semibold text-white">Pulse</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleGoHome}
+                      className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                    >
+                      <div className="relative w-5 h-5">
+                        <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
+                      </div>
+                      <span className="text-[15px] font-semibold text-white">Pulse</span>
+                    </button>
+                    <div className="flex-1" />
+                    <LanguageSelector />
+                  </div>
                 </div>
                 {radio.station && (
                   <NowPlayingHero
@@ -923,16 +1153,19 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     onTheater={() => setTheaterMode(true)}
                     lyrics={lyrics}
                     lyricsLoading={lyricsLoading}
-                    currentTime={radio.currentTime}
+                    currentTime={effectiveCurrentTime}
+                    activeLineOverride={realtimeLyrics?.activeLineIndex}
+                    syncConfidence={realtimeLyrics?.confidence}
+                    syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
                     lyricsVariant="desktop"
                   />
                 )}
                 {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
                   {([
-                    { id: "discover" as const, label: "Discover", icon: <RadioIcon size={13} /> },
-                    { id: "history" as const, label: "History", icon: <Clock size={13} /> },
-                    { id: "favorites" as const, label: "Favorites", icon: <Heart size={13} /> },
+                    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={13} /> },
+                    { id: "history" as const, label: t("history"), icon: <Clock size={13} /> },
+                    { id: "favorites" as const, label: t("favorites"), icon: <Heart size={13} /> },
                   ]).map((tab) => (
                     <button
                       key={tab.id}
@@ -955,10 +1188,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                       <Search size={12} className="text-dim flex-shrink-0" />
                       <input
                         type="search"
-                        placeholder="Search stations…"
+                        placeholder={t("searchStations")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        aria-label="Search stations"
+                        aria-label={t("searchStationsAria")}
                         className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
                         data-radio-search
                       />
@@ -983,6 +1216,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                         isFavorite={favs.has}
                         onPlay={handlePlay}
                         onToggleFav={favs.toggle}
+                        onPrefetch={radio.prefetchStream}
                         favorites={favs.favorites}
                         recent={recent.recent}
                         onSelectGenre={handleSelectGenre}
@@ -1031,11 +1265,15 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               radio.station && (
                 <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
                   {albumArt.artworkUrl ? (
-                    <img
-                      src={albumArt.artworkUrl}
-                      alt=""
-                      className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-                    />
+                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                      <UiImage
+                        src={albumArt.artworkUrl}
+                        alt=""
+                        className="object-cover"
+                        sizes="56px"
+                        loading="lazy"
+                      />
+                    </div>
                   ) : (
                     <div className="w-14 h-14 rounded-lg bg-surface-2 flex-shrink-0" />
                   )}
@@ -1044,7 +1282,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                       {enrichedTrack?.title || radio.station.name}
                     </p>
                     <p className="text-[12px] text-muted truncate">
-                      {enrichedTrack?.artist || "Internet Radio"}
+                      {enrichedTrack?.artist || t("internetRadio")}
                     </p>
                   </div>
                 </div>
@@ -1060,12 +1298,25 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         <EqPanel
           bands={eq.bands}
           enabled={eq.enabled}
+          normalizerEnabled={eq.normalizerEnabled}
+          stereoWidth={eq.stereoWidth}
+          bassEnhance={eq.bassEnhance}
+          compressorEnabled={eq.compressorEnabled}
+          compressorAmount={eq.compressorAmount}
+          noiseReductionMode={eq.noiseReductionMode}
           customPresets={eq.customPresets}
           onSetGain={eq.setBandGain}
           onApplyPreset={eq.applyPreset}
           onToggleEnabled={eq.toggleEnabled}
+          onToggleNormalizer={eq.toggleNormalizer}
+          onSetStereoWidth={eq.setStereoWidth}
+          onSetBassEnhance={eq.setBassEnhance}
+          onToggleCompressor={eq.toggleCompressor}
+          onSetCompressorAmount={eq.setCompressorAmount}
+          onSetNoiseReductionMode={eq.setNoiseReductionMode}
           onSaveCustomPreset={eq.saveCustomPreset}
           onRemoveCustomPreset={eq.removeCustomPreset}
+          onPresetChange={setEqPreset}
           onClose={() => setShowEq(false)}
         />
       )}
@@ -1094,13 +1345,29 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
 
       {/* Bottom bar */}
       <div className="relative z-10">
-        <button
-          onClick={() => setMiniMode((m) => !m)}
-          className="absolute -top-8 right-3 z-10 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
-          title={miniMode ? "Expand" : "Minimize"}
-        >
-          {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
-        </button>
+        <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex flex-col items-start gap-1.5 text-[10px] overflow-hidden">
+            {theaterAudioBadges.length > 0 && (
+              <>
+                <span className="text-white/70 shrink-0">{t("autoAudioEnhancements")}</span>
+                <div className="min-w-0 flex items-center gap-1.5 text-[10px] overflow-hidden">
+                  {theaterAudioBadges.map(label => (
+                    <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => setMiniMode((m) => !m)}
+            className="pointer-events-auto shrink-0 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
+            title={miniMode ? t("expand") : t("minimize")}
+          >
+            {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
+          </button>
+        </div>
 
         <NowPlayingBar
           station={radio.station}
@@ -1110,6 +1377,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
           muted={radio.muted}
           frequencyDataRef={analyser.frequencyDataRef}
           icyBitrate={icyBitrate}
+          streamQuality={radio.streamQuality}
           onTogglePlay={radio.togglePlay}
           onSetVolume={radio.setVolume}
           onToggleMute={radio.toggleMute}

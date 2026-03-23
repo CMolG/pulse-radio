@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
+'use client';
+
+import { useRef, useEffect, useCallback, useState } from 'react';
+
+export type UseWakeLockReturn = {
+  isActive: boolean;
+  request: () => Promise<void>;
+  release: () => Promise<void>;
+};
+
+/**
+ * Prevents the screen from dimming/locking while audio is playing.
+ * Uses the Screen Wake Lock API (supported in Chrome, Edge, Safari 16.4+).
+ * Automatically re-acquires the lock when the tab becomes visible again.
+ */
+export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
+  const lockRef = useRef<WakeLockSentinel | null>(null);
+  const [isActive, setIsActive] = useState(false);
+
+  const request = useCallback(async () => {
+    if (lockRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+    try {
+      lockRef.current = await navigator.wakeLock.request('screen');
+      setIsActive(true);
+      lockRef.current.addEventListener('release', () => {
+        lockRef.current = null;
+        setIsActive(false);
+      });
+    } catch {
+      // Wake lock request failed (e.g., low battery, or permission denied)
+    }
+  }, []);
+
+  const release = useCallback(async () => {
+    if (!lockRef.current) return;
+    try {
+      await lockRef.current.release();
+    } catch {
+      // Already released
+    }
+    lockRef.current = null;
+    setIsActive(false);
+  }, []);
+
+  // Auto-acquire/release based on shouldLock
+  useEffect(() => {
+    if (shouldLock) {
+      request();
+    } else {
+      release();
+    }
+  }, [shouldLock, request, release]);
+
+  // Re-acquire when tab becomes visible (browser releases lock on hide)
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (shouldLock && !document.hidden && !lockRef.current) {
+        request();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [shouldLock, request]);
+
+  // Cleanup on unmount
+  useEffect(() => () => { release(); }, [release]);
+
+  return { isActive, request, release };
+}

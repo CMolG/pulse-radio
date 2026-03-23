@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Loader2 } from "lucide-react";
 import type { LyricsData } from "../types";
 import {
-  getActiveLyricIndex,
+  getEffectiveActiveLyricIndex,
   getRenderableLyricLines,
 } from "../lyricsUtils";
 
@@ -18,8 +18,9 @@ type Props = {
   lyrics: LyricsData | null;
   loading: boolean;
   currentTime?: number;
-  artworkUrl?: string | null;
-  fallbackUrl?: string;
+   activeLineOverride?: number;
+   syncConfidence?: number;
+   syncMode?: "time" | "realtime";
   variant?: "mobile" | "desktop";
 };
 
@@ -27,8 +28,7 @@ export default function LyricsReel({
   lyrics,
   loading,
   currentTime,
-  artworkUrl: _artworkUrl,
-  fallbackUrl: _fallbackUrl,
+  activeLineOverride,
   variant = "mobile",
 }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -41,8 +41,8 @@ export default function LyricsReel({
     [lyrics],
   );
   const activeIdx = useMemo(
-    () => getActiveLyricIndex(lyrics, currentTime),
-    [lyrics, currentTime],
+    () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride),
+    [activeLineOverride, currentTime, lyrics],
   );
 
   const scrollToIndex = useCallback(

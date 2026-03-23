@@ -9,7 +9,8 @@
 import React, { useMemo } from "react";
 import { X, Mic2, Loader2 } from "lucide-react";
 import type { LyricsData } from "../types";
-import { getActiveLyricIndex } from "../lyricsUtils";
+import { getEffectiveActiveLyricIndex } from "../lyricsUtils";
+import type { RealtimeSyncStatus } from "../services/realtimeLyricsTypes";
 
 type Props = {
   lyrics: LyricsData | null;
@@ -17,14 +18,35 @@ type Props = {
   error?: boolean;
   onRetry?: () => void;
   currentTime?: number;
+  activeLineOverride?: number;
+  realtimeStatus?: RealtimeSyncStatus;
+  realtimeConfidence?: number;
   onClose: () => void;
 };
 
-export default function LyricsPanel({ lyrics, loading, error, onRetry, currentTime, onClose }: Props) {
+function confidenceLabel(confidence: number): string {
+  if (confidence >= 0.9) return "High";
+  if (confidence >= 0.75) return "Medium";
+  if (confidence > 0) return "Low";
+  return "N/A";
+}
+
+export default function LyricsPanel({
+  lyrics,
+  loading,
+  error,
+  onRetry,
+  currentTime,
+  activeLineOverride,
+  realtimeStatus,
+  realtimeConfidence = 0,
+  onClose,
+}: Props) {
   const activeIdx = useMemo(
-    () => getActiveLyricIndex(lyrics, currentTime),
-    [lyrics, currentTime],
+    () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride),
+    [activeLineOverride, currentTime, lyrics],
   );
+  const realtimeActive = realtimeStatus === "listening" || realtimeStatus === "recovering";
 
   return (
     <div className="flex flex-col h-full w-full bg-surface-1 bdr-l">
@@ -33,6 +55,16 @@ export default function LyricsPanel({ lyrics, loading, error, onRetry, currentTi
         <div className="flex-row-1.5">
           <Mic2 size={14} className="text-sys-orange" />
           <span className="text-[12px] font-semibold text-white">Lyrics</span>
+          {realtimeActive && (
+            <>
+              <span className="px-1.5 py-0.5 rounded-full border border-sys-orange/40 bg-sys-orange/15 text-[9px] font-semibold uppercase tracking-wide text-sys-orange">
+                Realtime Sync
+              </span>
+              <span className="px-1.5 py-0.5 rounded-full border border-white/15 bg-white/5 text-[9px] font-medium text-white/80">
+                {confidenceLabel(realtimeConfidence)}
+              </span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button onClick={onClose} className="p-1 text-subtle-hover">

@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ArtistInfo } from '../types';
 
 const MAX_CACHE = 200;
@@ -37,28 +37,20 @@ export function useArtistInfo(artist: string | null): {
   info: ArtistInfo | null;
   loading: boolean;
 } {
-  const [info, setInfo] = useState<ArtistInfo | null>(null);
-  const [loading, setLoading] = useState(false);
+  const key = artist ? artist.toLowerCase().trim() : '';
+  const cachedInfo = useMemo(() => {
+    if (!key) return null;
+    return cacheGet(key) ?? null;
+  }, [key]);
+  const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
 
   useEffect(() => {
-    if (!artist) {
-      setInfo(null);
-      return;
-    }
-
-    const key = artist.toLowerCase().trim();
-    const cached = cacheGet(key);
-    if (cached) {
-      setInfo(cached);
-      return;
-    }
+    if (!key || !artist || cachedInfo) return;
 
     let cancelled = false;
     const controller = new AbortController();
     // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
     const timeout = setTimeout(() => controller.abort(), 15_000);
-    setLoading(true);
-    setInfo(null);
 
     fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal })
       .then((r) => {
@@ -68,15 +60,14 @@ export function useArtistInfo(artist: string | null): {
       .then((data: ArtistInfo) => {
         if (!cancelled) {
           cacheSet(key, data);
-          setInfo(data);
+          setFetched({ key, info: data });
         }
       })
       .catch(() => {
-        if (!cancelled) setInfo(null);
+        if (!cancelled) setFetched({ key, info: null });
       })
       .finally(() => {
         clearTimeout(timeout);
-        if (!cancelled) setLoading(false);
       });
 
     return () => {
@@ -84,7 +75,11 @@ export function useArtistInfo(artist: string | null): {
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [artist]);
+  }, [artist, key, cachedInfo]);
 
-  return { info, loading };
+  const info = !key
+    ? null
+    : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
+
+  return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }

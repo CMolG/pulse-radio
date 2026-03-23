@@ -1,0 +1,180 @@
+/*
+ * Copyright (c) 2026 Carlos Molina Galindo.
+ * Open source project: Pulse Radio.
+ * Created by Carlos Molina Galindo (CMolG on GitHub).
+ */
+
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { STORAGE_KEYS } from '../constants';
+import type { LyricsData } from '../types';
+import {
+  defaultRealtimeState,
+  DEFAULT_REALTIME_ALIGN_POLICY,
+  isRealtimeEligible,
+  type RealtimeSyncResult,
+} from '../services/realtimeLyricsTypes';
+import { alignHypothesis, mapLineToEffectiveTime } from '../services/lyricsAligner';
+import {
+  createRealtimeSpeechEngine,
+  isRealtimeSpeechSupported,
+  type RealtimeSpeechEngine,
+} from '../services/realtimeSpeechRecognition';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+
+type Params = {
+  lyrics: LyricsData | null;
+  enabled: boolean;
+  languageHint: 'en' | 'es';
+};
+
+export function useRealtimeLyricsSync({
+  lyrics,
+  enabled,
+  languageHint,
+}: Params): RealtimeSyncResult {
+  const initialEnabled = useMemo(
+    () => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false),
+    [],
+  );
+
+  const [manuallyEnabled, setManuallyEnabled] = useState<boolean>(initialEnabled);
+  const [runtimeState, setRuntimeState] = useState(() => defaultRealtimeState(initialEnabled));
+  const engineRef = useRef<RealtimeSpeechEngine | null>(null);
+  const stableSamplesRef = useRef(0);
+  const eligible = isRealtimeEligible(lyrics);
+  const supported = isRealtimeSpeechSupported();
+  const realtimeAllowed = enabled && manuallyEnabled;
+  const realtimeActive = supported && eligible && realtimeAllowed;
+
+  const toggle = useCallback(() => {
+    setManuallyEnabled(prev => {
+      const next = !prev;
+      saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!realtimeActive) {
+      engineRef.current?.stop();
+      return;
+    }
+
+    engineRef.current?.destroy();
+    stableSamplesRef.current = 0;
+    // Reset sync state so stale activeLineIndex from a previous song doesn't
+    // bleed into new lyrics while the engine re-acquires position.
+    setRuntimeState(defaultRealtimeState(manuallyEnabled));
+
+    const engine = createRealtimeSpeechEngine({
+      onHypothesis: (hypothesis) => {
+        if (!lyrics || !isRealtimeEligible(lyrics)) return;
+        setRuntimeState(prev => {
+          const step = alignHypothesis({
+            lyrics,
+            hypothesisText: hypothesis.text,
+            previousConfirmedIndex: prev.activeLineIndex,
+            previousCandidateIndex: prev.candidateLineIndex,
+            stableSamples: stableSamplesRef.current,
+            policy: DEFAULT_REALTIME_ALIGN_POLICY,
+          });
+          stableSamplesRef.current = step.stableSamples;
+
+          const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
+          return {
+            ...prev,
+            status: 'listening',
+            activeLineIndex: step.confirmedIndex,
+            candidateLineIndex: step.candidateIndex,
+            confidence: step.score,
+            effectiveCurrentTime,
+            diagnostics: {
+              ...prev.diagnostics,
+              lastHypothesisMs: hypothesis.tsMs,
+              hypothesesSeen: prev.diagnostics.hypothesesSeen + 1,
+              confirmedTransitions:
+                step.confirmedIndex !== prev.activeLineIndex
+                  ? prev.diagnostics.confirmedTransitions + 1
+                  : prev.diagnostics.confirmedTransitions,
+              rejectedJumps:
+                step.jumpRejected
+                  ? prev.diagnostics.rejectedJumps + 1
+                  : prev.diagnostics.rejectedJumps,
+              relockCount:
+                step.relockTriggered
+                  ? prev.diagnostics.relockCount + 1
+                  : prev.diagnostics.relockCount,
+              errorMessage: null,
+            },
+          };
+        });
+      },
+      onFatalError: (errorMessage) => {
+        setRuntimeState(prev => ({
+          ...prev,
+          status: 'error',
+          activeLineIndex: -1,
+          candidateLineIndex: -1,
+          confidence: 0,
+          effectiveCurrentTime: undefined,
+          diagnostics: {
+            ...prev.diagnostics,
+            errorMessage,
+          },
+        }));
+      },
+    });
+
+    engineRef.current = engine;
+    engine.start(languageHint);
+
+    return () => {
+      engine.stop();
+    };
+  }, [lyrics, languageHint, realtimeActive]);
+
+  useEffect(() => {
+    return () => {
+      engineRef.current?.destroy();
+      engineRef.current = null;
+    };
+  }, []);
+
+  return {
+    ...runtimeState,
+    enabled: manuallyEnabled,
+    supported,
+    status: !supported
+      ? 'unsupported'
+      : !realtimeActive
+        ? 'idle'
+        : runtimeState.status === 'idle'
+          ? 'ready'
+          : runtimeState.status,
+    activeLineIndex:
+      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
+        ? runtimeState.activeLineIndex
+        : -1,
+    candidateLineIndex:
+      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
+        ? runtimeState.candidateLineIndex
+        : -1,
+    confidence:
+      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
+        ? runtimeState.confidence
+        : 0,
+    effectiveCurrentTime:
+      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
+        ? runtimeState.effectiveCurrentTime
+        : undefined,
+    diagnostics: {
+      ...runtimeState.diagnostics,
+      errorMessage: !supported
+        ? 'Realtime lyrics sync is not supported in this browser.'
+        : runtimeState.diagnostics.errorMessage,
+    },
+    toggle,
+  };
+}

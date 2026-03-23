@@ -45,6 +45,8 @@ export type LyricsData = {
   synced: boolean;
   lines: LyricLine[];
   plainText?: string;
+  realtimeCapable?: boolean;
+  realtimeLanguage?: 'en' | 'es' | null;
 };
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
@@ -89,7 +91,8 @@ export type ViewState = {
   mode: 'top' | 'search' | 'genre' | 'country';
   query: string;
   tag: string;
-  country: string;
+  countryCode: string;
+  countryQueryName: string;
   label: string;
 };
 

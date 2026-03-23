@@ -20,9 +20,11 @@ import {
   Clock,
 } from "lucide-react";
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
+import type { StreamQuality } from "../hooks/useRadio";
 import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
+import UiImage from "@/components/common/UiImage";
 
 function stationInitials(name: string) {
   return name
@@ -55,6 +57,7 @@ type Props = {
   compact?: boolean;
   sleepTimerMin?: number | null;
   onCycleSleepTimer?: () => void;
+  streamQuality?: StreamQuality;
 };
 
 export default function NowPlayingBar({
@@ -80,6 +83,7 @@ export default function NowPlayingBar({
   compact,
   sleepTimerMin,
   onCycleSleepTimer,
+  streamQuality,
 }: Props) {
   const isPlaying = status === "playing";
   const isLoading = status === "loading";
@@ -95,7 +99,7 @@ export default function NowPlayingBar({
 
   if (compact) {
     return (
-      <div className="flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0">
+      <div className="relative flex items-center justify-between gap-3 px-6 pb-2 min-h-20 glass-blur border-t border-border-default shrink-0">
         {/* Play/Pause — 44px touch target */}
         <button
           onClick={onTogglePlay}
@@ -160,6 +164,13 @@ export default function NowPlayingBar({
             </button>
           )}
         </div>
+
+        {/* Fill iPhone safe-area inset below the bar without adding layout height */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
+          style={{ height: "env(safe-area-inset-bottom, 0px)" }}
+        />
       </div>
     );
   }
@@ -171,7 +182,7 @@ export default function NowPlayingBar({
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
       {/* Station info */}
       <div className="flex-row-2.5 min-w-40">
-        <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
+        <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
           {showFallback ? (
             <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
@@ -185,10 +196,12 @@ export default function NowPlayingBar({
               </span>
             </div>
           ) : (
-            <img
+            <UiImage
               src={coverUrl}
               alt=""
-              className="size-full object-cover"
+              className="object-cover"
+              sizes="36px"
+              loading="lazy"
               onError={() => setImgError(true)}
             />
           )}
@@ -213,6 +226,18 @@ export default function NowPlayingBar({
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
             {icyBitrate}kbps
           </span>
+        )}
+        {streamQuality && isPlaying && (
+          <span
+            className={`w-2 h-2 rounded-full shrink-0 self-center ${
+              streamQuality === 'good' ? 'bg-green-500' :
+              streamQuality === 'fair' ? 'bg-yellow-500' :
+              streamQuality === 'poor' ? 'bg-red-500' :
+              'bg-gray-500'
+            }`}
+            title={`Stream: ${streamQuality}`}
+            aria-label={`Stream quality: ${streamQuality}`}
+          />
         )}
       </div>
 
