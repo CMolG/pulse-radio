@@ -215,6 +215,10 @@ export function useEqualizer(): UseEqualizerReturn {
         nrGateRef.current?.disconnect();
         nrDeEsserRef.current?.disconnect();
         nrDeEssGainRef.current?.disconnect();
+        bassLpRef.current?.disconnect();
+        bassShaperRef.current?.disconnect();
+        bassHpRef.current?.disconnect();
+        bassMixRef.current?.disconnect();
       } catch { /* ok */ }
       filtersRef.current = [];
       limiterRef.current = null;
@@ -241,6 +245,10 @@ export function useEqualizer(): UseEqualizerReturn {
       nrGateRef.current = null;
       nrDeEsserRef.current = null;
       nrDeEssGainRef.current = null;
+      bassLpRef.current = null;
+      bassShaperRef.current = null;
+      bassHpRef.current = null;
+      bassMixRef.current = null;
     }
 
     try {
