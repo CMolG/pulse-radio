@@ -159,7 +159,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     }
   }
 
-  return best ?? results[0];
+  return best ?? null;
 }
 
 function cacheSet(key: string, value: AlbumInfo) {
