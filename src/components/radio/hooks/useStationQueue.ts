@@ -35,6 +35,9 @@ export function useStationQueue(): UseStationQueueReturn {
   );
   const [currentIndex, setCurrentIndex] = useState(-1);
   const persistRef = useRef(false);
+  // Ref tracks latest queue so callbacks avoid stale closures
+  const queueRef = useRef(queue);
+  queueRef.current = queue;
 
   // Persist queue to storage on changes (skip initial mount)
   useEffect(() => {
@@ -56,21 +59,31 @@ export function useStationQueue(): UseStationQueueReturn {
     setQueue(prev => {
       const filtered = prev.filter(s => s.stationuuid !== station.stationuuid);
       if (filtered.length >= MAX_QUEUE_SIZE) return prev;
-      const insertAt = currentIndex >= 0 ? currentIndex + 1 : 0;
-      return [...filtered.slice(0, insertAt), station, ...filtered.slice(insertAt)];
+      // Read currentIndex via updater to avoid stale closure
+      return filtered;
     });
-  }, [currentIndex]);
+    // Re-insert at correct position using current state
+    setCurrentIndex(prevIdx => {
+      const filtered = queueRef.current.filter(s => s.stationuuid !== station.stationuuid);
+      const insertAt = prevIdx >= 0 ? Math.min(prevIdx + 1, filtered.length) : 0;
+      setQueue([...filtered.slice(0, insertAt), station, ...filtered.slice(insertAt)]);
+      return prevIdx;
+    });
+  }, []);
 
   const remove = useCallback((stationuuid: string) => {
-    setQueue(prev => prev.filter(s => s.stationuuid !== stationuuid));
+    let removedIdx = -1;
+    setQueue(prev => {
+      removedIdx = prev.findIndex(s => s.stationuuid === stationuuid);
+      return prev.filter(s => s.stationuuid !== stationuuid);
+    });
     setCurrentIndex(prev => {
-      const idx = queue.findIndex(s => s.stationuuid === stationuuid);
-      if (idx < 0) return prev;
-      if (idx < prev) return prev - 1;
-      if (idx === prev) return -1;
+      if (removedIdx < 0) return prev;
+      if (removedIdx < prev) return prev - 1;
+      if (removedIdx === prev) return -1;
       return prev;
     });
-  }, [queue]);
+  }, []);
 
   const clear = useCallback(() => {
     setQueue([]);
@@ -98,24 +111,35 @@ export function useStationQueue(): UseStationQueueReturn {
   }, []);
 
   const skipToNext = useCallback((): Station | null => {
-    if (queue.length === 0) return null;
-    const nextIdx = currentIndex + 1;
-    if (nextIdx >= queue.length) return null;
-    setCurrentIndex(nextIdx);
-    return queue[nextIdx];
-  }, [queue, currentIndex]);
+    const q = queueRef.current;
+    if (q.length === 0) return null;
+    let result: Station | null = null;
+    setCurrentIndex(prev => {
+      const nextIdx = prev + 1;
+      if (nextIdx >= queueRef.current.length) return prev;
+      result = queueRef.current[nextIdx];
+      return nextIdx;
+    });
+    return result;
+  }, []);
 
   const skipToPrev = useCallback((): Station | null => {
-    if (queue.length === 0 || currentIndex <= 0) return null;
-    const prevIdx = currentIndex - 1;
-    setCurrentIndex(prevIdx);
-    return queue[prevIdx];
-  }, [queue, currentIndex]);
+    const q = queueRef.current;
+    if (q.length === 0) return null;
+    let result: Station | null = null;
+    setCurrentIndex(prev => {
+      if (prev <= 0) return prev;
+      const prevIdx = prev - 1;
+      result = queueRef.current[prevIdx];
+      return prevIdx;
+    });
+    return result;
+  }, []);
 
   const setPlaying = useCallback((stationuuid: string) => {
-    const idx = queue.findIndex(s => s.stationuuid === stationuuid);
+    const idx = queueRef.current.findIndex(s => s.stationuuid === stationuuid);
     setCurrentIndex(idx);
-  }, [queue]);
+  }, []);
 
   const hasNext = currentIndex >= 0 && currentIndex < queue.length - 1;
   const hasPrev = currentIndex > 0;
