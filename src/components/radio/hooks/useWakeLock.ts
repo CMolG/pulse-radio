@@ -23,8 +23,11 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
   const lockRef = useRef<WakeLockSentinel | null>(null);
   const [isActive, setIsActive] = useState(false);
 
+  const requestingRef = useRef(false);
+
   const request = useCallback(async () => {
-    if (lockRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+    if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+    requestingRef.current = true;
     try {
       lockRef.current = await navigator.wakeLock.request('screen');
       setIsActive(true);
@@ -34,6 +37,8 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
       });
     } catch {
       // Wake lock request failed (e.g., low battery, or permission denied)
+    } finally {
+      requestingRef.current = false;
     }
   }, []);
 
