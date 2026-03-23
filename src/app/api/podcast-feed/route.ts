@@ -53,7 +53,6 @@ export async function GET(req: NextRequest) {
       },
       signal: controller.signal,
     });
-    clearTimeout(timeout);
 
     if (!res.ok) {
       await res.text().catch(() => {});
@@ -67,12 +66,13 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'public, max-age=1800, stale-while-revalidate=3600' },
     });
   } catch (e) {
-    clearTimeout(timeout);
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : 'Internal error' },
       { status: isTimeout ? 504 : 500 },
     );
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

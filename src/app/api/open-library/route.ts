@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
     clearTimeout(timeout);
 
     if (!res.ok) {
+      await res.text().catch(() => {});
       return NextResponse.json({ error: `Open Library returned ${res.status}` }, { status: 502 });
     }
 
