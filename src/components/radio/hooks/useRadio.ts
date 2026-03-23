@@ -89,6 +89,12 @@ export function useRadio(): UseRadioReturn {
   const [streamLatencyMs, setStreamLatencyMs] = useState<number | null>(null);
   const lastBufferEndRef = useRef<number>(0);
 
+  // Latest volume/muted refs so crossfade intervals read current values
+  const volumeRef = useRef(volume);
+  const mutedRef = useRef(muted);
+  volumeRef.current = volume;
+  mutedRef.current = muted;
+
   // Tracks whether the user explicitly requested a pause (vs stall/src-change pauses)
   const userPausedRef = useRef(false);
 
@@ -482,7 +488,8 @@ export function useRadio(): UseRadioReturn {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
-    if (audio) audio.volume = muted ? 0 : volume;
+    // Skip direct volume set while crossfade is in progress — the interval controls audio.volume
+    if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
   const play = useCallback((s: Station) => {
@@ -509,7 +516,6 @@ export function useRadio(): UseRadioReturn {
     }
 
     if (!audio.paused && audio.src) {
-      const targetVol = muted ? 0 : volume;
       const steps = 8;
       const interval = 40; // 320ms total
       let step = 0;
@@ -523,7 +529,8 @@ export function useRadio(): UseRadioReturn {
         if (step >= steps) {
           clearInterval(fadeTimerRef.current!);
           fadeTimerRef.current = null;
-          audio.volume = targetVol;
+          // Read current volume/muted from refs — user may have changed them during fade
+          audio.volume = mutedRef.current ? 0 : volumeRef.current;
           startPlayback(audio, s.url_resolved, handlePlayRejected);
         }
       }, interval);
@@ -602,9 +609,10 @@ export function useRadio(): UseRadioReturn {
       .then(() => {
         const latency = Math.round(performance.now() - start);
         setStreamLatencyMs(latency);
+        clearTimeout(timer);
       })
-      .catch(() => {});
-    setTimeout(() => controller.abort(), 2000);
+      .catch(() => { clearTimeout(timer); });
+    const timer = setTimeout(() => controller.abort(), 2000);
   }, []);
 
   const toggleMute = useCallback(() => setMuted(m => !m), []);
