@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Play,
   Pause,
@@ -167,8 +167,22 @@ export default function NowPlayingBar({
   const coverUrl = track?.artworkUrl ?? station?.favicon;
   const showFallback = !coverUrl || imgError;
 
+  const statusAnnouncement = useMemo(() => {
+    if (!station) return "No station selected";
+    const trackInfo = track?.title
+      ? track.artist ? `${track.artist}, ${track.title}` : track.title
+      : station.name;
+    if (isLoading) return `Loading ${trackInfo}`;
+    if (isPlaying) return `Now playing: ${trackInfo}`;
+    if (status === "error") return `Playback error: ${station.name}`;
+    return `Paused: ${trackInfo}`;
+  }, [station, track, isPlaying, isLoading, status]);
+
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {statusAnnouncement}
+      </div>
       {/* Station info */}
       <div className="flex-row-2.5 min-w-40">
         <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
