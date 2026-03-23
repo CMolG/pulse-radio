@@ -61,9 +61,14 @@ export function VisualizerCanvas({
         frameRef.current = requestAnimationFrame(draw);
         return;
       }
-      canvas.width = width * devicePixelRatio;
-      canvas.height = height * devicePixelRatio;
-      ctx.scale(devicePixelRatio, devicePixelRatio);
+      const dpr = devicePixelRatio;
+      const targetW = Math.round(width * dpr);
+      const targetH = Math.round(height * dpr);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
       if (mode === 'bars') {
