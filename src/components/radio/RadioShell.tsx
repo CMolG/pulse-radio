@@ -426,18 +426,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     isPlaying: radio.status === "playing",
     onPlay: radio.resume,
     onPause: radio.pause,
-    onNext: () => {
-      if (radio.station) {
-        const next = favs.playNext(radio.station.stationuuid);
-        if (next) handlePlay(next);
-      }
-    },
-    onPrev: () => {
-      if (radio.station) {
-        const prev = favs.playPrev(radio.station.stationuuid);
-        if (prev) handlePlay(prev);
-      }
-    },
+    onNext: handleSkipNext,
+    onPrev: handleSkipPrev,
     onStop: radio.stop,
     onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)),
     onSeekForward: () => radio.seek(radio.currentTime + 10),
