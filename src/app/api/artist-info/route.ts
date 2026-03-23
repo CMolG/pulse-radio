@@ -26,6 +26,11 @@ async function searchMusicBrainz(artist: string) {
       await res.text().catch(() => {}); // drain body to release connection
       return null;
     }
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
+      await res.body?.cancel().catch(() => {});
+      return null;
+    }
     const data = await res.json();
     return data.artists?.[0] ?? null;
   } catch {
@@ -42,6 +47,11 @@ async function fetchWikiSummary(title: string) {
     });
     if (!res.ok) {
       await res.text().catch(() => {}); // drain body to release connection
+      return null;
+    }
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
+      await res.body?.cancel().catch(() => {});
       return null;
     }
     const data = await res.json();

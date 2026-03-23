@@ -42,6 +42,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'iTunes API error', results: [] }, { status: 502 });
     }
 
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
+      await res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: 'Response too large', results: [] }, { status: 502 });
+    }
+
     const data = await res.json();
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },

@@ -62,6 +62,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Open Library returned ${res.status}` }, { status: 502 });
     }
 
+    const MAX_JSON_BYTES = 2 * 1024 * 1024;
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > MAX_JSON_BYTES) {
+      await res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: 'Response too large' }, { status: 502 });
+    }
+
     const data = await res.json();
     const docs: OLDoc[] = data.docs || [];
 

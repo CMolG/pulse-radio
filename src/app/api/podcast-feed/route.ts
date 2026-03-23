@@ -59,7 +59,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
     }
 
+    // Reject feeds larger than 5MB to prevent memory exhaustion from malicious sources
+    const contentLength = res.headers.get('content-length');
+    const MAX_FEED_BYTES = 5 * 1024 * 1024;
+    if (contentLength && parseInt(contentLength, 10) > MAX_FEED_BYTES) {
+      await res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: 'Feed too large' }, { status: 413 });
+    }
+
     const xml = await res.text();
+    if (xml.length > MAX_FEED_BYTES) {
+      return NextResponse.json({ error: 'Feed too large' }, { status: 413 });
+    }
     const episodes = parseRssFeed(xml);
 
     return NextResponse.json({ episodes }, {

@@ -46,7 +46,14 @@ export async function GET(req: NextRequest) {
     clearTimeout(timeout);
 
     if (!res.ok) {
+      await res.text().catch(() => {});
       return NextResponse.json({ error: `LibriVox API returned ${res.status}` }, { status: 502 });
+    }
+
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
+      await res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: 'Response too large' }, { status: 502 });
     }
 
     const data = await res.json();
