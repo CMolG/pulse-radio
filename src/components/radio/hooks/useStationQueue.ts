@@ -37,7 +37,7 @@ export function useStationQueue(): UseStationQueueReturn {
   const persistRef = useRef(false);
   // Ref tracks latest queue so callbacks avoid stale closures
   const queueRef = useRef(queue);
-  queueRef.current = queue;
+  useEffect(() => { queueRef.current = queue; }, [queue]);
 
   // Persist queue to storage on changes (skip initial mount)
   useEffect(() => {

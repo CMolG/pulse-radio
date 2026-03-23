@@ -91,6 +91,18 @@ export function useStationMeta(
   // Used to distinguish a station change from an isPlaying toggle.
   const prevStationUrlRef = useRef<string | null>(null);
 
+  // Clear track state during render when station goes null (avoid setState in effect)
+  const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null);
+  const currentStationId = station?.url_resolved ?? null;
+  if (currentStationId !== prevStationId) {
+    setPrevStationId(currentStationId);
+    if (!station) {
+      setTrack(null);
+      setIcyBitrate(null);
+      setStreamCodec(null);
+    }
+  }
+
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -98,9 +110,6 @@ export function useStationMeta(
     }
 
     if (!station) {
-      setTrack(null);
-      setIcyBitrate(null);
-      setStreamCodec(null);
       lastTitleRef.current = '';
       prevStationUrlRef.current = null;
       return;

@@ -97,6 +97,20 @@ export default function NowPlayingBar({
     }
   }, [coverUrlForReset]);
 
+  const coverUrl = track?.artworkUrl ?? station?.favicon;
+  const showFallback = !coverUrl || imgError;
+
+  const statusAnnouncement = useMemo(() => {
+    if (!station) return "No station selected";
+    const trackInfo = track?.title
+      ? track.artist ? `${track.artist}, ${track.title}` : track.title
+      : station.name;
+    if (isLoading) return `Loading ${trackInfo}`;
+    if (isPlaying) return `Now playing: ${trackInfo}`;
+    if (status === "error") return `Playback error: ${station.name}`;
+    return `Paused: ${trackInfo}`;
+  }, [station, track, isPlaying, isLoading, status]);
+
   if (compact) {
     return (
       <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={{ paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' }}>
@@ -163,20 +177,6 @@ export default function NowPlayingBar({
       </div>
     );
   }
-
-  const coverUrl = track?.artworkUrl ?? station?.favicon;
-  const showFallback = !coverUrl || imgError;
-
-  const statusAnnouncement = useMemo(() => {
-    if (!station) return "No station selected";
-    const trackInfo = track?.title
-      ? track.artist ? `${track.artist}, ${track.title}` : track.title
-      : station.name;
-    if (isLoading) return `Loading ${trackInfo}`;
-    if (isPlaying) return `Now playing: ${trackInfo}`;
-    if (status === "error") return `Playback error: ${station.name}`;
-    return `Paused: ${trackInfo}`;
-  }, [station, track, isPlaying, isLoading, status]);
 
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">

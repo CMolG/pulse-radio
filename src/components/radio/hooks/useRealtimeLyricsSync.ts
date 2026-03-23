@@ -48,6 +48,15 @@ export function useRealtimeLyricsSync({
   const realtimeAllowed = enabled && manuallyEnabled;
   const realtimeActive = supported && eligible && realtimeAllowed;
 
+  // Reset sync state during render when dependencies change, so stale
+  // activeLineIndex from a previous song doesn't bleed into new lyrics.
+  const [prevResetKey, setPrevResetKey] = useState('');
+  const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    setRuntimeState(defaultRealtimeState(manuallyEnabled));
+  }
+
   const toggle = useCallback(() => {
     setManuallyEnabled(prev => {
       const next = !prev;
@@ -64,9 +73,6 @@ export function useRealtimeLyricsSync({
 
     engineRef.current?.destroy();
     stableSamplesRef.current = 0;
-    // Reset sync state so stale activeLineIndex from a previous song doesn't
-    // bleed into new lyrics while the engine re-acquires position.
-    setRuntimeState(defaultRealtimeState(manuallyEnabled));
 
     const engine = createRealtimeSpeechEngine({
       onHypothesis: (hypothesis) => {
