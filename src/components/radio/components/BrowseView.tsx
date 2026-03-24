@@ -434,14 +434,14 @@ export default function BrowseView({
   const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length;
   const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
 
-  // Reset page when songFilter changes
-  const prevFilterRef = useRef(songFilter);
-  useEffect(() => {
-    if (prevFilterRef.current !== songFilter) {
-      prevFilterRef.current = songFilter;
-      setPage(0);
-    }
-  }, [songFilter]);
+  // Reset page synchronously during render when songFilter changes.
+  // Using the "adjusting state during render" pattern avoids a one-frame
+  // flash of empty results that the useEffect approach would cause.
+  const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
+  if (songFilter !== prevSongFilter) {
+    setPrevSongFilter(songFilter);
+    setPage(0);
+  }
 
   // Filter grid by song/artist when songFilter is active — paginated
   const allSongFilteredStations = useMemo(() => {
