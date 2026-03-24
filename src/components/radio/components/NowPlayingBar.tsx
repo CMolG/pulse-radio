@@ -108,14 +108,10 @@ function NowPlayingBar({
     return `Paused: ${trackInfo}`;
   }, [station, track, isPlaying, isLoading, status]);
 
-  const compactTags = useMemo(
-    () => station?.tags?.split(",").slice(0, 2).join(" · ") ?? "",
-    [station?.tags],
-  );
-  const firstTag = useMemo(
-    () => station?.tags?.split(",")[0] ?? "",
-    [station?.tags],
-  );
+  const [firstTag, compactTags] = useMemo(() => {
+    const tags = station?.tags?.split(",") ?? [];
+    return [tags[0] ?? "", tags.slice(0, 2).join(" · ")];
+  }, [station?.tags]);
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

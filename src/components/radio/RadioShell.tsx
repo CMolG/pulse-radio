@@ -757,8 +757,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
 
-  const syncMode = realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' as const : 'time' as const;
-
   const theaterBaseProps = {
     track: enrichedTrack,
     isPlaying: radio.status === "playing",
@@ -770,8 +768,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     lyrics,
     currentTime: effectiveCurrentTime,
     activeLineOverride: realtimeLyrics?.activeLineIndex,
-    syncConfidence: realtimeLyrics?.confidence,
-    syncMode,
   };
 
   const theaterFullProps = {

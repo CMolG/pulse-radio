@@ -17,8 +17,6 @@ type Props = {
   lyrics: LyricsData | null;
   currentTime?: number;
    activeLineOverride?: number;
-   syncConfidence?: number;
-   syncMode?: "time" | "realtime";
   variant?: "mobile" | "desktop";
 };
 

@@ -41,8 +41,6 @@ type Props = {
   lyrics?: LyricsData | null;
   currentTime?: number;
   activeLineOverride?: number;
-  syncConfidence?: number;
-  syncMode?: "time" | "realtime";
   lyricsVariant?: "mobile" | "desktop";
   compact?: boolean;
 };
@@ -122,8 +120,6 @@ export default function TheaterView({
   lyrics,
   currentTime,
   activeLineOverride,
-  syncConfidence,
-  syncMode,
   lyricsVariant = "mobile",
   compact,
 }: Props) {
@@ -398,8 +394,6 @@ export default function TheaterView({
                 lyrics={lyrics ?? null}
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
-                syncConfidence={syncConfidence}
-                syncMode={syncMode}
                 variant={lyricsVariant}
               />
             </div>
