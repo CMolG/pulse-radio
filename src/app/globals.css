@@ -65,9 +65,7 @@ input, select, textarea {
 /* macOS-style accent text cursor */
 input,
 textarea,
-[contenteditable] {
-  caret-color: var(--accent-color);
-}
+[contenteditable] { caret-color: var(--accent-color); }
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -102,9 +100,7 @@ textarea,
   -ms-overflow-style: none;
 }
 
-.lyrics-reel::-webkit-scrollbar {
-  display: none;
-}
+.lyrics-reel::-webkit-scrollbar { display: none; }
 
 /* Range slider - macOS style */
 input[type="range"] {
@@ -305,39 +301,25 @@ input[type="color"]:hover {
 
 /* ── Reusable App Layout Classes ──────────────────────────────────────────── */
 
-.app-body {
-  @apply flex-1 overflow-y-auto;
-}
+.app-body { @apply flex-1 overflow-y-auto; }
 
 /* ── Reusable Panels & Glass Surfaces ────────────────────────────────────── */
 
 /* ── Reusable Typography ─────────────────────────────────────────────────── */
 
-.text-muted {
-  @apply text-white/40;
-}
+.text-muted { @apply text-white/40; }
 
-.text-subtle {
-  @apply text-white/30;
-}
+.text-subtle { @apply text-white/30; }
 
-.text-secondary {
-  @apply text-white/60;
-}
+.text-secondary { @apply text-white/60; }
 
-.text-dim {
-  @apply text-white/50;
-}
+.text-dim { @apply text-white/50; }
 
-.text-soft {
-  @apply text-white/70;
-}
+.text-soft { @apply text-white/70; }
 
 /* ── Reusable Icon Sizes ─────────────────────────────────────────────────── */
 
-.icon-md {
-  @apply w-4 h-4;
-}
+.icon-md { @apply w-4 h-4; }
 
 /* globals.css */
 
@@ -374,91 +356,39 @@ input[type="color"]:hover {
 }
 
 
-.flex-center-col {
-  @apply flex flex-col items-center justify-center;
-}
-.flex-center-row {
-  @apply flex items-center justify-center;
-}
-.flex-between {
-  @apply flex items-center justify-between;
-}
+.flex-center-col { @apply flex flex-col items-center justify-center; }
+.flex-center-row { @apply flex items-center justify-center; }
+.flex-between { @apply flex items-center justify-between; }
 /* Dot / circle sizing utilities */
-.dot-1\.5 {
-  @apply w-1.5 h-1.5 rounded-full;
-}
-.dot-2 {
-  @apply w-2 h-2 rounded-full;
-}
-.dot-10 {
-  @apply w-10 h-10 rounded-full;
-}
-.flex-row-0\.5 {
-  @apply flex items-center gap-0.5;
-}
-.flex-row-1 {
-  @apply flex items-center gap-1;
-}
-.flex-row-1\.5 {
-  @apply flex items-center gap-1.5;
-}
-.flex-row-2 {
-  @apply flex items-center gap-2;
-}
-.flex-row-2\.5 {
-  @apply flex items-center gap-2.5;
-}
-.flex-row-3 {
-  @apply flex items-center gap-3;
-}
-.flex-row-4 {
-  @apply flex items-center gap-4;
-}
-.col-fill {
-  @apply flex-1 flex flex-col;
-}
-.flex-wrap-1 {
-  @apply flex flex-wrap gap-1;
-}
-.flex-wrap-1\.5 {
-  @apply flex flex-wrap gap-1.5;
-}
-.abs-fill {
-  @apply absolute inset-0;
-}
-.col-center {
-  @apply flex flex-col items-center;
-}
-.glass-blur {
-  @apply bg-sys-surface/80 backdrop-blur-xl backdrop-saturate-150;
-}
+.dot-1\.5 { @apply w-1.5 h-1.5 rounded-full; }
+.dot-2 { @apply w-2 h-2 rounded-full; }
+.dot-10 { @apply w-10 h-10 rounded-full; }
+.flex-row-0\.5 { @apply flex items-center gap-0.5; }
+.flex-row-1 { @apply flex items-center gap-1; }
+.flex-row-1\.5 { @apply flex items-center gap-1.5; }
+.flex-row-2 { @apply flex items-center gap-2; }
+.flex-row-2\.5 { @apply flex items-center gap-2.5; }
+.flex-row-3 { @apply flex items-center gap-3; }
+.flex-row-4 { @apply flex items-center gap-4; }
+.col-fill { @apply flex-1 flex flex-col; }
+.flex-wrap-1 { @apply flex flex-wrap gap-1; }
+.flex-wrap-1\.5 { @apply flex flex-wrap gap-1.5; }
+.abs-fill { @apply absolute inset-0; }
+.col-center { @apply flex flex-col items-center; }
+.glass-blur { @apply bg-sys-surface/80 backdrop-blur-xl backdrop-saturate-150; }
 
 /* ── Interactive text hover states ── */
-.text-muted-hover {
-  @apply text-white/40 hover:text-white/70 transition-colors;
-}
-.text-subtle-hover {
-  @apply text-white/30 hover:text-white/60 transition-colors;
-}
+.text-muted-hover { @apply text-white/40 hover:text-white/70 transition-colors; }
+.text-subtle-hover { @apply text-white/30 hover:text-white/60 transition-colors; }
 
 /* ── Padding + rounding combos ── */
-.pad-xs {
-  @apply px-1.5 py-0.5 rounded;
-}
-.pad-xs-full {
-  @apply px-1.5 py-0.5 rounded-full;
-}
+.pad-xs { @apply px-1.5 py-0.5 rounded; }
+.pad-xs-full { @apply px-1.5 py-0.5 rounded-full; }
 
 /* ── Border shortcuts ── */
-.bdr-b {
-  @apply border-b border-border-subtle;
-}
-.bdr {
-  @apply border border-border-subtle;
-}
-.flex-fill {
-  @apply flex-1 min-w-0;
-}
+.bdr-b { @apply border-b border-border-subtle; }
+.bdr { @apply border border-border-subtle; }
+.flex-fill { @apply flex-1 min-w-0; }
 
 /* ── Dawn gradient – radio station fallback background ── */
 .dawn-gradient {
@@ -497,13 +427,9 @@ input[type="color"]:hover {
   }
 
   /* Safe area padding for devices with notches/home indicators */
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-  .safe-top {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
+  .safe-top { padding-top: env(safe-area-inset-top, 0px); }
 
   .safe-x {
     padding-left: env(safe-area-inset-left, 0px);

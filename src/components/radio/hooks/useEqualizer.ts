@@ -503,10 +503,7 @@ export function useEqualizer(): UseEqualizerReturn {
             source.connect(normalizer);
             normalizer.connect(normGain);
             normGain.connect(nrHead);
-          } else {
-            normGain.gain.setTargetAtTime(1.0, t, RAMP_TIME);
-            source.connect(nrHead);
-          }
+          } else { normGain.gain.setTargetAtTime(1.0, t, RAMP_TIME); source.connect(nrHead); }
         } catch { /* ok */ }
       }
       return next;
