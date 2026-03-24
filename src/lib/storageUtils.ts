@@ -4,52 +4,40 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 
-/** Load a JSON value from localStorage with a fallback default */
-export function loadFromStorage<T>(key: string, defaultValue: T): T {
-  if (typeof window === 'undefined') return defaultValue;
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
-  return defaultValue;
+function tryLoad(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return localStorage.getItem(key); } catch { return null; }
 }
 
 function isQuotaExceeded(e: unknown): boolean {
   return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22);
 }
 
-/** Save a JSON value to localStorage. Returns false if quota is exceeded. */
-export function saveToStorage<T>(key: string, value: T): boolean {
+function trySave(key: string, raw: string): boolean {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(key, raw);
     return true;
   } catch (e) {
     if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
     return false;
   }
 }
+
+/** Load a JSON value from localStorage with a fallback default */
+export function loadFromStorage<T>(key: string, defaultValue: T): T {
+  const raw = tryLoad(key);
+  if (!raw) return defaultValue;
+  try { return JSON.parse(raw); } catch { return defaultValue; }
+}
+
+/** Save a JSON value to localStorage. Returns false if quota is exceeded. */
+export const saveToStorage = <T,>(key: string, value: T) => trySave(key, JSON.stringify(value));
 
 /** Load a plain string value from localStorage with fallback */
-export function loadStringFromStorage(key: string, defaultValue = ""): string {
-  if (typeof window === "undefined") return defaultValue;
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ?? defaultValue;
-  } catch {
-    return defaultValue;
-  }
-}
+export const loadStringFromStorage = (key: string, defaultValue = "") => tryLoad(key) ?? defaultValue;
 
 /** Save a plain string value to localStorage. Returns false if quota is exceeded. */
-export function saveStringToStorage(key: string, value: string): boolean {
-  try {
-    localStorage.setItem(key, value);
-    return true;
-  } catch (e) {
-    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
-    return false;
-  }
-}
+export const saveStringToStorage = (key: string, value: string) => trySave(key, value);
 
 /**
  * Storage schema version. Bump this when data structures change in a
