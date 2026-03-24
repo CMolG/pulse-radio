@@ -9,35 +9,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { STORAGE_KEYS } from '../constants';
 import type { LyricsData } from '../types';
-import {
-  defaultRealtimeState,
-  DEFAULT_REALTIME_ALIGN_POLICY,
-  isRealtimeEligible,
-  type RealtimeSyncResult,
-} from '../services/realtimeLyricsTypes';
+import { defaultRealtimeState, DEFAULT_REALTIME_ALIGN_POLICY, isRealtimeEligible, type RealtimeSyncResult } from '../services/realtimeLyricsTypes';
 import { alignHypothesis, mapLineToEffectiveTime } from '../services/lyricsAligner';
-import {
-  createRealtimeSpeechEngine,
-  isRealtimeSpeechSupported,
-  type RealtimeSpeechEngine,
-} from '../services/realtimeSpeechRecognition';
+import { createRealtimeSpeechEngine, isRealtimeSpeechSupported, type RealtimeSpeechEngine } from '../services/realtimeSpeechRecognition';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
-type Params = {
-  lyrics: LyricsData | null;
-  enabled: boolean;
-  languageHint: 'en' | 'es';
-};
+type Params = { lyrics: LyricsData | null; enabled: boolean; languageHint: 'en' | 'es' };
 
 export function useRealtimeLyricsSync({
   lyrics,
   enabled,
   languageHint,
 }: Params): RealtimeSyncResult {
-  const initialEnabled = useMemo(
-    () => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false),
-    [],
-  );
+  const initialEnabled = useMemo(() => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false), []);
 
   const [manuallyEnabled, setManuallyEnabled] = useState<boolean>(initialEnabled);
   const [runtimeState, setRuntimeState] = useState(() => defaultRealtimeState(initialEnabled));
@@ -113,18 +97,9 @@ export function useRealtimeLyricsSync({
               ...prev.diagnostics,
               lastHypothesisMs: hypothesis.tsMs,
               hypothesesSeen: prev.diagnostics.hypothesesSeen + 1,
-              confirmedTransitions:
-                step.confirmedIndex !== prev.activeLineIndex
-                  ? prev.diagnostics.confirmedTransitions + 1
-                  : prev.diagnostics.confirmedTransitions,
-              rejectedJumps:
-                step.jumpRejected
-                  ? prev.diagnostics.rejectedJumps + 1
-                  : prev.diagnostics.rejectedJumps,
-              relockCount:
-                step.relockTriggered
-                  ? prev.diagnostics.relockCount + 1
-                  : prev.diagnostics.relockCount,
+              confirmedTransitions: prev.diagnostics.confirmedTransitions + (step.confirmedIndex !== prev.activeLineIndex ? 1 : 0),
+              rejectedJumps: prev.diagnostics.rejectedJumps + (step.jumpRejected ? 1 : 0),
+              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0),
               errorMessage: null,
             },
           };
@@ -154,12 +129,7 @@ export function useRealtimeLyricsSync({
     };
   }, [lyrics, languageHint, realtimeActive]);
 
-  useEffect(() => {
-    return () => {
-      engineRef.current?.destroy();
-      engineRef.current = null;
-    };
-  }, []);
+  useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
 
   const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
 
