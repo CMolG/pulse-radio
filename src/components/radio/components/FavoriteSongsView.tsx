@@ -43,10 +43,10 @@ function SongContextMenu({
     };
     const onScroll = () => onClose();
     window.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => {
       window.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
     };
   }, [menu, onClose]);
 

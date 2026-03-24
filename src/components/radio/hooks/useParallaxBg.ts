@@ -61,7 +61,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     };
     tickRafRef.current = requestAnimationFrame(tick);
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(rafRef.current);
