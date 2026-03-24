@@ -5,6 +5,7 @@
  */
 
 import type { BrowseCategory, EqBand, EqPreset } from './types';
+import type { MessageKey } from '@/lib/i18n/messages';
 
 export const STORAGE_KEYS = {
   PLAYBACK: 'radio-playback',
@@ -103,3 +104,21 @@ export function countryFlag(code: string): string {
   _flagCache.set(code, flag);
   return flag;
 }
+
+export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
+  trending: "genreTrending",
+  pop: "genrePop",
+  rock: "genreRock",
+  jazz: "genreJazz",
+  classical: "genreClassical",
+  electronic: "genreElectronic",
+  hiphop: "genreHiphop",
+  country: "genreCountry",
+  ambient: "genreAmbient",
+  lofi: "genreLofi",
+  news: "genreNews",
+  latin: "genreLatin",
+  metal: "genreMetal",
+  local: "genreLocal",
+  world: "genreWorld",
+};

@@ -35,7 +35,7 @@ import type {
   FavoriteSong,
   SongDetailData,
 } from "./types";
-import { STORAGE_KEYS } from "./constants";
+import { STORAGE_KEYS, GENRE_LABEL_KEYS } from "./constants";
 import { useRadio } from "./hooks/useRadio";
 import { useEqualizer } from "./hooks/useEqualizer";
 import { useStationMeta } from "./hooks/useStationMeta";
@@ -69,7 +69,6 @@ import { saveToStorage } from "@/lib/storageUtils";
 import { useLocale } from "@/context/LocaleContext";
 import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
 import { getCountryDisplayName } from "@/lib/i18n/countryChips";
-import type { MessageKey } from "@/lib/i18n/messages";
 
 type LayoutMode = "desktop" | "mobile" | "pip";
 
@@ -83,24 +82,6 @@ function buildFavInput(
     trackNumber: t.trackNumber, trackCount: t.trackCount, stationName: s.name, stationUuid: s.stationuuid,
   };
 }
-
-const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
-  trending: "genreTrending",
-  pop: "genrePop",
-  rock: "genreRock",
-  jazz: "genreJazz",
-  classical: "genreClassical",
-  electronic: "genreElectronic",
-  hiphop: "genreHiphop",
-  country: "genreCountry",
-  ambient: "genreAmbient",
-  lofi: "genreLofi",
-  news: "genreNews",
-  latin: "genreLatin",
-  metal: "genreMetal",
-  local: "genreLocal",
-  world: "genreWorld",
-};
 
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>(() => ({

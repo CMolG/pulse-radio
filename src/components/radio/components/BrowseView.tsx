@@ -16,7 +16,7 @@ import React, {
 import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
-import { GENRE_CATEGORIES } from "../constants";
+import { GENRE_CATEGORIES, GENRE_LABEL_KEYS } from "../constants";
 import {
   searchStations,
   stationsByTag,
@@ -27,7 +27,6 @@ import {
 import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
 import StationCard from "./StationCard";
 import { useLocale } from "@/context/LocaleContext";
-import type { MessageKey } from "@/lib/i18n/messages";
 import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 
 /** Order in which category sections appear on the home screen */
@@ -40,24 +39,6 @@ const BROWSE_ORDER = [
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
-};
-
-const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
-  trending: "genreTrending",
-  pop: "genrePop",
-  rock: "genreRock",
-  jazz: "genreJazz",
-  classical: "genreClassical",
-  electronic: "genreElectronic",
-  hiphop: "genreHiphop",
-  country: "genreCountry",
-  ambient: "genreAmbient",
-  lofi: "genreLofi",
-  news: "genreNews",
-  latin: "genreLatin",
-  metal: "genreMetal",
-  local: "genreLocal",
-  world: "genreWorld",
 };
 
 type Props = {
@@ -637,22 +618,18 @@ export default function BrowseView({
                 {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId);
                   if (!cat) return null;
-
                   const catStations = categorySections[catId];
+                  if (catStations?.length === 0) return null;
 
-                  // Failed to load — show retry button
-                  if (!catStations && failedCategories.has(catId)) {
-                    return (
-                      <ScrollRow
-                        key={catId}
-                        title={cat.label}
-                        icon={
-                          CATEGORY_ICONS[catId] ?? (
-                            <Music size={14} className="text-dim" />
-                          )
-                        }
-                        isMobile={isMobile}
-                      >
+                  const icon = CATEGORY_ICONS[catId] ?? (
+                    catStations
+                      ? <span className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`} />
+                      : <Music size={14} className="text-dim" />
+                  );
+
+                  return (
+                    <ScrollRow key={catId} title={cat.label} icon={icon} isMobile={isMobile}>
+                      {!catStations && failedCategories.has(catId) ? (
                         <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
                           <Radio size={18} className="text-muted" />
                           <p className="text-[11px] text-muted">{t("failedToLoadStations")}</p>
@@ -663,50 +640,13 @@ export default function BrowseView({
                             {t("retry")}
                           </button>
                         </div>
-                      </ScrollRow>
-                    );
-                  }
-
-                  // Still loading — show skeleton placeholders
-                  if (!catStations) {
-                    return (
-                      <ScrollRow
-                        key={catId}
-                        title={cat.label}
-                        icon={
-                          CATEGORY_ICONS[catId] ?? (
-                            <Music size={14} className="text-dim" />
-                          )
-                        }
-                        isMobile={isMobile}
-                      >
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`}
-                          />
-                        ))}
-                      </ScrollRow>
-                    );
-                  }
-
-                  // No stations in this category
-                  if (!catStations || catStations.length === 0) return null;
-
-                  return (
-                    <ScrollRow
-                      key={catId}
-                      title={cat.label}
-                      icon={
-                        CATEGORY_ICONS[catId] ?? (
-                          <span
-                            className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`}
-                          />
-                        )
-                      }
-                      isMobile={isMobile}
-                    >
-                      {renderScrollStations(catStations)}
+                      ) : !catStations ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`} />
+                        ))
+                      ) : (
+                        renderScrollStations(catStations)
+                      )}
                     </ScrollRow>
                   );
                 })}
