@@ -325,87 +325,16 @@ input[type="color"]:hover {
   color: inherit;
 }
 
-/* ── Reusable Interaction Classes ─────────────────────────────────────────── */
-
-.app-press {
-  @apply transition-all duration-200 active:scale-[0.97];
-}
-
-.app-icon-btn {
-  @apply p-1.5 rounded-lg hover:bg-surface-4 transition-colors;
-}
-
 /* ── Reusable App Layout Classes ──────────────────────────────────────────── */
-
-.app-container {
-  @apply h-full flex flex-col text-white;
-}
-
-.app-container-select-none {
-  @apply h-full flex flex-col text-white select-none;
-}
-
-.app-header {
-  @apply shrink-0 p-3 flex items-center justify-between border-b border-border-subtle;
-}
-
-.app-toolbar {
-  @apply shrink-0 flex items-center gap-2 px-3 py-2 border-b border-border-subtle;
-}
-
-.app-footer {
-  @apply shrink-0 px-3 py-2 flex items-center border-t border-border-subtle;
-}
 
 .app-body {
   @apply flex-1 overflow-y-auto;
 }
 
-.app-layout {
-  @apply flex-1 flex overflow-hidden;
-}
-
-.app-sidebar {
-  @apply shrink-0 flex flex-col border-r border-border-subtle overflow-y-auto;
-}
-
-.app-empty {
-  @apply flex-1 flex flex-col items-center justify-center text-white/30;
-}
-
-.app-modal-overlay {
-  @apply absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm;
-}
-
-.app-center {
-  @apply absolute inset-0 flex items-center justify-center;
-}
-
-.app-center-col {
-  @apply absolute inset-0 flex flex-col items-center justify-center;
-}
-
 /* ── Reusable Panels & Glass Surfaces ────────────────────────────────────── */
 
-.panel-1 {
-  @apply bg-surface-1 border border-border-subtle;
-}
 .panel-2 {
   @apply bg-surface-2 border border-border-subtle;
-}
-.panel-3 {
-  @apply bg-surface-3 border border-border-strong;
-}
-.panel-2d {
-  @apply bg-surface-2 border border-border-default;
-}
-
-.glass-surface {
-  @apply bg-surface-1 border border-border-subtle rounded-lg;
-}
-
-.glass-surface-raised {
-  @apply bg-surface-2 border border-border-default rounded-lg;
 }
 
 .glass-panel {
@@ -470,21 +399,6 @@ input[type="color"]:hover {
   @apply w-4 h-4;
 }
 
-/* Toast fade-in animation */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fade-in {
-  animation: fade-in 200ms ease-out;
-}
-
 /* globals.css */
 
 @keyframes ambient-drift {
@@ -511,39 +425,6 @@ input[type="color"]:hover {
   animation: ambient-drift 15s ease-in-out infinite;
   /* Will-change avisa al navegador para que optimice la animación usando la GPU */
   will-change: transform;
-}
-
-/* ── Weather Center: Loading Skeleton Shimmer ── */
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.03) 75%
-  );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s ease-in-out infinite;
-}
-
-/* ── Weather Center: Dropdown Appear ── */
-@keyframes dropdown-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 @property --angle {
@@ -816,25 +697,4 @@ input[type="color"]:hover {
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
   }
-}
-
-/* ── Ambient drift parallax for theater background ── */
-@keyframes ambient-drift {
-  0% {
-    transform: scale(1.05) translate(0px, 0px);
-  }
-  33% {
-    transform: scale(1.12) translate(-20px, 16px);
-  }
-  66% {
-    transform: scale(1.1) translate(15px, -15px);
-  }
-  100% {
-    transform: scale(1.05) translate(0px, 0px);
-  }
-}
-
-.animate-ambient-drift {
-  animation: ambient-drift 15s ease-in-out infinite;
-  will-change: transform;
 }
