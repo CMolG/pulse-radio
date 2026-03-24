@@ -423,9 +423,6 @@ input[type="color"]:hover {
 .flex-wrap-1\.5 {
   @apply flex flex-wrap gap-1.5;
 }
-.caps {
-  @apply uppercase tracking-wider;
-}
 .abs-fill {
   @apply absolute inset-0;
 }
@@ -447,12 +444,6 @@ input[type="color"]:hover {
 /* ── Padding + rounding combos ── */
 .pad-xs {
   @apply px-1.5 py-0.5 rounded;
-}
-.pad-sm {
-  @apply px-2 py-1 rounded;
-}
-.pad-sm-full {
-  @apply px-2 py-0.5 rounded-full;
 }
 .pad-xs-full {
   @apply px-1.5 py-0.5 rounded-full;

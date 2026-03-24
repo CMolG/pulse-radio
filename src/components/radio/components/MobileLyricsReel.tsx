@@ -180,13 +180,9 @@ export default function LyricsReel({
               "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}
         >
-          {renderableLines.length === 0 ? null : (
             <div className="flex min-h-full flex-col justify-center py-14">
               {renderableLines.map((line, index) => {
-                const distanceFromFocus = Math.abs(index - focusedIdx);
-                const isActive = activeIdx >= 0 && index === activeIdx;
-                const ei = isActive ? 0 : Math.min(distanceFromFocus, 3) + 1;
-
+                const ei = (activeIdx >= 0 && index === activeIdx) ? 0 : Math.min(Math.abs(index - focusedIdx), 3) + 1;
                 return (
                   <LyricReelLine
                     key={line.id}
@@ -201,7 +197,6 @@ export default function LyricsReel({
                 );
               })}
             </div>
-          )}
         </div>
       </div>
     </div>
