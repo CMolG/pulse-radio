@@ -38,7 +38,7 @@ type Props = {
   onPresetChange?: (name: string | null) => void;
 };
 
-export default function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
+export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -190,4 +190,4 @@ export default function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth
           <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(compressorAmount * 100)}%</span>
         </div>
       </div></div>);
-}
+});

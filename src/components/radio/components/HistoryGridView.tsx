@@ -20,7 +20,7 @@ type Props = {
   onSelect?: (song: SongDetailData) => void;
 };
 
-export default function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
+export default React.memo(function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
   if (history.length === 0) {
     return (
       <div className="flex-center-col py-20 px-4">
@@ -61,4 +61,4 @@ export default function HistoryGridView({ history, onRemove, onClear, onToggleFa
       </div>
     </div>
   );
-}
+});
