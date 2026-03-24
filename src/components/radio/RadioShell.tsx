@@ -367,9 +367,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
 
+  // Keep EQ outputGain at unity — audio.volume already handles user volume.
+  // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
   useEffect(() => {
-    setOutputVolume(radio.volume, radio.muted);
-  }, [setOutputVolume, radio.muted, radio.volume]);
+    setOutputVolume(1, false);
+  }, [setOutputVolume]);
 
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
