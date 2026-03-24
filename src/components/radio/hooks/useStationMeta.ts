@@ -9,6 +9,12 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 
+const CODEC_MAP: Record<string, string> = {
+  MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC',
+  OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus',
+  FLAC: 'FLAC', WMA: 'WMA',
+};
+
 // Patterns that indicate ads/spam rather than real song metadata
 const AD_PATTERNS = [
   /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i,
@@ -164,10 +170,7 @@ export function useStationMeta(
       // Derive codec from station data for display
       if (station.codec) {
         const c = station.codec.toUpperCase();
-        const friendly = c === 'MP3' ? 'MP3' : c === 'AAC' || c === 'AAC+' ? 'AAC' :
-          c === 'OGG' || c === 'VORBIS' ? 'OGG' : c === 'OPUS' ? 'Opus' :
-          c === 'FLAC' ? 'FLAC' : c === 'WMA' ? 'WMA' : c;
-        setStreamCodec(friendly);
+        setStreamCodec(CODEC_MAP[c] ?? c);
       }
 
       if (streamTitle && streamTitle !== lastTitleRef.current) {
