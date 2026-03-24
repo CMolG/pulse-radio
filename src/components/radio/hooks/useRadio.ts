@@ -498,7 +498,8 @@ export function useRadio(): UseRadioReturn {
       lastBufferEndRef.current = bufferEnd;
 
       if (ahead >= 5) {
-        setStreamQuality('good');
+        // saveData means the user opted into reduced bandwidth; cap at 'fair'
+        setStreamQuality(conn?.saveData ? 'fair' : 'good');
       } else if (ahead >= MIN_BUFFER_AHEAD_S) {
         // Healthy buffer but thin — check if it's growing
         setStreamQuality(growth > 0 ? 'fair' : 'poor');
