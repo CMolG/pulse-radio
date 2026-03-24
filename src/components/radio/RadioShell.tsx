@@ -341,9 +341,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   // Keep EQ outputGain at unity — audio.volume already handles user volume.
   // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
-  useEffect(() => {
-    setOutputVolume(1, false);
-  }, [setOutputVolume]);
+  useEffect(() => { setOutputVolume(1, false); }, [setOutputVolume]);
 
   // Ref holds fresh deps so handlePlay can use [] and remain referentially
   // stable.  Prevents child components receiving onPlay={handlePlay} from
@@ -404,9 +402,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [radio.status]);
 
   const skipDepsRef = useRef({ radio, favs, stationQueue });
-  useEffect(() => {
-    skipDepsRef.current = { radio, favs, stationQueue };
-  }, [radio, favs, stationQueue]);
+  useEffect(() => { skipDepsRef.current = { radio, favs, stationQueue }; }, [radio, favs, stationQueue]);
 
   const handleSkipNext = useCallback(() => {
     const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;

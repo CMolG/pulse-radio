@@ -36,9 +36,7 @@ export function useFavorites(): UseFavoritesReturn {
     });
   });
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
-  }, [favorites]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITES, favorites); }, [favorites]);
 
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
 

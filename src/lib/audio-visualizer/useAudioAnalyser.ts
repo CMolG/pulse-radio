@@ -22,9 +22,7 @@ interface UseAudioAnalyserReturn {
   disconnect: () => void;
 }
 
-export function useAudioAnalyser(
-  opts: UseAudioAnalyserOptions = {},
-): UseAudioAnalyserReturn {
+export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
   const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts;
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0);

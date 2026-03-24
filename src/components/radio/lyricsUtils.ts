@@ -47,9 +47,7 @@ export function getEffectiveActiveLyricIndex(
   return getActiveLyricIndex(lyrics, currentTime);
 }
 
-export function getRenderableLyricLines(
-  lyrics: LyricsData | null,
-): RenderableLyricLine[] {
+export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLyricLine[] {
   if (!lyrics) return [];
 
   if (lyrics.synced && lyrics.lines.length > 0) {

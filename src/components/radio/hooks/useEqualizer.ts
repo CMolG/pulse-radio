@@ -611,9 +611,7 @@ export function useEqualizer(): UseEqualizerReturn {
     applyNoiseReductionPreset(mode);
   }, [applyNoiseReductionPreset]);
 
-  useEffect(() => {
-    applyNoiseReductionPreset(noiseReductionMode);
-  }, [applyNoiseReductionPreset, noiseReductionMode]);
+  useEffect(() => { applyNoiseReductionPreset(noiseReductionMode); }, [applyNoiseReductionPreset, noiseReductionMode]);
 
   return {
     bands,

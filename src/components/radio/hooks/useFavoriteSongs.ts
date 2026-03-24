@@ -53,9 +53,7 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
   const keySetRef = useRef(buildKeySet(songs));
   useMemo(() => { keySetRef.current = buildKeySet(songs); }, [songs]);
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
-  }, [songs]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs); }, [songs]);
 
   useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {

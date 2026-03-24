@@ -31,9 +31,7 @@ export function useRecent(): UseRecentReturn {
     });
   });
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.RECENT, recent);
-  }, [recent]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.RECENT, recent); }, [recent]);
 
   useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
 

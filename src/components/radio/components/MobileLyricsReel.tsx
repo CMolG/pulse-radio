@@ -113,9 +113,7 @@ export default function LyricsReel({
     setFocusedIdx((prev) => (prev === closestIdx ? prev : closestIdx));
   }, [renderableLines.length]);
 
-  useEffect(() => {
-    lineRefs.current = lineRefs.current.slice(0, renderableLines.length);
-  }, [renderableLines.length]);
+  useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
 
   // Reset scroll position when lyrics change (no autoscroll on active line —
   // user controls focus manually by scrolling or clicking a line)

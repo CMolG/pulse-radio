@@ -18,9 +18,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   const tickRafRef = useRef(0);
   // Ref avoids re-running the effect (and tearing down RAF + listener) on every amplitude change
   const audioAmplitudeRef = useRef(audioAmplitude);
-  useEffect(() => {
-    audioAmplitudeRef.current = audioAmplitude;
-  }, [audioAmplitude]);
+  useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const el = containerRef.current;

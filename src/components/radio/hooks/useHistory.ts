@@ -33,9 +33,7 @@ export function useHistory(
   const lastTrackRef = useRef<string>('');
   const lastStationRef = useRef<string | undefined>(stationUuid);
 
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.HISTORY, history);
-  }, [history]);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]);
 
   useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
 

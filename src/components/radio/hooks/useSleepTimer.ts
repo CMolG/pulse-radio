@@ -30,9 +30,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   const endTimeRef = useRef<number>(0);
   const savedVolumeRef = useRef<number | null>(null);
   const onExpireRef = useRef(onExpire);
-  useEffect(() => {
-    onExpireRef.current = onExpire;
-  }, [onExpire]);
+  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
 
   const stopFade = useCallback(() => {
     if (fadeTimerRef.current) {

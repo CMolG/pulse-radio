@@ -45,9 +45,7 @@ export function SpiralRenderer({
   const innerYRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 });
 
-  useEffect(() => {
-    colorsRef.current = { color1, color2, color3 };
-  }, [color1, color2, color3]);
+  useEffect(() => { colorsRef.current = { color1, color2, color3 }; }, [color1, color2, color3]);
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2;
