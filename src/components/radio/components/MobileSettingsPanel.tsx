@@ -118,6 +118,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
           <h2 className="text-[17px] font-semibold text-white">Settings</h2>
           <button
             onClick={onClose}
+            aria-label="Close settings"
             className="w-8 h-8 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <X size={16} />
@@ -201,6 +202,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         {preset.name}
                       </button>
                       <button onClick={() => eq.removeCustomPreset(preset.name)}
+                        aria-label={`Delete ${preset.name} preset`}
                         className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors">
                         <X size={10} />
                       </button>
@@ -238,6 +240,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                       <input type="range" min={-12} max={12} step={1} value={band.gain}
                         onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))}
                         disabled={!eq.enabled}
+                        aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />
                       <span className="text-[8px] text-white/40">{band.label}</span>
@@ -269,6 +272,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   <span className="text-[11px] text-white/50 w-10 shrink-0">Width</span>
                   <input type="range" min={0} max={200} step={5} value={Math.round(eq.stereoWidth * 100)}
                     onChange={e => eq.setStereoWidth(parseInt(e.target.value, 10) / 100)}
+                    aria-label="Stereo width"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.stereoWidth * 100)}%</span>
                 </div>
@@ -276,6 +280,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   <span className="text-[11px] text-white/50 w-10 shrink-0">Bass+</span>
                   <input type="range" min={0} max={100} step={5} value={Math.round(eq.bassEnhance * 100)}
                     onChange={e => eq.setBassEnhance(parseInt(e.target.value, 10) / 100)}
+                    aria-label="Bass enhance"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.bassEnhance * 100)}%</span>
                 </div>
@@ -284,6 +289,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   <input type="range" min={0} max={100} step={5} value={Math.round(eq.compressorAmount * 100)}
                     onChange={e => eq.setCompressorAmount(parseInt(e.target.value, 10) / 100)}
                     disabled={!eq.compressorEnabled}
+                    aria-label="Compressor amount"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.compressorAmount * 100)}%</span>
                 </div>
@@ -350,6 +356,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
               <div className="flex items-center gap-3 px-5 pb-3">
                 <button
                   onClick={() => setShowStats(false)}
+                  aria-label="Close statistics"
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                   <X size={16} />
