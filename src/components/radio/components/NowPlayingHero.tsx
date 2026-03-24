@@ -43,16 +43,15 @@ export default function NowPlayingHero({
 }: Props) {
   const [imgError, setImgError] = useState(false);
   const coverUrl = artworkUrl ?? station.favicon;
-  const showFallback = !coverUrl || imgError;
 
-  // Reset error state when image URL changes
-  const lastCoverRef = React.useRef(coverUrl);
-  React.useEffect(() => {
-    if (coverUrl !== lastCoverRef.current) {
-      lastCoverRef.current = coverUrl;
-      setImgError(false);
-    }
-  }, [coverUrl]);
+  // Reset error state when cover URL changes so new artwork gets a chance to load
+  const [prevCoverUrl, setPrevCoverUrl] = useState(coverUrl);
+  if (coverUrl !== prevCoverUrl) {
+    setPrevCoverUrl(coverUrl);
+    setImgError(false);
+  }
+
+  const showFallback = !coverUrl || imgError;
 
   return (
     <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">

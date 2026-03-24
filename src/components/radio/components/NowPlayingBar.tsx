@@ -89,13 +89,13 @@ export default function NowPlayingBar({
   const isLoading = status === "loading";
   const [imgError, setImgError] = useState(false);
   const coverUrlForReset = track?.artworkUrl ?? station?.favicon;
-  const lastBarCoverRef = React.useRef(coverUrlForReset);
-  React.useEffect(() => {
-    if (coverUrlForReset !== lastBarCoverRef.current) {
-      lastBarCoverRef.current = coverUrlForReset;
-      setImgError(false);
-    }
-  }, [coverUrlForReset]);
+
+  // Reset error state when cover URL changes so new artwork gets a chance to load
+  const [prevBarCoverUrl, setPrevBarCoverUrl] = useState(coverUrlForReset);
+  if (coverUrlForReset !== prevBarCoverUrl) {
+    setPrevBarCoverUrl(coverUrlForReset);
+    setImgError(false);
+  }
 
   const coverUrl = track?.artworkUrl ?? station?.favicon;
   const showFallback = !coverUrl || imgError;
