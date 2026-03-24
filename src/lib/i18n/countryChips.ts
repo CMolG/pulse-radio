@@ -72,7 +72,6 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
       return mapped ? candidates.has(mapped) : false;
     }),
   )
-    .sort((a, b) => b.population - a.population)
     .map((country) => country.code);
 }
 
@@ -92,7 +91,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     if (borders.has(country.code)) score += 100;
     if (subregions.has(country.subregion)) score += 60;
     if (regions.has(country.region)) score += 30;
-    score += Math.max(0, 30 - Math.log10(country.population + 1) * 5);
+    score += 30;
     score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };
   })

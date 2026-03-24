@@ -6,11 +6,9 @@
 
 export type SovereignCountry = {
   code: string;
-  code3: string;
   name: string;
   region: string;
   subregion: string;
-  population: number;
   borders: string[];
   lang3: string[];
 };
@@ -18,11 +16,9 @@ export type SovereignCountry = {
 export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   {
     "code": "AD",
-    "code3": "AND",
     "name": "Andorra",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "FR",
       "ES"
@@ -33,11 +29,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AE",
-    "code3": "ARE",
     "name": "United Arab Emirates",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "OM",
       "SA"
@@ -48,11 +42,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AF",
-    "code3": "AFG",
     "name": "Afghanistan",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "IR",
       "PK",
@@ -69,11 +61,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AG",
-    "code3": "ATG",
     "name": "Antigua and Barbuda",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -81,11 +71,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AL",
-    "code3": "ALB",
     "name": "Albania",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "ME",
       "GR",
@@ -98,11 +86,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AM",
-    "code3": "ARM",
     "name": "Armenia",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "AZ",
       "GE",
@@ -115,11 +101,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AO",
-    "code3": "AGO",
     "name": "Angola",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CG",
       "CD",
@@ -132,11 +116,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AR",
-    "code3": "ARG",
     "name": "Argentina",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "BO",
       "BR",
@@ -151,11 +133,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AT",
-    "code3": "AUT",
     "name": "Austria",
     "region": "Europe",
     "subregion": "Central Europe",
-    "population": 0,
     "borders": [
       "CZ",
       "DE",
@@ -172,11 +152,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AU",
-    "code3": "AUS",
     "name": "Australia",
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -184,11 +162,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "AZ",
-    "code3": "AZE",
     "name": "Azerbaijan",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "AM",
       "GE",
@@ -203,11 +179,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BA",
-    "code3": "BIH",
     "name": "Bosnia and Herzegovina",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "HR",
       "ME",
@@ -221,11 +195,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BB",
-    "code3": "BRB",
     "name": "Barbados",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -233,11 +205,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BD",
-    "code3": "BGD",
     "name": "Bangladesh",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "MM",
       "IN"
@@ -248,11 +218,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BE",
-    "code3": "BEL",
     "name": "Belgium",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "FR",
       "DE",
@@ -267,11 +235,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BF",
-    "code3": "BFA",
     "name": "Burkina Faso",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "BJ",
       "CI",
@@ -286,11 +252,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BG",
-    "code3": "BGR",
     "name": "Bulgaria",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "GR",
       "MK",
@@ -304,11 +268,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BH",
-    "code3": "BHR",
     "name": "Bahrain",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "ara"
@@ -316,11 +278,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BI",
-    "code3": "BDI",
     "name": "Burundi",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "CD",
       "RW",
@@ -333,11 +293,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BJ",
-    "code3": "BEN",
     "name": "Benin",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "BF",
       "NE",
@@ -350,11 +308,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BN",
-    "code3": "BRN",
     "name": "Brunei",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "MY"
     ],
@@ -364,11 +320,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BO",
-    "code3": "BOL",
     "name": "Bolivia",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "AR",
       "BR",
@@ -385,11 +339,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BR",
-    "code3": "BRA",
     "name": "Brazil",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "AR",
       "BO",
@@ -408,11 +360,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BS",
-    "code3": "BHS",
     "name": "Bahamas",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -420,11 +370,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BT",
-    "code3": "BTN",
     "name": "Bhutan",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "CN",
       "IN"
@@ -435,11 +383,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BW",
-    "code3": "BWA",
     "name": "Botswana",
     "region": "Africa",
     "subregion": "Southern Africa",
-    "population": 0,
     "borders": [
       "NA",
       "ZA",
@@ -453,11 +399,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BY",
-    "code3": "BLR",
     "name": "Belarus",
     "region": "Europe",
     "subregion": "Eastern Europe",
-    "population": 0,
     "borders": [
       "LV",
       "LT",
@@ -472,11 +416,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "BZ",
-    "code3": "BLZ",
     "name": "Belize",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "GT",
       "MX"
@@ -489,11 +431,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CA",
-    "code3": "CAN",
     "name": "Canada",
     "region": "Americas",
     "subregion": "North America",
-    "population": 0,
     "borders": [
       "US"
     ],
@@ -504,11 +444,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CD",
-    "code3": "COD",
     "name": "DR Congo",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "AO",
       "BI",
@@ -530,11 +468,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CF",
-    "code3": "CAF",
     "name": "Central African Republic",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CM",
       "TD",
@@ -550,11 +486,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CG",
-    "code3": "COG",
     "name": "Republic of the Congo",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "AO",
       "CM",
@@ -570,11 +504,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CH",
-    "code3": "CHE",
     "name": "Switzerland",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "AT",
       "FR",
@@ -591,11 +523,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CI",
-    "code3": "CIV",
     "name": "Ivory Coast",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "BF",
       "GH",
@@ -609,11 +539,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CL",
-    "code3": "CHL",
     "name": "Chile",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "AR",
       "BO",
@@ -625,11 +553,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CM",
-    "code3": "CMR",
     "name": "Cameroon",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CF",
       "TD",
@@ -645,11 +571,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CN",
-    "code3": "CHN",
     "name": "China",
     "region": "Asia",
     "subregion": "Eastern Asia",
-    "population": 0,
     "borders": [
       "AF",
       "BT",
@@ -674,11 +598,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CO",
-    "code3": "COL",
     "name": "Colombia",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "BR",
       "EC",
@@ -692,11 +614,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CR",
-    "code3": "CRI",
     "name": "Costa Rica",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "NI",
       "PA"
@@ -707,11 +627,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CU",
-    "code3": "CUB",
     "name": "Cuba",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "spa"
@@ -719,11 +637,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CV",
-    "code3": "CPV",
     "name": "Cape Verde",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [],
     "lang3": [
       "por"
@@ -731,11 +647,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CY",
-    "code3": "CYP",
     "name": "Cyprus",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [],
     "lang3": [
       "ell",
@@ -744,11 +658,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "CZ",
-    "code3": "CZE",
     "name": "Czechia",
     "region": "Europe",
     "subregion": "Central Europe",
-    "population": 0,
     "borders": [
       "AT",
       "DE",
@@ -762,11 +674,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "DE",
-    "code3": "DEU",
     "name": "Germany",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "AT",
       "BE",
@@ -784,11 +694,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "DJ",
-    "code3": "DJI",
     "name": "Djibouti",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "ER",
       "ET",
@@ -801,11 +709,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "DK",
-    "code3": "DNK",
     "name": "Denmark",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "DE"
     ],
@@ -815,11 +721,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "DM",
-    "code3": "DMA",
     "name": "Dominica",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -827,11 +731,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "DO",
-    "code3": "DOM",
     "name": "Dominican Republic",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [
       "HT"
     ],
@@ -841,11 +743,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "DZ",
-    "code3": "DZA",
     "name": "Algeria",
     "region": "Africa",
     "subregion": "Northern Africa",
-    "population": 0,
     "borders": [
       "TN",
       "LY",
@@ -861,11 +761,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "EC",
-    "code3": "ECU",
     "name": "Ecuador",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "CO",
       "PE"
@@ -876,11 +774,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "EE",
-    "code3": "EST",
     "name": "Estonia",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "LV",
       "RU"
@@ -891,11 +787,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "EG",
-    "code3": "EGY",
     "name": "Egypt",
     "region": "Africa",
     "subregion": "Northern Africa",
-    "population": 0,
     "borders": [
       "IL",
       "LY",
@@ -908,11 +802,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ER",
-    "code3": "ERI",
     "name": "Eritrea",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "DJ",
       "ET",
@@ -926,11 +818,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ES",
-    "code3": "ESP",
     "name": "Spain",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "AD",
       "FR",
@@ -944,11 +834,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ET",
-    "code3": "ETH",
     "name": "Ethiopia",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "DJ",
       "ER",
@@ -963,11 +851,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "FI",
-    "code3": "FIN",
     "name": "Finland",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "NO",
       "SE",
@@ -980,11 +866,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "FJ",
-    "code3": "FJI",
     "name": "Fiji",
     "region": "Oceania",
     "subregion": "Melanesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -994,11 +878,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "FM",
-    "code3": "FSM",
     "name": "Micronesia",
     "region": "Oceania",
     "subregion": "Micronesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -1006,11 +888,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "FR",
-    "code3": "FRA",
     "name": "France",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "AD",
       "BE",
@@ -1027,11 +907,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GA",
-    "code3": "GAB",
     "name": "Gabon",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CM",
       "CG",
@@ -1043,11 +921,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GB",
-    "code3": "GBR",
     "name": "United Kingdom",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "IE"
     ],
@@ -1057,11 +933,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GD",
-    "code3": "GRD",
     "name": "Grenada",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -1069,11 +943,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GE",
-    "code3": "GEO",
     "name": "Georgia",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "AM",
       "AZ",
@@ -1086,11 +958,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GH",
-    "code3": "GHA",
     "name": "Ghana",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "BF",
       "CI",
@@ -1102,11 +972,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GM",
-    "code3": "GMB",
     "name": "Gambia",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "SN"
     ],
@@ -1116,11 +984,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GN",
-    "code3": "GIN",
     "name": "Guinea",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "CI",
       "GW",
@@ -1135,11 +1001,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GQ",
-    "code3": "GNQ",
     "name": "Equatorial Guinea",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CM",
       "GA"
@@ -1152,11 +1016,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GR",
-    "code3": "GRC",
     "name": "Greece",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "AL",
       "BG",
@@ -1169,11 +1031,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GT",
-    "code3": "GTM",
     "name": "Guatemala",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "BZ",
       "SV",
@@ -1186,11 +1046,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GW",
-    "code3": "GNB",
     "name": "Guinea-Bissau",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "GN",
       "SN"
@@ -1202,11 +1060,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "GY",
-    "code3": "GUY",
     "name": "Guyana",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "BR",
       "SR",
@@ -1218,11 +1074,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "HN",
-    "code3": "HND",
     "name": "Honduras",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "GT",
       "SV",
@@ -1234,11 +1088,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "HR",
-    "code3": "HRV",
     "name": "Croatia",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "BA",
       "HU",
@@ -1252,11 +1104,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "HT",
-    "code3": "HTI",
     "name": "Haiti",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [
       "DO"
     ],
@@ -1267,11 +1117,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "HU",
-    "code3": "HUN",
     "name": "Hungary",
     "region": "Europe",
     "subregion": "Central Europe",
-    "population": 0,
     "borders": [
       "AT",
       "HR",
@@ -1287,11 +1135,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ID",
-    "code3": "IDN",
     "name": "Indonesia",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "TL",
       "MY",
@@ -1303,11 +1149,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IE",
-    "code3": "IRL",
     "name": "Ireland",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "GB"
     ],
@@ -1318,11 +1162,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IL",
-    "code3": "ISR",
     "name": "Israel",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "EG",
       "JO",
@@ -1337,11 +1179,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IN",
-    "code3": "IND",
     "name": "India",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "BD",
       "BT",
@@ -1358,11 +1198,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IQ",
-    "code3": "IRQ",
     "name": "Iraq",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IR",
       "JO",
@@ -1379,11 +1217,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IR",
-    "code3": "IRN",
     "name": "Iran",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "AF",
       "AM",
@@ -1399,11 +1235,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IS",
-    "code3": "ISL",
     "name": "Iceland",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [],
     "lang3": [
       "isl"
@@ -1411,11 +1245,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "IT",
-    "code3": "ITA",
     "name": "Italy",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "AT",
       "FR",
@@ -1430,11 +1262,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "JM",
-    "code3": "JAM",
     "name": "Jamaica",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -1443,11 +1273,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "JO",
-    "code3": "JOR",
     "name": "Jordan",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IQ",
       "IL",
@@ -1461,11 +1289,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "JP",
-    "code3": "JPN",
     "name": "Japan",
     "region": "Asia",
     "subregion": "Eastern Asia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "jpn"
@@ -1473,11 +1299,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KE",
-    "code3": "KEN",
     "name": "Kenya",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "ET",
       "SO",
@@ -1492,11 +1316,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KG",
-    "code3": "KGZ",
     "name": "Kyrgyzstan",
     "region": "Asia",
     "subregion": "Central Asia",
-    "population": 0,
     "borders": [
       "CN",
       "KZ",
@@ -1510,11 +1332,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KH",
-    "code3": "KHM",
     "name": "Cambodia",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "LA",
       "TH",
@@ -1526,11 +1346,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KI",
-    "code3": "KIR",
     "name": "Kiribati",
     "region": "Oceania",
     "subregion": "Micronesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -1539,11 +1357,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KM",
-    "code3": "COM",
     "name": "Comoros",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [],
     "lang3": [
       "ara",
@@ -1553,11 +1369,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KN",
-    "code3": "KNA",
     "name": "Saint Kitts and Nevis",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -1565,11 +1379,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KP",
-    "code3": "PRK",
     "name": "North Korea",
     "region": "Asia",
     "subregion": "Eastern Asia",
-    "population": 0,
     "borders": [
       "CN",
       "KR",
@@ -1581,11 +1393,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KR",
-    "code3": "KOR",
     "name": "South Korea",
     "region": "Asia",
     "subregion": "Eastern Asia",
-    "population": 0,
     "borders": [
       "KP"
     ],
@@ -1595,11 +1405,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KW",
-    "code3": "KWT",
     "name": "Kuwait",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IQ",
       "SA"
@@ -1610,11 +1418,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "KZ",
-    "code3": "KAZ",
     "name": "Kazakhstan",
     "region": "Asia",
     "subregion": "Central Asia",
-    "population": 0,
     "borders": [
       "CN",
       "KG",
@@ -1629,11 +1435,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LA",
-    "code3": "LAO",
     "name": "Laos",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "MM",
       "KH",
@@ -1647,11 +1451,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LB",
-    "code3": "LBN",
     "name": "Lebanon",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IL",
       "SY"
@@ -1663,11 +1465,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LC",
-    "code3": "LCA",
     "name": "Saint Lucia",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -1675,11 +1475,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LI",
-    "code3": "LIE",
     "name": "Liechtenstein",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "AT",
       "CH"
@@ -1690,11 +1488,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LK",
-    "code3": "LKA",
     "name": "Sri Lanka",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "IN"
     ],
@@ -1705,11 +1501,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LR",
-    "code3": "LBR",
     "name": "Liberia",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "GN",
       "CI",
@@ -1721,11 +1515,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LS",
-    "code3": "LSO",
     "name": "Lesotho",
     "region": "Africa",
     "subregion": "Southern Africa",
-    "population": 0,
     "borders": [
       "ZA"
     ],
@@ -1736,11 +1528,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LT",
-    "code3": "LTU",
     "name": "Lithuania",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "BY",
       "LV",
@@ -1753,11 +1543,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LU",
-    "code3": "LUX",
     "name": "Luxembourg",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "BE",
       "FR",
@@ -1771,11 +1559,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LV",
-    "code3": "LVA",
     "name": "Latvia",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "BY",
       "EE",
@@ -1788,11 +1574,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "LY",
-    "code3": "LBY",
     "name": "Libya",
     "region": "Africa",
     "subregion": "Northern Africa",
-    "population": 0,
     "borders": [
       "DZ",
       "TD",
@@ -1807,11 +1591,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MA",
-    "code3": "MAR",
     "name": "Morocco",
     "region": "Africa",
     "subregion": "Northern Africa",
-    "population": 0,
     "borders": [
       "DZ",
       "EH",
@@ -1824,11 +1606,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MC",
-    "code3": "MCO",
     "name": "Monaco",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "FR"
     ],
@@ -1838,11 +1618,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MD",
-    "code3": "MDA",
     "name": "Moldova",
     "region": "Europe",
     "subregion": "Eastern Europe",
-    "population": 0,
     "borders": [
       "RO",
       "UA"
@@ -1853,11 +1631,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ME",
-    "code3": "MNE",
     "name": "Montenegro",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "AL",
       "BA",
@@ -1871,11 +1647,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MG",
-    "code3": "MDG",
     "name": "Madagascar",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [],
     "lang3": [
       "fra",
@@ -1884,11 +1658,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MH",
-    "code3": "MHL",
     "name": "Marshall Islands",
     "region": "Oceania",
     "subregion": "Micronesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -1897,11 +1669,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MK",
-    "code3": "MKD",
     "name": "North Macedonia",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "AL",
       "BG",
@@ -1915,11 +1685,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ML",
-    "code3": "MLI",
     "name": "Mali",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "DZ",
       "BF",
@@ -1935,11 +1703,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MM",
-    "code3": "MMR",
     "name": "Myanmar",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "BD",
       "CN",
@@ -1953,11 +1719,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MN",
-    "code3": "MNG",
     "name": "Mongolia",
     "region": "Asia",
     "subregion": "Eastern Asia",
-    "population": 0,
     "borders": [
       "CN",
       "RU"
@@ -1968,11 +1732,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MR",
-    "code3": "MRT",
     "name": "Mauritania",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "DZ",
       "ML",
@@ -1985,11 +1747,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MT",
-    "code3": "MLT",
     "name": "Malta",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -1998,11 +1758,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MU",
-    "code3": "MUS",
     "name": "Mauritius",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2012,11 +1770,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MV",
-    "code3": "MDV",
     "name": "Maldives",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "div"
@@ -2024,11 +1780,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MW",
-    "code3": "MWI",
     "name": "Malawi",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "MZ",
       "TZ",
@@ -2041,11 +1795,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MX",
-    "code3": "MEX",
     "name": "Mexico",
     "region": "Americas",
     "subregion": "North America",
-    "population": 0,
     "borders": [
       "BZ",
       "GT",
@@ -2057,11 +1809,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MY",
-    "code3": "MYS",
     "name": "Malaysia",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "BN",
       "ID",
@@ -2074,11 +1824,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "MZ",
-    "code3": "MOZ",
     "name": "Mozambique",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "MW",
       "ZA",
@@ -2093,11 +1841,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NA",
-    "code3": "NAM",
     "name": "Namibia",
     "region": "Africa",
     "subregion": "Southern Africa",
-    "population": 0,
     "borders": [
       "AO",
       "BW",
@@ -2118,11 +1864,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NE",
-    "code3": "NER",
     "name": "Niger",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "DZ",
       "BJ",
@@ -2138,11 +1882,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NG",
-    "code3": "NGA",
     "name": "Nigeria",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "BJ",
       "CM",
@@ -2155,11 +1897,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NI",
-    "code3": "NIC",
     "name": "Nicaragua",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "CR",
       "HN"
@@ -2170,11 +1910,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NL",
-    "code3": "NLD",
     "name": "Netherlands",
     "region": "Europe",
     "subregion": "Western Europe",
-    "population": 0,
     "borders": [
       "BE",
       "DE"
@@ -2185,11 +1923,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NO",
-    "code3": "NOR",
     "name": "Norway",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "FI",
       "SE",
@@ -2203,11 +1939,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NP",
-    "code3": "NPL",
     "name": "Nepal",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "CN",
       "IN"
@@ -2218,11 +1952,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NR",
-    "code3": "NRU",
     "name": "Nauru",
     "region": "Oceania",
     "subregion": "Micronesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2231,11 +1963,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "NZ",
-    "code3": "NZL",
     "name": "New Zealand",
     "region": "Oceania",
     "subregion": "Australia and New Zealand",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2245,11 +1975,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "OM",
-    "code3": "OMN",
     "name": "Oman",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "SA",
       "AE",
@@ -2261,11 +1989,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PA",
-    "code3": "PAN",
     "name": "Panama",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "CO",
       "CR"
@@ -2276,11 +2002,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PE",
-    "code3": "PER",
     "name": "Peru",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "BO",
       "BR",
@@ -2296,11 +2020,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PG",
-    "code3": "PNG",
     "name": "Papua New Guinea",
     "region": "Oceania",
     "subregion": "Melanesia",
-    "population": 0,
     "borders": [
       "ID"
     ],
@@ -2312,11 +2034,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PH",
-    "code3": "PHL",
     "name": "Philippines",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2325,11 +2045,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PK",
-    "code3": "PAK",
     "name": "Pakistan",
     "region": "Asia",
     "subregion": "Southern Asia",
-    "population": 0,
     "borders": [
       "AF",
       "CN",
@@ -2343,11 +2061,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PL",
-    "code3": "POL",
     "name": "Poland",
     "region": "Europe",
     "subregion": "Central Europe",
-    "population": 0,
     "borders": [
       "BY",
       "CZ",
@@ -2363,11 +2079,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PS",
-    "code3": "PSE",
     "name": "Palestine",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IL",
       "EG",
@@ -2379,11 +2093,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PT",
-    "code3": "PRT",
     "name": "Portugal",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "ES"
     ],
@@ -2393,11 +2105,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PW",
-    "code3": "PLW",
     "name": "Palau",
     "region": "Oceania",
     "subregion": "Micronesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2406,11 +2116,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "PY",
-    "code3": "PRY",
     "name": "Paraguay",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "AR",
       "BO",
@@ -2423,11 +2131,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "QA",
-    "code3": "QAT",
     "name": "Qatar",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "SA"
     ],
@@ -2437,11 +2143,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "RO",
-    "code3": "ROU",
     "name": "Romania",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "BG",
       "HU",
@@ -2455,11 +2159,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "RS",
-    "code3": "SRB",
     "name": "Serbia",
     "region": "Europe",
     "subregion": "Southeast Europe",
-    "population": 0,
     "borders": [
       "BA",
       "BG",
@@ -2476,11 +2178,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "RU",
-    "code3": "RUS",
     "name": "Russia",
     "region": "Europe",
     "subregion": "Eastern Europe",
-    "population": 0,
     "borders": [
       "AZ",
       "BY",
@@ -2503,11 +2203,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "RW",
-    "code3": "RWA",
     "name": "Rwanda",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "BI",
       "CD",
@@ -2522,11 +2220,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SA",
-    "code3": "SAU",
     "name": "Saudi Arabia",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IQ",
       "JO",
@@ -2542,11 +2238,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SB",
-    "code3": "SLB",
     "name": "Solomon Islands",
     "region": "Oceania",
     "subregion": "Melanesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -2554,11 +2248,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SC",
-    "code3": "SYC",
     "name": "Seychelles",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [],
     "lang3": [
       "crs",
@@ -2568,11 +2260,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SD",
-    "code3": "SDN",
     "name": "Sudan",
     "region": "Africa",
     "subregion": "Northern Africa",
-    "population": 0,
     "borders": [
       "CF",
       "TD",
@@ -2589,11 +2279,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SE",
-    "code3": "SWE",
     "name": "Sweden",
     "region": "Europe",
     "subregion": "Northern Europe",
-    "population": 0,
     "borders": [
       "FI",
       "NO"
@@ -2604,11 +2292,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SG",
-    "code3": "SGP",
     "name": "Singapore",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2619,11 +2305,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SI",
-    "code3": "SVN",
     "name": "Slovenia",
     "region": "Europe",
     "subregion": "Central Europe",
-    "population": 0,
     "borders": [
       "AT",
       "HR",
@@ -2636,11 +2320,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SK",
-    "code3": "SVK",
     "name": "Slovakia",
     "region": "Europe",
     "subregion": "Central Europe",
-    "population": 0,
     "borders": [
       "AT",
       "CZ",
@@ -2654,11 +2336,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SL",
-    "code3": "SLE",
     "name": "Sierra Leone",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "GN",
       "LR"
@@ -2669,11 +2349,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SM",
-    "code3": "SMR",
     "name": "San Marino",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "IT"
     ],
@@ -2683,11 +2361,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SN",
-    "code3": "SEN",
     "name": "Senegal",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "GM",
       "GN",
@@ -2701,11 +2377,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SO",
-    "code3": "SOM",
     "name": "Somalia",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "DJ",
       "ET",
@@ -2718,11 +2392,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SR",
-    "code3": "SUR",
     "name": "Suriname",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "BR",
       "GF",
@@ -2734,11 +2406,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SS",
-    "code3": "SSD",
     "name": "South Sudan",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CF",
       "CD",
@@ -2753,11 +2423,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ST",
-    "code3": "STP",
     "name": "São Tomé and Príncipe",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [],
     "lang3": [
       "por"
@@ -2765,11 +2433,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SV",
-    "code3": "SLV",
     "name": "El Salvador",
     "region": "Americas",
     "subregion": "Central America",
-    "population": 0,
     "borders": [
       "GT",
       "HN"
@@ -2780,11 +2446,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SY",
-    "code3": "SYR",
     "name": "Syria",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "IQ",
       "IL",
@@ -2798,11 +2462,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "SZ",
-    "code3": "SWZ",
     "name": "Eswatini",
     "region": "Africa",
     "subregion": "Southern Africa",
-    "population": 0,
     "borders": [
       "MZ",
       "ZA"
@@ -2814,11 +2476,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TD",
-    "code3": "TCD",
     "name": "Chad",
     "region": "Africa",
     "subregion": "Middle Africa",
-    "population": 0,
     "borders": [
       "CM",
       "CF",
@@ -2834,11 +2494,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TG",
-    "code3": "TGO",
     "name": "Togo",
     "region": "Africa",
     "subregion": "Western Africa",
-    "population": 0,
     "borders": [
       "BJ",
       "BF",
@@ -2850,11 +2508,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TH",
-    "code3": "THA",
     "name": "Thailand",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "MM",
       "KH",
@@ -2867,11 +2523,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TJ",
-    "code3": "TJK",
     "name": "Tajikistan",
     "region": "Asia",
     "subregion": "Central Asia",
-    "population": 0,
     "borders": [
       "AF",
       "CN",
@@ -2885,11 +2539,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TL",
-    "code3": "TLS",
     "name": "Timor-Leste",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "ID"
     ],
@@ -2900,11 +2552,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TM",
-    "code3": "TKM",
     "name": "Turkmenistan",
     "region": "Asia",
     "subregion": "Central Asia",
-    "population": 0,
     "borders": [
       "AF",
       "IR",
@@ -2918,11 +2568,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TN",
-    "code3": "TUN",
     "name": "Tunisia",
     "region": "Africa",
     "subregion": "Northern Africa",
-    "population": 0,
     "borders": [
       "DZ",
       "LY"
@@ -2933,11 +2581,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TO",
-    "code3": "TON",
     "name": "Tonga",
     "region": "Oceania",
     "subregion": "Polynesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2946,11 +2592,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TR",
-    "code3": "TUR",
     "name": "Türkiye",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "AM",
       "AZ",
@@ -2967,11 +2611,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TT",
-    "code3": "TTO",
     "name": "Trinidad and Tobago",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -2979,11 +2621,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TV",
-    "code3": "TUV",
     "name": "Tuvalu",
     "region": "Oceania",
     "subregion": "Polynesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -2992,11 +2632,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "TZ",
-    "code3": "TZA",
     "name": "Tanzania",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "BI",
       "CD",
@@ -3014,11 +2652,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "UA",
-    "code3": "UKR",
     "name": "Ukraine",
     "region": "Europe",
     "subregion": "Eastern Europe",
-    "population": 0,
     "borders": [
       "BY",
       "HU",
@@ -3034,11 +2670,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "UG",
-    "code3": "UGA",
     "name": "Uganda",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "CD",
       "KE",
@@ -3053,11 +2687,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "US",
-    "code3": "USA",
     "name": "United States",
     "region": "Americas",
     "subregion": "North America",
-    "population": 0,
     "borders": [
       "CA",
       "MX"
@@ -3068,11 +2700,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "UY",
-    "code3": "URY",
     "name": "Uruguay",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "AR",
       "BR"
@@ -3083,11 +2713,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "UZ",
-    "code3": "UZB",
     "name": "Uzbekistan",
     "region": "Asia",
     "subregion": "Central Asia",
-    "population": 0,
     "borders": [
       "AF",
       "KZ",
@@ -3102,11 +2730,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "VA",
-    "code3": "VAT",
     "name": "Vatican City",
     "region": "Europe",
     "subregion": "Southern Europe",
-    "population": 0,
     "borders": [
       "IT"
     ],
@@ -3117,11 +2743,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "VC",
-    "code3": "VCT",
     "name": "Saint Vincent and the Grenadines",
     "region": "Americas",
     "subregion": "Caribbean",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng"
@@ -3129,11 +2753,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "VE",
-    "code3": "VEN",
     "name": "Venezuela",
     "region": "Americas",
     "subregion": "South America",
-    "population": 0,
     "borders": [
       "BR",
       "CO",
@@ -3145,11 +2767,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "VN",
-    "code3": "VNM",
     "name": "Vietnam",
     "region": "Asia",
     "subregion": "South-Eastern Asia",
-    "population": 0,
     "borders": [
       "KH",
       "CN",
@@ -3161,11 +2781,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "VU",
-    "code3": "VUT",
     "name": "Vanuatu",
     "region": "Oceania",
     "subregion": "Melanesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "bis",
@@ -3175,11 +2793,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "WS",
-    "code3": "WSM",
     "name": "Samoa",
     "region": "Oceania",
     "subregion": "Polynesia",
-    "population": 0,
     "borders": [],
     "lang3": [
       "eng",
@@ -3188,11 +2804,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "YE",
-    "code3": "YEM",
     "name": "Yemen",
     "region": "Asia",
     "subregion": "Western Asia",
-    "population": 0,
     "borders": [
       "OM",
       "SA"
@@ -3203,11 +2817,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ZA",
-    "code3": "ZAF",
     "name": "South Africa",
     "region": "Africa",
     "subregion": "Southern Africa",
-    "population": 0,
     "borders": [
       "BW",
       "LS",
@@ -3232,11 +2844,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ZM",
-    "code3": "ZMB",
     "name": "Zambia",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "AO",
       "BW",
@@ -3253,11 +2863,9 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   },
   {
     "code": "ZW",
-    "code3": "ZWE",
     "name": "Zimbabwe",
     "region": "Africa",
     "subregion": "Eastern Africa",
-    "population": 0,
     "borders": [
       "BW",
       "MZ",
