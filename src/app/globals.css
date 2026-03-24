@@ -460,54 +460,14 @@ input[type="color"]:hover {
   @apply text-white/20;
 }
 
-.text-ghost {
-  @apply text-white/10;
-}
-
-.text-whisper {
-  @apply text-white/15;
-}
-
-.text-hint {
-  @apply text-white/25;
-}
-
-.text-aside {
-  @apply text-white/35;
-}
-
-.text-primary {
-  @apply text-white/80;
-}
-
-.text-bright {
-  @apply text-white/90;
-}
-
 .text-soft {
   @apply text-white/70;
 }
 
 /* ── Reusable Icon Sizes ─────────────────────────────────────────────────── */
 
-.icon-xs {
-  @apply w-3 h-3;
-}
-
-.icon-sm {
-  @apply w-3.5 h-3.5;
-}
-
 .icon-md {
   @apply w-4 h-4;
-}
-
-.icon-lg {
-  @apply w-5 h-5;
-}
-
-.icon-xl {
-  @apply w-6 h-6;
 }
 
 /* Toast fade-in animation */
@@ -613,33 +573,6 @@ input[type="color"]:hover {
 }
 .app-mono-sm {
   @apply text-[10px] text-white/40 tabular-nums;
-}
-.app-icon-btn-xs {
-  @apply p-0.5 hover:bg-surface-3 rounded transition-colors;
-}
-.app-section-divider {
-  @apply p-3 border-b border-border-subtle;
-}
-.app-sm-btn {
-  @apply px-3 py-1.5 bg-surface-2 rounded-lg text-xs text-white/60 hover:bg-surface-5 flex items-center gap-1 transition-colors;
-}
-.app-pill {
-  @apply flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs;
-}
-.app-chip {
-  @apply flex items-center gap-1 px-2 py-1 rounded text-xs;
-}
-.app-section-header-sm {
-  @apply px-2 py-1 text-[10px] text-white/40 border-b border-border-subtle;
-}
-.app-label-hint {
-  @apply text-[10px] text-white/25 uppercase tracking-wider;
-}
-.app-label-faint {
-  @apply text-[9px] text-white/20 uppercase tracking-wider;
-}
-.app-hint-center {
-  @apply text-[10px] text-white/15 text-center mt-8;
 }
 .app-overlay-center {
   @apply absolute inset-0 flex items-center justify-center;
@@ -770,18 +703,6 @@ input[type="color"]:hover {
 }
 .text-subtle-hover {
   @apply text-white/30 hover:text-white/60 transition-colors;
-}
-.text-dim-hover {
-  @apply text-white/50 hover:text-white/80 transition-colors;
-}
-.text-faint-hover {
-  @apply text-white/20 hover:text-white/40 transition-colors;
-}
-.text-secondary-hover {
-  @apply text-white/60 hover:text-white/80 transition-colors;
-}
-.text-hint-hover {
-  @apply text-white/25 hover:text-white/50 transition-colors;
 }
 
 /* ── Background hover transitions ── */
