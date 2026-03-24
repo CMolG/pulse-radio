@@ -264,42 +264,31 @@ export default function BrowseView({
     scanGenRef.current++;
   }, [view]);
 
-  // Batch-fetch ICY metadata for a list of stations (max 3 concurrent)
-  const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
-    const queue = [...stationsToScan];
-    const CONCURRENCY = 3;
-    const worker = async () => {
-      while (queue.length > 0) {
-        if (scanGenRef.current !== gen) return;
-        const s = queue.shift()!;
-        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
-        try {
-          const result = await fetchIcyMeta(s.url_resolved);
-          if (scanGenRef.current !== gen) return;
-          const raw = result.streamTitle;
-          const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
-          setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
-        } catch {
-          if (scanGenRef.current !== gen) return;
-          setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
-        }
-      }
-    };
-    await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-  }, []);
-
-  // Manual single-station peek
-  const peekStation = useCallback(async (station: Station) => {
-    setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loading', track: null } }));
+  // Fetch ICY metadata for a single station, optionally guarded by a staleness check
+  const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => {
+    setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
     try {
-      const result = await fetchIcyMeta(station.url_resolved);
+      const result = await fetchIcyMeta(s.url_resolved);
+      if (stale?.()) return;
       const raw = result.streamTitle;
-      const track = raw ? (parseTrack(raw, station.name) ?? null) : null;
-      setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loaded', track } }));
+      const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
+      setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
     } catch {
-      setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'error', track: null } }));
+      if (stale?.()) return;
+      setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
     }
   }, []);
+
+  const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
+    const queue = [...stationsToScan];
+    const stale = () => scanGenRef.current !== gen;
+    const worker = async () => {
+      while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale);
+    };
+    await Promise.all(Array.from({ length: 3 }, worker));
+  }, [fetchMeta]);
+
+  const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
 
   useEffect(() => {
     let cancelled = false;
