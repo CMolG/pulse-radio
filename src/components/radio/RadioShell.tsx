@@ -34,7 +34,7 @@ import type {
   FavoriteSong,
   SongDetailData,
 } from "./types";
-import { STORAGE_KEYS, GENRE_LABEL_KEYS } from "./constants";
+import { GENRE_LABEL_KEYS } from "./constants";
 import { useRadio } from "./hooks/useRadio";
 import { useEqualizer } from "./hooks/useEqualizer";
 import { useStationMeta } from "./hooks/useStationMeta";
@@ -365,6 +365,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
       eqConnectSource(radio.audioRef.current);
+      analyser.connectAudio(radio.audioRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
@@ -374,13 +375,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     setOutputVolume(1, false);
   }, [setOutputVolume]);
-
-  useEffect(() => {
-    if (radio.station && radio.audioRef.current) {
-      analyser.connectAudio(radio.audioRef.current);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radio.station]);
 
   // Ref holds fresh deps so handlePlay can use [] and remain referentially
   // stable.  Prevents child components receiving onPlay={handlePlay} from
@@ -755,17 +749,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </motion.div>
   ) : null;
 
-  const navTabs14 = useMemo(() => [
-    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={14} /> },
-    { id: "history" as const, label: t("history"), icon: <Clock size={14} /> },
-    { id: "favorites" as const, label: t("favorites"), icon: <Heart size={14} /> },
-  ], [t]);
-
-  const navTabs13 = useMemo(() => [
-    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={13} /> },
-    { id: "history" as const, label: t("history"), icon: <Clock size={13} /> },
-    { id: "favorites" as const, label: t("favorites"), icon: <Heart size={13} /> },
-  ], [t]);
+  const mkNavTabs = (sz: number) => [
+    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={sz} /> },
+    { id: "history" as const, label: t("history"), icon: <Clock size={sz} /> },
+    { id: "favorites" as const, label: t("favorites"), icon: <Heart size={sz} /> },
+  ];
+  const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
+  const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
 
   const syncMode = realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' as const : 'time' as const;
 
