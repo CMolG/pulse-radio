@@ -329,6 +329,51 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     setSearchQuery("");
   }, [initialCountryCode, locale, view.countryCode, view.mode]);
 
+  // Sync view state when the user navigates with browser back/forward.
+  // pushState is used for country and home navigation but the browser's
+  // popstate event is the only way to detect back/forward.
+  useEffect(() => {
+    const onPopState = () => {
+      const path = window.location.pathname;
+      const segment = path.replace(/^\//, "").toUpperCase();
+
+      if (!segment) {
+        // Navigated back to "/"
+        setView({
+          mode: "top",
+          query: "",
+          tag: "",
+          countryCode: "",
+          countryQueryName: "",
+          label: t("topStations"),
+        });
+        setActiveTab("discover");
+        setTheaterMode(false);
+        setSearchQuery("");
+        return;
+      }
+
+      if (isSovereignCountryCode(segment)) {
+        const country = COUNTRY_BY_CODE[segment];
+        if (country) {
+          setView({
+            mode: "country",
+            query: "",
+            tag: "",
+            countryCode: segment,
+            countryQueryName: country.name,
+            label: getCountryDisplayName(locale, segment),
+          });
+          setActiveTab("discover");
+          setTheaterMode(false);
+          setSearchQuery("");
+        }
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [locale, t]);
+
   // Reset compact state on layout change
   useEffect(() => {
     if (layout === "pip") {
