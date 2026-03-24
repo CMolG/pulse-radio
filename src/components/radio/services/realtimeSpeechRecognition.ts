@@ -6,35 +6,17 @@
 
 import type { RealtimeSpeechHypothesis } from './realtimeLyricsTypes';
 
-type BrowserSpeechAlternative = {
-  transcript: string;
-  confidence?: number;
-};
-
-type BrowserSpeechResult = {
-  0?: BrowserSpeechAlternative;
-  isFinal: boolean;
-};
-
-type BrowserSpeechRecognitionEvent = {
-  resultIndex: number;
-  results: ArrayLike<BrowserSpeechResult>;
-};
-
-type BrowserSpeechRecognitionErrorEvent = {
-  error: string;
-};
+type BrowserSpeechAlternative = { transcript: string; confidence?: number };
+type BrowserSpeechResult = { 0?: BrowserSpeechAlternative; isFinal: boolean };
+type BrowserSpeechRecognitionEvent = { resultIndex: number; results: ArrayLike<BrowserSpeechResult> };
+type BrowserSpeechRecognitionErrorEvent = { error: string };
 
 type BrowserSpeechRecognition = {
-  continuous: boolean;
-  interimResults: boolean;
-  maxAlternatives: number;
-  lang: string;
+  continuous: boolean; interimResults: boolean; maxAlternatives: number; lang: string;
   onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
   onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
+  start: () => void; stop: () => void;
 };
 
 type RecognitionCtor = new () => BrowserSpeechRecognition;
@@ -48,12 +30,8 @@ const MAX_RESTARTS = 4;
 
 function getRecognitionCtor(): RecognitionCtor | null {
   if (typeof window === 'undefined' || !window.isSecureContext) return null;
-  const ctor = (window as Window & {
-    SpeechRecognition?: RecognitionCtor;
-    webkitSpeechRecognition?: RecognitionCtor;
-  }).SpeechRecognition
-    ?? (window as Window & { webkitSpeechRecognition?: RecognitionCtor }).webkitSpeechRecognition;
-  return ctor ?? null;
+  const w = window as Window & { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
 export function isRealtimeSpeechSupported(): boolean {
