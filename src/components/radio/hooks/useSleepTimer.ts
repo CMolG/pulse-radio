@@ -96,6 +96,9 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       const left = Math.max(0, endTimeRef.current - Date.now());
       const mins = Math.ceil(left / 60_000);
       if (left <= 0) {
+        // Discard saved volume so stopFade won't restore it — the
+        // fade brought volume to 0 intentionally before pausing.
+        savedVolumeRef.current = null;
         clear();
         onExpireRef.current();
       } else {
