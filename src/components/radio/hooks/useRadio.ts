@@ -113,6 +113,13 @@ export function useRadio(): UseRadioReturn {
           userPausedRef.current = true;
           audio.pause();
         }
+        // Cancel any in-progress crossfade so it doesn't restart playback
+        // after the cross-tab pause. Without this, the crossfade completion
+        // calls startPlayback() and overrides the pause from the other tab.
+        if (fadeTimerRef.current) {
+          clearInterval(fadeTimerRef.current);
+          fadeTimerRef.current = null;
+        }
       }
     };
     return () => {
