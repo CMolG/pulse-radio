@@ -89,6 +89,19 @@ export function useRealtimeLyricsSync({
           stableSamplesRef.current = step.stableSamples;
 
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
+
+          // Early bail — skip spread+setState when nothing observable changed
+          if (
+            prev.status === 'listening' &&
+            prev.activeLineIndex === step.confirmedIndex &&
+            prev.candidateLineIndex === step.candidateIndex &&
+            prev.confidence === step.score &&
+            !step.jumpRejected &&
+            !step.relockTriggered
+          ) {
+            return prev;
+          }
+
           return {
             ...prev,
             status: 'listening',
