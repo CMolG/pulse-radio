@@ -24,8 +24,11 @@ type CacheEntry = { key: string; data: LyricsData; ts: number };
 
 function loadCache(): CacheEntry[] {
   const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
-  // Backfill ts=0 for old entries so they expire on next TTL check
-  return raw.map(e => ({ ...e, ts: e.ts ?? 0 }));
+  // Backfill ts=0 for old entries so they expire on next TTL check — mutate in place to avoid allocation
+  for (let i = 0; i < raw.length; i++) {
+    if (raw[i].ts === undefined) (raw[i] as CacheEntry).ts = 0;
+  }
+  return raw as CacheEntry[];
 }
 
 function saveCache(entries: CacheEntry[]) {
