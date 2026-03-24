@@ -909,6 +909,43 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     theaterMode,
   };
 
+  /* ─── Shared tab content elements (used by mobile + desktop) ─── */
+  const browseViewElement = (
+    <BrowseView
+      view={view}
+      currentStation={radio.station}
+      isPlaying={radio.status === "playing"}
+      isFavorite={favs.has}
+      onPlay={handlePlay}
+      onToggleFav={favs.toggle}
+      onPrefetch={radio.prefetchStream}
+      favorites={favs.favorites}
+      recent={recent.recent}
+      onSelectGenre={handleSelectGenre}
+      onSelectCountry={handleSelectCountry}
+      onGoHome={handleGoHome}
+      userGenreOrder={usageStats.genreOrder}
+    />
+  );
+  const historyViewElement = (
+    <HistoryGridView
+      history={songHistory.history}
+      onRemove={songHistory.remove}
+      onClear={songHistory.clear}
+      onToggleFavSong={handleFavSongFromHistory}
+      isSongFavorite={favSongs.has}
+      onSelect={setSelectedSong}
+    />
+  );
+  const favsViewElement = (
+    <FavoriteSongsView
+      songs={favSongs.songs}
+      onRemove={favSongs.remove}
+      onClear={favSongs.clear}
+      onSelect={setSelectedSong}
+    />
+  );
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -1063,39 +1100,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 </form>
               </div>
               <div className="flex-1 min-h-0">
-                {activeTab === "discover" ? (
-                  <BrowseView
-                    view={view}
-                    currentStation={radio.station}
-                    isPlaying={radio.status === "playing"}
-                    isFavorite={favs.has}
-                    onPlay={handlePlay}
-                    onToggleFav={favs.toggle}
-                    onPrefetch={radio.prefetchStream}
-                    favorites={favs.favorites}
-                    recent={recent.recent}
-                    onSelectGenre={handleSelectGenre}
-                    onSelectCountry={handleSelectCountry}
-                    onGoHome={handleGoHome}
-                    userGenreOrder={usageStats.genreOrder}
-                  />
-                ) : activeTab === "history" ? (
-                  <HistoryGridView
-                    history={songHistory.history}
-                    onRemove={songHistory.remove}
-                    onClear={songHistory.clear}
-                    onToggleFavSong={handleFavSongFromHistory}
-                    isSongFavorite={favSongs.has}
-                    onSelect={setSelectedSong}
-                  />
-                ) : (
-                  <FavoriteSongsView
-                    songs={favSongs.songs}
-                    onRemove={favSongs.remove}
-                    onClear={favSongs.clear}
-                    onSelect={setSelectedSong}
-                  />
-                )}
+                {activeTab === "discover" ? browseViewElement : activeTab === "history" ? historyViewElement : favsViewElement}
               </div>
             </div>
           )}
@@ -1232,63 +1237,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 {/* ── Tab content ── */}
                 <AnimatePresence mode="wait">
                   {activeTab === "discover" ? (
-                    <motion.div
-                      key={viewKey}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex-1 min-h-0"
-                    >
-                      <BrowseView
-                        view={view}
-                        currentStation={radio.station}
-                        isPlaying={radio.status === "playing"}
-                        isFavorite={favs.has}
-                        onPlay={handlePlay}
-                        onToggleFav={favs.toggle}
-                        onPrefetch={radio.prefetchStream}
-                        favorites={favs.favorites}
-                        recent={recent.recent}
-                        onSelectGenre={handleSelectGenre}
-                        onSelectCountry={handleSelectCountry}
-                        onGoHome={handleGoHome}
-                        userGenreOrder={usageStats.genreOrder}
-                      />
+                    <motion.div key={viewKey} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0">
+                      {browseViewElement}
                     </motion.div>
                   ) : activeTab === "history" ? (
-                    <motion.div
-                      key="history-tab"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex-1 min-h-0 overflow-y-auto"
-                    >
-                      <HistoryGridView
-                        history={songHistory.history}
-                        onRemove={songHistory.remove}
-                        onClear={songHistory.clear}
-                        onToggleFavSong={handleFavSongFromHistory}
-                        isSongFavorite={favSongs.has}
-                        onSelect={setSelectedSong}
-                      />
+                    <motion.div key="history-tab" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0 overflow-y-auto">
+                      {historyViewElement}
                     </motion.div>
                   ) : (
-                    <motion.div
-                      key="favorites-tab"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="flex-1 min-h-0 overflow-y-auto"
-                    >
-                      <FavoriteSongsView
-                        songs={favSongs.songs}
-                        onRemove={favSongs.remove}
-                        onClear={favSongs.clear}
-                        onSelect={setSelectedSong}
-                      />
+                    <motion.div key="favorites-tab" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0 overflow-y-auto">
+                      {favsViewElement}
                     </motion.div>
                   )}
                 </AnimatePresence>
