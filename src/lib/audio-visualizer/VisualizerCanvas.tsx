@@ -155,10 +155,6 @@ export function VisualizerCanvas({
   }, [frequencyDataRef, mode, barCount, color]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`pointer-events-none ${className}`}
-      style={{ opacity }}
-    />
+    <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />
   );
 }

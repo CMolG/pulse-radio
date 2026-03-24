@@ -119,11 +119,7 @@ export function CircularRenderer({
 
   return (
     <div className={`relative ${className}`}>
-      <canvas
-        ref={canvasRef}
-        className="size-full"
-        style={{ imageRendering: "auto" }}
-      />
+      <canvas ref={canvasRef} className="size-full" style={{ imageRendering: "auto" }} />
     </div>
   );
 }

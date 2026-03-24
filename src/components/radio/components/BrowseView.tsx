@@ -447,13 +447,9 @@ export default function BrowseView({
   return (
     <div className="col-fill min-w-0 h-full">
       {/* Header */}
-      <div
-        className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}
-      >
+      <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
         <div>
-          <h2
-            className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}
-          >
+          <h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>
             {view.label}
           </h2>
           <p className="text-[12px] text-muted mt-0.5">

@@ -895,10 +895,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   /* ─── Mobile layout: drawer sidebar, overlay lyrics ─── */
   if (layout === "mobile") {
     return (
-      <div
-        ref={containerRef}
-        className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none"
-      >
+      <div ref={containerRef} className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none">
         {parallaxElement}
 
         {/* Single scrollable area — content scrolls behind sticky header */}
@@ -937,10 +934,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           {theaterMode && radio.station ? (
             <div className="h-full flex flex-col">
               <div className="flex-1 min-h-0">
-              <TheaterView
-                {...theaterFullProps}
-                lyricsVariant="mobile"
-              />
+              <TheaterView {...theaterFullProps} lyricsVariant="mobile" />
               </div>
               {/* Spacer for absolute bottom bar */}
               <div className="h-20 shrink-0" />

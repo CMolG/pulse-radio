@@ -289,11 +289,7 @@ export function FerrofluidRenderer({
 
   return (
     <div className={`relative ${className}`}>
-      <canvas
-        ref={canvasRef}
-        className="size-full"
-        style={{ imageRendering: 'auto' }}
-      />
+      <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />
       {/* SVG filter for smoothing the metaballs */}
       <svg className="absolute w-0 h-0" aria-hidden="true">
         <defs>

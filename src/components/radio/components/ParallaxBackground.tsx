@@ -39,10 +39,7 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
           willChange: 'transform',
         }}/>
       {landingMode && (
-        <div
-          className="absolute inset-0"
-          style={RADIAL_OVERLAY}
-        />
+        <div className="absolute inset-0" style={RADIAL_OVERLAY} />
       )}
       {faviconUrl && (
         <div

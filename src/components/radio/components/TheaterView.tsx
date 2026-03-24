@@ -326,17 +326,13 @@ export default function TheaterView({
               {track.artist ? `${track.artist} — ${track.title}` : track.title}
             </p>
           ) : (
-            <p
-              className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}
-            >
+            <p className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}>
               {theaterTags}
             </p>
           )}
 
           {track?.album && (
-            <p
-              className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}
-            >
+            <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}>
               {track.album}
             </p>
           )}
@@ -385,11 +381,7 @@ export default function TheaterView({
 
           {/* ── Lyrics reel inside glass panel ── */}
           {!compact && (
-            <div
-              className={`w-full ${
-                lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"
-              }`}
-            >
+            <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}>
               <LyricsReel
                 lyrics={lyrics ?? null}
                 currentTime={currentTime}
