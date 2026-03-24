@@ -26,9 +26,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
     }
     const host = url.hostname.toLowerCase();
-    if (isPrivateHost(host)) {
-      return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
-    }
+    if (isPrivateHost(host)) return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
   } catch {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
@@ -112,9 +110,7 @@ export async function GET(req: NextRequest) {
     }
 
     // ICY metadata starts at position metaint
-    if (buffer.length <= metaint) {
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
-    }
+    if (buffer.length <= metaint) return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
 
     const metaLength = buffer[metaint] * 16;
     if (metaLength === 0 || buffer.length < metaint + 1 + metaLength) {
@@ -132,9 +128,7 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) {
-      return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
-    }
+    if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }

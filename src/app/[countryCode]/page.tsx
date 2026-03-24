@@ -25,9 +25,7 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
   const resolved = await params;
   const countryCode = normalizeCountryCode(resolved.countryCode);
   const country = COUNTRY_BY_CODE[countryCode];
-  if (!country) {
-    return {};
-  }
+  if (!country) return {};
 
   const title = `Top radio stations in ${country.name} (${countryCode})`;
   const description = `Listen to top internet radio stations in ${country.name}. Discover popular genres, trending stations, and live broadcasts for ${country.name}.`;

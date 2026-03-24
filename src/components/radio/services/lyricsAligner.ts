@@ -151,9 +151,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
 }
 
 export function mapLineToEffectiveTime(lyrics: LyricsData, lineIndex: number): number | undefined {
-  if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) {
-    return undefined;
-  }
+  if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) return undefined;
   return lyrics.lines[lineIndex].time;
 }
 
