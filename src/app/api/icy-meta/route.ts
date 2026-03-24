@@ -131,10 +131,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
     clearTimeout(timeout);
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    if (message.includes('abort')) {
+    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    if (isTimeout) {
       return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     }
+    const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

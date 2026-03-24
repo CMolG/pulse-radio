@@ -74,10 +74,11 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    if (msg.includes('abort')) {
+    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    if (isTimeout) {
       return NextResponse.json({ error: 'LibriVox request timed out' }, { status: 504 });
     }
+    const msg = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 }

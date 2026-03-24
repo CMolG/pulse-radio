@@ -124,13 +124,14 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     if (timeout) clearTimeout(timeout);
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    if (message.includes('abort')) {
+    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    if (isTimeout) {
       return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504,
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 502,
       headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },
