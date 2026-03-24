@@ -54,7 +54,6 @@ export type UseRadioReturn = {
   muted: boolean;
   currentTime: number;
   streamQuality: StreamQuality;
-  streamLatencyMs: number | null;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   play: (station: Station) => void;
   pause: () => void;
@@ -86,7 +85,7 @@ export function useRadio(): UseRadioReturn {
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good');
-  const [streamLatencyMs, setStreamLatencyMs] = useState<number | null>(null);
+
   const lastBufferEndRef = useRef<number>(0);
 
   // Latest volume/muted refs so crossfade intervals read current values
@@ -625,11 +624,8 @@ export function useRadio(): UseRadioReturn {
     prefetchedUrlsRef.current.add(streamUrl);
     // Warm DNS+TCP+TLS with a HEAD request and measure latency
     const controller = new AbortController();
-    const start = performance.now();
     fetch(proxyUrl(streamUrl), { method: 'HEAD', signal: controller.signal })
       .then(() => {
-        const latency = Math.round(performance.now() - start);
-        setStreamLatencyMs(latency);
         clearTimeout(timer);
       })
       .catch(() => { clearTimeout(timer); });
@@ -652,7 +648,6 @@ export function useRadio(): UseRadioReturn {
     muted,
     currentTime,
     streamQuality,
-    streamLatencyMs,
     audioRef,
     play,
     pause,
