@@ -1138,10 +1138,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               eq={eq}
               onPresetChange={setEqPreset}
               statsData={{
-                topStations: usageStats.topStations(),
-                topSongs: usageStats.topSongs(),
-                topArtists: usageStats.topArtists(),
-                topGenres: usageStats.topGenres(),
+                topStations: usageStats.topStations,
+                topSongs: usageStats.topSongs,
+                topArtists: usageStats.topArtists,
+                topGenres: usageStats.topGenres,
                 totalListenMs: usageStats.stats.totalListenMs,
               }}
             />

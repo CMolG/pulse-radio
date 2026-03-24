@@ -180,14 +180,23 @@ export function useStats() {
     dirtyRef.current = true;
   }, []);
 
-  // Derived sorted lists
-  const sortedTop = <T,>(source: Record<string, T>, key: keyof T, limit: number) =>
-    Object.values(source).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, limit);
-
-  const topStations = useCallback((limit = 10) => sortedTop(statsRef.current.stationListenTimes, 'totalMs', limit), []);
-  const topSongs = useCallback((limit = 10) => sortedTop(statsRef.current.songPlayCounts, 'count', limit), []);
-  const topArtists = useCallback((limit = 10) => sortedTop(statsRef.current.artistPlayCounts, 'count', limit), []);
-  const topGenres = useCallback((limit = 10) => sortedTop(statsRef.current.genrePlayCounts, 'count', limit), []);
+  // Derived sorted lists — memoized to avoid re-sorting when data hasn't changed
+  const topStations = useMemo(
+    () => Object.values(stats.stationListenTimes).sort((a, b) => b.totalMs - a.totalMs).slice(0, 10),
+    [stats.stationListenTimes],
+  );
+  const topSongs = useMemo(
+    () => Object.values(stats.songPlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+    [stats.songPlayCounts],
+  );
+  const topArtists = useMemo(
+    () => Object.values(stats.artistPlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+    [stats.artistPlayCounts],
+  );
+  const topGenres = useMemo(
+    () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+    [stats.genrePlayCounts],
+  );
 
   // Stable genre ordering for home reorder — only recomputes when genre data changes,
   // not on every render like the previous genreOrder() function approach.
