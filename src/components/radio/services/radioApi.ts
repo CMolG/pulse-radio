@@ -62,41 +62,25 @@ export async function topStations(limit = 20): Promise<Station[]> {
   return fetchCached(`/stations/topvote?limit=${limit}`, `top-${limit}`);
 }
 
-export async function searchStations(query: string, limit = 30): Promise<Station[]> {
-  const params = new URLSearchParams({
-    name: query,
-    limit: String(limit),
-    order: 'votes',
-    reverse: 'true',
-  });
-  return fetchCached(`/stations/search?${params}`, `search:${query}`);
+function searchBy(filter: Record<string, string>, cacheKey: string, limit: number): Promise<Station[]> {
+  const params = new URLSearchParams({ ...filter, limit: String(limit), order: 'votes', reverse: 'true' });
+  return fetchCached(`/stations/search?${params}`, cacheKey);
 }
 
-export async function stationsByTag(tag: string, limit = 30): Promise<Station[]> {
-  const params = new URLSearchParams({
-    tag: tag.toLowerCase(),
-    limit: String(limit),
-    order: 'votes',
-    reverse: 'true',
-  });
-  return fetchCached(`/stations/search?${params}`, `tag:${tag}`);
+export function searchStations(query: string, limit = 30): Promise<Station[]> {
+  return searchBy({ name: query }, `search:${query}`, limit);
 }
 
-export async function stationsByCountry(country: string, limit = 30): Promise<Station[]> {
-  const params = new URLSearchParams({
-    country: country,
-    limit: String(limit),
-    order: 'votes',
-    reverse: 'true',
-  });
-  return fetchCached(`/stations/search?${params}`, `country:${country}`);
+export function stationsByTag(tag: string, limit = 30): Promise<Station[]> {
+  return searchBy({ tag: tag.toLowerCase() }, `tag:${tag}`, limit);
 }
 
-export async function trendingStations(limit = 20): Promise<Station[]> {
-  return fetchCached(
-    `/stations/topvote?limit=${limit}&order=votes&reverse=true`,
-    `trending-${limit}`,
-  );
+export function stationsByCountry(country: string, limit = 30): Promise<Station[]> {
+  return searchBy({ country }, `country:${country}`, limit);
+}
+
+export function trendingStations(limit = 20): Promise<Station[]> {
+  return topStations(limit);
 }
 
 export async function localStations(limit = 20): Promise<Station[]> {
