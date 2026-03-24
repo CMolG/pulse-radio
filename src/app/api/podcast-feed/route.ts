@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
 /** Lightweight RSS XML parser using regex — no external dependencies */
 function parseRssFeed(xml: string): PodcastEpisode[] {
   const episodes: PodcastEpisode[] = [];
-  const channelArt = extractTag(xml, 'itunes:image', 'href') || extractTagContent(xml, 'image>url') || '';
+  const channelArt = extractTag(xml, 'itunes:image', 'href') || extractNestedContent(xml, 'image', 'url') || '';
 
   const itemRegex = /<item[\s>]([\s\S]*?)<\/item>/gi;
   let match: RegExpExecArray | null;
@@ -130,4 +130,12 @@ function extractTag(xml: string, tag: string, attr: string): string | null {
 
 function stripHtml(text: string): string {
   return text.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+}
+
+/** Extract content of a child tag nested inside a parent tag: <parent>...<child>value</child>...</parent> */
+function extractNestedContent(xml: string, parent: string, child: string): string | null {
+  const parentRegex = new RegExp(`<${parent}[\\s>][\\s\\S]*?<\\/${parent}>`, 'i');
+  const m = parentRegex.exec(xml);
+  if (!m) return null;
+  return extractTagContent(m[0], child);
 }
