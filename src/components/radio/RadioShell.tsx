@@ -16,24 +16,8 @@ import React, {
 import UiImage from "@/components/common/UiImage";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Minimize2,
-  Maximize2,
-  Radio as RadioIcon,
-  Search,
-  Clock,
-  Heart,
-  Star,
-  Settings,
-} from "lucide-react";
-import type {
-  Station,
-  ViewState,
-  BrowseCategory,
-  HistoryEntry,
-  FavoriteSong,
-  SongDetailData,
-} from "./types";
+import { Minimize2, Maximize2, Radio as RadioIcon, Search, Clock, Heart, Star, Settings } from "lucide-react";
+import type { Station, ViewState, BrowseCategory, HistoryEntry, FavoriteSong, SongDetailData } from "./types";
 import { GENRE_LABEL_KEYS } from "./constants";
 import { useRadio } from "./hooks/useRadio";
 import { useEqualizer } from "./hooks/useEqualizer";
@@ -217,9 +201,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const [isOnline, setIsOnline] = useState(() =>
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+  const [isOnline, setIsOnline] = useState(() => typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [toast, setToast] = useState<{ msg: string; icon: "star" | "heart"; key: number } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const duckOrigVolRef = useRef<number | null>(null);
@@ -258,9 +240,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(
-    null,
-  );
+  const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(null);
 
   function mkView(mode: ViewState["mode"], label: string, overrides?: Partial<ViewState>): ViewState {
     return { mode, query: "", tag: "", countryCode: "", countryQueryName: "", label, ...overrides };
@@ -880,10 +860,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </button>
   );
 
-  const emptyStation = useMemo((): Station => ({
-    name: t("discover"), url_resolved: "", stationuuid: "", favicon: "",
-    tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0,
-  }), [t]);
+  const emptyStation = useMemo((): Station => ({ name: t("discover"), url_resolved: "", stationuuid: "", favicon: "", tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0 }), [t]);
 
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
 

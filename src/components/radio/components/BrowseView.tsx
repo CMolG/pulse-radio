@@ -17,13 +17,7 @@ import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES, GENRE_LABEL_KEYS } from "../constants";
-import {
-  searchStations,
-  stationsByTag,
-  stationsByCountry,
-  trendingStations,
-  localStations,
-} from "../services/radioApi";
+import { searchStations, stationsByTag, stationsByCountry, trendingStations, localStations } from "../services/radioApi";
 import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
 import StationCard from "./StationCard";
 import { useLocale } from "@/context/LocaleContext";

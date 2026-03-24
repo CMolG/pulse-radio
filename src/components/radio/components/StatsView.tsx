@@ -7,13 +7,7 @@
 'use client';
 
 import React from 'react';
-import {
-  IoRadioOutline,
-  IoMusicalNotesOutline,
-  IoPersonOutline,
-  IoDiscOutline,
-  IoTimeOutline,
-} from 'react-icons/io5';
+import { IoRadioOutline, IoMusicalNotesOutline, IoPersonOutline, IoDiscOutline, IoTimeOutline } from 'react-icons/io5';
 import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from '../hooks/useStats';
 
 function formatListenTime(ms: number): string {

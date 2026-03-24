@@ -11,9 +11,7 @@ import { Radio, Maximize2 } from "lucide-react";
 import type { Station, NowPlayingTrack } from "../types";
 import AnimatedBars from "./AnimatedBars";
 import UiImage from "@/components/common/UiImage";
-import {
-  ParallaxAlbumBackground,
-} from "@/lib/audio-visualizer";
+import { ParallaxAlbumBackground } from "@/lib/audio-visualizer";
 import { stationInitials } from "../utils/formatUtils";
 
 type Props = {
