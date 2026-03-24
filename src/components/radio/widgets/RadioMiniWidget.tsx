@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Radio, Play, Pause, SkipForward, Heart } from 'lucide-react';
 import type { Station, WidgetPlaybackState } from '../types';
 import { STORAGE_KEYS } from '../constants';
@@ -17,7 +17,7 @@ function sendCommand(action: string, station?: Station) {
   window.dispatchEvent(new CustomEvent('radio-command', { detail: { action, station } }));
 }
 
-export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
+function RadioMiniWidget({ preview }: { preview?: boolean }) {
   const [state, setState] = useState<WidgetPlaybackState | null>(null);
   const [favorites, setFavorites] = useState<Station[]>([]);
 
@@ -57,6 +57,8 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
     return () => clearInterval(iv);
   }, [preview]);
 
+  const displayFavs = useMemo(() => favorites.slice(0, 3), [favorites]);
+
   const isPlaying = state?.status === 'playing';
   const station = state?.station;
   const track = state?.track;
@@ -85,7 +87,7 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
         {/* Favorite station pills */}
         {favorites.length > 0 && (
           <div className="flex-center-row gap-1 mb-1.5 flex-wrap">
-            {favorites.slice(0, 3).map(s => (
+            {displayFavs.map(s => (
  <button key={s.stationuuid} onClick={() => sendCommand('play', s)}
                 aria-label={`Play ${s.name}`}
                 className="flex-row-1 pad-sm-full bg-surface-2 hover-4">
@@ -108,3 +110,5 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
             <SkipForward size={14} />
           </button></div></div></div>);
 }
+
+export default React.memo(RadioMiniWidget);

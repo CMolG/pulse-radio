@@ -6,13 +6,13 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Mic2 } from 'lucide-react';
 import type { WidgetPlaybackState, LyricsData } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage } from '@/lib/storageUtils';
 
-export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
+function LyricsCardWidget({ preview }: { preview?: boolean }) {
   const [state, setState] = useState<WidgetPlaybackState | null>(null);
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
 
@@ -57,8 +57,10 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
 
   const track = state?.track;
   const lines = lyrics?.lines ?? [];
-  const mid = Math.floor(lines.length / 2);
-  const visibleLines = lines.slice(Math.max(0, mid - 1), mid + 2);
+  const visibleLines = useMemo(() => {
+    const mid = Math.floor(lines.length / 2);
+    return lines.slice(Math.max(0, mid - 1), mid + 2);
+  }, [lines]);
 
   return (<div
       className="col-full bg-sys-surface/80 backdrop-blur-xl card-lg p-3 select-none overflow-hidden cursor-pointer"
@@ -91,3 +93,5 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
         )}
       </div></div>);
 }
+
+export default React.memo(LyricsCardWidget);
