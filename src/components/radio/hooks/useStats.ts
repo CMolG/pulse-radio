@@ -60,22 +60,14 @@ const EMPTY_STATS: UsageStats = {
 
 /** Keep only the top N entries by a numeric field, dropping the lowest */
 function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
-  const keys = Object.keys(map);
-  if (keys.length <= max) return map;
-  // Partial sort: find the Nth largest value, then keep entries >= that threshold
-  const vals = new Float64Array(keys.length);
-  for (let i = 0; i < keys.length; i++) vals[i] = map[keys[i]][key] as number;
-  vals.sort(); // ascending typed-array sort (native, much faster than Array.sort with comparator)
-  const threshold = vals[keys.length - max];
-  const pruned: Record<string, T> = {};
-  let count = 0;
-  for (let i = 0; i < keys.length && count < max; i++) {
-    if ((map[keys[i]][key] as number) >= threshold) {
-      pruned[keys[i]] = map[keys[i]];
-      count++;
-    }
-  }
-  return pruned;
+  const entries = Object.entries(map);
+  if (entries.length <= max) return map;
+  return Object.fromEntries(entries.sort((a, b) => (b[1][key] as number) - (a[1][key] as number)).slice(0, max));
+}
+
+/** Return top N values from a record, sorted descending by a numeric field */
+function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
+  return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n);
 }
 
 export function useStats() {
@@ -180,31 +172,15 @@ export function useStats() {
     dirtyRef.current = true;
   }, []);
 
-  // Derived sorted lists — memoized to avoid re-sorting when data hasn't changed
-  const topStations = useMemo(
-    () => Object.values(stats.stationListenTimes).sort((a, b) => b.totalMs - a.totalMs).slice(0, 10),
-    [stats.stationListenTimes],
-  );
-  const topSongs = useMemo(
-    () => Object.values(stats.songPlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
-    [stats.songPlayCounts],
-  );
-  const topArtists = useMemo(
-    () => Object.values(stats.artistPlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
-    [stats.artistPlayCounts],
-  );
-  const topGenres = useMemo(
-    () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+  const topStations = useMemo(() => topN(stats.stationListenTimes, 'totalMs', 10), [stats.stationListenTimes]);
+  const topSongs = useMemo(() => topN(stats.songPlayCounts, 'count', 10), [stats.songPlayCounts]);
+  const topArtists = useMemo(() => topN(stats.artistPlayCounts, 'count', 10), [stats.artistPlayCounts]);
+  const sortedGenres = useMemo(
+    () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count),
     [stats.genrePlayCounts],
   );
-
-  // Stable genre ordering for home reorder — only recomputes when genre data changes,
-  // not on every render like the previous genreOrder() function approach.
-  const genreOrder = useMemo(() => {
-    return Object.values(stats.genrePlayCounts)
-      .sort((a, b) => b.count - a.count)
-      .map(g => g.genre);
-  }, [stats.genrePlayCounts]);
+  const topGenres = useMemo(() => sortedGenres.slice(0, 10), [sortedGenres]);
+  const genreOrder = useMemo(() => sortedGenres.map(g => g.genre), [sortedGenres]);
 
   // Update artwork/genre on an existing song entry without incrementing counts.
   // Used when album metadata arrives after the initial recordSongPlay call.
@@ -223,13 +199,13 @@ export function useStats() {
 
       if (!needsArtwork && !needsGenre) return prev;
 
-      const next: UsageStats = { ...prev };
-      if (needsArtwork || needsGenre) {
-        next.songPlayCounts = {
+      const next: UsageStats = {
+        ...prev,
+        songPlayCounts: {
           ...prev.songPlayCounts,
           [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
-        };
-      }
+        },
+      };
       if (needsGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
