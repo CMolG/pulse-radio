@@ -241,7 +241,6 @@ export function useRadio(): UseRadioReturn {
 
     const onPause = () => {
       if (userPausedRef.current) {
-        userPausedRef.current = false;
         setStatus('paused');
       } else if (station) {
         // OS/browser interrupted playback (screen lock, phone call, etc.)
