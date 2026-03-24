@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   IoRadioOutline,
@@ -134,7 +134,6 @@ function OnboardingModal() {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
   const totalSteps = STEPS.length + 1; // +1 for PWA step
-  const dotIndices = useMemo(() => Array.from({ length: totalSteps }), [totalSteps]);
 
   useEffect(() => {
     const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
@@ -148,15 +147,6 @@ function OnboardingModal() {
     setShow(false);
     saveToStorage(ONBOARDING_KEY, true);
   }, []);
-
-  const handleNext = () => {
-    if (step < totalSteps - 1) setStep(s => s + 1);
-    else handleClose();
-  };
-
-  const handlePrev = () => {
-    if (step > 0) setStep(s => s - 1);
-  };
 
   if (!show) return null;
 
@@ -213,7 +203,7 @@ function OnboardingModal() {
             <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */}
               <div className="flex justify-center gap-2">
-                {dotIndices.map((_, i) => (
+                {Array.from({ length: totalSteps }, (_, i) => (
                   <button
                     key={i}
                     onClick={() => setStep(i)}
@@ -227,23 +217,14 @@ function OnboardingModal() {
 
               {/* Buttons */}
               <div className="flex items-center justify-between gap-3">
-                {step > 0 ? (
-                  <button
-                    onClick={handlePrev}
-                    className="px-5 py-2.5 rounded-xl text-[14px] font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    Back
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleClose}
-                    className="px-5 py-2.5 rounded-xl text-[14px] font-medium text-white/40 hover:text-white/60 transition-colors"
-                  >
-                    Skip
-                  </button>
-                )}
                 <button
-                  onClick={handleNext}
+                  onClick={step > 0 ? () => setStep(s => s - 1) : handleClose}
+                  className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
+                >
+                  {step > 0 ? 'Back' : 'Skip'}
+                </button>
+                <button
+                  onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
                 >
                   {isLast ? "Let's Go!" : 'Next'}
