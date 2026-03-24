@@ -73,10 +73,6 @@ export type EqPreset = {
   gains: number[];
 };
 
-export type FavoriteStation = Station;
-
-export type RecentStation = Station;
-
 export type SidebarSection = 'favorites' | 'recent' | 'browse';
 
 export type BrowseCategory = {
