@@ -33,8 +33,18 @@ export async function fetchIcyMeta(
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  const onParentAbort = () => controller.abort();
-  signal?.addEventListener('abort', onParentAbort);
+  if (signal) {
+    if (signal.aborted) {
+      clearTimeout(timeout);
+      controller.abort();
+    } else {
+      const onParentAbort = () => controller.abort();
+      signal.addEventListener('abort', onParentAbort, { once: true });
+      controller.signal.addEventListener('abort', () => {
+        signal.removeEventListener('abort', onParentAbort);
+      }, { once: true });
+    }
+  }
 
   try {
     const res = await fetch(
@@ -49,7 +59,6 @@ export async function fetchIcyMeta(
     return { streamTitle: null, icyBr: null };
   } finally {
     clearTimeout(timeout);
-    signal?.removeEventListener('abort', onParentAbort);
   }
 }
 
