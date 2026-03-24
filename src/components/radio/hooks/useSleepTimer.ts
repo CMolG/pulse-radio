@@ -45,7 +45,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       savedVolumeRef.current = null;
     }
     setIsFading(false);
-  }, [audioRef]);
+  }, []);
 
   const clear = useCallback(() => {
     if (timerRef.current) {
@@ -85,7 +85,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         fadeTimerRef.current = null;
       }
     }, 200);
-  }, [audioRef]);
+  }, []);
 
   const start = useCallback((minutes: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -110,7 +110,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         }
       }
     }, 1000); // check every second for smooth fade timing
-  }, [clear, stopFade, startFade, audioRef]);
+  }, [clear, stopFade, startFade]);
 
   const cycle = useCallback(() => {
     if (remainingMin === null) {
