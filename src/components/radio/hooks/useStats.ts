@@ -27,6 +27,7 @@ export interface SongPlayCount {
   artist: string;
   count: number;
   artworkUrl?: string;
+  genre?: string;
 }
 
 export interface ArtistPlayCount {
@@ -162,11 +163,12 @@ export function useStats() {
       const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
       const artistEntry = prev.artistPlayCounts[primary] ?? { name: primary, count: 0 };
 
+      const normalizedGenre = genre ? genre.toLowerCase().trim() : undefined;
       const next: UsageStats = {
         ...prev,
         songPlayCounts: {
           ...prev.songPlayCounts,
-          [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl },
+          [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         },
         artistPlayCounts: {
           ...prev.artistPlayCounts,
@@ -174,8 +176,7 @@ export function useStats() {
         },
       };
 
-      if (genre) {
-        const normalizedGenre = genre.toLowerCase().trim();
+      if (normalizedGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
           ...prev.genrePlayCounts,
@@ -232,21 +233,23 @@ export function useStats() {
 
       const needsArtwork = artworkUrl && songEntry.artworkUrl !== artworkUrl;
       const normalizedGenre = genre ? genre.toLowerCase().trim() : '';
-      const needsGenre = normalizedGenre && !prev.genrePlayCounts[normalizedGenre];
+      // Count genre if this song didn't already have its genre recorded
+      const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre;
 
       if (!needsArtwork && !needsGenre) return prev;
 
       const next: UsageStats = { ...prev };
-      if (needsArtwork) {
+      if (needsArtwork || needsGenre) {
         next.songPlayCounts = {
           ...prev.songPlayCounts,
-          [key]: { ...songEntry, artworkUrl },
+          [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
         };
       }
       if (needsGenre) {
+        const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
           ...prev.genrePlayCounts,
-          [normalizedGenre]: { genre: normalizedGenre, count: 1 },
+          [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
         };
       }
       return next;
