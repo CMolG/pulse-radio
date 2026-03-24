@@ -181,8 +181,16 @@ export function useStationMeta(
       intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     }
 
+    // When the tab returns from background, poll immediately so the user
+    // doesn't see stale metadata for up to POLL_INTERVAL_MS.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && isPlaying) poll();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      document.removeEventListener('visibilitychange', onVisible);
       abortController.abort();
     };
   }, [station, isPlaying]);
