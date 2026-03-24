@@ -70,7 +70,9 @@ export async function GET(req: NextRequest) {
       chapters: parseInt(b.num_sections, 10) || 0,
     }));
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ results }, {
+      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' },
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     if (msg.includes('abort')) {

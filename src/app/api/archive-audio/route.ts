@@ -106,6 +106,8 @@ export async function GET(req: NextRequest) {
         { id: 'librivoxaudio', label: 'LibriVox Audiobooks' },
         { id: 'audio_music', label: 'Music' },
       ],
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' },
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
