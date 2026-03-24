@@ -17,7 +17,21 @@ type Props = {
   landingMode?: boolean;
 };
 
-export default function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode = false }: Props) {
+const BF_STYLE: React.CSSProperties = {
+  WebkitBackfaceVisibility: 'hidden',
+  backfaceVisibility: 'hidden',
+};
+const BLUR_STYLE: React.CSSProperties = {
+  filter: 'blur(64px)',
+  WebkitFilter: 'blur(64px)',
+  transform: 'translate3d(0,0,0)',
+  WebkitTransform: 'translate3d(0,0,0)',
+};
+const RADIAL_OVERLAY: React.CSSProperties = {
+  background: 'radial-gradient(140% 120% at 50% 40%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%)',
+};
+
+function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode = false }: Props) {
   const { offset, containerRef, gradient } = useParallaxBg(genre, audioAmplitude);
 
   const baseGradient = landingMode
@@ -37,9 +51,7 @@ export default function ParallaxBackground({ faviconUrl, genre, audioAmplitude =
       {landingMode && (
         <div
           className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(140% 120% at 50% 40%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%)',
-          }}
+          style={RADIAL_OVERLAY}
         />
       )}
       {faviconUrl && (
@@ -51,21 +63,18 @@ export default function ParallaxBackground({ faviconUrl, genre, audioAmplitude =
             willChange: 'transform',
           }}>
           {/* Separate blur layer for iOS GPU compositing */}
-          <div className="absolute inset-0" style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}>
+          <div className="absolute inset-0" style={BF_STYLE}>
             <UiImage
               src={faviconUrl}
               alt=""
               className={`object-cover ${landingMode ? 'opacity-10' : 'opacity-20'}`}
               sizes="100vw"
-              style={{
-                filter: 'blur(64px)',
-                WebkitFilter: 'blur(64px)',
-                transform: 'translate3d(0,0,0)',
-                WebkitTransform: 'translate3d(0,0,0)',
-              }}
+              style={BLUR_STYLE}
             />
           </div>
         </div>
       )}
     </div>);
 }
+
+export default React.memo(ParallaxBackground);
