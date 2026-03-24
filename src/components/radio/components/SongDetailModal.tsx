@@ -75,6 +75,23 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       .trim() ||
     '';
 
+  const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
+  const lyricsSkeleton = (n: number) => (
+    <div className="space-y-2 animate-pulse">
+      {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}
+    </div>
+  );
+  const lyricsEmpty = (
+    <div>
+      <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
+      {lyricsError && (
+        <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
+          Retry
+        </button>
+      )}
+    </div>
+  );
+
   // Close on Escape
   useEffect(() => {
     if (!song) return;
@@ -392,15 +409,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   Lyrics (plain)
                 </h3>
 
-                {lyricsLoading && (
-                  <div className="space-y-2 animate-pulse">
-                    <div className="h-2.5 bg-surface-3 rounded w-full" />
-                    <div className="h-2.5 bg-surface-3 rounded w-11/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-10/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-9/12" />
-                  </div>
-                )}
-
+                {lyricsLoading && lyricsSkeleton(4)}
                 {!lyricsLoading && plainLyrics && (
                   <div className="max-h-52 overflow-y-auto rounded-xl bg-surface-3/50 border border-border-subtle p-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
                     <pre className="whitespace-pre-wrap break-words font-sans text-[12px] leading-relaxed text-secondary/90">
@@ -408,17 +417,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     </pre>
                   </div>
                 )}
-
-                {!lyricsLoading && !plainLyrics && (
-                  <div>
-                    <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
-                    {lyricsError && (
-                      <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
-                        Retry
-                      </button>
-                    )}
-                  </div>
-                )}
+                {!lyricsLoading && !plainLyrics && lyricsEmpty}
               </div>
 
               {/* Divider (mobile) */}
@@ -464,34 +463,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
               </div>
 
               <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-                {lyricsLoading && (
-                  <div className="space-y-2 animate-pulse">
-                    <div className="h-2.5 bg-surface-3 rounded w-full" />
-                    <div className="h-2.5 bg-surface-3 rounded w-11/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-10/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-9/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-8/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-10/12" />
-                    <div className="h-2.5 bg-surface-3 rounded w-7/12" />
-                  </div>
-                )}
-
+                {lyricsLoading && lyricsSkeleton(7)}
                 {!lyricsLoading && plainLyrics && (
                   <pre className="whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed text-secondary/90">
                     {plainLyrics}
                   </pre>
                 )}
-
-                {!lyricsLoading && !plainLyrics && (
-                  <div>
-                    <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
-                    {lyricsError && (
-                      <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
-                        Retry
-                      </button>
-                    )}
-                  </div>
-                )}
+                {!lyricsLoading && !plainLyrics && lyricsEmpty}
               </div>
             </div>
           </motion.div>
