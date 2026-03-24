@@ -898,6 +898,60 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     { id: "favorites" as const, label: t("favorites"), icon: <Heart size={size} /> },
   ];
 
+  const syncMode = realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' as const : 'time' as const;
+
+  const theaterBaseProps = {
+    track: enrichedTrack,
+    isPlaying: radio.status === "playing",
+    frequencyDataRef: analyser.frequencyDataRef,
+    artworkUrl: albumArt.artworkUrl,
+    icyBitrate,
+    onFavSong: enrichedTrack?.title ? handleFavSong : undefined,
+    isSongLiked,
+    lyrics,
+    currentTime: effectiveCurrentTime,
+    activeLineOverride: realtimeLyrics?.activeLineIndex,
+    syncConfidence: realtimeLyrics?.confidence,
+    syncMode,
+  };
+
+  const theaterFullProps = {
+    ...theaterBaseProps,
+    station: radio.station!,
+    onBack: () => setTheaterMode(false),
+    onToggleFav: radio.station ? handleToggleFav : undefined,
+    isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false,
+  };
+
+  const nowPlayingBaseProps = {
+    station: radio.station,
+    track: enrichedTrack,
+    status: radio.status,
+    volume: radio.volume,
+    muted: radio.muted,
+    frequencyDataRef: analyser.frequencyDataRef,
+    icyBitrate,
+    streamQuality: radio.streamQuality,
+    onTogglePlay: radio.togglePlay,
+    onSetVolume: radio.setVolume,
+    onToggleMute: radio.toggleMute,
+    sleepTimerMin: sleepTimer.remainingMin,
+    onCycleSleepTimer: sleepTimer.cycle,
+  };
+
+  const nowPlayingFullProps = {
+    ...nowPlayingBaseProps,
+    onToggleEq: () => setShowEq((s) => !s),
+    onToggleTheater: () => setTheaterMode(true),
+    onToggleFav: radio.station ? handleToggleFav : undefined,
+    onFavSong: enrichedTrack?.title ? handleFavSong : undefined,
+    isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false,
+    songLiked: isSongLiked,
+    eqPresetActive: eqPreset !== null,
+    showEq,
+    theaterMode,
+  };
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -912,6 +966,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         />
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
           <TheaterView
+            {...theaterBaseProps}
             station={
               radio.station ?? {
                 name: t("discover"),
@@ -926,39 +981,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 votes: 0,
               }
             }
-            track={enrichedTrack}
-            isPlaying={radio.status === "playing"}
-            frequencyDataRef={analyser.frequencyDataRef}
-            artworkUrl={albumArt.artworkUrl}
-            icyBitrate={icyBitrate}
             onBack={() => {}}
-            onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
-            isSongLiked={isSongLiked}
-            lyrics={lyrics}
-            currentTime={effectiveCurrentTime}
-            activeLineOverride={realtimeLyrics?.activeLineIndex}
-            syncConfidence={realtimeLyrics?.confidence}
-            syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
             compact
           />
         </div>
         <NowPlayingBar
-          station={radio.station}
-          track={enrichedTrack}
-          status={radio.status}
-          volume={radio.volume}
-          muted={radio.muted}
-          frequencyDataRef={analyser.frequencyDataRef}
-          icyBitrate={icyBitrate}
-          streamQuality={radio.streamQuality}
-          onTogglePlay={radio.togglePlay}
-          onSetVolume={radio.setVolume}
-          onToggleMute={radio.toggleMute}
+          {...nowPlayingBaseProps}
           onToggleEq={() => {}}
           showEq={false}
           theaterMode={true}
-          sleepTimerMin={sleepTimer.remainingMin}
-          onCycleSleepTimer={sleepTimer.cycle}
           compact
         />
         {songDetailModal}
@@ -1025,22 +1056,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             <div className="h-full flex flex-col">
               <div className="flex-1 min-h-0">
               <TheaterView
-                station={radio.station}
-                track={enrichedTrack}
-                isPlaying={radio.status === "playing"}
-                frequencyDataRef={analyser.frequencyDataRef}
-                artworkUrl={albumArt.artworkUrl}
-                icyBitrate={icyBitrate}
-                onBack={() => setTheaterMode(false)}
-                onToggleFav={radio.station ? handleToggleFav : undefined}
-                isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
-                onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
-                isSongLiked={isSongLiked}
-                lyrics={lyrics}
-                currentTime={effectiveCurrentTime}
-                activeLineOverride={realtimeLyrics?.activeLineIndex}
-                syncConfidence={realtimeLyrics?.confidence}
-                syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
+                {...theaterFullProps}
                 lyricsVariant="mobile"
               />
               </div>
@@ -1156,31 +1172,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
-          <NowPlayingBar
-            station={radio.station}
-            track={enrichedTrack}
-            status={radio.status}
-            volume={radio.volume}
-            muted={radio.muted}
-            frequencyDataRef={analyser.frequencyDataRef}
-            icyBitrate={icyBitrate}
-            streamQuality={radio.streamQuality}
-            onTogglePlay={radio.togglePlay}
-            onSetVolume={radio.setVolume}
-            onToggleMute={radio.toggleMute}
-            onToggleEq={() => setShowEq((s) => !s)}
-            onToggleTheater={() => setTheaterMode(true)}
-            onToggleFav={radio.station ? handleToggleFav : undefined}
-            onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
-            isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
-            songLiked={isSongLiked}
-            eqPresetActive={eqPreset !== null}
-            showEq={showEq}
-            theaterMode={theaterMode}
-            sleepTimerMin={sleepTimer.remainingMin}
-            onCycleSleepTimer={sleepTimer.cycle}
-            compact
-          />
+          <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
         {songDetailModal}
         {shortcutsOverlay}
@@ -1215,25 +1207,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 transition={{ duration: 0.3 }}
                 className="flex-1 min-h-0"
               >
-                <TheaterView
-                  station={radio.station}
-                  track={enrichedTrack}
-                  isPlaying={radio.status === "playing"}
-                  frequencyDataRef={analyser.frequencyDataRef}
-                  artworkUrl={albumArt.artworkUrl}
-                  icyBitrate={icyBitrate}
-                  onBack={() => setTheaterMode(false)}
-                  onToggleFav={radio.station ? handleToggleFav : undefined}
-                  isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
-                  onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
-                  isSongLiked={isSongLiked}
-                  lyrics={lyrics}
-                  currentTime={effectiveCurrentTime}
-                  activeLineOverride={realtimeLyrics?.activeLineIndex}
-                  syncConfidence={realtimeLyrics?.confidence}
-                  syncMode={realtimeLyrics?.status === 'listening' || realtimeLyrics?.status === 'recovering' ? 'realtime' : 'time'}
-                  lyricsVariant="desktop"
-                />
+                <TheaterView {...theaterFullProps} lyricsVariant="desktop" />
               </motion.div>
             ) : !miniMode ? (
               <React.Fragment key="browse">
@@ -1426,30 +1400,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           </button>
         </div>
 
-        <NowPlayingBar
-          station={radio.station}
-          track={enrichedTrack}
-          status={radio.status}
-          volume={radio.volume}
-          muted={radio.muted}
-          frequencyDataRef={analyser.frequencyDataRef}
-          icyBitrate={icyBitrate}
-          streamQuality={radio.streamQuality}
-          onTogglePlay={radio.togglePlay}
-          onSetVolume={radio.setVolume}
-          onToggleMute={radio.toggleMute}
-          onToggleEq={() => setShowEq((s) => !s)}
-          onToggleTheater={() => setTheaterMode(true)}
-          onToggleFav={radio.station ? handleToggleFav : undefined}
-          onFavSong={enrichedTrack?.title ? handleFavSong : undefined}
-          isFavorite={radio.station ? favs.has(radio.station.stationuuid) : false}
-          songLiked={isSongLiked}
-          eqPresetActive={eqPreset !== null}
-          showEq={showEq}
-          theaterMode={theaterMode}
-          sleepTimerMin={sleepTimer.remainingMin}
-          onCycleSleepTimer={sleepTimer.cycle}
-        />
+        <NowPlayingBar {...nowPlayingFullProps} />
       </div>
       {songDetailModal}
       {shortcutsOverlay}
