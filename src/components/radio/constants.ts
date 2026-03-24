@@ -88,11 +88,18 @@ export const EQ_PRESETS: EqPreset[] = [
   { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },
 ];
 
+const _flagCache = new Map<string, string>();
+
 export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐';
+  const cached = _flagCache.get(code);
+  if (cached) return cached;
   const upper = code.toUpperCase();
   if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
-  return String.fromCodePoint(
-    ...upper.split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+  const flag = String.fromCodePoint(
+    0x1F1E6 + upper.charCodeAt(0) - 65,
+    0x1F1E6 + upper.charCodeAt(1) - 65,
   );
+  _flagCache.set(code, flag);
+  return flag;
 }
