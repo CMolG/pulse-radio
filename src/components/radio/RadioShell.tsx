@@ -218,15 +218,27 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   );
   const [toast, setToast] = useState<{ msg: string; icon: "star" | "heart"; key: number } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const duckOrigVolRef = useRef<number | null>(null);
+  const duckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback((msg: string, icon: "star" | "heart") => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast({ msg, icon, key: Date.now() });
     // Brief audio duck: lower volume for 400ms then restore
     const audio = radio.audioRef.current;
     if (audio && !audio.paused) {
-      const origVol = audio.volume;
-      audio.volume = origVol * 0.4;
-      setTimeout(() => { if (audio) audio.volume = origVol; }, 400);
+      if (duckTimerRef.current) clearTimeout(duckTimerRef.current);
+      // Only capture pre-duck volume if not already ducking
+      if (duckOrigVolRef.current === null) {
+        duckOrigVolRef.current = audio.volume;
+      }
+      audio.volume = duckOrigVolRef.current * 0.4;
+      duckTimerRef.current = setTimeout(() => {
+        if (audio && duckOrigVolRef.current !== null) {
+          audio.volume = duckOrigVolRef.current;
+        }
+        duckOrigVolRef.current = null;
+        duckTimerRef.current = null;
+      }, 400);
     }
     toastTimerRef.current = setTimeout(() => setToast(null), 2500);
   }, [radio.audioRef]);
