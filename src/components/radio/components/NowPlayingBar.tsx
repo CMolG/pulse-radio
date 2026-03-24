@@ -78,10 +78,7 @@ function NowPlayingBar({
 
   // Reset error state when cover URL changes so new artwork gets a chance to load
   const [prevBarCoverUrl, setPrevBarCoverUrl] = useState(coverUrlForReset);
-  if (coverUrlForReset !== prevBarCoverUrl) {
-    setPrevBarCoverUrl(coverUrlForReset);
-    setImgError(false);
-  }
+  if (coverUrlForReset !== prevBarCoverUrl) { setPrevBarCoverUrl(coverUrlForReset); setImgError(false); }
 
   const coverUrl = track?.artworkUrl ?? station?.favicon;
   const showFallback = !coverUrl || imgError;

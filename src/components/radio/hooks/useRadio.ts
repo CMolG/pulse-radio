@@ -118,10 +118,7 @@ export function useRadio(): UseRadioReturn {
     bc.onmessage = (e: MessageEvent) => {
       if (e.data?.type === 'playing' && e.data?.tabId !== tabIdRef.current) {
         const audio = audioRef.current;
-        if (audio && !audio.paused) {
-          userPausedRef.current = true;
-          audio.pause();
-        }
+        if (audio && !audio.paused) { userPausedRef.current = true; audio.pause(); }
         // Cancel any in-progress crossfade so it doesn't restart playback
         // after the cross-tab pause. Without this, the crossfade completion
         // calls startPlayback() and overrides the pause from the other tab.
@@ -262,10 +259,7 @@ export function useRadio(): UseRadioReturn {
 
     const onPause = () => {
       // Case 1: user explicitly paused — just show paused state
-      if (userPausedRef.current) {
-        setStatus('paused');
-        return;
-      }
+      if (userPausedRef.current) { setStatus('paused'); return; }
       // Case 2: pause was caused by startPlayback assigning audio.src — ignore it.
       // The browser fires a synchronous 'pause' event when src changes; we must not
       // treat this as an OS interruption and queue a spurious reconnect.
@@ -419,10 +413,7 @@ export function useRadio(): UseRadioReturn {
 
     bufferCheckRef.current = setInterval(() => {
       // Update stream quality based on network and buffer state
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        setStreamQuality('offline');
-        return;
-      }
+      if (typeof navigator !== 'undefined' && !navigator.onLine) { setStreamQuality('offline'); return; }
 
       // Use Network Information API to detect poor connections proactively
       const conn = typeof navigator !== 'undefined'
@@ -430,10 +421,7 @@ export function useRadio(): UseRadioReturn {
         : undefined;
       if (conn?.saveData) setStreamQuality('fair');
 
-      if (userPausedRef.current || audio.paused || !station) {
-        lowBufferStreak = 0;
-        return;
-      }
+      if (userPausedRef.current || audio.paused || !station) { lowBufferStreak = 0; return; }
       // Skip check when tab is hidden — browser throttles network
       if (document.hidden) return;
       // Skip quality/reconnect logic during an active reconnect to avoid cascade
@@ -444,10 +432,7 @@ export function useRadio(): UseRadioReturn {
         // No buffer ranges at all while playing — treat as underrun
         lowBufferStreak++;
         setStreamQuality('poor');
-        if (lowBufferStreak >= 2) {
-          lowBufferStreak = 0;
-          reconnect(300);
-        }
+        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
         return;
       }
 
@@ -481,10 +466,7 @@ export function useRadio(): UseRadioReturn {
         lowBufferStreak++;
         // Require 2 consecutive low-buffer readings to avoid false positives
         // from momentary dips during normal streaming
-        if (lowBufferStreak >= 2) {
-          lowBufferStreak = 0;
-          reconnect(300);
-        }
+        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
       } else {
         lowBufferStreak = 0;
       }
@@ -518,10 +500,7 @@ export function useRadio(): UseRadioReturn {
   }, [volume, muted]);
 
   const play = useCallback((s: Station) => {
-    if (!isValidStreamUrl(s.url_resolved)) {
-      setStatus('error');
-      return;
-    }
+    if (!isValidStreamUrl(s.url_resolved)) { setStatus('error'); return; }
 
     const audio = getAudio();
     // Resume Web Audio context from user gesture (required on mobile)
@@ -611,10 +590,7 @@ export function useRadio(): UseRadioReturn {
     clearTimer(bufferCheckRef);
 
     const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.src = '';
-    }
+    if (audio) { audio.pause(); audio.src = ''; }
     setStation(null);
     setStatus('idle');
     setStreamQuality('good');

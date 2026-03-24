@@ -103,10 +103,7 @@ export default function LyricsReel({
       const lineCenter = rect.top + rect.height / 2;
       const distance = Math.abs(centerY - lineCenter);
 
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestIdx = index;
-      }
+      if (distance < closestDistance) { closestDistance = distance; closestIdx = index; }
     });
 
     setFocusedIdx((prev) => (prev === closestIdx ? prev : closestIdx));

@@ -55,10 +55,7 @@ export function VisualizerCanvas({
     const draw = () => {
       const canvas = canvasRef.current;
       const frequencyData = frequencyDataRef?.current;
-      if (!canvas || !frequencyData) {
-        frameRef.current = requestAnimationFrame(draw);
-        return;
-      }
+      if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; }
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
@@ -75,10 +72,7 @@ export function VisualizerCanvas({
       const resolvedColor = resolvedColorRef.current;
 
       const { width, height } = sizeRef.current;
-      if (width < 1 || height < 1) {
-        frameRef.current = requestAnimationFrame(draw);
-        return;
-      }
+      if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
       const dpr = devicePixelRatio;
       const targetW = Math.round(width * dpr);
       const targetH = Math.round(height * dpr);

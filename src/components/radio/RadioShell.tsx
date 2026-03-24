@@ -145,10 +145,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const lastTickRef = useRef(Date.now());
   const { tickListenTime } = usageStats;
   useEffect(() => {
-    if (radio.status !== 'playing' || !radio.station) {
-      lastTickRef.current = Date.now();
-      return;
-    }
+    if (radio.status !== 'playing' || !radio.station) { lastTickRef.current = Date.now(); return; }
     const interval = setInterval(() => {
       const now = Date.now();
       const delta = now - lastTickRef.current;
@@ -267,10 +264,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const onPopState = () => {
       const segment = window.location.pathname.replace(/^\//, "").toUpperCase();
 
-      if (!segment) {
-        resetNav(mkView("top", t("topStations")));
-        return;
-      }
+      if (!segment) { resetNav(mkView("top", t("topStations"))); return; }
 
       if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     };
@@ -364,10 +358,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (radio.status === 'error') {
       if (stationQueue.hasNext) {
         const next = stationQueue.skipToNext();
-        if (next) {
-          radio.play(next);
-          recent.add(next);
-        }
+        if (next) { radio.play(next); recent.add(next); }
       } else if (radio.station) {
         // No queue entries — find a similar station by genre tag
         import('./services/radioApi').then(({ similarStations }) => {
@@ -391,10 +382,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const next = sq.skipToNext();
       if (next) { handlePlay(next); return; }
     }
-    if (r.station) {
-      const next = f.playNext(r.station.stationuuid);
-      if (next) handlePlay(next);
-    }
+    if (r.station) { const next = f.playNext(r.station.stationuuid); if (next) handlePlay(next); }
   }, [handlePlay]);
 
   const handleSkipPrev = useCallback(() => {
@@ -403,10 +391,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const prev = sq.skipToPrev();
       if (prev) { handlePlay(prev); return; }
     }
-    if (r.station) {
-      const prev = f.playPrev(r.station.stationuuid);
-      if (prev) handlePlay(prev);
-    }
+    if (r.station) { const prev = f.playPrev(r.station.stationuuid); if (prev) handlePlay(prev); }
   }, [handlePlay]);
 
   useMediaSession({

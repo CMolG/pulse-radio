@@ -107,10 +107,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   for (let i = start; i <= end; i++) {
     const lineTokens = tokenize(lyrics.lines[i]?.text ?? '');
     const score = scoreLine(lineTokens, hypoTokens);
-    if (score > bestScore) {
-      bestScore = score;
-      bestIndex = i;
-    }
+    if (score > bestScore) { bestScore = score; bestIndex = i; }
   }
 
   if (bestIndex < 0 || bestScore < policy.candidateMinScore) {

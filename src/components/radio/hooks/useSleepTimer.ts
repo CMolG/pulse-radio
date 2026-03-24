@@ -33,10 +33,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
 
   const stopFade = useCallback(() => {
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
+    if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
     // Restore original volume if we saved it
     if (savedVolumeRef.current !== null && audioRef?.current) {
       audioRef.current.volume = savedVolumeRef.current;
@@ -46,10 +43,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   }, []);
 
   const clear = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     stopFade();
     endTimeRef.current = 0;
     setRemainingMin(null);
@@ -67,10 +61,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     fadeTimerRef.current = setInterval(() => {
       // Detect external volume changes (user adjusted volume during fade).
       // Check both directions — user may have raised or lowered the volume.
-      if (Math.abs(audio.volume - lastSetVol) > 0.01) {
-        baseVol = audio.volume;
-        savedVolumeRef.current = baseVol;
-      }
+      if (Math.abs(audio.volume - lastSetVol) > 0.01) { baseVol = audio.volume; savedVolumeRef.current = baseVol; }
       const elapsed = Date.now() - fadeStart;
       const progress = Math.min(1, elapsed / FADE_DURATION_MS);
       // Ease-out quadratic for gentle fade
@@ -78,10 +69,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       const target = Math.max(0, baseVol * factor);
       audio.volume = target;
       lastSetVol = target;
-      if (progress >= 1) {
-        clearInterval(fadeTimerRef.current!);
-        fadeTimerRef.current = null;
-      }
+      if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; }
     }, 200);
   }, []);
 

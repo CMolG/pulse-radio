@@ -57,10 +57,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
 
   const wireRecognition = (lang: 'en' | 'es') => {
     const Ctor = getRecognitionCtor();
-    if (!Ctor) {
-      callbacks.onFatalError('Speech recognition is not supported in this browser.');
-      return;
-    }
+    if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
 
     recognition = new Ctor();
     recognition.continuous = true;

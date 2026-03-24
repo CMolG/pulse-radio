@@ -37,10 +37,7 @@ export default React.memo(function NowPlayingHero({
 
   // Reset error state when cover URL changes so new artwork gets a chance to load
   const [prevCoverUrl, setPrevCoverUrl] = useState(coverUrl);
-  if (coverUrl !== prevCoverUrl) {
-    setPrevCoverUrl(coverUrl);
-    setImgError(false);
-  }
+  if (coverUrl !== prevCoverUrl) { setPrevCoverUrl(coverUrl); setImgError(false); }
 
   const showFallback = !coverUrl || imgError;
 

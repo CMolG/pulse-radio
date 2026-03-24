@@ -138,10 +138,7 @@ function drawMetaballs(
         const field = (r * r) / (distSq + 1);
         sum += field;
 
-        if (field > 0.01) {
-          weightedBand += blob.freqBand * field;
-          totalWeight += field;
-        }
+        if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; }
       }
 
       const idx = (py * sw + px) * 4;

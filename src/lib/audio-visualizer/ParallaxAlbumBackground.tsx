@@ -31,10 +31,7 @@ export function ParallaxAlbumBackground({
 
   // Reset error state when image URL changes so new artwork gets a chance to load
   const [prevImageUrl, setPrevImageUrl] = useState(imageUrl);
-  if (imageUrl !== prevImageUrl) {
-    setPrevImageUrl(imageUrl);
-    setImgError(false);
-  }
+  if (imageUrl !== prevImageUrl) { setPrevImageUrl(imageUrl); setImgError(false); }
 
   const src = (!imgError && imageUrl) || fallbackUrl || null;
 

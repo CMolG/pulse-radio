@@ -125,10 +125,7 @@ function OnboardingModal() {
 
   useEffect(() => {
     const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
-    if (!done) {
-      const timer = setTimeout(() => setShow(true), 800);
-      return () => clearTimeout(timer);
-    }
+    if (!done) { const timer = setTimeout(() => setShow(true), 800); return () => clearTimeout(timer); }
   }, []);
 
   const handleClose = useCallback(() => {

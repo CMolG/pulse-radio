@@ -51,15 +51,9 @@ export function useCanvasLoop(
 
       const { w, h } = sizeRef.current;
 
-      if (w < 1 || h < 1) {
-        frameRef.current = requestAnimationFrame(loop);
-        return;
-      }
+      if (w < 1 || h < 1) { frameRef.current = requestAnimationFrame(loop); return; }
 
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
 
       paintRef.current(ctx, w, h, freqRef.current?.current ?? null);
       frameRef.current = requestAnimationFrame(loop);

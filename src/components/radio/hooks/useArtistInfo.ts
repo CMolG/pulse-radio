@@ -58,10 +58,7 @@ export function useArtistInfo(artist: string | null): {
         return r.json();
       })
       .then((data: ArtistInfo) => {
-        if (!cancelled) {
-          cacheSet(key, data);
-          setFetched({ key, info: data });
-        }
+        if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); }
       })
       .catch(() => {
         if (!cancelled) setFetched({ key, info: null });

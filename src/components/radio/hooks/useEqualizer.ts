@@ -144,10 +144,7 @@ export function useEqualizer(): UseEqualizerReturn {
     } catch { /* ok */ }
     filtersRef.current = [];
     for (const ref of graphNodeRefs) ref.current = null;
-    if (includeSource) {
-      sourceRef.current = null;
-      connectedAudioRef.current = null;
-    }
+    if (includeSource) { sourceRef.current = null; connectedAudioRef.current = null; }
   }
 
   // Smooth ramp time for parameter changes to prevent clicks/pops

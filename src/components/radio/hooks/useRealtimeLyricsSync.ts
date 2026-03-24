@@ -36,10 +36,7 @@ export function useRealtimeLyricsSync({
   // activeLineIndex from a previous song doesn't bleed into new lyrics.
   const [prevResetKey, setPrevResetKey] = useState('');
   const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
-  if (resetKey !== prevResetKey) {
-    setPrevResetKey(resetKey);
-    setRuntimeState(defaultRealtimeState(manuallyEnabled));
-  }
+  if (resetKey !== prevResetKey) { setPrevResetKey(resetKey); setRuntimeState(defaultRealtimeState(manuallyEnabled)); }
 
   const toggle = useCallback(() => {
     setManuallyEnabled(prev => {
@@ -50,10 +47,7 @@ export function useRealtimeLyricsSync({
   }, []);
 
   useEffect(() => {
-    if (!realtimeActive) {
-      engineRef.current?.stop();
-      return;
-    }
+    if (!realtimeActive) { engineRef.current?.stop(); return; }
 
     engineRef.current?.destroy();
     stableSamplesRef.current = 0;

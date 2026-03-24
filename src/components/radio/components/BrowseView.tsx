@@ -351,10 +351,7 @@ export default function BrowseView({
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
     const pool = view.mode === "top" ? allCategoryStations : stations;
-    if (!discoveryMode) {
-      discoveryFiredRef.current = false;
-      return;
-    }
+    if (!discoveryMode) { discoveryFiredRef.current = false; return; }
     if (pool.length > 0) {
       // Play a random station immediately the first time discovery mode
       // activates (or when stations finish loading after activation),
@@ -415,10 +412,7 @@ export default function BrowseView({
   // Using the "adjusting state during render" pattern avoids a one-frame
   // flash of empty results that the useEffect approach would cause.
   const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
-  if (songFilter !== prevSongFilter) {
-    setPrevSongFilter(songFilter);
-    setPage(0);
-  }
+  if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
 
   // Filter grid by song/artist when songFilter is active — paginated
   const allSongFilteredStations = useMemo(() => {

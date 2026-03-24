@@ -83,10 +83,7 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
   if (raw === stationName) return null;
   // Cache lowercase station name to avoid recomputing on every poll
-  if (stationName !== _lastStation) {
-    _lastStation = stationName;
-    _lastStationLower = stationName.toLowerCase();
-  }
+  if (stationName !== _lastStation) { _lastStation = stationName; _lastStationLower = stationName.toLowerCase(); }
   if (raw.toLowerCase() === _lastStationLower) return null;
 
   // Common separators: " - ", " — ", " – "
@@ -128,10 +125,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
   }
 
   useEffect(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
 
     if (!station) {
       lastTitleRef.current = '';
@@ -160,10 +154,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
       if (icyBr) setIcyBitrate(icyBr);
 
       // Derive codec from station data for display
-      if (station.codec) {
-        const c = station.codec.toUpperCase();
-        setStreamCodec(CODEC_MAP[c] ?? c);
-      }
+      if (station.codec) { const c = station.codec.toUpperCase(); setStreamCodec(CODEC_MAP[c] ?? c); }
 
       if (streamTitle && streamTitle !== lastTitleRef.current) {
         lastTitleRef.current = streamTitle;

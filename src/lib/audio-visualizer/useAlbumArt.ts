@@ -149,10 +149,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
       }
     }
 
-    if (score > bestScore) {
-      bestScore = score;
-      best = results[i];
-    }
+    if (score > bestScore) { bestScore = score; best = results[i]; }
   }
 
   return best ?? null;

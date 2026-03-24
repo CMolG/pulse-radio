@@ -64,10 +64,7 @@ export async function GET(req: NextRequest) {
 
       for (const suffix of suffixes) {
         const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
-        if (attempt?.extract) {
-          wiki = attempt;
-          break;
-        }
+        if (attempt?.extract) { wiki = attempt; break; }
       }
     }
 
