@@ -19,18 +19,30 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
   useEffect(() => {
     if (preview) return;
     const MAX_STALE_MS = 30_000;
+    let lastPlaybackRaw = '';
+    let lastLyricsRaw = '';
     const read = () => {
       try {
-        const parsed = loadFromStorage<WidgetPlaybackState | null>(STORAGE_KEYS.PLAYBACK, null);
-        if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
-          setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
-        } else {
-          setState(parsed);
+        const pbRaw = localStorage.getItem(STORAGE_KEYS.PLAYBACK) ?? '';
+        if (pbRaw && pbRaw !== lastPlaybackRaw) {
+          lastPlaybackRaw = pbRaw;
+          const parsed = JSON.parse(pbRaw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          } else {
+            setState(parsed);
+          }
+        } else if (pbRaw && pbRaw === lastPlaybackRaw) {
+          const parsed = JSON.parse(pbRaw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          }
         }
       } catch { /* ignore */ }
       try {
-        const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE);
-        if (raw) {
+        const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE) ?? '';
+        if (raw && raw !== lastLyricsRaw) {
+          lastLyricsRaw = raw;
           const cache = JSON.parse(raw);
           if (Array.isArray(cache) && cache.length > 0 && cache[0]?.data) {
             setLyrics(cache[0].data);
