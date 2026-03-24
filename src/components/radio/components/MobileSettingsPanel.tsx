@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { X, Languages, Sliders, Power, ChevronDown, ChevronUp, Plus, Save } from "lucide-react";
 import { IoHelpCircleOutline, IoStatsChartOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from "motion/react";
@@ -62,17 +62,17 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [presetName, setPresetName] = useState("");
 
-  const handleSelectPreset = (name: string, gains: number[]) => {
+  const handleSelectPreset = useCallback((name: string, gains: number[]) => {
     setSelectedPreset(name);
     eq.applyPreset(gains);
     onPresetChange(name);
-  };
+  }, [eq, onPresetChange]);
 
-  const handleSetGain = (id: string, gain: number) => {
+  const handleSetGain = useCallback((id: string, gain: number) => {
     setSelectedPreset(null);
     onPresetChange(null);
     eq.setBandGain(id, gain);
-  };
+  }, [eq, onPresetChange]);
 
   const handleSave = () => {
     const name = presetName.trim();
