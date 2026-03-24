@@ -62,12 +62,19 @@ const EMPTY_STATS: UsageStats = {
 function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
   const keys = Object.keys(map);
   if (keys.length <= max) return map;
-  const sorted = keys
-    .map(k => ({ k, v: map[k][key] as number }))
-    .sort((a, b) => b.v - a.v)
-    .slice(0, max);
+  // Partial sort: find the Nth largest value, then keep entries >= that threshold
+  const vals = new Float64Array(keys.length);
+  for (let i = 0; i < keys.length; i++) vals[i] = map[keys[i]][key] as number;
+  vals.sort(); // ascending typed-array sort (native, much faster than Array.sort with comparator)
+  const threshold = vals[keys.length - max];
   const pruned: Record<string, T> = {};
-  for (const { k } of sorted) pruned[k] = map[k];
+  let count = 0;
+  for (let i = 0; i < keys.length && count < max; i++) {
+    if ((map[keys[i]][key] as number) >= threshold) {
+      pruned[keys[i]] = map[keys[i]];
+      count++;
+    }
+  }
   return pruned;
 }
 
