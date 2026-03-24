@@ -285,5 +285,8 @@ export function useAlbumArt(
     : cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO);
   const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey);
 
-  return { ...info, isLoading };
+  return useMemo(() => ({ ...info, isLoading }), [
+    info.artworkUrl, info.albumName, info.itunesUrl, info.durationMs,
+    info.genre, info.releaseDate, info.trackNumber, info.trackCount, isLoading,
+  ]);
 }

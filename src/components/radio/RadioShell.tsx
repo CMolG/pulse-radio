@@ -183,7 +183,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       trackNumber: albumArt.trackNumber ?? undefined,
       trackCount: albumArt.trackCount ?? undefined,
     };
-  }, [track, albumArt.albumName, albumArt.artworkUrl, albumArt.itunesUrl, albumArt.durationMs, albumArt.genre, albumArt.releaseDate, albumArt.trackNumber, albumArt.trackCount]);
+  }, [track, albumArt]);
 
   const songHistory = useHistory(
     radio.station?.name,
@@ -786,10 +786,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       return badges;
   }, [eq.enabled, eq.noiseReductionMode, eq.normalizerEnabled, eqPreset, radio.station, theaterMode, t]);
 
+  const selectedFavSong = selectedSong
+    ? favSongs.songs.find(s => s.title === selectedSong.title && s.artist === selectedSong.artist) ?? null
+    : null;
   const songDetailModal = (
     <SongDetailModal
       song={selectedSong}
       onClose={() => setSelectedSong(null)}
+      onRemoveFromFavorites={selectedFavSong ? () => {
+        favSongs.remove(selectedFavSong.id);
+        setSelectedSong(null);
+      } : undefined}
     />
   );
 
