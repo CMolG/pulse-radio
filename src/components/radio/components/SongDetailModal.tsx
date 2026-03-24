@@ -30,6 +30,11 @@ import { useAlbumArt } from '@/lib/audio-visualizer';
 import UiImage from '@/components/common/UiImage';
 import { itunesSearchUrl } from '../utils/formatUtils';
 
+const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]';
+const MetaBadge = ({ icon: Icon, cls, children }: { icon: typeof Clock; cls: string; children: React.ReactNode }) => (
+  <span className={`${BADGE_CLS} ${cls}`}><Icon size={9} />{children}</span>
+);
+
 type Props = {
   song: SongDetailData | null;
   onClose: () => void;
@@ -210,18 +215,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       <div className="grid grid-cols-2 items-start">
                         <div className="justify-self-start">
                           {resolvedDurationMs && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.08] border border-white/10 text-[10px] font-mono text-white/70">
-                              <Clock size={9} />
-                              {formatDuration(resolvedDurationMs)}
-                            </span>
+                            <MetaBadge icon={Clock} cls="bg-white/[0.08] border border-white/10 font-mono text-white/70">{formatDuration(resolvedDurationMs)}</MetaBadge>
                           )}
                         </div>
                         <div className="justify-self-end">
                           {resolvedTrackNumber != null && resolvedTrackCount != null && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.08] border border-white/10 text-[10px] text-white/70">
-                              <Disc3 size={9} />
-                              #{resolvedTrackNumber}/{resolvedTrackCount}
-                            </span>
+                            <MetaBadge icon={Disc3} cls="bg-white/[0.08] border border-white/10 text-white/70">#{resolvedTrackNumber}/{resolvedTrackCount}</MetaBadge>
                           )}
                         </div>
                       </div>
@@ -233,18 +232,8 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       )}
 
                       <div className="flex flex-wrap justify-center gap-1.5">
-                        {resolvedGenre && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/50">
-                            <Tag size={9} />
-                            {resolvedGenre}
-                          </span>
-                        )}
-                      {showMetaHydration && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-[10px] text-white/40 animate-pulse">
-                          <Clock size={9} />
-                          Fetching metadata…
-                        </span>
-                      )}
+                        {resolvedGenre && <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">{resolvedGenre}</MetaBadge>}
+                      {showMetaHydration && <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">Fetching metadata…</MetaBadge>}
                       </div>
                     </div>
                   )}
@@ -327,30 +316,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         )}
                         {/* Metadata badges */}
                         <div className="flex flex-wrap gap-1.5 mt-1.5">
-                          {info.type && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-[10px] text-secondary">
-                              {info.type === 'Group' ? (
-                                <Users size={9} />
-                              ) : (
-                                <User size={9} />
-                              )}
-                              {info.type}
-                            </span>
-                          )}
-                          {info.country && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-[10px] text-secondary">
-                              <Globe size={9} />
-                              {info.country}
-                            </span>
-                          )}
+                          {info.type && <MetaBadge icon={info.type === 'Group' ? Users : User} cls="bg-surface-3 text-secondary">{info.type}</MetaBadge>}
+                          {info.country && <MetaBadge icon={Globe} cls="bg-surface-3 text-secondary">{info.country}</MetaBadge>}
                           {info.lifeSpan?.begin && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-3 text-[10px] text-secondary">
-                              <Calendar size={9} />
-                              {info.lifeSpan.begin}
-                              {info.lifeSpan.ended && info.lifeSpan.end
-                                ? ` – ${info.lifeSpan.end}`
-                                : ' – present'}
-                            </span>
+                            <MetaBadge icon={Calendar} cls="bg-surface-3 text-secondary">
+                              {info.lifeSpan.begin}{info.lifeSpan.ended && info.lifeSpan.end ? ` – ${info.lifeSpan.end}` : ' – present'}
+                            </MetaBadge>
                           )}
                         </div>
                       </div>
