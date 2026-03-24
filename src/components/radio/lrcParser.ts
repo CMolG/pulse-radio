@@ -25,9 +25,7 @@ export function parseLrc(lrcText: string): LyricLine[] {
     if (timestamps.length === 0) continue;
     const text = raw.slice(lastIndex).trim();
     if (!text) continue;
-    for (const time of timestamps) {
-      lines.push({ time, text });
-    }
+    for (const time of timestamps) { lines.push({ time, text }); }
   }
   return lines.sort((a, b) => a.time - b.time);
 }

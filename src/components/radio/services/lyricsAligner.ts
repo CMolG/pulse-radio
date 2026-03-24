@@ -45,9 +45,7 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
 
   const lineSet = new Set(lineTokens);
   let overlaps = 0;
-  for (const token of hypoTokens) {
-    if (lineSet.has(token)) overlaps++;
-  }
+  for (const token of hypoTokens) { if (lineSet.has(token)) overlaps++; }
 
   const overlapScore = overlaps / Math.max(lineSet.size, 1);
 

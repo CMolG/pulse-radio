@@ -104,10 +104,7 @@ export async function GET(req: NextRequest) {
     // Concatenate chunks
     const buffer = new Uint8Array(totalRead);
     let offset = 0;
-    for (const chunk of chunks) {
-      buffer.set(chunk, offset);
-      offset += chunk.length;
-    }
+    for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.length; }
 
     // ICY metadata starts at position metaint
     if (buffer.length <= metaint) return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });

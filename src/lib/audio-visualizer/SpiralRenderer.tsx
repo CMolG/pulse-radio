@@ -77,9 +77,7 @@ export function SpiralRenderer({
       }
     } else {
       // No data: decay
-      for (let i = 0; i < NUM_BARS; i++) {
-        data[i] *= 0.95;
-      }
+      for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; }
     }
 
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)

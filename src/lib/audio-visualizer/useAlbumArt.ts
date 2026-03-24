@@ -94,10 +94,7 @@ function jaroWinkler(a: string, b: string): number {
   if (jaro < 0.7) return jaro;
   let prefix = 0;
   const maxPrefix = 4;
-  for (let i = 0; i < Math.min(maxPrefix, a.length, b.length); i++) {
-    if (a[i] === b[i]) prefix++;
-    else break;
-  }
+  for (let i = 0; i < Math.min(maxPrefix, a.length, b.length); i++) { if (a[i] === b[i]) prefix++; else break; }
   return jaro + prefix * 0.1 * (1 - jaro);
 }
 

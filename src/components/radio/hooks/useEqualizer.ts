@@ -262,9 +262,7 @@ export function useEqualizer(): UseEqualizerReturn {
       nrGate.connect(nrDeEsser);
       nrDeEsser.connect(nrDeEssGain);
       nrDeEssGain.connect(filters[0]);
-      for (let i = 0; i < filters.length - 1; i++) {
-        filters[i].connect(filters[i + 1]);
-      }
+      for (let i = 0; i < filters.length - 1; i++) { filters[i].connect(filters[i + 1]); }
 
       // Psychoacoustic bass enhancer: parallel path that extracts bass,
       // generates harmonics via waveshaping, then mixes back in.

@@ -28,9 +28,7 @@ function songKey(title: string, artist: string) {
 /** Build a Set of songKeys from a song array for O(1) lookups. */
 function buildKeySet(songs: FavoriteSong[]): Set<string> {
   const s = new Set<string>();
-  for (let i = 0; i < songs.length; i++) {
-    s.add(songKey(songs[i].title, songs[i].artist));
-  }
+  for (let i = 0; i < songs.length; i++) { s.add(songKey(songs[i].title, songs[i].artist)); }
   return s;
 }
 

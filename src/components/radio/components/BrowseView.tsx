@@ -182,9 +182,7 @@ export default function BrowseView({
     }
 
     // Append remaining in default order
-    for (const id of defaultOrder) {
-      if (!boostedIds.has(id)) ordered.push(id);
-    }
+    for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); }
     return ordered;
   }, [userGenreOrder]);
 

@@ -101,9 +101,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
 }
 
 function uniquePush(target: string[], values: string[]) {
-  for (const value of values) {
-    if (!target.includes(value)) target.push(value);
-  }
+  for (const value of values) { if (!target.includes(value)) target.push(value); }
 }
 
 export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36): CountryChip[] {

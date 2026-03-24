@@ -109,10 +109,7 @@ function drawMetaballs(
   // field = r² / (distSq + 1). For field >= 0.01 → distSq < r²/0.01 = 100*r²
   const blobCount = blobs.length;
   const blobMaxDistSq = new Float64Array(blobCount);
-  for (let b = 0; b < blobCount; b++) {
-    const r = blobs[b].baseRadius;
-    blobMaxDistSq[b] = r * r * 100;
-  }
+  for (let b = 0; b < blobCount; b++) { const r = blobs[b].baseRadius; blobMaxDistSq[b] = r * r * 100; }
 
   const thresholdLow = threshold * 0.7;
   const glowRange = threshold * 0.3;
