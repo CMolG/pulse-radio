@@ -846,6 +846,52 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </div>
   ) : null;
 
+  const eqPanelElement = showEq ? (
+    <EqPanel
+      bands={eq.bands}
+      enabled={eq.enabled}
+      normalizerEnabled={eq.normalizerEnabled}
+      stereoWidth={eq.stereoWidth}
+      bassEnhance={eq.bassEnhance}
+      compressorEnabled={eq.compressorEnabled}
+      compressorAmount={eq.compressorAmount}
+      noiseReductionMode={eq.noiseReductionMode}
+      customPresets={eq.customPresets}
+      onSetGain={eq.setBandGain}
+      onApplyPreset={eq.applyPreset}
+      onToggleEnabled={eq.toggleEnabled}
+      onToggleNormalizer={eq.toggleNormalizer}
+      onSetStereoWidth={eq.setStereoWidth}
+      onSetBassEnhance={eq.setBassEnhance}
+      onToggleCompressor={eq.toggleCompressor}
+      onSetCompressorAmount={eq.setCompressorAmount}
+      onSetNoiseReductionMode={eq.setNoiseReductionMode}
+      onSaveCustomPreset={eq.saveCustomPreset}
+      onRemoveCustomPreset={eq.removeCustomPreset}
+      onPresetChange={setEqPreset}
+      onClose={() => setShowEq(false)}
+    />
+  ) : null;
+
+  const toastElement = toast ? (
+    <motion.div
+      key={toast.key}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 4 }}
+      transition={{ duration: 0.18 }}
+      className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+    >
+      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
+        {toast.icon === "star"
+          ? <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
+          : <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
+        }
+        <span className="truncate">{toast.msg}</span>
+      </div>
+    </motion.div>
+  ) : null;
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -1081,32 +1127,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         </div>
 
         {/* EQ panel overlay */}
-        {showEq && (
-          <EqPanel
-            bands={eq.bands}
-            enabled={eq.enabled}
-            normalizerEnabled={eq.normalizerEnabled}
-            stereoWidth={eq.stereoWidth}
-            bassEnhance={eq.bassEnhance}
-            compressorEnabled={eq.compressorEnabled}
-            compressorAmount={eq.compressorAmount}
-            noiseReductionMode={eq.noiseReductionMode}
-            customPresets={eq.customPresets}
-            onSetGain={eq.setBandGain}
-            onApplyPreset={eq.applyPreset}
-            onToggleEnabled={eq.toggleEnabled}
-            onToggleNormalizer={eq.toggleNormalizer}
-            onSetStereoWidth={eq.setStereoWidth}
-            onSetBassEnhance={eq.setBassEnhance}
-            onToggleCompressor={eq.toggleCompressor}
-            onSetCompressorAmount={eq.setCompressorAmount}
-            onSetNoiseReductionMode={eq.setNoiseReductionMode}
-            onSaveCustomPreset={eq.saveCustomPreset}
-            onRemoveCustomPreset={eq.removeCustomPreset}
-            onPresetChange={setEqPreset}
-            onClose={() => setShowEq(false)}
-          />
-        )}
+        {eqPanelElement}
 
         {/* Mobile settings panel */}
         <AnimatePresence>
@@ -1128,25 +1149,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
         {/* Toast notification */}
         <AnimatePresence>
-          {toast && (
-            <motion.div
-              key={toast.key}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.18 }}
-              className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-              style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-            >
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
-                {toast.icon === "star"
-                  ? <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
-                  : <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
-                }
-                <span className="truncate">{toast.msg}</span>
-              </div>
-            </motion.div>
-          )}
+          {toastElement}
         </AnimatePresence>
 
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
@@ -1394,53 +1397,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       </div>
 
       {/* EQ panel overlay */}
-      {showEq && (
-        <EqPanel
-          bands={eq.bands}
-          enabled={eq.enabled}
-          normalizerEnabled={eq.normalizerEnabled}
-          stereoWidth={eq.stereoWidth}
-          bassEnhance={eq.bassEnhance}
-          compressorEnabled={eq.compressorEnabled}
-          compressorAmount={eq.compressorAmount}
-          noiseReductionMode={eq.noiseReductionMode}
-          customPresets={eq.customPresets}
-          onSetGain={eq.setBandGain}
-          onApplyPreset={eq.applyPreset}
-          onToggleEnabled={eq.toggleEnabled}
-          onToggleNormalizer={eq.toggleNormalizer}
-          onSetStereoWidth={eq.setStereoWidth}
-          onSetBassEnhance={eq.setBassEnhance}
-          onToggleCompressor={eq.toggleCompressor}
-          onSetCompressorAmount={eq.setCompressorAmount}
-          onSetNoiseReductionMode={eq.setNoiseReductionMode}
-          onSaveCustomPreset={eq.saveCustomPreset}
-          onRemoveCustomPreset={eq.removeCustomPreset}
-          onPresetChange={setEqPreset}
-          onClose={() => setShowEq(false)}
-        />
-      )}
+      {eqPanelElement}
 
       {/* Toast notification */}
       <AnimatePresence>
-        {toast && (
-          <motion.div
-            key={toast.key}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.18 }}
-            className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-          >
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
-              {toast.icon === "star"
-                ? <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
-                : <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
-              }
-              <span className="truncate">{toast.msg}</span>
-            </div>
-          </motion.div>
-        )}
+        {toastElement}
       </AnimatePresence>
 
       {/* Bottom bar */}
