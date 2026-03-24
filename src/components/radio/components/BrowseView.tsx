@@ -403,9 +403,7 @@ export default function BrowseView({
     scanGenRef.current = gen;
     startScan(pageStations, gen);
     return () => {
-      if (scanGenRef.current === gen) {
-        scanGenRef.current++;
-      }
+      if (scanGenRef.current === gen) scanGenRef.current++;
     };
   }, [scanEnabled, pageStations, view.mode, startScan]);
 

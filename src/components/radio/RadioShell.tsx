@@ -76,9 +76,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
     // Synchronous measurement replaces the window-based initial guess
     // one frame earlier than waiting for the ResizeObserver callback.
     const rect = el.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      setSize({ w: Math.round(rect.width), h: Math.round(rect.height) });
-    }
+    if (rect.width > 0 && rect.height > 0) setSize({ w: Math.round(rect.width), h: Math.round(rect.height) });
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
       if (width <= 0 || height <= 0) return;
@@ -155,9 +153,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const now = Date.now();
       const delta = now - lastTickRef.current;
       lastTickRef.current = now;
-      if (radio.station) {
-        tickListenTime(radio.station.stationuuid, radio.station.name, delta);
-      }
+      if (radio.station) tickListenTime(radio.station.stationuuid, radio.station.name, delta);
     }, 5000);
     lastTickRef.current = Date.now();
     return () => clearInterval(interval);
@@ -206,14 +202,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (audio && !audio.paused) {
       if (duckTimerRef.current) clearTimeout(duckTimerRef.current);
       // Only capture pre-duck volume if not already ducking
-      if (duckOrigVolRef.current === null) {
-        duckOrigVolRef.current = audio.volume;
-      }
+      if (duckOrigVolRef.current === null) duckOrigVolRef.current = audio.volume;
       audio.volume = duckOrigVolRef.current * 0.4;
       duckTimerRef.current = setTimeout(() => {
-        if (audio && duckOrigVolRef.current !== null) {
-          audio.volume = duckOrigVolRef.current;
-        }
+        if (audio && duckOrigVolRef.current !== null) audio.volume = duckOrigVolRef.current;
         duckOrigVolRef.current = null;
         duckTimerRef.current = null;
       }, 400);
@@ -224,9 +216,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // Without this, the 400ms duck timer restores the stale pre-duck volume,
   // and useRadio's volume effect won't re-run (state hasn't changed).
   useEffect(() => {
-    if (duckOrigVolRef.current !== null) {
-      duckOrigVolRef.current = radio.muted ? 0 : radio.volume;
-    }
+    if (duckOrigVolRef.current !== null) duckOrigVolRef.current = radio.muted ? 0 : radio.volume;
   }, [radio.volume, radio.muted]);
 
   const [eqPreset, setEqPreset] = useState<string | null>(null);
@@ -260,9 +250,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const newLabel = view.mode === "top" ? t("topStations")
       : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode)
       : null;
-    if (newLabel && newLabel !== view.label) {
-      setView(prev => ({ ...prev, label: newLabel }));
-    }
+    if (newLabel && newLabel !== view.label) setView(prev => ({ ...prev, label: newLabel }));
   }, [locale, t, view.countryCode, view.label, view.mode]);
 
   useEffect(() => {
@@ -284,9 +272,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         return;
       }
 
-      if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) {
-        resetNav(countryView(segment));
-      }
+      if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
@@ -294,9 +280,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   // Reset compact state on layout change
   useEffect(() => {
-    if (layout === "pip") {
-      setMiniMode(false);
-    }
+    if (layout === "pip") setMiniMode(false);
   }, [layout]);
 
   // Track network connectivity for offline indicator
@@ -369,9 +353,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       setTheaterMode(true);
       // Prefetch next station in queue for seamless transition
       const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
-      if (nextIdx > 0 && nextIdx < sq.queue.length) {
-        r.prefetchStream(sq.queue[nextIdx].url_resolved);
-      }
+      if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
     },
     [],
   );
@@ -390,9 +372,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         // No queue entries — find a similar station by genre tag
         import('./services/radioApi').then(({ similarStations }) => {
           similarStations(radio.station!, 3).then(alts => {
-            if (alts.length > 0 && !cancelled) {
-              handlePlay(alts[0]);
-            }
+            if (alts.length > 0 && !cancelled) handlePlay(alts[0]);
           }).catch(() => {});
         });
       }
@@ -548,9 +528,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           break;
         case "r":
         case "R":
-          if (rl) {
-            rl.toggle();
-          }
+          if (rl) rl.toggle();
           break;
         case "z":
         case "Z":           // Z: cycle sleep timer
@@ -624,9 +602,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     setTheaterMode(false);
     setSearchQuery("");
     const newPath = `/${countryCode}`;
-    if (pathname !== newPath) {
-      window.history.pushState(null, "", newPath);
-    }
+    if (pathname !== newPath) window.history.pushState(null, "", newPath);
   }, [pathname]);
 
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;

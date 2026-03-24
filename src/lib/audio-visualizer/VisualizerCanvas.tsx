@@ -112,9 +112,7 @@ export function VisualizerCanvas({
         ctx.fillStyle = fillStyle;
 
         // Feature-detect roundRect once instead of try-catch per bar
-        if (supportsRoundRectRef.current === null) {
-          supportsRoundRectRef.current = typeof ctx.roundRect === 'function';
-        }
+        if (supportsRoundRectRef.current === null) supportsRoundRectRef.current = typeof ctx.roundRect === 'function';
         const useRoundRect = supportsRoundRectRef.current;
         const radius = barWidth * 0.3;
         const radii: [number, number, number, number] = [radius, radius, 0, 0];

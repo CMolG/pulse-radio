@@ -226,9 +226,7 @@ function mergeBundle(locale: SupportedLocale): MessageBundle {
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};
 
 export function getMessages(locale: SupportedLocale): MessageBundle {
-  if (!MESSAGE_CACHE[locale]) {
-    MESSAGE_CACHE[locale] = mergeBundle(locale);
-  }
+  if (!MESSAGE_CACHE[locale]) MESSAGE_CACHE[locale] = mergeBundle(locale);
   return MESSAGE_CACHE[locale] as MessageBundle;
 }
 

@@ -61,9 +61,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         const tick = () => {
           // Skip expensive analyser reads when tab is hidden to save CPU
           if (!document.hidden) {
-            if (frequencyDataRef.current) {
-              analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
-            }
+            if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
             if (waveDataRef.current) {
               analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)

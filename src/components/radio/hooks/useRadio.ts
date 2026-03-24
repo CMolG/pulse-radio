@@ -337,9 +337,7 @@ export function useRadio(): UseRadioReturn {
       clearTimer(stallTimerRef);
       stallCount++;
       let bufferAhead = 0;
-      if (audio.buffered.length > 0) {
-        bufferAhead = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
-      }
+      if (audio.buffered.length > 0) bufferAhead = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
       // Adapt timeout: empty buffer → 1s, low → 2s, healthy → 6s
       // Consecutive stalls reduce patience (exponential decay)
       const baseTimeout = bufferAhead <= 0 ? 1000 : bufferAhead < 2 ? 2000 : 6000;
@@ -363,17 +361,13 @@ export function useRadio(): UseRadioReturn {
 
     // Ended: connection dropped — seamlessly reconnect
     const onEnded = () => {
-      if (!userPausedRef.current && station) {
-        reconnect(500);
-      }
+      if (!userPausedRef.current && station) reconnect(500);
     };
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
 
     const onCanPlay = () => {
-      if (!userPausedRef.current && station && audio.paused) {
-        audio.play().catch(() => {});
-      }
+      if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {});
     };
 
     // Single debounced handler for both visibilitychange and pageshow.
@@ -437,9 +431,7 @@ export function useRadio(): UseRadioReturn {
       const conn = typeof navigator !== 'undefined'
         ? (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } }).connection
         : undefined;
-      if (conn?.saveData) {
-        setStreamQuality('fair');
-      }
+      if (conn?.saveData) setStreamQuality('fair');
 
       if (userPausedRef.current || audio.paused || !station) {
         lowBufferStreak = 0;

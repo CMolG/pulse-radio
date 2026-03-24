@@ -175,21 +175,15 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
       if (streamTitle) return;
 
-      if (!lastTitleRef.current) {
-        setTrack(null);
-      }
+      if (!lastTitleRef.current) setTrack(null);
     };
 
     // Fetch immediately on station change or when resuming playback,
     // so we don't wait a full poll interval for fresh metadata.
-    if (stationChanged || isPlaying) {
-      poll();
-    }
+    if (stationChanged || isPlaying) poll();
 
     // Continuous polling only while actively playing
-    if (isPlaying) {
-      intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
-    }
+    if (isPlaying) intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
 
     // When the tab returns from background, poll immediately so the user
     // doesn't see stale metadata for up to POLL_INTERVAL_MS.

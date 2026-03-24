@@ -41,9 +41,7 @@ export function useStationQueue(): UseStationQueueReturn {
 
   // Persist queue to storage on changes (skip initial mount)
   useEffect(() => {
-    if (persistRef.current) {
-      saveToStorage(STORAGE_KEY, queue);
-    }
+    if (persistRef.current) saveToStorage(STORAGE_KEY, queue);
     persistRef.current = true;
   }, [queue]);
 

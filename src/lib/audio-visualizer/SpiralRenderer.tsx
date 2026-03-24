@@ -176,9 +176,7 @@ export function SpiralRenderer({
         const yc = (outerY[i] + outerY[i + 1]) / 2;
         ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc);
       }
-      if (endIdx - 1 > startIdx) {
-        ctx.lineTo(outerX[endIdx - 1], outerY[endIdx - 1]);
-      }
+      if (endIdx - 1 > startIdx) ctx.lineTo(outerX[endIdx - 1], outerY[endIdx - 1]);
 
       // Inner edge reversed
       ctx.lineTo(innerX[endIdx - 1], innerY[endIdx - 1]);

@@ -158,9 +158,7 @@ export function useEqualizer(): UseEqualizerReturn {
     const ctx = ctxRef.current;
     const t = ctx?.currentTime ?? 0;
 
-    if (nrHighpassRef.current) {
-      nrHighpassRef.current.frequency.setTargetAtTime(preset.hpfHz, t, RAMP_TIME);
-    }
+    if (nrHighpassRef.current) nrHighpassRef.current.frequency.setTargetAtTime(preset.hpfHz, t, RAMP_TIME);
     if (nrGateRef.current) {
       nrGateRef.current.threshold.setTargetAtTime(preset.gateThreshold, t, RAMP_TIME);
       nrGateRef.current.ratio.setTargetAtTime(preset.gateRatio, t, RAMP_TIME);
@@ -204,9 +202,7 @@ export function useEqualizer(): UseEqualizerReturn {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
 
     // Disconnect any existing chain before building a new one
-    if (connectedAudioRef.current) {
-      teardownGraph(false);
-    }
+    if (connectedAudioRef.current) teardownGraph(false);
 
     try {
       const { ctx, source } = getOrCreateAudioSource(audio);
@@ -597,12 +593,8 @@ export function useEqualizer(): UseEqualizerReturn {
     if (!compressorEnabled) return;
     const ctx = ctxRef.current;
     const t = ctx?.currentTime ?? 0;
-    if (mbDryGainRef.current) {
-      mbDryGainRef.current.gain.setTargetAtTime(1 - clamped * 0.5, t, RAMP_TIME);
-    }
-    if (mbWetGainRef.current) {
-      mbWetGainRef.current.gain.setTargetAtTime(clamped, t, RAMP_TIME);
-    }
+    if (mbDryGainRef.current) mbDryGainRef.current.gain.setTargetAtTime(1 - clamped * 0.5, t, RAMP_TIME);
+    if (mbWetGainRef.current) mbWetGainRef.current.gain.setTargetAtTime(clamped, t, RAMP_TIME);
   }, [compressorEnabled]);
 
   const setNoiseReductionMode = useCallback((mode: NoiseReductionMode) => {

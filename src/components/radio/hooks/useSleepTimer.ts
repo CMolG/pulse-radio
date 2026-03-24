@@ -103,9 +103,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       } else {
         setRemainingMin(mins);
         // Start fading volume when less than FADE_DURATION_MS remains
-        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) {
-          startFade();
-        }
+        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade();
       }
     }, 1000); // check every second for smooth fade timing
   }, [clear, stopFade, startFade]);

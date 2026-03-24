@@ -18,12 +18,8 @@ const cache = new WeakMap<
 let sharedCtx: AudioContext | null = null;
 
 function getSharedContext(): AudioContext {
-  if (!sharedCtx || sharedCtx.state === 'closed') {
-    sharedCtx = new AudioContext();
-  }
-  if (sharedCtx.state === 'suspended') {
-    sharedCtx.resume().catch(() => {});
-  }
+  if (!sharedCtx || sharedCtx.state === 'closed') sharedCtx = new AudioContext();
+  if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {});
   return sharedCtx;
 }
 
@@ -34,9 +30,7 @@ export function getOrCreateAudioSource(audio: HTMLAudioElement): {
   const existing = cache.get(audio);
   if (existing) {
     // Resume if suspended (Chrome autoplay policy)
-    if (existing.ctx.state === 'suspended') {
-      existing.ctx.resume().catch(() => {});
-    }
+    if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {});
     return existing;
   }
 
@@ -53,9 +47,7 @@ export function getOrCreateAudioSource(audio: HTMLAudioElement): {
  */
 export function resumeAudioContext(audio: HTMLAudioElement): void {
   const entry = cache.get(audio);
-  if (entry && entry.ctx.state === 'suspended') {
-    entry.ctx.resume().catch(() => {});
-  }
+  if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {});
 }
 
 /**
