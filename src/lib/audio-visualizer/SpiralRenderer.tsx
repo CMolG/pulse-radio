@@ -40,6 +40,11 @@ export function SpiralRenderer({
   const targetArrayRef = useRef(new Float64Array(NUM_BARS));
   const smoothedRef = useRef(new Float64Array(NUM_BARS));
   const tempRef = useRef(new Float64Array(NUM_BARS));
+  // Pre-allocated coordinate arrays — avoids 500+ object allocations per frame
+  const outerXRef = useRef(new Float64Array(NUM_BARS));
+  const outerYRef = useRef(new Float64Array(NUM_BARS));
+  const innerXRef = useRef(new Float64Array(NUM_BARS));
+  const innerYRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 });
 
   useEffect(() => {
@@ -146,9 +151,11 @@ export function SpiralRenderer({
       fillStyle = gradient;
     } catch { /* fallback to solid color */ }
 
-    // Build points
-    const outerPoints: { x: number; y: number }[] = [];
-    const innerPoints: { x: number; y: number }[] = [];
+    // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
+    const outerX = outerXRef.current;
+    const outerY = outerYRef.current;
+    const innerX = innerXRef.current;
+    const innerY = innerYRef.current;
 
     for (let i = 0; i < NUM_BARS; i++) {
       const val = smoothed[i];
@@ -162,14 +169,10 @@ export function SpiralRenderer({
       const cos = Math.cos(finalAngle);
       const sin = Math.sin(finalAngle);
 
-      innerPoints.push({
-        x: centerX + cos * radius,
-        y: centerY + sin * radius,
-      });
-      outerPoints.push({
-        x: centerX + cos * (radius + barHeight + 2),
-        y: centerY + sin * (radius + barHeight + 2),
-      });
+      innerX[i] = centerX + cos * radius;
+      innerY[i] = centerY + sin * radius;
+      outerX[i] = centerX + cos * (radius + barHeight + 2);
+      outerY[i] = centerY + sin * (radius + barHeight + 2);
     }
 
     // Draw slime shapes per cycle
@@ -185,38 +188,27 @@ export function SpiralRenderer({
       const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
       if (startIdx >= NUM_BARS) break;
 
-      const cycleOuter = outerPoints.slice(startIdx, endIdx);
-      const cycleInner = innerPoints.slice(startIdx, endIdx);
-
       ctx.beginPath();
 
       // Outer edge with quadratic curves
-      if (cycleOuter.length > 0) {
-        ctx.moveTo(cycleOuter[0].x, cycleOuter[0].y);
-        for (let i = 1; i < cycleOuter.length - 1; i++) {
-          const xc = (cycleOuter[i].x + cycleOuter[i + 1].x) / 2;
-          const yc = (cycleOuter[i].y + cycleOuter[i + 1].y) / 2;
-          ctx.quadraticCurveTo(cycleOuter[i].x, cycleOuter[i].y, xc, yc);
-        }
-        ctx.lineTo(
-          cycleOuter[cycleOuter.length - 1].x,
-          cycleOuter[cycleOuter.length - 1].y,
-        );
+      ctx.moveTo(outerX[startIdx], outerY[startIdx]);
+      for (let i = startIdx + 1; i < endIdx - 1; i++) {
+        const xc = (outerX[i] + outerX[i + 1]) / 2;
+        const yc = (outerY[i] + outerY[i + 1]) / 2;
+        ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc);
+      }
+      if (endIdx - 1 > startIdx) {
+        ctx.lineTo(outerX[endIdx - 1], outerY[endIdx - 1]);
       }
 
       // Inner edge reversed
-      if (cycleInner.length > 0) {
-        ctx.lineTo(
-          cycleInner[cycleInner.length - 1].x,
-          cycleInner[cycleInner.length - 1].y,
-        );
-        for (let i = cycleInner.length - 2; i > 0; i--) {
-          const xc = (cycleInner[i].x + cycleInner[i - 1].x) / 2;
-          const yc = (cycleInner[i].y + cycleInner[i - 1].y) / 2;
-          ctx.quadraticCurveTo(cycleInner[i].x, cycleInner[i].y, xc, yc);
-        }
-        ctx.lineTo(cycleInner[0].x, cycleInner[0].y);
+      ctx.lineTo(innerX[endIdx - 1], innerY[endIdx - 1]);
+      for (let i = endIdx - 2; i > startIdx; i--) {
+        const xc = (innerX[i] + innerX[i - 1]) / 2;
+        const yc = (innerY[i] + innerY[i - 1]) / 2;
+        ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc);
       }
+      ctx.lineTo(innerX[startIdx], innerY[startIdx]);
 
       ctx.closePath();
       ctx.fill();
