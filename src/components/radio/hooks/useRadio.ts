@@ -177,6 +177,7 @@ export function useRadio(): UseRadioReturn {
         // On iOS, direct playback is more stable in background.
         // If direct fails for non-autoplay reasons, fallback to proxy for this station.
         if (!shouldUseProxy && preferDirectStream && !isAutoplayBlocked(err)) {
+          if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
           proxyFallbackUrlsRef.current.add(streamUrl);
           setSourceAndPlay(true).catch(onRejected);
           return;
@@ -267,6 +268,7 @@ export function useRadio(): UseRadioReturn {
         // If currently proxied → try direct (or vice versa).
         // Only attempt this fallback once per station to avoid loops.
         if (station && !codecFallbackTriedRef.current.has(station.url_resolved)) {
+          if (codecFallbackTriedRef.current.size >= 200) codecFallbackTriedRef.current.clear();
           codecFallbackTriedRef.current.add(station.url_resolved);
           const isCurrentlyProxied = audio.src.startsWith(window.location.origin + '/api/proxy-stream');
           const setSourceAndPlay = (useProxy: boolean) => {
