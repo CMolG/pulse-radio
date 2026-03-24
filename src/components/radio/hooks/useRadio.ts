@@ -98,6 +98,11 @@ export function useRadio(): UseRadioReturn {
 
   const lastBufferEndRef = useRef<number>(0);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clearTimer = (ref: React.MutableRefObject<any>) => {
+    if (ref.current != null) { clearTimeout(ref.current); ref.current = null; }
+  };
+
   // Latest volume/muted refs so crossfade intervals read current values
   const volumeRef = useRef(volume);
   const mutedRef = useRef(muted);
@@ -125,10 +130,7 @@ export function useRadio(): UseRadioReturn {
         // Cancel any in-progress crossfade so it doesn't restart playback
         // after the cross-tab pause. Without this, the crossfade completion
         // calls startPlayback() and overrides the pause from the other tab.
-        if (fadeTimerRef.current) {
-          clearInterval(fadeTimerRef.current);
-          fadeTimerRef.current = null;
-        }
+        clearTimer(fadeTimerRef);
       }
     };
     return () => {
@@ -140,22 +142,10 @@ export function useRadio(): UseRadioReturn {
   // Clean up timers on unmount to prevent orphaned intervals
   useEffect(() => {
     return () => {
-      if (fadeTimerRef.current) {
-        clearInterval(fadeTimerRef.current);
-        fadeTimerRef.current = null;
-      }
-      if (pauseTimerRef.current) {
-        clearTimeout(pauseTimerRef.current);
-        pauseTimerRef.current = null;
-      }
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = null;
-      }
-      if (bufferCheckRef.current) {
-        clearInterval(bufferCheckRef.current);
-        bufferCheckRef.current = null;
-      }
+      clearTimer(fadeTimerRef);
+      clearTimer(pauseTimerRef);
+      clearTimer(reconnectTimerRef);
+      clearTimer(bufferCheckRef);
     };
   }, []);
 
@@ -222,14 +212,8 @@ export function useRadio(): UseRadioReturn {
     const audio = getAudio();
 
     const clearReconnectTimer = () => {
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = null;
-      }
-      if (stallTimerRef.current) {
-        clearTimeout(stallTimerRef.current);
-        stallTimerRef.current = null;
-      }
+      clearTimer(reconnectTimerRef);
+      clearTimer(stallTimerRef);
     };
 
     const sessionId = playSessionRef.current;
@@ -304,7 +288,7 @@ export function useRadio(): UseRadioReturn {
       // fire another pause event, and create a loop that exhausts all retries.
       if (!station) return;
       setStatus('loading');
-      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      clearTimer(pauseTimerRef);
       pauseTimerRef.current = setTimeout(() => {
         if (userPausedRef.current || !audio.paused) return;
         audio.play().catch((err) => {
@@ -355,7 +339,7 @@ export function useRadio(): UseRadioReturn {
     // Timeout adapts to remaining buffer: more buffer → wait longer for recovery
     let stallCount = 0;
     const onStalled = () => {
-      if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
+      clearTimer(stallTimerRef);
       stallCount++;
       let bufferAhead = 0;
       if (audio.buffered.length > 0) {
@@ -445,10 +429,7 @@ export function useRadio(): UseRadioReturn {
     const MIN_BUFFER_AHEAD_S = 2;
     let lowBufferStreak = 0;
 
-    if (bufferCheckRef.current) {
-      clearInterval(bufferCheckRef.current);
-      bufferCheckRef.current = null;
-    }
+    clearTimer(bufferCheckRef);
 
     bufferCheckRef.current = setInterval(() => {
       // Update stream quality based on network and buffer state
@@ -539,13 +520,10 @@ export function useRadio(): UseRadioReturn {
     window.addEventListener('offline', onOffline);
 
     return () => {
-      if (stallTimerRef.current) { clearTimeout(stallTimerRef.current); stallTimerRef.current = null; }
-      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      clearTimer(stallTimerRef);
+      clearTimer(pauseTimerRef);
       clearReconnectTimer();
-      if (bufferCheckRef.current) {
-        clearInterval(bufferCheckRef.current);
-        bufferCheckRef.current = null;
-      }
+      clearTimer(bufferCheckRef);
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
@@ -590,10 +568,7 @@ export function useRadio(): UseRadioReturn {
     lastBufferEndRef.current = 0;
 
     // Crossfade: fade out with ease-out curve before switching
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
+    clearTimer(fadeTimerRef);
 
     if (!audio.paused && audio.src) {
       const steps = 8;
@@ -624,10 +599,7 @@ export function useRadio(): UseRadioReturn {
     userPausedRef.current = true;
     // Cancel any in-progress crossfade so its completion doesn't call
     // startPlayback() and resume audio after this explicit pause.
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
+    clearTimer(fadeTimerRef);
     audioRef.current?.pause();
   }, []);
 
@@ -656,31 +628,16 @@ export function useRadio(): UseRadioReturn {
     } else {
       userPausedRef.current = true;
       // Cancel any in-progress crossfade (same reason as pause())
-      if (fadeTimerRef.current) {
-        clearInterval(fadeTimerRef.current);
-        fadeTimerRef.current = null;
-      }
+      clearTimer(fadeTimerRef);
       audio.pause();
     }
   }, []);
 
   const stop = useCallback(() => {
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
-    if (pauseTimerRef.current) {
-      clearTimeout(pauseTimerRef.current);
-      pauseTimerRef.current = null;
-    }
-    if (reconnectTimerRef.current) {
-      clearTimeout(reconnectTimerRef.current);
-      reconnectTimerRef.current = null;
-    }
-    if (bufferCheckRef.current) {
-      clearInterval(bufferCheckRef.current);
-      bufferCheckRef.current = null;
-    }
+    clearTimer(fadeTimerRef);
+    clearTimer(pauseTimerRef);
+    clearTimer(reconnectTimerRef);
+    clearTimer(bufferCheckRef);
 
     const audio = audioRef.current;
     if (audio) {
