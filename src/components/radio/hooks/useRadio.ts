@@ -556,7 +556,12 @@ export function useRadio(): UseRadioReturn {
   const resume = useCallback(() => {
     userPausedRef.current = false;
     const audio = audioRef.current;
-    if (audio) resumeAudioContext(audio);
+    if (audio) {
+      resumeAudioContext(audio);
+      // Restore audio.volume from React state — sleep timer fade may have
+      // set it to 0 directly, bypassing React state.
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
+    }
     audio?.play().catch(() => {});
   }, []);
 
@@ -566,6 +571,9 @@ export function useRadio(): UseRadioReturn {
     if (audio.paused) {
       userPausedRef.current = false;
       resumeAudioContext(audio);
+      // Restore audio.volume from React state — sleep timer fade may have
+      // set it to 0 directly, bypassing React state.
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
       audio.play().catch(() => {});
     } else {
       userPausedRef.current = true;
