@@ -49,10 +49,7 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
     };
 
     rafRef.current = requestAnimationFrame(loop);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      lastTsRef.current = 0;
-    };
+    return () => { cancelAnimationFrame(rafRef.current); lastTsRef.current = 0; };
   }, [enabled, meterRef]);
 
   return { amplitude };

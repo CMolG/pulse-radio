@@ -114,10 +114,7 @@ export default function LyricsReel({
   // user controls focus manually by scrolling or clicking a line)
   useEffect(() => {
     if (!renderableLines.length) return;
-    const frame = requestAnimationFrame(() => {
-      scrollToIndex(0, "auto");
-      setFocusedIdx(0);
-    });
+    const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); });
     return () => cancelAnimationFrame(frame);
   // Only react to lyrics changing, not to activeIdx
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,18 +125,12 @@ export default function LyricsReel({
     if (!scroller || !renderableLines.length) return;
 
     let frame = 0;
-    const handleScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(updateFocusedIdx);
-    };
+    const handleScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(updateFocusedIdx); };
 
     frame = requestAnimationFrame(updateFocusedIdx);
     scroller.addEventListener("scroll", handleScroll, { passive: true });
 
-    return () => {
-      cancelAnimationFrame(frame);
-      scroller.removeEventListener("scroll", handleScroll);
-    };
+    return () => { cancelAnimationFrame(frame); scroller.removeEventListener("scroll", handleScroll); };
   }, [renderableLines.length, updateFocusedIdx]);
 
   if (renderableLines.length === 0) return null;

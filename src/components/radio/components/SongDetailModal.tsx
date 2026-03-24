@@ -114,10 +114,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
     window.addEventListener('keydown', onTab);
-    return () => {
-      window.removeEventListener('keydown', onTab);
-      prev?.focus();
-    };
+    return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
   }, [song]);
 
   return (

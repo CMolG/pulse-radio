@@ -85,10 +85,7 @@ function ScrollRow({
     el.addEventListener("scroll", check, { passive: true });
     const ro = new ResizeObserver(check);
     ro.observe(el);
-    return () => {
-      el.removeEventListener("scroll", check);
-      ro.disconnect();
-    };
+    return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [check, children]);
 
   const scroll = (dir: -1 | 1) => { ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" }); };
@@ -323,10 +320,7 @@ export default function BrowseView({
       runBatch();
     }
 
-    return () => {
-      cancelled = true;
-      flags.cancelled = true;
-    };
+    return () => { cancelled = true; flags.cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
 

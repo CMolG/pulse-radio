@@ -90,10 +90,7 @@ export function useStats() {
 
   useEffect(() => {
     saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
-    return () => {
-      if (saveTimerRef.current) clearInterval(saveTimerRef.current);
-      persist();
-    };
+    return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); persist(); };
   }, [persist]);
 
   // Track listen time for a station (call periodically while playing)

@@ -120,10 +120,7 @@ export function useRadio(): UseRadioReturn {
         clearTimer(fadeTimerRef);
       }
     };
-    return () => {
-      bc.close();
-      bcRef.current = null;
-    };
+    return () => { bc.close(); bcRef.current = null; };
   }, []);
 
   // Clean up timers on unmount to prevent orphaned intervals
@@ -195,10 +192,7 @@ export function useRadio(): UseRadioReturn {
 
   useEffect(() => {
     const audio = getAudio();
-    const clearReconnectTimer = () => {
-      clearTimer(reconnectTimerRef);
-      clearTimer(stallTimerRef);
-    };
+    const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); };
 
     const sessionId = playSessionRef.current;
     const reconnect = (delay: number) => {

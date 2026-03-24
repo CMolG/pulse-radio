@@ -131,10 +131,7 @@ export function useLyrics(
     abortRef.current = controller;
     doFetch(key, cached, controller);
 
-    return () => {
-      controller.abort();
-      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-    };
+    return () => { controller.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.artist, track?.title, track?.album, stationName]);
 

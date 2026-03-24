@@ -34,10 +34,7 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
       }
       lockRef.current = lock;
       setIsActive(true);
-      lock.addEventListener('release', () => {
-        lockRef.current = null;
-        setIsActive(false);
-      });
+      lock.addEventListener('release', () => { lockRef.current = null; setIsActive(false); });
     } catch {
       // Wake lock request failed (e.g., low battery, or permission denied)
     } finally {
