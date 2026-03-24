@@ -311,15 +311,7 @@ input[type="color"]:hover {
 
 /* ── Reusable Panels & Glass Surfaces ────────────────────────────────────── */
 
-.panel-2 {
-  @apply bg-surface-2 border border-border-subtle;
-}
-
 /* ── Reusable Typography ─────────────────────────────────────────────────── */
-
-.app-label {
-  @apply text-[10px] uppercase tracking-wider text-white/40;
-}
 
 .text-muted {
   @apply text-white/40;
@@ -335,10 +327,6 @@ input[type="color"]:hover {
 
 .text-dim {
   @apply text-white/50;
-}
-
-.text-faint {
-  @apply text-white/20;
 }
 
 .text-soft {
@@ -402,12 +390,6 @@ input[type="color"]:hover {
 .dot-2 {
   @apply w-2 h-2 rounded-full;
 }
-.dot-7 {
-  @apply w-7 h-7 rounded-full;
-}
-.dot-8 {
-  @apply w-8 h-8 rounded-full;
-}
 .dot-10 {
   @apply w-10 h-10 rounded-full;
 }
@@ -450,9 +432,6 @@ input[type="color"]:hover {
 .col-center {
   @apply flex flex-col items-center;
 }
-.col-full {
-  @apply flex flex-col size-full;
-}
 .glass-blur {
   @apply bg-sys-surface/80 backdrop-blur-xl backdrop-saturate-150;
 }
@@ -463,17 +442,6 @@ input[type="color"]:hover {
 }
 .text-subtle-hover {
   @apply text-white/30 hover:text-white/60 transition-colors;
-}
-
-/* ── Background hover transitions ── */
-.hover-1 {
-  @apply hover:bg-surface-1 transition-colors;
-}
-.hover-2 {
-  @apply hover:bg-surface-2 transition-colors;
-}
-.hover-4 {
-  @apply hover:bg-surface-4 transition-colors;
 }
 
 /* ── Padding + rounding combos ── */
@@ -494,25 +462,11 @@ input[type="color"]:hover {
 .bdr-b {
   @apply border-b border-border-subtle;
 }
-.bdr-t {
-  @apply border-t border-border-subtle;
-}
-.bdr-r {
-  @apply border-r border-border-subtle;
-}
-.bdr-l {
-  @apply border-l border-border-subtle;
-}
 .bdr {
   @apply border border-border-subtle;
 }
 .flex-fill {
   @apply flex-1 min-w-0;
-}
-
-/* ── Card border + radius combos ── */
-.card-lg {
-  @apply border border-border-subtle rounded-2xl;
 }
 
 /* ── Dawn gradient – radio station fallback background ── */
