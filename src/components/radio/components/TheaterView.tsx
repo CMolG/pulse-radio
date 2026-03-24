@@ -42,9 +42,14 @@ type Props = {
   compact?: boolean;
 };
 
+const _colorCache = new Map<string, Promise<[string, string, string]>>();
+const MAX_COLOR_CACHE = 32;
+
 /** Extract the top-2 saturated hues from an artwork image for use as spiral colors. */
 function extractColors(imgUrl: string): Promise<[string, string, string]> {
-  return new Promise((resolve) => {
+  const cached = _colorCache.get(imgUrl);
+  if (cached) return cached;
+  const p = new Promise<[string, string, string]>((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
@@ -89,6 +94,12 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
     img.onerror = () => resolve(FALLBACK_COLORS);
     img.src = imgUrl;
   });
+  if (_colorCache.size >= MAX_COLOR_CACHE) {
+    const first = _colorCache.keys().next().value;
+    if (first !== undefined) _colorCache.delete(first);
+  }
+  _colorCache.set(imgUrl, p);
+  return p;
 }
 
 export default function TheaterView({
