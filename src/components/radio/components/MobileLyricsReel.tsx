@@ -31,6 +31,34 @@ const EMPHASIS: [string, string, string][] = [
   ["text-white/14 font-medium opacity-100 scale-[0.88]", "text-[12px]", "text-[16px]"],
 ];
 
+const LyricReelLine = React.memo(function LyricReelLine({
+  lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
+}: {
+  lineId: string; index: number; text: string; emphasisIdx: number;
+  isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>;
+  scrollToIndex: (i: number) => void;
+}) {
+  const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`;
+  return (
+    <button
+      key={lineId}
+      ref={(node) => { lineRefs.current[index] = node; }}
+      type="button"
+      onClick={() => scrollToIndex(index)}
+      className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
+    >
+      <span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>
+        {text}
+      </span>
+    </button>
+  );
+}, (prev, next) =>
+  prev.lineId === next.lineId &&
+  prev.text === next.text &&
+  prev.emphasisIdx === next.emphasisIdx &&
+  prev.isDesktop === next.isDesktop
+);
+
 export default function LyricsReel({
   lyrics,
   currentTime,
@@ -160,26 +188,18 @@ export default function LyricsReel({
                 const distanceFromFocus = Math.abs(index - focusedIdx);
                 const isActive = activeIdx >= 0 && index === activeIdx;
                 const ei = isActive ? 0 : Math.min(distanceFromFocus, 3) + 1;
-                const emphasisClass = `${EMPHASIS[ei][0]} ${EMPHASIS[ei][isDesktop ? 2 : 1]}`;
 
                 return (
-                  <button
+                  <LyricReelLine
                     key={line.id}
-                    ref={(node) => {
-                      lineRefs.current[index] = node;
-                    }}
-                    type="button"
-                    onClick={() => scrollToIndex(index)}
-                    className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
-                  >
-                    <span
-                      className={`mx-auto block whitespace-pre-wrap ${
-                        isDesktop ? "max-w-3xl" : "max-w-[92%]"
-                      }`}
-                    >
-                      {line.text}
-                    </span>
-                  </button>
+                    lineId={line.id}
+                    index={index}
+                    text={line.text}
+                    emphasisIdx={ei}
+                    isDesktop={isDesktop}
+                    lineRefs={lineRefs}
+                    scrollToIndex={scrollToIndex}
+                  />
                 );
               })}
             </div>
