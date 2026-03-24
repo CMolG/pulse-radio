@@ -610,10 +610,10 @@ export function useRadio(): UseRadioReturn {
         }
       }, interval);
     } else {
-      audio.volume = muted ? 0 : volume;
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
       startPlayback(audio, s.url_resolved, handlePlayRejected);
     }
-  }, [getAudio, muted, volume, startPlayback, handlePlayRejected]);
+  }, [getAudio, startPlayback, handlePlayRejected]);
 
   const pause = useCallback(() => {
     userPausedRef.current = true;
