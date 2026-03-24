@@ -171,6 +171,10 @@ export function useRadio(): UseRadioReturn {
   }, []);
 
   const handlePlayRejected = useCallback((err: unknown) => {
+    // AbortError means the play was superseded — stop(), pause(), or a new
+    // play() cleared audio.src while this promise was pending.  The caller
+    // already set the correct status (idle/loading), so swallow silently.
+    if (err instanceof DOMException && err.name === 'AbortError') return;
     setStatus(isAutoplayBlocked(err) ? 'paused' : 'error');
   }, []);
 
@@ -335,7 +339,8 @@ export function useRadio(): UseRadioReturn {
             return audio.play();
           };
           setStatus('loading');
-          setSourceAndPlay(!isCurrentlyProxied).catch(() => {
+          setSourceAndPlay(!isCurrentlyProxied).catch((fallbackErr) => {
+            if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return;
             setStatus('error');
           });
           return;
