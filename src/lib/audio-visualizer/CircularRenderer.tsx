@@ -43,7 +43,6 @@ export function CircularRenderer({
   }, [color1, color2]);
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
-
     timeRef.current += 0.016;
     const t = timeRef.current;
 

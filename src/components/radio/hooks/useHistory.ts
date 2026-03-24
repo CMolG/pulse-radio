@@ -23,11 +23,7 @@ export function useHistory(
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
     // Dedup by id on load in case of corrupted storage
     const seen = new Set<string>();
-    return loaded.filter(e => {
-      if (!e.id || seen.has(e.id)) return false;
-      seen.add(e.id);
-      return true;
-    });
+    return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
   });
 
   const lastTrackRef = useRef<string>('');

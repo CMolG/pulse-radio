@@ -243,8 +243,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
     );
   }
 
-  const toggleFilter = (mode: FilterMode) =>
-    setFilterMode(prev => (prev === mode ? "none" : mode));
+  const toggleFilter = (mode: FilterMode) => setFilterMode(prev => (prev === mode ? "none" : mode));
 
   return (
     <div className="p-4">

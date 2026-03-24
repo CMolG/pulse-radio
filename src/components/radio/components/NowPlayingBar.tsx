@@ -42,9 +42,7 @@ type Props = {
   streamQuality?: StreamQuality;
 };
 
-const SAFE_AREA_STYLE: React.CSSProperties = {
-  paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))',
-};
+const SAFE_AREA_STYLE: React.CSSProperties = { paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' };
 
 function NowPlayingBar({
   station,

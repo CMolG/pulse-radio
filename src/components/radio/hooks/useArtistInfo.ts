@@ -63,11 +63,7 @@ export function useArtistInfo(artist: string | null): {
       .catch(() => { if (!cancelled) setFetched({ key, info: null }); })
       .finally(() => { clearTimeout(timeout); });
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-      controller.abort();
-    };
+    return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
   }, [artist, key, cachedInfo]);
 
   const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);

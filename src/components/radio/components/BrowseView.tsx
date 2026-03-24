@@ -158,9 +158,7 @@ export default function BrowseView({
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
     const defaultOrder = [...BROWSE_ORDER];
     // Map genre stats to category IDs (handle partial matches: "hip hop" → "hiphop")
-    const GENRE_TO_CAT: Record<string, string> = {
-      'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi',
-    };
+    const GENRE_TO_CAT: Record<string, string> = { 'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi' };
     const boostedIds = new Set<string>();
     const ordered: string[] = [];
 

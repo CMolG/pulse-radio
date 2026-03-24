@@ -129,10 +129,6 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       }
     },
     stop: () => { running = false; teardown(); },
-    destroy: () => {
-      destroyed = true;
-      running = false;
-      teardown();
-    },
+    destroy: () => { destroyed = true; running = false; teardown(); },
   };
 }
