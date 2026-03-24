@@ -16,7 +16,6 @@ export const STORAGE_KEYS = {
   CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
   HISTORY: 'radio-history',
   FAVORITE_SONGS: 'radio-favorite-songs',
-  SIDEBAR_COLLAPSED: 'radio-sidebar-collapsed',
   NORMALIZER_ENABLED: 'radio-normalizer-enabled',
   STEREO_WIDTH: 'radio-stereo-width',
   BASS_ENHANCE: 'radio-bass-enhance',
