@@ -475,33 +475,42 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return () => clearInterval(iv);
   }, [radio.status, saveWidgetState]);
 
+  // Ref holds fresh handler functions so the event listener registered once
+  // always calls current versions — avoids stale closures when queue/favorites
+  // change without a station change.
+  const radioCommandRef = useRef({ handlePlay, handleSkipNext, handleSkipPrev, radio, favs });
+  useEffect(() => {
+    radioCommandRef.current = { handlePlay, handleSkipNext, handleSkipPrev, radio, favs };
+  }, [handlePlay, handleSkipNext, handleSkipPrev, radio, favs]);
+
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (!detail) return;
+      const { handlePlay: play, handleSkipNext: skipNext, handleSkipPrev: skipPrev, radio: r, favs: f } = radioCommandRef.current;
       switch (detail.action) {
         case "togglePlay":
-          radio.togglePlay();
+          r.togglePlay();
           break;
         case "play":
-          if (detail.station) handlePlay(detail.station);
+          if (detail.station) play(detail.station);
           break;
         case "stop":
-          radio.stop();
+          r.stop();
           break;
         case "skipNext":
-          handleSkipNext();
+          skipNext();
           break;
         case "skipPrev":
-          handleSkipPrev();
+          skipPrev();
           break;
         case "removeFavorite": {
-          if (detail.stationuuid) favs.remove(detail.stationuuid);
+          if (detail.stationuuid) f.remove(detail.stationuuid);
           break;
         }
         case "setVolume": {
           if (typeof detail.volume === 'number') {
-            radio.setVolume(detail.volume);
+            r.setVolume(detail.volume);
           }
           break;
         }
@@ -509,8 +518,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     };
     window.addEventListener("radio-command", handler);
     return () => window.removeEventListener("radio-command", handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radio.station]);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
