@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Radio, Maximize2 } from "lucide-react";
 import type { Station, NowPlayingTrack } from "../types";
 import AnimatedBars from "./AnimatedBars";
@@ -26,7 +26,7 @@ type Props = {
   onTheater?: () => void;
 };
 
-export default function NowPlayingHero({
+export default React.memo(function NowPlayingHero({
   station,
   track,
   isPlaying,
@@ -45,6 +45,11 @@ export default function NowPlayingHero({
   }
 
   const showFallback = !coverUrl || imgError;
+
+  const heroTags = useMemo(
+    () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
+    [station.tags],
+  );
 
   return (
     <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
@@ -96,8 +101,7 @@ export default function NowPlayingHero({
             </p>
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">
-              {station.tags?.split(",").slice(0, 3).join(" · ") ||
-                "Internet Radio"}
+              {heroTags}
             </p>
           )}
           {track?.album && (
@@ -121,4 +125,4 @@ export default function NowPlayingHero({
       </div>
     </div>
   );
-}
+});

@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { Station, NowPlayingTrack, LyricsData } from "../types";
@@ -140,6 +140,11 @@ export default function TheaterView({
   }, [artworkUrl]);
 
   const [color1, color2, color3] = colors;
+
+  const theaterTags = useMemo(
+    () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
+    [station.tags],
+  );
 
   return (
     <motion.div
@@ -323,7 +328,7 @@ export default function TheaterView({
             <p
               className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}
             >
-              {station.tags?.split(",").slice(0, 3).join(" · ") || "Internet Radio"}
+              {theaterTags}
             </p>
           )}
 
