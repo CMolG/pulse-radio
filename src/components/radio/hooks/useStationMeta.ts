@@ -175,20 +175,9 @@ export function useStationMeta(
 
       if (streamTitle && streamTitle !== lastTitleRef.current) {
         lastTitleRef.current = streamTitle;
-
-        if (isAdContent(streamTitle)) {
-          setTrack(null);
-          return;
-        }
-
-        const parsed = parseTrack(streamTitle, station.name);
-        // Only reject if title looks like ad content. Artist names can look like domains.
-        if (!parsed || isAdContent(parsed.title)) {
-          setTrack(null);
-          return;
-        }
-
-        setTrack(parsed);
+        // Reject ad content in raw title or parsed title (artist names may look like domains)
+        const parsed = !isAdContent(streamTitle) ? parseTrack(streamTitle, station.name) : null;
+        setTrack(parsed && !isAdContent(parsed.title) ? parsed : null);
         return;
       }
 

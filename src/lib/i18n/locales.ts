@@ -4,14 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 
-export type LocaleInfo = {
-  code: SupportedLocale;
-  nativeName: string;
-  englishName: string;
-  rtl?: boolean;
-};
-
-export const SUPPORTED_LOCALES: readonly LocaleInfo[] = [
+const _LOCALES = [
   { code: "en", nativeName: "English", englishName: "English" },
   { code: "es", nativeName: "Español", englishName: "Spanish" },
   { code: "fr", nativeName: "Français", englishName: "French" },
@@ -49,42 +42,16 @@ export const SUPPORTED_LOCALES: readonly LocaleInfo[] = [
   { code: "tl", nativeName: "Filipino", englishName: "Filipino" },
 ] as const;
 
-export type SupportedLocale =
-  | "en"
-  | "es"
-  | "fr"
-  | "de"
-  | "pt-BR"
-  | "pt"
-  | "it"
-  | "nl"
-  | "ja"
-  | "ko"
-  | "zh"
-  | "zh-TW"
-  | "ar"
-  | "hi"
-  | "bn"
-  | "ru"
-  | "uk"
-  | "pl"
-  | "tr"
-  | "sv"
-  | "da"
-  | "nb"
-  | "fi"
-  | "el"
-  | "cs"
-  | "hu"
-  | "ro"
-  | "th"
-  | "vi"
-  | "id"
-  | "ms"
-  | "fa"
-  | "he"
-  | "sw"
-  | "tl";
+export type SupportedLocale = (typeof _LOCALES)[number]['code'];
+
+export type LocaleInfo = {
+  code: SupportedLocale;
+  nativeName: string;
+  englishName: string;
+  rtl?: boolean;
+};
+
+export const SUPPORTED_LOCALES: readonly LocaleInfo[] = _LOCALES;
 
 const SUPPORTED_SET = new Set<SupportedLocale>(
   SUPPORTED_LOCALES.map((locale) => locale.code),
