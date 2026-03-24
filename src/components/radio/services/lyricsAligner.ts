@@ -6,6 +6,7 @@
 
 import type { LyricsData } from '../types';
 import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
+import { normalizeText } from '@/lib/stringUtils';
 
 export type AlignerStepInput = {
   lyrics: LyricsData;
@@ -31,16 +32,6 @@ const STOPWORDS = new Set([
 ]);
 
 const WORD_RE = /[a-z0-9']+/g;
-
-function normalizeText(value: string): string {
-  return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9'\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
 
 function tokenize(value: string): string[] {
   const normalized = normalizeText(value);

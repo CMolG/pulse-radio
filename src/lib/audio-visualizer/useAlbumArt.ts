@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { normalizeText } from '@/lib/stringUtils';
 
 const FETCH_TIMEOUT = 8_000;
 
@@ -46,17 +47,6 @@ type ItunesResult = {
   trackNumber?: number;
   trackCount?: number;
 };
-
-function normalizeText(value: string | null | undefined): string {
-  if (!value) return '';
-  return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9\s']/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
 
 function jaroDistance(a: string, b: string): number {
   if (a === b) return 1;
