@@ -9,21 +9,22 @@ export interface LyricLine {
   text: string;
 }
 
+const TS_REGEX = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
+
 export function parseLrc(lrcText: string): LyricLine[] {
   const lines: LyricLine[] = [];
-  const tsRegex = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
   for (const raw of lrcText.split('\n')) {
     const timestamps: number[] = [];
     let lastIndex = 0;
     let m;
-    tsRegex.lastIndex = 0;
-    while ((m = tsRegex.exec(raw)) !== null) {
+    TS_REGEX.lastIndex = 0;
+    while ((m = TS_REGEX.exec(raw)) !== null) {
       const minutes = parseInt(m[1], 10);
       const seconds = parseInt(m[2], 10);
       if (seconds >= 60) continue; // invalid timestamp
       const centiseconds = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
       timestamps.push(minutes * 60 + seconds + centiseconds / 1000);
-      lastIndex = tsRegex.lastIndex;
+      lastIndex = TS_REGEX.lastIndex;
     }
     if (timestamps.length === 0) continue;
     const text = raw.slice(lastIndex).trim();

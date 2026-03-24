@@ -1,7 +1,4 @@
 export function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return [r || 0, g || 0, b || 0];
+  const num = parseInt(hex.charAt(0) === '#' ? hex.slice(1) : hex, 16);
+  return [(num >> 16) & 0xFF, (num >> 8) & 0xFF, num & 0xFF];
 }
