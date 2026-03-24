@@ -552,33 +552,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const detail = (e as CustomEvent).detail;
       if (!detail) return;
       const { handlePlay: play, handleSkipNext: skipNext, handleSkipPrev: skipPrev, radio: r, favs: f } = radioCommandRef.current;
-      switch (detail.action) {
-        case "togglePlay":
-          r.togglePlay();
-          break;
-        case "play":
-          if (detail.station) play(detail.station);
-          break;
-        case "stop":
-          r.stop();
-          break;
-        case "skipNext":
-          skipNext();
-          break;
-        case "skipPrev":
-          skipPrev();
-          break;
-        case "removeFavorite": {
-          if (detail.stationuuid) f.remove(detail.stationuuid);
-          break;
-        }
-        case "setVolume": {
-          if (typeof detail.volume === 'number') {
-            r.setVolume(detail.volume);
-          }
-          break;
-        }
-      }
+      const commands: Record<string, () => void> = {
+        togglePlay: () => r.togglePlay(),
+        play: () => detail.station && play(detail.station),
+        stop: () => r.stop(),
+        skipNext: () => skipNext(),
+        skipPrev: () => skipPrev(),
+        removeFavorite: () => detail.stationuuid && f.remove(detail.stationuuid),
+        setVolume: () => typeof detail.volume === 'number' && r.setVolume(detail.volume),
+      };
+      commands[detail.action]?.();
     };
     window.addEventListener("radio-command", handler);
     return () => window.removeEventListener("radio-command", handler);

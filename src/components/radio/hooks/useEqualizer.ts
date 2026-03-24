@@ -23,25 +23,20 @@ const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: num
 
 const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
 
+function ensureQualityMigration(): void {
+  if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
+  saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
+  saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
+  saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
+}
+
 function getDefaultNoiseReductionMode(): NoiseReductionMode {
-  const migrated = loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false);
-  if (!migrated) {
-    saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
-    saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-    saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
-    return 'low';
-  }
+  ensureQualityMigration();
   return loadFromStorage<NoiseReductionMode>(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
 }
 
 function getDefaultNormalizerEnabled(): boolean {
-  const migrated = loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false);
-  if (!migrated) {
-    saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
-    saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-    saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
-    return true;
-  }
+  ensureQualityMigration();
   return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true);
 }
 
