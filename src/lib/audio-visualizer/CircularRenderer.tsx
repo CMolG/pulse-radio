@@ -39,6 +39,10 @@ export function CircularRenderer({
   const timeRef = useRef(0);
   const renderRef = useRef<() => void>(() => {});
   const frequencyDataRefRef = useRef(frequencyDataRef);
+  const demoBufferRef = useRef(new Uint8Array(128));
+  // Pre-computed position-based color strings — RGB doesn't depend on audio data,
+  // only on the gradient position (i/bufLen). Rebuilt when colors change.
+  const colorStringsRef = useRef<string[]>([]);
 
   const colorsRef = useRef({
     c1: hexToRgb(color1),
@@ -46,10 +50,19 @@ export function CircularRenderer({
   });
 
   useEffect(() => {
-    colorsRef.current = {
-      c1: hexToRgb(color1),
-      c2: hexToRgb(color2),
-    };
+    const c1 = hexToRgb(color1);
+    const c2 = hexToRgb(color2);
+    colorsRef.current = { c1, c2 };
+    // Rebuild position-based color strings (128 entries for 128 bars)
+    const strings: string[] = new Array(128);
+    for (let i = 0; i < 128; i++) {
+      const norm = i / 128;
+      const r = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
+      const g = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
+      const b = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
+      strings[i] = `rgb(${r},${g},${b})`;
+    }
+    colorStringsRef.current = strings;
   }, [color1, color2]);
 
   useEffect(() => {
@@ -97,7 +110,7 @@ export function CircularRenderer({
       bufLen = dataArray.length;
     } else if (demo) {
       bufLen = 128;
-      const demoData = new Uint8Array(bufLen);
+      const demoData = demoBufferRef.current;
       for (let i = 0; i < bufLen; i++) {
         const base = 80 + Math.sin(t * 2 + i * 0.15) * 60;
         const ripple = Math.sin(t * 3.5 + i * 0.3) * 40;
@@ -110,24 +123,32 @@ export function CircularRenderer({
       return;
     }
 
+    const colorStrings = colorStringsRef.current;
+    const hasColorStrings = colorStrings.length >= bufLen;
+
     for (let i = 0; i < bufLen; i++) {
       const val = (dataArray[i] / 255) * sensitivity;
       const angle = (i / bufLen) * Math.PI * 2;
       const r = baseR + val * baseR * 1.5;
       const x = cx + Math.cos(angle) * r;
       const y = cy + Math.sin(angle) * r;
-      const norm = i / bufLen;
 
-      const cr = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
-      const cg = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
-      const cb = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
-      const alpha = 0.5 + val * 0.5;
+      if (hasColorStrings) {
+        ctx.fillStyle = colorStrings[i];
+        ctx.globalAlpha = 0.5 + val * 0.5;
+      } else {
+        const norm = i / bufLen;
+        const cr = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
+        const cg = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
+        const cb = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},${0.5 + val * 0.5})`;
+      }
 
-      ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
       ctx.beginPath();
       ctx.arc(x, y, 3 + val * 6, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.globalAlpha = 1.0;
 
     // Inner reference circle
     ctx.beginPath();
