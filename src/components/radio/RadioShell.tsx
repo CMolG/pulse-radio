@@ -892,6 +892,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </motion.div>
   ) : null;
 
+  const navTabs = (size: number) => [
+    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={size} /> },
+    { id: "history" as const, label: t("history"), icon: <Clock size={size} /> },
+    { id: "favorites" as const, label: t("favorites"), icon: <Heart size={size} /> },
+  ];
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -1056,11 +1062,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               )}
               {/* ── Mobile top nav tabs + search ── */}
               <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
-                {([
-                  { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={14} /> },
-                  { id: "history" as const, label: t("history"), icon: <Clock size={14} /> },
-                  { id: "favorites" as const, label: t("favorites"), icon: <Heart size={14} /> },
-                ]).map((tab) => (
+                {navTabs(14).map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
@@ -1264,11 +1266,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 )}
                 {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
-                  {([
-                    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={13} /> },
-                    { id: "history" as const, label: t("history"), icon: <Clock size={13} /> },
-                    { id: "favorites" as const, label: t("favorites"), icon: <Heart size={13} /> },
-                  ]).map((tab) => (
+                  {navTabs(13).map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
