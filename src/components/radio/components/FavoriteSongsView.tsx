@@ -23,6 +23,12 @@ type Props = {
 };
 
 type ContextMenuState = { x: number; y: number; songId: string } | null;
+type FilterMode = "none" | "artist" | "album";
+
+const filterBtnClass = (active: boolean) =>
+  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+    active ? "bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30" : "bg-white/5 text-white/40 border border-white/8 hover:text-white/60"
+  }`;
 
 // ── Context Menu ─────────────────────────────────────────────────────────────
 function SongContextMenu({
@@ -199,7 +205,6 @@ function GroupStack({
 }
 
 // ── Main View ─────────────────────────────────────────────────────────────────
-type FilterMode = "none" | "artist" | "album";
 
 export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>("none");
@@ -258,35 +263,17 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
           <p className="text-[12px] text-dim">{songs.length} songs</p>
 
           {/* By Artist */}
-          <button
-            onClick={() => toggleFilter("artist")}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
-              filterMode === "artist"
-                ? "bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30"
-                : "bg-white/5 text-white/40 border border-white/8 hover:text-white/60"
-            }`}
-          >
+          <button onClick={() => toggleFilter("artist")} className={filterBtnClass(filterMode === "artist")}>
             <Users size={10} />
             By Artist
-            {filterMode === "artist" && (
-              <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />
-            )}
+            {filterMode === "artist" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
           </button>
 
           {/* By Album */}
-          <button
-            onClick={() => toggleFilter("album")}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
-              filterMode === "album"
-                ? "bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30"
-                : "bg-white/5 text-white/40 border border-white/8 hover:text-white/60"
-            }`}
-          >
+          <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
             <Disc3 size={10} />
             By Album
-            {filterMode === "album" && (
-              <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />
-            )}
+            {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
           </button>
         </div>
 

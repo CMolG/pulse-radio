@@ -21,6 +21,11 @@ import UiImage from "@/components/common/UiImage";
 // Fallback spiral colors — warm orange/red gradient
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];
 
+const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; children: React.ReactNode }) => (
+  <span className={`px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50${mono ? " font-mono" : ""}${upper ? " uppercase" : ""}`}>{children}</span>
+);
+
+
 type Props = {
   station: Station;
   track: NowPlayingTrack | null;
@@ -362,26 +367,10 @@ export default function TheaterView({
           {/* Station details badges */}
           {!compact && (
             <div className="flex flex-wrap justify-center gap-1.5 mt-1">
-              {station.codec && (
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-mono text-white/50 uppercase">
-                  {station.codec}
-                </span>
-              )}
-              {(icyBitrate || station.bitrate > 0) && (
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-mono text-white/50">
-                  {icyBitrate ?? station.bitrate}kbps
-                </span>
-              )}
-              {station.country && (
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
-                  {station.country}
-                </span>
-              )}
-              {track?.genre && (
-                <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50">
-                  {track.genre}
-                </span>
-              )}
+              {station.codec && <Badge mono upper>{station.codec}</Badge>}
+              {(icyBitrate || station.bitrate > 0) && <Badge mono>{icyBitrate ?? station.bitrate}kbps</Badge>}
+              {station.country && <Badge>{station.country}</Badge>}
+              {track?.genre && <Badge>{track.genre}</Badge>}
             </div>
           )}
 
