@@ -152,10 +152,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
 
         {/* Equalizer section — fully inline */}
         <div className="px-5 py-4">
-          <button
-            onClick={() => setShowEq((s) => !s)}
-            className="flex items-center justify-between w-full"
-          >
+          <button onClick={() => setShowEq((s) => !s)} className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
               <Sliders size={16} className="text-white/60" />
               <span className="text-[14px] font-medium text-white/80">Equalizer</span>

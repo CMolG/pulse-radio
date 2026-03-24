@@ -155,16 +155,8 @@ export default function LyricsReel({
   if (renderableLines.length === 0) return null;
 
   return (
-    <div
-      className={`relative flex-shrink-0 ${
-        isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"
-      }`}
-    >
-      <div
-        className={`relative z-20 flex h-full flex-col ${
-          isDesktop ? "px-8 pb-5 pt-3" : "px-5 pb-4 pt-2"
-        }`}
-      >
+    <div className={`relative flex-shrink-0 ${isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"}`}>
+      <div className={`relative z-20 flex h-full flex-col ${isDesktop ? "px-8 pb-5 pt-3" : "px-5 pb-4 pt-2"}`}>
         <div
           ref={scrollerRef}
           className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${

@@ -173,10 +173,7 @@ function GroupStack({
         <AnimatePresence>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             {visibleSongs.map((song, i) => (
-              <div
-                key={song.id}
-                onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}
-              >
+              <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}>
                 <SongCard
                   item={song}
                   onRemove={() => onRemove(song.id)}
@@ -317,10 +314,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
           {songs.map((song, i) => (
-            <div
-              key={song.id}
-              onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}
-            >
+            <div key={song.id} onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}>
               <SongCard
                 item={song}
                 onRemove={() => onRemove(song.id)}

@@ -873,20 +873,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       >
         {parallaxElement}
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
-          <TheaterView
-            {...theaterBaseProps}
-            station={radio.station ?? emptyStation}
-            onBack={() => {}}
-            compact
-          />
+          <TheaterView {...theaterBaseProps} station={radio.station ?? emptyStation} onBack={() => {}} compact />
         </div>
-        <NowPlayingBar
-          {...nowPlayingBaseProps}
-          onToggleEq={() => {}}
-          showEq={false}
-          theaterMode={true}
-          compact
-        />
+        <NowPlayingBar {...nowPlayingBaseProps} onToggleEq={() => {}} showEq={false} theaterMode={true} compact />
         {sharedModals}
       </div>
     );
@@ -1099,13 +1088,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
                   {albumArt.artworkUrl ? (
                     <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                      <UiImage
-                        src={albumArt.artworkUrl}
-                        alt=""
-                        className="object-cover"
-                        sizes="56px"
-                        loading="lazy"
-                      />
+                      <UiImage src={albumArt.artworkUrl} alt="" className="object-cover" sizes="56px" loading="lazy" />
                     </div>
                   ) : (
                     <div className="w-14 h-14 rounded-lg bg-surface-2 flex-shrink-0" />
