@@ -5,14 +5,12 @@
  */
 
 @import "tailwindcss";
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --accent-color: #3478f6;
   --accent-rgb: 52, 120, 246;
 }
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -41,10 +39,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root { --background: #0a0a0a; --foreground: #ededed; }
-}
-
+@media (prefers-color-scheme: dark) { :root { --background: #0a0a0a; --foreground: #ededed; } }
 body {
   background: var(--background);
   color: var(--foreground);
@@ -63,7 +58,6 @@ input, select, textarea {
 input,
 textarea,
 [contenteditable] { caret-color: var(--accent-color); }
-
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -79,21 +73,13 @@ textarea,
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.1);
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 /* Prevent scroll chaining from inner scrollable areas */
 .custom-scrollbar { overscroll-behavior: contain; scroll-behavior: smooth; }
-
-.lyrics-reel {
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
+.lyrics-reel { overscroll-behavior: contain; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
 .lyrics-reel::-webkit-scrollbar { display: none; }
 
 /* Range slider - macOS style */
@@ -103,13 +89,11 @@ input[type="range"] {
   background: transparent;
   cursor: pointer;
 }
-
 input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.12);
 }
-
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 14px;
@@ -120,21 +104,17 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   transition: transform 0.15s;
 }
-
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.15);
 }
-
 input[type="range"]::-webkit-slider-thumb:active {
   transform: scale(0.95);
 }
-
 input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.12);
 }
-
 input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
@@ -157,17 +137,14 @@ select {
     border-color 0.15s;
   cursor: pointer;
 }
-
 select:hover {
   background-color: rgba(255, 255, 255, 0.09);
   border-color: rgba(255, 255, 255, 0.12);
 }
-
 select:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.25);
 }
-
 select option {
   background-color: #2c2c2e;
   color: rgba(255, 255, 255, 0.85);
@@ -184,7 +161,6 @@ input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 input[type="number"] {
   -moz-appearance: textfield;
 }
@@ -206,7 +182,6 @@ input[type="radio"] {
     background-color 0.15s,
     border-color 0.15s;
 }
-
 input[type="radio"] {
   border-radius: 50%;
 }
@@ -216,7 +191,6 @@ input[type="radio"]:checked {
   background: var(--accent-color);
   border-color: var(--accent-color);
 }
-
 input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
@@ -228,7 +202,6 @@ input[type="checkbox"]:checked::after {
   border-width: 0 1.5px 1.5px 0;
   transform: rotate(45deg);
 }
-
 input[type="radio"]:checked::after {
   content: "";
   position: absolute;
@@ -261,16 +234,13 @@ input[type="color"] {
   padding: 1px;
   background: transparent;
 }
-
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
-
 input[type="color"]::-webkit-color-swatch {
   border: none;
   border-radius: 4px;
 }
-
 input[type="color"]:hover {
   border-color: rgba(255, 255, 255, 0.25);
 }
@@ -302,13 +272,9 @@ input[type="color"]:hover {
 /* ── Reusable Typography ─────────────────────────────────────────────────── */
 
 .text-muted { @apply text-white/40; }
-
 .text-subtle { @apply text-white/30; }
-
 .text-secondary { @apply text-white/60; }
-
 .text-dim { @apply text-white/50; }
-
 .text-soft { @apply text-white/70; }
 
 /* ── Reusable Icon Sizes ─────────────────────────────────────────────────── */
@@ -335,17 +301,13 @@ input[type="color"]:hover {
     transform: scale(1.05) translate(0px, 0px);
   }
 }
-
 .animate-ambient-drift {
   /* 25 segundos hace que sea imperceptiblemente lento y elegante */
   animation: ambient-drift 15s ease-in-out infinite;
   /* Will-change avisa al navegador para que optimice la animación usando la GPU */
   will-change: transform;
 }
-
 @property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
-
-
 .flex-center-col { @apply flex flex-col items-center justify-center; }
 .flex-center-row { @apply flex items-center justify-center; }
 .flex-between { @apply flex items-center justify-between; }
@@ -411,8 +373,6 @@ input[type="color"]:hover {
 
   /* Safe area padding for devices with notches/home indicators */
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
-
   .safe-top { padding-top: env(safe-area-inset-top, 0px); }
-
   .safe-x { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
 }
