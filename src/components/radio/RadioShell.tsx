@@ -533,8 +533,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return () => window.removeEventListener("radio-command", handler);
   }, []);
 
+  // Ref holds fresh state for keyboard handler so the event listener is
+  // registered once — avoids ~60fps add/removeEventListener churn from
+  // unstable deps (radio, favs, etc.) that change every render.
+  const keydownRef = useRef({ radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics });
+  useEffect(() => {
+    keydownRef.current = { radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics };
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics]);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      const { radio: r, handleSkipNext: skipNext, handleSkipPrev: skipPrev, favs: f, favSongs: fs, enrichedTrack: et, theaterMode: tm, showEq: eq, showShortcuts: sc, selectedSong: ss, sleepTimer: st, showToast: toast, realtimeLyrics: rl } = keydownRef.current;
       const target = e.target as HTMLElement;
       const isInput =
         target.tagName === "INPUT" ||
@@ -547,47 +556,47 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       // When EQ panel is open, suppress single-letter shortcuts that could
       // trigger unintended actions (theater, favorites, search, etc.).
       // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
-      if (showEq) {
+      if (eq) {
         const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
         if (!allowed.has(e.key)) return;
       }
 
       // When song detail modal is open, let it handle its own Escape;
       // block all keys here to prevent shortcuts from firing behind the modal
-      if (selectedSong) return;
+      if (ss) return;
 
       switch (e.key) {
         case " ":
           e.preventDefault();
-          radio.togglePlay();
+          r.togglePlay();
           break;
         case "ArrowLeft":
           e.preventDefault();
-          handleSkipPrev();
+          skipPrev();
           break;
         case "ArrowRight":
           e.preventDefault();
-          handleSkipNext();
+          skipNext();
           break;
         case "ArrowUp":
           e.preventDefault();
-          radio.setVolume(Math.min(1, radio.volume + 0.05));
+          r.setVolume(Math.min(1, r.volume + 0.05));
           break;
         case "ArrowDown":
           e.preventDefault();
-          radio.setVolume(Math.max(0, radio.volume - 0.05));
+          r.setVolume(Math.max(0, r.volume - 0.05));
           break;
         case "m":
         case "M":
-          radio.toggleMute();
+          r.toggleMute();
           break;
         case "n":
         case "N":
-          handleSkipNext();
+          skipNext();
           break;
         case "p":
         case "P":
-          handleSkipPrev();
+          skipPrev();
           break;
         case "f":
         case "F": {
@@ -600,17 +609,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         }
         case "s":
         case "S":
-          if (radio.station) {
-            const wasFav = favs.has(radio.station.stationuuid);
-            favs.toggle(radio.station);
-            showToast(wasFav ? "Removed from favorites" : radio.station.name, "star");
+          if (r.station) {
+            const wasFav = f.has(r.station.stationuuid);
+            f.toggle(r.station);
+            toast(wasFav ? "Removed from favorites" : r.station.name, "star");
           }
           break;
         case "Escape":
           // Priority: close topmost overlay first, then exit theater
-          if (showShortcuts) setShowShortcuts(false);
-          else if (showEq) setShowEq(false);
-          else if (theaterMode) setTheaterMode(false);
+          if (sc) setShowShortcuts(false);
+          else if (eq) setShowEq(false);
+          else if (tm) setTheaterMode(false);
           break;
         case "t":
         case "T":
@@ -622,34 +631,34 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           break;
         case "l":
         case "L":
-          if (enrichedTrack?.title) {
-            const wasLiked = favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? '');
-            favSongs.toggle({
-              title: enrichedTrack.title,
-              artist: enrichedTrack.artist ?? '',
-              album: enrichedTrack.album,
-              artworkUrl: enrichedTrack.artworkUrl,
-              itunesUrl: enrichedTrack.itunesUrl,
-              durationMs: enrichedTrack.durationMs,
-              genre: enrichedTrack.genre,
-              releaseDate: enrichedTrack.releaseDate,
-              trackNumber: enrichedTrack.trackNumber,
-              trackCount: enrichedTrack.trackCount,
-              stationName: radio.station?.name ?? '',
-              stationUuid: radio.station?.stationuuid ?? '',
+          if (et?.title) {
+            const wasLiked = fs.has(et.title, et.artist ?? '');
+            fs.toggle({
+              title: et.title,
+              artist: et.artist ?? '',
+              album: et.album,
+              artworkUrl: et.artworkUrl,
+              itunesUrl: et.itunesUrl,
+              durationMs: et.durationMs,
+              genre: et.genre,
+              releaseDate: et.releaseDate,
+              trackNumber: et.trackNumber,
+              trackCount: et.trackCount,
+              stationName: r.station?.name ?? '',
+              stationUuid: r.station?.stationuuid ?? '',
             });
-            showToast(wasLiked ? "Song removed" : enrichedTrack.title, "heart");
+            toast(wasLiked ? "Song removed" : et.title, "heart");
           }
           break;
         case "r":
         case "R":
-          if (realtimeLyrics) {
-            realtimeLyrics.toggle();
+          if (rl) {
+            rl.toggle();
           }
           break;
         case "z":
         case "Z":           // Z: cycle sleep timer
-          sleepTimer.cycle();
+          st.cycle();
           break;
         case "?":
           setShowShortcuts(prev => !prev);
@@ -658,7 +667,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics]);
+  }, []);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
