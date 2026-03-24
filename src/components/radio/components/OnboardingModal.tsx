@@ -22,11 +22,7 @@ const GLASS_STYLE: React.CSSProperties = {
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
 };
 
-interface OnboardingStep {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
+type OnboardingStep = { icon: React.ReactNode; title: string; description: string; };
 
 const STEPS: OnboardingStep[] = [
   {

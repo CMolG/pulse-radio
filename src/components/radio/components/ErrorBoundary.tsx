@@ -15,10 +15,7 @@ interface Props {
   fallback?: React.ReactNode;
 }
 
-interface State {
-  hasError: boolean;
-  error: Error | null;
-}
+type State = { hasError: boolean; error: Error | null; };
 
 export class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false, error: null };

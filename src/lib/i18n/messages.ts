@@ -220,10 +220,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
 
 function mergeBundle(locale: SupportedLocale): MessageBundle {
   const patch = DEEP_MESSAGES[locale] ?? {};
-  return {
-    ...BASE_MESSAGES,
-    ...patch,
-  };
+  return { ...BASE_MESSAGES, ...patch };
 }
 
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};

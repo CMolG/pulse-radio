@@ -4,10 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 
-export interface LyricLine {
-  time: number;
-  text: string;
-}
+export type LyricLine = { time: number; text: string; };
 
 const TS_REGEX = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
 

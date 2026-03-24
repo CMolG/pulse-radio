@@ -18,29 +18,13 @@ const MAX_SONGS = 500;
 const MAX_ARTISTS = 200;
 const MAX_GENRES = 100;
 
-export interface StationListenTime {
-  name: string;
-  uuid: string;
-  totalMs: number;
-}
+export type StationListenTime = { name: string; uuid: string; totalMs: number; };
 
-export interface SongPlayCount {
-  title: string;
-  artist: string;
-  count: number;
-  artworkUrl?: string;
-  genre?: string;
-}
+export type SongPlayCount = { title: string; artist: string; count: number; artworkUrl?: string; genre?: string; };
 
-export interface ArtistPlayCount {
-  name: string;
-  count: number;
-}
+export type ArtistPlayCount = { name: string; count: number; };
 
-export interface GenrePlayCount {
-  genre: string;
-  count: number;
-}
+export type GenrePlayCount = { genre: string; count: number; };
 
 export interface UsageStats {
   stationListenTimes: Record<string, StationListenTime>;

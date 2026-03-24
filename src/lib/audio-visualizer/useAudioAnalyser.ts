@@ -8,10 +8,7 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { getOrCreateAudioSource } from './audioSourceCache';
 
-interface UseAudioAnalyserOptions {
-  fftSize?: number;
-  smoothingTimeConstant?: number;
-}
+type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: number; };
 
 interface UseAudioAnalyserReturn {
   connectAudio: (audio: HTMLAudioElement) => void;

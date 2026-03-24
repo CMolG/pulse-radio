@@ -19,11 +19,7 @@ const GLASS_STYLE: React.CSSProperties = {
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
 };
 
-interface GuideSection {
-  icon: React.ReactNode;
-  title: string;
-  content: string;
-}
+type GuideSection = { icon: React.ReactNode; title: string; content: string; };
 
 const GUIDE_SECTIONS: GuideSection[] = [
   {
