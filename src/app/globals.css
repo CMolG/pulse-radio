@@ -11,18 +11,6 @@
   --foreground: #171717;
   --accent-color: #3478f6;
   --accent-rgb: 52, 120, 246;
-  --theme-bg: #000000;
-  --theme-surface: rgba(28, 28, 30, 0.85);
-  --theme-surface-raised: rgba(44, 44, 46, 0.9);
-  --theme-text: #ffffff;
-  --theme-text-secondary: rgba(255, 255, 255, 0.55);
-  --theme-text-tertiary: rgba(255, 255, 255, 0.3);
-  --theme-border: rgba(255, 255, 255, 0.08);
-  --theme-separator: rgba(255, 255, 255, 0.06);
-  --theme-window-bg: rgba(28, 28, 30, 0.85);
-  --theme-dock-bg: rgba(30, 30, 30, 0.7);
-  --theme-menubar-bg: rgba(30, 30, 30, 0.8);
-  --theme-menubar-text: rgba(255, 255, 255, 0.9);
 }
 
 @theme inline {
@@ -41,24 +29,14 @@
   --color-sys-surface: #1c1c1e;
   --color-sys-surface-raised: #2c2c2e;
   --color-sys-glass: rgba(28, 28, 30, 0.82);
-  --color-sys-glass-heavy: rgba(28, 28, 30, 0.95);
   /* System colors */
-  --color-sys-green: #34c759;
   --color-sys-red: #ff3b30;
   --color-sys-orange: #ff9f0a;
-  --color-sys-yellow: #ffcc00;
-  --color-sys-blue: #0a84ff;
-  --color-sys-indigo: #5856d6;
   --color-sys-purple: #4a4a4a;
-  --color-sys-pink: #ff2d55;
-  --color-sys-teal: #5ac8fa;
-  --color-sys-cyan: #00e5ff;
   /* Borders */
   --color-border-subtle: rgba(255, 255, 255, 0.06);
   --color-border-default: rgba(255, 255, 255, 0.08);
   --color-border-strong: rgba(255, 255, 255, 0.12);
-  --color-border-raised: rgba(255, 255, 255, 0.2);
-  --color-border-focus: rgba(255, 255, 255, 0.25);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -407,10 +385,6 @@ input[type="color"]:hover {
   inherits: false;
 }
 
-
-/* ── Mobile responsive ─────────────────────────────────────────── */.app-tab-bar {
-  @apply flex border-b border-border-subtle;
-}
 
 .flex-center-col {
   @apply flex flex-col items-center justify-center;
