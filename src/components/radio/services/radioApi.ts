@@ -84,10 +84,7 @@ export function trendingStations(limit = 20): Promise<Station[]> {
 }
 
 export async function localStations(limit = 20): Promise<Station[]> {
-  const countryCode =
-    typeof navigator !== 'undefined'
-      ? navigator.language?.split('-')[1]?.toUpperCase() || ''
-      : '';
+  const countryCode = typeof navigator !== 'undefined' ? navigator.language?.split('-')[1]?.toUpperCase() || '' : '';
   if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit);
   return fetchCached(
     `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`,

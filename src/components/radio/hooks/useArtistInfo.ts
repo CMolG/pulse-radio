@@ -77,9 +77,7 @@ export function useArtistInfo(artist: string | null): {
     };
   }, [artist, key, cachedInfo]);
 
-  const info = !key
-    ? null
-    : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
+  const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
 
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }

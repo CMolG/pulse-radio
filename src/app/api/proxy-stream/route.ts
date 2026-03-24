@@ -50,9 +50,7 @@ export async function GET(req: NextRequest) {
   }
 
   const controller = new AbortController();
-  const timeout = MAX_DURATION_MS > 0
-    ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
-    : null;
+  const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
 
   // Propagate client disconnect to upstream so we don't leak connections
   if (req.signal) {

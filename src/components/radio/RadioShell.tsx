@@ -98,11 +98,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const pathname = usePathname();
   const { t, locale } = useLocale();
 
-  const layout: LayoutMode = isPipProp
-    ? "pip"
-    : containerSize.w <= 640
-      ? "mobile"
-      : "desktop";
+  const layout: LayoutMode = isPipProp ? "pip" : containerSize.w <= 640 ? "mobile" : "desktop";
 
   const radio = useRadio();
   const eq = useEqualizer();
@@ -573,9 +569,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const isSongLiked = enrichedTrack?.title
-    ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
-    : false;
+  const isSongLiked = enrichedTrack?.title ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "") : false;
 
   const handleToggleFav = useCallback(() => {
     if (!radio.station) return;

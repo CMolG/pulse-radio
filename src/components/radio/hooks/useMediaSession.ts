@@ -44,9 +44,7 @@ export function useMediaSession(config: MediaSessionConfig): void {
     if (metaKey === lastMetaRef.current) return;
     lastMetaRef.current = metaKey;
 
-    const artwork = artSrc
-      ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }]
-      : [];
+    const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : [];
 
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
