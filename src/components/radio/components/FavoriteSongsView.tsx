@@ -7,12 +7,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Music, Radio, Heart, Trash2, ExternalLink, Clock, Users, X, ChevronDown } from "lucide-react";
+import { Music, Heart, Trash2, Users, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import type { FavoriteSong, SongDetailData } from "../types";
-import { formatDuration } from "../utils/formatDuration";
 import UiImage from "@/components/common/UiImage";
-import { formatTimeAgo, itunesSearchUrl, primaryArtist } from "../utils/formatUtils";
+import { primaryArtist } from "../utils/formatUtils";
+import SongCard from "./SongCard";
 
 type Props = {
   songs: FavoriteSong[];
@@ -20,86 +20,6 @@ type Props = {
   onClear: () => void;
   onSelect?: (song: SongDetailData) => void;
 };
-
-function SongCard({ song, onRemove, onSelect, delay }: { song: FavoriteSong; onRemove: (id: string) => void; onSelect?: (song: SongDetailData) => void; delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(delay * 0.03, 0.5) }}
-      className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
-      role="button"
-      tabIndex={0}
-      aria-label={`${song.title} by ${song.artist}`}
-      onClick={() => onSelect?.({
-        title: song.title,
-        artist: song.artist,
-        album: song.album,
-        artworkUrl: song.artworkUrl,
-        itunesUrl: song.itunesUrl,
-        durationMs: song.durationMs,
-        genre: song.genre,
-        releaseDate: song.releaseDate,
-        trackNumber: song.trackNumber,
-        trackCount: song.trackCount,
-        stationName: song.stationName,
-      })}
-    >
-      <div className="w-full aspect-square bg-surface-3 relative">
-        {song.artworkUrl ? (
-          <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />
-        ) : (
-          <div className="size-full flex items-center justify-center"><Music size={32} className="text-dim" /></div>
-        )}
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
-          aria-label="Remove from favorites"
-          className="absolute top-2 left-2 p-1.5 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-all"
-        >
-          <Heart size={12} className="fill-pink-400" />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(song.id); }}
-          aria-label="Delete song"
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-        >
-          <Trash2 size={12} />
-        </button>
-      </div>
-      <div className="p-3 space-y-0.5">
-        <p className="text-[13px] font-medium text-white line-clamp-1">{song.title}</p>
-        <p className="text-[12px] text-secondary line-clamp-1">{song.artist}</p>
-        {song.album && <p className="text-[11px] text-dim line-clamp-1">{song.album}</p>}
-        {(song.genre || song.durationMs) && (
-          <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
-            {song.genre && <span>{song.genre}</span>}
-            {song.durationMs && (
-              <span className="inline-flex items-center gap-0.5">
-                <Clock size={8} className="opacity-60" />{formatDuration(song.durationMs)}
-              </span>
-            )}
-          </p>
-        )}
-      </div>
-      <div className="px-3 pb-2.5 space-y-1.5">
-        <a
-          href={song.itunesUrl || itunesSearchUrl(song.title, song.artist)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
-        >
-          <ExternalLink size={10} />Listen on Apple Music
-        </a>
-        <div className="flex items-center gap-1.5">
-          <Radio size={9} className="text-dim flex-shrink-0" />
-          <p className="text-[10px] text-dim truncate flex-1">{song.stationName}</p>
-          <span className="text-[10px] text-dim">{formatTimeAgo(song.timestamp)}</span>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 function ArtistStack({ artistName, songs, onRemove, onSelect }: { artistName: string; songs: FavoriteSong[]; onRemove: (id: string) => void; onSelect?: (song: SongDetailData) => void }) {
   const [expanded, setExpanded] = useState(false);
@@ -177,7 +97,7 @@ function ArtistStack({ artistName, songs, onRemove, onSelect }: { artistName: st
         <AnimatePresence>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             {visibleSongs.map((song, i) => (
-              <SongCard key={song.id} song={song} onRemove={onRemove} onSelect={onSelect} delay={i} />
+              <SongCard key={song.id} item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={{ filled: true, onClick: () => onRemove(song.id), label: "Remove from favorites" }} />
             ))}
           </div>
         </AnimatePresence>
@@ -266,7 +186,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
           {songs.map((song, i) => (
-            <SongCard key={song.id} song={song} onRemove={onRemove} onSelect={onSelect} delay={i} />
+            <SongCard key={song.id} item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={{ filled: true, onClick: () => onRemove(song.id), label: "Remove from favorites" }} />
           ))}
         </div>
       )}
