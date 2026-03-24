@@ -252,6 +252,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }
     toastTimerRef.current = setTimeout(() => setToast(null), 2500);
   }, [radio.audioRef]);
+  // Keep duck-restore target in sync if user changes volume while ducked.
+  // Without this, the 400ms duck timer restores the stale pre-duck volume,
+  // and useRadio's volume effect won't re-run (state hasn't changed).
+  useEffect(() => {
+    if (duckOrigVolRef.current !== null) {
+      duckOrigVolRef.current = radio.muted ? 0 : radio.volume;
+    }
+  }, [radio.volume, radio.muted]);
+
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
   const [searchQuery, setSearchQuery] = useState("");
