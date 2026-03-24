@@ -170,9 +170,7 @@ function drawMetaballs(
         sd[idx + 1] = (colors.accent[1] * glowIntensity * 0.4) | 0;
         sd[idx + 2] = (colors.accent[2] * glowIntensity * 0.4) | 0;
         sd[idx + 3] = (glowIntensity * 60) | 0;
-      } else {
-        sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0;
-      }
+      } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0;
     }
   }
 
@@ -253,9 +251,7 @@ export function FerrofluidRenderer({
         const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08;
         blob.targetX += Math.cos(angle * 1.3) * demoDisp;
         blob.targetY += Math.sin(angle * 1.7) * demoDisp;
-      } else {
-        bandVal = 0.3;
-      }
+      } else bandVal = 0.3;
 
       // smooth follow
       blob.vx += (blob.targetX - blob.x) * 0.08;

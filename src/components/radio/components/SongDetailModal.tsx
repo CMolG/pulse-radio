@@ -113,10 +113,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
+      } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
     window.addEventListener('keydown', onTab);
     return () => {

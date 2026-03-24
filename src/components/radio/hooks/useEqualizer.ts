@@ -259,9 +259,7 @@ export function useEqualizer(): UseEqualizerReturn {
         source.connect(normalizer);
         normalizer.connect(normGain);
         normGain.connect(nrHighpass);
-      } else {
-        source.connect(nrHighpass);
-      }
+      } else source.connect(nrHighpass);
 
       nrHighpass.connect(nrGate);
       nrGate.connect(nrDeEsser);

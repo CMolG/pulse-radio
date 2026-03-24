@@ -226,9 +226,7 @@ export default function BrowseView({
         result = await localStations(15);
       } else if (cat.tag) {
         result = await stationsByTag(cat.tag, 15);
-      } else {
-        return;
-      }
+      } else return;
       if (!flags?.cancelled) {
         setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {

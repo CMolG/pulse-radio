@@ -263,9 +263,7 @@ export function useRadio(): UseRadioReturn {
       // Case 2: pause was caused by startPlayback assigning audio.src — ignore it.
       // The browser fires a synchronous 'pause' event when src changes; we must not
       // treat this as an OS interruption and queue a spurious reconnect.
-      if (srcChangingRef.current) {
-        return;
-      }
+      if (srcChangingRef.current) return;
       // Case 3: OS/browser interruption (screen lock, phone call, etc.)
       // Attempt a single resume after a brief delay.
       // On mobile, play() without a user gesture will fail with NotAllowedError.
@@ -382,9 +380,7 @@ export function useRadio(): UseRadioReturn {
           if (isAutoplayBlocked(err)) {
             // Mobile: no gesture — show play button
             setStatus('paused');
-          } else {
-            reconnect(500);
-          }
+          } else reconnect(500);
         });
       }
     };
@@ -458,18 +454,14 @@ export function useRadio(): UseRadioReturn {
       } else if (ahead >= MIN_BUFFER_AHEAD_S) {
         // Healthy buffer but thin — check if it's growing
         setStreamQuality(growth > 0 ? 'fair' : 'poor');
-      } else {
-        setStreamQuality('poor');
-      }
+      } else setStreamQuality('poor');
 
       if (ahead < MIN_BUFFER_AHEAD_S) {
         lowBufferStreak++;
         // Require 2 consecutive low-buffer readings to avoid false positives
         // from momentary dips during normal streaming
         if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
-      } else {
-        lowBufferStreak = 0;
-      }
+      } else lowBufferStreak = 0;
     }, BUFFER_CHECK_MS);
 
     const pairs: [EventTarget, string, EventListener][] = [

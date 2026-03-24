@@ -88,9 +88,7 @@ export function useStats() {
         const pruned: UsageStats = { ...current, stationListenTimes: pStations, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };
         setStats(pruned);
         saveToStorage(STORAGE_KEY, pruned);
-      } else {
-        saveToStorage(STORAGE_KEY, current);
-      }
+      } else saveToStorage(STORAGE_KEY, current);
       dirtyRef.current = false;
     }
   }, []);

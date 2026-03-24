@@ -71,9 +71,7 @@ export function CircularRenderer({
         demoData[i] = Math.max(0, Math.min(255, base + ripple + pulse));
       }
       dataArray = demoData;
-    } else {
-      return;
-    }
+    } else return;
 
     // Lazily rebuild color cache for actual bufLen (runs once per color/bufLen change)
     const cacheKey = `${color1}_${color2}_${bufLen}`;

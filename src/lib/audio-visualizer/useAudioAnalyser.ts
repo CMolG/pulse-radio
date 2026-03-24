@@ -49,9 +49,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
           analyser.smoothingTimeConstant = smoothingTimeConstant;
           source.connect(analyser);
           analyserRef.current = analyser;
-        } else {
-          source.connect(analyserRef.current);
-        }
+        } else source.connect(analyserRef.current);
 
         // Allocate buffers once — reused across all frames (zero per-frame allocation)
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);

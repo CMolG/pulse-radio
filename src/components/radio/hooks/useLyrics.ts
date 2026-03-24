@@ -90,9 +90,7 @@ export function useLyrics(
           setLyrics(result);
           const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
-        } else {
-          setLyrics(null);
-        }
+        } else setLyrics(null);
       })
       .catch(() => {
         if (controller.signal.aborted) return;

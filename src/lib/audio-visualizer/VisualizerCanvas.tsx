@@ -65,9 +65,7 @@ export function VisualizerCanvas({
           const varName = color.slice(4, -1).trim();
           const computed = getComputedStyle(canvas).getPropertyValue(varName).trim();
           resolvedColorRef.current = computed || '#34d399';
-        } else {
-          resolvedColorRef.current = color;
-        }
+        } else resolvedColorRef.current = color;
       }
       const resolvedColor = resolvedColorRef.current;
 
@@ -122,9 +120,7 @@ export function VisualizerCanvas({
           if (useRoundRect) {
             ctx.roundRect(x, y, w, barHeight, radii);
             ctx.fill();
-          } else {
-            ctx.fillRect(x, y, w, barHeight);
-          }
+          } else ctx.fillRect(x, y, w, barHeight);
         }
       } else {
         const step = width / frequencyData.length;
