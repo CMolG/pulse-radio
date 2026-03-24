@@ -516,6 +516,8 @@ export function useRadio(): UseRadioReturn {
     codecFallbackTriedRef.current.delete(s.url_resolved);
     setStation(s);
     setStatus('loading');
+    setStreamQuality('good');
+    lastBufferEndRef.current = 0;
 
     // Crossfade: fade out with ease-out curve before switching
     if (fadeTimerRef.current) {
@@ -606,6 +608,8 @@ export function useRadio(): UseRadioReturn {
     }
     setStation(null);
     setStatus('idle');
+    setStreamQuality('good');
+    lastBufferEndRef.current = 0;
   }, []);
 
   const setVolume = useCallback((v: number) => {
