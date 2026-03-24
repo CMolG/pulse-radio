@@ -295,6 +295,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return mkView("country", getCountryDisplayName(locale, code), { countryCode: code, countryQueryName: country?.name ?? "" });
   }
 
+  const resetNav = useCallback((v: ViewState) => {
+    setView(v);
+    setActiveTab("discover");
+    setTheaterMode(false);
+    setSearchQuery("");
+  }, []);
+
   const [view, setView] = useState<ViewState>(() => {
     const code = (initialCountryCode ?? "").toUpperCase();
     if (isSovereignCountryCode(code)) return countryView(code);
@@ -302,66 +309,40 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   });
 
   useEffect(() => {
-    if (view.mode === "top" && view.label !== t("topStations")) {
-      setView((prev) => ({
-        ...prev,
-        label: t("topStations"),
-      }));
-    }
-
-    if (view.mode === "country" && view.countryCode) {
-      const localized = getCountryDisplayName(locale, view.countryCode);
-      if (localized && localized !== view.label) {
-        setView((prev) => ({
-          ...prev,
-          label: localized,
-        }));
-      }
+    const newLabel = view.mode === "top" ? t("topStations")
+      : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode)
+      : null;
+    if (newLabel && newLabel !== view.label) {
+      setView(prev => ({ ...prev, label: newLabel }));
     }
   }, [locale, t, view.countryCode, view.label, view.mode]);
 
   useEffect(() => {
     const code = (initialCountryCode ?? "").toUpperCase();
-    if (!isSovereignCountryCode(code)) return;
+    if (!isSovereignCountryCode(code) || !COUNTRY_BY_CODE[code]) return;
     if (view.mode === "country" && view.countryCode === code) return;
-    if (!COUNTRY_BY_CODE[code]) return;
-
-    setView(countryView(code));
-    setActiveTab("discover");
-    setTheaterMode(false);
-    setSearchQuery("");
-  }, [initialCountryCode, locale, view.countryCode, view.mode]);
+    resetNav(countryView(code));
+  }, [initialCountryCode, locale, view.countryCode, view.mode, resetNav]);
 
   // Sync view state when the user navigates with browser back/forward.
   // pushState is used for country and home navigation but the browser's
   // popstate event is the only way to detect back/forward.
   useEffect(() => {
     const onPopState = () => {
-      const path = window.location.pathname;
-      const segment = path.replace(/^\//, "").toUpperCase();
+      const segment = window.location.pathname.replace(/^\//, "").toUpperCase();
 
       if (!segment) {
-        // Navigated back to "/"
-        setView(mkView("top", t("topStations")));
-        setActiveTab("discover");
-        setTheaterMode(false);
-        setSearchQuery("");
+        resetNav(mkView("top", t("topStations")));
         return;
       }
 
-      if (isSovereignCountryCode(segment)) {
-        const country = COUNTRY_BY_CODE[segment];
-        if (country) {
-          setView(countryView(segment));
-          setActiveTab("discover");
-          setTheaterMode(false);
-          setSearchQuery("");
-        }
+      if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) {
+        resetNav(countryView(segment));
       }
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [locale, t]);
+  }, [locale, t, resetNav]);
 
   // Reset compact state on layout change
   useEffect(() => {
@@ -735,14 +716,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [t]);
 
   const handleGoHome = useCallback(() => {
-    setView(mkView("top", t("topStations")));
-    setActiveTab("discover");
-    setTheaterMode(false);
-    setSearchQuery("");
-    if (pathname !== "/") {
-      window.history.pushState(null, "", "/");
-    }
-  }, [pathname, t]);
+    resetNav(mkView("top", t("topStations")));
+    if (pathname !== "/") window.history.pushState(null, "", "/");
+  }, [pathname, t, resetNav]);
 
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -998,6 +974,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </button>
   );
 
+  const emptyStation = useMemo((): Station => ({
+    name: t("discover"), url_resolved: "", stationuuid: "", favicon: "",
+    tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0,
+  }), [t]);
+
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
 
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
@@ -1011,20 +992,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
           <TheaterView
             {...theaterBaseProps}
-            station={
-              radio.station ?? {
-                name: t("discover"),
-                url_resolved: "",
-                stationuuid: "",
-                favicon: "",
-                tags: "",
-                codec: "",
-                bitrate: 0,
-                country: "",
-                countrycode: "",
-                votes: 0,
-              }
-            }
+            station={radio.station ?? emptyStation}
             onBack={() => {}}
             compact
           />
