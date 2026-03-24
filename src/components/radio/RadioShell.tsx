@@ -730,6 +730,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [enrichedTrack, radio.station, favSongs, showToast]);
 
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
+    const wasLiked = favSongs.has(entry.title, entry.artist);
     favSongs.toggle({
       title: entry.title,
       artist: entry.artist,
@@ -744,7 +745,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       stationName: entry.stationName,
       stationUuid: entry.stationUuid,
     });
-  }, [favSongs]);
+    showToast(wasLiked ? "Song removed" : entry.title, "heart");
+  }, [favSongs, showToast]);
 
   const handleSearch = useCallback((query: string) => {
     const sanitized = query.trim();
