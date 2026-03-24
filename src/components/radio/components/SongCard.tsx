@@ -15,9 +15,10 @@ type Props = {
   onRemove: () => void;
   onSelect?: (song: SongDetailData) => void;
   heart?: HeartAction | null;
+  hideRemove?: boolean;
 };
 
-export default function SongCard({ item, delay, onRemove, onSelect, heart }: Props) {
+export default React.memo(function SongCard({ item, delay, onRemove, onSelect, heart, hideRemove }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -49,13 +50,15 @@ export default function SongCard({ item, delay, onRemove, onSelect, heart }: Pro
             <Heart size={12} className={heart.filled ? "fill-pink-400" : ""} />
           </button>
         )}
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          aria-label="Remove"
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-        >
-          <Trash2 size={12} />
-        </button>
+        {!hideRemove && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove(); }}
+            aria-label="Remove"
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+          >
+            <Trash2 size={12} />
+          </button>
+        )}
       </div>
       <div className="p-3 space-y-0.5">
         <p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>
@@ -90,4 +93,9 @@ export default function SongCard({ item, delay, onRemove, onSelect, heart }: Pro
       </div>
     </motion.div>
   );
-}
+}, (prev, next) =>
+  prev.item === next.item &&
+  prev.delay === next.delay &&
+  prev.hideRemove === next.hideRemove &&
+  prev.heart?.filled === next.heart?.filled
+);

@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Play, Pause, Heart, Radio, Music2, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Station } from '../types';
@@ -27,9 +27,13 @@ type Props = {
   onPrefetch?: () => void;
 };
 
-export default function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek, onPrefetch }: Props) {
+export default React.memo(function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek, onPrefetch }: Props) {
   const [imgError, setImgError] = useState(false);
   const showFallback = !station.favicon || imgError;
+  const tags = useMemo(
+    () => station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean) ?? [],
+    [station.tags],
+  );
 
   return (<div
       role="button"
@@ -90,7 +94,7 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
             {station.codec}{station.bitrate > 0 ? ` ${station.bitrate}k` : ''}
           </span>
         )}
-        {station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean).map(tag => (
+        {tags.map(tag => (
           <span key={tag} className="pad-xs-full bg-surface-2 text-[9px] text-secondary truncate max-w-[80px]">{tag}</span>
         ))}
         {station.countrycode && (
@@ -129,4 +133,11 @@ export default function StationCard({ station, isPlaying, isCurrent, isFavorite,
         </button>
       )}
     </div>);
-}
+}, (prev, next) =>
+  prev.station === next.station &&
+  prev.isPlaying === next.isPlaying &&
+  prev.isCurrent === next.isCurrent &&
+  prev.isFavorite === next.isFavorite &&
+  prev.liveStatus === next.liveStatus &&
+  prev.liveTrack === next.liveTrack
+);
