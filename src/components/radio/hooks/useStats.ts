@@ -57,32 +57,13 @@ const EMPTY_STATS: UsageStats = {
   totalListenMs: 0,
 };
 
-/** Keep only the top N entries by count, dropping the least-played */
-function pruneByCount<T extends { count: number }>(
-  map: Record<string, T>,
-  max: number,
-): Record<string, T> {
+/** Keep only the top N entries by a numeric field, dropping the lowest */
+function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
   const keys = Object.keys(map);
   if (keys.length <= max) return map;
   const sorted = keys
-    .map(k => ({ k, c: map[k].count }))
-    .sort((a, b) => b.c - a.c)
-    .slice(0, max);
-  const pruned: Record<string, T> = {};
-  for (const { k } of sorted) pruned[k] = map[k];
-  return pruned;
-}
-
-/** Keep only the top N entries by totalMs, dropping the least-listened */
-function pruneByMs<T extends { totalMs: number }>(
-  map: Record<string, T>,
-  max: number,
-): Record<string, T> {
-  const keys = Object.keys(map);
-  if (keys.length <= max) return map;
-  const sorted = keys
-    .map(k => ({ k, ms: map[k].totalMs }))
-    .sort((a, b) => b.ms - a.ms)
+    .map(k => ({ k, v: map[k][key] as number }))
+    .sort((a, b) => b.v - a.v)
     .slice(0, max);
   const pruned: Record<string, T> = {};
   for (const { k } of sorted) pruned[k] = map[k];
@@ -120,10 +101,10 @@ export function useStats() {
   const persist = useCallback(() => {
     if (dirtyRef.current) {
       const current = statsRef.current;
-      const pStations = pruneByMs(current.stationListenTimes, MAX_STATIONS);
-      const pSongs = pruneByCount(current.songPlayCounts, MAX_SONGS);
-      const pArtists = pruneByCount(current.artistPlayCounts, MAX_ARTISTS);
-      const pGenres = pruneByCount(current.genrePlayCounts, MAX_GENRES);
+      const pStations = pruneTop(current.stationListenTimes, MAX_STATIONS, 'totalMs');
+      const pSongs = pruneTop(current.songPlayCounts, MAX_SONGS, 'count');
+      const pArtists = pruneTop(current.artistPlayCounts, MAX_ARTISTS, 'count');
+      const pGenres = pruneTop(current.genrePlayCounts, MAX_GENRES, 'count');
       const didPrune =
         pStations !== current.stationListenTimes ||
         pSongs !== current.songPlayCounts ||
