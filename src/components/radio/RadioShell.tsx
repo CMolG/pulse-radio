@@ -946,6 +946,36 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     />
   );
 
+  const parallaxElement = (
+    <ParallaxBackground
+      faviconUrl={radio.station?.favicon}
+      genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
+      audioAmplitude={bgAudio.amplitude}
+      landingMode={isLandingNavigation}
+    />
+  );
+
+  const nowPlayingHeroElement = radio.station ? (
+    <NowPlayingHero
+      station={radio.station}
+      track={enrichedTrack}
+      isPlaying={radio.status === "playing"}
+      frequencyDataRef={analyser.frequencyDataRef}
+      artworkUrl={albumArt.artworkUrl}
+      icyBitrate={icyBitrate}
+      onTheater={() => setTheaterMode(true)}
+    />
+  ) : null;
+
+  const sharedModals = (
+    <>
+      {songDetailModal}
+      {shortcutsOverlay}
+      {offlineBanner}
+      <OnboardingModal />
+    </>
+  );
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -953,11 +983,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         ref={containerRef}
         className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
       >
-        <ParallaxBackground
-          faviconUrl={radio.station?.favicon}
-          genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
-          audioAmplitude={bgAudio.amplitude}
-        />
+        {parallaxElement}
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
           <TheaterView
             {...theaterBaseProps}
@@ -986,10 +1012,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           theaterMode={true}
           compact
         />
-        {songDetailModal}
-        {shortcutsOverlay}
-        {offlineBanner}
-        <OnboardingModal />
+        {sharedModals}
       </div>
     );
   }
@@ -1001,12 +1024,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         ref={containerRef}
         className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none"
       >
-        <ParallaxBackground
-          faviconUrl={radio.station?.favicon}
-          genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
-          audioAmplitude={bgAudio.amplitude}
-          landingMode={isLandingNavigation}
-        />
+        {parallaxElement}
 
         {/* Single scrollable area — content scrolls behind sticky header */}
         <div className="h-full overflow-y-auto relative z-10">
@@ -1059,17 +1077,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             </div>
           ) : (
             <div className="flex flex-col min-h-full pb-24">
-              {radio.station && (
-                <NowPlayingHero
-                  station={radio.station}
-                  track={enrichedTrack}
-                  isPlaying={radio.status === "playing"}
-                  frequencyDataRef={analyser.frequencyDataRef}
-                  artworkUrl={albumArt.artworkUrl}
-                  icyBitrate={icyBitrate}
-                  onTheater={() => setTheaterMode(true)}
-                />
-              )}
+              {nowPlayingHeroElement}
               {/* ── Mobile top nav tabs + search ── */}
               <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
                 {navTabs(14).map((tab) => (
@@ -1136,10 +1144,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
           <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
-        {songDetailModal}
-        {shortcutsOverlay}
-        {offlineBanner}
-        <OnboardingModal />
+        {sharedModals}
       </div>
     );
   }
@@ -1150,12 +1155,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       ref={containerRef}
       className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
     >
-      <ParallaxBackground
-        faviconUrl={radio.station?.favicon}
-        genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
-        audioAmplitude={bgAudio.amplitude}
-        landingMode={isLandingNavigation}
-      />
+      {parallaxElement}
       <div className="flex flex-1 min-h-0 relative z-10">
         {/* Main content */}
         <div className="col-fill min-w-0">
@@ -1189,17 +1189,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     <LanguageSelector />
                   </div>
                 </div>
-                {radio.station && (
-                  <NowPlayingHero
-                    station={radio.station}
-                    track={enrichedTrack}
-                    isPlaying={radio.status === "playing"}
-                    frequencyDataRef={analyser.frequencyDataRef}
-                    artworkUrl={albumArt.artworkUrl}
-                    icyBitrate={icyBitrate}
-                    onTheater={() => setTheaterMode(true)}
-                  />
-                )}
+                {nowPlayingHeroElement}
                 {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
                   {navTabs(13).map((tab) => (
@@ -1317,10 +1307,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
         <NowPlayingBar {...nowPlayingFullProps} />
       </div>
-      {songDetailModal}
-      {shortcutsOverlay}
-      {offlineBanner}
-      <OnboardingModal />
+      {sharedModals}
     </div>
   );
 }
