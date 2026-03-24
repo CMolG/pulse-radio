@@ -211,11 +211,7 @@ export function FerrofluidRenderer({
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
-    if (
-      blobsRef.current.length !== blobCount ||
-      sizeRef.current.w !== w ||
-      sizeRef.current.h !== h
-    ) {
+    if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
       blobsRef.current = createBlobs(blobCount, w, h);
       sizeRef.current = { w, h };
     }

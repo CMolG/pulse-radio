@@ -107,10 +107,7 @@ export type UseStationMetaReturn = {
   streamCodec: string | null;
 };
 
-export function useStationMeta(
-  station: Station | null,
-  isPlaying: boolean,
-): UseStationMetaReturn {
+export function useStationMeta(station: Station | null, isPlaying: boolean): UseStationMetaReturn {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const [streamCodec, setStreamCodec] = useState<string | null>(null);

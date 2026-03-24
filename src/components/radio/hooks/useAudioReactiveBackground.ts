@@ -22,10 +22,7 @@ function clamp01(value: number): number {
  * Produces a smoothed audio-reactive amplitude suitable for background motion.
  * Uses fast attack + slower release to track energy while avoiding jitter.
  */
-export function useAudioReactiveBackground(
-  meterRef: MeterRef,
-  enabled: boolean,
-): { amplitude: number } {
+export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amplitude: number } {
   const [amplitude, setAmplitude] = useState(0);
   const valueRef = useRef(0);
   const lastPublishedRef = useRef(0);

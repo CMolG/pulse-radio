@@ -207,10 +207,7 @@ export interface UseAlbumArtReturn {
   isLoading: boolean;
 }
 
-export function useAlbumArt(
-  title: string | null,
-  artist: string | null,
-): UseAlbumArtReturn {
+export function useAlbumArt(title: string | null, artist: string | null): UseAlbumArtReturn {
   const hasTitle = Boolean(title);
   const cacheKey = useMemo(
     () => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''),

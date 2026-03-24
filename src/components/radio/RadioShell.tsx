@@ -145,11 +145,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     };
   }, [track, albumArt]);
 
-  const songHistory = useHistory(
-    radio.station?.name,
-    radio.station?.stationuuid,
-    enrichedTrack,
-  );
+  const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
 
   // Track listen time for stats (every 5 seconds while playing)
   const lastTickRef = useRef(Date.now());

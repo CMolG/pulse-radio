@@ -232,11 +232,7 @@ export function getMessages(locale: SupportedLocale): MessageBundle {
   return MESSAGE_CACHE[locale] as MessageBundle;
 }
 
-export function translate(
-  locale: SupportedLocale,
-  key: MessageKey,
-  vars?: Record<string, string | number>,
-): string {
+export function translate(locale: SupportedLocale, key: MessageKey, vars?: Record<string, string | number>): string {
   const message = getMessages(locale)[key] ?? BASE_MESSAGES[key];
   if (!vars) return message;
   return message.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, token: string) => {

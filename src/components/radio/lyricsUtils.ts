@@ -14,10 +14,7 @@ export type RenderableLyricLine = { id: string; text: string; };
  * Binary search for the last lyric line whose time ≤ currentTime.
  * Lines are sorted ascending by time, so binary search is O(log n) vs O(n).
  */
-export function getActiveLyricIndex(
-  lyrics: LyricsData | null,
-  currentTime?: number,
-) {
+function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1;
 
   const lines = lyrics.lines;
