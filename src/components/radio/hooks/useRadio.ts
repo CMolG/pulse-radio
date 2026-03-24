@@ -506,36 +506,23 @@ export function useRadio(): UseRadioReturn {
       }
     }, BUFFER_CHECK_MS);
 
-    audio.addEventListener('playing', onPlaying);
-    audio.addEventListener('pause', onPause);
-    audio.addEventListener('waiting', onWaiting);
-    audio.addEventListener('error', onError);
-    audio.addEventListener('stalled', onStalled);
-    audio.addEventListener('ended', onEnded);
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('canplay', onCanPlay);
-    document.addEventListener('visibilitychange', onVisibilityResume);
-    window.addEventListener('pageshow', onVisibilityResume);
-    window.addEventListener('online', onOnline);
-    window.addEventListener('offline', onOffline);
+    const pairs: [EventTarget, string, EventListener][] = [
+      [audio, 'playing', onPlaying], [audio, 'pause', onPause],
+      [audio, 'waiting', onWaiting], [audio, 'error', onError],
+      [audio, 'stalled', onStalled], [audio, 'ended', onEnded],
+      [audio, 'timeupdate', onTimeUpdate], [audio, 'canplay', onCanPlay],
+      [document, 'visibilitychange', onVisibilityResume],
+      [window, 'pageshow', onVisibilityResume],
+      [window, 'online', onOnline], [window, 'offline', onOffline],
+    ];
+    pairs.forEach(([t, e, h]) => t.addEventListener(e, h));
 
     return () => {
       clearTimer(stallTimerRef);
       clearTimer(pauseTimerRef);
       clearReconnectTimer();
       clearTimer(bufferCheckRef);
-      audio.removeEventListener('playing', onPlaying);
-      audio.removeEventListener('pause', onPause);
-      audio.removeEventListener('waiting', onWaiting);
-      audio.removeEventListener('error', onError);
-      audio.removeEventListener('stalled', onStalled);
-      audio.removeEventListener('ended', onEnded);
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('canplay', onCanPlay);
-      document.removeEventListener('visibilitychange', onVisibilityResume);
-      window.removeEventListener('pageshow', onVisibilityResume);
-      window.removeEventListener('online', onOnline);
-      window.removeEventListener('offline', onOffline);
+      pairs.forEach(([t, e, h]) => t.removeEventListener(e, h));
     };
   }, [station, getAudio, startPlayback, handlePlayRejected]);
 
