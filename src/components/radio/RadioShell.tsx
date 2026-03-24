@@ -239,7 +239,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (isSovereignCountryCode(code)) return countryView(code);
     return mkView("top", t("topStations"));
   });
-
   useEffect(() => {
     const newLabel = view.mode === "top" ? t("topStations")
       : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode)

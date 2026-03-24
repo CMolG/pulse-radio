@@ -284,29 +284,12 @@ input[type="color"]:hover {
 /* globals.css */
 
 @keyframes ambient-drift {
-  0% {
-    /* Empezamos con el scale para evitar los bordes blancos del blur */
-    transform: scale(1.05) translate(0px, 0px);
-  }
-  33% {
-    /* Se mueve un poco y hace zoom in */
-    transform: scale(1.12) translate(-20px, 16px);
-  }
-  66% {
-    /* Cambia de dirección sutilmente */
-    transform: scale(1.1) translate(15px, -15px);
-  }
-  100% {
-    /* Vuelve al inicio de forma fluida */
-    transform: scale(1.05) translate(0px, 0px);
-  }
+  0% { transform: scale(1.05) translate(0px, 0px); }
+  33% { transform: scale(1.12) translate(-20px, 16px); }
+  66% { transform: scale(1.1) translate(15px, -15px); }
+  100% { transform: scale(1.05) translate(0px, 0px); }
 }
-.animate-ambient-drift {
-  /* 25 segundos hace que sea imperceptiblemente lento y elegante */
-  animation: ambient-drift 15s ease-in-out infinite;
-  /* Will-change avisa al navegador para que optimice la animación usando la GPU */
-  will-change: transform;
-}
+.animate-ambient-drift { animation: ambient-drift 15s ease-in-out infinite; will-change: transform; }
 @property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
 .flex-center-col { @apply flex flex-col items-center justify-center; }
 .flex-center-row { @apply flex items-center justify-center; }
