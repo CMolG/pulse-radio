@@ -43,11 +43,8 @@ const _LOCALES = [
 ] as const;
 
 export type SupportedLocale = (typeof _LOCALES)[number]['code'];
-
 export type LocaleInfo = { code: SupportedLocale; nativeName: string; englishName: string; rtl?: boolean; };
-
 export const SUPPORTED_LOCALES: readonly LocaleInfo[] = _LOCALES;
-
 const SUPPORTED_SET = new Set<SupportedLocale>(
   SUPPORTED_LOCALES.map((locale) => locale.code),
 );

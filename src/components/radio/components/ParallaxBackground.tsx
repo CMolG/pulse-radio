@@ -11,7 +11,6 @@ import { useParallaxBg } from '../hooks/useParallaxBg';
 import UiImage from '@/components/common/UiImage';
 
 type Props = { faviconUrl?: string; genre?: string; audioAmplitude?: number; landingMode?: boolean; };
-
 const BF_STYLE: React.CSSProperties = { WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' };
 const BLUR_STYLE: React.CSSProperties = {
   filter: 'blur(64px)',

@@ -33,9 +33,7 @@ type TrackFields = {
 };
 
 export type NowPlayingTrack = TrackFields;
-
 export type LyricLine = { time: number; text: string };
-
 export type LyricsData = {
   trackName: string;
   artistName: string;
@@ -49,7 +47,6 @@ export type LyricsData = {
 };
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
-
 export type PlaybackState = {
   station: Station | null;
   status: PlaybackStatus;
@@ -61,9 +58,7 @@ export type PlaybackState = {
 
 export type EqBand = { id: string; frequency: number; type: BiquadFilterType; gain: number; label: string };
 export type EqPreset = { name: string; gains: number[] };
-
 export type BrowseCategory = { id: string; label: string; tag?: string; country?: string; gradient: string; };
-
 export type ViewState = {
   mode: 'top' | 'search' | 'genre' | 'country';
   query: string;
@@ -87,7 +82,6 @@ export type LrcLibResponse = {
 export type SongDetailData = TrackFields & { stationName: string };
 export type HistoryEntry = SongDetailData & { id: string; stationUuid: string; timestamp: number };
 export type FavoriteSong = HistoryEntry;
-
 export type ArtistInfo = {
   name: string;
   disambiguation: string | null;

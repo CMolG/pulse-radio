@@ -12,7 +12,6 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'radio-station-queue';
 const MAX_QUEUE_SIZE = 20;
-
 export type UseStationQueueReturn = {
   queue: Station[];
   currentIndex: number;

@@ -20,7 +20,6 @@ const GLASS_STYLE: React.CSSProperties = {
 };
 
 type GuideSection = { icon: React.ReactNode; title: string; content: string; };
-
 const GUIDE_SECTIONS: GuideSection[] = [
   {
     icon: <IoRadioOutline size={22} className="text-[#3478f6]" />,

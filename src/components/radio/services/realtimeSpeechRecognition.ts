@@ -10,7 +10,6 @@ type BrowserSpeechAlternative = { transcript: string; confidence?: number };
 type BrowserSpeechResult = { 0?: BrowserSpeechAlternative; isFinal: boolean };
 type BrowserSpeechRecognitionEvent = { resultIndex: number; results: ArrayLike<BrowserSpeechResult> };
 type BrowserSpeechRecognitionErrorEvent = { error: string };
-
 type BrowserSpeechRecognition = {
   continuous: boolean; interimResults: boolean; maxAlternatives: number; lang: string;
   onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
@@ -20,7 +19,6 @@ type BrowserSpeechRecognition = {
 };
 
 type RecognitionCtor = new () => BrowserSpeechRecognition;
-
 type EngineCallbacks = {
   onHypothesis: (hypothesis: RealtimeSpeechHypothesis) => void;
   onFatalError: (errorMessage: string) => void;

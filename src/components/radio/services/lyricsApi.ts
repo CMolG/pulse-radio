@@ -8,7 +8,6 @@ import type { LyricsData, LrcLibResponse } from '../types';
 import { parseLrc } from '../lrcParser';
 
 const LRCLIB_BASE = 'https://lrclib.net/api';
-
 const FETCH_TIMEOUT_MS = 8_000;
 
 function isTransientError(err: unknown): boolean {

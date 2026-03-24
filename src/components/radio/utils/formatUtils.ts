@@ -1,5 +1,4 @@
 const ITUNES_REFERRER = "pt=pulse-radio&ct=www.pulse-radio.online";
-
 const WHITESPACE_RE = /\s+/;
 const ARTIST_SPLIT_RE = /[,;&]|feat\.|ft\.|featuring|vs\.?/i;
 

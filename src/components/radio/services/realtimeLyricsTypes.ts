@@ -7,11 +7,8 @@
 import type { LyricsData } from '../types';
 
 export type RealtimeSyncStatus = 'idle' | 'unsupported' | 'ready' | 'listening' | 'recovering' | 'disabled' | 'error';
-
 export type RealtimeSyncQualityMode = 'high' | 'balanced' | 'conservative';
-
 export type RealtimeSpeechHypothesis = { text: string; confidence: number; isFinal: boolean; tsMs: number; };
-
 export type RealtimeSyncDiagnostics = {
   qualityMode: RealtimeSyncQualityMode;
   lastHypothesisMs: number | null;
@@ -34,9 +31,7 @@ export type RealtimeSyncState = {
 };
 
 export type RealtimeSyncControls = { toggle: () => void; };
-
 export type RealtimeSyncResult = RealtimeSyncState & RealtimeSyncControls;
-
 export type RealtimeAlignPolicy = {
   candidateMinScore: number;
   confirmMinScore: number;

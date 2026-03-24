@@ -24,7 +24,6 @@ type Props = {
 
 type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = "none" | "artist" | "album";
-
 const filterBtnClass = (active: boolean) =>
   `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
     active ? "bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30" : "bg-white/5 text-white/40 border border-white/8 hover:text-white/60"

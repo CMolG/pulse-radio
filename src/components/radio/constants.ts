@@ -30,7 +30,6 @@ export const STORAGE_KEYS = {
 
 export const MAX_RECENT = 15;
 export const MAX_HISTORY = 100;
-
 export const GENRE_CATEGORIES: BrowseCategory[] = [
   { id: 'pop',        label: 'Pop',        tag: 'pop',        gradient: 'from-pink-500 to-rose-600' },
   { id: 'rock',       label: 'Rock',       tag: 'rock',       gradient: 'from-red-600 to-orange-600' },

@@ -16,7 +16,6 @@ import type { RealtimeSyncDiagnostics, RealtimeSyncStatus } from '../services/re
 
 const MAX_CACHE = 50;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
 type CacheEntry = { key: string; data: LyricsData; ts: number };
 
 function loadCache(): CacheEntry[] {

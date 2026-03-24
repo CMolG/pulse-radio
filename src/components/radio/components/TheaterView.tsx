@@ -20,7 +20,6 @@ import UiImage from "@/components/common/UiImage";
 
 // Fallback spiral colors — warm orange/red gradient
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];
-
 const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; children: React.ReactNode }) => (
   <span className={`px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50${mono ? " font-mono" : ""}${upper ? " uppercase" : ""}`}>{children}</span>
 );

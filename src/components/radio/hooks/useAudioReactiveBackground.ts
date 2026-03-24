@@ -9,7 +9,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 type MeterRef = React.RefObject<{ peak: number; rms: number }>;
-
 const ATTACK_MS = 80;
 const RELEASE_MS = 350;
 const MAX_AMPLITUDE = 0.35;

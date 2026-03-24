@@ -13,7 +13,6 @@ import { IoRadioOutline, IoMusicalNotesOutline, IoHeartOutline, IoStatsChartOutl
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const ONBOARDING_KEY = 'radio-onboarding-done';
-
 const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(20, 22, 35, 0.75)',
   backdropFilter: 'blur(32px) saturate(1.6)',
@@ -23,7 +22,6 @@ const GLASS_STYLE: React.CSSProperties = {
 };
 
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string; };
-
 const STEPS: OnboardingStep[] = [
   {
     icon: <IoRadioOutline size={48} className="text-[#3478f6]" />,

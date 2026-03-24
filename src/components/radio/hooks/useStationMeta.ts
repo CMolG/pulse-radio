@@ -27,7 +27,6 @@ const AD_PATTERNS = [
 const FETCH_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500;
-
 const _adCache = new Map<string, boolean>();
 const MAX_AD_CACHE = 256;
 

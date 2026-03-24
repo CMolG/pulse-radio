@@ -10,7 +10,6 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 const PRESETS_MIN = [15, 30, 60] as const;
 const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
-
 export type UseSleepTimerReturn = {
   /** Minutes remaining (null = inactive) */
   remainingMin: number | null;

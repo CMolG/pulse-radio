@@ -64,9 +64,7 @@ const BASE_MESSAGES = {
 } as const;
 
 export type MessageKey = keyof typeof BASE_MESSAGES;
-
 export type MessageBundle = Record<MessageKey, string>;
-
 const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = {
   es: {
     topStations: "Top Stations",
