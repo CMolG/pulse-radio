@@ -412,6 +412,21 @@ export default function BrowseView({
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
 
+  const renderScrollStations = (list: Station[]) =>
+    list.map((s) => (
+      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
+        <StationCard
+          station={s}
+          isCurrent={s.stationuuid === currentStation?.stationuuid}
+          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
+          isFavorite={isFavorite(s.stationuuid)}
+          onPlay={() => onPlay(s)}
+          onToggleFav={() => onToggleFav(s)}
+          onPrefetch={() => onPrefetch?.(s.url_resolved)}
+        />
+      </div>
+    ));
+
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => {
     return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -603,19 +618,7 @@ export default function BrowseView({
                       icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}
                     >
-                    {favorites.map((s) => (
-                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
-                        <StationCard
-                          station={s}
-                          isCurrent={s.stationuuid === currentStation?.stationuuid}
-                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
-                          isFavorite={isFavorite(s.stationuuid)}
-                          onPlay={() => onPlay(s)}
-                          onToggleFav={() => onToggleFav(s)}
-                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                        />
-                      </div>
-                    ))}
+                    {renderScrollStations(favorites)}
                   </ScrollRow>
                 )}
 
@@ -626,19 +629,7 @@ export default function BrowseView({
                       icon={<Clock size={14} className="text-blue-400/70" />}
                       isMobile={isMobile}
                     >
-                    {recent.map((s) => (
-                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
-                        <StationCard
-                          station={s}
-                          isCurrent={s.stationuuid === currentStation?.stationuuid}
-                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
-                          isFavorite={isFavorite(s.stationuuid)}
-                          onPlay={() => onPlay(s)}
-                          onToggleFav={() => onToggleFav(s)}
-                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                        />
-                      </div>
-                    ))}
+                    {renderScrollStations(recent)}
                   </ScrollRow>
                 )}
 
@@ -714,27 +705,7 @@ export default function BrowseView({
                       }
                       isMobile={isMobile}
                     >
-                      {catStations.map((s) => (
-                        <div
-                          key={s.stationuuid}
-                          className={`snap-start shrink-0 ${itemWidth}`}
-                        >
-                          <StationCard
-                            station={s}
-                            isPlaying={
-                              isPlaying &&
-                              currentStation?.stationuuid === s.stationuuid
-                            }
-                            isCurrent={
-                              currentStation?.stationuuid === s.stationuuid
-                            }
-                            isFavorite={isFavorite(s.stationuuid)}
-                            onPlay={() => onPlay(s)}
-                            onToggleFav={() => onToggleFav(s)}
-                            onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                          />
-                        </div>
-                      ))}
+                      {renderScrollStations(catStations)}
                     </ScrollRow>
                   );
                 })}
