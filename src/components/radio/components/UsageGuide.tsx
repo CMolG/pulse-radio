@@ -8,17 +8,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  IoRadioOutline,
-  IoHeartOutline,
-  IoMusicalNotesOutline,
-  IoStatsChartOutline,
-  IoSearchOutline,
-  IoColorPaletteOutline,
-  IoTimerOutline,
-  IoGlobeOutline,
-  IoChevronBack,
-} from 'react-icons/io5';
+import { IoRadioOutline, IoHeartOutline, IoMusicalNotesOutline, IoStatsChartOutline, IoSearchOutline,
+  IoColorPaletteOutline, IoTimerOutline, IoGlobeOutline, IoChevronBack } from 'react-icons/io5';
 
 const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(20, 22, 35, 0.75)',

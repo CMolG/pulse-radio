@@ -8,16 +8,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  IoRadioOutline,
-  IoMusicalNotesOutline,
-  IoHeartOutline,
-  IoStatsChartOutline,
-  IoColorPaletteOutline,
-  IoPhonePortraitOutline,
-  IoShareOutline,
-  IoCheckmarkCircleOutline,
-} from 'react-icons/io5';
+import { IoRadioOutline, IoMusicalNotesOutline, IoHeartOutline, IoStatsChartOutline,
+  IoColorPaletteOutline, IoPhonePortraitOutline, IoShareOutline, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const ONBOARDING_KEY = 'radio-onboarding-done';

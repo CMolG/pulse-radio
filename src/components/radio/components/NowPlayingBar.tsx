@@ -7,18 +7,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Radio,
-  SlidersHorizontal,
-  Maximize2,
-  Star,
-  Heart,
-  Clock,
-} from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Radio, SlidersHorizontal, Maximize2, Star, Heart, Clock } from "lucide-react";
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
 import type { StreamQuality } from "../hooks/useRadio";
 import AnimatedBars from "./AnimatedBars";

@@ -8,20 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  X,
-  ExternalLink,
-  Radio,
-  Globe,
-  Calendar,
-  Music,
-  User,
-  Users,
-  Clock,
-  Disc3,
-  Tag,
-  Trash2,
-} from 'lucide-react';
+import { X, ExternalLink, Radio, Globe, Calendar, Music, User, Users, Clock, Disc3, Tag, Trash2 } from 'lucide-react';
 import type { SongDetailData } from '../types';
 import { useArtistInfo } from '../hooks/useArtistInfo';
 import { useLyrics } from '../hooks/useLyrics';
