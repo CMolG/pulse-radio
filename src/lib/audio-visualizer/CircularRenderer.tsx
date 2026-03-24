@@ -31,29 +31,15 @@ export function CircularRenderer({
 }: CircularRendererProps) {
   const timeRef = useRef(0);
   const demoBufferRef = useRef(new Uint8Array(128));
-  // Pre-computed position-based color strings — RGB doesn't depend on audio data,
-  // only on the gradient position (i/bufLen). Rebuilt when colors change.
+  // Pre-computed position-based color strings keyed by (color1, color2, bufLen).
+  // Rebuilt only when colors or buffer length change.
   const colorStringsRef = useRef<string[]>([]);
-
-  const colorsRef = useRef({
-    c1: hexToRgb(color1),
-    c2: hexToRgb(color2),
-  });
+  const colorCacheKeyRef = useRef('');
 
   useEffect(() => {
-    const c1 = hexToRgb(color1);
-    const c2 = hexToRgb(color2);
-    colorsRef.current = { c1, c2 };
-    // Rebuild position-based color strings (128 entries for 128 bars)
-    const strings: string[] = new Array(128);
-    for (let i = 0; i < 128; i++) {
-      const norm = i / 128;
-      const r = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
-      const g = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
-      const b = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
-      strings[i] = `rgb(${r},${g},${b})`;
-    }
-    colorStringsRef.current = strings;
+    // Invalidate on color change; will rebuild lazily in paint for actual bufLen
+    colorCacheKeyRef.current = '';
+    colorStringsRef.current = [];
   }, [color1, color2]);
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
@@ -68,7 +54,6 @@ export function CircularRenderer({
     const cx = w / 2;
     const cy = h / 2;
     const baseR = Math.min(w, h) * 0.2;
-    const { c1, c2 } = colorsRef.current;
 
     // Build or use demo data
     let dataArray: Uint8Array | null = freqData;
@@ -90,8 +75,23 @@ export function CircularRenderer({
       return;
     }
 
+    // Lazily rebuild color cache for actual bufLen (runs once per color/bufLen change)
+    const cacheKey = `${color1}_${color2}_${bufLen}`;
+    if (colorCacheKeyRef.current !== cacheKey) {
+      const c1 = hexToRgb(color1);
+      const c2 = hexToRgb(color2);
+      const strings: string[] = new Array(bufLen);
+      for (let i = 0; i < bufLen; i++) {
+        const norm = i / bufLen;
+        const r = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
+        const g = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
+        const b = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
+        strings[i] = `rgb(${r},${g},${b})`;
+      }
+      colorStringsRef.current = strings;
+      colorCacheKeyRef.current = cacheKey;
+    }
     const colorStrings = colorStringsRef.current;
-    const hasColorStrings = colorStrings.length >= bufLen;
 
     for (let i = 0; i < bufLen; i++) {
       const val = (dataArray[i] / 255) * sensitivity;
@@ -100,16 +100,8 @@ export function CircularRenderer({
       const x = cx + Math.cos(angle) * r;
       const y = cy + Math.sin(angle) * r;
 
-      if (hasColorStrings) {
-        ctx.fillStyle = colorStrings[i];
-        ctx.globalAlpha = 0.5 + val * 0.5;
-      } else {
-        const norm = i / bufLen;
-        const cr = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
-        const cg = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
-        const cb = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
-        ctx.fillStyle = `rgba(${cr},${cg},${cb},${0.5 + val * 0.5})`;
-      }
+      ctx.fillStyle = colorStrings[i];
+      ctx.globalAlpha = 0.5 + val * 0.5;
 
       ctx.beginPath();
       ctx.arc(x, y, 3 + val * 6, 0, Math.PI * 2);
