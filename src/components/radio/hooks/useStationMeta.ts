@@ -22,8 +22,16 @@ const FETCH_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500;
 
+const _adCache = new Map<string, boolean>();
+const MAX_AD_CACHE = 256;
+
 function isAdContent(text: string): boolean {
-  return AD_PATTERNS.some(re => re.test(text));
+  let result = _adCache.get(text);
+  if (result !== undefined) return result;
+  result = AD_PATTERNS.some(re => re.test(text));
+  if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!);
+  _adCache.set(text, result);
+  return result;
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
