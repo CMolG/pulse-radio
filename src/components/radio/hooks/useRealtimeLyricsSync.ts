@@ -117,9 +117,7 @@ export function useRealtimeLyricsSync({
     engineRef.current = engine;
     engine.start(languageHint);
 
-    return () => {
-      engine.stop();
-    };
+    return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
 
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);

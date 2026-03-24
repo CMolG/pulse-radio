@@ -83,9 +83,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   // Close on Escape
   useEffect(() => {
     if (!song) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [song, onClose]);

@@ -99,9 +99,7 @@ export function useLyrics(
           retryCountRef.current = 0;
         }
       })
-      .finally(() => {
-        if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false);
-      });
+      .finally(() => { if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false); });
   };
 
   useEffect(() => {

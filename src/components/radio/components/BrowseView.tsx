@@ -91,9 +91,7 @@ function ScrollRow({
     };
   }, [check, children]);
 
-  const scroll = (dir: -1 | 1) => {
-    ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
-  };
+  const scroll = (dir: -1 | 1) => { ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" }); };
 
   return (
     <div className={`mb-4 ${className ?? ""}`}>
@@ -270,9 +268,7 @@ export default function BrowseView({
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
     const queue = [...stationsToScan];
     const stale = () => scanGenRef.current !== gen;
-    const worker = async () => {
-      while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale);
-    };
+    const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); };
     await Promise.all(Array.from({ length: 3 }, worker));
   }, [fetchMeta]);
 
@@ -359,9 +355,7 @@ export default function BrowseView({
         if (random) onPlay(random);
       }, 30_000);
     }
-    return () => {
-      if (discoveryRef.current) clearInterval(discoveryRef.current);
-    };
+    return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
@@ -391,9 +385,7 @@ export default function BrowseView({
     const gen = scanGenRef.current + 1;
     scanGenRef.current = gen;
     startScan(pageStations, gen);
-    return () => {
-      if (scanGenRef.current === gen) scanGenRef.current++;
-    };
+    return () => { if (scanGenRef.current === gen) scanGenRef.current++; };
   }, [scanEnabled, pageStations, view.mode, startScan]);
 
   // Derived scan stats

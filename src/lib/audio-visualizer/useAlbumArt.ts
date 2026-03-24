@@ -254,9 +254,7 @@ export function useAlbumArt(title: string | null, artist: string | null): UseAlb
           setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO });
         }
       })
-      .finally(() => {
-        clearTimeout(timeout);
-      });
+      .finally(() => { clearTimeout(timeout); });
 
     return () => { clearTimeout(timeout); controller.abort(); };
   }, [title, artist, cacheKey, cachedInfo]);

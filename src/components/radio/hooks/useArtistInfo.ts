@@ -63,9 +63,7 @@ export function useArtistInfo(artist: string | null): {
       .catch(() => {
         if (!cancelled) setFetched({ key, info: null });
       })
-      .finally(() => {
-        clearTimeout(timeout);
-      });
+      .finally(() => { clearTimeout(timeout); });
 
     return () => {
       cancelled = true;

@@ -342,14 +342,10 @@ export function useRadio(): UseRadioReturn {
     };
 
     // Ended: connection dropped — seamlessly reconnect
-    const onEnded = () => {
-      if (!userPausedRef.current && station) reconnect(500);
-    };
+    const onEnded = () => { if (!userPausedRef.current && station) reconnect(500); };
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onCanPlay = () => {
-      if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {});
-    };
+    const onCanPlay = () => { if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {}); };
 
     // Single debounced handler for both visibilitychange and pageshow.
     // On iOS, both events fire on the same resume (screen unlock / tab switch),
@@ -377,9 +373,7 @@ export function useRadio(): UseRadioReturn {
     };
 
     // Network status: pause retries when offline, auto-reconnect when back online
-    const onOffline = () => {
-      clearReconnectTimer();
-    };
+    const onOffline = () => { clearReconnectTimer(); };
 
     const onOnline = () => {
       if (station && !userPausedRef.current && (audio.paused || audio.readyState < 2)) {

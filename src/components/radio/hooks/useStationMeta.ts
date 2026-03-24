@@ -176,9 +176,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
     // When the tab returns from background, poll immediately so the user
     // doesn't see stale metadata for up to POLL_INTERVAL_MS.
-    const onVisible = () => {
-      if (document.visibilityState === 'visible' && isPlaying) poll();
-    };
+    const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); };
     document.addEventListener('visibilitychange', onVisible);
 
     return () => {

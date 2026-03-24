@@ -131,9 +131,7 @@ export default function TheaterView({
     if (!artworkUrl || artworkUrl === lastUrlRef.current) return;
     lastUrlRef.current = artworkUrl;
     let cancelled = false;
-    extractColors(artworkUrl).then(c => {
-      if (!cancelled) setColors(c);
-    });
+    extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); });
     return () => { cancelled = true; };
   }, [artworkUrl]);
 

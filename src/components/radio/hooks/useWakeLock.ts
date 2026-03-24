@@ -69,9 +69,7 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
 
   // Re-acquire when tab becomes visible (browser releases lock on hide)
   useEffect(() => {
-    const onVisibilityChange = () => {
-      if (shouldLock && !document.hidden && !lockRef.current) request();
-    };
+    const onVisibilityChange = () => { if (shouldLock && !document.hidden && !lockRef.current) request(); };
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [shouldLock, request]);

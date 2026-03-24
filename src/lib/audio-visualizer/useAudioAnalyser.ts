@@ -101,9 +101,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
   }, []);
 
   useEffect(
-    () => () => {
-      cancelAnimationFrame(rafRef.current);
-    },
+    () => () => { cancelAnimationFrame(rafRef.current); },
     [],
   );
 

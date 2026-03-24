@@ -28,9 +28,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     console.error("[Pulse Radio] Component error caught by boundary:", error, info.componentStack);
   }
 
-  private handleReset = () => {
-    this.setState({ hasError: false, error: null });
-  };
+  private handleReset = () => { this.setState({ hasError: false, error: null }); };
 
   render() {
     if (this.state.hasError) {
