@@ -49,9 +49,7 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
       return;
     }
     if (!lockRef.current) return;
-    try {
-      await lockRef.current.release();
-    } catch {
+    try { await lockRef.current.release(); } catch {
       // Already released
     }
     lockRef.current = null;

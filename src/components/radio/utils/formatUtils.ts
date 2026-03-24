@@ -5,8 +5,7 @@ const ARTIST_SPLIT_RE = /[,;&]|feat\.|ft\.|featuring|vs\.?/i;
 export function stationInitials(name: string) {
   return name
     .split(WHITESPACE_RE)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
+    .slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "")
     .join("");
 }
 

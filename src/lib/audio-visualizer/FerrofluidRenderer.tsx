@@ -97,9 +97,7 @@ function drawMetaballs(
 
   // Reuse ImageData across frames — every pixel is written below, so no zeroing needed
   if (!_imgData || _imgData.width !== sw || _imgData.height !== sh) {
-    try {
-      _imgData = offCtx.createImageData(sw, sh);
-    } catch { return; }
+    try { _imgData = offCtx.createImageData(sw, sh); } catch { return; }
   }
   const sd = _imgData.data;
 

@@ -75,8 +75,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
   if (seedCodes.length === 0) return [];
 
   const seed = seedCodes
-    .map((code) => COUNTRY_BY_CODE[code])
-    .filter(Boolean);
+    .map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
 
   const regions = new Set(seed.map((country) => country.region));
   const subregions = new Set(seed.map((country) => country.subregion));
@@ -91,8 +90,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };
   })
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .filter((item) => item.score > 0).sort((a, b) => b.score - a.score)
     .map((item) => item.code);
 }
 
@@ -110,8 +108,7 @@ export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36)
   uniquePush(ordered, GLOBAL_INTEREST_CODES);
 
   const capped = ordered
-    .filter((code) => COUNTRY_BY_CODE[code] && !EXCLUDED_LOW_RELEVANCE_CODES.has(code))
-    .slice(0, maxChips);
+    .filter((code) => COUNTRY_BY_CODE[code] && !EXCLUDED_LOW_RELEVANCE_CODES.has(code)).slice(0, maxChips);
   const languageSet = new Set(languageCodes);
   const proximitySet = new Set(proximityCodes);
 

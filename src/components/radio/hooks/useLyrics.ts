@@ -64,8 +64,7 @@ export function useLyrics(
   const MAX_RETRIES = 2;
   const enableRealtime = Boolean(options?.enableRealtime && track?.title);
   const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
-    if (controller.signal.aborted) return;
-    if (!track?.title) return;
+    if (controller.signal.aborted || !track?.title) return;
     setLoading(true);
     setError(false);
     fetchLyricsApi(

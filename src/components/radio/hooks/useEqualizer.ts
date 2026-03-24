@@ -479,12 +479,8 @@ export function useEqualizer(): UseEqualizerReturn {
       const nrHead = nrHighpassRef.current;
       if (source && normalizer && normGain && nrHead) {
         try {
-          try {
-            source.disconnect(normalizer);
-          } catch { /* source may not be connected to normalizer */ }
-          try {
-            source.disconnect(nrHead);
-          } catch { /* source may not be connected to NR head */ }
+          try { source.disconnect(normalizer); } catch { /* source may not be connected to normalizer */ }
+          try { source.disconnect(nrHead); } catch { /* source may not be connected to NR head */ }
           normalizer.disconnect();
           normGain.disconnect();
           const ctx = ctxRef.current;

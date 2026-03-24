@@ -57,8 +57,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const plainLyrics =
     lyrics?.plainText?.trim() ||
     lyrics?.lines
-      ?.map((line) => line.text.trim())
-      .filter(Boolean)
+      ?.map((line) => line.text.trim()).filter(Boolean)
       .join('\n')
       .trim() ||
     '';

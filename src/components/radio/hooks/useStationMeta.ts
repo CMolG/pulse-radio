@@ -143,8 +143,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
 
     const abortController = new AbortController();
     const poll = async () => {
-      if (abortController.signal.aborted) return;
-      if (document.hidden) return;
+      if (abortController.signal.aborted || document.hidden) return;
 
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
       if (abortController.signal.aborted) return;

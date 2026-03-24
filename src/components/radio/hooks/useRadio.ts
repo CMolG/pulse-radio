@@ -194,8 +194,7 @@ export function useRadio(): UseRadioReturn {
 
     const sessionId = playSessionRef.current;
     const reconnect = (delay: number) => {
-      if (playSessionRef.current !== sessionId) return;
-      if (!station || userPausedRef.current) return;
+      if (playSessionRef.current !== sessionId || !station || userPausedRef.current) return;
       // Don't retry when browser is offline — onOnline will resume
       if (typeof navigator !== 'undefined' && !navigator.onLine) return;
       // Prevent concurrent reconnects — only one attempt at a time
@@ -343,8 +342,7 @@ export function useRadio(): UseRadioReturn {
     let lastResumeAttempt = 0;
     const RESUME_DEBOUNCE_MS = 1000;
     const onVisibilityResume = () => {
-      if (document.visibilityState !== 'visible') return;
-      if (!station || userPausedRef.current) return;
+      if (document.visibilityState !== 'visible' || !station || userPausedRef.current) return;
       const now = Date.now();
       if (now - lastResumeAttempt < RESUME_DEBOUNCE_MS) return;
       lastResumeAttempt = now;
@@ -570,8 +568,7 @@ export function useRadio(): UseRadioReturn {
 
   const prefetchedUrlsRef = useRef<Set<string>>(new Set());
   const prefetchStream = useCallback((streamUrl: string) => {
-    if (!isValidStreamUrl(streamUrl)) return;
-    if (prefetchedUrlsRef.current.has(streamUrl)) return;
+    if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
     if (prefetchedUrlsRef.current.size >= 500) prefetchedUrlsRef.current.clear();
     prefetchedUrlsRef.current.add(streamUrl);
     // Warm DNS+TCP+TLS with a HEAD request and measure latency

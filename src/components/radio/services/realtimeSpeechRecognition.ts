@@ -105,9 +105,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       // this is a stale onend firing and we should not restart.
       const current = recognition;
       if (!current) return;
-      try {
-        current.start();
-      } catch {
+      try { current.start(); } catch {
         running = false;
         callbacks.onFatalError('Speech recognition failed to restart.');
       }

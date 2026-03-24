@@ -94,6 +94,5 @@ export async function similarStations(station: Station, limit = 5): Promise<Stat
   const results = await stationsByTag(firstTag, limit + 5);
   // Exclude the current station and filter to only online streams
   return results
-    .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved)
-    .slice(0, limit);
+    .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit);
 }
