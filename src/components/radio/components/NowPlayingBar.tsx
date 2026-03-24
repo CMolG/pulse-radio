@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -53,7 +53,11 @@ type Props = {
   streamQuality?: StreamQuality;
 };
 
-export default function NowPlayingBar({
+const SAFE_AREA_STYLE: React.CSSProperties = {
+  paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))',
+};
+
+function NowPlayingBar({
   station,
   track,
   status,
@@ -104,9 +108,27 @@ export default function NowPlayingBar({
     return `Paused: ${trackInfo}`;
   }, [station, track, isPlaying, isLoading, status]);
 
+  const compactTags = useMemo(
+    () => station?.tags?.split(",").slice(0, 2).join(" · ") ?? "",
+    [station?.tags],
+  );
+  const firstTag = useMemo(
+    () => station?.tags?.split(",")[0] ?? "",
+    [station?.tags],
+  );
+
+  const handleVolumeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const v = parseFloat(e.target.value);
+      onSetVolume(v);
+      if (muted && v > 0) onToggleMute();
+    },
+    [muted, onSetVolume, onToggleMute],
+  );
+
   if (compact) {
     return (
-      <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={{ paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' }}>
+      <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
         {/* Play/Pause — 48px touch target */}
         <button
           onClick={onTogglePlay}
@@ -140,7 +162,7 @@ export default function NowPlayingBar({
                   </>
                 )}
                 <span className="text-[11px] text-secondary truncate">
-                  {track?.artist || station.tags?.split(",").slice(0, 2).join(" · ") || ""}
+                  {track?.artist || compactTags || ""}
                 </span>
               </div>
             </>
@@ -214,7 +236,7 @@ export default function NowPlayingBar({
               ? track.artist
                 ? `${track.artist} — ${track.title}`
                 : track.title
-              : station?.tags?.split(",")[0] || ""}
+              : firstTag}
           </p>
           {track?.album && (
             <p className="text-[9px] text-dim truncate">{track.album}</p>
@@ -365,11 +387,7 @@ export default function NowPlayingBar({
           max={1}
           step={0.01}
           value={volume}
-          onChange={(e) => {
-            const v = parseFloat(e.target.value);
-            onSetVolume(v);
-            if (muted && v > 0) onToggleMute();
-          }}
+          onChange={handleVolumeChange}
           aria-label="Volume"
           className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
@@ -377,3 +395,5 @@ export default function NowPlayingBar({
     </div>
   );
 }
+
+export default React.memo(NowPlayingBar);
