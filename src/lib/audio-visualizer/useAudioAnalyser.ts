@@ -71,18 +71,19 @@ export function useAudioAnalyser(
             }
             if (waveDataRef.current) {
               analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
-              // Compute peak and RMS from waveform (0-255 range, 128 = silence)
+              // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
+              // to avoid 256 float divisions per frame — normalize once at the end
               const buf = waveDataRef.current;
-              let sumSq = 0;
-              let maxAbs = 0;
+              let sumSqInt = 0;
+              let maxAbsInt = 0;
               for (let i = 0; i < buf.length; i++) {
-                const sample = (buf[i] - 128) / 128; // normalize to -1..1
-                sumSq += sample * sample;
-                const abs = Math.abs(sample);
-                if (abs > maxAbs) maxAbs = abs;
+                const s = buf[i] - 128;
+                sumSqInt += s * s;
+                const a = s < 0 ? -s : s;
+                if (a > maxAbsInt) maxAbsInt = a;
               }
-              meterRef.current.peak = maxAbs;
-              meterRef.current.rms = Math.sqrt(sumSq / buf.length);
+              meterRef.current.peak = maxAbsInt / 128;
+              meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128;
             }
           }
           rafRef.current = requestAnimationFrame(tick);
