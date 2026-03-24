@@ -29,19 +29,26 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
   useEffect(() => {
     if (preview) return;
     const MAX_STALE_MS = 30_000;
+    let lastRaw = '';
     const read = () => {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.PLAYBACK);
-        if (raw) {
+        if (raw && raw !== lastRaw) {
+          lastRaw = raw;
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            // Treat data older than 30s as stale — main app likely inactive
             if (parsed.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
               setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
             } else {
               setState(parsed);
             }
             if (typeof parsed.volume === 'number') setWidgetVolume(parsed.volume);
+          }
+        } else if (raw && raw === lastRaw) {
+          // Same raw string — only check staleness
+          const parsed = JSON.parse(raw);
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
           }
         }
       } catch { /* ok */ }

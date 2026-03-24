@@ -24,17 +24,32 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
   useEffect(() => {
     if (preview) return;
     const MAX_STALE_MS = 30_000;
+    let lastRaw = '';
+    let lastFavRaw = '';
     const read = () => {
       try {
-        const parsed = loadFromStorage<WidgetPlaybackState | null>(STORAGE_KEYS.PLAYBACK, null);
-        if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
-          setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
-        } else {
-          setState(parsed);
+        const raw = localStorage.getItem(STORAGE_KEYS.PLAYBACK) ?? '';
+        if (raw && raw !== lastRaw) {
+          lastRaw = raw;
+          const parsed = JSON.parse(raw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          } else {
+            setState(parsed);
+          }
+        } else if (raw && raw === lastRaw) {
+          const parsed = JSON.parse(raw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          }
         }
       } catch { /* ok */ }
       try {
-        setFavorites(loadFromStorage(STORAGE_KEYS.FAVORITES, []))
+        const favRaw = localStorage.getItem(STORAGE_KEYS.FAVORITES) ?? '';
+        if (favRaw !== lastFavRaw) {
+          lastFavRaw = favRaw;
+          setFavorites(loadFromStorage(STORAGE_KEYS.FAVORITES, []));
+        }
       } catch { /* ok */ }
     };
     read();
