@@ -15,18 +15,18 @@ const COUNTRY_LOCALE_OVERRIDES: Partial<Record<string, SupportedLocale>> = {
   MO: "zh-TW",
 };
 
-export function getDefaultLocaleForCountry(countryCode: string): SupportedLocale {
+export function getDefaultLocaleForCountry(countryCode: string): SupportedLocale | null {
   const normalized = countryCode.toUpperCase();
   const override = COUNTRY_LOCALE_OVERRIDES[normalized];
   if (override) return override;
 
   const country = COUNTRY_BY_CODE[normalized];
-  if (!country) return "en";
+  if (!country) return null;
 
   for (const lang3 of country.lang3) {
     const locale = LANG3_TO_LOCALE[lang3];
     if (locale) return locale;
   }
 
-  return "en";
+  return null;
 }
