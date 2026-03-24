@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'radio-usage-stats';
@@ -230,12 +230,13 @@ export function useStats() {
       .slice(0, limit);
   }, []);
 
-  // Get genre ordering for home reorder
-  const genreOrder = useCallback(() => {
-    return Object.values(statsRef.current.genrePlayCounts)
+  // Stable genre ordering for home reorder — only recomputes when genre data changes,
+  // not on every render like the previous genreOrder() function approach.
+  const genreOrder = useMemo(() => {
+    return Object.values(stats.genrePlayCounts)
       .sort((a, b) => b.count - a.count)
       .map(g => g.genre);
-  }, []);
+  }, [stats.genrePlayCounts]);
 
   // Update artwork/genre on an existing song entry without incrementing counts.
   // Used when album metadata arrives after the initial recordSongPlay call.

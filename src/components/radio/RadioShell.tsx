@@ -1060,7 +1060,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     onSelectGenre={handleSelectGenre}
                     onSelectCountry={handleSelectCountry}
                     onGoHome={handleGoHome}
-                    userGenreOrder={usageStats.genreOrder()}
+                    userGenreOrder={usageStats.genreOrder}
                   />
                 ) : activeTab === "history" ? (
                   <HistoryGridView
@@ -1325,7 +1325,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         onSelectGenre={handleSelectGenre}
                         onSelectCountry={handleSelectCountry}
                         onGoHome={handleGoHome}
-                        userGenreOrder={usageStats.genreOrder()}
+                        userGenreOrder={usageStats.genreOrder}
                       />
                     </motion.div>
                   ) : activeTab === "history" ? (
