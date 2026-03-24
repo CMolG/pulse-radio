@@ -216,8 +216,8 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         placeholder="Preset name…"
                         className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/25 outline-none focus:border-sys-orange/50"
                         autoFocus />
-                      <button onClick={handleSave} className="p-1.5 rounded-lg bg-sys-orange/20 text-sys-orange"><Save size={12} /></button>
-                      <button onClick={() => setShowSaveInput(false)} className="p-1.5 rounded-lg bg-white/5 text-white/40"><X size={12} /></button>
+                      <button onClick={handleSave} aria-label="Save preset" className="p-1.5 rounded-lg bg-sys-orange/20 text-sys-orange"><Save size={12} /></button>
+                      <button onClick={() => setShowSaveInput(false)} aria-label="Cancel" className="p-1.5 rounded-lg bg-white/5 text-white/40"><X size={12} /></button>
                     </div>
                   ) : (
                     <button onClick={() => setShowSaveInput(true)}

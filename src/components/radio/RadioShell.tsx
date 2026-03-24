@@ -14,7 +14,7 @@ import React, {
   useRef,
 } from "react";
 import UiImage from "@/components/common/UiImage";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Minimize2,
@@ -117,7 +117,6 @@ type RadioShellProps = {
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const containerSize = useContainerSize(containerRef);
-  const router = useRouter();
   const pathname = usePathname();
   const { t, locale } = useLocale();
 
@@ -391,13 +390,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handlePlay = useCallback(
     (station: Station) => {
       const { radio: r, recent: rec, stationQueue: sq, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
+      // Pre-create audio element and set up the Web Audio graph BEFORE calling play().
+      // On iOS Safari, createMediaElementSource() must be called BEFORE audio.src is
+      // assigned and audio.play() is invoked — calling it after play() can result in
+      // the audio being CORS-tainted and silenced in the Web Audio pipeline.
+      // ensureAudio() is also needed so resumeAudioContext() inside play() finds the
+      // AudioContext in the cache and can resume it within the same user-gesture context.
+      const audio = r.ensureAudio();
+      eqSrc(audio);
+      an.connectAudio(audio);
       r.play(station);
-      // Connect EQ and analyser within user gesture context so AudioContext
-      // is created/resumed from a tap — required by mobile browsers.
-      if (r.audioRef.current) {
-        eqSrc(r.audioRef.current);
-        an.connectAudio(r.audioRef.current);
-      }
       rec.add(station);
       sq.setPlaying(station.stationuuid);
       setTheaterMode(true);
@@ -762,9 +764,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     setTheaterMode(false);
     setSearchQuery("");
     if (pathname !== "/") {
-      router.push("/");
+      window.history.pushState(null, "", "/");
     }
-  }, [pathname, router, t]);
+  }, [pathname, t]);
 
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -803,10 +805,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     });
     setTheaterMode(false);
     setSearchQuery("");
-    if (pathname !== `/${countryCode}`) {
-      router.push(`/${countryCode}`);
+    const newPath = `/${countryCode}`;
+    if (pathname !== newPath) {
+      window.history.pushState(null, "", newPath);
     }
-  }, [pathname, router]);
+  }, [pathname]);
 
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
   const isLandingNavigation = !theaterMode;

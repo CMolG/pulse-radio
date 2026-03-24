@@ -118,6 +118,7 @@ export default function NowPlayingBar({
         <button
           onClick={onTogglePlay}
           disabled={!station}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
           {isLoading ? (
@@ -162,6 +163,7 @@ export default function NowPlayingBar({
               onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
+              aria-label="Theater mode"
             >
               <Maximize2 size={18} />
             </button>
@@ -299,6 +301,7 @@ export default function NowPlayingBar({
             onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
+            aria-label="Theater mode"
           >
             <Maximize2 size={14} />
           </button>

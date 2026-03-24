@@ -57,3 +57,12 @@ export function resumeAudioContext(audio: HTMLAudioElement): void {
     entry.ctx.resume().catch(() => {});
   }
 }
+
+/**
+ * Returns true if a MediaElementAudioSourceNode has been created for this element.
+ * Used to detect when the Web Audio graph is active and CORS-compatible streaming
+ * (via proxy) is required to prevent cross-origin audio taint on iOS Safari.
+ */
+export function hasAudioSource(audio: HTMLAudioElement): boolean {
+  return cache.has(audio);
+}

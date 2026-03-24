@@ -67,7 +67,7 @@ export default function LyricsPanel({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onClose} className="p-1 text-subtle-hover">
+          <button onClick={onClose} aria-label="Close lyrics" className="p-1 text-subtle-hover">
             <X size={14} />
           </button>
         </div>
