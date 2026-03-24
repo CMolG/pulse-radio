@@ -101,6 +101,22 @@ export function useStats() {
   const statsRef = useRef(stats);
   useEffect(() => { statsRef.current = stats; }, [stats]);
 
+  // Sync stats from other tabs — safe because BroadcastChannel ensures
+  // only one tab plays at a time, so the writing tab always has the latest.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || e.newValue == null) return;
+      try {
+        const parsed = JSON.parse(e.newValue) as UsageStats;
+        if (parsed && typeof parsed.totalListenMs === 'number') {
+          setStats(parsed);
+        }
+      } catch { /* ignore malformed */ }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
