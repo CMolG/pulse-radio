@@ -358,16 +358,18 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }
   }, [radio.status, radio.volume, radio.muted, radio.currentTime, enrichedTrack, albumArt.artworkUrl, pbStore]);
 
+  const { setOutputVolume, connectSource: eqConnectSource } = eq;
+
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
-      eq.connectSource(radio.audioRef.current);
+      eqConnectSource(radio.audioRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
 
   useEffect(() => {
-    eq.setOutputVolume(radio.volume, radio.muted);
-  }, [eq, radio.muted, radio.volume]);
+    setOutputVolume(radio.volume, radio.muted);
+  }, [setOutputVolume, radio.muted, radio.volume]);
 
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
@@ -382,7 +384,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       // Connect EQ and analyser within user gesture context so AudioContext
       // is created/resumed from a tap — required by mobile browsers.
       if (radio.audioRef.current) {
-        eq.connectSource(radio.audioRef.current);
+        eqConnectSource(radio.audioRef.current);
         analyser.connectAudio(radio.audioRef.current);
       }
       recent.add(station);
@@ -394,7 +396,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         radio.prefetchStream(stationQueue.queue[nextIdx].url_resolved);
       }
     },
-    [radio, recent, stationQueue, eq, analyser],
+    [radio, recent, stationQueue, eqConnectSource, analyser],
   );
 
   // Auto-advance to next queued station on error, or failover to similar station
