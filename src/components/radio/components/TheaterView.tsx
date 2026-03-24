@@ -15,15 +15,8 @@ import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
+import { stationInitials } from "../utils/formatUtils";
 import UiImage from "@/components/common/UiImage";
-
-function stationInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 // Fallback spiral colors — warm orange/red gradient
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];

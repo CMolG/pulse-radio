@@ -8,6 +8,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { primaryArtist } from '../utils/formatUtils';
 
 const STORAGE_KEY = 'radio-usage-stats';
 const SAVE_INTERVAL_MS = 10_000;
@@ -55,11 +56,6 @@ const EMPTY_STATS: UsageStats = {
   genrePlayCounts: {},
   totalListenMs: 0,
 };
-
-function primaryArtist(artist: string): string {
-  // Split by common artist separators, take the first
-  return artist.split(/[,;&]|feat\.|ft\.|featuring|vs\.?/i)[0].trim();
-}
 
 /** Keep only the top N entries by count, dropping the least-played */
 function pruneByCount<T extends { count: number }>(

@@ -25,14 +25,7 @@ import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import UiImage from "@/components/common/UiImage";
-
-function stationInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
+import { stationInitials } from "../utils/formatUtils";
 
 type Props = {
   station: Station | null;

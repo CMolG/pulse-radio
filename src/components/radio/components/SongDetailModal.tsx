@@ -27,13 +27,7 @@ import { useLyrics } from '../hooks/useLyrics';
 import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
 import { useAlbumArt } from '@/lib/audio-visualizer';
 import UiImage from '@/components/common/UiImage';
-
-const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
-
-function itunesSearchUrl(title: string, artist: string): string {
-  const q = encodeURIComponent(`${artist} ${title}`.trim());
-  return `https://music.apple.com/search?term=${q}&${ITUNES_REFERRER}`;
-}
+import { itunesSearchUrl } from '../utils/formatUtils';
 
 type Props = {
   song: SongDetailData | null;

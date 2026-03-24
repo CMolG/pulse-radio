@@ -14,14 +14,7 @@ import UiImage from "@/components/common/UiImage";
 import {
   ParallaxAlbumBackground,
 } from "@/lib/audio-visualizer";
-
-function stationInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
+import { stationInitials } from "../utils/formatUtils";
 
 type Props = {
   station: Station;

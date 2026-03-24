@@ -12,6 +12,7 @@ import { motion } from 'motion/react';
 import type { Station } from '../types';
 import { countryFlag } from '../constants';
 import UiImage from '@/components/common/UiImage';
+import { stationInitials } from '../utils/formatUtils';
 
 type Props = {
   station: Station;
@@ -25,8 +26,6 @@ type Props = {
   onPeek?: () => void;
   onPrefetch?: () => void;
 };
-
-function stationInitials(name: string) { return name.split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join(''); }
 
 export default function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek, onPrefetch }: Props) {
   const [imgError, setImgError] = useState(false);
