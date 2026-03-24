@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { FavoriteSong } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 
 export type UseFavoriteSongsReturn = {
   songs: FavoriteSong[];
@@ -43,18 +44,7 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
     saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
   }, [songs]);
 
-  // Sync favorite songs across tabs via storage events
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEYS.FAVORITE_SONGS || e.newValue == null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as FavoriteSong[];
-        if (Array.isArray(parsed)) setSongs(parsed);
-      } catch { /* ignore malformed */ }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => {
       const key = songKey(song.title, song.artist);

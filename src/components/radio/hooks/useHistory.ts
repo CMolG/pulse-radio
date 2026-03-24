@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { NowPlayingTrack, HistoryEntry } from '../types';
 import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 
 export type UseHistoryReturn = {
   history: HistoryEntry[];
@@ -40,18 +41,7 @@ export function useHistory(
     saveToStorage(STORAGE_KEYS.HISTORY, history);
   }, [history]);
 
-  // Sync history across tabs via storage events
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEYS.HISTORY || e.newValue == null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as HistoryEntry[];
-        if (Array.isArray(parsed)) setHistory(parsed);
-      } catch { /* ignore malformed */ }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
 
   // Add entry when track changes; handles station transitions in a single effect
   // to prevent the race between station-reset and track-add

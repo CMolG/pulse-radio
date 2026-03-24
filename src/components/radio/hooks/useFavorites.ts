@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { Station } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 
 export type UseFavoritesReturn = {
   favorites: Station[];
@@ -39,18 +40,7 @@ export function useFavorites(): UseFavoritesReturn {
     saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
   }, [favorites]);
 
-  // Sync favorites across tabs via storage events
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEYS.FAVORITES || e.newValue == null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as Station[];
-        if (Array.isArray(parsed)) setFavorites(parsed);
-      } catch { /* ignore malformed */ }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
 
   const add = useCallback((station: Station) => {
     setFavorites(prev => {

@@ -8,6 +8,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 import { primaryArtist } from '../utils/formatUtils';
 
 const STORAGE_KEY = 'radio-usage-stats';
@@ -80,19 +81,9 @@ export function useStats() {
 
   // Sync stats from other tabs — safe because BroadcastChannel ensures
   // only one tab plays at a time, so the writing tab always has the latest.
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEY || e.newValue == null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as UsageStats;
-        if (parsed && typeof parsed.totalListenMs === 'number') {
-          setStats(parsed);
-        }
-      } catch { /* ignore malformed */ }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats =>
+    !!v && typeof (v as UsageStats).totalListenMs === 'number',
+  );
 
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

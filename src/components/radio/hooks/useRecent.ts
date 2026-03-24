@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { Station } from '../types';
 import { STORAGE_KEYS, MAX_RECENT } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 
 export type UseRecentReturn = {
   recent: Station[];
@@ -34,18 +35,7 @@ export function useRecent(): UseRecentReturn {
     saveToStorage(STORAGE_KEYS.RECENT, recent);
   }, [recent]);
 
-  // Sync recent stations across tabs via storage events
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEYS.RECENT || e.newValue == null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as Station[];
-        if (Array.isArray(parsed)) setRecent(parsed);
-      } catch { /* ignore malformed */ }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
 
   const add = useCallback((station: Station) => {
     setRecent(prev => {
