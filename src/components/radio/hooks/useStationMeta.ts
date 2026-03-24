@@ -70,9 +70,18 @@ export async function fetchIcyMeta(
   }
 }
 
+let _lastStation = '';
+let _lastStationLower = '';
+
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
-  if (raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
+  if (raw === stationName) return null;
+  // Cache lowercase station name to avoid recomputing on every poll
+  if (stationName !== _lastStation) {
+    _lastStation = stationName;
+    _lastStationLower = stationName.toLowerCase();
+  }
+  if (raw.toLowerCase() === _lastStationLower) return null;
 
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
