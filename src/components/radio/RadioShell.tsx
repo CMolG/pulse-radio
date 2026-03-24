@@ -376,6 +376,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   // Auto-advance to next queued station on error, or failover to similar station
   useEffect(() => {
+    let cancelled = false;
     if (radio.status === 'error') {
       if (stationQueue.hasNext) {
         const next = stationQueue.skipToNext();
@@ -387,13 +388,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         // No queue entries — find a similar station by genre tag
         import('./services/radioApi').then(({ similarStations }) => {
           similarStations(radio.station!, 3).then(alts => {
-            if (alts.length > 0 && radio.status === 'error') {
+            if (alts.length > 0 && !cancelled) {
               handlePlay(alts[0]);
             }
           }).catch(() => {});
         });
       }
     }
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.status]);
 
