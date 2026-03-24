@@ -75,18 +75,19 @@ export function VisualizerCanvas({
         const step = Math.max(1, Math.floor(frequencyData.length / barCount));
         const barWidth = width / barCount;
         const gap = barWidth * 0.2;
+        // One gradient for all bars — avoids 64 createLinearGradient per frame
+        let fillStyle: string | CanvasGradient = resolvedColor;
+        try {
+          const gradient = ctx.createLinearGradient(0, height, 0, 0);
+          gradient.addColorStop(0, resolvedColor);
+          gradient.addColorStop(1, 'transparent');
+          fillStyle = gradient;
+        } catch { /* fallback to solid color */ }
+        ctx.fillStyle = fillStyle;
         for (let i = 0; i < barCount; i++) {
           const idx = Math.min(i * step, frequencyData.length - 1);
           const value = frequencyData[idx] / 255;
           const barHeight = value * height * 0.8;
-          let fillStyle: string | CanvasGradient = resolvedColor;
-          try {
-            const gradient = ctx.createLinearGradient(0, height, 0, height - barHeight);
-            gradient.addColorStop(0, resolvedColor);
-            gradient.addColorStop(1, 'transparent');
-            fillStyle = gradient;
-          } catch { /* fallback to solid color */ }
-          ctx.fillStyle = fillStyle;
           ctx.beginPath();
           try {
             ctx.roundRect(
