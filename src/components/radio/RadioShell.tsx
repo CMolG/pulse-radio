@@ -158,12 +158,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       ...track,
       album: track.album || albumArt.albumName || undefined,
       artworkUrl: track.artworkUrl || albumArt.artworkUrl || undefined,
-      itunesUrl: albumArt.itunesUrl || undefined,
-      durationMs: albumArt.durationMs || undefined,
+      itunesUrl: albumArt.itunesUrl ?? undefined,
+      durationMs: albumArt.durationMs ?? undefined,
       genre: albumArt.genre || undefined,
       releaseDate: albumArt.releaseDate || undefined,
-      trackNumber: albumArt.trackNumber || undefined,
-      trackCount: albumArt.trackCount || undefined,
+      trackNumber: albumArt.trackNumber ?? undefined,
+      trackCount: albumArt.trackCount ?? undefined,
     };
   }, [track, albumArt.albumName, albumArt.artworkUrl, albumArt.itunesUrl, albumArt.durationMs, albumArt.genre, albumArt.releaseDate, albumArt.trackNumber, albumArt.trackCount]);
 
