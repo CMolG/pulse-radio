@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect } from "react";
 
 interface CircularRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>;
@@ -19,6 +19,7 @@ interface CircularRendererProps {
 }
 
 import { hexToRgb } from './colorUtils';
+import { useCanvasLoop } from './useCanvasLoop';
 
 export function CircularRenderer({
   frequencyDataRef,
@@ -28,11 +29,7 @@ export function CircularRenderer({
   sensitivity = 1.0,
   demo = false,
 }: CircularRendererProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
   const timeRef = useRef(0);
-  const renderRef = useRef<() => void>(() => {});
-  const frequencyDataRefRef = useRef(frequencyDataRef);
   const demoBufferRef = useRef(new Uint8Array(128));
   // Pre-computed position-based color strings — RGB doesn't depend on audio data,
   // only on the gradient position (i/bufLen). Rebuilt when colors change.
@@ -59,30 +56,7 @@ export function CircularRenderer({
     colorStringsRef.current = strings;
   }, [color1, color2]);
 
-  useEffect(() => {
-    frequencyDataRefRef.current = frequencyDataRef;
-  }, [frequencyDataRef]);
-
-  const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(rect.width * dpr);
-    const h = Math.round(rect.height * dpr);
-
-    if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(renderRef.current);
-      return;
-    }
-
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
+  const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
 
     timeRef.current += 0.016;
     const t = timeRef.current;
@@ -97,7 +71,7 @@ export function CircularRenderer({
     const { c1, c2 } = colorsRef.current;
 
     // Build or use demo data
-    let dataArray: Uint8Array | null = frequencyDataRefRef.current?.current ?? null;
+    let dataArray: Uint8Array | null = freqData;
     let bufLen: number;
 
     if (dataArray) {
@@ -113,7 +87,6 @@ export function CircularRenderer({
       }
       dataArray = demoData;
     } else {
-      frameRef.current = requestAnimationFrame(renderRef.current);
       return;
     }
 
@@ -150,18 +123,7 @@ export function CircularRenderer({
     ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 1;
     ctx.stroke();
-
-    frameRef.current = requestAnimationFrame(renderRef.current);
-  }, [sensitivity, demo]);
-
-  useEffect(() => {
-    renderRef.current = render;
-  }, [render]);
-
-  useEffect(() => {
-    frameRef.current = requestAnimationFrame(renderRef.current);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, []);
+  });
 
   return (
     <div className={`relative ${className}`}>

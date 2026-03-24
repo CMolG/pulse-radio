@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 interface FerrofluidRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>;
@@ -22,6 +22,7 @@ interface FerrofluidRendererProps {
 
 /* ─── helpers ─── */
 import { hexToRgb } from './colorUtils';
+import { useCanvasLoop } from './useCanvasLoop';
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -184,13 +185,9 @@ export function FerrofluidRenderer({
   sensitivity = 1.0,
   demo = false,
 }: FerrofluidRendererProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const blobsRef = useRef<Blob[]>([]);
-  const frameRef = useRef(0);
   const timeRef = useRef(0);
   const sizeRef = useRef({ w: 0, h: 0 });
-  const renderRef = useRef<() => void>(() => {});
-  const frequencyDataRefRef = useRef(frequencyDataRef);
 
   const colors = useRef({
     primary: hexToRgb(colorPrimary),
@@ -206,31 +203,7 @@ export function FerrofluidRenderer({
     };
   }, [colorPrimary, colorSecondary, colorAccent]);
 
-  useEffect(() => {
-    frequencyDataRefRef.current = frequencyDataRef;
-  }, [frequencyDataRef]);
-
-  const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(rect.width * dpr * 0.5); // render at half DPR for performance
-    const h = Math.round(rect.height * dpr * 0.5);
-
-    if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(renderRef.current);
-      return;
-    }
-
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-
+  const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
     if (
       blobsRef.current.length !== blobCount ||
@@ -249,7 +222,7 @@ export function FerrofluidRenderer({
 
     // compute overall energy
     let energy = 0;
-    const frequencyData = frequencyDataRefRef.current?.current ?? null;
+    const frequencyData = freqData;
     if (frequencyData) {
       let sum = 0;
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
@@ -306,18 +279,7 @@ export function FerrofluidRenderer({
 
     // draw metaballs
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
-
-    frameRef.current = requestAnimationFrame(renderRef.current);
-  }, [blobCount, sensitivity, demo]);
-
-  useEffect(() => {
-    renderRef.current = render;
-  }, [render]);
-
-  useEffect(() => {
-    frameRef.current = requestAnimationFrame(renderRef.current);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, []);
+  }, 0.5);
 
   return (
     <div className={`relative ${className}`}>

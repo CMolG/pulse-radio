@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect } from "react";
 
 interface SpiralRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>;
@@ -17,6 +17,8 @@ interface SpiralRendererProps {
   sensitivity?: number;
   demo?: boolean;
 }
+
+import { useCanvasLoop } from './useCanvasLoop';
 
 const NUM_BARS = 250;
 const CYCLES = 4;
@@ -31,11 +33,7 @@ export function SpiralRenderer({
   sensitivity = 1.0,
   demo = false,
 }: SpiralRendererProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
   const rotationRef = useRef(0);
-  const renderRef = useRef<() => void>(() => {});
-  const frequencyDataRefRef = useRef(frequencyDataRef);
   const dataArrayRef = useRef(new Float64Array(NUM_BARS));
   const targetArrayRef = useRef(new Float64Array(NUM_BARS));
   const smoothedRef = useRef(new Float64Array(NUM_BARS));
@@ -51,38 +49,14 @@ export function SpiralRenderer({
     colorsRef.current = { color1, color2, color3 };
   }, [color1, color2, color3]);
 
-  useEffect(() => {
-    frequencyDataRefRef.current = frequencyDataRef;
-  }, [frequencyDataRef]);
-
-  const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(rect.width * dpr);
-    const h = Math.round(rect.height * dpr);
-
-    if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(renderRef.current);
-      return;
-    }
-
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-
+  const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2;
     const centerY = h / 2;
 
     // Update mock/frequency data
     const data = dataArrayRef.current;
     const target = targetArrayRef.current;
-    const frequencyData = frequencyDataRefRef.current?.current ?? null;
+    const frequencyData = freqData;
 
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
@@ -215,18 +189,7 @@ export function SpiralRenderer({
     }
 
     ctx.globalAlpha = 1.0;
-
-    frameRef.current = requestAnimationFrame(renderRef.current);
-  }, [sensitivity, demo]);
-
-  useEffect(() => {
-    renderRef.current = render;
-  }, [render]);
-
-  useEffect(() => {
-    frameRef.current = requestAnimationFrame(renderRef.current);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, []);
+  });
 
   return (
     <div
