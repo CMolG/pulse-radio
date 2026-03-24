@@ -44,10 +44,7 @@ export default React.memo(function NowPlayingHero({
 
   const showFallback = !coverUrl || imgError;
 
-  const heroTags = useMemo(
-    () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
-    [station.tags],
-  );
+  const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]);
 
   return (
     <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">

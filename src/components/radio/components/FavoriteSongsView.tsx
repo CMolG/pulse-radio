@@ -101,10 +101,7 @@ function GroupStack({
   const [expanded, setExpanded] = useState(false);
   const VISIBLE_COUNT = 3;
   const hasMore = songs.length > VISIBLE_COUNT;
-  const visibleSongs = useMemo(
-    () => expanded ? songs : songs.slice(0, VISIBLE_COUNT),
-    [expanded, songs],
-  );
+  const visibleSongs = useMemo(() => expanded ? songs : songs.slice(0, VISIBLE_COUNT), [expanded, songs]);
 
   return (
     <div className="mb-6">

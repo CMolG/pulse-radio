@@ -65,10 +65,7 @@ export default function LyricsReel({
   const [focusedIdx, setFocusedIdx] = useState(0);
   const isDesktop = variant === "desktop";
 
-  const renderableLines = useMemo(
-    () => getRenderableLyricLines(lyrics),
-    [lyrics],
-  );
+  const renderableLines = useMemo(() => getRenderableLyricLines(lyrics), [lyrics]);
   const activeIdx = useMemo(
     () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride),
     [activeLineOverride, currentTime, lyrics],

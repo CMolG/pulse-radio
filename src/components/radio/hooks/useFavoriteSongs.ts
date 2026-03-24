@@ -91,10 +91,7 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
     });
   }, []);
 
-  const has = useCallback(
-    (title: string, artist: string) => keySetRef.current.has(songKey(title, artist)),
-    [],
-  );
+  const has = useCallback((title: string, artist: string) => keySetRef.current.has(songKey(title, artist)), []);
 
   const clear = useCallback(() => setSongs([]), []);
 

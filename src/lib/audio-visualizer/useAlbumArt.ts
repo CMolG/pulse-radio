@@ -209,10 +209,7 @@ export interface UseAlbumArtReturn {
 
 export function useAlbumArt(title: string | null, artist: string | null): UseAlbumArtReturn {
   const hasTitle = Boolean(title);
-  const cacheKey = useMemo(
-    () => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''),
-    [title, artist],
-  );
+  const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
   const cachedInfo = useMemo(() => {
     if (!cacheKey) return null;
     return cacheGet(cacheKey) ?? null;
