@@ -202,7 +202,6 @@ function GroupStack({
 export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>("none");
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
-
   const handleContextMenu = useCallback((e: React.MouseEvent, songId: string) => {
     e.preventDefault();
     setContextMenu({ x: e.clientX, y: e.clientY, songId });

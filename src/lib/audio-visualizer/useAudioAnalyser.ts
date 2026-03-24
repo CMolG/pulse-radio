@@ -31,7 +31,6 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
   const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 });
   const [isActive, setIsActive] = useState(false);
-
   const connectAudio = useCallback(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;

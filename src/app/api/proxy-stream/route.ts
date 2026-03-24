@@ -95,7 +95,6 @@ export async function GET(req: NextRequest) {
     const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
     const icyBr = upstream.headers.get('icy-br');
     const icyName = upstream.headers.get('icy-name');
-
     const responseHeaders: Record<string, string> = {
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*',

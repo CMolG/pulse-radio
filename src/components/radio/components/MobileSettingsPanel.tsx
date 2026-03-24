@@ -59,7 +59,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [presetName, setPresetName] = useState("");
-
   const handleSelectPreset = useCallback((name: string, gains: number[]) => {
     setSelectedPreset(name);
     eq.applyPreset(gains);

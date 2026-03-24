@@ -65,10 +65,8 @@ export function useLyrics(
   const abortRef = useRef<AbortController | null>(null);
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const MAX_RETRIES = 2;
   const enableRealtime = Boolean(options?.enableRealtime && track?.title);
-
   const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
     if (controller.signal.aborted) return;
     if (!track?.title) return;

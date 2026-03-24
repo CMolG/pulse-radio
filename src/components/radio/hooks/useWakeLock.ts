@@ -18,10 +18,8 @@ export type UseWakeLockReturn = { isActive: boolean; request: () => Promise<void
 export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
   const lockRef = useRef<WakeLockSentinel | null>(null);
   const [isActive, setIsActive] = useState(false);
-
   const requestingRef = useRef(false);
   const wantReleaseRef = useRef(false);
-
   const request = useCallback(async () => {
     if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
     requestingRef.current = true;

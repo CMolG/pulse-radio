@@ -71,7 +71,6 @@ function ScrollRow({
   const ref = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
-
   const check = useCallback(() => {
     const el = ref.current;
     if (!el) return;
@@ -214,7 +213,6 @@ export default function BrowseView({
   const scanGenRef = useRef(0);
   const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
-
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = translatedGenreCategories.find((c) => c.id === catId);
     if (!cat) return;
@@ -322,7 +320,6 @@ export default function BrowseView({
 
       const CONCURRENCY = 3;
       const queue = [...effectiveBrowseOrder];
-
       const runBatch = async () => {
         while (queue.length > 0 && !flags.cancelled) {
           const batch = queue.splice(0, CONCURRENCY);
@@ -370,7 +367,6 @@ export default function BrowseView({
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
-
   const renderScrollStations = (list: Station[]) =>
     list.map((s) => (
       <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>

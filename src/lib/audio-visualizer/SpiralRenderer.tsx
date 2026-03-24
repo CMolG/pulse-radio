@@ -140,11 +140,9 @@ export function SpiralRenderer({
       const val = result[i];
       const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
       const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor;
-
       const baseAngle = (i / NUM_BARS) * maxAngle;
       const radius = minRadius * Math.exp(b * baseAngle);
       const finalAngle = baseAngle + rotation;
-
       const cos = Math.cos(finalAngle);
       const sin = Math.sin(finalAngle);
 

@@ -63,7 +63,6 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
     }
   }
   const orderScore = ordered / Math.max(hypoTokens.length, 1);
-
   const shortPenalty = lineTokens.length <= 2 ? 0.2 : 0;
   return Math.max(0, overlapScore * 0.7 + orderScore * 0.3 - shortPenalty);
 }

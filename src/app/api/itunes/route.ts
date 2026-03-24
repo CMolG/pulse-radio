@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
     })}`;
 
     const res = await apiFetch(url, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes API' });
-
     const data = await res.json();
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },

@@ -27,7 +27,6 @@ export function useMediaSession(config: MediaSessionConfig): void {
   useEffect(() => { configRef.current = config; }, [config]);
 
   const { station, track, isPlaying } = config;
-
   const lastMetaRef = useRef('');
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export function useMediaSession(config: MediaSessionConfig): void {
     const trackArtist = track?.artist || 'Internet Radio';
     const artSrc = track?.artworkUrl || station.favicon;
     const album = station.tags?.split(',')[0] || 'Live';
-
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return;
     lastMetaRef.current = metaKey;

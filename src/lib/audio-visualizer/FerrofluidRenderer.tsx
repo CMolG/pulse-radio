@@ -199,7 +199,6 @@ export function FerrofluidRenderer({
   const blobsRef = useRef<Blob[]>([]);
   const timeRef = useRef(0);
   const sizeRef = useRef({ w: 0, h: 0 });
-
   const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
   const colors = useRef(mkColors());
   useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]);

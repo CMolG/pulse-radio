@@ -82,7 +82,6 @@ function NowPlayingBar({
 
   const coverUrl = track?.artworkUrl ?? station?.favicon;
   const showFallback = !coverUrl || imgError;
-
   const statusAnnouncement = useMemo(() => {
     if (!station) return "No station selected";
     const trackInfo = track?.title ? (track.artist ? `${track.artist}, ${track.title}` : track.title) : station.name;

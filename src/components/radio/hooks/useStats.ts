@@ -67,7 +67,6 @@ export function useStats() {
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
-
   const persist = useCallback(() => {
     if (dirtyRef.current) {
       const current = statsRef.current;
@@ -123,7 +122,6 @@ export function useStats() {
     setStats(prev => {
       const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
       const artistEntry = prev.artistPlayCounts[primary] ?? { name: primary, count: 0 };
-
       const normalizedGenre = genre ? genre.toLowerCase().trim() : undefined;
       const next: UsageStats = {
         ...prev,

@@ -40,7 +40,6 @@ export default React.memo(function NowPlayingHero({
   if (coverUrl !== prevCoverUrl) { setPrevCoverUrl(coverUrl); setImgError(false); }
 
   const showFallback = !coverUrl || imgError;
-
   const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]);
 
   return (

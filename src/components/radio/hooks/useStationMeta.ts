@@ -142,7 +142,6 @@ export function useStationMeta(station: Station | null, isPlaying: boolean): Use
     }
 
     const abortController = new AbortController();
-
     const poll = async () => {
       if (abortController.signal.aborted) return;
       if (document.hidden) return;

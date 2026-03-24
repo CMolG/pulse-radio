@@ -88,7 +88,6 @@ export function useRadio(): UseRadioReturn {
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good');
-
   const lastBufferEndRef = useRef<number>(0);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,7 +169,6 @@ export function useRadio(): UseRadioReturn {
       // the response has CORS headers so the Web Audio pipeline outputs sound.
       const webAudioConnected = hasAudioSource(audio);
       const shouldUseProxy = !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected;
-
       const setSourceAndPlay = (useProxy: boolean) => {
         // Set flag before assigning src — the browser fires a synchronous 'pause'
         // event on src change, and onPause must ignore that synthetic pause.
@@ -199,14 +197,12 @@ export function useRadio(): UseRadioReturn {
 
   useEffect(() => {
     const audio = getAudio();
-
     const clearReconnectTimer = () => {
       clearTimer(reconnectTimerRef);
       clearTimer(stallTimerRef);
     };
 
     const sessionId = playSessionRef.current;
-
     const reconnect = (delay: number) => {
       if (playSessionRef.current !== sessionId) return;
       if (!station || userPausedRef.current) return;
@@ -286,7 +282,6 @@ export function useRadio(): UseRadioReturn {
     };
 
     const onWaiting = () => setStatus('loading');
-
     const onError = () => {
       const err = audio.error;
       if (err && (err.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || err.code === MediaError.MEDIA_ERR_DECODE)) {
@@ -352,7 +347,6 @@ export function useRadio(): UseRadioReturn {
     };
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-
     const onCanPlay = () => {
       if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {});
     };
@@ -362,7 +356,6 @@ export function useRadio(): UseRadioReturn {
     // so without debouncing we get two parallel reconnect attempts.
     let lastResumeAttempt = 0;
     const RESUME_DEBOUNCE_MS = 1000;
-
     const onVisibilityResume = () => {
       if (document.visibilityState !== 'visible') return;
       if (!station || userPausedRef.current) return;
@@ -592,7 +585,6 @@ export function useRadio(): UseRadioReturn {
   }, []);
 
   const prefetchedUrlsRef = useRef<Set<string>>(new Set());
-
   const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl)) return;
     if (prefetchedUrlsRef.current.has(streamUrl)) return;
@@ -609,7 +601,6 @@ export function useRadio(): UseRadioReturn {
   }, []);
 
   const toggleMute = useCallback(() => setMuted(m => !m), []);
-
   const seek = useCallback((t: number) => {
     const audio = audioRef.current;
     if (!audio || !isFinite(t)) return;

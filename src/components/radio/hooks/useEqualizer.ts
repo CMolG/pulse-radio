@@ -89,7 +89,6 @@ export function useEqualizer(): UseEqualizerReturn {
     loadFromStorage<number>(STORAGE_KEYS.COMPRESSOR_AMOUNT, 0.5)
   );
   const [noiseReductionMode, setNoiseReductionModeState] = useState<NoiseReductionMode>(getDefaultNoiseReductionMode);
-
   const ctxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]);
@@ -149,7 +148,6 @@ export function useEqualizer(): UseEqualizerReturn {
 
   // Smooth ramp time for parameter changes to prevent clicks/pops
   const RAMP_TIME = 0.02; // 20ms — fast enough to feel instant, slow enough to avoid clicks
-
   const applyNoiseReductionPreset = useCallback((mode: NoiseReductionMode) => {
     const preset = NR_PRESETS[mode];
     const ctx = ctxRef.current;
@@ -202,7 +200,6 @@ export function useEqualizer(): UseEqualizerReturn {
       sourceRef.current = source;
       connectedAudioRef.current = audio;
       const nrPreset = NR_PRESETS[noiseReductionMode];
-
       const nyquist = ctx.sampleRate / 2;
       const filters = bands.map(band => {
         const filter = ctx.createBiquadFilter();
@@ -315,7 +312,6 @@ export function useEqualizer(): UseEqualizerReturn {
       mbMerge.gain.value = 1.0;
       const wetAmount = compressorEnabled ? compressorAmount : 0;
       const dryAmount = compressorEnabled ? 1 - compressorAmount * 0.5 : 1; // keep some dry to avoid over-squash
-
       const mbDry = ctx.createGain();
       mbDry.gain.value = dryAmount;
       const mbWet = ctx.createGain();
@@ -410,7 +406,6 @@ export function useEqualizer(): UseEqualizerReturn {
       const w = stereoWidth;
       const direct = (1 + w) / 2;
       const cross = (1 - w) / 2;
-
       const splitter = ctx.createChannelSplitter(2);
       const merger = ctx.createChannelMerger(2);
       const outputGain = ctx.createGain();
@@ -462,7 +457,6 @@ export function useEqualizer(): UseEqualizerReturn {
   }, []);
 
   const MAX_GAIN_DB = 12;
-
   const setBandGain = useCallback((id: string, gain: number) => {
     const clamped = Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gain));
     setBands(prev => prev.map(b => b.id === id ? { ...b, gain: clamped } : b));
@@ -476,7 +470,6 @@ export function useEqualizer(): UseEqualizerReturn {
   }, []);
 
   const toggleEnabled = useCallback(() => setEnabled(e => !e), []);
-
   const toggleNormalizer = useCallback(() => {
     setNormalizerEnabled(prev => {
       const next = !prev;

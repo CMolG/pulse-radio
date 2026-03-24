@@ -40,7 +40,6 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
-
   const handleSelectPreset = (name: string, gains: number[]) => {
     setSelectedPreset(name);
     onApplyPreset(gains);

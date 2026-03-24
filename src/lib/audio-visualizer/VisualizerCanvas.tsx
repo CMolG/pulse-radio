@@ -68,7 +68,6 @@ export function VisualizerCanvas({
         } else resolvedColorRef.current = color;
       }
       const resolvedColor = resolvedColorRef.current;
-
       const { width, height } = sizeRef.current;
       if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
       const dpr = devicePixelRatio;

@@ -36,7 +36,6 @@ function buildKeySet(songs: FavoriteSong[]): Set<string> {
 
 export function useFavoriteSongs(): UseFavoriteSongsReturn {
   const MAX_SONGS = 500;
-
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
     // Dedup on load in case of corrupted storage
@@ -90,7 +89,6 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
   }, []);
 
   const has = useCallback((title: string, artist: string) => keySetRef.current.has(songKey(title, artist)), []);
-
   const clear = useCallback(() => setSongs([]), []);
 
   return { songs, add, remove, toggle, has, clear };

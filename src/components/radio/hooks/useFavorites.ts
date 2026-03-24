@@ -60,7 +60,6 @@ export function useFavorites(): UseFavoritesReturn {
   }, []);
 
   const has = useCallback((uuid: string) => favorites.some(s => s.stationuuid === uuid), [favorites]);
-
   const playNext = useCallback((currentUuid: string): Station | null => {
     const idx = favorites.findIndex(s => s.stationuuid === currentUuid);
     if (idx < 0 || favorites.length < 2) return null;

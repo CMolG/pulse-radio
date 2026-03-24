@@ -95,9 +95,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const containerSize = useContainerSize(containerRef);
   const pathname = usePathname();
   const { t, locale } = useLocale();
-
   const layout: LayoutMode = isPipProp ? "pip" : containerSize.w <= 640 ? "mobile" : "desktop";
-
   const radio = useRadio();
   const eq = useEqualizer();
   const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
@@ -123,7 +121,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === "playing");
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
   const usageStats = useStats();
-
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
     return {
@@ -529,7 +526,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, []);
 
   const isSongLiked = enrichedTrack?.title ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "") : false;
-
   const handleToggleFav = useCallback(() => {
     if (!radio.station) return;
     const wasFav = favs.has(radio.station.stationuuid);
@@ -677,7 +673,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   ];
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
-
   const theaterBaseProps = {
     track: enrichedTrack,
     isPlaying: radio.status === "playing",
@@ -805,7 +800,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   );
 
   const emptyStation = useMemo((): Station => ({ name: t("discover"), url_resolved: "", stationuuid: "", favicon: "", tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0 }), [t]);
-
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
 
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */

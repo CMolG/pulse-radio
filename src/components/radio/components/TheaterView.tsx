@@ -124,7 +124,6 @@ export default function TheaterView({
   const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
   const [colors, setColors] = useState<[string, string, string]>(FALLBACK_COLORS);
   const lastUrlRef = useRef<string | null>(null);
-
   const coverUrl = artworkUrl ?? station.favicon;
   const showFallback = !coverUrl || failedCoverUrl === coverUrl;
 
@@ -139,7 +138,6 @@ export default function TheaterView({
   }, [artworkUrl]);
 
   const [color1, color2, color3] = colors;
-
   const theaterTags = useMemo(
     () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
     [station.tags],
