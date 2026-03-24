@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid q parameter' }, { status: 400 });
   }
 
-  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10), 50);
+  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10) || 20, 50);
 
   try {
     const url = `${LIBRIVOX_API}?title=${encodeURIComponent(query)}&format=json&limit=${limit}`;

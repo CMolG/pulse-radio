@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid q parameter' }, { status: 400 });
   }
 
-  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '10', 10), 30);
+  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '10', 10) || 10, 30);
 
   try {
     const params = new URLSearchParams({
