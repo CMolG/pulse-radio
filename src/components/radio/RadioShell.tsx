@@ -30,7 +30,6 @@ import type {
   Station,
   ViewState,
   BrowseCategory,
-  WidgetPlaybackState,
   HistoryEntry,
   FavoriteSong,
   SongDetailData,
@@ -65,7 +64,6 @@ import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 import LanguageSelector from "./components/LanguageSelector";
 import MobileSettingsPanel from "./components/MobileSettingsPanel";
 import OnboardingModal from "./components/OnboardingModal";
-import { saveToStorage } from "@/lib/storageUtils";
 import { useLocale } from "@/context/LocaleContext";
 import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
 import { getCountryDisplayName } from "@/lib/i18n/countryChips";
@@ -484,62 +482,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)),
     onSeekForward: () => radio.seek(radio.currentTime + 10),
   });
-
-  const widgetSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const saveWidgetState = useCallback(() => {
-    const state: WidgetPlaybackState = {
-      station: radio.station,
-      status: radio.status,
-      track: enrichedTrack,
-      volume: radio.volume,
-      updatedAt: Date.now(),
-    };
-    saveToStorage(STORAGE_KEYS.PLAYBACK, state);
-  }, [radio.station, radio.status, enrichedTrack, radio.volume]);
-
-  useEffect(() => {
-    if (widgetSaveTimerRef.current) clearTimeout(widgetSaveTimerRef.current);
-    widgetSaveTimerRef.current = setTimeout(saveWidgetState, 500);
-    return () => {
-      if (widgetSaveTimerRef.current) clearTimeout(widgetSaveTimerRef.current);
-    };
-  }, [saveWidgetState]);
-
-  // Heartbeat: refresh updatedAt every 15s during playback so widgets
-  // don't mark the state as stale during uninterrupted streams
-  useEffect(() => {
-    if (radio.status !== 'playing') return;
-    const iv = setInterval(saveWidgetState, 15_000);
-    return () => clearInterval(iv);
-  }, [radio.status, saveWidgetState]);
-
-  // Ref holds fresh handler functions so the event listener registered once
-  // always calls current versions — avoids stale closures when queue/favorites
-  // change without a station change.
-  const radioCommandRef = useRef({ handlePlay, handleSkipNext, handleSkipPrev, radio, favs });
-  useEffect(() => {
-    radioCommandRef.current = { handlePlay, handleSkipNext, handleSkipPrev, radio, favs };
-  }, [handlePlay, handleSkipNext, handleSkipPrev, radio, favs]);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (!detail) return;
-      const { handlePlay: play, handleSkipNext: skipNext, handleSkipPrev: skipPrev, radio: r, favs: f } = radioCommandRef.current;
-      const commands: Record<string, () => void> = {
-        togglePlay: () => r.togglePlay(),
-        play: () => detail.station && play(detail.station),
-        stop: () => r.stop(),
-        skipNext: () => skipNext(),
-        skipPrev: () => skipPrev(),
-        removeFavorite: () => detail.stationuuid && f.remove(detail.stationuuid),
-        setVolume: () => typeof detail.volume === 'number' && r.setVolume(detail.volume),
-      };
-      commands[detail.action]?.();
-    };
-    window.addEventListener("radio-command", handler);
-    return () => window.removeEventListener("radio-command", handler);
-  }, []);
 
   // Ref holds fresh state for keyboard handler so the event listener is
   // registered once — avoids ~60fps add/removeEventListener churn from

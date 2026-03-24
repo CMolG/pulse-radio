@@ -118,14 +118,6 @@ export type HistoryEntry = {
   timestamp: number;
 };
 
-export type WidgetPlaybackState = {
-  station: Station | null;
-  status: PlaybackStatus;
-  track: NowPlayingTrack | null;
-  volume: number;
-  updatedAt: number;
-};
-
 export type FavoriteSong = {
   id: string;
   title: string;

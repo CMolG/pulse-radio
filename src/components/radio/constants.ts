@@ -8,7 +8,6 @@ import type { BrowseCategory, EqBand, EqPreset } from './types';
 import type { MessageKey } from '@/lib/i18n/messages';
 
 export const STORAGE_KEYS = {
-  PLAYBACK: 'radio-playback',
   FAVORITES: 'radio-favorites',
   RECENT: 'radio-recent',
   VOLUME: 'radio-volume',
