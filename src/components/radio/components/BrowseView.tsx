@@ -460,13 +460,14 @@ export default function BrowseView({
 
   // Filter grid by song/artist when songFilter is active — paginated
   const allSongFilteredStations = useMemo(() => {
-    if (!songFilter.trim()) return [];
-    const q = songFilter.toLowerCase();
+    const trimmed = songFilter.trim();
+    if (!trimmed) return [];
+    const q = trimmed.toLowerCase();
     return stations.filter(s => {
       const live = liveData[s.stationuuid];
       if (!live?.track) return false;
-      const { title = '', artist = '' } = live.track;
-      return title.toLowerCase().includes(q) || artist.toLowerCase().includes(q);
+      const { title, artist } = live.track;
+      return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));
     });
   }, [stations, songFilter, liveData]);
 
