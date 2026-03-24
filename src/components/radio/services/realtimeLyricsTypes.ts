@@ -6,23 +6,11 @@
 
 import type { LyricsData } from '../types';
 
-export type RealtimeSyncStatus =
-  | 'idle'
-  | 'unsupported'
-  | 'ready'
-  | 'listening'
-  | 'recovering'
-  | 'disabled'
-  | 'error';
+export type RealtimeSyncStatus = 'idle' | 'unsupported' | 'ready' | 'listening' | 'recovering' | 'disabled' | 'error';
 
 export type RealtimeSyncQualityMode = 'high' | 'balanced' | 'conservative';
 
-export type RealtimeSpeechHypothesis = {
-  text: string;
-  confidence: number;
-  isFinal: boolean;
-  tsMs: number;
-};
+export type RealtimeSpeechHypothesis = { text: string; confidence: number; isFinal: boolean; tsMs: number; };
 
 export type RealtimeSyncDiagnostics = {
   qualityMode: RealtimeSyncQualityMode;
@@ -45,9 +33,7 @@ export type RealtimeSyncState = {
   diagnostics: RealtimeSyncDiagnostics;
 };
 
-export type RealtimeSyncControls = {
-  toggle: () => void;
-};
+export type RealtimeSyncControls = { toggle: () => void; };
 
 export type RealtimeSyncResult = RealtimeSyncState & RealtimeSyncControls;
 

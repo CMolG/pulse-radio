@@ -62,13 +62,7 @@ export type PlaybackState = {
 export type EqBand = { id: string; frequency: number; type: BiquadFilterType; gain: number; label: string };
 export type EqPreset = { name: string; gains: number[] };
 
-export type BrowseCategory = {
-  id: string;
-  label: string;
-  tag?: string;
-  country?: string;
-  gradient: string;
-};
+export type BrowseCategory = { id: string; label: string; tag?: string; country?: string; gradient: string; };
 
 export type ViewState = {
   mode: 'top' | 'search' | 'genre' | 'country';
@@ -106,3 +100,5 @@ export type ArtistInfo = {
   imageUrl: string | null;
   wikipediaUrl: string | null;
 };
+
+export type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';

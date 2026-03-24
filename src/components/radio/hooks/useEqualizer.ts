@@ -7,12 +7,10 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import type { EqBand, EqPreset } from '../types';
+import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_BANDS, STORAGE_KEYS } from '../constants';
 import { getOrCreateAudioSource } from '@/lib/audio-visualizer';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-
-type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';
 
 const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: number; gateRatio: number; deEsserCenterHz: number; deEsserGain: number }> = {
   off: { hpfHz: 20, gateThreshold: -90, gateRatio: 1.0, deEsserCenterHz: 6000, deEsserGain: 0 },

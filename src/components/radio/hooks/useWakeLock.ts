@@ -8,11 +8,7 @@
 
 import { useRef, useEffect, useCallback, useState } from 'react';
 
-export type UseWakeLockReturn = {
-  isActive: boolean;
-  request: () => Promise<void>;
-  release: () => Promise<void>;
-};
+export type UseWakeLockReturn = { isActive: boolean; request: () => Promise<void>; release: () => Promise<void>; };
 
 /**
  * Prevents the screen from dimming/locking while audio is playing.

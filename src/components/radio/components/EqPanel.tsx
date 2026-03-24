@@ -8,10 +8,8 @@
 
 import React, { useState } from 'react';
 import { X, Power, Plus, Save } from 'lucide-react';
-import type { EqBand, EqPreset } from '../types';
+import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_PRESETS } from '../constants';
-
-type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';
 
 type Props = {
   bands: EqBand[];

@@ -12,11 +12,7 @@ import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 
-export type UseHistoryReturn = {
-  history: HistoryEntry[];
-  remove: (id: string) => void;
-  clear: () => void;
-};
+export type UseHistoryReturn = { history: HistoryEntry[]; remove: (id: string) => void; clear: () => void; };
 
 export function useHistory(
   stationName: string | undefined,

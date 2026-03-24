@@ -38,11 +38,7 @@ export function isRealtimeSpeechSupported(): boolean {
   return getRecognitionCtor() !== null;
 }
 
-export type RealtimeSpeechEngine = {
-  start: (lang: 'en' | 'es') => void;
-  stop: () => void;
-  destroy: () => void;
-};
+export type RealtimeSpeechEngine = { start: (lang: 'en' | 'es') => void; stop: () => void; destroy: () => void; };
 
 export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): RealtimeSpeechEngine {
   let recognition: BrowserSpeechRecognition | null = null;

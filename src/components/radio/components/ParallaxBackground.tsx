@@ -10,12 +10,7 @@ import React from 'react';
 import { useParallaxBg } from '../hooks/useParallaxBg';
 import UiImage from '@/components/common/UiImage';
 
-type Props = {
-  faviconUrl?: string;
-  genre?: string;
-  audioAmplitude?: number;
-  landingMode?: boolean;
-};
+type Props = { faviconUrl?: string; genre?: string; audioAmplitude?: number; landingMode?: boolean; };
 
 const BF_STYLE: React.CSSProperties = {
   WebkitBackfaceVisibility: 'hidden',

@@ -8,10 +8,7 @@
 
 import type { LyricsData } from "./types";
 
-export type RenderableLyricLine = {
-  id: string;
-  text: string;
-};
+export type RenderableLyricLine = { id: string; text: string; };
 
 /**
  * Binary search for the last lyric line whose time ≤ currentTime.

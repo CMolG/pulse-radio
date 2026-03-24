@@ -12,12 +12,10 @@ import { IoHelpCircleOutline, IoStatsChartOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from "motion/react";
 import { useLocale } from "@/context/LocaleContext";
 import { EQ_PRESETS } from "../constants";
-import type { EqBand, EqPreset } from "../types";
+import type { EqBand, EqPreset, NoiseReductionMode } from "../types";
 import UsageGuide from "./UsageGuide";
 import StatsView from "./StatsView";
 import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from "../hooks/useStats";
-
-type NoiseReductionMode = "off" | "low" | "medium" | "high";
 
 type Props = {
   onClose: () => void;

@@ -44,12 +44,7 @@ const _LOCALES = [
 
 export type SupportedLocale = (typeof _LOCALES)[number]['code'];
 
-export type LocaleInfo = {
-  code: SupportedLocale;
-  nativeName: string;
-  englishName: string;
-  rtl?: boolean;
-};
+export type LocaleInfo = { code: SupportedLocale; nativeName: string; englishName: string; rtl?: boolean; };
 
 export const SUPPORTED_LOCALES: readonly LocaleInfo[] = _LOCALES;
 

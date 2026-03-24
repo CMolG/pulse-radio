@@ -40,12 +40,7 @@ function isIOSDevice(): boolean {
 
 export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 
-/** Latency measurement for a stream URL */
-export type StreamLatency = {
-  url: string;
-  latencyMs: number;
-  timestamp: number;
-};
+export type StreamLatency = { url: string; latencyMs: number; timestamp: number; };
 
 export type UseRadioReturn = {
   station: Station | null;
