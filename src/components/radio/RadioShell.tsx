@@ -378,25 +378,34 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
 
+  // Ref holds fresh deps so handlePlay can use [] and remain referentially
+  // stable.  Prevents child components receiving onPlay={handlePlay} from
+  // re-rendering on every frame during playback.
+  const handlePlayRef = useRef({ radio, recent, stationQueue, eqConnectSource, analyser });
+  useEffect(() => {
+    handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser };
+  }, [radio, recent, stationQueue, eqConnectSource, analyser]);
+
   const handlePlay = useCallback(
     (station: Station) => {
-      radio.play(station);
+      const { radio: r, recent: rec, stationQueue: sq, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
+      r.play(station);
       // Connect EQ and analyser within user gesture context so AudioContext
       // is created/resumed from a tap — required by mobile browsers.
-      if (radio.audioRef.current) {
-        eqConnectSource(radio.audioRef.current);
-        analyser.connectAudio(radio.audioRef.current);
+      if (r.audioRef.current) {
+        eqSrc(r.audioRef.current);
+        an.connectAudio(r.audioRef.current);
       }
-      recent.add(station);
-      stationQueue.setPlaying(station.stationuuid);
+      rec.add(station);
+      sq.setPlaying(station.stationuuid);
       setTheaterMode(true);
       // Prefetch next station in queue for seamless transition
-      const nextIdx = stationQueue.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
-      if (nextIdx > 0 && nextIdx < stationQueue.queue.length) {
-        radio.prefetchStream(stationQueue.queue[nextIdx].url_resolved);
+      const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
+      if (nextIdx > 0 && nextIdx < sq.queue.length) {
+        r.prefetchStream(sq.queue[nextIdx].url_resolved);
       }
     },
-    [radio, recent, stationQueue, eqConnectSource, analyser],
+    [],
   );
 
   // Auto-advance to next queued station on error, or failover to similar station
@@ -424,28 +433,35 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.status]);
 
+  const skipDepsRef = useRef({ radio, favs, stationQueue });
+  useEffect(() => {
+    skipDepsRef.current = { radio, favs, stationQueue };
+  }, [radio, favs, stationQueue]);
+
   const handleSkipNext = useCallback(() => {
+    const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     // Prefer queue if it has entries
-    if (stationQueue.hasNext) {
-      const next = stationQueue.skipToNext();
+    if (sq.hasNext) {
+      const next = sq.skipToNext();
       if (next) { handlePlay(next); return; }
     }
-    if (radio.station) {
-      const next = favs.playNext(radio.station.stationuuid);
+    if (r.station) {
+      const next = f.playNext(r.station.stationuuid);
       if (next) handlePlay(next);
     }
-  }, [radio.station, favs, stationQueue, handlePlay]);
+  }, [handlePlay]);
 
   const handleSkipPrev = useCallback(() => {
-    if (stationQueue.hasPrev) {
-      const prev = stationQueue.skipToPrev();
+    const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
+    if (sq.hasPrev) {
+      const prev = sq.skipToPrev();
       if (prev) { handlePlay(prev); return; }
     }
-    if (radio.station) {
-      const prev = favs.playPrev(radio.station.stationuuid);
+    if (r.station) {
+      const prev = f.playPrev(r.station.stationuuid);
       if (prev) handlePlay(prev);
     }
-  }, [radio.station, favs, stationQueue, handlePlay]);
+  }, [handlePlay]);
 
   useMediaSession({
     station: radio.station,
