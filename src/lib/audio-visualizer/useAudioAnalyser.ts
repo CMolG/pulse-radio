@@ -103,6 +103,7 @@ export function useAudioAnalyser(
 
   const disconnect = useCallback(() => {
     cancelAnimationFrame(rafRef.current);
+    connectedRef.current = null;
     setIsActive(false);
     frequencyDataRef.current = null;
     waveDataRef.current = null;
