@@ -6,9 +6,7 @@
 
 import { COUNTRY_BY_CODE } from "@/lib/i18n/countries";
 
-type CountryHeadProps = {
-  params: Promise<{ countryCode: string }>;
-};
+type CountryHeadProps = { params: Promise<{ countryCode: string }> };
 
 export default async function Head({ params }: CountryHeadProps) {
   const resolved = await params;

@@ -77,9 +77,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
   },
 ];
 
-type Props = {
-  onClose: () => void;
-};
+type Props = { onClose: () => void };
 
 function UsageGuide({ onClose }: Props) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);

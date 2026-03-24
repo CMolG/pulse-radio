@@ -106,10 +106,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
-type RadioShellProps = {
-  isPip?: boolean;
-  initialCountryCode?: string;
-};
+type RadioShellProps = { isPip?: boolean; initialCountryCode?: string };
 
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1115,11 +1112,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 {/* ── Tab content ── */}
                 <AnimatePresence mode="wait">
                   {(() => {
-                    const [key, content, extra] = activeTab === "discover"
-                      ? [viewKey, browseViewElement, ""]
-                      : activeTab === "history"
-                        ? ["history-tab", historyViewElement, " overflow-y-auto"]
-                        : ["favorites-tab", favsViewElement, " overflow-y-auto"];
+                    const [key, content, extra] = activeTab === "discover" ? [viewKey, browseViewElement, ""]
+                      : activeTab === "history" ? ["history-tab", historyViewElement, " overflow-y-auto"]
+                      : ["favorites-tab", favsViewElement, " overflow-y-auto"];
                     return (
                       <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className={`flex-1 min-h-0${extra}`}>
                         {content}

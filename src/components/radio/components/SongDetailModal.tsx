@@ -35,11 +35,7 @@ const MetaBadge = ({ icon: Icon, cls, children }: { icon: typeof Clock; cls: str
   <span className={`${BADGE_CLS} ${cls}`}><Icon size={9} />{children}</span>
 );
 
-type Props = {
-  song: SongDetailData | null;
-  onClose: () => void;
-  onRemoveFromFavorites?: () => void;
-};
+type Props = { song: SongDetailData | null; onClose: () => void; onRemoveFromFavorites?: () => void };
 
 function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);

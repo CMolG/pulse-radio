@@ -99,9 +99,7 @@ function NowPlayingBar({
 
   const statusAnnouncement = useMemo(() => {
     if (!station) return "No station selected";
-    const trackInfo = track?.title
-      ? track.artist ? `${track.artist}, ${track.title}` : track.title
-      : station.name;
+    const trackInfo = track?.title ? (track.artist ? `${track.artist}, ${track.title}` : track.title) : station.name;
     if (isLoading) return `Loading ${trackInfo}`;
     if (isPlaying) return `Now playing: ${trackInfo}`;
     if (status === "error") return `Playback error: ${station.name}`;
@@ -228,11 +226,7 @@ function NowPlayingBar({
             {station?.name || "Not Playing"}
           </p>
           <p className="text-[10px] text-secondary truncate">
-            {track?.title
-              ? track.artist
-                ? `${track.artist} — ${track.title}`
-                : track.title
-              : firstTag}
+            {track?.title ? (track.artist ? `${track.artist} — ${track.title}` : track.title) : firstTag}
           </p>
           {track?.album && (
             <p className="text-[9px] text-dim truncate">{track.album}</p>
