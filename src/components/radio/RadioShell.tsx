@@ -273,27 +273,20 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(
     null,
   );
+
+  function mkView(mode: ViewState["mode"], label: string, overrides?: Partial<ViewState>): ViewState {
+    return { mode, query: "", tag: "", countryCode: "", countryQueryName: "", label, ...overrides };
+  }
+
+  function countryView(code: string): ViewState {
+    const country = COUNTRY_BY_CODE[code];
+    return mkView("country", getCountryDisplayName(locale, code), { countryCode: code, countryQueryName: country?.name ?? "" });
+  }
+
   const [view, setView] = useState<ViewState>(() => {
     const code = (initialCountryCode ?? "").toUpperCase();
-    if (isSovereignCountryCode(code)) {
-      const country = COUNTRY_BY_CODE[code];
-      return {
-        mode: "country",
-        query: "",
-        tag: "",
-        countryCode: code,
-        countryQueryName: country.name,
-      label: getCountryDisplayName(locale, code),
-      };
-    }
-    return {
-      mode: "top",
-      query: "",
-      tag: "",
-      countryCode: "",
-      countryQueryName: "",
-      label: t("topStations"),
-    };
+    if (isSovereignCountryCode(code)) return countryView(code);
+    return mkView("top", t("topStations"));
   });
 
   useEffect(() => {
@@ -319,17 +312,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const code = (initialCountryCode ?? "").toUpperCase();
     if (!isSovereignCountryCode(code)) return;
     if (view.mode === "country" && view.countryCode === code) return;
-    const country = COUNTRY_BY_CODE[code];
-    if (!country) return;
+    if (!COUNTRY_BY_CODE[code]) return;
 
-    setView({
-      mode: "country",
-      query: "",
-      tag: "",
-      countryCode: code,
-      countryQueryName: country.name,
-      label: getCountryDisplayName(locale, code),
-    });
+    setView(countryView(code));
     setActiveTab("discover");
     setTheaterMode(false);
     setSearchQuery("");
@@ -345,14 +330,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
       if (!segment) {
         // Navigated back to "/"
-        setView({
-          mode: "top",
-          query: "",
-          tag: "",
-          countryCode: "",
-          countryQueryName: "",
-          label: t("topStations"),
-        });
+        setView(mkView("top", t("topStations")));
         setActiveTab("discover");
         setTheaterMode(false);
         setSearchQuery("");
@@ -362,14 +340,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (isSovereignCountryCode(segment)) {
         const country = COUNTRY_BY_CODE[segment];
         if (country) {
-          setView({
-            mode: "country",
-            query: "",
-            tag: "",
-            countryCode: segment,
-            countryQueryName: country.name,
-            label: getCountryDisplayName(locale, segment),
-          });
+          setView(countryView(segment));
           setActiveTab("discover");
           setTheaterMode(false);
           setSearchQuery("");
@@ -801,27 +772,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   const handleSearch = useCallback((query: string) => {
     const sanitized = query.trim();
-    setView({
-      mode: "search",
-      query: sanitized,
-      tag: "",
-      countryCode: "",
-      countryQueryName: "",
-      label: t("searchResultLabel", { query: sanitized }),
-    });
+    setView(mkView("search", t("searchResultLabel", { query: sanitized }), { query: sanitized }));
     setActiveTab("discover");
     setTheaterMode(false);
   }, [t]);
 
   const handleGoHome = useCallback(() => {
-    setView({
-      mode: "top",
-      query: "",
-      tag: "",
-      countryCode: "",
-      countryQueryName: "",
-      label: t("topStations"),
-    });
+    setView(mkView("top", t("topStations")));
     setActiveTab("discover");
     setTheaterMode(false);
     setSearchQuery("");
@@ -844,27 +801,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   const handleSelectGenre = useCallback((cat: BrowseCategory) => {
     const key = GENRE_LABEL_KEYS[cat.id];
-    setView({
-      mode: "genre",
-      query: "",
-      tag: cat.tag || cat.id,
-      countryCode: "",
-      countryQueryName: "",
-      label: key ? t(key) : cat.label,
-    });
+    setView(mkView("genre", key ? t(key) : cat.label, { tag: cat.tag || cat.id }));
     setTheaterMode(false);
     setSearchQuery("");
   }, [t]);
 
   const handleSelectCountry = useCallback((countryCode: string, countryQueryName: string, countryDisplayName: string) => {
-    setView({
-      mode: "country",
-      query: "",
-      tag: "",
-      countryCode,
-      countryQueryName,
-      label: countryDisplayName,
-    });
+    setView(mkView("country", countryDisplayName, { countryCode, countryQueryName }));
     setTheaterMode(false);
     setSearchQuery("");
     const newPath = `/${countryCode}`;
