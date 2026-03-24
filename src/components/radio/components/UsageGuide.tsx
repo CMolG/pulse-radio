@@ -81,7 +81,7 @@ type Props = {
   onClose: () => void;
 };
 
-export default function UsageGuide({ onClose }: Props) {
+function UsageGuide({ onClose }: Props) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
@@ -166,3 +166,5 @@ export default function UsageGuide({ onClose }: Props) {
     </motion.div>
   );
 }
+
+export default React.memo(UsageGuide);
