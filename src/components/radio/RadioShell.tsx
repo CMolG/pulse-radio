@@ -198,14 +198,23 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (!enrichedTrack?.title || !enrichedTrack?.artist) return;
     const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`;
-    if (key === lastRecordedTrackRef.current) return;
-    lastRecordedTrackRef.current = key;
-    usageStats.recordSongPlay(
-      enrichedTrack.title,
-      enrichedTrack.artist,
-      enrichedTrack.genre,
-      enrichedTrack.artworkUrl,
-    );
+    if (key !== lastRecordedTrackRef.current) {
+      lastRecordedTrackRef.current = key;
+      usageStats.recordSongPlay(
+        enrichedTrack.title,
+        enrichedTrack.artist,
+        enrichedTrack.genre,
+        enrichedTrack.artworkUrl,
+      );
+    } else {
+      // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
+      usageStats.updateSongMeta(
+        enrichedTrack.title,
+        enrichedTrack.artist,
+        enrichedTrack.genre,
+        enrichedTrack.artworkUrl,
+      );
+    }
   }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, usageStats]);
 
   const [showEq, setShowEq] = useState(false);

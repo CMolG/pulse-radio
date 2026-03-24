@@ -220,6 +220,40 @@ export function useStats() {
       .map(g => g.genre);
   }, []);
 
+  // Update artwork/genre on an existing song entry without incrementing counts.
+  // Used when album metadata arrives after the initial recordSongPlay call.
+  const updateSongMeta = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
+    if (!title) return;
+    const key = `${title}|||${artist}`;
+
+    setStats(prev => {
+      const songEntry = prev.songPlayCounts[key];
+      if (!songEntry) return prev;
+
+      const needsArtwork = artworkUrl && songEntry.artworkUrl !== artworkUrl;
+      const normalizedGenre = genre ? genre.toLowerCase().trim() : '';
+      const needsGenre = normalizedGenre && !prev.genrePlayCounts[normalizedGenre];
+
+      if (!needsArtwork && !needsGenre) return prev;
+
+      const next: UsageStats = { ...prev };
+      if (needsArtwork) {
+        next.songPlayCounts = {
+          ...prev.songPlayCounts,
+          [key]: { ...songEntry, artworkUrl },
+        };
+      }
+      if (needsGenre) {
+        next.genrePlayCounts = {
+          ...prev.genrePlayCounts,
+          [normalizedGenre]: { genre: normalizedGenre, count: 1 },
+        };
+      }
+      return next;
+    });
+    dirtyRef.current = true;
+  }, []);
+
   const clearStats = useCallback(() => {
     setStats(EMPTY_STATS);
     saveToStorage(STORAGE_KEY, EMPTY_STATS);
@@ -229,6 +263,7 @@ export function useStats() {
     stats,
     tickListenTime,
     recordSongPlay,
+    updateSongMeta,
     topStations,
     topSongs,
     topArtists,
