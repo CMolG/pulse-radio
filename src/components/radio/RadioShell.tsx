@@ -517,10 +517,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         if (!allowed.has(e.key)) return;
       }
 
-      // When song detail modal is open, only allow Escape to close it
-      if (selectedSong) {
-        if (e.key !== 'Escape') return;
-      }
+      // When song detail modal is open, let it handle its own Escape;
+      // block all keys here to prevent shortcuts from firing behind the modal
+      if (selectedSong) return;
 
       switch (e.key) {
         case " ":
@@ -573,9 +572,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           }
           break;
         case "Escape":
-          setShowEq(false);
-          setShowShortcuts(false);
-          if (theaterMode) setTheaterMode(false);
+          // Priority: close topmost overlay first, then exit theater
+          if (showShortcuts) setShowShortcuts(false);
+          else if (showEq) setShowEq(false);
+          else if (theaterMode) setTheaterMode(false);
           break;
         case "t":
         case "T":
@@ -623,7 +623,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, selectedSong, sleepTimer, showToast, realtimeLyrics]);
+  }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics]);
 
   const isSongLiked = enrichedTrack?.title
     ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "")
