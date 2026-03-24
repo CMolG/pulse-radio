@@ -85,22 +85,29 @@ export function SpiralRenderer({
     }
 
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
+    // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
     const smoothed = smoothedRef.current;
     const temp = tempRef.current;
-    smoothed.set(data);
+    let src = data;
+    let dst = smoothed;
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
-      temp.set(smoothed);
       for (let i = 0; i < NUM_BARS; i++) {
-        const prev = temp[i > 0 ? i - 1 : 0];
-        const next = temp[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
-        smoothed[i] = prev * 0.25 + temp[i] * 0.5 + next * 0.25;
+        const prev = src[i > 0 ? i - 1 : 0];
+        const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
+        dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25;
       }
+      // Swap: previous dst becomes next src
+      const swap = src === data ? temp : src;
+      src = dst;
+      dst = swap;
     }
+    // After SMOOTH_PASSES iterations, result is in `src`
+    const result = src;
 
     // Spiral configuration
     const maxAngle = CYCLES * Math.PI * 2;
     const minRadius = Math.max(w, h) * 0.01;
-    const maxRadius = Math.hypot(w, h) * 0.8;
+    const maxRadius = Math.sqrt(w * w + h * h) * 0.8;
     const b = Math.log(maxRadius / minRadius) / maxAngle;
 
     rotationRef.current += 0.0015;
@@ -132,7 +139,7 @@ export function SpiralRenderer({
     const innerY = innerYRef.current;
 
     for (let i = 0; i < NUM_BARS; i++) {
-      const val = smoothed[i];
+      const val = result[i];
       const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
       const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor;
 
