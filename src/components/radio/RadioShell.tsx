@@ -98,9 +98,15 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Synchronous measurement replaces the window-based initial guess
+    // one frame earlier than waiting for the ResizeObserver callback.
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      setSize({ w: Math.round(rect.width), h: Math.round(rect.height) });
+    }
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
-      if (width <= 0 || height <= 0) return; // ignore detached/hidden elements
+      if (width <= 0 || height <= 0) return;
       setSize({ w: Math.round(width), h: Math.round(height) });
     });
     ro.observe(el);
