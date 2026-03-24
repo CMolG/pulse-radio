@@ -227,6 +227,9 @@ export default function BrowseView({
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Tracks whether the initial immediate play has fired for the current
+  // discovery-mode session.  Reset when discovery mode is turned off.
+  const discoveryFiredRef = useRef(false);
 
   // Live track scanning
   type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
@@ -384,7 +387,19 @@ export default function BrowseView({
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
     const pool = view.mode === "top" ? allCategoryStations : stations;
-    if (discoveryMode && pool.length > 0) {
+    if (!discoveryMode) {
+      discoveryFiredRef.current = false;
+      return;
+    }
+    if (pool.length > 0) {
+      // Play a random station immediately the first time discovery mode
+      // activates (or when stations finish loading after activation),
+      // so the user doesn't wait 30s staring at a button they just pressed.
+      if (!discoveryFiredRef.current) {
+        discoveryFiredRef.current = true;
+        const random = pool[Math.floor(Math.random() * pool.length)];
+        if (random) onPlay(random);
+      }
       discoveryRef.current = setInterval(() => {
         const random = pool[Math.floor(Math.random() * pool.length)];
         if (random) onPlay(random);
