@@ -21,9 +21,7 @@ export type UseFavoriteSongsReturn = {
   clear: () => void;
 };
 
-function songKey(title: string, artist: string) {
-  return `${title}|||${artist}`;
-}
+function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
 
 /** Build a Set of songKeys from a song array for O(1) lookups. */
 function buildKeySet(songs: FavoriteSong[]): Set<string> {

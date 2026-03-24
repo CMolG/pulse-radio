@@ -14,6 +14,4 @@ export function formatDuration(ms: number): string {
 }
 
 /** Format an ISO date string to a readable year */
-export function formatReleaseDate(isoDate: string): string {
-  return isoDate.slice(0, 4);
-}
+export function formatReleaseDate(isoDate: string): string { return isoDate.slice(0, 4); }

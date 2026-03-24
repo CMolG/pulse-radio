@@ -49,9 +49,7 @@ function localeCandidates(locale: SupportedLocale): SupportedLocale[] {
   return LOCALE_SELF_CANDIDATES[locale] ?? [locale];
 }
 
-function localeFromLang3(code3: string): SupportedLocale | null {
-  return LANG3_TO_LOCALE[code3] ?? null;
-}
+function localeFromLang3(code3: string): SupportedLocale | null { return LANG3_TO_LOCALE[code3] ?? null; }
 
 export function getCountryDisplayName(locale: SupportedLocale, code: string): string {
   const country = COUNTRY_BY_CODE[code];

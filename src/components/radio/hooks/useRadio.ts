@@ -13,9 +13,7 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { resumeAudioContext, hasAudioSource } from '@/lib/audio-visualizer';
 
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
-function proxyUrl(raw: string): string {
-  return `/api/proxy-stream?url=${encodeURIComponent(raw)}`;
-}
+function proxyUrl(raw: string): string { return `/api/proxy-stream?url=${encodeURIComponent(raw)}`; }
 
 function isValidStreamUrl(url: string | undefined): url is string {
   if (!url) return false;
@@ -587,9 +585,7 @@ export function useRadio(): UseRadioReturn {
     // Warm DNS+TCP+TLS with a HEAD request and measure latency
     const controller = new AbortController();
     fetch(proxyUrl(streamUrl), { method: 'HEAD', signal: controller.signal })
-      .then(() => {
-        clearTimeout(timer);
-      })
+      .then(() => { clearTimeout(timer); })
       .catch(() => { clearTimeout(timer); });
     const timer = setTimeout(() => controller.abort(), 2000);
   }, []);

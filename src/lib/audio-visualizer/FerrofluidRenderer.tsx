@@ -24,9 +24,7 @@ interface FerrofluidRendererProps {
 import { hexToRgb } from './colorUtils';
 import { useCanvasLoop } from './useCanvasLoop';
 
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
+function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 /* ─── blob state ─── */
 interface Blob {

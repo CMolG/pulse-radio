@@ -13,12 +13,8 @@ const SERVERS = [
   'https://nl1.api.radio-browser.info/json',
 ];
 let serverIndex = 0;
-function getBase(): string {
-  return SERVERS[serverIndex % SERVERS.length];
-}
-function rotateServer(): void {
-  serverIndex = (serverIndex + 1) % SERVERS.length;
-}
+function getBase(): string { return SERVERS[serverIndex % SERVERS.length]; }
+function rotateServer(): void { serverIndex = (serverIndex + 1) % SERVERS.length; }
 
 const cache = new Map<string, { data: Station[]; ts: number }>();
 const TTL = 60_000;
@@ -79,9 +75,7 @@ export function stationsByCountry(country: string, limit = 30): Promise<Station[
   return searchBy({ country }, `country:${country}`, limit);
 }
 
-export function trendingStations(limit = 20): Promise<Station[]> {
-  return topStations(limit);
-}
+export function trendingStations(limit = 20): Promise<Station[]> { return topStations(limit); }
 
 export async function localStations(limit = 20): Promise<Station[]> {
   const countryCode = typeof navigator !== 'undefined' ? navigator.language?.split('-')[1]?.toUpperCase() || '' : '';

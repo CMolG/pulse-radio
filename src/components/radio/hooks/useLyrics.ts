@@ -25,9 +25,7 @@ function loadCache(): CacheEntry[] {
   return raw as CacheEntry[];
 }
 
-function saveCache(entries: CacheEntry[]) {
-  saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE));
-}
+function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 
 export type UseLyricsReturn = {
   lyrics: LyricsData | null;

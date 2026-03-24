@@ -23,9 +23,7 @@ export function getStoredLocale(): SupportedLocale | null {
   return raw ? normalizeLocale(raw) : null;
 }
 
-export function getInitialLocale(): SupportedLocale {
-  return getStoredLocale() ?? getBrowserLocale();
-}
+export function getInitialLocale(): SupportedLocale { return getStoredLocale() ?? getBrowserLocale(); }
 
 export function getInitialLocaleForCountry(countryCode: string): SupportedLocale {
   return getStoredLocale() ?? getDefaultLocaleForCountry(countryCode) ?? getBrowserLocale();

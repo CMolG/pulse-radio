@@ -10,9 +10,7 @@ export function stationInitials(name: string) {
     .join("");
 }
 
-export function primaryArtist(artist: string): string {
-  return artist.split(ARTIST_SPLIT_RE)[0].trim();
-}
+export function primaryArtist(artist: string): string { return artist.split(ARTIST_SPLIT_RE)[0].trim(); }
 
 export function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);

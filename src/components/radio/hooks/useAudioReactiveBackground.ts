@@ -13,9 +13,7 @@ const ATTACK_MS = 80;
 const RELEASE_MS = 350;
 const MAX_AMPLITUDE = 0.35;
 
-function clamp01(value: number): number {
-  return Math.max(0, Math.min(1, value));
-}
+function clamp01(value: number): number { return Math.max(0, Math.min(1, value)); }
 
 /**
  * Produces a smoothed audio-reactive amplitude suitable for background motion.

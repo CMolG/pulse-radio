@@ -55,6 +55,4 @@ export function resumeAudioContext(audio: HTMLAudioElement): void {
  * Used to detect when the Web Audio graph is active and CORS-compatible streaming
  * (via proxy) is required to prevent cross-origin audio taint on iOS Safari.
  */
-export function hasAudioSource(audio: HTMLAudioElement): boolean {
-  return cache.has(audio);
-}
+export function hasAudioSource(audio: HTMLAudioElement): boolean { return cache.has(audio); }
