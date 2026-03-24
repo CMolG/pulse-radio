@@ -5,11 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch, apiCatchResponse, stripHtml } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
 const LIBRIVOX_API = 'https://librivox.org/api/feed/audiobooks';
-const TIMEOUT_MS = 10_000;
 
 type LibriVoxBook = {
   id: string;
@@ -35,19 +35,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid q parameter' }, { status: 400 });
   }
 
-  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10), 50);
+  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10) || 20, 50);
 
   try {
     const url = `${LIBRIVOX_API}?title=${encodeURIComponent(query)}&format=json&limit=${limit}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      return NextResponse.json({ error: `LibriVox API returned ${res.status}` }, { status: 502 });
-    }
+    const res = await apiFetch(url, { timeoutMs: 10_000, maxBytes: 2 * 1024 * 1024, label: 'LibriVox API' });
 
     const data = await res.json();
     const books: LibriVoxBook[] = data.books || [];
@@ -63,16 +55,10 @@ export async function GET(req: NextRequest) {
       chapters: parseInt(b.num_sections, 10) || 0,
     }));
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ results }, {
+      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' },
+    });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    if (msg.includes('abort')) {
-      return NextResponse.json({ error: 'LibriVox request timed out' }, { status: 504 });
-    }
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return apiCatchResponse(err);
   }
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }

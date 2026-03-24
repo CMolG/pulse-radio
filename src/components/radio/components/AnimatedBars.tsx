@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-export default function AnimatedBars({ size = 'default' }: { size?: 'small' | 'default' }) {
+export default React.memo(function AnimatedBars({ size = 'default' }: { size?: 'small' | 'default' }) {
   const h = size === 'small' ? 10 : 16;
   const w = size === 'small' ? 2 : 3;
 
@@ -27,4 +27,4 @@ export default function AnimatedBars({ size = 'default' }: { size?: 'small' | 'd
         }
       `}</style>
     </span>);
-}
+});

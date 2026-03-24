@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { normalizeText } from '@/lib/stringUtils';
 
 const FETCH_TIMEOUT = 8_000;
 
@@ -47,33 +48,30 @@ type ItunesResult = {
   trackCount?: number;
 };
 
-function normalizeText(value: string | null | undefined): string {
-  if (!value) return '';
-  return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9\s']/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
+// Reusable match arrays for Jaro distance — avoids allocation per call
+let _aMatches: boolean[] = [];
+let _bMatches: boolean[] = [];
 
 function jaroDistance(a: string, b: string): number {
   if (a === b) return 1;
   if (!a.length || !b.length) return 0;
 
   const matchDistance = Math.floor(Math.max(a.length, b.length) / 2) - 1;
-  const aMatches = new Array(a.length).fill(false);
-  const bMatches = new Array(b.length).fill(false);
+
+  // Grow and reset reusable arrays
+  if (_aMatches.length < a.length) _aMatches = new Array(a.length);
+  if (_bMatches.length < b.length) _bMatches = new Array(b.length);
+  for (let i = 0; i < a.length; i++) _aMatches[i] = false;
+  for (let i = 0; i < b.length; i++) _bMatches[i] = false;
 
   let matches = 0;
   for (let i = 0; i < a.length; i++) {
     const start = Math.max(0, i - matchDistance);
     const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
-      if (bMatches[j] || a[i] !== b[j]) continue;
-      aMatches[i] = true;
-      bMatches[j] = true;
+      if (_bMatches[j] || a[i] !== b[j]) continue;
+      _aMatches[i] = true;
+      _bMatches[j] = true;
       matches++;
       break;
     }
@@ -84,8 +82,8 @@ function jaroDistance(a: string, b: string): number {
   let t = 0;
   let k = 0;
   for (let i = 0; i < a.length; i++) {
-    if (!aMatches[i]) continue;
-    while (!bMatches[k]) k++;
+    if (!_aMatches[i]) continue;
+    while (k < b.length && !_bMatches[k]) k++;
     if (a[i] !== b[k]) t++;
     k++;
   }
@@ -117,35 +115,40 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   const normalizedRequestedArtist = normalizeText(requestedArtist);
   if (!normalizedRequestedTitle) return null;
 
-  const exactByTitle = results.find((r) => normalizeText(r.trackName) === normalizedRequestedTitle);
-  if (exactByTitle) {
-    if (!normalizedRequestedArtist) return exactByTitle;
-    const exactArtist = normalizeText(exactByTitle.artistName);
+  // Pre-normalize all candidates once to avoid redundant normalizeText calls in loop
+  const normTitles = new Array<string>(results.length);
+  const normArtists = new Array<string>(results.length);
+  for (let i = 0; i < results.length; i++) {
+    normTitles[i] = normalizeText(results[i].trackName);
+    normArtists[i] = normalizeText(results[i].artistName);
+  }
+
+  const exactIdx = normTitles.indexOf(normalizedRequestedTitle);
+  if (exactIdx !== -1) {
+    if (!normalizedRequestedArtist) return results[exactIdx];
+    const exactArtist = normArtists[exactIdx];
     if (!exactArtist || exactArtist === normalizedRequestedArtist || exactArtist.includes(normalizedRequestedArtist) || normalizedRequestedArtist.includes(exactArtist)) {
-      return exactByTitle;
+      return results[exactIdx];
     }
   }
 
   let best: ItunesResult | null = null;
   let bestScore = 0;
 
-  for (const candidate of results) {
-    const candidateTitle = normalizeText(candidate.trackName);
+  for (let i = 0; i < results.length; i++) {
+    const candidateTitle = normTitles[i];
     if (!candidateTitle) continue;
 
     const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length);
     const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length);
     if (maxLen > 0 && lenDiff / maxLen > 0.35) continue;
 
-    // Use plain Jaro (no prefix bonus) for titles: Winkler's prefix boost inflates
-    // scores when one title is a prefix of another (e.g. "Don't Know" vs "Don't Know Why"),
-    // allowing false positives that pass the 0.94 threshold.
     const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle);
     if (titleScore < 0.94) continue;
 
     let score = titleScore;
     if (normalizedRequestedArtist) {
-      const candidateArtist = normalizeText(candidate.artistName);
+      const candidateArtist = normArtists[i];
       if (candidateArtist) {
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist);
         if (artistScore < 0.85) continue;
@@ -155,11 +158,21 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
 
     if (score > bestScore) {
       bestScore = score;
-      best = candidate;
+      best = results[i];
     }
   }
 
-  return best ?? results[0];
+  return best ?? null;
+}
+
+function cacheGet(key: string): AlbumInfo | undefined {
+  const val = CACHE.get(key);
+  if (val !== undefined) {
+    // Move to end for LRU ordering
+    CACHE.delete(key);
+    CACHE.set(key, val);
+  }
+  return val;
 }
 
 function cacheSet(key: string, value: AlbumInfo) {
@@ -206,12 +219,12 @@ export function useAlbumArt(
 ): UseAlbumArtReturn {
   const hasTitle = Boolean(title);
   const cacheKey = useMemo(
-    () => (title ? `${artist ?? ''}::${title}`.toLowerCase() : ''),
+    () => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''),
     [title, artist],
   );
   const cachedInfo = useMemo(() => {
     if (!cacheKey) return null;
-    return CACHE.get(cacheKey) ?? null;
+    return cacheGet(cacheKey) ?? null;
   }, [cacheKey]);
   const [fetched, setFetched] = useState<{ key: string; info: AlbumInfo } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -272,5 +285,8 @@ export function useAlbumArt(
     : cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO);
   const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey);
 
-  return { ...info, isLoading };
+  return useMemo(() => ({ ...info, isLoading }), [
+    info.artworkUrl, info.albumName, info.itunesUrl, info.durationMs,
+    info.genre, info.releaseDate, info.trackNumber, info.trackCount, isLoading,
+  ]);
 }

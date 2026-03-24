@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Radio, Maximize2 } from "lucide-react";
 import type { Station, NowPlayingTrack } from "../types";
 import AnimatedBars from "./AnimatedBars";
@@ -14,14 +14,7 @@ import UiImage from "@/components/common/UiImage";
 import {
   ParallaxAlbumBackground,
 } from "@/lib/audio-visualizer";
-
-function stationInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
+import { stationInitials } from "../utils/formatUtils";
 
 type Props = {
   station: Station;
@@ -33,7 +26,7 @@ type Props = {
   onTheater?: () => void;
 };
 
-export default function NowPlayingHero({
+export default React.memo(function NowPlayingHero({
   station,
   track,
   isPlaying,
@@ -43,16 +36,20 @@ export default function NowPlayingHero({
 }: Props) {
   const [imgError, setImgError] = useState(false);
   const coverUrl = artworkUrl ?? station.favicon;
+
+  // Reset error state when cover URL changes so new artwork gets a chance to load
+  const [prevCoverUrl, setPrevCoverUrl] = useState(coverUrl);
+  if (coverUrl !== prevCoverUrl) {
+    setPrevCoverUrl(coverUrl);
+    setImgError(false);
+  }
+
   const showFallback = !coverUrl || imgError;
 
-  // Reset error state when image URL changes
-  const lastCoverRef = React.useRef(coverUrl);
-  React.useEffect(() => {
-    if (coverUrl !== lastCoverRef.current) {
-      lastCoverRef.current = coverUrl;
-      setImgError(false);
-    }
-  }, [coverUrl]);
+  const heroTags = useMemo(
+    () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
+    [station.tags],
+  );
 
   return (
     <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
@@ -104,8 +101,7 @@ export default function NowPlayingHero({
             </p>
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">
-              {station.tags?.split(",").slice(0, 3).join(" · ") ||
-                "Internet Radio"}
+              {heroTags}
             </p>
           )}
           {track?.album && (
@@ -129,4 +125,4 @@ export default function NowPlayingHero({
       </div>
     </div>
   );
-}
+});

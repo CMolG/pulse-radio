@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
+import { apiFetch, apiCatchResponse, stripHtml } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
@@ -42,44 +43,44 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
-
   try {
-    const res = await fetch(parsed.toString(), {
-      headers: {
-        'User-Agent': 'PulseRadio/1.0',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
+    const res = await apiFetch(parsed.toString(), {
+      timeoutMs: 10_000,
+      init: {
+        headers: {
+          'User-Agent': 'PulseRadio/1.0',
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        },
       },
-      signal: controller.signal,
+      label: 'Upstream',
     });
-    clearTimeout(timeout);
 
-    if (!res.ok) {
-      await res.text().catch(() => {});
-      return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
+    // Reject feeds larger than 5MB to prevent memory exhaustion from malicious sources
+    const contentLength = res.headers.get('content-length');
+    const MAX_FEED_BYTES = 5 * 1024 * 1024;
+    if (contentLength && parseInt(contentLength, 10) > MAX_FEED_BYTES) {
+      await res.body?.cancel().catch(() => {});
+      return NextResponse.json({ error: 'Feed too large' }, { status: 413 });
     }
 
     const xml = await res.text();
+    if (xml.length > MAX_FEED_BYTES) {
+      return NextResponse.json({ error: 'Feed too large' }, { status: 413 });
+    }
     const episodes = parseRssFeed(xml);
 
     return NextResponse.json({ episodes }, {
       headers: { 'Cache-Control': 'public, max-age=1800, stale-while-revalidate=3600' },
     });
   } catch (e) {
-    clearTimeout(timeout);
-    const isTimeout = e instanceof DOMException && e.name === 'AbortError';
-    return NextResponse.json(
-      { error: isTimeout ? 'Request timed out' : 'Internal error' },
-      { status: isTimeout ? 504 : 500 },
-    );
+    return apiCatchResponse(e, 500);
   }
 }
 
 /** Lightweight RSS XML parser using regex — no external dependencies */
 function parseRssFeed(xml: string): PodcastEpisode[] {
   const episodes: PodcastEpisode[] = [];
-  const channelArt = extractTag(xml, 'itunes:image', 'href') || extractTagContent(xml, 'image>url') || '';
+  const channelArt = extractTag(xml, 'itunes:image', 'href') || extractNestedContent(xml, 'image', 'url') || '';
 
   const itemRegex = /<item[\s>]([\s\S]*?)<\/item>/gi;
   let match: RegExpExecArray | null;
@@ -117,6 +118,10 @@ function extractTag(xml: string, tag: string, attr: string): string | null {
   return m?.[1]?.trim() || null;
 }
 
-function stripHtml(text: string): string {
-  return text.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+/** Extract content of a child tag nested inside a parent tag: <parent>...<child>value</child>...</parent> */
+function extractNestedContent(xml: string, parent: string, child: string): string | null {
+  const parentRegex = new RegExp(`<${parent}[\\s>][\\s\\S]*?<\\/${parent}>`, 'i');
+  const m = parentRegex.exec(xml);
+  if (!m) return null;
+  return extractTagContent(m[0], child);
 }

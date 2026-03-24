@@ -48,6 +48,15 @@ export function useRealtimeLyricsSync({
   const realtimeAllowed = enabled && manuallyEnabled;
   const realtimeActive = supported && eligible && realtimeAllowed;
 
+  // Reset sync state during render when dependencies change, so stale
+  // activeLineIndex from a previous song doesn't bleed into new lyrics.
+  const [prevResetKey, setPrevResetKey] = useState('');
+  const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    setRuntimeState(defaultRealtimeState(manuallyEnabled));
+  }
+
   const toggle = useCallback(() => {
     setManuallyEnabled(prev => {
       const next = !prev;
@@ -64,9 +73,6 @@ export function useRealtimeLyricsSync({
 
     engineRef.current?.destroy();
     stableSamplesRef.current = 0;
-    // Reset sync state so stale activeLineIndex from a previous song doesn't
-    // bleed into new lyrics while the engine re-acquires position.
-    setRuntimeState(defaultRealtimeState(manuallyEnabled));
 
     const engine = createRealtimeSpeechEngine({
       onHypothesis: (hypothesis) => {
@@ -83,6 +89,19 @@ export function useRealtimeLyricsSync({
           stableSamplesRef.current = step.stableSamples;
 
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
+
+          // Early bail — skip spread+setState when nothing observable changed
+          if (
+            prev.status === 'listening' &&
+            prev.activeLineIndex === step.confirmedIndex &&
+            prev.candidateLineIndex === step.candidateIndex &&
+            prev.confidence === step.score &&
+            !step.jumpRejected &&
+            !step.relockTriggered
+          ) {
+            return prev;
+          }
+
           return {
             ...prev,
             status: 'listening',
@@ -142,6 +161,8 @@ export function useRealtimeLyricsSync({
     };
   }, []);
 
+  const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
+
   return {
     ...runtimeState,
     enabled: manuallyEnabled,
@@ -153,22 +174,10 @@ export function useRealtimeLyricsSync({
         : runtimeState.status === 'idle'
           ? 'ready'
           : runtimeState.status,
-    activeLineIndex:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.activeLineIndex
-        : -1,
-    candidateLineIndex:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.candidateLineIndex
-        : -1,
-    confidence:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.confidence
-        : 0,
-    effectiveCurrentTime:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.effectiveCurrentTime
-        : undefined,
+    activeLineIndex: isSyncing ? runtimeState.activeLineIndex : -1,
+    candidateLineIndex: isSyncing ? runtimeState.candidateLineIndex : -1,
+    confidence: isSyncing ? runtimeState.confidence : 0,
+    effectiveCurrentTime: isSyncing ? runtimeState.effectiveCurrentTime : undefined,
     diagnostics: {
       ...runtimeState.diagnostics,
       errorMessage: !supported

@@ -6,33 +6,47 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Mic2 } from 'lucide-react';
 import type { WidgetPlaybackState, LyricsData } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage } from '@/lib/storageUtils';
 
-export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
+function LyricsCardWidget({ preview }: { preview?: boolean }) {
   const [state, setState] = useState<WidgetPlaybackState | null>(null);
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
 
   useEffect(() => {
     if (preview) return;
     const MAX_STALE_MS = 30_000;
+    let lastPlaybackRaw = '';
+    let lastLyricsRaw = '';
     const read = () => {
       try {
-        const parsed = loadFromStorage<WidgetPlaybackState | null>(STORAGE_KEYS.PLAYBACK, null);
-        if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
-          setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
-        } else {
-          setState(parsed);
+        const pbRaw = localStorage.getItem(STORAGE_KEYS.PLAYBACK) ?? '';
+        if (pbRaw && pbRaw !== lastPlaybackRaw) {
+          lastPlaybackRaw = pbRaw;
+          const parsed = JSON.parse(pbRaw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          } else {
+            setState(parsed);
+          }
+        } else if (pbRaw && pbRaw === lastPlaybackRaw) {
+          const parsed = JSON.parse(pbRaw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          }
         }
       } catch { /* ignore */ }
       try {
-        const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE);
-        if (raw) {
-          const cache: { key: string; data: LyricsData }[] = JSON.parse(raw);
-          if (cache.length > 0) setLyrics(cache[0].data);
+        const raw = localStorage.getItem(STORAGE_KEYS.LYRICS_CACHE) ?? '';
+        if (raw && raw !== lastLyricsRaw) {
+          lastLyricsRaw = raw;
+          const cache = JSON.parse(raw);
+          if (Array.isArray(cache) && cache.length > 0 && cache[0]?.data) {
+            setLyrics(cache[0].data);
+          }
         }
       } catch { /* ignore */ }
     };
@@ -43,8 +57,10 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
 
   const track = state?.track;
   const lines = lyrics?.lines ?? [];
-  const mid = Math.floor(lines.length / 2);
-  const visibleLines = lines.slice(Math.max(0, mid - 1), mid + 2);
+  const visibleLines = useMemo(() => {
+    const mid = Math.floor(lines.length / 2);
+    return lines.slice(Math.max(0, mid - 1), mid + 2);
+  }, [lines]);
 
   return (<div
       className="col-full bg-sys-surface/80 backdrop-blur-xl card-lg p-3 select-none overflow-hidden cursor-pointer"
@@ -77,3 +93,5 @@ export default function LyricsCardWidget({ preview }: { preview?: boolean }) {
         )}
       </div></div>);
 }
+
+export default React.memo(LyricsCardWidget);

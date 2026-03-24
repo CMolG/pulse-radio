@@ -54,6 +54,15 @@ export async function GET(req: NextRequest) {
     ? setTimeout(() => controller.abort(), MAX_DURATION_MS)
     : null;
 
+  // Propagate client disconnect to upstream so we don't leak connections
+  if (req.signal) {
+    if (req.signal.aborted) {
+      controller.abort();
+    } else {
+      req.signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+  }
+
   try {
     const upstream = await fetch(parsed.toString(), {
       headers: {
@@ -115,13 +124,14 @@ export async function GET(req: NextRequest) {
     });
   } catch (err) {
     if (timeout) clearTimeout(timeout);
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    if (message.includes('abort')) {
+    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    if (isTimeout) {
       return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504,
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 502,
       headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },

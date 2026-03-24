@@ -13,7 +13,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Heart, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES } from "../constants";
@@ -227,6 +227,9 @@ export default function BrowseView({
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Tracks whether the initial immediate play has fired for the current
+  // discovery-mode session.  Reset when discovery mode is turned off.
+  const discoveryFiredRef = useRef(false);
 
   // Live track scanning
   type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
@@ -289,11 +292,16 @@ export default function BrowseView({
         if (scanGenRef.current !== gen) return;
         const s = queue.shift()!;
         setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
-        const result = await fetchIcyMeta(s.url_resolved);
-        if (scanGenRef.current !== gen) return;
-        const raw = result.streamTitle;
-        const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
-        setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
+        try {
+          const result = await fetchIcyMeta(s.url_resolved);
+          if (scanGenRef.current !== gen) return;
+          const raw = result.streamTitle;
+          const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
+          setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
+        } catch {
+          if (scanGenRef.current !== gen) return;
+          setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
+        }
       }
     };
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -302,10 +310,14 @@ export default function BrowseView({
   // Manual single-station peek
   const peekStation = useCallback(async (station: Station) => {
     setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loading', track: null } }));
-    const result = await fetchIcyMeta(station.url_resolved);
-    const raw = result.streamTitle;
-    const track = raw ? (parseTrack(raw, station.name) ?? null) : null;
-    setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loaded', track } }));
+    try {
+      const result = await fetchIcyMeta(station.url_resolved);
+      const raw = result.streamTitle;
+      const track = raw ? (parseTrack(raw, station.name) ?? null) : null;
+      setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'loaded', track } }));
+    } catch {
+      setLiveData(prev => ({ ...prev, [station.stationuuid]: { status: 'error', track: null } }));
+    }
   }, []);
 
   useEffect(() => {
@@ -375,7 +387,19 @@ export default function BrowseView({
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
     const pool = view.mode === "top" ? allCategoryStations : stations;
-    if (discoveryMode && pool.length > 0) {
+    if (!discoveryMode) {
+      discoveryFiredRef.current = false;
+      return;
+    }
+    if (pool.length > 0) {
+      // Play a random station immediately the first time discovery mode
+      // activates (or when stations finish loading after activation),
+      // so the user doesn't wait 30s staring at a button they just pressed.
+      if (!discoveryFiredRef.current) {
+        discoveryFiredRef.current = true;
+        const random = pool[Math.floor(Math.random() * pool.length)];
+        if (random) onPlay(random);
+      }
       discoveryRef.current = setInterval(() => {
         const random = pool[Math.floor(Math.random() * pool.length)];
         if (random) onPlay(random);
@@ -387,6 +411,21 @@ export default function BrowseView({
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
 
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
+
+  const renderScrollStations = (list: Station[]) =>
+    list.map((s) => (
+      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
+        <StationCard
+          station={s}
+          isCurrent={s.stationuuid === currentStation?.stationuuid}
+          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
+          isFavorite={isFavorite(s.stationuuid)}
+          onPlay={() => onPlay(s)}
+          onToggleFav={() => onToggleFav(s)}
+          onPrefetch={() => onPrefetch?.(s.url_resolved)}
+        />
+      </div>
+    ));
 
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => {
@@ -410,18 +449,32 @@ export default function BrowseView({
   const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length;
   const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
 
-  // Filter grid by song/artist when songFilter is active
-  const songFilteredStations = useMemo(() => {
-    if (!songFilter.trim()) return pageStations;
-    const q = songFilter.toLowerCase();
-    // Filter from ALL stations, not just the current page
+  // Reset page synchronously during render when songFilter changes.
+  // Using the "adjusting state during render" pattern avoids a one-frame
+  // flash of empty results that the useEffect approach would cause.
+  const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
+  if (songFilter !== prevSongFilter) {
+    setPrevSongFilter(songFilter);
+    setPage(0);
+  }
+
+  // Filter grid by song/artist when songFilter is active — paginated
+  const allSongFilteredStations = useMemo(() => {
+    const trimmed = songFilter.trim();
+    if (!trimmed) return [];
+    const q = trimmed.toLowerCase();
     return stations.filter(s => {
       const live = liveData[s.stationuuid];
       if (!live?.track) return false;
-      const { title = '', artist = '' } = live.track;
-      return title.toLowerCase().includes(q) || artist.toLowerCase().includes(q);
+      const { title, artist } = live.track;
+      return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));
     });
-  }, [stations, pageStations, songFilter, liveData]);
+  }, [stations, songFilter, liveData]);
+
+  const songFilteredStations = useMemo(() => {
+    if (!songFilter.trim()) return pageStations;
+    return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  }, [allSongFilteredStations, pageStations, songFilter, page, PAGE_SIZE]);
 
   // Chip active states based on current view (chips trigger view changes, not local filters)
   const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
@@ -566,19 +619,7 @@ export default function BrowseView({
                       icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}
                     >
-                    {favorites.map((s) => (
-                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
-                        <StationCard
-                          station={s}
-                          isCurrent={s.stationuuid === currentStation?.stationuuid}
-                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
-                          isFavorite={isFavorite(s.stationuuid)}
-                          onPlay={() => onPlay(s)}
-                          onToggleFav={() => onToggleFav(s)}
-                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                        />
-                      </div>
-                    ))}
+                    {renderScrollStations(favorites)}
                   </ScrollRow>
                 )}
 
@@ -589,19 +630,7 @@ export default function BrowseView({
                       icon={<Clock size={14} className="text-blue-400/70" />}
                       isMobile={isMobile}
                     >
-                    {recent.map((s) => (
-                      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
-                        <StationCard
-                          station={s}
-                          isCurrent={s.stationuuid === currentStation?.stationuuid}
-                          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
-                          isFavorite={isFavorite(s.stationuuid)}
-                          onPlay={() => onPlay(s)}
-                          onToggleFav={() => onToggleFav(s)}
-                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                        />
-                      </div>
-                    ))}
+                    {renderScrollStations(recent)}
                   </ScrollRow>
                 )}
 
@@ -677,27 +706,7 @@ export default function BrowseView({
                       }
                       isMobile={isMobile}
                     >
-                      {catStations.map((s) => (
-                        <div
-                          key={s.stationuuid}
-                          className={`snap-start shrink-0 ${itemWidth}`}
-                        >
-                          <StationCard
-                            station={s}
-                            isPlaying={
-                              isPlaying &&
-                              currentStation?.stationuuid === s.stationuuid
-                            }
-                            isCurrent={
-                              currentStation?.stationuuid === s.stationuuid
-                            }
-                            isFavorite={isFavorite(s.stationuuid)}
-                            onPlay={() => onPlay(s)}
-                            onToggleFav={() => onToggleFav(s)}
-                            onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                          />
-                        </div>
-                      ))}
+                      {renderScrollStations(catStations)}
                     </ScrollRow>
                   );
                 })}
@@ -706,7 +715,9 @@ export default function BrowseView({
 
             {/* Grid column for search / genre / country views — paginated */}
             {view.mode !== "top" && stations.length > 0 && (() => {
-              const totalPages = Math.ceil(stations.length / PAGE_SIZE);
+              const filterActive = !!songFilter.trim();
+              const paginationSource = filterActive ? allSongFilteredStations : stations;
+              const totalPages = Math.ceil(paginationSource.length / PAGE_SIZE);
               return (
                 <>
                   {/* Scan now-playing bar */}
@@ -747,7 +758,7 @@ export default function BrowseView({
                     )}
                     {scanEnabled && songFilter && (
                       <span className="text-[11px] text-dim shrink-0">
-                        {t("stationCount", { count: songFilteredStations.length })}
+                        {t("stationCount", { count: allSongFilteredStations.length })}
                       </span>
                     )}
                   </div>
@@ -775,7 +786,7 @@ export default function BrowseView({
                   </div>
 
                   {/* Pagination */}
-                  {totalPages > 1 && !songFilter.trim() && (
+                  {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-3 pt-2 pb-6">
                       <button
                         onClick={() => setPage((p) => Math.max(0, p - 1))}

@@ -5,11 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch, apiCatchResponse } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
 const ITUNES_SEARCH = 'https://itunes.apple.com/search';
-const TIMEOUT_MS = 8_000;
 
 type ITunesPodcast = {
   collectionId: number;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid q parameter' }, { status: 400 });
   }
 
-  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10), 50);
+  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10) || 20, 50);
   const genre = req.nextUrl.searchParams.get('genre') || '';
 
   const params = new URLSearchParams({
@@ -49,17 +49,7 @@ export async function GET(req: NextRequest) {
   if (genre) params.set('genreId', genre);
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const res = await fetch(`${ITUNES_SEARCH}?${params}`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      return NextResponse.json({ error: `iTunes returned ${res.status}` }, { status: 502 });
-    }
+    const res = await apiFetch(`${ITUNES_SEARCH}?${params}`, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes' });
 
     const data = await res.json();
     const podcasts: ITunesPodcast[] = data.results || [];
@@ -83,10 +73,6 @@ export async function GET(req: NextRequest) {
       { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' } },
     );
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    if (msg.includes('abort')) {
-      return NextResponse.json({ error: 'iTunes request timed out' }, { status: 504 });
-    }
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return apiCatchResponse(err);
   }
 }

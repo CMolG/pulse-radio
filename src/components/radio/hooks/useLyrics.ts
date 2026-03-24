@@ -24,8 +24,11 @@ type CacheEntry = { key: string; data: LyricsData; ts: number };
 
 function loadCache(): CacheEntry[] {
   const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
-  // Backfill ts=0 for old entries so they expire on next TTL check
-  return raw.map(e => ({ ...e, ts: e.ts ?? 0 }));
+  // Backfill ts=0 for old entries so they expire on next TTL check — mutate in place to avoid allocation
+  for (let i = 0; i < raw.length; i++) {
+    if (raw[i].ts === undefined) (raw[i] as CacheEntry).ts = 0;
+  }
+  return raw as CacheEntry[];
 }
 
 function saveCache(entries: CacheEntry[]) {
@@ -81,6 +84,7 @@ export function useLyrics(
       track.album,
       undefined,
       stationName ?? undefined,
+      controller.signal,
     )
       .then(result => {
         if (controller.signal.aborted) return;
@@ -124,7 +128,7 @@ export function useLyrics(
     }
 
     const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}:${track.title}`.toLowerCase();
+    const key = `${artistSeed}\n${track.title}`.toLowerCase();
     if (key === lastKeyRef.current) return;
     lastKeyRef.current = key;
 
@@ -151,7 +155,7 @@ export function useLyrics(
   const retry = () => {
     if (!track?.title) return;
     const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}:${track.title}`.toLowerCase();
+    const key = `${artistSeed}\n${track.title}`.toLowerCase();
     const cached = loadCache();
     if (abortRef.current) abortRef.current.abort();
     if (retryTimerRef.current) clearTimeout(retryTimerRef.current);

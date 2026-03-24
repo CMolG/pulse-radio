@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   IoRadioOutline,
@@ -80,7 +80,9 @@ function PWAStep() {
 
   const handleInstall = async () => {
     if (deferredPrompt) {
-      await deferredPrompt.prompt();
+      try {
+        await deferredPrompt.prompt();
+      } catch { /* user dismissed install prompt */ }
       setDeferredPrompt(null);
     }
   };
@@ -128,10 +130,11 @@ function PWAStep() {
   );
 }
 
-export default function OnboardingModal() {
+function OnboardingModal() {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
   const totalSteps = STEPS.length + 1; // +1 for PWA step
+  const dotIndices = useMemo(() => Array.from({ length: totalSteps }), [totalSteps]);
 
   useEffect(() => {
     const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
@@ -210,7 +213,7 @@ export default function OnboardingModal() {
             <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */}
               <div className="flex justify-center gap-2">
-                {Array.from({ length: totalSteps }).map((_, i) => (
+                {dotIndices.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setStep(i)}
@@ -253,3 +256,5 @@ export default function OnboardingModal() {
     </AnimatePresence>
   );
 }
+
+export default React.memo(OnboardingModal);

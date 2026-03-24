@@ -9,6 +9,12 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 
+const CODEC_MAP: Record<string, string> = {
+  MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC',
+  OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus',
+  FLAC: 'FLAC', WMA: 'WMA',
+};
+
 // Patterns that indicate ads/spam rather than real song metadata
 const AD_PATTERNS = [
   /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i,
@@ -22,8 +28,16 @@ const FETCH_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500;
 
+const _adCache = new Map<string, boolean>();
+const MAX_AD_CACHE = 256;
+
 function isAdContent(text: string): boolean {
-  return AD_PATTERNS.some(re => re.test(text));
+  let result = _adCache.get(text);
+  if (result !== undefined) return result;
+  result = AD_PATTERNS.some(re => re.test(text));
+  if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!);
+  _adCache.set(text, result);
+  return result;
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
@@ -33,8 +47,18 @@ export async function fetchIcyMeta(
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  const onParentAbort = () => controller.abort();
-  signal?.addEventListener('abort', onParentAbort);
+  if (signal) {
+    if (signal.aborted) {
+      clearTimeout(timeout);
+      controller.abort();
+    } else {
+      const onParentAbort = () => controller.abort();
+      signal.addEventListener('abort', onParentAbort, { once: true });
+      controller.signal.addEventListener('abort', () => {
+        signal.removeEventListener('abort', onParentAbort);
+      }, { once: true });
+    }
+  }
 
   try {
     const res = await fetch(
@@ -49,13 +73,21 @@ export async function fetchIcyMeta(
     return { streamTitle: null, icyBr: null };
   } finally {
     clearTimeout(timeout);
-    signal?.removeEventListener('abort', onParentAbort);
   }
 }
 
+let _lastStation = '';
+let _lastStationLower = '';
+
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
-  if (raw === stationName || raw.toLowerCase() === stationName.toLowerCase()) return null;
+  if (raw === stationName) return null;
+  // Cache lowercase station name to avoid recomputing on every poll
+  if (stationName !== _lastStation) {
+    _lastStation = stationName;
+    _lastStationLower = stationName.toLowerCase();
+  }
+  if (raw.toLowerCase() === _lastStationLower) return null;
 
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
@@ -91,6 +123,18 @@ export function useStationMeta(
   // Used to distinguish a station change from an isPlaying toggle.
   const prevStationUrlRef = useRef<string | null>(null);
 
+  // Clear track state during render when station goes null (avoid setState in effect)
+  const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null);
+  const currentStationId = station?.url_resolved ?? null;
+  if (currentStationId !== prevStationId) {
+    setPrevStationId(currentStationId);
+    if (!station) {
+      setTrack(null);
+      setIcyBitrate(null);
+      setStreamCodec(null);
+    }
+  }
+
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -98,9 +142,6 @@ export function useStationMeta(
     }
 
     if (!station) {
-      setTrack(null);
-      setIcyBitrate(null);
-      setStreamCodec(null);
       lastTitleRef.current = '';
       prevStationUrlRef.current = null;
       return;
@@ -129,10 +170,7 @@ export function useStationMeta(
       // Derive codec from station data for display
       if (station.codec) {
         const c = station.codec.toUpperCase();
-        const friendly = c === 'MP3' ? 'MP3' : c === 'AAC' || c === 'AAC+' ? 'AAC' :
-          c === 'OGG' || c === 'VORBIS' ? 'OGG' : c === 'OPUS' ? 'Opus' :
-          c === 'FLAC' ? 'FLAC' : c === 'WMA' ? 'WMA' : c;
-        setStreamCodec(friendly);
+        setStreamCodec(CODEC_MAP[c] ?? c);
       }
 
       if (streamTitle && streamTitle !== lastTitleRef.current) {
@@ -172,8 +210,16 @@ export function useStationMeta(
       intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     }
 
+    // When the tab returns from background, poll immediately so the user
+    // doesn't see stale metadata for up to POLL_INTERVAL_MS.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && isPlaying) poll();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      document.removeEventListener('visibilitychange', onVisible);
       abortController.abort();
     };
   }, [station, isPlaying]);

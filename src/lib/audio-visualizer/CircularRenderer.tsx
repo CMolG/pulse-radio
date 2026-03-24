@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect } from "react";
 
 interface CircularRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>;
@@ -18,13 +18,8 @@ interface CircularRendererProps {
   demo?: boolean;
 }
 
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return [r || 0, g || 0, b || 0];
-}
+import { hexToRgb } from './colorUtils';
+import { useCanvasLoop } from './useCanvasLoop';
 
 export function CircularRenderer({
   frequencyDataRef,
@@ -34,48 +29,20 @@ export function CircularRenderer({
   sensitivity = 1.0,
   demo = false,
 }: CircularRendererProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
   const timeRef = useRef(0);
-  const renderRef = useRef<() => void>(() => {});
-  const frequencyDataRefRef = useRef(frequencyDataRef);
-
-  const colorsRef = useRef({
-    c1: hexToRgb(color1),
-    c2: hexToRgb(color2),
-  });
+  const demoBufferRef = useRef(new Uint8Array(128));
+  // Pre-computed position-based color strings keyed by (color1, color2, bufLen).
+  // Rebuilt only when colors or buffer length change.
+  const colorStringsRef = useRef<string[]>([]);
+  const colorCacheKeyRef = useRef('');
 
   useEffect(() => {
-    colorsRef.current = {
-      c1: hexToRgb(color1),
-      c2: hexToRgb(color2),
-    };
+    // Invalidate on color change; will rebuild lazily in paint for actual bufLen
+    colorCacheKeyRef.current = '';
+    colorStringsRef.current = [];
   }, [color1, color2]);
 
-  useEffect(() => {
-    frequencyDataRefRef.current = frequencyDataRef;
-  }, [frequencyDataRef]);
-
-  const render = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(rect.width * dpr);
-    const h = Math.round(rect.height * dpr);
-
-    if (w < 1 || h < 1) {
-      frameRef.current = requestAnimationFrame(renderRef.current);
-      return;
-    }
-
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
+  const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
 
     timeRef.current += 0.016;
     const t = timeRef.current;
@@ -87,17 +54,16 @@ export function CircularRenderer({
     const cx = w / 2;
     const cy = h / 2;
     const baseR = Math.min(w, h) * 0.2;
-    const { c1, c2 } = colorsRef.current;
 
     // Build or use demo data
-    let dataArray: Uint8Array | null = frequencyDataRefRef.current?.current ?? null;
+    let dataArray: Uint8Array | null = freqData;
     let bufLen: number;
 
     if (dataArray) {
       bufLen = dataArray.length;
     } else if (demo) {
       bufLen = 128;
-      const demoData = new Uint8Array(bufLen);
+      const demoData = demoBufferRef.current;
       for (let i = 0; i < bufLen; i++) {
         const base = 80 + Math.sin(t * 2 + i * 0.15) * 60;
         const ripple = Math.sin(t * 3.5 + i * 0.3) * 40;
@@ -106,9 +72,26 @@ export function CircularRenderer({
       }
       dataArray = demoData;
     } else {
-      frameRef.current = requestAnimationFrame(renderRef.current);
       return;
     }
+
+    // Lazily rebuild color cache for actual bufLen (runs once per color/bufLen change)
+    const cacheKey = `${color1}_${color2}_${bufLen}`;
+    if (colorCacheKeyRef.current !== cacheKey) {
+      const c1 = hexToRgb(color1);
+      const c2 = hexToRgb(color2);
+      const strings: string[] = new Array(bufLen);
+      for (let i = 0; i < bufLen; i++) {
+        const norm = i / bufLen;
+        const r = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
+        const g = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
+        const b = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
+        strings[i] = `rgb(${r},${g},${b})`;
+      }
+      colorStringsRef.current = strings;
+      colorCacheKeyRef.current = cacheKey;
+    }
+    const colorStrings = colorStringsRef.current;
 
     for (let i = 0; i < bufLen; i++) {
       const val = (dataArray[i] / 255) * sensitivity;
@@ -116,18 +99,15 @@ export function CircularRenderer({
       const r = baseR + val * baseR * 1.5;
       const x = cx + Math.cos(angle) * r;
       const y = cy + Math.sin(angle) * r;
-      const norm = i / bufLen;
 
-      const cr = Math.round(c1[0] + (c2[0] - c1[0]) * norm);
-      const cg = Math.round(c1[1] + (c2[1] - c1[1]) * norm);
-      const cb = Math.round(c1[2] + (c2[2] - c1[2]) * norm);
-      const alpha = 0.5 + val * 0.5;
+      ctx.fillStyle = colorStrings[i];
+      ctx.globalAlpha = 0.5 + val * 0.5;
 
-      ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
       ctx.beginPath();
       ctx.arc(x, y, 3 + val * 6, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.globalAlpha = 1.0;
 
     // Inner reference circle
     ctx.beginPath();
@@ -135,18 +115,7 @@ export function CircularRenderer({
     ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.lineWidth = 1;
     ctx.stroke();
-
-    frameRef.current = requestAnimationFrame(renderRef.current);
-  }, [sensitivity, demo]);
-
-  useEffect(() => {
-    renderRef.current = render;
-  }, [render]);
-
-  useEffect(() => {
-    frameRef.current = requestAnimationFrame(renderRef.current);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, []);
+  });
 
   return (
     <div className={`relative ${className}`}>

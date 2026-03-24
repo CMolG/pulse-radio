@@ -41,5 +41,9 @@ export function isPrivateHost(hostname: string): boolean {
   if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true; // unique local
   if (ipv6 === '::1' || ipv6 === '::') return true;
 
+  // IPv6-mapped IPv4 (::ffff:A.B.C.D) — extract the embedded IPv4 and check it
+  const mappedMatch = ipv6.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i);
+  if (mappedMatch) return isPrivateHost(mappedMatch[1]);
+
   return false;
 }

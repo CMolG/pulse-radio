@@ -6,10 +6,11 @@
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { FavoriteSong } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 
 export type UseFavoriteSongsReturn = {
   songs: FavoriteSong[];
@@ -22,6 +23,15 @@ export type UseFavoriteSongsReturn = {
 
 function songKey(title: string, artist: string) {
   return `${title}|||${artist}`;
+}
+
+/** Build a Set of songKeys from a song array for O(1) lookups. */
+function buildKeySet(songs: FavoriteSong[]): Set<string> {
+  const s = new Set<string>();
+  for (let i = 0; i < songs.length; i++) {
+    s.add(songKey(songs[i].title, songs[i].artist));
+  }
+  return s;
 }
 
 export function useFavoriteSongs(): UseFavoriteSongsReturn {
@@ -39,26 +49,19 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
     });
   });
 
+  // O(1) lookup Set — rebuilt only when songs array changes
+  const keySetRef = useRef(buildKeySet(songs));
+  useMemo(() => { keySetRef.current = buildKeySet(songs); }, [songs]);
+
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs);
   }, [songs]);
 
-  // Sync favorite songs across tabs via storage events
-  useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEYS.FAVORITE_SONGS || e.newValue == null) return;
-      try {
-        const parsed = JSON.parse(e.newValue) as FavoriteSong[];
-        if (Array.isArray(parsed)) setSongs(parsed);
-      } catch { /* ignore malformed */ }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => {
       const key = songKey(song.title, song.artist);
-      if (prev.some(s => songKey(s.title, s.artist) === key)) return prev;
+      if (keySetRef.current.has(key)) return prev;
       const entry: FavoriteSong = {
         ...song,
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -89,9 +92,8 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
   }, []);
 
   const has = useCallback(
-    (title: string, artist: string) =>
-      songs.some(s => songKey(s.title, s.artist) === songKey(title, artist)),
-    [songs],
+    (title: string, artist: string) => keySetRef.current.has(songKey(title, artist)),
+    [],
   );
 
   const clear = useCallback(() => setSongs([]), []);

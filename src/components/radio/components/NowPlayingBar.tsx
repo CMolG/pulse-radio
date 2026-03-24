@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -25,14 +25,7 @@ import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import UiImage from "@/components/common/UiImage";
-
-function stationInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
+import { stationInitials } from "../utils/formatUtils";
 
 type Props = {
   station: Station | null;
@@ -60,7 +53,11 @@ type Props = {
   streamQuality?: StreamQuality;
 };
 
-export default function NowPlayingBar({
+const SAFE_AREA_STYLE: React.CSSProperties = {
+  paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))',
+};
+
+function NowPlayingBar({
   station,
   track,
   status,
@@ -89,21 +86,54 @@ export default function NowPlayingBar({
   const isLoading = status === "loading";
   const [imgError, setImgError] = useState(false);
   const coverUrlForReset = track?.artworkUrl ?? station?.favicon;
-  const lastBarCoverRef = React.useRef(coverUrlForReset);
-  React.useEffect(() => {
-    if (coverUrlForReset !== lastBarCoverRef.current) {
-      lastBarCoverRef.current = coverUrlForReset;
-      setImgError(false);
-    }
-  }, [coverUrlForReset]);
+
+  // Reset error state when cover URL changes so new artwork gets a chance to load
+  const [prevBarCoverUrl, setPrevBarCoverUrl] = useState(coverUrlForReset);
+  if (coverUrlForReset !== prevBarCoverUrl) {
+    setPrevBarCoverUrl(coverUrlForReset);
+    setImgError(false);
+  }
+
+  const coverUrl = track?.artworkUrl ?? station?.favicon;
+  const showFallback = !coverUrl || imgError;
+
+  const statusAnnouncement = useMemo(() => {
+    if (!station) return "No station selected";
+    const trackInfo = track?.title
+      ? track.artist ? `${track.artist}, ${track.title}` : track.title
+      : station.name;
+    if (isLoading) return `Loading ${trackInfo}`;
+    if (isPlaying) return `Now playing: ${trackInfo}`;
+    if (status === "error") return `Playback error: ${station.name}`;
+    return `Paused: ${trackInfo}`;
+  }, [station, track, isPlaying, isLoading, status]);
+
+  const compactTags = useMemo(
+    () => station?.tags?.split(",").slice(0, 2).join(" · ") ?? "",
+    [station?.tags],
+  );
+  const firstTag = useMemo(
+    () => station?.tags?.split(",")[0] ?? "",
+    [station?.tags],
+  );
+
+  const handleVolumeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const v = parseFloat(e.target.value);
+      onSetVolume(v);
+      if (muted && v > 0) onToggleMute();
+    },
+    [muted, onSetVolume, onToggleMute],
+  );
 
   if (compact) {
     return (
-      <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={{ paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' }}>
+      <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
         {/* Play/Pause — 48px touch target */}
         <button
           onClick={onTogglePlay}
           disabled={!station}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
           {isLoading ? (
@@ -132,7 +162,7 @@ export default function NowPlayingBar({
                   </>
                 )}
                 <span className="text-[11px] text-secondary truncate">
-                  {track?.artist || station.tags?.split(",").slice(0, 2).join(" · ") || ""}
+                  {track?.artist || compactTags || ""}
                 </span>
               </div>
             </>
@@ -148,6 +178,7 @@ export default function NowPlayingBar({
               onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
+              aria-label="Theater mode"
             >
               <Maximize2 size={18} />
             </button>
@@ -164,11 +195,11 @@ export default function NowPlayingBar({
     );
   }
 
-  const coverUrl = track?.artworkUrl ?? station?.favicon;
-  const showFallback = !coverUrl || imgError;
-
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {statusAnnouncement}
+      </div>
       {/* Station info */}
       <div className="flex-row-2.5 min-w-40">
         <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
@@ -205,7 +236,7 @@ export default function NowPlayingBar({
               ? track.artist
                 ? `${track.artist} — ${track.title}`
                 : track.title
-              : station?.tags?.split(",")[0] || ""}
+              : firstTag}
           </p>
           {track?.album && (
             <p className="text-[9px] text-dim truncate">{track.album}</p>
@@ -285,6 +316,7 @@ export default function NowPlayingBar({
             onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
+            aria-label="Theater mode"
           >
             <Maximize2 size={14} />
           </button>
@@ -355,11 +387,7 @@ export default function NowPlayingBar({
           max={1}
           step={0.01}
           value={volume}
-          onChange={(e) => {
-            const v = parseFloat(e.target.value);
-            onSetVolume(v);
-            if (muted && v > 0) onToggleMute();
-          }}
+          onChange={handleVolumeChange}
           aria-label="Volume"
           className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
@@ -367,3 +395,5 @@ export default function NowPlayingBar({
     </div>
   );
 }
+
+export default React.memo(NowPlayingBar);

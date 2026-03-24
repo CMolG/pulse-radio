@@ -10,7 +10,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Station, PlaybackStatus } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { resumeAudioContext } from '@/lib/audio-visualizer';
+import { resumeAudioContext, hasAudioSource } from '@/lib/audio-visualizer';
 
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
 function proxyUrl(raw: string): string {
@@ -54,8 +54,11 @@ export type UseRadioReturn = {
   muted: boolean;
   currentTime: number;
   streamQuality: StreamQuality;
-  streamLatencyMs: number | null;
   audioRef: React.RefObject<HTMLAudioElement | null>;
+  /** Pre-creates the audio element so EQ/analyser can connect BEFORE play() is called.
+   *  Must be called from a user-gesture handler to ensure AudioContext is created
+   *  within the gesture context and audio.play() runs after Web Audio is wired up. */
+  ensureAudio: () => HTMLAudioElement;
   play: (station: Station) => void;
   pause: () => void;
   resume: () => void;
@@ -77,6 +80,12 @@ export function useRadio(): UseRadioReturn {
   const playSessionRef = useRef(0);
   const proxyFallbackUrlsRef = useRef<Set<string>>(new Set());
   const codecFallbackTriedRef = useRef<Set<string>>(new Set());
+  // Gate: prevents concurrent reconnect attempts (cleared on success/failure)
+  const isReconnectingRef = useRef(false);
+  // Flag: true while startPlayback is assigning audio.src, so onPause ignores the synthetic pause
+  const srcChangingRef = useRef(false);
+  // Stall timer promoted to ref so clearReconnectTimer() can cancel it
+  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [preferDirectStream] = useState(() => isIOSDevice());
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
@@ -86,8 +95,19 @@ export function useRadio(): UseRadioReturn {
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good');
-  const [streamLatencyMs, setStreamLatencyMs] = useState<number | null>(null);
+
   const lastBufferEndRef = useRef<number>(0);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clearTimer = (ref: React.MutableRefObject<any>) => {
+    if (ref.current != null) { clearTimeout(ref.current); ref.current = null; }
+  };
+
+  // Latest volume/muted refs so crossfade intervals read current values
+  const volumeRef = useRef(volume);
+  const mutedRef = useRef(muted);
+  volumeRef.current = volume;
+  mutedRef.current = muted;
 
   // Tracks whether the user explicitly requested a pause (vs stall/src-change pauses)
   const userPausedRef = useRef(false);
@@ -107,6 +127,10 @@ export function useRadio(): UseRadioReturn {
           userPausedRef.current = true;
           audio.pause();
         }
+        // Cancel any in-progress crossfade so it doesn't restart playback
+        // after the cross-tab pause. Without this, the crossfade completion
+        // calls startPlayback() and overrides the pause from the other tab.
+        clearTimer(fadeTimerRef);
       }
     };
     return () => {
@@ -118,22 +142,10 @@ export function useRadio(): UseRadioReturn {
   // Clean up timers on unmount to prevent orphaned intervals
   useEffect(() => {
     return () => {
-      if (fadeTimerRef.current) {
-        clearInterval(fadeTimerRef.current);
-        fadeTimerRef.current = null;
-      }
-      if (pauseTimerRef.current) {
-        clearTimeout(pauseTimerRef.current);
-        pauseTimerRef.current = null;
-      }
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = null;
-      }
-      if (bufferCheckRef.current) {
-        clearInterval(bufferCheckRef.current);
-        bufferCheckRef.current = null;
-      }
+      clearTimer(fadeTimerRef);
+      clearTimer(pauseTimerRef);
+      clearTimer(reconnectTimerRef);
+      clearTimer(bufferCheckRef);
     };
   }, []);
 
@@ -149,6 +161,10 @@ export function useRadio(): UseRadioReturn {
   }, []);
 
   const handlePlayRejected = useCallback((err: unknown) => {
+    // AbortError means the play was superseded — stop(), pause(), or a new
+    // play() cleared audio.src while this promise was pending.  The caller
+    // already set the correct status (idle/loading), so swallow silently.
+    if (err instanceof DOMException && err.name === 'AbortError') return;
     setStatus(isAutoplayBlocked(err) ? 'paused' : 'error');
   }, []);
 
@@ -158,12 +174,22 @@ export function useRadio(): UseRadioReturn {
       streamUrl: string,
       onRejected: (err: unknown) => void,
     ) => {
+      // Force proxy when the Web Audio graph is connected to this element.
+      // On iOS Safari, a cross-origin audio element with crossOrigin=null routed
+      // through Web Audio produces silence (CORS taint). Using the proxy ensures
+      // the response has CORS headers so the Web Audio pipeline outputs sound.
+      const webAudioConnected = hasAudioSource(audio);
       const shouldUseProxy =
-        !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl);
+        !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected;
 
       const setSourceAndPlay = (useProxy: boolean) => {
+        // Set flag before assigning src — the browser fires a synchronous 'pause'
+        // event on src change, and onPause must ignore that synthetic pause.
+        srcChangingRef.current = true;
         audio.crossOrigin = useProxy ? 'anonymous' : null;
         audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
+        // Clear in a microtask (after the synchronous pause event has fired)
+        Promise.resolve().then(() => { srcChangingRef.current = false; });
         return audio.play();
       };
 
@@ -171,6 +197,7 @@ export function useRadio(): UseRadioReturn {
         // On iOS, direct playback is more stable in background.
         // If direct fails for non-autoplay reasons, fallback to proxy for this station.
         if (!shouldUseProxy && preferDirectStream && !isAutoplayBlocked(err)) {
+          if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
           proxyFallbackUrlsRef.current.add(streamUrl);
           setSourceAndPlay(true).catch(onRejected);
           return;
@@ -185,10 +212,8 @@ export function useRadio(): UseRadioReturn {
     const audio = getAudio();
 
     const clearReconnectTimer = () => {
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = null;
-      }
+      clearTimer(reconnectTimerRef);
+      clearTimer(stallTimerRef);
     };
 
     const sessionId = playSessionRef.current;
@@ -198,10 +223,14 @@ export function useRadio(): UseRadioReturn {
       if (!station || userPausedRef.current) return;
       // Don't retry when browser is offline — onOnline will resume
       if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+      // Prevent concurrent reconnects — only one attempt at a time
+      if (isReconnectingRef.current) return;
       if (retryRef.current >= 10) {
         setStatus('error');
+        isReconnectingRef.current = false;
         return;
       }
+      isReconnectingRef.current = true;
       retryRef.current++;
       setStatus('loading');
       clearReconnectTimer();
@@ -228,29 +257,50 @@ export function useRadio(): UseRadioReturn {
       const jitter = adaptedDelay * (0.7 + Math.random() * 0.6);
       reconnectTimerRef.current = setTimeout(() => {
         reconnectTimerRef.current = null;
-        if (userPausedRef.current || playSessionRef.current !== sessionId) return;
-        startPlayback(audio, station.url_resolved, handlePlayRejected);
+        if (userPausedRef.current || playSessionRef.current !== sessionId) {
+          isReconnectingRef.current = false;
+          return;
+        }
+        startPlayback(audio, station.url_resolved, (err) => {
+          isReconnectingRef.current = false;
+          handlePlayRejected(err);
+        });
       }, jitter);
     };
 
     const onPause = () => {
+      // Case 1: user explicitly paused — just show paused state
       if (userPausedRef.current) {
-        userPausedRef.current = false;
         setStatus('paused');
-      } else if (station) {
-        // OS/browser interrupted playback (screen lock, phone call, etc.)
-        // Attempt automatic resume after a brief delay.
-        setStatus('loading');
-        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
-        pauseTimerRef.current = setTimeout(() => {
-          if (!userPausedRef.current && audio.paused) {
-            audio.play().catch(() => {
-              // Direct resume failed — reconnect with fresh source
-              reconnect(500);
-            });
-          }
-        }, 300);
+        return;
       }
+      // Case 2: pause was caused by startPlayback assigning audio.src — ignore it.
+      // The browser fires a synchronous 'pause' event when src changes; we must not
+      // treat this as an OS interruption and queue a spurious reconnect.
+      if (srcChangingRef.current) {
+        return;
+      }
+      // Case 3: OS/browser interruption (screen lock, phone call, etc.)
+      // Attempt a single resume after a brief delay.
+      // On mobile, play() without a user gesture will fail with NotAllowedError.
+      // In that case we show 'paused' so the user can tap the play button.
+      // We do NOT call reconnect() on NotAllowedError — that would set audio.src,
+      // fire another pause event, and create a loop that exhausts all retries.
+      if (!station) return;
+      setStatus('loading');
+      clearTimer(pauseTimerRef);
+      pauseTimerRef.current = setTimeout(() => {
+        if (userPausedRef.current || !audio.paused) return;
+        audio.play().catch((err) => {
+          if (isAutoplayBlocked(err)) {
+            // Mobile: no gesture available — show play button, user resumes manually
+            setStatus('paused');
+          } else {
+            // Genuine network/decode error — reconnect with a fresh source
+            reconnect(500);
+          }
+        });
+      }, 300);
     };
 
     const onWaiting = () => setStatus('loading');
@@ -262,15 +312,19 @@ export function useRadio(): UseRadioReturn {
         // If currently proxied → try direct (or vice versa).
         // Only attempt this fallback once per station to avoid loops.
         if (station && !codecFallbackTriedRef.current.has(station.url_resolved)) {
+          if (codecFallbackTriedRef.current.size >= 200) codecFallbackTriedRef.current.clear();
           codecFallbackTriedRef.current.add(station.url_resolved);
           const isCurrentlyProxied = audio.src.startsWith(window.location.origin + '/api/proxy-stream');
           const setSourceAndPlay = (useProxy: boolean) => {
+            srcChangingRef.current = true;
             audio.crossOrigin = useProxy ? 'anonymous' : null;
             audio.src = useProxy ? proxyUrl(station.url_resolved) : station.url_resolved;
+            Promise.resolve().then(() => { srcChangingRef.current = false; });
             return audio.play();
           };
           setStatus('loading');
-          setSourceAndPlay(!isCurrentlyProxied).catch(() => {
+          setSourceAndPlay(!isCurrentlyProxied).catch((fallbackErr) => {
+            if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return;
             setStatus('error');
           });
           return;
@@ -283,10 +337,9 @@ export function useRadio(): UseRadioReturn {
 
     // Stalled: the browser stopped receiving data but hasn't errored
     // Timeout adapts to remaining buffer: more buffer → wait longer for recovery
-    let stallTimer: ReturnType<typeof setTimeout> | null = null;
     let stallCount = 0;
     const onStalled = () => {
-      if (stallTimer) clearTimeout(stallTimer);
+      clearTimer(stallTimerRef);
       stallCount++;
       let bufferAhead = 0;
       if (audio.buffered.length > 0) {
@@ -296,9 +349,10 @@ export function useRadio(): UseRadioReturn {
       // Consecutive stalls reduce patience (exponential decay)
       const baseTimeout = bufferAhead <= 0 ? 1000 : bufferAhead < 2 ? 2000 : 6000;
       const timeout = Math.max(500, baseTimeout / Math.min(stallCount, 4));
-      stallTimer = setTimeout(() => {
+      stallTimerRef.current = setTimeout(() => {
+        stallTimerRef.current = null;
         if (audio.paused || audio.readyState < 3) {
-          reconnect(1500);
+          reconnect(1500); // isReconnectingRef gate prevents overlap with other paths
         }
       }, timeout);
     };
@@ -308,6 +362,7 @@ export function useRadio(): UseRadioReturn {
       retryRef.current = 0;
       stallCount = 0; // Reset stall counter on successful playback
       userPausedRef.current = false;
+      isReconnectingRef.current = false; // Clear gate — reconnect path succeeded
       bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current });
     };
 
@@ -326,23 +381,31 @@ export function useRadio(): UseRadioReturn {
       }
     };
 
-    const onPageShow = () => {
-      if (!station || userPausedRef.current) return;
-      if (audio.paused || audio.readyState < 2) {
-        setStatus('loading');
-        retryRef.current = 0;
-        audio.play().catch(() => startPlayback(audio, station.url_resolved, handlePlayRejected));
-      }
-    };
+    // Single debounced handler for both visibilitychange and pageshow.
+    // On iOS, both events fire on the same resume (screen unlock / tab switch),
+    // so without debouncing we get two parallel reconnect attempts.
+    let lastResumeAttempt = 0;
+    const RESUME_DEBOUNCE_MS = 1000;
 
-    // Resume playback when page returns from background (screen unlock, tab switch)
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && station && !userPausedRef.current) {
-        if (audio.paused || audio.readyState < 2) {
-          setStatus('loading');
-          retryRef.current = 0;
-          audio.play().catch(() => startPlayback(audio, station.url_resolved, handlePlayRejected));
-        }
+    const onVisibilityResume = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!station || userPausedRef.current) return;
+      const now = Date.now();
+      if (now - lastResumeAttempt < RESUME_DEBOUNCE_MS) return;
+      lastResumeAttempt = now;
+
+      if (audio.paused || audio.readyState < 2) {
+        retryRef.current = 0;
+        isReconnectingRef.current = false; // Reset gate for fresh visibility-triggered resume
+        setStatus('loading');
+        audio.play().catch((err) => {
+          if (isAutoplayBlocked(err)) {
+            // Mobile: no gesture — show play button
+            setStatus('paused');
+          } else {
+            reconnect(500);
+          }
+        });
       }
     };
 
@@ -366,10 +429,7 @@ export function useRadio(): UseRadioReturn {
     const MIN_BUFFER_AHEAD_S = 2;
     let lowBufferStreak = 0;
 
-    if (bufferCheckRef.current) {
-      clearInterval(bufferCheckRef.current);
-      bufferCheckRef.current = null;
-    }
+    clearTimer(bufferCheckRef);
 
     bufferCheckRef.current = setInterval(() => {
       // Update stream quality based on network and buffer state
@@ -392,6 +452,8 @@ export function useRadio(): UseRadioReturn {
       }
       // Skip check when tab is hidden — browser throttles network
       if (document.hidden) return;
+      // Skip quality/reconnect logic during an active reconnect to avoid cascade
+      if (isReconnectingRef.current) return;
 
       const { buffered, currentTime: ct } = audio;
       if (buffered.length === 0) {
@@ -422,7 +484,8 @@ export function useRadio(): UseRadioReturn {
       lastBufferEndRef.current = bufferEnd;
 
       if (ahead >= 5) {
-        setStreamQuality('good');
+        // saveData means the user opted into reduced bandwidth; cap at 'fair'
+        setStreamQuality(conn?.saveData ? 'fair' : 'good');
       } else if (ahead >= MIN_BUFFER_AHEAD_S) {
         // Healthy buffer but thin — check if it's growing
         setStreamQuality(growth > 0 ? 'fair' : 'poor');
@@ -451,19 +514,16 @@ export function useRadio(): UseRadioReturn {
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('canplay', onCanPlay);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('pageshow', onPageShow);
+    document.addEventListener('visibilitychange', onVisibilityResume);
+    window.addEventListener('pageshow', onVisibilityResume);
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
 
     return () => {
-      if (stallTimer) clearTimeout(stallTimer);
-      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+      clearTimer(stallTimerRef);
+      clearTimer(pauseTimerRef);
       clearReconnectTimer();
-      if (bufferCheckRef.current) {
-        clearInterval(bufferCheckRef.current);
-        bufferCheckRef.current = null;
-      }
+      clearTimer(bufferCheckRef);
       audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
@@ -472,8 +532,8 @@ export function useRadio(): UseRadioReturn {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('canplay', onCanPlay);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('pageshow', onPageShow);
+      document.removeEventListener('visibilitychange', onVisibilityResume);
+      window.removeEventListener('pageshow', onVisibilityResume);
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
     };
@@ -482,7 +542,8 @@ export function useRadio(): UseRadioReturn {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
-    if (audio) audio.volume = muted ? 0 : volume;
+    // Skip direct volume set while crossfade is in progress — the interval controls audio.volume
+    if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
   const play = useCallback((s: Station) => {
@@ -497,19 +558,19 @@ export function useRadio(): UseRadioReturn {
     playSessionRef.current++;
     retryRef.current = 0;
     userPausedRef.current = false;
+    // A user-initiated play always overrides any in-progress reconnect
+    isReconnectingRef.current = false;
     proxyFallbackUrlsRef.current.delete(s.url_resolved);
     codecFallbackTriedRef.current.delete(s.url_resolved);
     setStation(s);
     setStatus('loading');
+    setStreamQuality('good');
+    lastBufferEndRef.current = 0;
 
     // Crossfade: fade out with ease-out curve before switching
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
+    clearTimer(fadeTimerRef);
 
     if (!audio.paused && audio.src) {
-      const targetVol = muted ? 0 : volume;
       const steps = 8;
       const interval = 40; // 320ms total
       let step = 0;
@@ -523,25 +584,34 @@ export function useRadio(): UseRadioReturn {
         if (step >= steps) {
           clearInterval(fadeTimerRef.current!);
           fadeTimerRef.current = null;
-          audio.volume = targetVol;
+          // Read current volume/muted from refs — user may have changed them during fade
+          audio.volume = mutedRef.current ? 0 : volumeRef.current;
           startPlayback(audio, s.url_resolved, handlePlayRejected);
         }
       }, interval);
     } else {
-      audio.volume = muted ? 0 : volume;
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
       startPlayback(audio, s.url_resolved, handlePlayRejected);
     }
-  }, [getAudio, muted, volume, startPlayback, handlePlayRejected]);
+  }, [getAudio, startPlayback, handlePlayRejected]);
 
   const pause = useCallback(() => {
     userPausedRef.current = true;
+    // Cancel any in-progress crossfade so its completion doesn't call
+    // startPlayback() and resume audio after this explicit pause.
+    clearTimer(fadeTimerRef);
     audioRef.current?.pause();
   }, []);
 
   const resume = useCallback(() => {
     userPausedRef.current = false;
     const audio = audioRef.current;
-    if (audio) resumeAudioContext(audio);
+    if (audio) {
+      resumeAudioContext(audio);
+      // Restore audio.volume from React state — sleep timer fade may have
+      // set it to 0 directly, bypassing React state.
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
+    }
     audio?.play().catch(() => {});
   }, []);
 
@@ -551,30 +621,23 @@ export function useRadio(): UseRadioReturn {
     if (audio.paused) {
       userPausedRef.current = false;
       resumeAudioContext(audio);
+      // Restore audio.volume from React state — sleep timer fade may have
+      // set it to 0 directly, bypassing React state.
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
       audio.play().catch(() => {});
     } else {
       userPausedRef.current = true;
+      // Cancel any in-progress crossfade (same reason as pause())
+      clearTimer(fadeTimerRef);
       audio.pause();
     }
   }, []);
 
   const stop = useCallback(() => {
-    if (fadeTimerRef.current) {
-      clearInterval(fadeTimerRef.current);
-      fadeTimerRef.current = null;
-    }
-    if (pauseTimerRef.current) {
-      clearTimeout(pauseTimerRef.current);
-      pauseTimerRef.current = null;
-    }
-    if (reconnectTimerRef.current) {
-      clearTimeout(reconnectTimerRef.current);
-      reconnectTimerRef.current = null;
-    }
-    if (bufferCheckRef.current) {
-      clearInterval(bufferCheckRef.current);
-      bufferCheckRef.current = null;
-    }
+    clearTimer(fadeTimerRef);
+    clearTimer(pauseTimerRef);
+    clearTimer(reconnectTimerRef);
+    clearTimer(bufferCheckRef);
 
     const audio = audioRef.current;
     if (audio) {
@@ -583,6 +646,8 @@ export function useRadio(): UseRadioReturn {
     }
     setStation(null);
     setStatus('idle');
+    setStreamQuality('good');
+    lastBufferEndRef.current = 0;
   }, []);
 
   const setVolume = useCallback((v: number) => {
@@ -594,17 +659,16 @@ export function useRadio(): UseRadioReturn {
   const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl)) return;
     if (prefetchedUrlsRef.current.has(streamUrl)) return;
+    if (prefetchedUrlsRef.current.size >= 500) prefetchedUrlsRef.current.clear();
     prefetchedUrlsRef.current.add(streamUrl);
     // Warm DNS+TCP+TLS with a HEAD request and measure latency
     const controller = new AbortController();
-    const start = performance.now();
     fetch(proxyUrl(streamUrl), { method: 'HEAD', signal: controller.signal })
       .then(() => {
-        const latency = Math.round(performance.now() - start);
-        setStreamLatencyMs(latency);
+        clearTimeout(timer);
       })
-      .catch(() => {});
-    setTimeout(() => controller.abort(), 2000);
+      .catch(() => { clearTimeout(timer); });
+    const timer = setTimeout(() => controller.abort(), 2000);
   }, []);
 
   const toggleMute = useCallback(() => setMuted(m => !m), []);
@@ -616,6 +680,8 @@ export function useRadio(): UseRadioReturn {
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
 
+  const ensureAudio = useCallback(() => getAudio(), [getAudio]);
+
   return {
     station,
     status,
@@ -623,8 +689,8 @@ export function useRadio(): UseRadioReturn {
     muted,
     currentTime,
     streamQuality,
-    streamLatencyMs,
     audioRef,
+    ensureAudio,
     play,
     pause,
     resume,

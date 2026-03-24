@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { Station } from '../types';
 import { STORAGE_KEYS, MAX_RECENT } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
 
 export type UseRecentReturn = {
   recent: Station[];
@@ -33,6 +34,8 @@ export function useRecent(): UseRecentReturn {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.RECENT, recent);
   }, [recent]);
+
+  useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
 
   const add = useCallback((station: Station) => {
     setRecent(prev => {

@@ -51,12 +51,20 @@ export function usePlaybackPosition(): UsePlaybackPositionReturn {
     const positions = positionsRef.current;
     positions[url] = { position, duration, updatedAt: Date.now() };
 
-    // Evict oldest entries if over limit
+    // Evict oldest entries if over limit — threshold-based, no full sort
     const keys = Object.keys(positions);
     if (keys.length > MAX_ENTRIES) {
-      const sorted = keys.sort((a, b) => (positions[a].updatedAt || 0) - (positions[b].updatedAt || 0));
-      for (let i = 0; i < keys.length - MAX_ENTRIES; i++) {
-        delete positions[sorted[i]];
+      const excess = keys.length - MAX_ENTRIES;
+      const timestamps = new Float64Array(keys.length);
+      for (let i = 0; i < keys.length; i++) timestamps[i] = positions[keys[i]].updatedAt || 0;
+      timestamps.sort();
+      const threshold = timestamps[excess - 1];
+      let removed = 0;
+      for (let i = 0; i < keys.length && removed < excess; i++) {
+        if ((positions[keys[i]].updatedAt || 0) <= threshold) {
+          delete positions[keys[i]];
+          removed++;
+        }
       }
     }
     persist();
@@ -87,15 +95,21 @@ export function usePlaybackPosition(): UsePlaybackPositionReturn {
     trackingRef.current = { url, audio };
 
     intervalRef.current = setInterval(() => {
-      if (audio.paused || !isFinite(audio.currentTime)) return;
-      savePosition(url, audio.currentTime, audio.duration || 0);
+      if (audio.paused || !isFinite(audio.currentTime) || !isFinite(audio.duration)) return;
+      savePosition(url, audio.currentTime, audio.duration);
     }, SAVE_INTERVAL_MS);
   }, [stopTracking, savePosition]);
 
   // Cleanup on unmount
   useEffect(() => () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-  }, []);
+    if (trackingRef.current) {
+      const { url, audio } = trackingRef.current;
+      if (audio.currentTime > 0 && isFinite(audio.duration)) {
+        savePosition(url, audio.currentTime, audio.duration);
+      }
+    }
+  }, [savePosition]);
 
   return { getPosition, savePosition, clearPosition, startTracking, stopTracking };
 }

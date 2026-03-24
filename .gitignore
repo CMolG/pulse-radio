@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /program.md
+/auto-refiner.md
+/auto-reducer.md
+/auto-optimizer.md
 /.idea/
 /.superpowers/
 /verify-lyrics-ui.mjs

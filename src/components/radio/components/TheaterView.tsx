@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import type { Station, NowPlayingTrack, LyricsData } from "../types";
@@ -15,15 +15,8 @@ import LyricsReel from "./MobileLyricsReel";
 import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
+import { stationInitials } from "../utils/formatUtils";
 import UiImage from "@/components/common/UiImage";
-
-function stationInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-}
 
 // Fallback spiral colors — warm orange/red gradient
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];
@@ -41,7 +34,6 @@ type Props = {
   onFavSong?: () => void;
   isSongLiked?: boolean;
   lyrics?: LyricsData | null;
-  lyricsLoading?: boolean;
   currentTime?: number;
   activeLineOverride?: number;
   syncConfidence?: number;
@@ -50,9 +42,14 @@ type Props = {
   compact?: boolean;
 };
 
+const _colorCache = new Map<string, Promise<[string, string, string]>>();
+const MAX_COLOR_CACHE = 32;
+
 /** Extract the top-2 saturated hues from an artwork image for use as spiral colors. */
 function extractColors(imgUrl: string): Promise<[string, string, string]> {
-  return new Promise((resolve) => {
+  const cached = _colorCache.get(imgUrl);
+  if (cached) return cached;
+  const p = new Promise<[string, string, string]>((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
@@ -97,6 +94,12 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
     img.onerror = () => resolve(FALLBACK_COLORS);
     img.src = imgUrl;
   });
+  if (_colorCache.size >= MAX_COLOR_CACHE) {
+    const first = _colorCache.keys().next().value;
+    if (first !== undefined) _colorCache.delete(first);
+  }
+  _colorCache.set(imgUrl, p);
+  return p;
 }
 
 export default function TheaterView({
@@ -112,7 +115,6 @@ export default function TheaterView({
   onFavSong,
   isSongLiked,
   lyrics,
-  lyricsLoading,
   currentTime,
   activeLineOverride,
   syncConfidence,
@@ -138,6 +140,11 @@ export default function TheaterView({
   }, [artworkUrl]);
 
   const [color1, color2, color3] = colors;
+
+  const theaterTags = useMemo(
+    () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
+    [station.tags],
+  );
 
   return (
     <motion.div
@@ -321,7 +328,7 @@ export default function TheaterView({
             <p
               className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}
             >
-              {station.tags?.split(",").slice(0, 3).join(" · ") || "Internet Radio"}
+              {theaterTags}
             </p>
           )}
 
@@ -400,7 +407,6 @@ export default function TheaterView({
             >
               <LyricsReel
                 lyrics={lyrics ?? null}
-                loading={Boolean(lyricsLoading)}
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
                 syncConfidence={syncConfidence}

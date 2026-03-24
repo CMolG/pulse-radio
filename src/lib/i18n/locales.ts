@@ -134,7 +134,7 @@ const BASE_LOCALE_MAP: Record<string, SupportedLocale> = {
 
 export function normalizeLocale(input: string | null | undefined): SupportedLocale {
   if (!input) return "en";
-  const normalized = input.replace("_", "-").trim();
+  const normalized = input.replace(/_/g, "-").trim();
   if (isSupportedLocale(normalized)) return normalized;
 
   const lower = normalized.toLowerCase();

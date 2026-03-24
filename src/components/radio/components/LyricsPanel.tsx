@@ -12,6 +12,22 @@ import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex } from "../lyricsUtils";
 import type { RealtimeSyncStatus } from "../services/realtimeLyricsTypes";
 
+const LyricLine = React.memo(function LyricLine({ text, isActive, isPast }: { text: string; isActive: boolean; isPast: boolean }) {
+  return (
+    <p
+      className={`text-[13px] leading-relaxed transition-all duration-200 ${
+        isActive
+          ? "text-white font-semibold border-l-2 border-sys-orange pl-2"
+          : isPast
+            ? "text-white/30 pl-2.5"
+            : "text-secondary pl-2.5"
+      }`}
+    >
+      {text || "♪"}
+    </p>
+  );
+});
+
 type Props = {
   lyrics: LyricsData | null;
   loading: boolean;
@@ -67,7 +83,7 @@ export default function LyricsPanel({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={onClose} className="p-1 text-subtle-hover">
+          <button onClick={onClose} aria-label="Close lyrics" className="p-1 text-subtle-hover">
             <X size={14} />
           </button>
         </div>
@@ -111,24 +127,9 @@ export default function LyricsPanel({
             )}
 
             {lyrics.synced && lyrics.lines.length > 0 ? (
-              lyrics.lines.map((line, i) => {
-                const isActive = i === activeIdx;
-
-                return (
-                  <p
-                    key={i}
-                    className={`text-[13px] leading-relaxed transition-all duration-200 ${
-                      isActive
-                        ? "text-white font-semibold border-l-2 border-sys-orange pl-2"
-                        : i < activeIdx
-                          ? "text-white/30 pl-2.5"
-                          : "text-secondary pl-2.5"
-                     }`}
-                   >
-                     {line.text || "♪"}
-                   </p>
-                 );
-               })
+              lyrics.lines.map((line, i) => (
+                <LyricLine key={i} text={line.text} isActive={i === activeIdx} isPast={i < activeIdx} />
+              ))
             ) : lyrics.plainText ? (
               <p className="text-[13px] text-secondary leading-relaxed whitespace-pre-wrap">
                 {lyrics.plainText}

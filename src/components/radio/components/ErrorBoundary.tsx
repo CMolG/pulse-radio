@@ -37,7 +37,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) return this.props.fallback;
+      if (this.props.fallback !== undefined) return this.props.fallback;
 
       return (
         <div className="flex-center-col gap-4 p-8 h-full bg-surface-1 text-center select-none">

@@ -15,41 +15,29 @@ const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)';
 const MUSIC_KEYWORDS =
   /band|singer|musician|artist|rapper|group|duo|dj|producer|composer|vocalist|songwriter|hip.hop|rock|pop|jazz|classical|electronic|country|metal|r&b|soul|blues|funk|reggae|punk|folk/i;
 
-async function searchMusicBrainz(artist: string) {
+async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T | null> {
   try {
-    const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
-      signal: AbortSignal.timeout(8_000),
-    });
-    if (!res.ok) {
-      await res.text().catch(() => {}); // drain body to release connection
-      return null;
-    }
-    const data = await res.json();
-    return data.artists?.[0] ?? null;
-  } catch {
-    return null;
-  }
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(8_000) });
+    if (!res.ok) { await res.text().catch(() => {}); return null; }
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) { await res.body?.cancel().catch(() => {}); return null; }
+    return await res.json();
+  } catch { return null; }
+}
+
+async function searchMusicBrainz(artist: string) {
+  const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await fetchJson<{ artists?: any[] }>(url, { 'User-Agent': USER_AGENT, Accept: 'application/json' });
+  return data?.artists?.[0] ?? null;
 }
 
 async function fetchWikiSummary(title: string) {
-  try {
-    const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
-    const res = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT },
-      signal: AbortSignal.timeout(8_000),
-    });
-    if (!res.ok) {
-      await res.text().catch(() => {}); // drain body to release connection
-      return null;
-    }
-    const data = await res.json();
-    if (data.type === 'disambiguation') return null;
-    return data;
-  } catch {
-    return null;
-  }
+  const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT });
+  if (data?.type === 'disambiguation') return null;
+  return data;
 }
 
 export async function GET(req: NextRequest) {

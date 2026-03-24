@@ -15,7 +15,6 @@ import {
 
 type Props = {
   lyrics: LyricsData | null;
-  loading: boolean;
   currentTime?: number;
    activeLineOverride?: number;
    syncConfidence?: number;
@@ -23,9 +22,45 @@ type Props = {
   variant?: "mobile" | "desktop";
 };
 
+// [base classes, mobile size, desktop size]
+const EMPHASIS: [string, string, string][] = [
+  ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],
+  ["text-white/82 font-semibold opacity-100 scale-[0.985]", "text-[18px]", "text-[23px]"],
+  ["text-white/50 font-medium opacity-100 scale-95", "text-[15px]", "text-[19px]"],
+  ["text-white/26 font-medium opacity-100 scale-[0.92]", "text-[13px]", "text-[17px]"],
+  ["text-white/14 font-medium opacity-100 scale-[0.88]", "text-[12px]", "text-[16px]"],
+];
+
+const LyricReelLine = React.memo(function LyricReelLine({
+  lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
+}: {
+  lineId: string; index: number; text: string; emphasisIdx: number;
+  isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>;
+  scrollToIndex: (i: number) => void;
+}) {
+  const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`;
+  return (
+    <button
+      key={lineId}
+      ref={(node) => { lineRefs.current[index] = node; }}
+      type="button"
+      onClick={() => scrollToIndex(index)}
+      className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
+    >
+      <span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>
+        {text}
+      </span>
+    </button>
+  );
+}, (prev, next) =>
+  prev.lineId === next.lineId &&
+  prev.text === next.text &&
+  prev.emphasisIdx === next.emphasisIdx &&
+  prev.isDesktop === next.isDesktop
+);
+
 export default function LyricsReel({
   lyrics,
-  loading,
   currentTime,
   activeLineOverride,
   variant = "mobile",
@@ -90,26 +125,18 @@ export default function LyricsReel({
     lineRefs.current = lineRefs.current.slice(0, renderableLines.length);
   }, [renderableLines.length]);
 
+  // Reset scroll position when lyrics change (no autoscroll on active line —
+  // user controls focus manually by scrolling or clicking a line)
   useEffect(() => {
-    if (!renderableLines.length) {
-      const frame = requestAnimationFrame(() => {
-        setFocusedIdx(0);
-      });
-
-      return () => cancelAnimationFrame(frame);
-    }
-
-    const targetIdx = activeIdx >= 0
-      ? Math.min(activeIdx, renderableLines.length - 1)
-      : 0;
-
+    if (!renderableLines.length) return;
     const frame = requestAnimationFrame(() => {
-      setFocusedIdx((prev) => (prev === targetIdx ? prev : targetIdx));
-      scrollToIndex(targetIdx, activeIdx >= 0 ? "smooth" : "auto");
+      scrollToIndex(0, "auto");
+      setFocusedIdx(0);
     });
-
     return () => cancelAnimationFrame(frame);
-  }, [activeIdx, renderableLines.length, scrollToIndex]);
+  // Only react to lyrics changing, not to activeIdx
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderableLines.length]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -160,44 +187,19 @@ export default function LyricsReel({
               {renderableLines.map((line, index) => {
                 const distanceFromFocus = Math.abs(index - focusedIdx);
                 const isActive = activeIdx >= 0 && index === activeIdx;
-                const emphasisClass = isActive
-                  ? isDesktop
-                    ? "text-white text-[28px] font-bold opacity-100 scale-100"
-                    : "text-white text-[22px] font-bold opacity-100 scale-100"
-                  : distanceFromFocus === 0
-                    ? isDesktop
-                      ? "text-white/82 text-[23px] font-semibold opacity-100 scale-[0.985]"
-                      : "text-white/82 text-[18px] font-semibold opacity-100 scale-[0.985]"
-                    : distanceFromFocus === 1
-                      ? isDesktop
-                        ? "text-white/50 text-[19px] font-medium opacity-100 scale-95"
-                        : "text-white/50 text-[15px] font-medium opacity-100 scale-95"
-                      : distanceFromFocus === 2
-                        ? isDesktop
-                          ? "text-white/26 text-[17px] font-medium opacity-100 scale-[0.92]"
-                          : "text-white/26 text-[13px] font-medium opacity-100 scale-[0.92]"
-                        : isDesktop
-                          ? "text-white/14 text-[16px] font-medium opacity-100 scale-[0.88]"
-                          : "text-white/14 text-[12px] font-medium opacity-100 scale-[0.88]";
+                const ei = isActive ? 0 : Math.min(distanceFromFocus, 3) + 1;
 
                 return (
-                  <button
+                  <LyricReelLine
                     key={line.id}
-                    ref={(node) => {
-                      lineRefs.current[index] = node;
-                    }}
-                    type="button"
-                    onClick={() => scrollToIndex(index)}
-                    className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
-                  >
-                    <span
-                      className={`mx-auto block whitespace-pre-wrap ${
-                        isDesktop ? "max-w-3xl" : "max-w-[92%]"
-                      }`}
-                    >
-                      {line.text}
-                    </span>
-                  </button>
+                    lineId={line.id}
+                    index={index}
+                    text={line.text}
+                    emphasisIdx={ei}
+                    isDesktop={isDesktop}
+                    lineRefs={lineRefs}
+                    scrollToIndex={scrollToIndex}
+                  />
                 );
               })}
             </div>

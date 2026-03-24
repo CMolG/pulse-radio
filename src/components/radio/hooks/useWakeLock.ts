@@ -23,21 +23,40 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
   const lockRef = useRef<WakeLockSentinel | null>(null);
   const [isActive, setIsActive] = useState(false);
 
+  const requestingRef = useRef(false);
+  const wantReleaseRef = useRef(false);
+
   const request = useCallback(async () => {
-    if (lockRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+    if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+    requestingRef.current = true;
+    wantReleaseRef.current = false;
     try {
-      lockRef.current = await navigator.wakeLock.request('screen');
+      const lock = await navigator.wakeLock.request('screen');
+      if (wantReleaseRef.current) {
+        // release() was called while we were awaiting — honour it immediately
+        try { await lock.release(); } catch { /* already released */ }
+        setIsActive(false);
+        return;
+      }
+      lockRef.current = lock;
       setIsActive(true);
-      lockRef.current.addEventListener('release', () => {
+      lock.addEventListener('release', () => {
         lockRef.current = null;
         setIsActive(false);
       });
     } catch {
       // Wake lock request failed (e.g., low battery, or permission denied)
+    } finally {
+      requestingRef.current = false;
     }
   }, []);
 
   const release = useCallback(async () => {
+    if (requestingRef.current) {
+      // request() is in-flight — flag so it releases on completion
+      wantReleaseRef.current = true;
+      return;
+    }
     if (!lockRef.current) return;
     try {
       await lockRef.current.release();

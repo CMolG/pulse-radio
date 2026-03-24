@@ -5,11 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch, apiCatchResponse, stripHtml } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
 const ARCHIVE_API = 'https://archive.org/advancedsearch.php';
-const TIMEOUT_MS = 10_000;
 
 type ArchiveDoc = {
   identifier: string;
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
   }
 
   const collection = req.nextUrl.searchParams.get('collection') || '';
-  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10), 50);
+  const limit = Math.min(parseInt(req.nextUrl.searchParams.get('limit') || '20', 10) || 20, 50);
 
   // Build search query: filter by audio mediatype and optional collection
   let searchQuery = `(${query}) AND mediatype:audio`;
@@ -61,15 +61,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const url = `${ARCHIVE_API}?${params}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      return NextResponse.json({ error: `Archive.org returned ${res.status}` }, { status: 502 });
-    }
+    const res = await apiFetch(url, { timeoutMs: 10_000, maxBytes: 2 * 1024 * 1024, label: 'Archive.org' });
 
     const data = await res.json();
     const docs: ArchiveDoc[] = data.response?.docs || [];
@@ -99,16 +91,10 @@ export async function GET(req: NextRequest) {
         { id: 'librivoxaudio', label: 'LibriVox Audiobooks' },
         { id: 'audio_music', label: 'Music' },
       ],
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    if (msg.includes('abort')) {
-      return NextResponse.json({ error: 'Archive.org request timed out' }, { status: 504 });
-    }
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return apiCatchResponse(err);
   }
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }

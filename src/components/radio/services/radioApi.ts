@@ -45,9 +45,10 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
       const data: Station[] = await res.json();
       const filtered = data.filter(s => s.url_resolved);
       cache.set(key, { data: filtered, ts: Date.now() });
-      if (cache.size > MAX_CACHE) {
+      while (cache.size > MAX_CACHE) {
         const oldest = cache.keys().next().value;
         if (oldest !== undefined) cache.delete(oldest);
+        else break;
       }
       return filtered;
     } catch {

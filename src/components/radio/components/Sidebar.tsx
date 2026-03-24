@@ -18,7 +18,7 @@ type Props = {
   onGoHome?: () => void;
 };
 
-export default function Sidebar({
+export default React.memo(function Sidebar({
   onSearch, onSelectGenre, onGoHome,
 }: Props) {
   const [query, setQuery] = useState('');
@@ -73,7 +73,7 @@ export default function Sidebar({
           ))}
         </Section></div>
     </div>);
-}
+});
 
 function Section({ label, action, children, collapsed, onToggle }: { label: string; action?: React.ReactNode; children: React.ReactNode; collapsed: boolean; onToggle: () => void }) {
   return (<div>

@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Radio, Play, Pause, SkipForward, SkipBack, Search, Heart, Volume2 } from 'lucide-react';
 import type { Station, WidgetPlaybackState } from '../types';
 import { STORAGE_KEYS, countryFlag } from '../constants';
@@ -18,7 +18,7 @@ function sendCommand(action: string, station?: Station) {
   window.dispatchEvent(new CustomEvent('radio-command', { detail: { action, station } }));
 }
 
-export default function RadioImmersiveWidget({ preview }: { preview?: boolean }) {
+function RadioImmersiveWidget({ preview }: { preview?: boolean }) {
   const [state, setState] = useState<WidgetPlaybackState | null>(null);
   const [favorites, setFavorites] = useState<Station[]>([]);
   const [query, setQuery] = useState('');
@@ -29,18 +29,27 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
   useEffect(() => {
     if (preview) return;
     const MAX_STALE_MS = 30_000;
+    let lastRaw = '';
     const read = () => {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.PLAYBACK);
-        if (raw) {
+        if (raw && raw !== lastRaw) {
+          lastRaw = raw;
           const parsed = JSON.parse(raw);
-          // Treat data older than 30s as stale — main app likely inactive
-          if (parsed.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
-            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
-          } else {
-            setState(parsed);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            if (parsed.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+              setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+            } else {
+              setState(parsed);
+            }
+            if (typeof parsed.volume === 'number') setWidgetVolume(parsed.volume);
           }
-          if (typeof parsed.volume === 'number') setWidgetVolume(parsed.volume);
+        } else if (raw && raw === lastRaw) {
+          // Same raw string — only check staleness
+          const parsed = JSON.parse(raw);
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          }
         }
       } catch { /* ok */ }
       try {
@@ -51,6 +60,8 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
     const iv = setInterval(read, 3000);
     return () => clearInterval(iv);
   }, [preview]);
+
+  const displayFavs = useMemo(() => favorites.slice(0, 6), [favorites]);
 
   const handleSearch = useCallback(async () => {
     try {
@@ -152,7 +163,7 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
               {/* Fav pills */}
               {favorites.length > 0 && (
                 <div className="flex-wrap-1 px-1">
-                  {favorites.slice(0, 6).map(s => (
+                  {displayFavs.map(s => (
  <button key={s.stationuuid} onClick={() => sendCommand('play', s)}
                       aria-label={`Play ${s.name}`}
                       className="flex-row-1 pad-sm-full bg-surface-2 hover-4">
@@ -187,3 +198,5 @@ export default function RadioImmersiveWidget({ preview }: { preview?: boolean })
             <SkipForward size={14} />
           </button></div></div></div>);
 }
+
+export default React.memo(RadioImmersiveWidget);

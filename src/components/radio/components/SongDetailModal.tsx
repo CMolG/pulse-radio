@@ -20,6 +20,7 @@ import {
   Clock,
   Disc3,
   Tag,
+  Trash2,
 } from 'lucide-react';
 import type { SongDetailData } from '../types';
 import { useArtistInfo } from '../hooks/useArtistInfo';
@@ -27,20 +28,15 @@ import { useLyrics } from '../hooks/useLyrics';
 import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
 import { useAlbumArt } from '@/lib/audio-visualizer';
 import UiImage from '@/components/common/UiImage';
-
-const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
-
-function itunesSearchUrl(title: string, artist: string): string {
-  const q = encodeURIComponent(`${artist} ${title}`.trim());
-  return `https://music.apple.com/search?term=${q}&${ITUNES_REFERRER}`;
-}
+import { itunesSearchUrl } from '../utils/formatUtils';
 
 type Props = {
   song: SongDetailData | null;
   onClose: () => void;
+  onRemoveFromFavorites?: () => void;
 };
 
-export default function SongDetailModal({ song, onClose }: Props) {
+function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
   const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
   const resolvedArtworkUrl = song?.artworkUrl ?? albumMeta.artworkUrl ?? undefined;
@@ -428,8 +424,24 @@ export default function SongDetailModal({ song, onClose }: Props) {
               {/* Divider (mobile) */}
               <div className="mx-5 my-5 border-t border-border-default md:hidden" />
 
+              {/* ── Remove from favorites ── */}
+              {onRemoveFromFavorites && (
+                <>
+                  <div className="mx-5 my-5 border-t border-border-default" />
+                  <div className="px-5 pb-2">
+                    <button
+                      onClick={onRemoveFromFavorites}
+                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"
+                    >
+                      <Trash2 size={14} />
+                      Borrar de favoritos
+                    </button>
+                  </div>
+                </>
+              )}
+
               {/* ── Station ── */}
-              <div className="px-5 pb-6">
+              <div className="px-5 pb-6 pt-4">
                 <div className="flex items-center gap-2">
                   <Radio size={12} className="text-dim flex-shrink-0" />
                   <p className="text-[11px] text-dim">
@@ -488,3 +500,5 @@ export default function SongDetailModal({ song, onClose }: Props) {
     </AnimatePresence>
   );
 }
+
+export default React.memo(SongDetailModal);

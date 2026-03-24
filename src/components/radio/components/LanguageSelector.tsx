@@ -6,10 +6,11 @@
 
 "use client";
 
+import React from "react";
 import { Languages } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 
-export default function LanguageSelector() {
+function LanguageSelector() {
   const { locale, setLocale, locales } = useLocale();
 
   return (
@@ -32,3 +33,5 @@ export default function LanguageSelector() {
     </label>
   );
 }
+
+export default React.memo(LanguageSelector);

@@ -6,11 +6,17 @@
 
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { useStorageSync } from '@/lib/useStorageSync';
+import { primaryArtist } from '../utils/formatUtils';
 
 const STORAGE_KEY = 'radio-usage-stats';
 const SAVE_INTERVAL_MS = 10_000;
+const MAX_STATIONS = 300;
+const MAX_SONGS = 500;
+const MAX_ARTISTS = 200;
+const MAX_GENRES = 100;
 
 export interface StationListenTime {
   name: string;
@@ -23,6 +29,7 @@ export interface SongPlayCount {
   artist: string;
   count: number;
   artworkUrl?: string;
+  genre?: string;
 }
 
 export interface ArtistPlayCount {
@@ -51,9 +58,24 @@ const EMPTY_STATS: UsageStats = {
   totalListenMs: 0,
 };
 
-function primaryArtist(artist: string): string {
-  // Split by common artist separators, take the first
-  return artist.split(/[,;&]|feat\.|ft\.|featuring|vs\.?/i)[0].trim();
+/** Keep only the top N entries by a numeric field, dropping the lowest */
+function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
+  const keys = Object.keys(map);
+  if (keys.length <= max) return map;
+  // Partial sort: find the Nth largest value, then keep entries >= that threshold
+  const vals = new Float64Array(keys.length);
+  for (let i = 0; i < keys.length; i++) vals[i] = map[keys[i]][key] as number;
+  vals.sort(); // ascending typed-array sort (native, much faster than Array.sort with comparator)
+  const threshold = vals[keys.length - max];
+  const pruned: Record<string, T> = {};
+  let count = 0;
+  for (let i = 0; i < keys.length && count < max; i++) {
+    if ((map[keys[i]][key] as number) >= threshold) {
+      pruned[keys[i]] = map[keys[i]];
+      count++;
+    }
+  }
+  return pruned;
 }
 
 export function useStats() {
@@ -64,13 +86,35 @@ export function useStats() {
   const statsRef = useRef(stats);
   useEffect(() => { statsRef.current = stats; }, [stats]);
 
+  // Sync stats from other tabs — safe because BroadcastChannel ensures
+  // only one tab plays at a time, so the writing tab always has the latest.
+  useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats =>
+    !!v && typeof (v as UsageStats).totalListenMs === 'number',
+  );
+
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
 
   const persist = useCallback(() => {
     if (dirtyRef.current) {
-      saveToStorage(STORAGE_KEY, statsRef.current);
+      const current = statsRef.current;
+      const pStations = pruneTop(current.stationListenTimes, MAX_STATIONS, 'totalMs');
+      const pSongs = pruneTop(current.songPlayCounts, MAX_SONGS, 'count');
+      const pArtists = pruneTop(current.artistPlayCounts, MAX_ARTISTS, 'count');
+      const pGenres = pruneTop(current.genrePlayCounts, MAX_GENRES, 'count');
+      const didPrune =
+        pStations !== current.stationListenTimes ||
+        pSongs !== current.songPlayCounts ||
+        pArtists !== current.artistPlayCounts ||
+        pGenres !== current.genrePlayCounts;
+      if (didPrune) {
+        const pruned: UsageStats = { ...current, stationListenTimes: pStations, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };
+        setStats(pruned);
+        saveToStorage(STORAGE_KEY, pruned);
+      } else {
+        saveToStorage(STORAGE_KEY, current);
+      }
       dirtyRef.current = false;
     }
   }, []);
@@ -110,11 +154,12 @@ export function useStats() {
       const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
       const artistEntry = prev.artistPlayCounts[primary] ?? { name: primary, count: 0 };
 
+      const normalizedGenre = genre ? genre.toLowerCase().trim() : undefined;
       const next: UsageStats = {
         ...prev,
         songPlayCounts: {
           ...prev.songPlayCounts,
-          [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl },
+          [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         },
         artistPlayCounts: {
           ...prev.artistPlayCounts,
@@ -122,8 +167,7 @@ export function useStats() {
         },
       };
 
-      if (genre) {
-        const normalizedGenre = genre.toLowerCase().trim();
+      if (normalizedGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
           ...prev.genrePlayCounts,
@@ -136,36 +180,66 @@ export function useStats() {
     dirtyRef.current = true;
   }, []);
 
-  // Derived sorted lists
-  const topStations = useCallback((limit = 10) => {
-    return Object.values(statsRef.current.stationListenTimes)
-      .sort((a, b) => b.totalMs - a.totalMs)
-      .slice(0, limit);
-  }, []);
+  // Derived sorted lists — memoized to avoid re-sorting when data hasn't changed
+  const topStations = useMemo(
+    () => Object.values(stats.stationListenTimes).sort((a, b) => b.totalMs - a.totalMs).slice(0, 10),
+    [stats.stationListenTimes],
+  );
+  const topSongs = useMemo(
+    () => Object.values(stats.songPlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+    [stats.songPlayCounts],
+  );
+  const topArtists = useMemo(
+    () => Object.values(stats.artistPlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+    [stats.artistPlayCounts],
+  );
+  const topGenres = useMemo(
+    () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count).slice(0, 10),
+    [stats.genrePlayCounts],
+  );
 
-  const topSongs = useCallback((limit = 10) => {
-    return Object.values(statsRef.current.songPlayCounts)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-  }, []);
-
-  const topArtists = useCallback((limit = 10) => {
-    return Object.values(statsRef.current.artistPlayCounts)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-  }, []);
-
-  const topGenres = useCallback((limit = 10) => {
-    return Object.values(statsRef.current.genrePlayCounts)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-  }, []);
-
-  // Get genre ordering for home reorder
-  const genreOrder = useCallback(() => {
-    return Object.values(statsRef.current.genrePlayCounts)
+  // Stable genre ordering for home reorder — only recomputes when genre data changes,
+  // not on every render like the previous genreOrder() function approach.
+  const genreOrder = useMemo(() => {
+    return Object.values(stats.genrePlayCounts)
       .sort((a, b) => b.count - a.count)
       .map(g => g.genre);
+  }, [stats.genrePlayCounts]);
+
+  // Update artwork/genre on an existing song entry without incrementing counts.
+  // Used when album metadata arrives after the initial recordSongPlay call.
+  const updateSongMeta = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
+    if (!title) return;
+    const key = `${title}|||${artist}`;
+
+    setStats(prev => {
+      const songEntry = prev.songPlayCounts[key];
+      if (!songEntry) return prev;
+
+      const needsArtwork = artworkUrl && songEntry.artworkUrl !== artworkUrl;
+      const normalizedGenre = genre ? genre.toLowerCase().trim() : '';
+      // Count genre if this song didn't already have its genre recorded
+      const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre;
+
+      if (!needsArtwork && !needsGenre) return prev;
+
+      const next: UsageStats = { ...prev };
+      if (needsArtwork || needsGenre) {
+        next.songPlayCounts = {
+          ...prev.songPlayCounts,
+          [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
+        };
+      }
+      if (needsGenre) {
+        const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
+        next.genrePlayCounts = {
+          ...prev.genrePlayCounts,
+          [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
+        };
+      }
+      return next;
+    });
+    dirtyRef.current = true;
   }, []);
 
   const clearStats = useCallback(() => {
@@ -177,6 +251,7 @@ export function useStats() {
     stats,
     tickListenTime,
     recordSongPlay,
+    updateSongMeta,
     topStations,
     topSongs,
     topArtists,

@@ -31,7 +31,7 @@ interface Props {
   onClose: () => void;
 }
 
-export function KeyboardShortcutsHelp({ onClose }: Props) {
+export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) {
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
@@ -72,4 +72,4 @@ export function KeyboardShortcutsHelp({ onClose }: Props) {
       </div>
     </div>
   );
-}
+});

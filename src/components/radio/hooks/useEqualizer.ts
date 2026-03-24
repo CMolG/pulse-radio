@@ -23,25 +23,20 @@ const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: num
 
 const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
 
+function ensureQualityMigration(): void {
+  if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
+  saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
+  saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
+  saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
+}
+
 function getDefaultNoiseReductionMode(): NoiseReductionMode {
-  const migrated = loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false);
-  if (!migrated) {
-    saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
-    saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-    saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
-    return 'low';
-  }
+  ensureQualityMigration();
   return loadFromStorage<NoiseReductionMode>(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
 }
 
 function getDefaultNormalizerEnabled(): boolean {
-  const migrated = loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false);
-  if (!migrated) {
-    saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
-    saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-    saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
-    return true;
-  }
+  ensureQualityMigration();
   return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true);
 }
 
@@ -133,6 +128,30 @@ export function useEqualizer(): UseEqualizerReturn {
   const mbMergeRef = useRef<GainNode | null>(null);
   const connectedAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  // All audio graph node refs (for bulk disconnect/cleanup)
+  const graphNodeRefs: React.MutableRefObject<AudioNode | null>[] = [
+    normalizerRef, normGainRef, limiterRef, splitterRef, mergerRef, outputGainRef,
+    directGainLRef, directGainRRef, crossGainLRef, crossGainRRef,
+    mbLowLpRef, mbLowCompRef, mbMidBpLpRef, mbMidBpHpRef, mbMidCompRef,
+    mbHighHpRef, mbHighCompRef, mbDryGainRef, mbWetGainRef, mbMergeRef,
+    nrHighpassRef, nrGateRef, nrDeEsserRef, nrDeEssGainRef,
+    bassLpRef, bassShaperRef, bassHpRef, bassMixRef,
+  ];
+
+  function teardownGraph(includeSource: boolean) {
+    try {
+      sourceRef.current?.disconnect();
+      filtersRef.current.forEach(f => f.disconnect());
+      for (const ref of graphNodeRefs) ref.current?.disconnect();
+    } catch { /* ok */ }
+    filtersRef.current = [];
+    for (const ref of graphNodeRefs) ref.current = null;
+    if (includeSource) {
+      sourceRef.current = null;
+      connectedAudioRef.current = null;
+    }
+  }
+
   // Smooth ramp time for parameter changes to prevent clicks/pops
   const RAMP_TIME = 0.02; // 20ms — fast enough to feel instant, slow enough to avoid clicks
 
@@ -188,59 +207,7 @@ export function useEqualizer(): UseEqualizerReturn {
 
     // Disconnect any existing chain before building a new one
     if (connectedAudioRef.current) {
-      try {
-        sourceRef.current?.disconnect();
-        normalizerRef.current?.disconnect();
-        normGainRef.current?.disconnect();
-        filtersRef.current.forEach(f => f.disconnect());
-        limiterRef.current?.disconnect();
-        splitterRef.current?.disconnect();
-        mergerRef.current?.disconnect();
-        outputGainRef.current?.disconnect();
-        directGainLRef.current?.disconnect();
-        directGainRRef.current?.disconnect();
-        crossGainLRef.current?.disconnect();
-        crossGainRRef.current?.disconnect();
-        mbLowLpRef.current?.disconnect();
-        mbLowCompRef.current?.disconnect();
-        mbMidBpLpRef.current?.disconnect();
-        mbMidBpHpRef.current?.disconnect();
-        mbMidCompRef.current?.disconnect();
-        mbHighHpRef.current?.disconnect();
-        mbHighCompRef.current?.disconnect();
-        mbDryGainRef.current?.disconnect();
-        mbWetGainRef.current?.disconnect();
-        mbMergeRef.current?.disconnect();
-        nrHighpassRef.current?.disconnect();
-        nrGateRef.current?.disconnect();
-        nrDeEsserRef.current?.disconnect();
-        nrDeEssGainRef.current?.disconnect();
-      } catch { /* ok */ }
-      filtersRef.current = [];
-      limiterRef.current = null;
-      normalizerRef.current = null;
-      normGainRef.current = null;
-      splitterRef.current = null;
-      mergerRef.current = null;
-      outputGainRef.current = null;
-      directGainLRef.current = null;
-      directGainRRef.current = null;
-      crossGainLRef.current = null;
-      crossGainRRef.current = null;
-      mbLowLpRef.current = null;
-      mbLowCompRef.current = null;
-      mbMidBpLpRef.current = null;
-      mbMidBpHpRef.current = null;
-      mbMidCompRef.current = null;
-      mbHighHpRef.current = null;
-      mbHighCompRef.current = null;
-      mbDryGainRef.current = null;
-      mbWetGainRef.current = null;
-      mbMergeRef.current = null;
-      nrHighpassRef.current = null;
-      nrGateRef.current = null;
-      nrDeEsserRef.current = null;
-      nrDeEssGainRef.current = null;
+      teardownGraph(false);
     }
 
     try {
@@ -507,69 +474,7 @@ export function useEqualizer(): UseEqualizerReturn {
   }, [bands, bassEnhance, compressorAmount, compressorEnabled, enabled, noiseReductionMode, normalizerEnabled, stereoWidth]);
 
   const disconnect = useCallback(() => {
-    try {
-      sourceRef.current?.disconnect();
-      normalizerRef.current?.disconnect();
-      normGainRef.current?.disconnect();
-      filtersRef.current.forEach(f => f.disconnect());
-      limiterRef.current?.disconnect();
-      splitterRef.current?.disconnect();
-      mergerRef.current?.disconnect();
-      outputGainRef.current?.disconnect();
-      directGainLRef.current?.disconnect();
-      directGainRRef.current?.disconnect();
-      crossGainLRef.current?.disconnect();
-      crossGainRRef.current?.disconnect();
-      mbLowLpRef.current?.disconnect();
-      mbLowCompRef.current?.disconnect();
-      mbMidBpLpRef.current?.disconnect();
-      mbMidBpHpRef.current?.disconnect();
-      mbMidCompRef.current?.disconnect();
-      mbHighHpRef.current?.disconnect();
-      mbHighCompRef.current?.disconnect();
-      mbDryGainRef.current?.disconnect();
-      mbWetGainRef.current?.disconnect();
-      mbMergeRef.current?.disconnect();
-      bassLpRef.current?.disconnect();
-      bassShaperRef.current?.disconnect();
-      bassHpRef.current?.disconnect();
-      bassMixRef.current?.disconnect();
-      nrHighpassRef.current?.disconnect();
-      nrGateRef.current?.disconnect();
-      nrDeEsserRef.current?.disconnect();
-      nrDeEssGainRef.current?.disconnect();
-    } catch { /* ok */ }
-    sourceRef.current = null;
-    filtersRef.current = [];
-    limiterRef.current = null;
-    normalizerRef.current = null;
-    normGainRef.current = null;
-    splitterRef.current = null;
-    mergerRef.current = null;
-    outputGainRef.current = null;
-    directGainLRef.current = null;
-    directGainRRef.current = null;
-    crossGainLRef.current = null;
-    crossGainRRef.current = null;
-    mbLowLpRef.current = null;
-    mbLowCompRef.current = null;
-    mbMidBpLpRef.current = null;
-    mbMidBpHpRef.current = null;
-    mbMidCompRef.current = null;
-    mbHighHpRef.current = null;
-    mbHighCompRef.current = null;
-    mbDryGainRef.current = null;
-    mbWetGainRef.current = null;
-    mbMergeRef.current = null;
-    bassLpRef.current = null;
-    bassShaperRef.current = null;
-    bassHpRef.current = null;
-    bassMixRef.current = null;
-    nrHighpassRef.current = null;
-    nrGateRef.current = null;
-    nrDeEsserRef.current = null;
-    nrDeEssGainRef.current = null;
-    connectedAudioRef.current = null;
+    teardownGraph(true);
   }, []);
 
   const MAX_GAIN_DB = 12;

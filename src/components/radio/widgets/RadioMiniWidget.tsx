@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Radio, Play, Pause, SkipForward, Heart } from 'lucide-react';
 import type { Station, WidgetPlaybackState } from '../types';
 import { STORAGE_KEYS } from '../constants';
@@ -17,30 +17,47 @@ function sendCommand(action: string, station?: Station) {
   window.dispatchEvent(new CustomEvent('radio-command', { detail: { action, station } }));
 }
 
-export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
+function RadioMiniWidget({ preview }: { preview?: boolean }) {
   const [state, setState] = useState<WidgetPlaybackState | null>(null);
   const [favorites, setFavorites] = useState<Station[]>([]);
 
   useEffect(() => {
     if (preview) return;
     const MAX_STALE_MS = 30_000;
+    let lastRaw = '';
+    let lastFavRaw = '';
     const read = () => {
       try {
-        const parsed = loadFromStorage<WidgetPlaybackState | null>(STORAGE_KEYS.PLAYBACK, null);
-        if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
-          setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
-        } else {
-          setState(parsed);
+        const raw = localStorage.getItem(STORAGE_KEYS.PLAYBACK) ?? '';
+        if (raw && raw !== lastRaw) {
+          lastRaw = raw;
+          const parsed = JSON.parse(raw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          } else {
+            setState(parsed);
+          }
+        } else if (raw && raw === lastRaw) {
+          const parsed = JSON.parse(raw) as WidgetPlaybackState | null;
+          if (parsed?.updatedAt && Date.now() - parsed.updatedAt > MAX_STALE_MS) {
+            setState(prev => prev ? { ...prev, status: 'paused' as const } : prev);
+          }
         }
       } catch { /* ok */ }
       try {
-        setFavorites(loadFromStorage(STORAGE_KEYS.FAVORITES, []))
+        const favRaw = localStorage.getItem(STORAGE_KEYS.FAVORITES) ?? '';
+        if (favRaw !== lastFavRaw) {
+          lastFavRaw = favRaw;
+          setFavorites(loadFromStorage(STORAGE_KEYS.FAVORITES, []));
+        }
       } catch { /* ok */ }
     };
     read();
     const iv = setInterval(read, 3000);
     return () => clearInterval(iv);
   }, [preview]);
+
+  const displayFavs = useMemo(() => favorites.slice(0, 3), [favorites]);
 
   const isPlaying = state?.status === 'playing';
   const station = state?.station;
@@ -70,7 +87,7 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
         {/* Favorite station pills */}
         {favorites.length > 0 && (
           <div className="flex-center-row gap-1 mb-1.5 flex-wrap">
-            {favorites.slice(0, 3).map(s => (
+            {displayFavs.map(s => (
  <button key={s.stationuuid} onClick={() => sendCommand('play', s)}
                 aria-label={`Play ${s.name}`}
                 className="flex-row-1 pad-sm-full bg-surface-2 hover-4">
@@ -93,3 +110,5 @@ export default function RadioMiniWidget({ preview }: { preview?: boolean }) {
             <SkipForward size={14} />
           </button></div></div></div>);
 }
+
+export default React.memo(RadioMiniWidget);

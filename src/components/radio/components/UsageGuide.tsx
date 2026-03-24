@@ -81,7 +81,7 @@ type Props = {
   onClose: () => void;
 };
 
-export default function UsageGuide({ onClose }: Props) {
+function UsageGuide({ onClose }: Props) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   return (
@@ -111,6 +111,7 @@ export default function UsageGuide({ onClose }: Props) {
         <div className="flex items-center gap-3 px-5 pb-3">
           <button
             onClick={onClose}
+            aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <IoChevronBack size={16} />
@@ -165,3 +166,5 @@ export default function UsageGuide({ onClose }: Props) {
     </motion.div>
   );
 }
+
+export default React.memo(UsageGuide);

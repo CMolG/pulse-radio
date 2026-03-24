@@ -41,13 +41,13 @@ export async function GET(req: NextRequest) {
       headers: { 'Icy-MetaData': '1' },
       signal: controller.signal,
     });
-    clearTimeout(timeout);
 
     // Validate the final URL after redirects to prevent SSRF via redirect
     if (res.url) {
       try {
         const finalUrl = new URL(res.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+          clearTimeout(timeout);
           res.body?.cancel().catch(() => {});
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 });
         }
@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!res.ok) {
+      clearTimeout(timeout);
       res.body?.cancel().catch(() => {});
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
     }
@@ -66,6 +67,7 @@ export async function GET(req: NextRequest) {
 
     if (!icyMetaint || !res.body) {
       // No ICY support — return whatever headers are available
+      clearTimeout(timeout);
       res.body?.cancel().catch(() => {});
       return NextResponse.json({
         streamTitle: null,
@@ -79,6 +81,7 @@ export async function GET(req: NextRequest) {
     // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
     const MAX_METAINT = 131072;
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
+      clearTimeout(timeout);
       res.body.cancel().catch(() => {});
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
@@ -96,6 +99,7 @@ export async function GET(req: NextRequest) {
         totalRead += value.length;
       }
     } finally {
+      clearTimeout(timeout);
       reader.cancel().catch(() => {});
     }
 
@@ -127,10 +131,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
     clearTimeout(timeout);
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    if (message.includes('abort')) {
+    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    if (isTimeout) {
       return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     }
+    const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -14,15 +14,17 @@ export function loadFromStorage<T>(key: string, defaultValue: T): T {
   return defaultValue;
 }
 
+function isQuotaExceeded(e: unknown): boolean {
+  return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22);
+}
+
 /** Save a JSON value to localStorage. Returns false if quota is exceeded. */
 export function saveToStorage<T>(key: string, value: T): boolean {
   try {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (e) {
-    if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.code === 22)) {
-      console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
-    }
+    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
     return false;
   }
 }
@@ -44,9 +46,7 @@ export function saveStringToStorage(key: string, value: string): boolean {
     localStorage.setItem(key, value);
     return true;
   } catch (e) {
-    if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
-      console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
-    }
+    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
     return false;
   }
 }
