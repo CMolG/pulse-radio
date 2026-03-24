@@ -73,8 +73,6 @@ export type EqPreset = {
   gains: number[];
 };
 
-export type SidebarSection = 'favorites' | 'recent' | 'browse';
-
 export type BrowseCategory = {
   id: string;
   label: string;
