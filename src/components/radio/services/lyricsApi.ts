@@ -46,13 +46,9 @@ export async function fetchLyrics(
   fallbackArtist?: string,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
-  const artistCandidates = Array.from(
-    new Set(
-      [artist, fallbackArtist]
-        .map((value) => value?.trim())
-        .filter((value): value is string => Boolean(value && value.length > 0)),
-    ),
-  );
+  const artistCandidates = [...new Set(
+    [artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),
+  )];
 
   if (!artistCandidates.length || !title?.trim()) return null;
 
@@ -70,6 +66,15 @@ export async function fetchLyrics(
   return null;
 }
 
+async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: (d: T) => LyricsData | null): Promise<LyricsData | null> {
+  try {
+    const res = await fetchWithCancel(url, signal);
+    if (res.ok) return parse(await res.json());
+    await res.text().catch(() => {}); // drain body
+  } catch (err) { if (isTransientError(err)) throw err; }
+  return null;
+}
+
 async function fetchLyricsForArtist(
   artist: string,
   title: string,
@@ -84,42 +89,13 @@ async function fetchLyricsForArtist(
   if (album) params.set('album_name', album);
   if (duration) params.set('duration', String(Math.round(duration)));
 
-  // Exact match
-  try {
-    const res = await fetchWithCancel(`${LRCLIB_BASE}/get?${params}`, signal);
-    if (res.ok) {
-      const data: LrcLibResponse = await res.json();
-      const lyrics = transform(data, artist, title);
-      if (lyrics) return lyrics;
-    } else {
-      await res.text().catch(() => {}); // drain body to release connection
-    }
-  } catch (err) {
-    if (isTransientError(err)) throw err;
-  }
-
+  const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, d => transform(d, artist, title));
+  if (exact) return exact;
   if (signal?.aborted) return null;
-
-  // Search fallback
-  try {
-    const res = await fetchWithCancel(
-      `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
-      signal,
-    );
-    if (res.ok) {
-      const results: LrcLibResponse[] = await res.json();
-      if (results.length > 0) {
-        const lyrics = transform(results[0], artist, title);
-        if (lyrics) return lyrics;
-      }
-    } else {
-      await res.text().catch(() => {}); // drain body to release connection
-    }
-  } catch (err) {
-    if (isTransientError(err)) throw err;
-  }
-
-  return null;
+  return tryFetch<LrcLibResponse[]>(
+    `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+    signal, r => r.length > 0 ? transform(r[0], artist, title) : null,
+  );
 }
 
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
