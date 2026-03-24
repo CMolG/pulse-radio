@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 
-/** Strip HTML tags and decode common entities. */
+const ENTITY_MAP: Record<string, string> = {
+  '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'",
+};
+const STRIP_RE = /<[^>]*>|&(?:amp|lt|gt|quot|#39);/g;
+
+/** Strip HTML tags and decode common entities in a single pass. */
 export function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .trim();
+  return html.replace(STRIP_RE, m => ENTITY_MAP[m] ?? '').trim();
 }
 
 export class ApiError extends Error {
