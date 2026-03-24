@@ -23,14 +23,8 @@ interface AlbumInfo {
 const CACHE = new Map<string, AlbumInfo>();
 const MAX_CACHE = 200;
 const EMPTY_ALBUM_INFO: AlbumInfo = {
-  artworkUrl: null,
-  albumName: null,
-  releaseDate: null,
-  itunesUrl: null,
-  durationMs: null,
-  genre: null,
-  trackNumber: null,
-  trackCount: null,
+  artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
+  durationMs: null, genre: null, trackNumber: null, trackCount: null,
 };
 
 

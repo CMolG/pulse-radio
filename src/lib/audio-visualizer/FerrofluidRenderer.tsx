@@ -205,19 +205,9 @@ export function FerrofluidRenderer({
   const timeRef = useRef(0);
   const sizeRef = useRef({ w: 0, h: 0 });
 
-  const colors = useRef({
-    primary: hexToRgb(colorPrimary),
-    secondary: hexToRgb(colorSecondary),
-    accent: hexToRgb(colorAccent),
-  });
-
-  useEffect(() => {
-    colors.current = {
-      primary: hexToRgb(colorPrimary),
-      secondary: hexToRgb(colorSecondary),
-      accent: hexToRgb(colorAccent),
-    };
-  }, [colorPrimary, colorSecondary, colorAccent]);
+  const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
+  const colors = useRef(mkColors());
+  useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]);
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
