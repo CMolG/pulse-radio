@@ -95,14 +95,20 @@ function drawMetaballs(
   if (!offscreen || offscreen.width !== sw || offscreen.height !== sh) {
     offscreen = new OffscreenCanvas(sw, sh);
     (drawMetaballs as { _offscreen?: OffscreenCanvas })._offscreen = offscreen;
+    // Invalidate cached ImageData when dimensions change
+    (drawMetaballs as { _imgData?: ImageData })._imgData = undefined;
   }
   const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
   if (!offCtx) return;
 
-  let smallImg: ImageData;
-  try {
-    smallImg = offCtx.createImageData(sw, sh);
-  } catch { return; }
+  // Reuse ImageData across frames — every pixel is written below, so no zeroing needed
+  let smallImg = (drawMetaballs as { _imgData?: ImageData })._imgData;
+  if (!smallImg || smallImg.width !== sw || smallImg.height !== sh) {
+    try {
+      smallImg = offCtx.createImageData(sw, sh);
+    } catch { return; }
+    (drawMetaballs as { _imgData?: ImageData })._imgData = smallImg;
+  }
   const sd = smallImg.data;
 
   for (let py = 0; py < sh; py++) {
