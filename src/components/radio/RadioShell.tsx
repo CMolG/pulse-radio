@@ -475,20 +475,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "stop":
           radio.stop();
           break;
-        case "skipNext": {
-          if (radio.station) {
-            const next = favs.playNext(radio.station.stationuuid);
-            if (next) handlePlay(next);
-          }
+        case "skipNext":
+          handleSkipNext();
           break;
-        }
-        case "skipPrev": {
-          if (radio.station) {
-            const prev = favs.playPrev(radio.station.stationuuid);
-            if (prev) handlePlay(prev);
-          }
+        case "skipPrev":
+          handleSkipPrev();
           break;
-        }
         case "removeFavorite": {
           if (detail.stationuuid) favs.remove(detail.stationuuid);
           break;
