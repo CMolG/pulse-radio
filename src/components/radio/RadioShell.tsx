@@ -32,6 +32,7 @@ import type {
   BrowseCategory,
   WidgetPlaybackState,
   HistoryEntry,
+  FavoriteSong,
   SongDetailData,
 } from "./types";
 import { STORAGE_KEYS } from "./constants";
@@ -71,6 +72,17 @@ import { getCountryDisplayName } from "@/lib/i18n/countryChips";
 import type { MessageKey } from "@/lib/i18n/messages";
 
 type LayoutMode = "desktop" | "mobile" | "pip";
+
+function buildFavInput(
+  t: { title: string; artist?: string; album?: string; artworkUrl?: string; itunesUrl?: string; durationMs?: number; genre?: string; releaseDate?: string; trackNumber?: number; trackCount?: number },
+  s: { name: string; stationuuid: string },
+): Omit<FavoriteSong, 'id' | 'timestamp'> {
+  return {
+    title: t.title, artist: t.artist ?? '', album: t.album, artworkUrl: t.artworkUrl,
+    itunesUrl: t.itunesUrl, durationMs: t.durationMs, genre: t.genre, releaseDate: t.releaseDate,
+    trackNumber: t.trackNumber, trackCount: t.trackCount, stationName: s.name, stationUuid: s.stationuuid,
+  };
+}
 
 const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
   trending: "genreTrending",
@@ -665,22 +677,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           break;
         case "l":
         case "L":
-          if (et?.title) {
+          if (et?.title && r.station) {
             const wasLiked = fs.has(et.title, et.artist ?? '');
-            fs.toggle({
-              title: et.title,
-              artist: et.artist ?? '',
-              album: et.album,
-              artworkUrl: et.artworkUrl,
-              itunesUrl: et.itunesUrl,
-              durationMs: et.durationMs,
-              genre: et.genre,
-              releaseDate: et.releaseDate,
-              trackNumber: et.trackNumber,
-              trackCount: et.trackCount,
-              stationName: r.station?.name ?? '',
-              stationUuid: r.station?.stationuuid ?? '',
-            });
+            fs.toggle(buildFavInput(et, r.station));
             toast(wasLiked ? "Song removed" : et.title, "heart");
           }
           break;
@@ -717,39 +716,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleFavSong = useCallback(() => {
     if (!enrichedTrack?.title || !radio.station) return;
     const wasLiked = favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "");
-    favSongs.toggle({
-      title: enrichedTrack.title,
-      artist: enrichedTrack.artist ?? "",
-      album: enrichedTrack.album,
-      artworkUrl: enrichedTrack.artworkUrl,
-      itunesUrl: enrichedTrack.itunesUrl,
-      durationMs: enrichedTrack.durationMs,
-      genre: enrichedTrack.genre,
-      releaseDate: enrichedTrack.releaseDate,
-      trackNumber: enrichedTrack.trackNumber,
-      trackCount: enrichedTrack.trackCount,
-      stationName: radio.station.name,
-      stationUuid: radio.station.stationuuid,
-    });
+    favSongs.toggle(buildFavInput(enrichedTrack, radio.station));
     showToast(wasLiked ? "Song removed" : enrichedTrack.title, "heart");
   }, [enrichedTrack, radio.station, favSongs, showToast]);
 
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
     const wasLiked = favSongs.has(entry.title, entry.artist);
-    favSongs.toggle({
-      title: entry.title,
-      artist: entry.artist,
-      album: entry.album,
-      artworkUrl: entry.artworkUrl,
-      itunesUrl: entry.itunesUrl,
-      durationMs: entry.durationMs,
-      genre: entry.genre,
-      releaseDate: entry.releaseDate,
-      trackNumber: entry.trackNumber,
-      trackCount: entry.trackCount,
-      stationName: entry.stationName,
-      stationUuid: entry.stationUuid,
-    });
+    const { id: _, timestamp: _t, ...input } = entry;
+    favSongs.toggle(input);
     showToast(wasLiked ? "Song removed" : entry.title, "heart");
   }, [favSongs, showToast]);
 
