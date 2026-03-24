@@ -128,9 +128,7 @@ function JsonLd() {
     softwareVersion: "1.0",
     screenshot: `${SITE_URL}/android-chrome-512x512.png`,
   };
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
 
 export default function RootLayout({

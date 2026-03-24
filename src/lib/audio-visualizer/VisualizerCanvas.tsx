@@ -141,7 +141,5 @@ export function VisualizerCanvas({
     return () => cancelAnimationFrame(frameRef.current);
   }, [frequencyDataRef, mode, barCount, color]);
 
-  return (
-    <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />
-  );
+  return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />;
 }

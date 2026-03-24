@@ -88,9 +88,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
           `hsl(${h2}, 65%, 50%)`,
           `hsl(${h3}, 60%, 45%)`,
         ]);
-      } catch {
-        resolve(FALLBACK_COLORS);
-      }
+      } catch { resolve(FALLBACK_COLORS); }
     };
     img.onerror = () => resolve(FALLBACK_COLORS);
     img.src = imgUrl;

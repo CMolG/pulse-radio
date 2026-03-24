@@ -57,9 +57,7 @@ export function getCountryDisplayName(locale: SupportedLocale, code: string): st
   try {
     const dn = new Intl.DisplayNames([locale], { type: "region" });
     return dn.of(code) ?? country.name;
-  } catch {
-    return country.name;
-  }
+  } catch { return country.name; }
 }
 
 function getSameLanguageCountries(locale: SupportedLocale): string[] {

@@ -20,9 +20,7 @@ function isValidStreamUrl(url: string | undefined): url is string {
   try {
     const parsed = new URL(url);
     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 /** Browser blocked autoplay — treat as paused, not error */

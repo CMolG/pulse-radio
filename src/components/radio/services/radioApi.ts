@@ -47,9 +47,7 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
         else break;
       }
       return filtered;
-    } catch {
-      rotateServer();
-    }
+    } catch { rotateServer(); }
   }
   throw new Error('All Radio-Browser API servers unavailable');
 }

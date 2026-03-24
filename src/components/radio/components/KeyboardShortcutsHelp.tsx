@@ -27,9 +27,7 @@ const SHORTCUTS = [
   { key: "?", desc: "Toggle this help" },
 ];
 
-interface Props {
-  onClose: () => void;
-}
+interface Props { onClose: () => void; }
 
 export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) {
   return (

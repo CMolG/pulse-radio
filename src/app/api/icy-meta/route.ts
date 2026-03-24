@@ -27,9 +27,7 @@ export async function GET(req: NextRequest) {
     }
     const host = url.hostname.toLowerCase();
     if (isPrivateHost(host)) return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
-  } catch {
-    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
-  }
+  } catch { return NextResponse.json({ error: 'Invalid URL' }, { status: 400 }); }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
