@@ -616,6 +616,12 @@ export function useRadio(): UseRadioReturn {
 
   const pause = useCallback(() => {
     userPausedRef.current = true;
+    // Cancel any in-progress crossfade so its completion doesn't call
+    // startPlayback() and resume audio after this explicit pause.
+    if (fadeTimerRef.current) {
+      clearInterval(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
     audioRef.current?.pause();
   }, []);
 
@@ -643,6 +649,11 @@ export function useRadio(): UseRadioReturn {
       audio.play().catch(() => {});
     } else {
       userPausedRef.current = true;
+      // Cancel any in-progress crossfade (same reason as pause())
+      if (fadeTimerRef.current) {
+        clearInterval(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+      }
       audio.pause();
     }
   }, []);
