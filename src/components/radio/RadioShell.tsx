@@ -976,6 +976,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </>
   );
 
+  const pulseLogoButton = (
+    <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+      <div className="relative w-5 h-5 flex-shrink-0">
+        <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
+      </div>
+      <span className="text-[15px] font-semibold text-white">Pulse</span>
+    </button>
+  );
+
+  const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
+
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -1030,14 +1041,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div className="h-full overflow-y-auto relative z-10">
           {/* Sticky header — glassmorphism (content scrolls underneath) */}
           {!theaterMode && (
-            <div data-testid="mobile-header" className="sticky top-0 z-30 safe-top border-b border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
+            <div data-testid="mobile-header" className="sticky top-0 z-30 safe-top border-b border-white/10" style={glassStyle}>
                 <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-                <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-                  <div className="relative w-5 h-5 flex-shrink-0">
-                    <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
-                  </div>
-                  <span className="text-[15px] font-semibold text-white">Pulse</span>
-                </button>
+                {pulseLogoButton}
                   <div className="flex-1" />
                   <button
                     onClick={() => setShowMobileSettings(true)}
@@ -1141,7 +1147,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         </AnimatePresence>
 
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
-        <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={{ background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
+        <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={glassStyle}>
           <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
         {sharedModals}
@@ -1176,15 +1182,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 {/* ── Pulse branding header ── */}
                 <div className="shrink-0 px-5 py-3">
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={handleGoHome}
-                      className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
-                    >
-                      <div className="relative w-5 h-5">
-                        <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
-                      </div>
-                      <span className="text-[15px] font-semibold text-white">Pulse</span>
-                    </button>
+                    {pulseLogoButton}
                     <div className="flex-1" />
                     <LanguageSelector />
                   </div>
@@ -1226,19 +1224,18 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 </div>
                 {/* ── Tab content ── */}
                 <AnimatePresence mode="wait">
-                  {activeTab === "discover" ? (
-                    <motion.div key={viewKey} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0">
-                      {browseViewElement}
-                    </motion.div>
-                  ) : activeTab === "history" ? (
-                    <motion.div key="history-tab" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0 overflow-y-auto">
-                      {historyViewElement}
-                    </motion.div>
-                  ) : (
-                    <motion.div key="favorites-tab" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-h-0 overflow-y-auto">
-                      {favsViewElement}
-                    </motion.div>
-                  )}
+                  {(() => {
+                    const [key, content, extra] = activeTab === "discover"
+                      ? [viewKey, browseViewElement, ""]
+                      : activeTab === "history"
+                        ? ["history-tab", historyViewElement, " overflow-y-auto"]
+                        : ["favorites-tab", favsViewElement, " overflow-y-auto"];
+                    return (
+                      <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className={`flex-1 min-h-0${extra}`}>
+                        {content}
+                      </motion.div>
+                    );
+                  })()}
                 </AnimatePresence>
               </React.Fragment>
             ) : (
