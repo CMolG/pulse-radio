@@ -581,11 +581,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (searchQuery.trim()) {
-        handleSearch(searchQuery.trim());
-      } else {
-        handleGoHome();
-      }
+      if (searchQuery.trim()) handleSearch(searchQuery.trim());
+      else handleGoHome();
     },
     [searchQuery, handleSearch, handleGoHome],
   );

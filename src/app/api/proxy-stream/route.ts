@@ -54,11 +54,8 @@ export async function GET(req: NextRequest) {
 
   // Propagate client disconnect to upstream so we don't leak connections
   if (req.signal) {
-    if (req.signal.aborted) {
-      controller.abort();
-    } else {
-      req.signal.addEventListener('abort', () => controller.abort(), { once: true });
-    }
+    if (req.signal.aborted) controller.abort();
+    else req.signal.addEventListener('abort', () => controller.abort(), { once: true });
   }
 
   try {

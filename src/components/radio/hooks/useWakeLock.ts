@@ -65,11 +65,8 @@ export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
 
   // Auto-acquire/release based on shouldLock
   useEffect(() => {
-    if (shouldLock) {
-      request();
-    } else {
-      release();
-    }
+    if (shouldLock) request();
+    else release();
   }, [shouldLock, request, release]);
 
   // Re-acquire when tab becomes visible (browser releases lock on hide)

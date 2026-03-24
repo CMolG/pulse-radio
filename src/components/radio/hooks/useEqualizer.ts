@@ -189,11 +189,8 @@ export function useEqualizer(): UseEqualizerReturn {
     filtersRef.current.forEach((f, i) => {
       if (bands[i]) {
         const target = enabled ? bands[i].gain : 0;
-        if (ctx) {
-          f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
-        } else {
-          f.gain.value = target;
-        }
+        if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
+        else f.gain.value = target;
       }
     });
   }, [bands, enabled]);

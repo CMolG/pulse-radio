@@ -114,11 +114,8 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     } else {
       const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin);
       const nextIdx = currentIdx + 1;
-      if (nextIdx < PRESETS_MIN.length) {
-        start(PRESETS_MIN[nextIdx]);
-      } else {
-        clear();
-      }
+      if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]);
+      else clear();
     }
   }, [remainingMin, start, clear]);
 
