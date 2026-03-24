@@ -108,7 +108,7 @@ export function useHistory(
     const releaseDate = track.releaseDate;
     const trackNumber = track.trackNumber;
     const trackCount = track.trackCount;
-    if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null) return;
+    if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
 
     setHistory(prev => {
       const head = prev[0];
