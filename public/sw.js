@@ -20,6 +20,8 @@ self.addEventListener("install", (event) => {
   );
 });
 
+const MAX_CACHE_ENTRIES = 150;
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
@@ -27,6 +29,13 @@ self.addEventListener("activate", (event) => {
       await Promise.all(
         keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)),
       );
+      // Trim stale entries from old deployments (hashed Next.js assets accumulate)
+      const cache = await caches.open(CACHE);
+      const entries = await cache.keys();
+      if (entries.length > MAX_CACHE_ENTRIES) {
+        const toDelete = entries.slice(0, entries.length - MAX_CACHE_ENTRIES);
+        await Promise.all(toDelete.map((r) => cache.delete(r)));
+      }
       await self.clients.claim();
     })(),
   );
