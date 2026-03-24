@@ -148,6 +148,8 @@ export function useRealtimeLyricsSync({
     };
   }, []);
 
+  const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
+
   return {
     ...runtimeState,
     enabled: manuallyEnabled,
@@ -159,22 +161,10 @@ export function useRealtimeLyricsSync({
         : runtimeState.status === 'idle'
           ? 'ready'
           : runtimeState.status,
-    activeLineIndex:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.activeLineIndex
-        : -1,
-    candidateLineIndex:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.candidateLineIndex
-        : -1,
-    confidence:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.confidence
-        : 0,
-    effectiveCurrentTime:
-      realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering')
-        ? runtimeState.effectiveCurrentTime
-        : undefined,
+    activeLineIndex: isSyncing ? runtimeState.activeLineIndex : -1,
+    candidateLineIndex: isSyncing ? runtimeState.candidateLineIndex : -1,
+    confidence: isSyncing ? runtimeState.confidence : 0,
+    effectiveCurrentTime: isSyncing ? runtimeState.effectiveCurrentTime : undefined,
     diagnostics: {
       ...runtimeState.diagnostics,
       errorMessage: !supported
