@@ -37,6 +37,8 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     });
   }, []);
 
+  const lastPublishedRef = useRef({ x: 0, y: 0 });
+
   useEffect(() => {
     const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.
@@ -45,10 +47,16 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
         x: a * 2.2,
         y: -a * 6.5,
       };
-      setOffset({
-        x: pointerOffsetRef.current.x + audioOffsetRef.current.x,
-        y: pointerOffsetRef.current.y + audioOffsetRef.current.y,
-      });
+      const nextX = pointerOffsetRef.current.x + audioOffsetRef.current.x;
+      const nextY = pointerOffsetRef.current.y + audioOffsetRef.current.y;
+      // Skip setState when values haven't meaningfully changed to avoid ~60fps re-renders
+      if (
+        Math.abs(nextX - lastPublishedRef.current.x) >= 0.05 ||
+        Math.abs(nextY - lastPublishedRef.current.y) >= 0.05
+      ) {
+        lastPublishedRef.current = { x: nextX, y: nextY };
+        setOffset(lastPublishedRef.current);
+      }
       tickRafRef.current = requestAnimationFrame(tick);
     };
     tickRafRef.current = requestAnimationFrame(tick);
