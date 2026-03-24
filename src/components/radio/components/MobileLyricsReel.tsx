@@ -77,8 +77,7 @@ export default function LyricsReel({
       const line = lineRefs.current[index];
       if (!scroller || !line) return;
 
-      const top =
-        line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2;
+      const top = line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2;
 
       scroller.scrollTo({
         top: Math.max(0, top),

@@ -174,8 +174,7 @@ export function useRadio(): UseRadioReturn {
       // through Web Audio produces silence (CORS taint). Using the proxy ensures
       // the response has CORS headers so the Web Audio pipeline outputs sound.
       const webAudioConnected = hasAudioSource(audio);
-      const shouldUseProxy =
-        !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected;
+      const shouldUseProxy = !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected;
 
       const setSourceAndPlay = (useProxy: boolean) => {
         // Set flag before assigning src — the browser fires a synchronous 'pause'
@@ -241,9 +240,7 @@ export function useRadio(): UseRadioReturn {
           adaptedDelay = Math.max(delay, 5000);
         } else if (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') {
           adaptedDelay = Math.max(delay, 4000);
-        } else if (conn.effectiveType === '3g') {
-          adaptedDelay = Math.max(delay, 2000);
-        }
+        } else if (conn.effectiveType === '3g') adaptedDelay = Math.max(delay, 2000);
         // 4g or better: use original delay
       }
 

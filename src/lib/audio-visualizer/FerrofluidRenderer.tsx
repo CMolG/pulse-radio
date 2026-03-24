@@ -229,9 +229,7 @@ export function FerrofluidRenderer({
       let sum = 0;
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
       energy = (sum / frequencyData.length / 255) * sensitivity;
-    } else if (demo) {
-      energy = 0.3 + Math.sin(t * 0.5) * 0.2;
-    }
+    } else if (demo) energy = 0.3 + Math.sin(t * 0.5) * 0.2;
 
     // update blobs
     const minWH = Math.min(w, h);

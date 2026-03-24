@@ -25,7 +25,6 @@ const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; chi
   <span className={`px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50${mono ? " font-mono" : ""}${upper ? " uppercase" : ""}`}>{children}</span>
 );
 
-
 type Props = {
   station: Station;
   track: NowPlayingTrack | null;

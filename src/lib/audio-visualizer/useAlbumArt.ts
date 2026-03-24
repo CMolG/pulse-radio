@@ -27,7 +27,6 @@ const EMPTY_ALBUM_INFO: AlbumInfo = {
   durationMs: null, genre: null, trackNumber: null, trackCount: null,
 };
 
-
 type ItunesResult = {
   trackName?: string;
   artistName?: string;

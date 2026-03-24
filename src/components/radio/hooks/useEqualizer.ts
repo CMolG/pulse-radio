@@ -178,9 +178,7 @@ export function useEqualizer(): UseEqualizerReturn {
 
     if (outputGainRef.current && ctx) {
       outputGainRef.current.gain.setTargetAtTime(next, ctx.currentTime, RAMP_TIME);
-    } else if (outputGainRef.current) {
-      outputGainRef.current.gain.value = next;
-    }
+    } else if (outputGainRef.current) outputGainRef.current.gain.value = next;
   }, []);
 
   useEffect(() => {
@@ -558,9 +556,7 @@ export function useEqualizer(): UseEqualizerReturn {
     const ctx = ctxRef.current;
     if (bassMixRef.current && ctx) {
       bassMixRef.current.gain.setTargetAtTime(clamped, ctx.currentTime, RAMP_TIME);
-    } else if (bassMixRef.current) {
-      bassMixRef.current.gain.value = clamped;
-    }
+    } else if (bassMixRef.current) bassMixRef.current.gain.value = clamped;
   }, []);
 
   const toggleCompressor = useCallback(() => {
