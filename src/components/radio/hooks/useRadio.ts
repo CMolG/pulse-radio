@@ -601,6 +601,7 @@ export function useRadio(): UseRadioReturn {
   const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl)) return;
     if (prefetchedUrlsRef.current.has(streamUrl)) return;
+    if (prefetchedUrlsRef.current.size >= 500) prefetchedUrlsRef.current.clear();
     prefetchedUrlsRef.current.add(streamUrl);
     // Warm DNS+TCP+TLS with a HEAD request and measure latency
     const controller = new AbortController();

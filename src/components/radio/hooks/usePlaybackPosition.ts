@@ -95,7 +95,13 @@ export function usePlaybackPosition(): UsePlaybackPositionReturn {
   // Cleanup on unmount
   useEffect(() => () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-  }, []);
+    if (trackingRef.current) {
+      const { url, audio } = trackingRef.current;
+      if (audio.currentTime > 0 && isFinite(audio.duration)) {
+        savePosition(url, audio.currentTime, audio.duration);
+      }
+    }
+  }, [savePosition]);
 
   return { getPosition, savePosition, clearPosition, startTracking, stopTracking };
 }

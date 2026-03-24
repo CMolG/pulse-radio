@@ -56,18 +56,18 @@ export function useStationQueue(): UseStationQueueReturn {
   }, []);
 
   const addNext = useCallback((station: Station) => {
-    setQueue(prev => {
-      const filtered = prev.filter(s => s.stationuuid !== station.stationuuid);
-      if (filtered.length >= MAX_QUEUE_SIZE) return prev;
-      // Read currentIndex via updater to avoid stale closure
-      return filtered;
-    });
-    // Re-insert at correct position using current state
+    let removedIdx = -1;
     setCurrentIndex(prevIdx => {
-      const filtered = queueRef.current.filter(s => s.stationuuid !== station.stationuuid);
-      const insertAt = prevIdx >= 0 ? Math.min(prevIdx + 1, filtered.length) : 0;
+      const q = queueRef.current;
+      removedIdx = q.findIndex(s => s.stationuuid === station.stationuuid);
+      const filtered = q.filter(s => s.stationuuid !== station.stationuuid);
+      if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;
+      // Adjust for removal of the station from before the current position
+      let adjusted = prevIdx;
+      if (removedIdx >= 0 && removedIdx < prevIdx) adjusted--;
+      const insertAt = adjusted >= 0 ? Math.min(adjusted + 1, filtered.length) : 0;
       setQueue([...filtered.slice(0, insertAt), station, ...filtered.slice(insertAt)]);
-      return prevIdx;
+      return adjusted;
     });
   }, []);
 
@@ -91,22 +91,38 @@ export function useStationQueue(): UseStationQueueReturn {
   }, []);
 
   const moveUp = useCallback((stationuuid: string) => {
+    let movedIdx = -1;
     setQueue(prev => {
       const idx = prev.findIndex(s => s.stationuuid === stationuuid);
       if (idx <= 0) return prev;
+      movedIdx = idx;
       const next = [...prev];
       [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
       return next;
     });
+    setCurrentIndex(prev => {
+      if (movedIdx < 0) return prev;
+      if (prev === movedIdx) return movedIdx - 1;
+      if (prev === movedIdx - 1) return movedIdx;
+      return prev;
+    });
   }, []);
 
   const moveDown = useCallback((stationuuid: string) => {
+    let movedIdx = -1;
     setQueue(prev => {
       const idx = prev.findIndex(s => s.stationuuid === stationuuid);
       if (idx < 0 || idx >= prev.length - 1) return prev;
+      movedIdx = idx;
       const next = [...prev];
       [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
       return next;
+    });
+    setCurrentIndex(prev => {
+      if (movedIdx < 0) return prev;
+      if (prev === movedIdx) return movedIdx + 1;
+      if (prev === movedIdx + 1) return movedIdx;
+      return prev;
     });
   }, []);
 
