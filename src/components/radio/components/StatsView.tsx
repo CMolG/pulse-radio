@@ -37,7 +37,7 @@ type Props = {
   totalListenMs: number;
 };
 
-function StatSection({
+const StatSection = React.memo(function StatSection({
   title,
   icon,
   children,
@@ -55,9 +55,9 @@ function StatSection({
       <div className="space-y-1">{children}</div>
     </div>
   );
-}
+});
 
-function BarRow({ label, value, maxValue, suffix }: { label: string; value: number; maxValue: number; suffix: string }) {
+const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { label: string; value: number; maxValue: number; suffix: string }) {
   const pct = maxValue > 0 ? Math.max(8, (value / maxValue) * 100) : 0;
   return (
     <div className="flex items-center gap-2 group">
@@ -71,9 +71,9 @@ function BarRow({ label, value, maxValue, suffix }: { label: string; value: numb
       <span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span>
     </div>
   );
-}
+});
 
-export default function StatsView({ topStations, topSongs, topArtists, topGenres, totalListenMs }: Props) {
+export default React.memo(function StatsView({ topStations, topSongs, topArtists, topGenres, totalListenMs }: Props) {
   const hasData = totalListenMs > 0 || topSongs.length > 0;
 
   if (!hasData) {
@@ -139,4 +139,4 @@ export default function StatsView({ topStations, topSongs, topArtists, topGenres
       )}
     </div>
   );
-}
+});
