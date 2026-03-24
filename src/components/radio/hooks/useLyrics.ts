@@ -81,6 +81,7 @@ export function useLyrics(
       track.album,
       undefined,
       stationName ?? undefined,
+      controller.signal,
     )
       .then(result => {
         if (controller.signal.aborted) return;
