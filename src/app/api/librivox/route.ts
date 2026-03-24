@@ -5,11 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch, apiCatchResponse, stripHtml } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
 const LIBRIVOX_API = 'https://librivox.org/api/feed/audiobooks';
-const TIMEOUT_MS = 10_000;
 
 type LibriVoxBook = {
   id: string;
@@ -39,22 +39,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const url = `${LIBRIVOX_API}?title=${encodeURIComponent(query)}&format=json&limit=${limit}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      await res.text().catch(() => {});
-      return NextResponse.json({ error: `LibriVox API returned ${res.status}` }, { status: 502 });
-    }
-
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(() => {});
-      return NextResponse.json({ error: 'Response too large' }, { status: 502 });
-    }
+    const res = await apiFetch(url, { timeoutMs: 10_000, maxBytes: 2 * 1024 * 1024, label: 'LibriVox API' });
 
     const data = await res.json();
     const books: LibriVoxBook[] = data.books || [];
@@ -74,15 +59,6 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' },
     });
   } catch (err) {
-    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) {
-      return NextResponse.json({ error: 'LibriVox request timed out' }, { status: 504 });
-    }
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return apiCatchResponse(err);
   }
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }

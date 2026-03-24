@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
+import { apiFetch, apiCatchResponse, stripHtml } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
@@ -42,22 +43,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
-
   try {
-    const res = await fetch(parsed.toString(), {
-      headers: {
-        'User-Agent': 'PulseRadio/1.0',
-        'Accept': 'application/rss+xml, application/xml, text/xml',
+    const res = await apiFetch(parsed.toString(), {
+      timeoutMs: 10_000,
+      init: {
+        headers: {
+          'User-Agent': 'PulseRadio/1.0',
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        },
       },
-      signal: controller.signal,
+      label: 'Upstream',
     });
-
-    if (!res.ok) {
-      await res.text().catch(() => {});
-      return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
-    }
 
     // Reject feeds larger than 5MB to prevent memory exhaustion from malicious sources
     const contentLength = res.headers.get('content-length');
@@ -77,13 +73,7 @@ export async function GET(req: NextRequest) {
       headers: { 'Cache-Control': 'public, max-age=1800, stale-while-revalidate=3600' },
     });
   } catch (e) {
-    const isTimeout = e instanceof DOMException && e.name === 'AbortError';
-    return NextResponse.json(
-      { error: isTimeout ? 'Request timed out' : 'Internal error' },
-      { status: isTimeout ? 504 : 500 },
-    );
-  } finally {
-    clearTimeout(timeout);
+    return apiCatchResponse(e, 500);
   }
 }
 
@@ -126,10 +116,6 @@ function extractTag(xml: string, tag: string, attr: string): string | null {
   const regex = new RegExp(`<${tag}[^>]*?${attr}=["']([^"']+)["']`, 'i');
   const m = regex.exec(xml);
   return m?.[1]?.trim() || null;
-}
-
-function stripHtml(text: string): string {
-  return text.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
 }
 
 /** Extract content of a child tag nested inside a parent tag: <parent>...<child>value</child>...</parent> */

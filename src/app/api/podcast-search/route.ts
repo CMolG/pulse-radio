@@ -5,11 +5,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch, apiCatchResponse } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
 const ITUNES_SEARCH = 'https://itunes.apple.com/search';
-const TIMEOUT_MS = 8_000;
 
 type ITunesPodcast = {
   collectionId: number;
@@ -49,24 +49,7 @@ export async function GET(req: NextRequest) {
   if (genre) params.set('genreId', genre);
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const res = await fetch(`${ITUNES_SEARCH}?${params}`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      await res.text().catch(() => {});
-      return NextResponse.json({ error: `iTunes returned ${res.status}` }, { status: 502 });
-    }
-
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(() => {});
-      return NextResponse.json({ error: 'Response too large' }, { status: 502 });
-    }
+    const res = await apiFetch(`${ITUNES_SEARCH}?${params}`, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes' });
 
     const data = await res.json();
     const podcasts: ITunesPodcast[] = data.results || [];
@@ -90,11 +73,6 @@ export async function GET(req: NextRequest) {
       { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' } },
     );
   } catch (err) {
-    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) {
-      return NextResponse.json({ error: 'iTunes request timed out' }, { status: 504 });
-    }
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return apiCatchResponse(err);
   }
 }

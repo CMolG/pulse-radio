@@ -5,12 +5,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch, apiCatchResponse } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
 const OL_SEARCH = 'https://openlibrary.org/search.json';
 const OL_COVERS = 'https://covers.openlibrary.org/b/olid';
-const TIMEOUT_MS = 8_000;
 
 type OLDoc = {
   key: string;
@@ -48,26 +48,12 @@ export async function GET(req: NextRequest) {
       fields: 'key,title,author_name,first_publish_year,cover_edition_key,subject,number_of_pages_median,language,edition_count,has_fulltext',
     });
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const res = await fetch(`${OL_SEARCH}?${params}`, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'PulseRadio/1.0 (audiobook-enrichment)' },
+    const res = await apiFetch(`${OL_SEARCH}?${params}`, {
+      timeoutMs: 8_000,
+      maxBytes: 2 * 1024 * 1024,
+      init: { headers: { 'User-Agent': 'PulseRadio/1.0 (audiobook-enrichment)' } },
+      label: 'Open Library',
     });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      await res.text().catch(() => {});
-      return NextResponse.json({ error: `Open Library returned ${res.status}` }, { status: 502 });
-    }
-
-    const MAX_JSON_BYTES = 2 * 1024 * 1024;
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > MAX_JSON_BYTES) {
-      await res.body?.cancel().catch(() => {});
-      return NextResponse.json({ error: 'Response too large' }, { status: 502 });
-    }
 
     const data = await res.json();
     const docs: OLDoc[] = data.docs || [];
@@ -93,11 +79,6 @@ export async function GET(req: NextRequest) {
       { headers: { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=172800' } },
     );
   } catch (err) {
-    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) {
-      return NextResponse.json({ error: 'Open Library request timed out' }, { status: 504 });
-    }
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return apiCatchResponse(err);
   }
 }

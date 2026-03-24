@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiFetch } from '@/lib/apiUtils';
 
 export const runtime = 'nodejs';
 
@@ -23,9 +24,6 @@ export async function GET(req: NextRequest) {
   const entity = media === 'podcast' ? 'podcast' : 'song';
   const limit = media === 'podcast' ? '20' : '3';
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8_000);
-
   try {
     const url = `https://itunes.apple.com/search?${new URLSearchParams({
       term,
@@ -34,29 +32,16 @@ export async function GET(req: NextRequest) {
       limit,
     })}`;
 
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      await res.text().catch(() => {}); // drain body to release connection
-      return NextResponse.json({ error: 'iTunes API error', results: [] }, { status: 502 });
-    }
-
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(() => {});
-      return NextResponse.json({ error: 'Response too large', results: [] }, { status: 502 });
-    }
+    const res = await apiFetch(url, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes API' });
 
     const data = await res.json();
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
     });
   } catch (e) {
-    clearTimeout(timeout);
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     return NextResponse.json(
-      { error: isTimeout ? 'Request timed out' : 'Internal error', results: [] },
+      { error: isTimeout ? 'Request timed out' : (e instanceof Error ? e.message : 'Internal error'), results: [] },
       { status: isTimeout ? 504 : 500 },
     );
   }
