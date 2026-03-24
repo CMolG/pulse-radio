@@ -216,7 +216,7 @@ export function useAlbumArt(
 ): UseAlbumArtReturn {
   const hasTitle = Boolean(title);
   const cacheKey = useMemo(
-    () => (title ? `${artist ?? ''}::${title}`.toLowerCase() : ''),
+    () => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''),
     [title, artist],
   );
   const cachedInfo = useMemo(() => {

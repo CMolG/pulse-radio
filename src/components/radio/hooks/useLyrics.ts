@@ -125,7 +125,7 @@ export function useLyrics(
     }
 
     const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}:${track.title}`.toLowerCase();
+    const key = `${artistSeed}\n${track.title}`.toLowerCase();
     if (key === lastKeyRef.current) return;
     lastKeyRef.current = key;
 
@@ -152,7 +152,7 @@ export function useLyrics(
   const retry = () => {
     if (!track?.title) return;
     const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}:${track.title}`.toLowerCase();
+    const key = `${artistSeed}\n${track.title}`.toLowerCase();
     const cached = loadCache();
     if (abortRef.current) abortRef.current.abort();
     if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
