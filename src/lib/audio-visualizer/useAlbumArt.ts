@@ -85,7 +85,7 @@ function jaroDistance(a: string, b: string): number {
   let k = 0;
   for (let i = 0; i < a.length; i++) {
     if (!aMatches[i]) continue;
-    while (!bMatches[k]) k++;
+    while (k < b.length && !bMatches[k]) k++;
     if (a[i] !== b[k]) t++;
     k++;
   }
