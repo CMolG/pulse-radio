@@ -176,6 +176,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   // Track listen time for stats (every 5 seconds while playing)
   const lastTickRef = useRef(Date.now());
+  const { tickListenTime } = usageStats;
   useEffect(() => {
     if (radio.status !== 'playing' || !radio.station) {
       lastTickRef.current = Date.now();
@@ -186,21 +187,22 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const delta = now - lastTickRef.current;
       lastTickRef.current = now;
       if (radio.station) {
-        usageStats.tickListenTime(radio.station.stationuuid, radio.station.name, delta);
+        tickListenTime(radio.station.stationuuid, radio.station.name, delta);
       }
     }, 5000);
     lastTickRef.current = Date.now();
     return () => clearInterval(interval);
-  }, [radio.status, radio.station, usageStats]);
+  }, [radio.status, radio.station, tickListenTime]);
 
   // Record song play when a new track starts
   const lastRecordedTrackRef = useRef<string | null>(null);
+  const { recordSongPlay, updateSongMeta } = usageStats;
   useEffect(() => {
     if (!enrichedTrack?.title || !enrichedTrack?.artist) return;
     const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`;
     if (key !== lastRecordedTrackRef.current) {
       lastRecordedTrackRef.current = key;
-      usageStats.recordSongPlay(
+      recordSongPlay(
         enrichedTrack.title,
         enrichedTrack.artist,
         enrichedTrack.genre,
@@ -208,14 +210,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       );
     } else {
       // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
-      usageStats.updateSongMeta(
+      updateSongMeta(
         enrichedTrack.title,
         enrichedTrack.artist,
         enrichedTrack.genre,
         enrichedTrack.artworkUrl,
       );
     }
-  }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, usageStats]);
+  }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, recordSongPlay, updateSongMeta]);
 
   const [showEq, setShowEq] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
