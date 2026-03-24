@@ -12,10 +12,7 @@ import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useRealtimeLyricsSync } from './useRealtimeLyricsSync';
-import type {
-  RealtimeSyncDiagnostics,
-  RealtimeSyncStatus,
-} from '../services/realtimeLyricsTypes';
+import type { RealtimeSyncDiagnostics, RealtimeSyncStatus } from '../services/realtimeLyricsTypes';
 
 const MAX_CACHE = 50;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours

@@ -19,7 +19,7 @@ export type Station = {
   homepage?: string;
 };
 
-export type NowPlayingTrack = {
+type TrackFields = {
   title: string;
   artist: string;
   album?: string;
@@ -32,10 +32,9 @@ export type NowPlayingTrack = {
   trackCount?: number;
 };
 
-export type LyricLine = {
-  time: number;
-  text: string;
-};
+export type NowPlayingTrack = TrackFields;
+
+export type LyricLine = { time: number; text: string };
 
 export type LyricsData = {
   trackName: string;
@@ -60,18 +59,8 @@ export type PlaybackState = {
   errorMessage?: string;
 };
 
-export type EqBand = {
-  id: string;
-  frequency: number;
-  type: BiquadFilterType;
-  gain: number;
-  label: string;
-};
-
-export type EqPreset = {
-  name: string;
-  gains: number[];
-};
+export type EqBand = { id: string; frequency: number; type: BiquadFilterType; gain: number; label: string };
+export type EqPreset = { name: string; gains: number[] };
 
 export type BrowseCategory = {
   id: string;
@@ -101,53 +90,9 @@ export type LrcLibResponse = {
   syncedLyrics: string | null;
 };
 
-export type HistoryEntry = {
-  id: string;
-  stationName: string;
-  stationUuid: string;
-  artist: string;
-  title: string;
-  album?: string;
-  artworkUrl?: string;
-  itunesUrl?: string;
-  durationMs?: number;
-  genre?: string;
-  releaseDate?: string;
-  trackNumber?: number;
-  trackCount?: number;
-  timestamp: number;
-};
-
-export type FavoriteSong = {
-  id: string;
-  title: string;
-  artist: string;
-  album?: string;
-  artworkUrl?: string;
-  itunesUrl?: string;
-  durationMs?: number;
-  genre?: string;
-  releaseDate?: string;
-  trackNumber?: number;
-  trackCount?: number;
-  stationName: string;
-  stationUuid: string;
-  timestamp: number;
-};
-
-export type SongDetailData = {
-  title: string;
-  artist: string;
-  album?: string;
-  artworkUrl?: string;
-  itunesUrl?: string;
-  durationMs?: number;
-  genre?: string;
-  releaseDate?: string;
-  trackNumber?: number;
-  trackCount?: number;
-  stationName: string;
-};
+export type SongDetailData = TrackFields & { stationName: string };
+export type HistoryEntry = SongDetailData & { id: string; stationUuid: string; timestamp: number };
+export type FavoriteSong = HistoryEntry;
 
 export type ArtistInfo = {
   name: string;
