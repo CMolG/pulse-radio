@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 /* Checks whether a hostname resolves to a private/internal address. Blocks loopback, link-local, and RFC 1918 pr
- * ivate ranges to prevent SSRF. */
-export function isPrivateHost(hostname: string): boolean { const host = hostname.toLowerCase(); if ( host === 'localhost' || host === '127.0.0.1' || host === '::1' || // Loopback
-    host === '0.0.0.0' || host.endsWith('.localhost')
-  ) { return true; } const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/); if (ipv4Match) { const [, a, b] = ipv4Match.map(Number); if (a === 10) return true;                          // 10.0.0.0/8 // IPv4 private ranges (RFC 1918 + link-local + shared address space)
+ * ivate ranges to prevent SSRF. */ export function isPrivateHost(hostname: string): boolean { const host = hostname.toLowerCase(); if ( host === 'localhost' || host === '127.0.0.1' || host === '::1' || // Loopback
+    host === '0.0.0.0' || host.endsWith('.localhost') ) { return true; } const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/); if (ipv4Match) { const [, a, b] = ipv4Match.map(Number); if (a === 10) return true;                          // 10.0.0.0/8 // IPv4 private ranges (RFC 1918 + link-local + shared address space)
     if (a === 172 && b >= 16 && b <= 31) return true;   // 172.16.0.0/12
     if (a === 192 && b === 168) return true;             // 192.168.0.0/16
     if (a === 169 && b === 254) return true;             // 169.254.0.0/16 (link-local)

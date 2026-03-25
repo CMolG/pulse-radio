@@ -5,11 +5,9 @@ function getSharedContext(): AudioContext { if (!sharedCtx || sharedCtx.state ==
 } { const existing = cache.get(audio); if (existing) { if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {}); return existing; } // Resume if suspended (Chrome autoplay policy)
   const ctx = getSharedContext(); const source = ctx.createMediaElementSource(audio); const entry = { ctx, source }; cache.set(audio, entry); return entry; }
 /* Resume a suspended AudioContext bound to this audio element. Must be called from a user-gesture handler (click
- * /tap) on mobile browsers. */
-export function resumeAudioContext(audio: HTMLAudioElement): void { const entry = cache.get(audio); if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {}); }
+ * /tap) on mobile browsers. */ export function resumeAudioContext(audio: HTMLAudioElement): void { const entry = cache.get(audio); if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {}); }
 /**
  * Returns true if a MediaElementAudioSourceNode has been created for this element.
  * Used to detect when the Web Audio graph is active and CORS-compatible streaming
  * (via proxy) is required to prevent cross-origin audio taint on iOS Safari.
- */
-export function hasAudioSource(audio: HTMLAudioElement): boolean { return cache.has(audio); }
+ */ export function hasAudioSource(audio: HTMLAudioElement): boolean { return cache.has(audio); }
