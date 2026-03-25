@@ -6661,7 +6661,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
       if (!arr) { arr = []; groups.set(artist, arr); }
       arr.push(song);
     }
-    return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
+    return [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
   const albumGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
@@ -6671,7 +6671,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
       if (!arr) { arr = []; groups.set(album, arr); }
       arr.push(song);
     }
-    return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
+    return [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
   if (songs.length === 0) {
     return (
