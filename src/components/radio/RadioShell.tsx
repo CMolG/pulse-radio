@@ -421,15 +421,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "ArrowDown": e.preventDefault();
           r.setVolume(Math.max(0, r.volume - 0.05));
           break;
-        case "m":
-        case "M": r.toggleMute();
-          break;
-        case "n":
-        case "N": skipNext();
-          break;
-        case "p":
-        case "P": skipPrev();
-          break;
+        case "m": case "M": r.toggleMute(); break;
+        case "n": case "N": skipNext(); break;
+        case "p": case "P": skipPrev(); break;
         case "f":
         case "F": {
           e.preventDefault();
@@ -453,12 +447,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           else if (eq) setShowEq(false);
           else if (tm) setTheaterMode(false);
           break;
-        case "t":
-        case "T": setTheaterMode(prev => !prev);
-          break;
-        case "e":
-        case "E": setShowEq(prev => !prev);
-          break;
+        case "t": case "T": setTheaterMode(prev => !prev); break;
+        case "e": case "E": setShowEq(prev => !prev); break;
         case "l":
         case "L":
           if (et?.title && r.station) {
@@ -467,12 +457,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             toast(wasLiked ? "Song removed" : et.title, "heart");
           }
           break;
-        case "r":
-        case "R": if (rl) rl.toggle();
-          break;
-        case "z":
-        case "Z":           // Z: cycle sleep timer st.cycle();
-          break;
+        case "r": case "R": if (rl) rl.toggle(); break;
+        case "z": case "Z":           // Z: cycle sleep timer st.cycle(); break;
         case "?": setShowShortcuts(prev => !prev);
           break;
       }
