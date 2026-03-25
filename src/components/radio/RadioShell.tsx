@@ -211,15 +211,25 @@ import type { SupportedLocale } from '@/lib/i18n/locales';
 const DIACRITIC_RE = /[\u0300-\u036f]/g;
 const NON_ALPHANUM_RE = /[^a-zA-Z0-9\s']/g;
 const WHITESPACE_RE = /\s+/g;
+const _normalizeCache = new Map<string, string>();
+const _NORMALIZE_CACHE_MAX = 512;
 function normalizeText(value: string | null | undefined): string {
   if (!value) return '';
-  return value
+  const cached = _normalizeCache.get(value);
+  if (cached !== undefined) return cached;
+  const result = value
     .normalize('NFKD')
     .replace(DIACRITIC_RE, '')
     .replace(NON_ALPHANUM_RE, ' ')
     .replace(WHITESPACE_RE, ' ')
     .trim()
     .toLowerCase();
+  if (_normalizeCache.size >= _NORMALIZE_CACHE_MAX) {
+    const oldest = _normalizeCache.keys().next().value;
+    if (oldest !== undefined) _normalizeCache.delete(oldest);
+  }
+  _normalizeCache.set(value, result);
+  return result;
 }
 class LRU<T> {
   private m = new Map<string, T>();
