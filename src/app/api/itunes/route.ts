@@ -1,4 +1,5 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ async function apiFetch(
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ const _NOOP = () => {};
+async function apiFetch(
   url: string,
   opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string },
 ): Promise<Response> {
@@ -7,13 +8,13 @@
   try {
     const res = await fetch(url, { ...opts.init, signal: controller.signal });
     if (!res.ok) {
-      await res.text().catch(() => {});
+      await res.text().catch(_NOOP);
       throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`);
     }
     if (opts.maxBytes) {
       const cl = res.headers.get('content-length');
       if (cl && parseInt(cl, 10) > opts.maxBytes) {
-        await res.body?.cancel().catch(() => {});
+        await res.body?.cancel().catch(_NOOP);
         throw new Error('Response too large');
       }
     }

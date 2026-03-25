@@ -12,16 +12,17 @@ const _PERSON_SUFFIXES = ['(singer)', '(musician)', '(rapper)'] as const;
 const _BAND_SUFFIXES = ['(band)', '(musical group)', '(singer)', '(musician)'] as const;
 const _ERR_400 = { error: 'Missing or invalid artist parameter' };
 const _ERR_500 = { error: 'Internal error' };
+const _NOOP = () => {};
 async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T | null> {
   try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(8_000) });
     if (!res.ok) {
-      await res.text().catch(() => {});
+      await res.text().catch(_NOOP);
       return null;
     }
     const cl = res.headers.get('content-length');
     if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(() => {});
+      await res.body?.cancel().catch(_NOOP);
       return null;
     }
     return await res.json();
