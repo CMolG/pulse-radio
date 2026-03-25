@@ -3445,7 +3445,7 @@ function BrowseView({
         </div>
         <button
           onClick={() => setDiscoveryMode((d) => !d)}
-          className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? 'bg-sys-purple/20 text-sys-purple border border-sys-purple/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
+          className={`flex-row-1.5 px-3 py-2 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? 'bg-sys-purple/20 text-sys-purple border border-sys-purple/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
           title={t('discoveryModeTitle')}
           aria-pressed={discoveryMode}
           aria-label={t('discoveryModeAria')}
@@ -3465,7 +3465,7 @@ function BrowseView({
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >
               {t('all')}
             </button>{' '}
@@ -3474,7 +3474,7 @@ function BrowseView({
                 key={cat.id}
                 onClick={() => onSelectGenre?.(cat)}
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-                className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 {cat.label}
               </button>
@@ -3482,7 +3482,7 @@ function BrowseView({
             {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setGenreChipsExpanded(true)}
-                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+                className="px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >
                 {t('seeMore')}
               </button>
@@ -3499,14 +3499,14 @@ function BrowseView({
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >{`🌐 ${t('allCountries')}`}</button>{' '}
             {visibleCountries.map((c) => (
               <button
                 key={c.code}
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
                 aria-current={countryChipActive(c.code) || undefined}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`flex items-center gap-1 px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 <span>{c.flag}</span>
                 <span>{c.displayName}</span>
@@ -3515,7 +3515,7 @@ function BrowseView({
             {collapsed && countryChips.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setCountryChipsExpanded(true)}
-                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+                className="px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >
                 {t('seeMore')}
               </button>
@@ -3635,7 +3635,7 @@ function BrowseView({
                     <div className={`flex items-center gap-2 mb-3 ${isMobile ? 'px-3' : 'px-0'}`}>
                       <button
                         onClick={() => setScanEnabled((v) => !v)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
                         title={t('scanNowPlaying')}
                       >
                         <ScanSearch size={12} />{' '}
