@@ -3,15 +3,12 @@
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
 type Props = { lyrics: LyricsData | null; currentTime?: number; activeLineOverride?: number; variant?: "mobile" | "desktop"; };
 const EMPHASIS: [string, string, string][] = [ // [base classes, mobile size, desktop size]
-  ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],
-  ["text-white/82 font-semibold opacity-100 scale-[0.985]", "text-[18px]", "text-[23px]"],
-  ["text-white/50 font-medium opacity-100 scale-95", "text-[15px]", "text-[19px]"],
-  ["text-white/26 font-medium opacity-100 scale-[0.92]", "text-[13px]", "text-[17px]"],
+  ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"], ["text-white/82 font-semibold opacity-100 scale-[0.985]", "text-[18px]", "text-[23px]"],
+  ["text-white/50 font-medium opacity-100 scale-95", "text-[15px]", "text-[19px]"], ["text-white/26 font-medium opacity-100 scale-[0.92]", "text-[13px]", "text-[17px]"],
   ["text-white/14 font-medium opacity-100 scale-[0.88]", "text-[12px]", "text-[16px]"],];
 const LyricReelLine = React.memo(function LyricReelLine({
   lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
-}: { lineId: string; index: number; text: string; emphasisIdx: number;
-  isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>; scrollToIndex: (i: number) => void;
+}: { lineId: string; index: number; text: string; emphasisIdx: number; isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>; scrollToIndex: (i: number) => void;
 }) { const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`; return ( <button
       key={lineId} ref={(node) => { lineRefs.current[index] = node; }} type="button" onClick={() => scrollToIndex(index)}
       className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
@@ -19,8 +16,7 @@ const LyricReelLine = React.memo(function LyricReelLine({
 }, (prev, next) =>prev.lineId === next.lineId && prev.text === next.text && prev.emphasisIdx === next.emphasisIdx && prev.isDesktop === next.isDesktop);
 export default function LyricsReel({ lyrics, currentTime, activeLineOverride, variant = "mobile", }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null); const lineRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [focusedIdx, setFocusedIdx] = useState(0); const isDesktop = variant === "desktop";
-  const renderableLines = useMemo(() => getRenderableLyricLines(lyrics), [lyrics]);
+  const [focusedIdx, setFocusedIdx] = useState(0); const isDesktop = variant === "desktop"; const renderableLines = useMemo(() => getRenderableLyricLines(lyrics), [lyrics]);
   const activeIdx = useMemo( () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride), [activeLineOverride, currentTime, lyrics],);
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
       const scroller = scrollerRef.current; const line = lineRefs.current[index]; if (!scroller || !line) return;
@@ -35,8 +31,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   }, [renderableLines.length]); useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
   // Reset scroll position when lyrics change (no autoscroll on active line —
   // user controls focus manually by scrolling or clicking a line)
-  useEffect(() => { if (!renderableLines.length) return;
-    const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); }); return () => cancelAnimationFrame(frame);
+  useEffect(() => { if (!renderableLines.length) return; const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); }); return () => cancelAnimationFrame(frame);
   // Only react to lyrics changing, not to activeIdx
   }, [renderableLines.length]); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -54,7 +49,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
             maskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}><div className="flex min-h-full flex-col justify-center py-14"> {renderableLines.map((line, index) => {
                 const ei = (activeIdx >= 0 && index === activeIdx) ? 0 : Math.min(Math.abs(index - focusedIdx), 3) + 1;
-                return ( <LyricReelLine key={line.id} lineId={line.id} index={index} text={line.text} emphasisIdx={ei}
-                    isDesktop={isDesktop} lineRefs={lineRefs} scrollToIndex={scrollToIndex} /> );
+                return ( <LyricReelLine key={line.id} lineId={line.id} index={index} text={line.text} emphasisIdx={ei} isDesktop={isDesktop} lineRefs={lineRefs} scrollToIndex={scrollToIndex} /> );
               })}</div></div></div></div>
   ); }

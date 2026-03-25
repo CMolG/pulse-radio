@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-function tryLoad(key: string): string | null { if (typeof window === 'undefined') return null;
-  try { return localStorage.getItem(key); } catch { return null; } }
+function tryLoad(key: string): string | null { if (typeof window === 'undefined') return null; try { return localStorage.getItem(key); } catch { return null; } }
 function isQuotaExceeded(e: unknown): boolean {
   return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22); }
 function trySave(key: string, raw: string): boolean { try { localStorage.setItem(key, raw); return true; } catch (e) {
@@ -17,8 +16,7 @@ export const loadStringFromStorage = (key: string, defaultValue = "") => tryLoad
 export const saveStringToStorage = (key: string, value: string) => trySave(key, value);
 /* Storage schema version. Bump this when data structures change in a backwards-incompatible way. On mismatch, st
  * ale keys are cleared so the app can re-initialize cleanly instead of crashing on malformed data. */
-const STORAGE_SCHEMA_VERSION = 1; const VERSION_KEY = 'radio-schema-version';
-export function ensureStorageVersion(managedKeys: readonly string[]): void { if (typeof window === 'undefined') return;
+const STORAGE_SCHEMA_VERSION = 1; const VERSION_KEY = 'radio-schema-version'; export function ensureStorageVersion(managedKeys: readonly string[]): void { if (typeof window === 'undefined') return;
   try { const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION); if (stored === current) return;
     // Version mismatch — clear managed keys to prevent stale data crashes
     for (const key of managedKeys) { localStorage.removeItem(key); } localStorage.setItem(VERSION_KEY, current);

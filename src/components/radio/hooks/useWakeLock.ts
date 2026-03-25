@@ -17,8 +17,7 @@ export function useWakeLock(shouldLock: boolean) {
     if (!lockRef.current) return; try { await lockRef.current.release(); } catch { } // Already released
     lockRef.current = null; setIsActive(false);}, []);
   // Auto-acquire/release based on shouldLock
-  useEffect(() => { if (shouldLock) request(); else release(); }, [shouldLock, request, release]);
-  useEffect(() => { // Re-acquire when tab becomes visible (browser releases lock on hide)
+  useEffect(() => { if (shouldLock) request(); else release(); }, [shouldLock, request, release]); useEffect(() => { // Re-acquire when tab becomes visible (browser releases lock on hide)
     const onVisibilityChange = () => { if (shouldLock && !document.hidden && !lockRef.current) request(); };
     document.addEventListener('visibilitychange', onVisibilityChange); return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [shouldLock, request]); useEffect(() => () => { release(); }, [release]); return { isActive, request, release }; } // Cleanup on unmount

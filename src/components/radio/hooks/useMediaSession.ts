@@ -15,8 +15,7 @@ export function useMediaSession(config: MediaSessionConfig): void {
     if (!('mediaSession' in navigator)) return; navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [isPlaying]); const setupHandlers = useCallback(() => { if (!('mediaSession' in navigator)) return;
     const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [ ['play', () => configRef.current.onPlay()],
-      ['pause', () => configRef.current.onPause()], ['nexttrack', () => configRef.current.onNext()],
-      ['previoustrack', () => configRef.current.onPrev()], ['stop', () => configRef.current.onStop()],
+      ['pause', () => configRef.current.onPause()], ['nexttrack', () => configRef.current.onNext()], ['previoustrack', () => configRef.current.onPrev()], ['stop', () => configRef.current.onStop()],
       ['seekbackward', () => { if (configRef.current.onSeekBackward) configRef.current.onSeekBackward(); }],
       ['seekforward', () => { if (configRef.current.onSeekForward) configRef.current.onSeekForward(); }],];
     for (const [action, handler] of handlers) { try { navigator.mediaSession.setActionHandler(action, handler); } catch { /* not supported */ } }

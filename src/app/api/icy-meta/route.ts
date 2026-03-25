@@ -7,12 +7,10 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   try { const url = new URL(streamUrl); if (!['http:', 'https:'].includes(url.protocol)) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 }); }
     const host = url.hostname.toLowerCase(); if (isPrivateHost(host)) return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
-  } catch { return NextResponse.json({ error: 'Invalid URL' }, { status: 400 }); }
-  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 8000);
+  } catch { return NextResponse.json({ error: 'Invalid URL' }, { status: 400 }); } const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 8000);
   try { const res = await fetch(streamUrl, { headers: { 'Icy-MetaData': '1' }, signal: controller.signal, });
     // Validate the final URL after redirects to prevent SSRF via redirect
-    if (res.url) { try { const finalUrl = new URL(res.url);
-        if (isPrivateHost(finalUrl.hostname.toLowerCase())) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
+    if (res.url) { try { const finalUrl = new URL(res.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 }); }
       } catch { /* URL parse failed — continue */ } }
     if (!res.ok) { clearTimeout(timeout); res.body?.cancel().catch(() => {}); return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 }); }
@@ -25,8 +23,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout); res.body.cancel().catch(() => {}); return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
     const reader = res.body.getReader(); const chunks: Uint8Array[] = []; let totalRead = 0; const bytesNeeded = metaint + 4096;
-    try { while (totalRead < bytesNeeded) { const { done, value } = await reader.read(); if (done || !value) break;
-        chunks.push(value); totalRead += value.length; }
+    try { while (totalRead < bytesNeeded) { const { done, value } = await reader.read(); if (done || !value) break; chunks.push(value); totalRead += value.length; }
     } finally { clearTimeout(timeout); reader.cancel().catch(() => {}); } const buffer = new Uint8Array(totalRead); let offset = 0; // Concatenate chunks
     for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.length; }
     // ICY metadata starts at position metaint
@@ -35,8 +32,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength); const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(/\0+$/, '');
     // Parse StreamTitle='Artist - Title';
-    const match = metaString.match(/StreamTitle='([^']*)'/); const streamTitle = match?.[1]?.trim() || null;
-    return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
+    const match = metaString.match(/StreamTitle='([^']*)'/); const streamTitle = match?.[1]?.trim() || null; return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     const message = err instanceof Error ? err.message : 'Unknown error'; return NextResponse.json({ error: message }, { status: 500 }); }

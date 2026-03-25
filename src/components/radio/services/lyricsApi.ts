@@ -8,13 +8,11 @@ const LRCLIB_BASE = 'https://lrclib.net/api'; const FETCH_TIMEOUT_MS = 8_000; fu
 function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> {
   if (!parentSignal) return fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  const onParentAbort = () => controller.abort(); if (parentSignal.aborted) { clearTimeout(timeout); controller.abort();
-    return fetch(url, { signal: controller.signal }); // will reject immediately
+  const onParentAbort = () => controller.abort(); if (parentSignal.aborted) { clearTimeout(timeout); controller.abort(); return fetch(url, { signal: controller.signal }); // will reject immediately
   } parentSignal.addEventListener('abort', onParentAbort, { once: true }); return fetch(url, { signal: controller.signal }).finally(() => {
     clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);});
 }
-export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
-  fallbackArtist?: string, signal?: AbortSignal, ): Promise<LyricsData | null> {
+export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number, fallbackArtist?: string, signal?: AbortSignal, ): Promise<LyricsData | null> {
   const artistCandidates = [...new Set([artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),)];
   if (!artistCandidates.length || !title?.trim()) return null; for (const artistCandidate of artistCandidates) { if (signal?.aborted) return null;
     try { const match = await fetchLyricsForArtist(artistCandidate, title, album, duration, signal); if (match) return match; } catch (err) {
@@ -29,8 +27,7 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
   if (album) params.set('album_name', album); if (duration) params.set('duration', String(Math.round(duration)));
   const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, d => transform(d, artist, title));
   if (exact) return exact; if (signal?.aborted) return null; return tryFetch<LrcLibResponse[]>(
-    `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
-    signal, r => r.length > 0 ? transform(r[0], artist, title) : null,);
+    `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`, signal, r => r.length > 0 ? transform(r[0], artist, title) : null,);
 } function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null { if (data.syncedLyrics) {
     return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) }; }
   if (data.plainLyrics) {

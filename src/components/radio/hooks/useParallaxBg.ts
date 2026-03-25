@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import { useState, useEffect, useCallback, useRef } from 'react';
-import { GENRE_GRADIENTS } from '../constants'; export function useParallaxBg(genre?: string, audioAmplitude = 0) {
+'use client'; import { useState, useEffect, useCallback, useRef } from 'react'; import { GENRE_GRADIENTS } from '../constants'; export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   const [offset, setOffset] = useState({ x: 0, y: 0 }); const containerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef(0); const pointerOffsetRef = useRef({ x: 0, y: 0 }); const audioOffsetRef = useRef({ x: 0, y: 0 }); const tickRafRef = useRef(0);
   // Ref avoids re-running the effect (and tearing down RAF + listener) on every amplitude change
@@ -8,8 +7,7 @@ import { GENRE_GRADIENTS } from '../constants'; export function useParallaxBg(ge
   const handleMouseMove = useCallback((e: MouseEvent) => { const el = containerRef.current; if (!el) return;
     cancelAnimationFrame(rafRef.current); // Coalesce rapid mouse events into a single rAF update
     rafRef.current = requestAnimationFrame(() => {
-      const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;
+      const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;
       const y = ((e.clientY - cy) / rect.height) * 20; pointerOffsetRef.current = { x, y };});
   }, []); const lastPublishedRef = useRef({ x: 0, y: 0 }); useEffect(() => { const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.
@@ -20,5 +18,4 @@ import { GENRE_GRADIENTS } from '../constants'; export function useParallaxBg(ge
       ) { lastPublishedRef.current = { x: nextX, y: nextY }; setOffset(lastPublishedRef.current); } tickRafRef.current = requestAnimationFrame(tick);
     }; tickRafRef.current = requestAnimationFrame(tick); window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => { window.removeEventListener('mousemove', handleMouseMove); cancelAnimationFrame(rafRef.current); cancelAnimationFrame(tickRafRef.current); };
-  }, [handleMouseMove]); const gradient = genre ? GENRE_GRADIENTS[genre.toLowerCase()] || GENRE_GRADIENTS.default : GENRE_GRADIENTS.default;
-  return { offset, containerRef, gradient }; }
+  }, [handleMouseMove]); const gradient = genre ? GENRE_GRADIENTS[genre.toLowerCase()] || GENRE_GRADIENTS.default : GENRE_GRADIENTS.default; return { offset, containerRef, gradient }; }

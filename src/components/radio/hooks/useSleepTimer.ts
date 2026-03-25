@@ -1,18 +1,14 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import { useState, useRef, useCallback, useEffect } from 'react';
-const PRESETS_MIN = [15, 30, 60] as const; const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
+'use client'; import { useState, useRef, useCallback, useEffect } from 'react'; const PRESETS_MIN = [15, 30, 60] as const; const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
 export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>) {
-  const [remainingMin, setRemainingMin] = useState<number | null>(null);
-  const [isFading, setIsFading] = useState(false); const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [remainingMin, setRemainingMin] = useState<number | null>(null); const [isFading, setIsFading] = useState(false); const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null); const endTimeRef = useRef<number>(0);
-  const savedVolumeRef = useRef<number | null>(null); const onExpireRef = useRef(onExpire);
-  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]); const stopFade = useCallback(() => {
+  const savedVolumeRef = useRef<number | null>(null); const onExpireRef = useRef(onExpire); useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]); const stopFade = useCallback(() => {
     if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
     if (savedVolumeRef.current !== null && audioRef?.current) { // Restore original volume if we saved it
       audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null; }
     setIsFading(false);}, []);
-  const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    stopFade(); endTimeRef.current = 0; setRemainingMin(null);
+  const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } stopFade(); endTimeRef.current = 0; setRemainingMin(null);
   }, [stopFade]); const startFade = useCallback(() => {
     if (!audioRef?.current || fadeTimerRef.current) return; const audio = audioRef.current; savedVolumeRef.current = audio.volume; setIsFading(true);
     const fadeStart = Date.now(); let baseVol = audio.volume; let lastSetVol = audio.volume; fadeTimerRef.current = setInterval(() => {
@@ -35,8 +31,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade(); }
     }, 1000); // check every second for smooth fade timing
   }, [clear, stopFade, startFade]); const cycle = useCallback(() => { if (remainingMin === null) { start(PRESETS_MIN[0]);
-    } else { const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin); const nextIdx = currentIdx + 1;
-      if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear(); }
+    } else { const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin); const nextIdx = currentIdx + 1; if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear(); }
   }, [remainingMin, start, clear]); useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); // Cleanup on unmount
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
   }, []); return { remainingMin, isFading, cycle, cancel: clear }; }

@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { NextRequest } from 'next/server'; import { isPrivateHost } from '@/lib/urlSecurity';
-export const runtime = 'nodejs'; const ALLOWED_PROTOCOLS = ['http:', 'https:'];
+import { NextRequest } from 'next/server'; import { isPrivateHost } from '@/lib/urlSecurity'; export const runtime = 'nodejs'; const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
 /* Proxies an internet radio stream, adding CORS headers so the browser can use it with <audio crossOrigin="anony
  * mous"> + Web Audio API. */
@@ -24,22 +23,18 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     // Validate the final URL after redirects to prevent SSRF via redirect
     if (upstream.url) { try { const finalUrl = new URL(upstream.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
-          if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
-          return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
+          if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403, headers: { 'Content-Type': 'application/json' },});
         }} catch {
       } } // URL parse failed — continue with original validation
     if (!upstream.ok || !upstream.body) { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '3' },});
-    } const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
-    const icyBr = upstream.headers.get('icy-br'); const icyName = upstream.headers.get('icy-name');
-    const responseHeaders: Record<string, string> = { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache, no-store', 'Transfer-Encoding': 'chunked',
+    } const contentType = upstream.headers.get('content-type') || 'audio/mpeg'; const icyBr = upstream.headers.get('icy-br'); const icyName = upstream.headers.get('icy-name');
+    const responseHeaders: Record<string, string> = { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache, no-store', 'Transfer-Encoding': 'chunked',
     }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr; if (icyName) responseHeaders['X-Stream-Name'] = icyName;
     // HEAD requests: return headers only (for prefetch / codec sniffing)
-    if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
-      return new Response(null, { status: 200, headers: responseHeaders }); }
+    if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(null, { status: 200, headers: responseHeaders }); }
     return new Response(upstream.body, { status: 200, headers: responseHeaders, });
   } catch (err) {
     if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';

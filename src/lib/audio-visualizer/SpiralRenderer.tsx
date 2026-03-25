@@ -1,12 +1,10 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 "use client"; import React, { useRef, useEffect } from "react"; interface SpiralRendererProps {
-  frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string;
-  color3?: string; sensitivity?: number; demo?: boolean; }
+  frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string; color3?: string; sensitivity?: number; demo?: boolean; }
 import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYCLES = 4; const SMOOTH_PASSES = 3;
 export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068", color3 = "#f9d423", sensitivity = 1.0, demo = false,
 }: SpiralRendererProps) { const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS));
-  const targetArrayRef = useRef(new Float64Array(NUM_BARS)); const smoothedRef = useRef(new Float64Array(NUM_BARS));
-  const tempRef = useRef(new Float64Array(NUM_BARS));
+  const targetArrayRef = useRef(new Float64Array(NUM_BARS)); const smoothedRef = useRef(new Float64Array(NUM_BARS)); const tempRef = useRef(new Float64Array(NUM_BARS));
   // Pre-allocated coordinate arrays — avoids 500+ object allocations per frame
   const outerXRef = useRef(new Float64Array(NUM_BARS)); const outerYRef = useRef(new Float64Array(NUM_BARS));
   const innerXRef = useRef(new Float64Array(NUM_BARS)); const innerYRef = useRef(new Float64Array(NUM_BARS));
@@ -25,8 +23,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       }} else { for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; } } // No data: decay
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
-    const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
-    for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) {
+    const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed; for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) {
         const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1]; dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25; }
       const swap = src === data ? temp : src; src = dst; dst = swap; } // Swap: previous dst becomes next src
     const result = src; // After SMOOTH_PASSES iterations, result is in `src`
@@ -41,14 +38,11 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
     const outerX = outerXRef.current; const outerY = outerYRef.current; const innerX = innerXRef.current; const innerY = innerYRef.current;
     for (let i = 0; i < NUM_BARS; i++) { const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
-      const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle;
-      const radius = minRadius * Math.exp(b * baseAngle);
-      const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle);
-      innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
+      const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle; const radius = minRadius * Math.exp(b * baseAngle);
+      const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle); innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
       outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2); }
     // Draw slime shapes per cycle
-    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
-    const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) {
+    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85; const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) {
       const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
       if (startIdx >= NUM_BARS) break; ctx.beginPath(); ctx.moveTo(outerX[startIdx], outerY[startIdx]); // Outer edge with quadratic curves
       for (let i = startIdx + 1; i < endIdx - 1; i++) {

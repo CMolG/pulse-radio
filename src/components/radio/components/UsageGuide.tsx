@@ -1,10 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import React, { useState } from 'react'; import { motion, AnimatePresence } from 'motion/react';
-import { IoRadioOutline, IoHeartOutline, IoMusicalNotesOutline, IoStatsChartOutline, IoSearchOutline,
-  IoColorPaletteOutline, IoTimerOutline, IoGlobeOutline, IoChevronBack } from 'react-icons/io5';
+import { IoRadioOutline, IoHeartOutline, IoMusicalNotesOutline, IoStatsChartOutline, IoSearchOutline, IoColorPaletteOutline, IoTimerOutline, IoGlobeOutline, IoChevronBack } from 'react-icons/io5';
 const GLASS_STYLE: React.CSSProperties = {
-  background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
-  WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
+  background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)', WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)', };
 type GuideSection = { icon: React.ReactNode; title: string; content: string; }; const GUIDE_SECTIONS: GuideSection[] = [
   { icon: <IoRadioOutline size={22} className="text-[#3478f6]" />, title: 'Listening to Radio',
@@ -33,18 +31,13 @@ type Props = { onClose: () => void }; function UsageGuide({ onClose }: Props) { 
         {/* Header */} <div className="flex items-center gap-3 px-5 pb-3"><button onClick={onClose} aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           ><IoChevronBack size={16} /></button> <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2></div>
-        <div className="border-t border-white/8" /> {/* Guide sections */} <div className="px-5 py-4 space-y-2">
-          {GUIDE_SECTIONS.map((section, idx) => { const isExpanded = expandedIdx === idx;
-            return ( <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]"><button
-                  onClick={() => setExpandedIdx(isExpanded ? null : idx)}
+        <div className="border-t border-white/8" /> {/* Guide sections */} <div className="px-5 py-4 space-y-2"> {GUIDE_SECTIONS.map((section, idx) => { const isExpanded = expandedIdx === idx;
+            return ( <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]"><button onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
-                ><div className="flex-shrink-0">{section.icon}</div>
-                  <span className="text-[14px] font-medium text-white/80 flex-1">{section.title}</span><motion.span
-                    animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}
-                    className="text-white/30 text-[12px]">▶</motion.span></button><AnimatePresence>
+                ><div className="flex-shrink-0">{section.icon}</div> <span className="text-[14px] font-medium text-white/80 flex-1">{section.title}</span><motion.span
+                    animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }} className="text-white/30 text-[12px]">▶</motion.span></button><AnimatePresence>
                   {isExpanded && ( <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }} className="overflow-hidden">
-                      <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">{section.content}</p>
+                      transition={{ duration: 0.2 }} className="overflow-hidden"> <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">{section.content}</p>
                     </motion.div>)}</AnimatePresence></div> );
           })}</div><div className="h-6" /></motion.div></motion.div>
   ); }
