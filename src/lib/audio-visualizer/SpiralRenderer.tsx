@@ -8,8 +8,7 @@
         data[i] += (target[i] - data[i]) * 0.1;
       }} else { for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; } } // No data: decay
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed; for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) { // Ping-pong buffers: alternate read/write to avoid full-array copy per pass // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
-        const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1]; dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25; }
-      const swap = src === data ? temp : src; src = dst; dst = swap; } // Swap: previous dst becomes next src
+        const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1]; dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25; } const swap = src === data ? temp : src; src = dst; dst = swap; } // Swap: previous dst becomes next src
     const result = src; // After SMOOTH_PASSES iterations, result is in `src`
     const maxAngle = CYCLES * Math.PI * 2; const minRadius = Math.max(w, h) * 0.01; // Spiral configuration
     const maxRadius = Math.sqrt(w * w + h * h) * 0.8; const b = Math.log(maxRadius / minRadius) / maxAngle; rotationRef.current += 0.0015; const rotation = rotationRef.current; ctx.clearRect(0, 0, w, h); // Clear

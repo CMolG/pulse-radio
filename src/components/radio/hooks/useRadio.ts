@@ -52,8 +52,7 @@
       const conn = typeof navigator !== 'undefined' ? (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } }).connection : undefined; if (conn?.saveData) setStreamQuality('fair'); if (userPausedRef.current || audio.paused || !station) { lowBufferStreak = 0; return; } if (document.hidden) return; // Skip check when tab is hidden — browser throttles network // Use Network Information API to detect poor connections proactively
       if (isReconnectingRef.current) return; const { buffered, currentTime: ct } = audio; if (buffered.length === 0) { // Skip quality/reconnect logic during an active reconnect to avoid cascade
         lowBufferStreak++; setStreamQuality('poor'); // No buffer ranges at all while playing — treat as underrun
-        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); } return; }
-      let ahead = 0; let bufferEnd = 0; // Find the buffer range containing currentTime
+        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); } return; } let ahead = 0; let bufferEnd = 0; // Find the buffer range containing currentTime
       for (let i = 0; i < buffered.length; i++) { if (ct >= buffered.start(i) && ct <= buffered.end(i)) { ahead = buffered.end(i) - ct; bufferEnd = buffered.end(i); break; } } const prevEnd = lastBufferEndRef.current; // Stream quality: based on buffer-ahead and growth rate
       const growth = bufferEnd - prevEnd; // how much buffer grew since last check
       lastBufferEndRef.current = bufferEnd; if (ahead >= 5) { setStreamQuality(conn?.saveData ? 'fair' : 'good'); // saveData means the user opted into reduced bandwidth; cap at 'fair'
