@@ -32,8 +32,7 @@ type RadioShellProps = { isPip?: boolean; initialCountryCode?: string }; export 
   useEffect(() => { let cancelled = false; if (radio.status === 'error') { if (stationQueue.hasNext) { const next = stationQueue.skipToNext(); if (next) { radio.play(next); recent.add(next); } } else if (radio.station) { // Auto-advance to next queued station on error, or failover to similar station
         import('./services/radioApi').then(({ similarStations }) => { similarStations(radio.station!, 3).then(alts => { // No queue entries — find a similar station by genre tag
             if (alts.length > 0 && !cancelled) handlePlay(alts[0]);
-          }).catch(() => {});});
-      } }
+          }).catch(() => {});}); } }
     return () => { cancelled = true; };
   }, [radio.status]); const skipDepsRef = useRef({ radio, favs, stationQueue }); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { skipDepsRef.current = { radio, favs, stationQueue }; }, [radio, favs, stationQueue]); const handleSkipNext = useCallback(() => { const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current; if (sq.hasNext) { const next = sq.skipToNext(); // Prefer queue if it has entries

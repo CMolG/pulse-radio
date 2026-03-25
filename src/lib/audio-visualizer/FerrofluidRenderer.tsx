@@ -27,8 +27,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
     for (let i = 0; i < blobs.length; i++) { const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5; const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127); const orbitRadius = minWH * (0.1 + energy * 0.25); // base orbit
       blob.targetX = cx + Math.cos(angle) * orbitRadius; blob.targetY = cy + Math.sin(angle * 0.7) * orbitRadius * 0.8; let bandVal: number; if (frequencyData) { bandVal = frequencyData[bandIdx] / 255; // frequency-driven displacement
         const displacement = bandVal * minWH * 0.15 * sensitivity; const dispAngle = angle + Math.PI * 0.5; blob.targetX += Math.cos(dispAngle) * displacement; blob.targetY += Math.sin(dispAngle) * displacement;
-      } else if (demo) { bandVal = 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3; const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08; blob.targetX += Math.cos(angle * 1.3) * demoDisp; blob.targetY += Math.sin(angle * 1.7) * demoDisp;
-      } else bandVal = 0.3; blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08; // smooth follow
+      } else if (demo) { bandVal = 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3; const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08; blob.targetX += Math.cos(angle * 1.3) * demoDisp; blob.targetY += Math.sin(angle * 1.7) * demoDisp; } else bandVal = 0.3; blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08; // smooth follow
       blob.vx *= 0.85; blob.vy *= 0.85; blob.x += blob.vx; blob.y += blob.vy; blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity; } // pulse radius with energy (reuses cached bandVal and minWH)
     ctx.clearRect(0, 0, w, h); // clear
     drawMetaballs(ctx, blobs, w, h, colors.current, energy); // draw metaballs

@@ -25,8 +25,7 @@ function isAutoplayBlocked(err: unknown): boolean { return err instanceof DOMExc
     }, [preferDirectStream], ); useEffect(() => { const audio = getAudio(); const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); }; const sessionId = playSessionRef.current; const reconnect = (delay: number) => { if (playSessionRef.current !== sessionId || !station || userPausedRef.current) return; if (typeof navigator !== 'undefined' && !navigator.onLine) return; if (isReconnectingRef.current) return; // Prevent concurrent reconnects — only one attempt at a time // Don't retry when browser is offline — onOnline will resume
       if (retryRef.current >= 10) { setStatus('error'); isReconnectingRef.current = false; return; } isReconnectingRef.current = true; retryRef.current++; setStatus('loading'); clearReconnectTimer(); let adaptedDelay = delay; // Adapt reconnect delay based on network quality (Network Information API)
       const conn = typeof navigator !== 'undefined' ? (navigator as Navigator & { connection?: { effectiveType?: string; downlink?: number; saveData?: boolean } }).connection : undefined; if (conn) { if (conn.saveData) { adaptedDelay = Math.max(delay, 5000); // User opted into data saving — longer delays to reduce bandwidth
-        } else if (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') { adaptedDelay = Math.max(delay, 4000);
-        } else if (conn.effectiveType === '3g') adaptedDelay = Math.max(delay, 2000);
+        } else if (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g') { adaptedDelay = Math.max(delay, 4000); } else if (conn.effectiveType === '3g') adaptedDelay = Math.max(delay, 2000);
       } // 4g or better: use original delay
       const jitter = adaptedDelay * (0.7 + Math.random() * 0.6); reconnectTimerRef.current = setTimeout(() => { reconnectTimerRef.current = null; if (userPausedRef.current || playSessionRef.current !== sessionId) { isReconnectingRef.current = false; return; } startPlayback(audio, station.url_resolved, (err) => { // Add ±30% random jitter to prevent thundering-herd reconnects when a station recovers and all clients try simultaneously
           isReconnectingRef.current = false; handlePlayRejected(err);});
@@ -67,8 +66,7 @@ function isAutoplayBlocked(err: unknown): boolean { return err instanceof DOMExc
         lowBufferStreak++; setStreamQuality('poor'); // No buffer ranges at all while playing — treat as underrun
         if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); } return; }
       let ahead = 0; let bufferEnd = 0; // Find the buffer range containing currentTime
-      for (let i = 0; i < buffered.length; i++) { if (ct >= buffered.start(i) && ct <= buffered.end(i)) { ahead = buffered.end(i) - ct; bufferEnd = buffered.end(i); break; }
-      } const prevEnd = lastBufferEndRef.current; // Stream quality: based on buffer-ahead and growth rate
+      for (let i = 0; i < buffered.length; i++) { if (ct >= buffered.start(i) && ct <= buffered.end(i)) { ahead = buffered.end(i) - ct; bufferEnd = buffered.end(i); break; } } const prevEnd = lastBufferEndRef.current; // Stream quality: based on buffer-ahead and growth rate
       const growth = bufferEnd - prevEnd; // how much buffer grew since last check
       lastBufferEndRef.current = bufferEnd; if (ahead >= 5) { setStreamQuality(conn?.saveData ? 'fair' : 'good'); // saveData means the user opted into reduced bandwidth; cap at 'fair'
       } else if (ahead >= MIN_BUFFER_AHEAD_S) { setStreamQuality(growth > 0 ? 'fair' : 'poor'); // Healthy buffer but thin — check if it's growing
