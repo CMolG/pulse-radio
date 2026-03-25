@@ -39,8 +39,7 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
   useEffect(() => {
     if (!key || !artist || cachedInfo) return;
 
-    let cancelled = false;
-    const controller = new AbortController();
+    let cancelled = false; const controller = new AbortController();
     // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
     const timeout = setTimeout(() => controller.abort(), 15_000);
 

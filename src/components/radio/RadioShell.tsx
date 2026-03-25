@@ -67,8 +67,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
       const { width, height } = entry.contentRect;
       if (width <= 0 || height <= 0) return;
       setSize({ w: Math.round(width), h: Math.round(height) });
-    });
-    ro.observe(el); return () => ro.disconnect();
+    }); ro.observe(el); return () => ro.disconnect();
   }, [ref]);
   return size;
 }
@@ -122,11 +121,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (radio.status !== 'playing' || !radio.station) { lastTickRef.current = Date.now(); return; }
     const interval = setInterval(() => {
-      const now = Date.now(); const delta = now - lastTickRef.current;
-      lastTickRef.current = now;
+      const now = Date.now(); const delta = now - lastTickRef.current; lastTickRef.current = now;
       if (radio.station) tickListenTime(radio.station.stationuuid, radio.station.name, delta);
-    }, 5000);
-    lastTickRef.current = Date.now();
+    }, 5000); lastTickRef.current = Date.now();
     return () => clearInterval(interval);
   }, [radio.status, radio.station, tickListenTime]);
 
@@ -194,8 +191,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }
 
   const resetNav = useCallback((v: ViewState) => {
-    setView(v); setActiveTab("discover");
-    setTheaterMode(false); setSearchQuery("");
+    setView(v); setActiveTab("discover"); setTheaterMode(false); setSearchQuery("");
   }, []);
 
   const [view, setView] = useState<ViewState>(() => {
@@ -227,8 +223,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (!segment) { resetNav(mkView("top", t("topStations"))); return; }
 
       if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
-    };
-    window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
+    }; window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
   }, [locale, t, resetNav]);
 
   // Reset compact state on layout change
@@ -244,12 +239,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // Sync to shared playback store
   const pbStore = usePlaybackStore;
   useEffect(() => {
-    const state = pbStore.getState();
-    state.setSource("radio");
-    state.setPlaying(radio.status === "playing");
-    state.setVolume(radio.volume);
-    state.setMuted(radio.muted);
-    state.setCurrentTime(radio.currentTime);
+    const state = pbStore.getState(); state.setSource("radio");
+    state.setPlaying(radio.status === "playing"); state.setVolume(radio.volume);
+    state.setMuted(radio.muted); state.setCurrentTime(radio.currentTime);
     if (enrichedTrack) {
       state.setTrackInfo(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.artworkUrl ?? albumArt.artworkUrl,);
     }
@@ -284,12 +276,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       // the audio being CORS-tainted and silenced in the Web Audio pipeline.
       // ensureAudio() is also needed so resumeAudioContext() inside play() finds the
       // AudioContext in the cache and can resume it within the same user-gesture context.
-      const audio = r.ensureAudio();
-      eqSrc(audio);
-      an.connectAudio(audio);
-      r.play(station);
-      rec.add(station);
-      sq.setPlaying(station.stationuuid);
+      const audio = r.ensureAudio(); eqSrc(audio);
+      an.connectAudio(audio); r.play(station);
+      rec.add(station); sq.setPlaying(station.stationuuid);
       setTheaterMode(true);
       // Prefetch next station in queue for seamless transition
       const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
@@ -405,8 +394,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "s":
         case "S":
           if (r.station) {
-            const wasFav = f.has(r.station.stationuuid);
-            f.toggle(r.station);
+            const wasFav = f.has(r.station.stationuuid); f.toggle(r.station);
             toast(wasFav ? "Removed from favorites" : r.station.name, "star");
           }
           break;
@@ -421,8 +409,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "l":
         case "L":
           if (et?.title && r.station) {
-            const wasLiked = fs.has(et.title, et.artist ?? '');
-            fs.toggle(buildFavInput(et, r.station));
+            const wasLiked = fs.has(et.title, et.artist ?? ''); fs.toggle(buildFavInput(et, r.station));
             toast(wasLiked ? "Song removed" : et.title, "heart");
           }
           break;
@@ -430,15 +417,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "z": case "Z":           // Z: cycle sleep timer st.cycle(); break;
         case "?": setShowShortcuts(prev => !prev); break;
       }
-    };
-    window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown);
+    }; window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const isSongLiked = enrichedTrack?.title ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "") : false;
   const handleToggleFav = useCallback(() => {
     if (!radio.station) return;
-    const wasFav = favs.has(radio.station.stationuuid);
-    favs.toggle(radio.station);
+    const wasFav = favs.has(radio.station.stationuuid); favs.toggle(radio.station);
     showToast(wasFav ? "Removed from favorites" : radio.station.name, "star");
   }, [radio.station, favs, showToast]);
 
@@ -451,8 +436,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
     const wasLiked = favSongs.has(entry.title, entry.artist); const { id: _, timestamp: _t, ...input } = entry;
-    favSongs.toggle(input);
-    showToast(wasLiked ? "Song removed" : entry.title, "heart");
+    favSongs.toggle(input); showToast(wasLiked ? "Song removed" : entry.title, "heart");
   }, [favSongs, showToast]);
 
   const handleSearch = useCallback((query: string) => {
@@ -482,8 +466,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   const handleSelectCountry = useCallback((countryCode: string, countryQueryName: string, countryDisplayName: string) => {
     setView(mkView("country", countryDisplayName, { countryCode, countryQueryName }));
-    setTheaterMode(false); setSearchQuery("");
-    const newPath = `/${countryCode}`;
+    setTheaterMode(false); setSearchQuery(""); const newPath = `/${countryCode}`;
     if (pathname !== newPath) window.history.pushState(null, "", newPath);
   }, [pathname]);
 
@@ -508,8 +491,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       song={selectedSong}
       onClose={() => setSelectedSong(null)}
       onRemoveFromFavorites={selectedFavSong ? () => {
-        favSongs.remove(selectedFavSong.id);
-        setSelectedSong(null);
+        favSongs.remove(selectedFavSong.id); setSelectedSong(null);
       } : undefined}
     />
   );

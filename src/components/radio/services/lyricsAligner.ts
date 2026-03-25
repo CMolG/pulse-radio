@@ -53,8 +53,7 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
   for (const token of hypoTokens) {
     for (let i = lineIdx; i < lineTokens.length; i++) {
       if (lineTokens[i] === token) {
-        ordered++;
-        lineIdx = i + 1;
+        ordered++; lineIdx = i + 1;
         break;
       }
     }
@@ -121,8 +120,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     confirmed = bestIndex;
   } else if (jumpRejected && bestScore >= Math.min(0.98, policy.confirmMinScore + 0.08)) {
     // Strict relock path for distant jumps with very high confidence
-    confirmed = bestIndex;
-    relockTriggered = true;
+    confirmed = bestIndex; relockTriggered = true;
   }
 
   return {

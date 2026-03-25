@@ -62,8 +62,7 @@ function jaroDistance(a: string, b: string): number {
     const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
       if (_bMatches[j] || a[i] !== b[j]) continue;
-      _aMatches[i] = true;
-      _bMatches[j] = true;
+      _aMatches[i] = true; _bMatches[j] = true;
       matches++;
       break;
     }
@@ -108,8 +107,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   const normTitles = new Array<string>(results.length);
   const normArtists = new Array<string>(results.length);
   for (let i = 0; i < results.length; i++) {
-    normTitles[i] = normalizeText(results[i].trackName);
-    normArtists[i] = normalizeText(results[i].artistName);
+    normTitles[i] = normalizeText(results[i].trackName); normArtists[i] = normalizeText(results[i].artistName);
   }
 
   const exactIdx = normTitles.indexOf(normalizedRequestedTitle);
@@ -155,8 +153,7 @@ function cacheGet(key: string): AlbumInfo | undefined {
   const val = CACHE.get(key);
   if (val !== undefined) {
     // Move to end for LRU ordering
-    CACHE.delete(key);
-    CACHE.set(key, val);
+    CACHE.delete(key); CACHE.set(key, val);
   }
   return val;
 }
@@ -197,8 +194,7 @@ export function useAlbumArt(title: string | null, artist: string | null) {
   useEffect(() => {
     if (!title || !cacheKey || cachedInfo) return;
 
-    abortRef.current?.abort();
-    const controller = new AbortController();
+    abortRef.current?.abort(); const controller = new AbortController();
     abortRef.current = controller;
 
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
@@ -223,15 +219,13 @@ export function useAlbumArt(title: string | null, artist: string | null) {
           genre: result?.primaryGenreName ?? null,
           trackNumber: typeof result?.trackNumber === 'number' ? result.trackNumber : null,
           trackCount: typeof result?.trackCount === 'number' ? result.trackCount : null,
-        };
-        cacheSet(cacheKey, albumInfo);
+        }; cacheSet(cacheKey, albumInfo);
         if (artworkUrl) preloadImage(artworkUrl);
         setFetched({ key: cacheKey, info: albumInfo });
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          cacheSet(cacheKey, EMPTY_ALBUM_INFO);
-          setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO });
+          cacheSet(cacheKey, EMPTY_ALBUM_INFO); setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO });
         }
       })
       .finally(() => { clearTimeout(timeout); });

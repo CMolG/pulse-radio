@@ -25,8 +25,7 @@ function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   while (lo <= hi) {
     const mid = (lo + hi) >>> 1;
     if (lines[mid].time <= currentTime) {
-      result = mid;
-      lo = mid + 1;
+      result = mid; lo = mid + 1;
     } else hi = mid - 1;
   }
 

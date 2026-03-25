@@ -20,32 +20,21 @@ import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount 
 type Props = {
   onClose: () => void;
   eq: {
-    bands: EqBand[];
-    enabled: boolean;
-    normalizerEnabled: boolean;
-    stereoWidth: number;
-    bassEnhance: number;
-    compressorEnabled: boolean;
-    compressorAmount: number;
-    noiseReductionMode: NoiseReductionMode;
-    customPresets: EqPreset[];
-    setBandGain: (id: string, gain: number) => void;
-    applyPreset: (gains: number[]) => void;
-    toggleEnabled: () => void;
-    toggleNormalizer: () => void;
-    setStereoWidth: (w: number) => void; setBassEnhance: (v: number) => void;
-    toggleCompressor: () => void;
-    setCompressorAmount: (v: number) => void;
-    setNoiseReductionMode: (mode: NoiseReductionMode) => void;
-    saveCustomPreset: (name: string) => void;
+    bands: EqBand[]; enabled: boolean;
+    normalizerEnabled: boolean; stereoWidth: number;
+    bassEnhance: number; compressorEnabled: boolean;
+    compressorAmount: number; noiseReductionMode: NoiseReductionMode;
+    customPresets: EqPreset[]; setBandGain: (id: string, gain: number) => void;
+    applyPreset: (gains: number[]) => void; toggleEnabled: () => void;
+    toggleNormalizer: () => void; setStereoWidth: (w: number) => void; setBassEnhance: (v: number) => void;
+    toggleCompressor: () => void; setCompressorAmount: (v: number) => void;
+    setNoiseReductionMode: (mode: NoiseReductionMode) => void; saveCustomPreset: (name: string) => void;
     removeCustomPreset: (name: string) => void;
   };
   onPresetChange: (name: string | null) => void;
   statsData?: {
-    topStations: StationListenTime[];
-    topSongs: SongPlayCount[];
-    topArtists: ArtistPlayCount[];
-    topGenres: GenrePlayCount[];
+    topStations: StationListenTime[]; topSongs: SongPlayCount[];
+    topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[];
     totalListenMs: number;
   };
 };
@@ -59,22 +48,19 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [presetName, setPresetName] = useState("");
   const handleSelectPreset = useCallback((name: string, gains: number[]) => {
-    setSelectedPreset(name);
-    eq.applyPreset(gains);
+    setSelectedPreset(name); eq.applyPreset(gains);
     onPresetChange(name);
   }, [eq, onPresetChange]);
 
   const handleSetGain = useCallback((id: string, gain: number) => {
-    setSelectedPreset(null);
-    onPresetChange(null);
+    setSelectedPreset(null); onPresetChange(null);
     eq.setBandGain(id, gain);
   }, [eq, onPresetChange]);
 
   const handleSave = () => {
     const name = presetName.trim();
     if (name) {
-      eq.saveCustomPreset(name);
-      setPresetName(""); setShowSaveInput(false);
+      eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false);
     }
   };
 

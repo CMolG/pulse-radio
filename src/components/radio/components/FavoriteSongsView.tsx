@@ -41,8 +41,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
     if (!menu) return;
     const onPointerDown = (e: PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    const onScroll = () => onClose();
+    }; const onScroll = () => onClose();
     window.addEventListener("pointerdown", onPointerDown, true);
     window.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => {
@@ -192,8 +191,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const [filterMode, setFilterMode] = useState<FilterMode>("none");
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
   const handleContextMenu = useCallback((e: React.MouseEvent, songId: string) => {
-    e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, songId });
+    e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, songId });
   }, []);
 
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
@@ -202,8 +200,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const artistGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
-      const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? [];
-      existing.push(song);
+      const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? []; existing.push(song);
       groups.set(artist, existing);
     }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
@@ -213,8 +210,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const albumGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
-      const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? [];
-      existing.push(song);
+      const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? []; existing.push(song);
       groups.set(album, existing);
     }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);

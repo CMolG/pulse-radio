@@ -74,24 +74,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
 
-    const reader = res.body.getReader(); const chunks: Uint8Array[] = [];
-    let totalRead = 0;
+    const reader = res.body.getReader(); const chunks: Uint8Array[] = []; let totalRead = 0;
     const bytesNeeded = metaint + 4096;
 
     try {
       while (totalRead < bytesNeeded) {
         const { done, value } = await reader.read();
         if (done || !value) break;
-        chunks.push(value);
-        totalRead += value.length;
+        chunks.push(value); totalRead += value.length;
       }
     } finally {
       clearTimeout(timeout); reader.cancel().catch(() => {});
     }
 
     // Concatenate chunks
-    const buffer = new Uint8Array(totalRead);
-    let offset = 0;
+    const buffer = new Uint8Array(totalRead); let offset = 0;
     for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.length; }
 
     // ICY metadata starts at position metaint
@@ -110,8 +107,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
-    clearTimeout(timeout);
-    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

@@ -30,8 +30,7 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
     try {
       const url = `${getBase()}${path}`; const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) {
-        await res.text().catch(() => {});
-        rotateServer();
+        await res.text().catch(() => {}); rotateServer();
         continue;
       }
       const data: Station[] = await res.json(); const filtered = data.filter(s => s.url_resolved);

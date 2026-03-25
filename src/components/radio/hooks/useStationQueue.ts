@@ -36,8 +36,7 @@ export function useStationQueue() {
   const addNext = useCallback((station: Station) => {
     let removedIdx = -1;
     setCurrentIndex(prevIdx => {
-      const q = queueRef.current;
-      removedIdx = q.findIndex(s => s.stationuuid === station.stationuuid);
+      const q = queueRef.current; removedIdx = q.findIndex(s => s.stationuuid === station.stationuuid);
       const filtered = q.filter(s => s.stationuuid !== station.stationuuid);
       if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;
       // Adjust for removal of the station from before the current position
@@ -72,8 +71,7 @@ export function useStationQueue() {
     setQueue(prev => {
       const idx = prev.findIndex(s => s.stationuuid === stationuuid);
       if (idx <= 0) return prev;
-      movedIdx = idx;
-      const next = [...prev];
+      movedIdx = idx; const next = [...prev];
       [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
       return next;
     });
@@ -90,8 +88,7 @@ export function useStationQueue() {
     setQueue(prev => {
       const idx = prev.findIndex(s => s.stationuuid === stationuuid);
       if (idx < 0 || idx >= prev.length - 1) return prev;
-      movedIdx = idx;
-      const next = [...prev];
+      movedIdx = idx; const next = [...prev];
       [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
       return next;
     });
@@ -121,16 +118,14 @@ export function useStationQueue() {
     let result: Station | null = null;
     setCurrentIndex(prev => {
       if (prev <= 0) return prev;
-      const prevIdx = prev - 1;
-      result = queueRef.current[prevIdx];
+      const prevIdx = prev - 1; result = queueRef.current[prevIdx];
       return prevIdx;
     });
     return result;
   }, []);
 
   const setPlaying = useCallback((stationuuid: string) => {
-    const idx = queueRef.current.findIndex(s => s.stationuuid === stationuuid);
-    setCurrentIndex(idx);
+    const idx = queueRef.current.findIndex(s => s.stationuuid === stationuuid); setCurrentIndex(idx);
   }, []);
 
   const hasNext = currentIndex >= 0 && currentIndex < queue.length - 1;

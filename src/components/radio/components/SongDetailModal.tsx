@@ -84,8 +84,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     // Focus first focusable element
     const focusable = modal.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    focusable[0]?.focus();
+    ); focusable[0]?.focus();
 
     const onTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
@@ -95,11 +94,9 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       if (nodes.length === 0) return;
       const first = nodes[0]; const last = nodes[nodes.length - 1];
       if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
+        e.preventDefault(); last.focus();
       } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    window.addEventListener('keydown', onTab);
+    }; window.addEventListener('keydown', onTab);
     return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
   }, [song]);
 

@@ -59,16 +59,13 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
   const check = useCallback(() => {
-    const el = ref.current; if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
+    const el = ref.current; if (!el) return; setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   }, []);
 
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    check();
-    el.addEventListener("scroll", check, { passive: true });
-    const ro = new ResizeObserver(check);
+    const el = ref.current; if (!el) return; check();
+    el.addEventListener("scroll", check, { passive: true }); const ro = new ResizeObserver(check);
     ro.observe(el); return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [check, children]);
 
@@ -146,14 +143,12 @@ export default function BrowseView({
     const ordered: string[] = [];
 
     // Always keep trending first
-    ordered.push('trending');
-    boostedIds.add('trending');
+    ordered.push('trending'); boostedIds.add('trending');
 
     for (const genre of userGenreOrder) {
       const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
       if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
-        ordered.push(catId);
-        boostedIds.add(catId);
+        ordered.push(catId); boostedIds.add(catId);
       }
     }
 
@@ -198,8 +193,7 @@ export default function BrowseView({
         setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {
           if (!prev.has(catId)) return prev;
-          const next = new Set(prev);
-          next.delete(catId);
+          const next = new Set(prev); next.delete(catId);
           return next;
         });
       }
@@ -207,8 +201,7 @@ export default function BrowseView({
       if (!flags?.cancelled) {
         setFailedCategories((prev) => {
           if (prev.has(catId)) return prev;
-          const next = new Set(prev);
-          next.add(catId);
+          const next = new Set(prev); next.add(catId);
           return next;
         });
       }
@@ -216,8 +209,7 @@ export default function BrowseView({
   }, [translatedGenreCategories]);
 
   useEffect(() => {
-    setPage(0); setLiveData({});
-    setScanEnabled(false); setSongFilter("");
+    setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter("");
     scanGenRef.current++;
   }, [view]);
 
@@ -244,8 +236,7 @@ export default function BrowseView({
   const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
 
   useEffect(() => {
-    let cancelled = false;
-    const flags = { cancelled: false };
+    let cancelled = false; const flags = { cancelled: false };
     setError(null);
 
     if (view.mode !== "top") {
@@ -262,12 +253,10 @@ export default function BrowseView({
           }
           if (!cancelled) setStations(result);
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
-      };
-      load();
+      }; load();
     } else {
       // Top view — progressively load categories (3 concurrent max)
-      setLoading(false); setCategorySections({});
-      setFailedCategories(new Set());
+      setLoading(false); setCategorySections({}); setFailedCategories(new Set());
 
       const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
       const runBatch = async () => {
@@ -275,8 +264,7 @@ export default function BrowseView({
           const batch = queue.splice(0, CONCURRENCY);
           await Promise.allSettled(batch.map(catId => loadCategory(catId, flags)));
         }
-      };
-      runBatch();
+      }; runBatch();
     }
 
     return () => { cancelled = true; flags.cancelled = true; };
@@ -297,8 +285,7 @@ export default function BrowseView({
       // activates (or when stations finish loading after activation),
       // so the user doesn't wait 30s staring at a button they just pressed.
       if (!discoveryFiredRef.current) {
-        discoveryFiredRef.current = true;
-        const random = pool[Math.floor(Math.random() * pool.length)];
+        discoveryFiredRef.current = true; const random = pool[Math.floor(Math.random() * pool.length)];
         if (random) onPlay(random);
       }
       discoveryRef.current = setInterval(() => {
@@ -333,8 +320,7 @@ export default function BrowseView({
   // Trigger scan when enabled or page changes (non-top modes only)
   useEffect(() => {
     if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return;
-    const gen = scanGenRef.current + 1; scanGenRef.current = gen;
-    startScan(pageStations, gen);
+    const gen = scanGenRef.current + 1; scanGenRef.current = gen; startScan(pageStations, gen);
     return () => { if (scanGenRef.current === gen) scanGenRef.current++; };
   }, [scanEnabled, pageStations, view.mode, startScan]);
 

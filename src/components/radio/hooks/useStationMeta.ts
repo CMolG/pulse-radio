@@ -46,8 +46,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
     if (signal.aborted) {
       clearTimeout(timeout); controller.abort();
     } else {
-      const onParentAbort = () => controller.abort();
-      signal.addEventListener('abort', onParentAbort, { once: true });
+      const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
       controller.signal.addEventListener('abort', () => {
         signal.removeEventListener('abort', onParentAbort);
       }, { once: true });
@@ -101,8 +100,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   if (currentStationId !== prevStationId) {
     setPrevStationId(currentStationId);
     if (!station) {
-      setTrack(null); setIcyBitrate(null);
-      setStreamCodec(null);
+      setTrack(null); setIcyBitrate(null); setStreamCodec(null);
     }
   }
 
@@ -110,8 +108,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
 
     if (!station) {
-      lastTitleRef.current = ''; prevStationUrlRef.current = null;
-      return;
+      lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
     }
 
     const stationChanged = station.url_resolved !== prevStationUrlRef.current;
@@ -138,8 +135,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
         lastTitleRef.current = streamTitle;
         // Reject ad content in raw title or parsed title (artist names may look like domains)
         const parsed = !isAdContent(streamTitle) ? parseTrack(streamTitle, station.name) : null;
-        setTrack(parsed && !isAdContent(parsed.title) ? parsed : null);
-        return;
+        setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return;
       }
 
       if (streamTitle) return;
@@ -161,8 +157,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener('visibilitychange', onVisible);
-      abortController.abort();
+      document.removeEventListener('visibilitychange', onVisible); abortController.abort();
     };
   }, [station, isPlaying]);
 

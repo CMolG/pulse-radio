@@ -79,10 +79,8 @@ export function useStats() {
         pArtists !== current.artistPlayCounts || pGenres !== current.genrePlayCounts;
       if (didPrune) {
         const pruned: UsageStats = { ...current, stationListenTimes: pStations, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };
-        setStats(pruned);
-        saveToStorage(STORAGE_KEY, pruned);
-      } else saveToStorage(STORAGE_KEY, current);
-      dirtyRef.current = false;
+        setStats(pruned); saveToStorage(STORAGE_KEY, pruned);
+      } else saveToStorage(STORAGE_KEY, current); dirtyRef.current = false;
     }
   }, []);
 
@@ -104,8 +102,7 @@ export function useStats() {
         },
         totalListenMs: prev.totalListenMs + deltaMs,
       };
-    });
-    dirtyRef.current = true;
+    }); dirtyRef.current = true;
   }, []);
 
   // Record a song play
@@ -135,8 +132,7 @@ export function useStats() {
       }
 
       return next;
-    });
-    dirtyRef.current = true;
+    }); dirtyRef.current = true;
   }, []);
 
   const topStations = useMemo(() => topN(stats.stationListenTimes, 'totalMs', 10), [stats.stationListenTimes]);
@@ -180,8 +176,7 @@ export function useStats() {
         };
       }
       return next;
-    });
-    dirtyRef.current = true;
+    }); dirtyRef.current = true;
   }, []);
 
   const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);

@@ -71,8 +71,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     if (borders.has(country.code)) score += 100;
     if (subregions.has(country.subregion)) score += 60;
     if (regions.has(country.region)) score += 30;
-    score += 30;
-    score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
+    score += 30; score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };
   }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.code);
 }

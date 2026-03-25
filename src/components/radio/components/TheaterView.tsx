@@ -51,16 +51,13 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
   const cached = _colorCache.get(imgUrl);
   if (cached) return cached;
   const p = new Promise<[string, string, string]>((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
+    const img = new Image(); img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
-        const canvas = document.createElement("canvas"); const size = 48;
-        canvas.width = size; canvas.height = size;
+        const canvas = document.createElement("canvas"); const size = 48; canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext("2d");
         if (!ctx) return resolve(FALLBACK_COLORS);
-        ctx.drawImage(img, 0, 0, size, size);
-        const data = ctx.getImageData(0, 0, size, size).data;
+        ctx.drawImage(img, 0, 0, size, size); const data = ctx.getImageData(0, 0, size, size).data;
         const buckets: Record<number, number> = {};
         for (let i = 0; i < data.length; i += 12) {
           const r = data[i], g = data[i + 1], b = data[i + 2]; const max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -72,8 +69,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
           else if (max === g) h = 60 * ((b - r) / (max - min) + 2);
           else h = 60 * ((r - g) / (max - min) + 4);
           if (h < 0) h += 360;
-          const bucket = Math.round(h / 30) * 30;
-          buckets[bucket] = (buckets[bucket] || 0) + 1;
+          const bucket = Math.round(h / 30) * 30; buckets[bucket] = (buckets[bucket] || 0) + 1;
         }
         const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
         if (sorted.length < 1) return resolve(FALLBACK_COLORS);
@@ -82,8 +78,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         resolve([ `hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`,
         ]);
       } catch { resolve(FALLBACK_COLORS); }
-    };
-    img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;
+    }; img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;
   });
   if (_colorCache.size >= MAX_COLOR_CACHE) {
     const first = _colorCache.keys().next().value;
@@ -119,8 +114,7 @@ export default function TheaterView({
 
   useEffect(() => {
     if (!artworkUrl || artworkUrl === lastUrlRef.current) return; lastUrlRef.current = artworkUrl;
-    let cancelled = false;
-    extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); });
+    let cancelled = false; extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); });
     return () => { cancelled = true; };
   }, [artworkUrl]);
 

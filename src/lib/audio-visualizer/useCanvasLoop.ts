@@ -25,10 +25,8 @@ export function useCanvasLoop(
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect(); const dpr = Math.min(window.devicePixelRatio || 1, 2) * dprScale;
       sizeRef.current = { w: Math.round(rect.width * dpr), h: Math.round(rect.height * dpr), };
-    };
-    updateSize();
-    const ro = new ResizeObserver(updateSize);
-    ro.observe(canvas); return () => ro.disconnect();
+    }; updateSize();
+    const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, [dprScale]);
 
   useEffect(() => {

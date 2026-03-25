@@ -44,8 +44,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
 
   const teardown = () => {
     if (!recognition) return;
-    recognition.onresult = null; recognition.onerror = null; recognition.onend = null;
-    recognition.stop();
+    recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.stop();
     recognition = null;
   };
 
@@ -53,8 +52,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
     const Ctor = getRecognitionCtor();
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
 
-    recognition = new Ctor();
-    recognition.continuous = true; recognition.interimResults = true;
+    recognition = new Ctor(); recognition.continuous = true; recognition.interimResults = true;
     recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
 
     recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
@@ -81,8 +79,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
         || event.error === 'service-not-allowed'
         || event.error === 'language-not-supported';
       if (fatal) {
-        running = false;
-        callbacks.onFatalError(`Speech recognition error: ${event.error}`);
+        running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`);
         return;
       }
     };
@@ -90,8 +87,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
     recognition.onend = () => {
       if (destroyed || !running) return;
       if (restartCount >= MAX_RESTARTS) {
-        running = false;
-        callbacks.onFatalError('Speech recognition stopped too many times.');
+        running = false; callbacks.onFatalError('Speech recognition stopped too many times.');
         return;
       }
       restartCount++;
@@ -99,8 +95,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       // this is a stale onend firing and we should not restart.
       const current = recognition; if (!current) return;
       try { current.start(); } catch {
-        running = false;
-        callbacks.onFatalError('Speech recognition failed to restart.');
+        running = false; callbacks.onFatalError('Speech recognition failed to restart.');
       }
     };
   };
@@ -111,8 +106,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       wireRecognition(lang);
       if (!recognition) return;
       try {
-        recognition.start();
-        running = true;
+        recognition.start(); running = true;
         restartCount = 0;
       } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
     },

@@ -36,8 +36,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
 
     // Station just changed — skip this render's potentially stale metadata
     if (stationUuid !== lastStationRef.current) {
-      lastStationRef.current = stationUuid; lastTrackRef.current = '';
-      return;
+      lastStationRef.current = stationUuid; lastTrackRef.current = ''; return;
     }
 
     const key = `${stationUuid}::${track.artist}::${track.title}`;
@@ -100,8 +99,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
   const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
 
   const clear = useCallback(() => {
-    setHistory([]);
-    lastTrackRef.current = '';
+    setHistory([]); lastTrackRef.current = '';
   }, []);
 
   return { history, remove, clear };

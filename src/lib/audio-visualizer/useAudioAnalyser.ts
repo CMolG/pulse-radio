@@ -38,20 +38,17 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
       cancelAnimationFrame(rafRef.current);
 
       try {
-        const { ctx, source } = getOrCreateAudioSource(audio);
-        connectedRef.current = audio;
+        const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
 
         if (!analyserRef.current) {
           const analyser = ctx.createAnalyser();
-          analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant;
-          source.connect(analyser);
+          analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
 
         // Allocate buffers once — reused across all frames (zero per-frame allocation)
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
-        waveDataRef.current = new Uint8Array(analyserRef.current.fftSize);
-        setIsActive(true);
+        waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true);
 
         const tick = () => {
           // Skip expensive analyser reads when tab is hidden to save CPU
@@ -61,11 +58,9 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
               analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
               // to avoid 256 float divisions per frame — normalize once at the end
-              const buf = waveDataRef.current;
-              let sumSqInt = 0; let maxAbsInt = 0;
+              const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0;
               for (let i = 0; i < buf.length; i++) {
-                const s = buf[i] - 128;
-                sumSqInt += s * s;
+                const s = buf[i] - 128; sumSqInt += s * s;
                 const a = s < 0 ? -s : s;
                 if (a > maxAbsInt) maxAbsInt = a;
               }
@@ -73,14 +68,12 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
             }
           }
           rafRef.current = requestAnimationFrame(tick);
-        };
-        rafRef.current = requestAnimationFrame(tick);
+        }; rafRef.current = requestAnimationFrame(tick);
       } catch {
         // Some mobile browsers (notably iOS in background paths) can reject
         // WebAudio graph connections for cross-origin streams. Keep playback
         // alive and just disable analyser updates.
-        cancelAnimationFrame(rafRef.current);
-        setIsActive(false);
+        cancelAnimationFrame(rafRef.current); setIsActive(false);
         frequencyDataRef.current = null; waveDataRef.current = null;
       }
     },
@@ -88,8 +81,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
   );
 
   const disconnect = useCallback(() => {
-    cancelAnimationFrame(rafRef.current); connectedRef.current = null;
-    setIsActive(false);
+    cancelAnimationFrame(rafRef.current); connectedRef.current = null; setIsActive(false);
     frequencyDataRef.current = null; waveDataRef.current = null;
   }, []);
 

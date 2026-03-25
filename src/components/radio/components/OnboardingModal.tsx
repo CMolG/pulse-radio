@@ -59,8 +59,7 @@ function PWAStep() {
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as unknown as { prompt: () => Promise<void> });
-    };
-    window.addEventListener('beforeinstallprompt', handler);
+    }; window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 

@@ -38,12 +38,9 @@ export function VisualizerCanvas({
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const updateSize = () => {
-      const rect = canvas.getBoundingClientRect();
-      sizeRef.current = { width: rect.width, height: rect.height };
-    };
-    updateSize();
-    const ro = new ResizeObserver(updateSize);
-    ro.observe(canvas); return () => ro.disconnect();
+      const rect = canvas.getBoundingClientRect(); sizeRef.current = { width: rect.width, height: rect.height };
+    }; updateSize();
+    const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
@@ -64,27 +61,22 @@ export function VisualizerCanvas({
       if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
       const dpr = devicePixelRatio; const targetW = Math.round(width * dpr); const targetH = Math.round(height * dpr);
       if (canvas.width !== targetW || canvas.height !== targetH) {
-        canvas.width = targetW; canvas.height = targetH;
-        gradientCacheRef.current = null;
+        canvas.width = targetW; canvas.height = targetH; gradientCacheRef.current = null;
       }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, width, height);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height);
 
       if (mode === 'bars') {
         const step = Math.max(1, Math.floor(frequencyData.length / barCount));
         const barWidth = width / barCount; const gap = barWidth * 0.2;
 
         // Cache gradient — only recreate on height or color change
-        const gradKey = `${height}_${resolvedColor}`;
-        let fillStyle: string | CanvasGradient = resolvedColor;
+        const gradKey = `${height}_${resolvedColor}`; let fillStyle: string | CanvasGradient = resolvedColor;
         if (gradientCacheRef.current?.key === gradKey) {
           fillStyle = gradientCacheRef.current.gradient;
         } else {
           try {
-            const gradient = ctx.createLinearGradient(0, height, 0, 0);
-            gradient.addColorStop(0, resolvedColor);
-            gradient.addColorStop(1, 'transparent');
-            fillStyle = gradient;
+            const gradient = ctx.createLinearGradient(0, height, 0, 0); gradient.addColorStop(0, resolvedColor);
+            gradient.addColorStop(1, 'transparent'); fillStyle = gradient;
             gradientCacheRef.current = { key: gradKey, gradient };
           } catch { /* fallback to solid color */ }
         }
@@ -98,16 +90,13 @@ export function VisualizerCanvas({
         for (let i = 0; i < barCount; i++) {
           const idx = Math.min(i * step, frequencyData.length - 1);
           const value = frequencyData[idx] / 255; const barHeight = value * height * 0.8;
-          const x = i * barWidth + gap / 2; const y = height - barHeight; const w = barWidth - gap;
-          ctx.beginPath();
+          const x = i * barWidth + gap / 2; const y = height - barHeight; const w = barWidth - gap; ctx.beginPath();
           if (useRoundRect) {
-            ctx.roundRect(x, y, w, barHeight, radii);
-            ctx.fill();
+            ctx.roundRect(x, y, w, barHeight, radii); ctx.fill();
           } else ctx.fillRect(x, y, w, barHeight);
         }
       } else {
-        const step = width / frequencyData.length;
-        ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2;
+        const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2;
         ctx.beginPath();
         for (let i = 0; i < frequencyData.length; i++) {
           const y = height - (frequencyData[i] / 255) * height * 0.6;

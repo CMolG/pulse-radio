@@ -27,8 +27,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     rafRef.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;
-      const y = ((e.clientY - cy) / rect.height) * 20;
-      pointerOffsetRef.current = { x, y };
+      const y = ((e.clientY - cy) / rect.height) * 20; pointerOffsetRef.current = { x, y };
     });
   }, []);
 
@@ -49,8 +48,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
         lastPublishedRef.current = { x: nextX, y: nextY }; setOffset(lastPublishedRef.current);
       }
       tickRafRef.current = requestAnimationFrame(tick);
-    };
-    tickRafRef.current = requestAnimationFrame(tick);
+    }; tickRafRef.current = requestAnimationFrame(tick);
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => {

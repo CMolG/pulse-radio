@@ -96,8 +96,7 @@ function NowPlayingBar({
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const v = parseFloat(e.target.value);
-      onSetVolume(v);
+      const v = parseFloat(e.target.value); onSetVolume(v);
       if (muted && v > 0) onToggleMute();
     },
     [muted, onSetVolume, onToggleMute],

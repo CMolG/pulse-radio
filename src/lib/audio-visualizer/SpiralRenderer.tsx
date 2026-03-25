@@ -57,8 +57,7 @@ export function SpiralRenderer({
       // Map real frequency data to our bars
       for (let i = 0; i < NUM_BARS; i++) {
         const srcIdx = Math.min(Math.floor((i / NUM_BARS) * frequencyData.length), frequencyData.length - 1,);
-        target[i] = (frequencyData[srcIdx] / 255) * sensitivity;
-        data[i] += (target[i] - data[i]) * 0.15;
+        target[i] = (frequencyData[srcIdx] / 255) * sensitivity; data[i] += (target[i] - data[i]) * 0.15;
       }
     } else if (demo) {
       // Demo mode: organic simulated audio
@@ -76,8 +75,7 @@ export function SpiralRenderer({
 
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
-    const smoothed = smoothedRef.current; const temp = tempRef.current;
-    let src = data; let dst = smoothed;
+    const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
       for (let i = 0; i < NUM_BARS; i++) {
         const prev = src[i > 0 ? i - 1 : 0];
@@ -85,8 +83,7 @@ export function SpiralRenderer({
         dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25;
       }
       // Swap: previous dst becomes next src
-      const swap = src === data ? temp : src;
-      src = dst;
+      const swap = src === data ? temp : src; src = dst;
       dst = swap;
     }
     // After SMOOTH_PASSES iterations, result is in `src`
@@ -102,15 +99,12 @@ export function SpiralRenderer({
     ctx.clearRect(0, 0, w, h);
 
     // Gradient
-    const { color1: c1, color2: c2, color3: c3 } = colorsRef.current;
-    let fillStyle: string | CanvasGradient = c1;
+    const { color1: c1, color2: c2, color3: c3 } = colorsRef.current; let fillStyle: string | CanvasGradient = c1;
     try {
       const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,
         centerY + maxRadius,
-      );
-      gradient.addColorStop(0, c1);
-      gradient.addColorStop(0.5, c2);
-      gradient.addColorStop(1, c3);
+      ); gradient.addColorStop(0, c1);
+      gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3);
       fillStyle = gradient;
     } catch { /* fallback to solid color */ }
 
@@ -124,15 +118,12 @@ export function SpiralRenderer({
       const radius = minRadius * Math.exp(b * baseAngle);
       const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle);
 
-      innerX[i] = centerX + cos * radius;
-      innerY[i] = centerY + sin * radius;
-      outerX[i] = centerX + cos * (radius + barHeight + 2);
-      outerY[i] = centerY + sin * (radius + barHeight + 2);
+      innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
+      outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2);
     }
 
     // Draw slime shapes per cycle
-    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20;
-    ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
+    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
 
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
 
@@ -158,8 +149,7 @@ export function SpiralRenderer({
       }
       ctx.lineTo(innerX[startIdx], innerY[startIdx]);
 
-      ctx.closePath();
-      ctx.fill();
+      ctx.closePath(); ctx.fill();
     }
 
     ctx.globalAlpha = 1.0;

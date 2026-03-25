@@ -35,8 +35,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
 
   const toggle = useCallback(() => {
     setManuallyEnabled(prev => {
-      const next = !prev;
-      saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next);
+      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next);
       return next;
     });
   }, []);
@@ -56,8 +55,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
             previousCandidateIndex: prev.candidateLineIndex,
             stableSamples: stableSamplesRef.current,
             policy: DEFAULT_REALTIME_ALIGN_POLICY,
-          });
-          stableSamplesRef.current = step.stableSamples;
+          }); stableSamplesRef.current = step.stableSamples;
 
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
 
@@ -103,8 +101,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
       },
     });
 
-    engineRef.current = engine;
-    engine.start(languageHint);
+    engineRef.current = engine; engine.start(languageHint);
 
     return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);

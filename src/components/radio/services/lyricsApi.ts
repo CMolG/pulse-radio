@@ -31,8 +31,7 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
   parentSignal.addEventListener('abort', onParentAbort, { once: true });
 
   return fetch(url, { signal: controller.signal }).finally(() => {
-    clearTimeout(timeout);
-    parentSignal.removeEventListener('abort', onParentAbort);
+    clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);
   });
 }
 

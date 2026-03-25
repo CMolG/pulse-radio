@@ -83,8 +83,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
 
   // Use an offscreen canvas for smooth bilinear upscaling
   if (!_offscreen || _offscreen.width !== sw || _offscreen.height !== sh) {
-    _offscreen = new OffscreenCanvas(sw, sh);
-    _imgData = undefined;
+    _offscreen = new OffscreenCanvas(sw, sh); _imgData = undefined;
   }
   const offCtx = _offscreen.getContext('2d', { willReadFrequently: true });
   if (!offCtx) return;
@@ -106,8 +105,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
 
   for (let py = 0; py < sh; py++) {
     for (let px = 0; px < sw; px++) {
-      const x = px * scale; const y = py * scale;
-      let sum = 0; let weightedBand = 0;
+      const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0;
       let totalWeight = 0;
 
       for (let b = 0; b < blobCount; b++) {
@@ -116,8 +114,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
         // Early-exit: skip blobs too far to contribute meaningfully
         if (distSq > blobMaxDistSq[b]) continue;
 
-        const r = blob.baseRadius; const field = (r * r) / (distSq + 1);
-        sum += field;
+        const r = blob.baseRadius; const field = (r * r) / (distSq + 1); sum += field;
 
         if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; }
       }
@@ -137,18 +134,15 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
         const b = (lerp(colors.primary[2], colors.secondary[2], bandNorm) * brightnessMul) | 0;
 
         // add accent glow at edges
-        const accentMix = edgeGlow * energy * 0.6;
-        sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0);
+        const accentMix = edgeGlow * energy * 0.6; sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0);
         sd[idx + 1] = Math.min(255, g + (colors.accent[1] * accentMix) | 0);
         sd[idx + 2] = Math.min(255, b + (colors.accent[2] * accentMix) | 0);
         sd[idx + 3] = Math.min(255, (180 + coreIntensity * 75) | 0);
       } else if (sum > thresholdLow) {
         // outer glow
-        const glowIntensity = (sum - thresholdLow) / glowRange;
-        sd[idx] = (colors.accent[0] * glowIntensity * 0.4) | 0;
+        const glowIntensity = (sum - thresholdLow) / glowRange; sd[idx] = (colors.accent[0] * glowIntensity * 0.4) | 0;
         sd[idx + 1] = (colors.accent[1] * glowIntensity * 0.4) | 0;
-        sd[idx + 2] = (colors.accent[2] * glowIntensity * 0.4) | 0;
-        sd[idx + 3] = (glowIntensity * 60) | 0;
+        sd[idx + 2] = (colors.accent[2] * glowIntensity * 0.4) | 0; sd[idx + 3] = (glowIntensity * 60) | 0;
       } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0;
     }
   }
@@ -156,8 +150,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   // Put image data into offscreen canvas, then draw upscaled with
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
   try {
-    offCtx.putImageData(_imgData, 0, 0);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h);
   } catch { /* skip frame on canvas error */ }
 }
@@ -191,8 +184,7 @@ export function FerrofluidRenderer({
     const blobs = blobsRef.current; const cx = w / 2; const cy = h / 2;
 
     // compute overall energy
-    let energy = 0;
-    const frequencyData = freqData;
+    let energy = 0; const frequencyData = freqData;
     if (frequencyData) {
       let sum = 0;
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
@@ -216,15 +208,13 @@ export function FerrofluidRenderer({
         const displacement = bandVal * minWH * 0.15 * sensitivity; const dispAngle = angle + Math.PI * 0.5;
         blob.targetX += Math.cos(dispAngle) * displacement; blob.targetY += Math.sin(dispAngle) * displacement;
       } else if (demo) {
-        bandVal = 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3;
-        const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08;
+        bandVal = 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3; const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08;
         blob.targetX += Math.cos(angle * 1.3) * demoDisp; blob.targetY += Math.sin(angle * 1.7) * demoDisp;
       } else bandVal = 0.3;
 
       // smooth follow
       blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08;
-      blob.vx *= 0.85; blob.vy *= 0.85;
-      blob.x += blob.vx; blob.y += blob.vy;
+      blob.vx *= 0.85; blob.vy *= 0.85; blob.x += blob.vx; blob.y += blob.vy;
 
       // pulse radius with energy (reuses cached bandVal and minWH)
       blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity;
