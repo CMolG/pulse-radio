@@ -2506,10 +2506,8 @@ function useLyrics(
         retryCountRef.current = 0;
         if (result) {
           setLyrics(result);
-          const updated = [
-            { key, data: result, ts: Date.now() },
-            ...cached.filter((e) => e.key !== key),
-          ];
+          const updated = cached.filter((e) => e.key !== key);
+          updated.unshift({ key, data: result, ts: Date.now() });
           saveCache(updated);
         } else setLyrics(null);
       })
@@ -8439,7 +8437,7 @@ function useFavoriteSongs() {
       timestamp: now,
     };
     const next = [entry, ...prev];
-    return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
+    return next.length > MAX_SONGS ? (next.length = MAX_SONGS, next) : next;
   };
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs((prev) =>
@@ -8486,7 +8484,8 @@ function useFavorites() {
   const add = useCallback((station: Station) => {
     setFavorites((prev) => {
       if (prev.some((s) => s.stationuuid === station.stationuuid)) return prev;
-      return [station, ...prev].slice(0, MAX_FAVORITES);
+      const next = [station, ...prev];
+      return next.length > MAX_FAVORITES ? (next.length = MAX_FAVORITES, next) : next;
     });
   }, []);
   const remove = useCallback((uuid: string) => {
@@ -8496,7 +8495,8 @@ function useFavorites() {
     setFavorites((prev) => {
       const exists = prev.some((s) => s.stationuuid === station.stationuuid);
       if (exists) return prev.filter((s) => s.stationuuid !== station.stationuuid);
-      return [station, ...prev].slice(0, MAX_FAVORITES);
+      const next = [station, ...prev];
+      return next.length > MAX_FAVORITES ? (next.length = MAX_FAVORITES, next) : next;
     });
   }, []);
   const has = useCallback(
@@ -8576,7 +8576,9 @@ function useHistory(
             e.stationUuid === entry.stationUuid
           ),
       );
-      return [entry, ...deduped].slice(0, MAX_HISTORY);
+      deduped.unshift(entry);
+      if (deduped.length > MAX_HISTORY) deduped.length = MAX_HISTORY;
+      return deduped;
     });
   }, [track?.title, track?.artist, stationUuid, stationName]);
   useEffect(() => {
@@ -8756,7 +8758,9 @@ function useRecent() {
   const add = useCallback((station: Station) => {
     setRecent((prev) => {
       const filtered = prev.filter((s) => s.stationuuid !== station.stationuuid);
-      return [station, ...filtered].slice(0, MAX_RECENT);
+      filtered.unshift(station);
+      if (filtered.length > MAX_RECENT) filtered.length = MAX_RECENT;
+      return filtered;
     });
   }, []);
   const remove = useCallback((uuid: string) => {
