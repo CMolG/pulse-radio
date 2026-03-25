@@ -16,7 +16,6 @@ import type { EqBand, EqPreset, NoiseReductionMode } from "../types";
 import UsageGuide from "./UsageGuide";
 import StatsView from "./StatsView";
 import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from "../hooks/useStats";
-
 type Props = {
   onClose: () => void;
   eq: {
@@ -34,7 +33,6 @@ type Props = {
     topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number;
   };
 };
-
 export default function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: Props) {
   const { locale, setLocale, locales } = useLocale(); const [showEq, setShowEq] = useState(false);
   const [showGuide, setShowGuide] = useState(false); const [showStats, setShowStats] = useState(false);

@@ -10,7 +10,6 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 import { primaryArtist } from '../utils/formatUtils';
-
 const STORAGE_KEY = 'radio-usage-stats';
 const SAVE_INTERVAL_MS = 10_000;
 const MAX_STATIONS = 300;
@@ -27,7 +26,6 @@ export interface UsageStats {
   artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>;
   totalListenMs: number;
 }
-
 const EMPTY_STATS: UsageStats = {
   stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0,
 };
@@ -42,7 +40,6 @@ function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<
 function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
   return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n);
 }
-
 export function useStats() {
   const [stats, setStats] = useState<UsageStats>(() =>
     loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),

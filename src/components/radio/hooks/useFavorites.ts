@@ -11,9 +11,7 @@ import type { Station } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
-
 const MAX_FAVORITES = 500;
-
 export function useFavorites() {
   const [favorites, setFavorites] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []);

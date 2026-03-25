@@ -10,13 +10,11 @@ import React from "react";
 import { Clock, Trash2 } from "lucide-react";
 import type { HistoryEntry, SongDetailData } from "../types";
 import SongCard from "./SongCard";
-
 type Props = {
   history: HistoryEntry[]; onRemove: (id: string) => void;
   onClear: () => void; onToggleFavSong?: (entry: HistoryEntry) => void;
   isSongFavorite?: (title: string, artist: string) => boolean; onSelect?: (song: SongDetailData) => void;
 };
-
 export default React.memo(function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
   if (history.length === 0) {
     return (

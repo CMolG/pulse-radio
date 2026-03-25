@@ -9,7 +9,6 @@
 import React from 'react';
 import { useParallaxBg } from '../hooks/useParallaxBg';
 import UiImage from '@/components/common/UiImage';
-
 type Props = { faviconUrl?: string; genre?: string; audioAmplitude?: number; landingMode?: boolean; };
 const BF_STYLE: React.CSSProperties = { WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' };
 const BLUR_STYLE: React.CSSProperties = {
@@ -19,7 +18,6 @@ const BLUR_STYLE: React.CSSProperties = {
 const RADIAL_OVERLAY: React.CSSProperties = {
   background: 'radial-gradient(140% 120% at 50% 40%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%)',
 };
-
 function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode = false }: Props) {
   const { offset, containerRef, gradient } = useParallaxBg(genre, audioAmplitude);
   const baseGradient = landingMode ? 'radial-gradient(120% 100% at 50% 8%, rgba(112,112,112,0.18) 0%, rgba(44,44,44,0.16) 35%, rgba(24,24,24,0.92) 100%)' : gradient;
@@ -49,5 +47,4 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
       )}
     </div>);
 }
-
 export default React.memo(ParallaxBackground);

@@ -7,7 +7,6 @@
 'use client';
 
 import React from 'react';
-
 export default React.memo(function AnimatedBars({ size = 'default' }: { size?: 'small' | 'default' }) {
   const h = size === 'small' ? 10 : 16; const w = size === 'small' ? 2 : 3;
   return (<span className="inline-flex items-end" style={{ height: h, gap: size === 'small' ? 1 : 1.5 }}>

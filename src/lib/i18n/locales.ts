@@ -38,23 +38,19 @@ const _LOCALES = [ { code: "en", nativeName: "English", englishName: "English" }
   { code: "sw", nativeName: "Kiswahili", englishName: "Swahili" },
   { code: "tl", nativeName: "Filipino", englishName: "Filipino" },
 ] as const;
-
 export type SupportedLocale = (typeof _LOCALES)[number]['code'];
 export type LocaleInfo = { code: SupportedLocale; nativeName: string; englishName: string; rtl?: boolean; };
 export const SUPPORTED_LOCALES: readonly LocaleInfo[] = _LOCALES;
 const SUPPORTED_SET = new Set<SupportedLocale>(SUPPORTED_LOCALES.map((locale) => locale.code),);
-
 export function isSupportedLocale(value: string): value is SupportedLocale {
   return SUPPORTED_SET.has(value as SupportedLocale);
 }
-
 const BASE_LOCALE_MAP: Record<string, SupportedLocale> = {
   en: "en", es: "es", fr: "fr", de: "de", pt: "pt", it: "it", nl: "nl", ja: "ja",
   ko: "ko", zh: "zh", ar: "ar", hi: "hi", bn: "bn", ru: "ru", uk: "uk", pl: "pl",
   tr: "tr", sv: "sv", da: "da", nb: "nb", no: "nb", fi: "fi", el: "el", cs: "cs",
   hu: "hu", ro: "ro", th: "th", vi: "vi", id: "id", ms: "ms", fa: "fa", he: "he", sw: "sw", tl: "tl", fil: "tl",
 };
-
 export function normalizeLocale(input: string | null | undefined): SupportedLocale {
   if (!input) return "en"; const normalized = input.replace(/_/g, "-").trim();
   if (isSupportedLocale(normalized)) return normalized; const lower = normalized.toLowerCase();
@@ -62,7 +58,6 @@ export function normalizeLocale(input: string | null | undefined): SupportedLoca
   if (lower === "zh-tw" || lower === "zh-hk" || lower === "zh-mo") return "zh-TW"; const base = lower.split("-")[0];
   return BASE_LOCALE_MAP[base] ?? "en";
 }
-
 export function isRtlLocale(locale: SupportedLocale): boolean {
   const info = SUPPORTED_LOCALES.find((item) => item.code === locale); return Boolean(info?.rtl);
 }

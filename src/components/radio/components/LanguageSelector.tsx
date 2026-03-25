@@ -9,7 +9,6 @@
 import React from "react";
 import { Languages } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
-
 function LanguageSelector() {
   const { locale, setLocale, locales } = useLocale();
   return (
@@ -24,5 +23,4 @@ function LanguageSelector() {
         ))}</select></label>
   );
 }
-
 export default React.memo(LanguageSelector);

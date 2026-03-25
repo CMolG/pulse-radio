@@ -6,10 +6,8 @@
 
 import type { LyricsData, LrcLibResponse } from '../types';
 import { parseLrc } from '../lrcParser';
-
 const LRCLIB_BASE = 'https://lrclib.net/api';
 const FETCH_TIMEOUT_MS = 8_000;
-
 function isTransientError(err: unknown): boolean {
   if (err instanceof DOMException && err.name === 'TimeoutError') return true;
   if (err instanceof TypeError) return true; // fetch network failure
@@ -31,7 +29,6 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
     clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);
   });
 }
-
 export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
   fallbackArtist?: string, signal?: AbortSignal,
 ): Promise<LyricsData | null> {
@@ -49,7 +46,6 @@ export async function fetchLyrics( artist: string, title: string, album?: string
   }
   return null;
 }
-
 async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: (d: T) => LyricsData | null): Promise<LyricsData | null> {
   try {
     const res = await fetchWithCancel(url, signal); if (res.ok) return parse(await res.json());
@@ -57,7 +53,6 @@ async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: 
   } catch (err) { if (isTransientError(err)) throw err; }
   return null;
 }
-
 async function fetchLyricsForArtist( artist: string, title: string, album?: string, duration?: number,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
@@ -70,7 +65,6 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
     signal, r => r.length > 0 ? transform(r[0], artist, title) : null,
   );
 }
-
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
   if (data.syncedLyrics) {
     return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) };

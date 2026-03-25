@@ -5,7 +5,6 @@
  */
 
 import Link from "next/link";
-
 export default function CountryNotFound() {
   return (
     <main className="h-full min-h-screen bg-[#0a0f1a] text-white flex items-center justify-center px-6">

@@ -10,15 +10,12 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { getInitialLocale, getInitialLocaleForCountry, saveLocale } from "@/lib/i18n/localeStorage";
 import { isRtlLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/i18n/locales";
 import { type MessageKey, translate } from "@/lib/i18n/messages";
-
 type TranslateFn = (key: MessageKey, vars?: Record<string, string | number>) => string;
 type LocaleContextValue = {
   locale: SupportedLocale; setLocale: (locale: SupportedLocale) => void; t: TranslateFn; rtl: boolean;
   locales: typeof SUPPORTED_LOCALES;
 };
-
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
-
 export function LocaleProvider({ children, countryCode, }: { children: React.ReactNode; countryCode?: string; }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>
     countryCode ? getInitialLocaleForCountry(countryCode) : getInitialLocale(),
@@ -34,7 +31,6 @@ export function LocaleProvider({ children, countryCode, }: { children: React.Rea
     return { locale, setLocale: setLocaleState, t, rtl: isRtlLocale(locale), locales: SUPPORTED_LOCALES };
   }, [locale]); return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
-
 export function useLocale() {
   const context = useContext(LocaleContext);
   if (!context) throw new Error("useLocale must be used within a LocaleProvider"); return context;

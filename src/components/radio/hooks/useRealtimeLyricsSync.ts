@@ -13,9 +13,7 @@ import { defaultRealtimeState, DEFAULT_REALTIME_ALIGN_POLICY, isRealtimeEligible
 import { alignHypothesis, mapLineToEffectiveTime } from '../services/lyricsAligner';
 import { createRealtimeSpeechEngine, isRealtimeSpeechSupported, type RealtimeSpeechEngine } from '../services/realtimeSpeechRecognition';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-
 type Params = { lyrics: LyricsData | null; enabled: boolean; languageHint: 'en' | 'es' };
-
 export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params): RealtimeSyncResult {
   const initialEnabled = useMemo(() => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false), []);
   const [manuallyEnabled, setManuallyEnabled] = useState<boolean>(initialEnabled);

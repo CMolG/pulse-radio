@@ -5,7 +5,6 @@
  */
 
 import type { SupportedLocale } from "./locales";
-
 const BASE_MESSAGES = {
   topStations: "Top Stations", loadingStations: "Loading…", stationCount: "{count} stations", discovery: "Discovery",
   discoveryOn: "ON", discoveryModeAria: "Discovery mode",
@@ -28,7 +27,6 @@ const BASE_MESSAGES = {
   genreAmbient: "Ambient", genreLofi: "Lo-Fi", genreNews: "News", genreLatin: "Latin",
   genreMetal: "Metal", genreLocal: "Local", genreWorld: "World", seeMore: "See more",
 } as const;
-
 export type MessageKey = keyof typeof BASE_MESSAGES;
 export type MessageBundle = Record<MessageKey, string>;
 const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = {
@@ -91,18 +89,14 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     minimize: "تصغير", expand: "توسيع",
   },
 };
-
 function mergeBundle(locale: SupportedLocale): MessageBundle {
   const patch = DEEP_MESSAGES[locale] ?? {}; return { ...BASE_MESSAGES, ...patch };
 }
-
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};
-
 export function getMessages(locale: SupportedLocale): MessageBundle {
   if (!MESSAGE_CACHE[locale]) MESSAGE_CACHE[locale] = mergeBundle(locale);
   return MESSAGE_CACHE[locale] as MessageBundle;
 }
-
 export function translate(locale: SupportedLocale, key: MessageKey, vars?: Record<string, string | number>): string {
   const message = getMessages(locale)[key] ?? BASE_MESSAGES[key]; if (!vars) return message;
   return message.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, token: string) => {

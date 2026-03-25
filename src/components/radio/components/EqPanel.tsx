@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { X, Power, Plus, Save } from 'lucide-react';
 import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_PRESETS } from '../constants';
-
 type Props = {
   bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; stereoWidth: number;
   bassEnhance: number; compressorEnabled: boolean; compressorAmount: number; noiseReductionMode: NoiseReductionMode;
@@ -22,7 +21,6 @@ type Props = {
   onClose: () => void; onSaveCustomPreset?: (name: string) => void;
   onRemoveCustomPreset?: (name: string) => void; onPresetChange?: (name: string | null) => void;
 };
-
 export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
   const [showSaveInput, setShowSaveInput] = useState(false); const [presetName, setPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);

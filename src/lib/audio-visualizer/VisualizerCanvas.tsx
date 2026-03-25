@@ -11,7 +11,6 @@ interface VisualizerCanvasProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
   opacity?: number; className?: string;
 }
-
 export function VisualizerCanvas({
   frequencyDataRef, mode = 'bars', barCount = 64, color = 'var(--accent-color)', opacity = 0.4, className = '',
 }: VisualizerCanvasProps) {

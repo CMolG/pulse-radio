@@ -16,14 +16,11 @@ import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
 import { useAlbumArt } from '@/lib/audio-visualizer';
 import UiImage from '@/components/common/UiImage';
 import { itunesSearchUrl } from '../utils/formatUtils';
-
 const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]';
 const MetaBadge = ({ icon: Icon, cls, children }: { icon: typeof Clock; cls: string; children: React.ReactNode }) => (
   <span className={`${BADGE_CLS} ${cls}`}><Icon size={9} />{children}</span>
 );
-
 type Props = { song: SongDetailData | null; onClose: () => void; onRemoveFromFavorites?: () => void };
-
 function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
   const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
@@ -261,5 +258,4 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
         </motion.div>)}</AnimatePresence>
   );
 }
-
 export default React.memo(SongDetailModal);

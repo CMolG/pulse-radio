@@ -6,7 +6,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { apiFetch } from '@/lib/apiUtils';
-
 export const runtime = 'nodejs';
 
 /**

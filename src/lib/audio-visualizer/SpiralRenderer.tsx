@@ -14,11 +14,9 @@ interface SpiralRendererProps {
 }
 
 import { useCanvasLoop } from './useCanvasLoop';
-
 const NUM_BARS = 250;
 const CYCLES = 4;
 const SMOOTH_PASSES = 3;
-
 export function SpiralRenderer({
   frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068",
   color3 = "#f9d423", sensitivity = 1.0, demo = false,
@@ -123,5 +121,4 @@ export function SpiralRenderer({
         style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div>
   );
 }
-
 export default SpiralRenderer;

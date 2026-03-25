@@ -7,7 +7,6 @@
 "use client";
 
 import type { LyricsData } from "./types";
-
 export type RenderableLyricLine = { id: string; text: string; };
 
 /**
@@ -25,7 +24,6 @@ function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   }
   return result;
 }
-
 export function getEffectiveActiveLyricIndex( lyrics: LyricsData | null, currentTime: number | undefined,
   activeLineOverride?: number, ) {
   if (typeof activeLineOverride === 'number' && activeLineOverride >= 0) {
@@ -34,7 +32,6 @@ export function getEffectiveActiveLyricIndex( lyrics: LyricsData | null, current
   }
   return getActiveLyricIndex(lyrics, currentTime);
 }
-
 export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLyricLine[] {
   if (!lyrics) return [];
   if (lyrics.synced && lyrics.lines.length > 0) {

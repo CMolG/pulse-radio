@@ -8,11 +8,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistrar } from "./ServiceWorkerRegistrar";
-
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], });
-
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], });
-
 const SITE_URL = "https://www.pulse-radio.online";
 const SITE_TITLE = "Pulse Radio — Free Internet Radio with Visualizer";
 const SITE_DESCRIPTION =
@@ -36,9 +33,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   alternates: { canonical: SITE_URL, }, category: "music", other: { "mobile-web-app-capable": "yes", },
 };
-
 export const viewport: Viewport = { themeColor: "#0a0f1a", width: "device-width", initialScale: 1, maximumScale: 5, viewportFit: "cover" };
-
 function JsonLd() {
   const schema = {
     "@context": "https://schema.org", "@type": "WebApplication", name: "Pulse Radio", url: SITE_URL,
@@ -48,7 +43,6 @@ function JsonLd() {
     screenshot: `${SITE_URL}/android-chrome-512x512.png`,
   }; return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
-
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en" dir="ltr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}>

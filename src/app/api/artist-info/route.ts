@@ -5,7 +5,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -22,21 +21,18 @@ async function fetchJson<T>(url: string, headers: Record<string, string>): Promi
     return await res.json();
   } catch { return null; }
 }
-
 async function searchMusicBrainz(artist: string) {
   const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = await fetchJson<{ artists?: any[] }>(url, { 'User-Agent': USER_AGENT, Accept: 'application/json' });
   return data?.artists?.[0] ?? null;
 }
-
 async function fetchWikiSummary(title: string) {
   const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT });
   if (data?.type === 'disambiguation') return null; return data;
 }
-
 export async function GET(req: NextRequest) {
   const artist = req.nextUrl.searchParams.get('artist');
   if (!artist || artist.length > 200) {

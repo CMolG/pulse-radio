@@ -1,7 +1,5 @@
 "use client";
-
 import { useRef, useEffect } from "react";
-
 export type PaintFn = (ctx: CanvasRenderingContext2D, w: number, h: number, freqData: Uint8Array | null,) => void;
 
 /** Shared RAF-driven canvas loop with DPR-aware sizing. */

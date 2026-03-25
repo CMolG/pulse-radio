@@ -11,7 +11,6 @@ import type { FavoriteSong } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
-
 function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
 
 /** Build a Set of songKeys from a song array for O(1) lookups. */
@@ -20,7 +19,6 @@ function buildKeySet(songs: FavoriteSong[]): Set<string> {
   for (let i = 0; i < songs.length; i++) { s.add(songKey(songs[i].title, songs[i].artist)); }
   return s;
 }
-
 export function useFavoriteSongs() {
   const MAX_SONGS = 500;
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {

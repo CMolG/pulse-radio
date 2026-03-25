@@ -8,7 +8,6 @@
 
 import React from "react";
 import { X } from "lucide-react";
-
 const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: "Previous station" },
   { key: "→", desc: "Next station" }, { key: "↑", desc: "Volume up" },
   { key: "↓", desc: "Volume down" }, { key: "M", desc: "Mute / Unmute" },
@@ -20,7 +19,6 @@ const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: 
 ];
 
 interface Props { onClose: () => void; }
-
 export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) {
   return (
     <div

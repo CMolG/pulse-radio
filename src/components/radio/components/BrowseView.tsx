@@ -21,12 +21,10 @@ import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
   'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world',
 ] as const;
-
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
 };
-
 type Props = {
   view: ViewState; currentStation: Station | null; isPlaying: boolean; isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void; onToggleFav: (station: Station) => void;
@@ -35,7 +33,6 @@ type Props = {
   onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
   onGoHome?: () => void; userGenreOrder?: string[];
 };
-
 const SCROLL_CLASS =
   "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
 
@@ -74,7 +71,6 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
       )} <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div></div>
   );
 }
-
 export default function BrowseView({
   view, currentStation, isPlaying, isFavorite, onPlay, onToggleFav, onPrefetch, favorites,
   recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder,

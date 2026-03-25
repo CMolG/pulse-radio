@@ -11,30 +11,24 @@ import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_BANDS, STORAGE_KEYS } from '../constants';
 import { getOrCreateAudioSource } from '@/lib/audio-visualizer';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-
 const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: number; gateRatio: number; deEsserCenterHz: number; deEsserGain: number }> = {
   off: { hpfHz: 20, gateThreshold: -90, gateRatio: 1.0, deEsserCenterHz: 6000, deEsserGain: 0 },
   low: { hpfHz: 35, gateThreshold: -55, gateRatio: 1.5, deEsserCenterHz: 5500, deEsserGain: -1.5 },
   medium: { hpfHz: 35, gateThreshold: -48, gateRatio: 2.0, deEsserCenterHz: 6000, deEsserGain: -3 },
   high: { hpfHz: 35, gateThreshold: -42, gateRatio: 3.0, deEsserCenterHz: 6500, deEsserGain: -4.5 },
 };
-
 const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
-
 function ensureQualityMigration(): void {
   if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
   saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low'); saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
   saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
 }
-
 function getDefaultNoiseReductionMode(): NoiseReductionMode {
   ensureQualityMigration(); return loadFromStorage<NoiseReductionMode>(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
 }
-
 function getDefaultNormalizerEnabled(): boolean {
   ensureQualityMigration(); return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true);
 }
-
 export function useEqualizer() {
   const [bands, setBands] = useState<EqBand[]>(() => {
     const defaults = EQ_BANDS.map(b => ({ ...b }));

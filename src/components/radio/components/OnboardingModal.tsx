@@ -11,14 +11,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { IoRadioOutline, IoMusicalNotesOutline, IoHeartOutline, IoStatsChartOutline,
   IoColorPaletteOutline, IoPhonePortraitOutline, IoShareOutline, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-
 const ONBOARDING_KEY = 'radio-onboarding-done';
 const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
   WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
 };
-
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string; };
 const STEPS: OnboardingStep[] = [
   {
@@ -42,7 +40,6 @@ const STEPS: OnboardingStep[] = [
     description: 'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
   },
 ];
-
 function PWAStep() {
   const [deferredPrompt, setDeferredPrompt] = useState<{ prompt: () => Promise<void> } | null>(null);
   const [isIos] = useState(() => typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent));
@@ -90,7 +87,6 @@ function PWAStep() {
           Use Chrome or Edge for the install option, or add this page to your home screen.</p>)}</div>
   );
 }
-
 function OnboardingModal() {
   const [show, setShow] = useState(false); const [step, setStep] = useState(0);
   const totalSteps = STEPS.length + 1; // +1 for PWA step
@@ -149,5 +145,4 @@ function OnboardingModal() {
                 >{isLast ? "Let's Go!" : 'Next'}</button></div></div></motion.div></motion.div>)}</AnimatePresence>
   );
 }
-
 export default React.memo(OnboardingModal);

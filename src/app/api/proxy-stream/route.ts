@@ -6,7 +6,6 @@
 
 import { NextRequest } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
-
 export const runtime = 'nodejs';
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely

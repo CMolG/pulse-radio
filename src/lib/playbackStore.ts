@@ -7,7 +7,6 @@
 'use client';
 
 import { create } from 'zustand';
-
 export type PlaybackSource = 'radio' | null;
 
 interface PlaybackState {
@@ -18,7 +17,6 @@ interface PlaybackState {
   setMuted: (m: boolean) => void; setTrackInfo: (title: string, artist: string, artwork?: string | null) => void;
   reset: () => void;
 }
-
 export const usePlaybackStore = create<PlaybackState>((set) => ({
   source: null, isPlaying: false, currentTime: 0, volume: 0.8,
   muted: false, trackTitle: '', trackArtist: '', artworkUrl: null,

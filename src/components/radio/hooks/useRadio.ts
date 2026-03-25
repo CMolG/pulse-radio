@@ -14,7 +14,6 @@ import { resumeAudioContext, hasAudioSource } from '@/lib/audio-visualizer';
 
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
 function proxyUrl(raw: string): string { return `/api/proxy-stream?url=${encodeURIComponent(raw)}`; }
-
 function isValidStreamUrl(url: string | undefined): url is string {
   if (!url) return false;
   try {
@@ -26,12 +25,10 @@ function isValidStreamUrl(url: string | undefined): url is string {
 function isAutoplayBlocked(err: unknown): boolean {
   return err instanceof DOMException && err.name === 'NotAllowedError';
 }
-
 function isIOSDevice(): boolean {
   if (typeof navigator === 'undefined') return false; const ua = navigator.userAgent || '';
   return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
-
 export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 export type StreamLatency = { url: string; latencyMs: number; timestamp: number; };
 export function useRadio() {

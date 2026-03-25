@@ -14,7 +14,6 @@ interface Props {
   /** Optional fallback to render instead of the default error UI */
   fallback?: React.ReactNode;
 }
-
 type State = { hasError: boolean; error: Error | null; };
 
 export class ErrorBoundary extends React.Component<Props, State> {

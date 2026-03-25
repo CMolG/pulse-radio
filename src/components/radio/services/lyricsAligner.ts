@@ -7,28 +7,22 @@
 import type { LyricsData } from '../types';
 import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
 import { normalizeText } from '@/lib/stringUtils';
-
 export type AlignerStepInput = {
   lyrics: LyricsData; hypothesisText: string; previousConfirmedIndex: number; previousCandidateIndex: number;
   stableSamples: number; policy: RealtimeAlignPolicy;
 };
-
 export type AlignerStepResult = {
   candidateIndex: number; confirmedIndex: number; score: number; stableSamples: number;
   jumpRejected: boolean; relockTriggered: boolean;
 };
-
 const STOPWORDS = new Set([ 'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'for', 'with',
   'el', 'la', 'los', 'las', 'de', 'del', 'y', 'en', 'por', 'con', 'un', 'una',
 ]);
-
 const WORD_RE = /[a-z0-9']+/g;
-
 function tokenize(value: string): string[] {
   const normalized = normalizeText(value); if (!normalized) return []; const matches = normalized.match(WORD_RE) ?? [];
   return matches.filter(token => token.length > 1 && !STOPWORDS.has(token));
 }
-
 function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
   if (!lineTokens.length || !hypoTokens.length) return 0; const lineSet = new Set(lineTokens); let overlaps = 0;
   for (const token of hypoTokens) { if (lineSet.has(token)) overlaps++; }
@@ -43,13 +37,11 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
   const orderScore = ordered / Math.max(hypoTokens.length, 1); const shortPenalty = lineTokens.length <= 2 ? 0.2 : 0;
   return Math.max(0, overlapScore * 0.7 + orderScore * 0.3 - shortPenalty);
 }
-
 function windowBounds(total: number, center: number, relockWindow: number): [number, number] {
   if (total <= 0) return [0, 0]; if (center < 0) return [0, Math.min(total - 1, relockWindow)];
   const start = Math.max(0, center - relockWindow); const end = Math.min(total - 1, center + relockWindow);
   return [start, end];
 }
-
 export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const { lyrics, hypothesisText, previousConfirmedIndex, previousCandidateIndex, stableSamples, policy, } = input;
   const hypoTokens = tokenize(hypothesisText);
@@ -87,7 +79,6 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     jumpRejected, relockTriggered,
   };
 }
-
 export function mapLineToEffectiveTime(lyrics: LyricsData, lineIndex: number): number | undefined {
   if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) return undefined;
   return lyrics.lines[lineIndex].time;

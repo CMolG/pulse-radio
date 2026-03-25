@@ -15,7 +15,6 @@ import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import UiImage from "@/components/common/UiImage";
 import { stationInitials } from "../utils/formatUtils";
-
 type Props = {
   station: Station | null; track: NowPlayingTrack | null; status: PlaybackStatus; volume: number;
   muted: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
@@ -25,9 +24,7 @@ type Props = {
   theaterMode?: boolean; compact?: boolean; sleepTimerMin?: number | null; onCycleSleepTimer?: () => void;
   streamQuality?: StreamQuality;
 };
-
 const SAFE_AREA_STYLE: React.CSSProperties = { paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' };
-
 function NowPlayingBar({
   station, track, status, volume, muted, frequencyDataRef, icyBitrate, onTogglePlay,
   onSetVolume, onToggleMute, onToggleEq, onToggleTheater, onToggleFav, onFavSong, isFavorite, songLiked,
@@ -227,5 +224,4 @@ function NowPlayingBar({
         /></div></div>
   );
 }
-
 export default React.memo(NowPlayingBar);

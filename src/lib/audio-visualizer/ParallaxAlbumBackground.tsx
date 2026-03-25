@@ -12,7 +12,6 @@ interface ParallaxAlbumBackgroundProps {
   imageUrl: string | null; fallbackUrl?: string; blurClass?: string; overlayClass?: string;
   enableDrift?: boolean; showTopGlow?: boolean; children?: React.ReactNode;
 }
-
 export function ParallaxAlbumBackground({
   imageUrl, fallbackUrl, blurClass = 'blur-2xl', overlayClass = 'bg-black/50',
   enableDrift = true, showTopGlow = true, children,

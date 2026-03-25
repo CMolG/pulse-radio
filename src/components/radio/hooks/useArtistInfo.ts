@@ -8,10 +8,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { ArtistInfo } from '../types';
-
 const MAX_CACHE = 200;
 const cache = new Map<string, ArtistInfo>();
-
 function cacheGet(key: string): ArtistInfo | undefined {
   const val = cache.get(key);
   if (val !== undefined) {
@@ -20,7 +18,6 @@ function cacheGet(key: string): ArtistInfo | undefined {
   }
   return val;
 }
-
 function cacheSet(key: string, val: ArtistInfo) {
   cache.delete(key); // ensure fresh insertion order
   cache.set(key, val);
@@ -29,7 +26,6 @@ function cacheSet(key: string, val: ArtistInfo) {
     const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break;
   }
 }
-
 export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => { if (!key) return null; return cacheGet(key) ?? null; }, [key]);
@@ -40,11 +36,9 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
     const timeout = setTimeout(() => controller.abort(), 15_000);
     fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();
-      })
-      .then((data: ArtistInfo) => {
+      }).then((data: ArtistInfo) => {
         if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); }
-      })
-      .catch(() => { if (!cancelled) setFetched({ key, info: null }); })
+      }).catch(() => { if (!cancelled) setFetched({ key, info: null }); })
       .finally(() => { clearTimeout(timeout); });
     return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
   }, [artist, key, cachedInfo]); const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);

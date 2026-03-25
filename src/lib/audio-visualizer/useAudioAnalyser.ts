@@ -7,7 +7,6 @@
 'use client';
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { getOrCreateAudioSource } from './audioSourceCache';
-
 type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: number; };
 
 interface UseAudioAnalyserReturn {
@@ -19,7 +18,6 @@ interface UseAudioAnalyserReturn {
   /** Audio metering: peak level 0-1, RMS level 0-1 (updated every frame) */
   meterRef: React.RefObject<{ peak: number; rms: number }>; isActive: boolean; disconnect: () => void;
 }
-
 export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
   const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts; const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0); const connectedRef = useRef<HTMLAudioElement | null>(null);

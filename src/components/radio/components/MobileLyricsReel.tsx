@@ -9,7 +9,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
-
 type Props = {
   lyrics: LyricsData | null; currentTime?: number;
    activeLineOverride?: number;
@@ -24,7 +23,6 @@ const EMPHASIS: [string, string, string][] = [
   ["text-white/26 font-medium opacity-100 scale-[0.92]", "text-[13px]", "text-[17px]"],
   ["text-white/14 font-medium opacity-100 scale-[0.88]", "text-[12px]", "text-[16px]"],
 ];
-
 const LyricReelLine = React.memo(function LyricReelLine({
   lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
 }: {
@@ -48,7 +46,6 @@ const LyricReelLine = React.memo(function LyricReelLine({
   prev.emphasisIdx === next.emphasisIdx &&
   prev.isDesktop === next.isDesktop
 );
-
 export default function LyricsReel({ lyrics, currentTime, activeLineOverride, variant = "mobile", }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null); const lineRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [focusedIdx, setFocusedIdx] = useState(0); const isDesktop = variant === "desktop";

@@ -7,7 +7,6 @@
 export type SovereignCountry = {
   code: string; name: string; region: string; subregion: string; borders: string[]; lang3: string[];
 };
-
 export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   { code: "AD", name: "Andorra", region: "Europe", subregion: "Southern Europe", borders: ["FR", "ES"], lang3: ["cat"] },
   { code: "AE", name: "United Arab Emirates", region: "Asia", subregion: "Western Asia", borders: ["OM", "SA"], lang3: ["ara"] },
@@ -205,12 +204,10 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   { code: "ZM", name: "Zambia", region: "Africa", subregion: "Eastern Africa", borders: ["AO", "BW", "CD", "MW", "MZ", "NA", "TZ", "ZW"], lang3: ["eng"] },
   { code: "ZW", name: "Zimbabwe", region: "Africa", subregion: "Eastern Africa", borders: ["BW", "MZ", "ZA", "ZM"], lang3: ["bwg", "eng", "kck", "khi", "ndc", "nde", "nya", "sna", "sot", "toi", "tsn", "tso", "ven", "xho", "zib"] },
 ];
-
 export const SOVEREIGN_COUNTRY_CODES = SOVEREIGN_COUNTRIES.map((c) => c.code);
 export const COUNTRY_BY_CODE: Record<string, SovereignCountry> = Object.fromEntries(
   SOVEREIGN_COUNTRIES.map((country) => [country.code, country]),
 );
-
 export function isSovereignCountryCode(code: string): boolean {
   if (!code || code.length !== 2) return false; return Boolean(COUNTRY_BY_CODE[code.toUpperCase()]);
 }

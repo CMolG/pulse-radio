@@ -9,7 +9,6 @@
 import React from 'react';
 import { IoRadioOutline, IoMusicalNotesOutline, IoPersonOutline, IoDiscOutline, IoTimeOutline } from 'react-icons/io5';
 import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from '../hooks/useStats';
-
 function formatListenTime(ms: number): string {
   const totalSec = Math.floor(ms / 1000); if (totalSec < 60) return `${totalSec}s`;
   const mins = Math.floor(totalSec / 60); if (mins < 60) return `${mins}m`;
@@ -17,12 +16,10 @@ function formatListenTime(ms: number): string {
   if (hours < 24) return `${hours}h ${remMins}m`; const days = Math.floor(hours / 24);
   const remHours = hours % 24; return `${days}d ${remHours}h`;
 }
-
 type Props = {
   topStations: StationListenTime[]; topSongs: SongPlayCount[];
   topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number;
 };
-
 const StatSection = React.memo(function StatSection({ title, icon, children, }: {
   title: string; icon: React.ReactNode; children: React.ReactNode;
 }) {
@@ -32,7 +29,6 @@ const StatSection = React.memo(function StatSection({ title, icon, children, }: 
       </div><div className="space-y-1">{children}</div></div>
   );
 });
-
 const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { label: string; value: number; maxValue: number; suffix: string }) {
   const pct = maxValue > 0 ? Math.max(8, (value / maxValue) * 100) : 0;
   return (
@@ -44,7 +40,6 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
       </div><span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span></div>
   );
 });
-
 export default React.memo(function StatsView({ topStations, topSongs, topArtists, topGenres, totalListenMs }: Props) {
   const hasData = totalListenMs > 0 || topSongs.length > 0;
   if (!hasData) {

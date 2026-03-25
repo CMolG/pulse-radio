@@ -18,7 +18,6 @@ interface FerrofluidRendererProps {
 /* ─── helpers ─── */
 import { hexToRgb } from './colorUtils';
 import { useCanvasLoop } from './useCanvasLoop';
-
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 /* ─── blob state ─── */
@@ -28,7 +27,6 @@ interface Blob {
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number;
   freqBand: number; // which frequency band drives this blob
 }
-
 function createBlobs(count: number, w: number, h: number): Blob[] {
   const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2;
   for (let i = 0; i < count; i++) {
@@ -48,7 +46,6 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
 let _offscreen: OffscreenCanvas | null = null;
 let _imgData: ImageData | undefined;
-
 function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number, h: number,
   colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] },
   energy: number, ) {
@@ -172,5 +169,4 @@ export function FerrofluidRenderer({
             <feComposite in="SourceGraphic" in2="goo" operator="atop" /></filter></defs></svg></div>
   );
 }
-
 export default FerrofluidRenderer;

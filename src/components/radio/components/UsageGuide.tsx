@@ -16,7 +16,6 @@ const GLASS_STYLE: React.CSSProperties = {
   WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
 };
-
 type GuideSection = { icon: React.ReactNode; title: string; content: string; };
 const GUIDE_SECTIONS: GuideSection[] = [
   {
@@ -52,9 +51,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     content: 'Space: play/pause • ← →: skip station • ↑ ↓: volume • T: theater • E: equalizer • L: like song • S: star station • F: focus search • ?: show all shortcuts.',
   },
 ];
-
 type Props = { onClose: () => void };
-
 function UsageGuide({ onClose }: Props) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   return (
@@ -103,5 +100,4 @@ function UsageGuide({ onClose }: Props) {
           })}</div><div className="h-6" /></motion.div></motion.div>
   );
 }
-
 export default React.memo(UsageGuide);

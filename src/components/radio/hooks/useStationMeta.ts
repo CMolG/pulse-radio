@@ -8,7 +8,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
-
 const CODEC_MAP: Record<string, string> = {
   MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus', FLAC: 'FLAC', WMA: 'WMA',
 };
@@ -18,13 +17,11 @@ const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|t
   /\b(shopify|squarespace|wix|spotify\.com|instagram|facebook|twitter|tiktok|youtube)\b/i,
   /\b(buy now|subscribe|promo|advertisement|advert|commercial|sponsor)\b/i, /\b(www\.)/i,
 ];
-
 const FETCH_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500;
 const _adCache = new Map<string, boolean>();
 const MAX_AD_CACHE = 256;
-
 function isAdContent(text: string): boolean {
   let result = _adCache.get(text); if (result !== undefined) return result;
   result = AD_PATTERNS.some(re => re.test(text));
@@ -57,7 +54,6 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 
 let _lastStation = '';
 let _lastStationLower = '';
-
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null; if (raw === stationName) return null;
   // Cache lowercase station name to avoid recomputing on every poll
@@ -71,7 +67,6 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   }
   return { title: raw.trim(), artist: '' };
 }
-
 export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);

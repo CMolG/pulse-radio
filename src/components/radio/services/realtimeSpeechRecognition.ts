@@ -5,7 +5,6 @@
  */
 
 import type { RealtimeSpeechHypothesis } from './realtimeLyricsTypes';
-
 type BrowserSpeechAlternative = { transcript: string; confidence?: number };
 type BrowserSpeechResult = { 0?: BrowserSpeechAlternative; isFinal: boolean };
 type BrowserSpeechRecognitionEvent = { resultIndex: number; results: ArrayLike<BrowserSpeechResult> };
@@ -16,24 +15,18 @@ type BrowserSpeechRecognition = {
   onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null;
   start: () => void; stop: () => void;
 };
-
 type RecognitionCtor = new () => BrowserSpeechRecognition;
 type EngineCallbacks = {
   onHypothesis: (hypothesis: RealtimeSpeechHypothesis) => void; onFatalError: (errorMessage: string) => void;
 };
-
 const MAX_RESTARTS = 4;
-
 function getRecognitionCtor(): RecognitionCtor | null {
   if (typeof window === 'undefined' || !window.isSecureContext) return null;
   const w = window as Window & { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
-
 export function isRealtimeSpeechSupported(): boolean { return getRecognitionCtor() !== null; }
-
 export type RealtimeSpeechEngine = { start: (lang: 'en' | 'es') => void; stop: () => void; destroy: () => void; };
-
 export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): RealtimeSpeechEngine {
   let recognition: BrowserSpeechRecognition | null = null; let running = false;
   let destroyed = false; let restartCount = 0;

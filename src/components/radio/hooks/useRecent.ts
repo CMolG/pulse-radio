@@ -11,7 +11,6 @@ import type { Station } from '../types';
 import { STORAGE_KEYS, MAX_RECENT } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
-
 export function useRecent() {
   const [recent, setRecent] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, []);

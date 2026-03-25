@@ -45,13 +45,10 @@ import OnboardingModal from "./components/OnboardingModal";
 import { useLocale } from "@/context/LocaleContext";
 import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
 import { getCountryDisplayName } from "@/lib/i18n/countryChips";
-
 type LayoutMode = "desktop" | "mobile" | "pip";
-
 function buildFavInput(t: NowPlayingTrack, s: Station): Omit<FavoriteSong, 'id' | 'timestamp'> {
   return { ...t, artist: t.artist ?? '', stationName: s.name, stationUuid: s.stationuuid };
 }
-
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>(() => ({
     w: typeof window !== 'undefined' ? window.innerWidth : 800,
@@ -69,9 +66,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
     }); ro.observe(el); return () => ro.disconnect();
   }, [ref]); return size;
 }
-
 type RadioShellProps = { isPip?: boolean; initialCountryCode?: string };
-
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
   const containerRef = useRef<HTMLDivElement>(null); const containerSize = useContainerSize(containerRef);
   const pathname = usePathname(); const { t, locale } = useLocale();

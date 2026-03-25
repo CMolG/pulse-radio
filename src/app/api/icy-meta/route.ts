@@ -6,7 +6,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
-
 export const runtime = 'nodejs';
 
 /**

@@ -8,7 +8,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GENRE_GRADIENTS } from '../constants';
-
 export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   const [offset, setOffset] = useState({ x: 0, y: 0 }); const containerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef(0); const pointerOffsetRef = useRef({ x: 0, y: 0 });
