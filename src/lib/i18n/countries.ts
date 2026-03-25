@@ -1602,10 +1602,12 @@ export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
     ],
   },
 ];
-export const SOVEREIGN_COUNTRY_CODES = SOVEREIGN_COUNTRIES.map((c) => c.code);
-export const COUNTRY_BY_CODE: Record<string, SovereignCountry> = Object.fromEntries(
-  SOVEREIGN_COUNTRIES.map((country) => [country.code, country]),
-);
+export const SOVEREIGN_COUNTRY_CODES: string[] = [];
+export const COUNTRY_BY_CODE: Record<string, SovereignCountry> = {};
+for (const country of SOVEREIGN_COUNTRIES) {
+  SOVEREIGN_COUNTRY_CODES.push(country.code);
+  COUNTRY_BY_CODE[country.code] = country;
+}
 export function isSovereignCountryCode(code: string): boolean {
   if (!code || code.length !== 2) return false;
   return Boolean(COUNTRY_BY_CODE[code.toUpperCase()]);
