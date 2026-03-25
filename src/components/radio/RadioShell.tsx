@@ -98,8 +98,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => { if (!enrichedTrack?.title || !enrichedTrack?.artist) return;
     const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`;
     if (key !== lastRecordedTrackRef.current) { lastRecordedTrackRef.current = key;
-      recordSongPlay(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);
-    } else {
+      recordSongPlay(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);} else {
       // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
       updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);
     }
@@ -142,8 +141,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return mkView("country", getCountryDisplayName(locale, code), { countryCode: code, countryQueryName: country?.name ?? "" });
   }
   const resetNav = useCallback((v: ViewState) => {
-    setView(v); setActiveTab("discover"); setTheaterMode(false); setSearchQuery("");
-  }, []);
+    setView(v); setActiveTab("discover"); setTheaterMode(false); setSearchQuery("");}, []);
   const [view, setView] = useState<ViewState>(() => {
     const code = (initialCountryCode ?? "").toUpperCase(); if (isSovereignCountryCode(code)) return countryView(code);
     return mkView("top", t("topStations"));});
@@ -207,8 +205,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       rec.add(station); sq.setPlaying(station.stationuuid); setTheaterMode(true);
       // Prefetch next station in queue for seamless transition
       const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
-      if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
-    }, [],);
+      if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);}, [],);
   // Auto-advance to next queued station on error, or failover to similar station
   useEffect(() => { let cancelled = false;
     if (radio.status === 'error') { if (stationQueue.hasNext) {
@@ -318,8 +315,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     favSongs.toggle(input); showToast(wasLiked ? "Song removed" : entry.title, "heart");
   }, [favSongs, showToast]); const handleSearch = useCallback((query: string) => { const sanitized = query.trim();
     setView(mkView("search", t("searchResultLabel", { query: sanitized }), { query: sanitized }));
-    setActiveTab("discover"); setTheaterMode(false);
-  }, [t]);
+    setActiveTab("discover"); setTheaterMode(false);}, [t]);
   const handleGoHome = useCallback(() => {
     resetNav(mkView("top", t("topStations"))); if (pathname !== "/") window.history.pushState(null, "", "/");
   }, [pathname, t, resetNav]);
@@ -328,8 +324,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }, [searchQuery, handleSearch, handleGoHome],
   ); const handleSelectGenre = useCallback((cat: BrowseCategory) => { const key = GENRE_LABEL_KEYS[cat.id];
     setView(mkView("genre", key ? t(key) : cat.label, { tag: cat.tag || cat.id }));
-    setTheaterMode(false); setSearchQuery("");
-  }, [t]);
+    setTheaterMode(false); setSearchQuery("");}, [t]);
   const handleSelectCountry = useCallback((countryCode: string, countryQueryName: string, countryDisplayName: string) => {
     setView(mkView("country", countryDisplayName, { countryCode, countryQueryName }));
     setTheaterMode(false); setSearchQuery(""); const newPath = `/${countryCode}`;

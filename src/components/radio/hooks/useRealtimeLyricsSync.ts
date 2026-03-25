@@ -25,8 +25,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
   if (resetKey !== prevResetKey) { setPrevResetKey(resetKey); setRuntimeState(defaultRealtimeState(manuallyEnabled)); }
   const toggle = useCallback(() => { setManuallyEnabled(prev => {
-      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next); return next;});
-  }, []);
+      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next); return next;});}, []);
   useEffect(() => { if (!realtimeActive) { engineRef.current?.stop(); return; }
     engineRef.current?.destroy(); stableSamplesRef.current = 0;
     const engine = createRealtimeSpeechEngine({ onHypothesis: (hypothesis) => {

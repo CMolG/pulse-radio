@@ -49,8 +49,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
             }
           }
           rafRef.current = requestAnimationFrame(tick);
-        }; rafRef.current = requestAnimationFrame(tick);
-      } catch {
+        }; rafRef.current = requestAnimationFrame(tick);} catch {
         // Some mobile browsers (notably iOS in background paths) can reject
         // WebAudio graph connections for cross-origin streams. Keep playback
         // alive and just disable analyser updates.

@@ -27,16 +27,14 @@ const STEPS: OnboardingStep[] = [
     description: 'Enjoy a reactive audio visualizer with CRT effects. Customize the sound with the built-in equalizer.',
   }, { icon: <IoStatsChartOutline size={48} className="text-emerald-400" />, title: 'Your Stats',
     description: 'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
-  },
-];
+  },];
 function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prompt: () => Promise<void> } | null>(null);
   const [isIos] = useState(() => typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent));
   const [isStandalone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches);
   useEffect(() => { const handler = (e: Event) => {
       e.preventDefault(); setDeferredPrompt(e as unknown as { prompt: () => Promise<void> });
     }; window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+    return () => window.removeEventListener('beforeinstallprompt', handler);}, []);
   const handleInstall = async () => { if (deferredPrompt) {
       try { await deferredPrompt.prompt(); } catch { /* user dismissed install prompt */ }
       setDeferredPrompt(null);

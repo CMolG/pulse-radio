@@ -39,8 +39,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
           const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6; target[i] = Math.random() * maxVal * sensitivity;
         }
         data[i] += (target[i] - data[i]) * 0.1;
-      }
-    } else {
+      }} else {
       // No data: decay
       for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; }
     }

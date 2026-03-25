@@ -70,8 +70,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
           ...prev.stationListenTimes, [stationUuid]: { ...entry, name: stationName, totalMs: entry.totalMs + deltaMs },
         }, totalListenMs: prev.totalListenMs + deltaMs,
       };
-    }); dirtyRef.current = true;
-  }, []);
+    }); dirtyRef.current = true;}, []);
   // Record a song play
   const recordSongPlay = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return; const songKey = `${title}|||${artist}`; const primary = primaryArtist(artist);

@@ -12,8 +12,7 @@ const CODEC_MAP: Record<string, string> = {
 // Patterns that indicate ads/spam rather than real song metadata
 const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i, /^https?:\/\//i,
   /\b(shopify|squarespace|wix|spotify\.com|instagram|facebook|twitter|tiktok|youtube)\b/i,
-  /\b(buy now|subscribe|promo|advertisement|advert|commercial|sponsor)\b/i, /\b(www\.)/i,
-];
+  /\b(buy now|subscribe|promo|advertisement|advert|commercial|sponsor)\b/i, /\b(www\.)/i,];
 const FETCH_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500;
@@ -29,8 +28,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   if (signal) { if (signal.aborted) {
-      clearTimeout(timeout); controller.abort();
-    } else {
+      clearTimeout(timeout); controller.abort();} else {
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
       controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort);
       }, { once: true });

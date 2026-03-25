@@ -56,7 +56,5 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
           <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
           <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div>
   );
-}, (prev, next) =>prev.item === next.item &&
-  prev.delay === next.delay &&
-  prev.hideRemove === next.hideRemove &&
+}, (prev, next) =>prev.item === next.item && prev.delay === next.delay && prev.hideRemove === next.hideRemove &&
   prev.heart?.filled === next.heart?.filled);

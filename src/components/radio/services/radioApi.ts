@@ -6,8 +6,7 @@
 import type { Station } from '../types';
 // Radio-Browser API mirrors for redundancy
 const SERVERS = [ 'https://de1.api.radio-browser.info/json', 'https://de2.api.radio-browser.info/json',
-  'https://nl1.api.radio-browser.info/json',
-];
+  'https://nl1.api.radio-browser.info/json',];
 let serverIndex = 0;
 function getBase(): string { return SERVERS[serverIndex % SERVERS.length]; }
 function rotateServer(): void { serverIndex = (serverIndex + 1) % SERVERS.length; }

@@ -32,8 +32,7 @@ export const GENRE_CATEGORIES: BrowseCategory[] = [
   { id: 'metal',      label: 'Metal',      tag: 'metal',      gradient: 'from-gray-600 to-zinc-800' },
   { id: 'trending',   label: 'Trending',   tag: '',          gradient: 'from-yellow-400 to-orange-500' },
   { id: 'local',      label: 'Local',      tag: '',          gradient: 'from-green-400 to-emerald-500' },
-  { id: 'world',      label: 'World',      tag: 'world',     gradient: 'from-blue-400 to-indigo-500' },
-];
+  { id: 'world',      label: 'World',      tag: 'world',     gradient: 'from-blue-400 to-indigo-500' },];
 export const GENRE_GRADIENTS: Record<string, string> = {
   pop: 'linear-gradient(135deg, #ec4899, #e11d48)', rock: 'linear-gradient(135deg, #dc2626, #ea580c)',
   jazz: 'linear-gradient(135deg, #f59e0b, #ca8a04)', classical: 'linear-gradient(135deg, #6366f1, #9333ea)',
@@ -48,14 +47,12 @@ export const EQ_BANDS: EqBand[] = [ { id: 'low',     frequency: 60,    type: 'lo
   { id: 'lo-mid',  frequency: 230,   type: 'peaking',   gain: 0, label: '230' },
   { id: 'mid',     frequency: 910,   type: 'peaking',   gain: 0, label: '910' },
   { id: 'hi-mid',  frequency: 3600,  type: 'peaking',   gain: 0, label: '3.6k' },
-  { id: 'high',    frequency: 14000, type: 'highshelf', gain: 0, label: '14k' },
-];
+  { id: 'high',    frequency: 14000, type: 'highshelf', gain: 0, label: '14k' },];
 export const EQ_PRESETS: EqPreset[] = [ { name: 'Flat',       gains: [0, 0, 0, 0, 0] },
   { name: 'Bass Boost', gains: [6, 4, 0, 0, 0] }, { name: 'Treble',     gains: [0, 0, 0, 3, 6] },
   { name: 'V-Shape',    gains: [5, 2, -2, 2, 5] }, { name: 'Vocal',      gains: [-2, 0, 4, 3, 0] },
   { name: 'Rock',       gains: [4, 2, -1, 3, 4] }, { name: 'Electronic', gains: [5, 3, -1, 2, 6] },
-  { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },
-];
+  { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },];
 const _flagCache = new Map<string, string>();
 export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐'; const cached = _flagCache.get(code);

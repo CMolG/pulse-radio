@@ -124,11 +124,9 @@ export default function BrowseView({
     setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
     try { const result = await fetchIcyMeta(s.url_resolved); if (stale?.()) return;
       const raw = result.streamTitle; const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
-      setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
-    } catch {
+      setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));} catch {
       if (stale?.()) return; setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
-    }
-  }, []);
+    }}, []);
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
     const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen;
     const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); };
@@ -145,8 +143,7 @@ export default function BrowseView({
           }
           if (!cancelled) setStations(result);
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
-      }; load();
-    } else {
+      }; load();} else {
       // Top view — progressively load categories (3 concurrent max)
       setLoading(false); setCategorySections({}); setFailedCategories(new Set());
       const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];

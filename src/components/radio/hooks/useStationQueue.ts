@@ -44,21 +44,18 @@ export function useStationQueue() { const [queue, setQueue] = useState<Station[]
       if (idx < 0 || idx >= prev.length - 1) return prev; movedIdx = idx; const next = [...prev];
       [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]; return next;
     }); setCurrentIndex(prev => { if (movedIdx < 0) return prev; if (prev === movedIdx) return movedIdx + 1;
-      if (prev === movedIdx + 1) return movedIdx; return prev;});
-  }, []);
+      if (prev === movedIdx + 1) return movedIdx; return prev;});}, []);
   const skipToNext = useCallback((): Station | null => {
     const q = queueRef.current; if (q.length === 0) return null; let result: Station | null = null;
     setCurrentIndex(prev => {
       const nextIdx = prev + 1; if (nextIdx >= queueRef.current.length) return prev; result = queueRef.current[nextIdx];
       return nextIdx;
-    }); return result;
-  }, []);
+    }); return result;}, []);
   const skipToPrev = useCallback((): Station | null => {
     const q = queueRef.current; if (q.length === 0) return null; let result: Station | null = null;
     setCurrentIndex(prev => {
       if (prev <= 0) return prev; const prevIdx = prev - 1; result = queueRef.current[prevIdx]; return prevIdx;
-    }); return result;
-  }, []);
+    }); return result;}, []);
   const setPlaying = useCallback((stationuuid: string) => {
     const idx = queueRef.current.findIndex(s => s.stationuuid === stationuuid); setCurrentIndex(idx);
   }, []); const hasNext = currentIndex >= 0 && currentIndex < queue.length - 1; const hasPrev = currentIndex > 0;

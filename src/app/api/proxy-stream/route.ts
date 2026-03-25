@@ -45,8 +45,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
           if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403, headers: { 'Content-Type': 'application/json' },});
-        }
-      } catch {
+        }} catch {
         // URL parse failed — continue with original validation
       }
     }

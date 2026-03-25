@@ -66,26 +66,22 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
         // calls startPlayback() and overrides the pause from the other tab.
         clearTimer(fadeTimerRef);
       }
-    }; return () => { bc.close(); bcRef.current = null; };
-  }, []);
+    }; return () => { bc.close(); bcRef.current = null; };}, []);
   // Clean up timers on unmount to prevent orphaned intervals
   useEffect(() => { return () => {
       clearTimer(fadeTimerRef); clearTimer(pauseTimerRef); clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
-    };
-  }, []);
+    };}, []);
   const getAudio = useCallback(() => { if (!audioRef.current) {
       const audio = new Audio(); audio.crossOrigin = 'anonymous';
       audio.setAttribute('playsinline', ''); audio.preload = 'none'; audioRef.current = audio;
     }
-    return audioRef.current;
-  }, []);
+    return audioRef.current;}, []);
   const handlePlayRejected = useCallback((err: unknown) => {
     // AbortError means the play was superseded — stop(), pause(), or a new
     // play() cleared audio.src while this promise was pending.  The caller
     // already set the correct status (idle/loading), so swallow silently.
     if (err instanceof DOMException && err.name === 'AbortError') return;
-    setStatus(isAutoplayBlocked(err) ? 'paused' : 'error');
-  }, []);
+    setStatus(isAutoplayBlocked(err) ? 'paused' : 'error');}, []);
   const startPlayback = useCallback(
     (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void,) => {
       // Force proxy when the Web Audio graph is connected to this element.
@@ -163,8 +159,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       pauseTimerRef.current = setTimeout(() => { if (userPausedRef.current || !audio.paused) return;
         audio.play().catch((err) => { if (isAutoplayBlocked(err)) {
             // Mobile: no gesture available — show play button, user resumes manually
-            setStatus('paused');
-          } else {
+            setStatus('paused');} else {
             // Genuine network/decode error — reconnect with a fresh source
             reconnect(500);
           }});
@@ -318,8 +313,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
           audio.volume = mutedRef.current ? 0 : volumeRef.current;
           startPlayback(audio, s.url_resolved, handlePlayRejected);
         }
-      }, interval);
-    } else {
+      }, interval);} else {
       audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected);
     }
   }, [getAudio, startPlayback, handlePlayRejected]); const pause = useCallback(() => { userPausedRef.current = true;
@@ -341,8 +335,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     } else { userPausedRef.current = true;
       // Cancel any in-progress crossfade (same reason as pause())
       clearTimer(fadeTimerRef); audio.pause();
-    }
-  }, []);
+    }}, []);
   const stop = useCallback(() => {
     clearTimer(fadeTimerRef); clearTimer(pauseTimerRef); clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
     const audio = audioRef.current;

@@ -19,8 +19,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     if (savedVolumeRef.current !== null && audioRef?.current) {
       audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null;
     }
-    setIsFading(false);
-  }, []);
+    setIsFading(false);}, []);
   const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     stopFade(); endTimeRef.current = 0; setRemainingMin(null);
   }, [stopFade]);

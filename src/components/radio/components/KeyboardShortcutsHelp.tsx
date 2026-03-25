@@ -13,8 +13,7 @@ const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: 
   { key: "L", desc: "Like current song" }, { key: "R", desc: "Toggle realtime lyrics sync" },
   { key: "T", desc: "Theater mode" }, { key: "E", desc: "Equalizer" },
   { key: "Z", desc: "Cycle sleep timer" }, { key: "Esc", desc: "Close panel / exit theater" },
-  { key: "?", desc: "Toggle this help" },
-];
+  { key: "?", desc: "Toggle this help" },];
 interface Props { onClose: () => void; }
 export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) { return (
     <div

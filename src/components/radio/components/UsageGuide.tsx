@@ -31,8 +31,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     content: 'Press Z or use the timer icon to cycle through sleep durations (15, 30, 60, 90 min). Pulse will automatically stop playback when the timer ends.',
   }, { icon: <IoGlobeOutline size={22} className="text-sky-400" />, title: 'Keyboard Shortcuts',
     content: 'Space: play/pause • ← →: skip station • ↑ ↓: volume • T: theater • E: equalizer • L: like song • S: star station • F: focus search • ?: show all shortcuts.',
-  },
-];
+  },];
 type Props = { onClose: () => void };
 function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   return ( <motion.div

@@ -19,8 +19,7 @@ export function useRecent() { const [recent, setRecent] = useState<Station[]>(()
   useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
   const add = useCallback((station: Station) => { setRecent(prev => {
       const filtered = prev.filter(s => s.stationuuid !== station.stationuuid);
-      return [station, ...filtered].slice(0, MAX_RECENT);});
-  }, []);
+      return [station, ...filtered].slice(0, MAX_RECENT);});}, []);
   const remove = useCallback((uuid: string) => { setRecent(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
   const clear = useCallback(() => setRecent([]), []); return { recent, add, remove, clear };
 }

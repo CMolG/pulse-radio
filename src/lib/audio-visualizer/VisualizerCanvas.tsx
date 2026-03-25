@@ -21,8 +21,7 @@ export function VisualizerCanvas({
   useEffect(() => { const canvas = canvasRef.current; if (!canvas) return;
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect(); sizeRef.current = { width: rect.width, height: rect.height };
-    }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
-  }, []);
+    }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();}, []);
   useEffect(() => { const draw = () => {
       const canvas = canvasRef.current; const frequencyData = frequencyDataRef?.current;
       if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; }
@@ -62,8 +61,7 @@ export function VisualizerCanvas({
           const x = i * barWidth + gap / 2; const y = height - barHeight; const w = barWidth - gap; ctx.beginPath();
           if (useRoundRect) { ctx.roundRect(x, y, w, barHeight, radii); ctx.fill();
           } else ctx.fillRect(x, y, w, barHeight);
-        }
-      } else {
+        }} else {
         const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2; ctx.beginPath();
         for (let i = 0; i < frequencyData.length; i++) {
           const y = height - (frequencyData[i] / 255) * height * 0.6; if (i === 0) ctx.moveTo(0, y);

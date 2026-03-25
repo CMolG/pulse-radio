@@ -83,8 +83,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           Check track</button>
       )}
     </div>);
-}, (prev, next) =>prev.station === next.station &&
-  prev.isPlaying === next.isPlaying &&
+}, (prev, next) =>prev.station === next.station && prev.isPlaying === next.isPlaying &&
   prev.isCurrent === next.isCurrent &&
   prev.isFavorite === next.isFavorite &&
   prev.liveStatus === next.liveStatus &&

@@ -17,8 +17,7 @@ const EMPHASIS: [string, string, string][] = [
   ["text-white/82 font-semibold opacity-100 scale-[0.985]", "text-[18px]", "text-[23px]"],
   ["text-white/50 font-medium opacity-100 scale-95", "text-[15px]", "text-[19px]"],
   ["text-white/26 font-medium opacity-100 scale-[0.92]", "text-[13px]", "text-[17px]"],
-  ["text-white/14 font-medium opacity-100 scale-[0.88]", "text-[12px]", "text-[16px]"],
-];
+  ["text-white/14 font-medium opacity-100 scale-[0.88]", "text-[12px]", "text-[16px]"],];
 const LyricReelLine = React.memo(function LyricReelLine({
   lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
 }: { lineId: string; index: number; text: string; emphasisIdx: number;
@@ -32,9 +31,7 @@ const LyricReelLine = React.memo(function LyricReelLine({
       className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
     ><span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>{text}</span>
     </button>);
-}, (prev, next) =>prev.lineId === next.lineId &&
-  prev.text === next.text &&
-  prev.emphasisIdx === next.emphasisIdx &&
+}, (prev, next) =>prev.lineId === next.lineId && prev.text === next.text && prev.emphasisIdx === next.emphasisIdx &&
   prev.isDesktop === next.isDesktop);
 export default function LyricsReel({ lyrics, currentTime, activeLineOverride, variant = "mobile", }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null); const lineRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -45,8 +42,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
       const scroller = scrollerRef.current; const line = lineRefs.current[index]; if (!scroller || !line) return;
       const top = line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2;
-      scroller.scrollTo({ top: Math.max(0, top), behavior, });
-    }, [],);
+      scroller.scrollTo({ top: Math.max(0, top), behavior, });}, [],);
   const updateFocusedIdx = useCallback(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
     const scrollerRect = scroller.getBoundingClientRect(); const centerY = scrollerRect.top + scrollerRect.height / 2;

@@ -20,8 +20,7 @@ export function useFavorites() { const [favorites, setFavorites] = useState<Stat
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
   const add = useCallback((station: Station) => { setFavorites(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
-      return [station, ...prev].slice(0, MAX_FAVORITES);});
-  }, []);
+      return [station, ...prev].slice(0, MAX_FAVORITES);});}, []);
   const remove = useCallback((uuid: string) => { setFavorites(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
   const toggle = useCallback((station: Station) => { setFavorites(prev => {
       const exists = prev.some(s => s.stationuuid === station.stationuuid);
