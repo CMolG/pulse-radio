@@ -1550,19 +1550,19 @@ function useRadio() {
     const MIN_BUFFER_AHEAD_S = 2;
     let lowBufferStreak = 0;
     clearTimer(bufferCheckRef);
+    const _hasNav = typeof navigator !== 'undefined';
     bufferCheckRef.current = setInterval(() => {
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      if (_hasNav && !navigator.onLine) {
         setStreamQuality('offline');
         return;
       }
-      const conn =
-        typeof navigator !== 'undefined'
-          ? (
-              navigator as Navigator & {
-                connection?: { effectiveType?: string; saveData?: boolean };
-              }
-            ).connection
-          : undefined;
+      const conn = _hasNav
+        ? (
+            navigator as Navigator & {
+              connection?: { effectiveType?: string; saveData?: boolean };
+            }
+          ).connection
+        : undefined;
       if (conn?.saveData) setStreamQuality('fair');
       if (userPausedRef.current || audio.paused || !station) {
         lowBufferStreak = 0;
