@@ -12,23 +12,7 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'radio-station-queue';
 const MAX_QUEUE_SIZE = 20;
-export type UseStationQueueReturn = {
-  queue: Station[];
-  currentIndex: number;
-  add: (station: Station) => void;
-  addNext: (station: Station) => void;
-  remove: (stationuuid: string) => void;
-  clear: () => void;
-  moveUp: (stationuuid: string) => void;
-  moveDown: (stationuuid: string) => void;
-  skipToNext: () => Station | null;
-  skipToPrev: () => Station | null;
-  hasNext: boolean;
-  hasPrev: boolean;
-  setPlaying: (stationuuid: string) => void;
-};
-
-export function useStationQueue(): UseStationQueueReturn {
+export function useStationQueue() {
   const [queue, setQueue] = useState<Station[]>(() =>
     loadFromStorage<Station[]>(STORAGE_KEY, [])
   );

@@ -91,13 +91,7 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   return { title: raw.trim(), artist: '' };
 }
 
-export type UseStationMetaReturn = {
-  track: NowPlayingTrack | null;
-  icyBitrate: string | null;
-  streamCodec: string | null;
-};
-
-export function useStationMeta(station: Station | null, isPlaying: boolean): UseStationMetaReturn {
+export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const [streamCodec, setStreamCodec] = useState<string | null>(null);

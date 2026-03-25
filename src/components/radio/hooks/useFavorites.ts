@@ -12,19 +12,9 @@ import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 
-export type UseFavoritesReturn = {
-  favorites: Station[];
-  add: (station: Station) => void;
-  remove: (uuid: string) => void;
-  toggle: (station: Station) => void;
-  has: (uuid: string) => boolean;
-  playNext: (currentUuid: string) => Station | null;
-  playPrev: (currentUuid: string) => Station | null;
-};
-
 const MAX_FAVORITES = 500;
 
-export function useFavorites(): UseFavoritesReturn {
+export function useFavorites() {
   const [favorites, setFavorites] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []);
     // Dedup on load in case of corrupted storage

@@ -12,14 +12,7 @@ import { STORAGE_KEYS, MAX_RECENT } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 
-export type UseRecentReturn = {
-  recent: Station[];
-  add: (station: Station) => void;
-  remove: (uuid: string) => void;
-  clear: () => void;
-};
-
-export function useRecent(): UseRecentReturn {
+export function useRecent() {
   const [recent, setRecent] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, []);
     // Dedup by stationuuid on load in case of corrupted storage

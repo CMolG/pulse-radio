@@ -8,14 +8,12 @@
 
 import { useRef, useEffect, useCallback, useState } from 'react';
 
-export type UseWakeLockReturn = { isActive: boolean; request: () => Promise<void>; release: () => Promise<void>; };
-
 /**
  * Prevents the screen from dimming/locking while audio is playing.
  * Uses the Screen Wake Lock API (supported in Chrome, Edge, Safari 16.4+).
  * Automatically re-acquires the lock when the tab becomes visible again.
  */
-export function useWakeLock(shouldLock: boolean): UseWakeLockReturn {
+export function useWakeLock(shouldLock: boolean) {
   const lockRef = useRef<WakeLockSentinel | null>(null);
   const [isActive, setIsActive] = useState(false);
   const requestingRef = useRef(false);

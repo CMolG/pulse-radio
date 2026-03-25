@@ -36,30 +36,7 @@ function isIOSDevice(): boolean {
 
 export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 export type StreamLatency = { url: string; latencyMs: number; timestamp: number; };
-export type UseRadioReturn = {
-  station: Station | null;
-  status: PlaybackStatus;
-  volume: number;
-  muted: boolean;
-  currentTime: number;
-  streamQuality: StreamQuality;
-  audioRef: React.RefObject<HTMLAudioElement | null>;
-  /** Pre-creates the audio element so EQ/analyser can connect BEFORE play() is called.
-   *  Must be called from a user-gesture handler to ensure AudioContext is created
-   *  within the gesture context and audio.play() runs after Web Audio is wired up. */
-  ensureAudio: () => HTMLAudioElement;
-  play: (station: Station) => void;
-  pause: () => void;
-  resume: () => void;
-  togglePlay: () => void;
-  stop: () => void;
-  setVolume: (v: number) => void;
-  toggleMute: () => void;
-  seek: (time: number) => void;
-  prefetchStream: (streamUrl: string) => void;
-};
-
-export function useRadio(): UseRadioReturn {
+export function useRadio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);

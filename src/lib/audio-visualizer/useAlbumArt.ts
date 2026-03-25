@@ -188,19 +188,7 @@ function preloadImage(url: string) {
   img.src = url;
 }
 
-export interface UseAlbumArtReturn {
-  artworkUrl: string | null;
-  albumName: string | null;
-  releaseDate: string | null;
-  itunesUrl: string | null;
-  durationMs: number | null;
-  genre: string | null;
-  trackNumber: number | null;
-  trackCount: number | null;
-  isLoading: boolean;
-}
-
-export function useAlbumArt(title: string | null, artist: string | null): UseAlbumArtReturn {
+export function useAlbumArt(title: string | null, artist: string | null) {
   const hasTitle = Boolean(title);
   const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
   const cachedInfo = useMemo(() => {

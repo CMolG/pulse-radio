@@ -12,15 +12,6 @@ import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 
-export type UseFavoriteSongsReturn = {
-  songs: FavoriteSong[];
-  add: (song: Omit<FavoriteSong, 'id' | 'timestamp'>) => void;
-  remove: (id: string) => void;
-  toggle: (song: Omit<FavoriteSong, 'id' | 'timestamp'>) => void;
-  has: (title: string, artist: string) => boolean;
-  clear: () => void;
-};
-
 function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
 
 /** Build a Set of songKeys from a song array for O(1) lookups. */
@@ -30,7 +21,7 @@ function buildKeySet(songs: FavoriteSong[]): Set<string> {
   return s;
 }
 
-export function useFavoriteSongs(): UseFavoriteSongsReturn {
+export function useFavoriteSongs() {
   const MAX_SONGS = 500;
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);

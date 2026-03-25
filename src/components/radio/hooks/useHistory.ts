@@ -12,13 +12,11 @@ import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 
-export type UseHistoryReturn = { history: HistoryEntry[]; remove: (id: string) => void; clear: () => void; };
-
 export function useHistory(
   stationName: string | undefined,
   stationUuid: string | undefined,
   track: NowPlayingTrack | null,
-): UseHistoryReturn {
+) {
   const [history, setHistory] = useState<HistoryEntry[]>(() => {
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
     // Dedup by id on load in case of corrupted storage

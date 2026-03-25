@@ -38,33 +38,7 @@ function getDefaultNormalizerEnabled(): boolean {
   return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true);
 }
 
-export type UseEqualizerReturn = {
-  bands: EqBand[];
-  enabled: boolean;
-  normalizerEnabled: boolean;
-  stereoWidth: number;
-  bassEnhance: number;
-  compressorEnabled: boolean;
-  compressorAmount: number;
-  noiseReductionMode: NoiseReductionMode;
-  customPresets: EqPreset[];
-  setBandGain: (id: string, gain: number) => void;
-  applyPreset: (gains: number[]) => void;
-  toggleEnabled: () => void;
-  toggleNormalizer: () => void;
-  setStereoWidth: (w: number) => void;
-  setBassEnhance: (v: number) => void;
-  toggleCompressor: () => void;
-  setCompressorAmount: (v: number) => void;
-  setNoiseReductionMode: (mode: NoiseReductionMode) => void;
-  setOutputVolume: (volume: number, muted: boolean) => void;
-  connectSource: (audio: HTMLAudioElement) => void;
-  disconnect: () => void;
-  saveCustomPreset: (name: string) => void;
-  removeCustomPreset: (name: string) => void;
-};
-
-export function useEqualizer(): UseEqualizerReturn {
+export function useEqualizer() {
   const [bands, setBands] = useState<EqBand[]>(() => {
     const defaults = EQ_BANDS.map(b => ({ ...b }));
     const saved = loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, defaults);

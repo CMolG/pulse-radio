@@ -27,29 +27,11 @@ function loadCache(): CacheEntry[] {
 
 function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 
-export type UseLyricsReturn = {
-  lyrics: LyricsData | null;
-  loading: boolean;
-  error: boolean;
-  retry: () => void;
-  effectiveCurrentTime: number | undefined;
-  realtime?: {
-    enabled: boolean;
-    supported: boolean;
-    status: RealtimeSyncStatus;
-    activeLineIndex: number;
-    candidateLineIndex: number;
-    confidence: number;
-    diagnostics: RealtimeSyncDiagnostics;
-    toggle: () => void;
-  };
-};
-
 export function useLyrics(
   track: NowPlayingTrack | null,
   stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
-): UseLyricsReturn {
+) {
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);

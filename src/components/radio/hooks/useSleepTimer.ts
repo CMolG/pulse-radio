@@ -10,18 +10,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 const PRESETS_MIN = [15, 30, 60] as const;
 const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
-export type UseSleepTimerReturn = {
-  /** Minutes remaining (null = inactive) */
-  remainingMin: number | null;
-  /** Whether the volume is currently fading out */
-  isFading: boolean;
-  /** Cycle through presets: off → 15 → 30 → 60 → off */
-  cycle: () => void;
-  /** Cancel active timer */
-  cancel: () => void;
-};
-
-export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>): UseSleepTimerReturn {
+export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>) {
   const [remainingMin, setRemainingMin] = useState<number | null>(null);
   const [isFading, setIsFading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
