@@ -4,7 +4,6 @@
 } from 'next/server';
 import { cacheGet, cacheSet } from '@/lib/server-cache';
 export const runtime = 'nodejs';
-export const maxDuration = 10;
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
 const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)';

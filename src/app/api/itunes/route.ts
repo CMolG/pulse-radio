@@ -26,7 +26,6 @@ async function apiFetch(
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheGet, cacheSet } from '@/lib/server-cache';
 export const runtime = 'nodejs';
-export const maxDuration = 10;
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour

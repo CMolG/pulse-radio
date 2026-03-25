@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cacheGet, cacheSet } from '@/lib/server-cache';
 
 export const runtime = 'nodejs';
-export const maxDuration = 10;
 const BANDSINTOWN_APP_ID = 'pulse-radio';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
 const TIMEOUT_MS = 8_000;

@@ -42,7 +42,6 @@ const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
   return false;
 }
 export const runtime = 'nodejs';
-export const maxDuration = 10;
 const _ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const _ERR_INVALID_PARAM = { error: 'Missing or invalid url parameter' } as const;
 const _ERR_INVALID_PROTO = { error: 'Invalid protocol' } as const;

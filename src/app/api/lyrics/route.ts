@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cacheGet, cacheSet } from '@/lib/server-cache';
 
 export const runtime = 'nodejs';
-export const maxDuration = 10;
 const LRCLIB_BASE = 'https://lrclib.net/api';
 const LRCLIB_TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
