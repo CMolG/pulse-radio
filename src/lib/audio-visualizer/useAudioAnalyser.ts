@@ -43,8 +43,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
 
         if (!analyserRef.current) {
           const analyser = ctx.createAnalyser();
-          analyser.fftSize = fftSize;
-          analyser.smoothingTimeConstant = smoothingTimeConstant;
+          analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant;
           source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
@@ -63,8 +62,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
               // to avoid 256 float divisions per frame — normalize once at the end
               const buf = waveDataRef.current;
-              let sumSqInt = 0;
-              let maxAbsInt = 0;
+              let sumSqInt = 0; let maxAbsInt = 0;
               for (let i = 0; i < buf.length; i++) {
                 const s = buf[i] - 128;
                 sumSqInt += s * s;

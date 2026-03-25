@@ -62,11 +62,9 @@ export function VisualizerCanvas({
       }
       const resolvedColor = resolvedColorRef.current; const { width, height } = sizeRef.current;
       if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
-      const dpr = devicePixelRatio; const targetW = Math.round(width * dpr);
-      const targetH = Math.round(height * dpr);
+      const dpr = devicePixelRatio; const targetW = Math.round(width * dpr); const targetH = Math.round(height * dpr);
       if (canvas.width !== targetW || canvas.height !== targetH) {
-        canvas.width = targetW;
-        canvas.height = targetH;
+        canvas.width = targetW; canvas.height = targetH;
         gradientCacheRef.current = null;
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -94,15 +92,13 @@ export function VisualizerCanvas({
 
         // Feature-detect roundRect once instead of try-catch per bar
         if (supportsRoundRectRef.current === null) supportsRoundRectRef.current = typeof ctx.roundRect === 'function';
-        const useRoundRect = supportsRoundRectRef.current;
-        const radius = barWidth * 0.3;
+        const useRoundRect = supportsRoundRectRef.current; const radius = barWidth * 0.3;
         const radii: [number, number, number, number] = [radius, radius, 0, 0];
 
         for (let i = 0; i < barCount; i++) {
           const idx = Math.min(i * step, frequencyData.length - 1);
           const value = frequencyData[idx] / 255; const barHeight = value * height * 0.8;
-          const x = i * barWidth + gap / 2; const y = height - barHeight;
-          const w = barWidth - gap;
+          const x = i * barWidth + gap / 2; const y = height - barHeight; const w = barWidth - gap;
           ctx.beginPath();
           if (useRoundRect) {
             ctx.roundRect(x, y, w, barHeight, radii);
@@ -111,8 +107,7 @@ export function VisualizerCanvas({
         }
       } else {
         const step = width / frequencyData.length;
-        ctx.strokeStyle = resolvedColor;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2;
         ctx.beginPath();
         for (let i = 0; i < frequencyData.length; i++) {
           const y = height - (frequencyData[i] / 255) * height * 0.6;

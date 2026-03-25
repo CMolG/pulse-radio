@@ -44,8 +44,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
 
   const teardown = () => {
     if (!recognition) return;
-    recognition.onresult = null; recognition.onerror = null;
-    recognition.onend = null;
+    recognition.onresult = null; recognition.onerror = null; recognition.onend = null;
     recognition.stop();
     recognition = null;
   };
@@ -55,10 +54,8 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
 
     recognition = new Ctor();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
+    recognition.continuous = true; recognition.interimResults = true;
+    recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
 
     recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
       // Reset restart counter on any successful recognition — proves engine is alive.

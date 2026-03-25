@@ -56,16 +56,14 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas"); const size = 48;
-        canvas.width = size;
-        canvas.height = size;
+        canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext("2d");
         if (!ctx) return resolve(FALLBACK_COLORS);
         ctx.drawImage(img, 0, 0, size, size);
         const data = ctx.getImageData(0, 0, size, size).data;
         const buckets: Record<number, number> = {};
         for (let i = 0; i < data.length; i += 12) {
-          const r = data[i], g = data[i + 1], b = data[i + 2];
-          const max = Math.max(r, g, b), min = Math.min(r, g, b);
+          const r = data[i], g = data[i + 1], b = data[i + 2]; const max = Math.max(r, g, b), min = Math.min(r, g, b);
           if (max - min < 25) continue;
           const s = (max - min) / max;
           if (s < 0.2) continue;
@@ -79,15 +77,13 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         }
         const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
         if (sorted.length < 1) return resolve(FALLBACK_COLORS);
-        const h1 = parseInt(sorted[0][0]);
-        const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
+        const h1 = parseInt(sorted[0][0]); const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
         const h3 = sorted.length > 2 ? parseInt(sorted[2][0]) : (h1 + 240) % 360;
         resolve([ `hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`,
         ]);
       } catch { resolve(FALLBACK_COLORS); }
     };
-    img.onerror = () => resolve(FALLBACK_COLORS);
-    img.src = imgUrl;
+    img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;
   });
   if (_colorCache.size >= MAX_COLOR_CACHE) {
     const first = _colorCache.keys().next().value;

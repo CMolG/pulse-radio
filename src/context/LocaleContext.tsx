@@ -30,8 +30,7 @@ export function LocaleProvider({ children, countryCode, }: { children: React.Rea
   useEffect(() => {
     saveLocale(locale);
     if (typeof document !== "undefined") {
-      document.documentElement.lang = locale;
-      document.documentElement.dir = isRtlLocale(locale) ? "rtl" : "ltr";
+      document.documentElement.lang = locale; document.documentElement.dir = isRtlLocale(locale) ? "rtl" : "ltr";
     }
   }, [locale]);
 

@@ -51,8 +51,7 @@ export function SpiralRenderer({
     const centerX = w / 2; const centerY = h / 2;
 
     // Update mock/frequency data
-    const data = dataArrayRef.current; const target = targetArrayRef.current;
-    const frequencyData = freqData;
+    const data = dataArrayRef.current; const target = targetArrayRef.current; const frequencyData = freqData;
 
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
@@ -78,8 +77,7 @@ export function SpiralRenderer({
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
     const smoothed = smoothedRef.current; const temp = tempRef.current;
-    let src = data;
-    let dst = smoothed;
+    let src = data; let dst = smoothed;
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
       for (let i = 0; i < NUM_BARS; i++) {
         const prev = src[i > 0 ? i - 1 : 0];
@@ -96,8 +94,7 @@ export function SpiralRenderer({
 
     // Spiral configuration
     const maxAngle = CYCLES * Math.PI * 2; const minRadius = Math.max(w, h) * 0.01;
-    const maxRadius = Math.sqrt(w * w + h * h) * 0.8;
-    const b = Math.log(maxRadius / minRadius) / maxAngle;
+    const maxRadius = Math.sqrt(w * w + h * h) * 0.8; const b = Math.log(maxRadius / minRadius) / maxAngle;
 
     rotationRef.current += 0.0015; const rotation = rotationRef.current;
 
@@ -123,11 +120,9 @@ export function SpiralRenderer({
 
     for (let i = 0; i < NUM_BARS; i++) {
       const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
-      const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor;
-      const baseAngle = (i / NUM_BARS) * maxAngle;
+      const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle;
       const radius = minRadius * Math.exp(b * baseAngle);
-      const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle);
-      const sin = Math.sin(finalAngle);
+      const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle);
 
       innerX[i] = centerX + cos * radius;
       innerY[i] = centerY + sin * radius;
@@ -136,16 +131,13 @@ export function SpiralRenderer({
     }
 
     // Draw slime shapes per cycle
-    ctx.fillStyle = fillStyle;
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = `${c1}66`;
-    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20;
+    ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
 
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
 
     for (let c = 0; c < CYCLES; c++) {
-      const startIdx = c * barsPerCycle;
-      const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
+      const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
       if (startIdx >= NUM_BARS) break;
 
       ctx.beginPath();

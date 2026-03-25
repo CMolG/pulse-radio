@@ -59,8 +59,7 @@ function jaroDistance(a: string, b: string): number {
 
   let matches = 0;
   for (let i = 0; i < a.length; i++) {
-    const start = Math.max(0, i - matchDistance);
-    const end = Math.min(i + matchDistance + 1, b.length);
+    const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
       if (_bMatches[j] || a[i] !== b[j]) continue;
       _aMatches[i] = true;

@@ -23,8 +23,7 @@ export function useCanvasLoop(
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     const updateSize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2) * dprScale;
+      const rect = canvas.getBoundingClientRect(); const dpr = Math.min(window.devicePixelRatio || 1, 2) * dprScale;
       sizeRef.current = { w: Math.round(rect.width * dpr), h: Math.round(rect.height * dpr), };
     };
     updateSize();
@@ -34,8 +33,7 @@ export function useCanvasLoop(
 
   useEffect(() => {
     const loop = () => {
-      const canvas = canvasRef.current; if (!canvas) return;
-      const ctx = canvas.getContext("2d"); if (!ctx) return;
+      const canvas = canvasRef.current; if (!canvas) return; const ctx = canvas.getContext("2d"); if (!ctx) return;
 
       const { w, h } = sizeRef.current;
 

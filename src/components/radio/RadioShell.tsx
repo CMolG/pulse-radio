@@ -237,8 +237,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // Track network connectivity for offline indicator
   useEffect(() => {
     const goOnline = () => setIsOnline(true); const goOffline = () => setIsOnline(false);
-    window.addEventListener('online', goOnline);
-    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline); window.addEventListener('offline', goOffline);
     return () => { window.removeEventListener('online', goOnline); window.removeEventListener('offline', goOffline); };
   }, []);
 
@@ -451,8 +450,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [enrichedTrack, radio.station, favSongs, showToast]);
 
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
-    const wasLiked = favSongs.has(entry.title, entry.artist);
-    const { id: _, timestamp: _t, ...input } = entry;
+    const wasLiked = favSongs.has(entry.title, entry.artist); const { id: _, timestamp: _t, ...input } = entry;
     favSongs.toggle(input);
     showToast(wasLiked ? "Song removed" : entry.title, "heart");
   }, [favSongs, showToast]);

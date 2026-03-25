@@ -227,8 +227,7 @@ export default function BrowseView({
     try {
       const result = await fetchIcyMeta(s.url_resolved);
       if (stale?.()) return;
-      const raw = result.streamTitle;
-      const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
+      const raw = result.streamTitle; const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
       setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
     } catch {
       if (stale?.()) return;
@@ -397,8 +396,7 @@ export default function BrowseView({
 
       {/* Genre chips — wrapping, limited on mobile */}
       {(() => {
-        const MOBILE_LIMIT = 7;
-        const collapsed = isMobile && !genreChipsExpanded;
+        const MOBILE_LIMIT = 7; const collapsed = isMobile && !genreChipsExpanded;
         const visibleGenres = collapsed ? translatedGenreCategories.slice(0, MOBILE_LIMIT) : translatedGenreCategories;
         return (
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
@@ -432,8 +430,7 @@ export default function BrowseView({
 
       {/* Country chips — wrapping, limited on mobile */}
       {(() => {
-        const MOBILE_LIMIT = 7;
-        const collapsed = isMobile && !countryChipsExpanded;
+        const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
         const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
         return (
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>

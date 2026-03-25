@@ -96,8 +96,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   const retry = () => {
     if (!track?.title) return;
     const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}\n${track.title}`.toLowerCase();
-    const cached = loadCache();
+    const key = `${artistSeed}\n${track.title}`.toLowerCase(); const cached = loadCache();
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
     const controller = new AbortController();

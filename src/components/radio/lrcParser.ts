@@ -11,8 +11,7 @@ export function parseLrc(lrcText: string): LyricLine[] {
   const lines: LyricLine[] = [];
   for (const raw of lrcText.split('\n')) {
     const timestamps: number[] = [];
-    let lastIndex = 0;
-    let m;
+    let lastIndex = 0; let m;
     TS_REGEX.lastIndex = 0;
     while ((m = TS_REGEX.exec(raw)) !== null) {
       const minutes = parseInt(m[1], 10); const seconds = parseInt(m[2], 10);

@@ -139,8 +139,7 @@ export function useRadio() {
         // Set flag before assigning src — the browser fires a synchronous 'pause'
         // event on src change, and onPause must ignore that synthetic pause.
         srcChangingRef.current = true;
-        audio.crossOrigin = useProxy ? 'anonymous' : null;
-        audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
+        audio.crossOrigin = useProxy ? 'anonymous' : null; audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
         // Clear in a microtask (after the synchronous pause event has fired)
         Promise.resolve().then(() => { srcChangingRef.current = false; });
         return audio.play();
@@ -374,8 +373,7 @@ export function useRadio() {
       }
 
       // Find the buffer range containing currentTime
-      let ahead = 0;
-      let bufferEnd = 0;
+      let ahead = 0; let bufferEnd = 0;
       for (let i = 0; i < buffered.length; i++) {
         if (ct >= buffered.start(i) && ct <= buffered.end(i)) {
           ahead = buffered.end(i) - ct;
@@ -537,8 +535,7 @@ export function useRadio() {
 
   const toggleMute = useCallback(() => setMuted(m => !m), []);
   const seek = useCallback((t: number) => {
-    const audio = audioRef.current; if (!audio || !isFinite(t)) return;
-    const duration = audio.duration || 0;
+    const audio = audioRef.current; if (!audio || !isFinite(t)) return; const duration = audio.duration || 0;
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
 

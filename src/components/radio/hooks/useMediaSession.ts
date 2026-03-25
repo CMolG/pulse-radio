@@ -32,10 +32,8 @@ export function useMediaSession(config: MediaSessionConfig): void {
   useEffect(() => {
     if (!('mediaSession' in navigator) || !station) return;
 
-    const trackTitle = track?.title || station.name;
-    const trackArtist = track?.artist || 'Internet Radio';
-    const artSrc = track?.artworkUrl || station.favicon;
-    const album = station.tags?.split(',')[0] || 'Live';
+    const trackTitle = track?.title || station.name; const trackArtist = track?.artist || 'Internet Radio';
+    const artSrc = track?.artworkUrl || station.favicon; const album = station.tags?.split(',')[0] || 'Live';
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return; lastMetaRef.current = metaKey;
 

@@ -28,15 +28,13 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
   // Try current server, failover to next on error
   for (let attempt = 0; attempt < SERVERS.length; attempt++) {
     try {
-      const url = `${getBase()}${path}`;
-      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+      const url = `${getBase()}${path}`; const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) {
         await res.text().catch(() => {});
         rotateServer();
         continue;
       }
-      const data: Station[] = await res.json();
-      const filtered = data.filter(s => s.url_resolved);
+      const data: Station[] = await res.json(); const filtered = data.filter(s => s.url_resolved);
       cache.set(key, { data: filtered, ts: Date.now() });
       while (cache.size > MAX_CACHE) {
         const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest);

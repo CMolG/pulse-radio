@@ -106,8 +106,7 @@ export async function GET(req: NextRequest) {
     const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(/\0+$/, '');
 
     // Parse StreamTitle='Artist - Title';
-    const match = metaString.match(/StreamTitle='([^']*)'/);
-    const streamTitle = match?.[1]?.trim() || null;
+    const match = metaString.match(/StreamTitle='([^']*)'/); const streamTitle = match?.[1]?.trim() || null;
 
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {

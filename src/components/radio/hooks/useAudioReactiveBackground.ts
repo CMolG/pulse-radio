@@ -29,10 +29,8 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
   useEffect(() => {
     const loop = (ts: number) => {
       const lastTs = lastTsRef.current || ts; lastTsRef.current = ts;
-      const dtSec = Math.max(0.001, (ts - lastTs) / 1000);
-      const meter = meterRef.current;
-      const rms = enabled && meter ? clamp01(meter.rms) : 0;
-      const peak = enabled && meter ? clamp01(meter.peak) : 0;
+      const dtSec = Math.max(0.001, (ts - lastTs) / 1000); const meter = meterRef.current;
+      const rms = enabled && meter ? clamp01(meter.rms) : 0; const peak = enabled && meter ? clamp01(meter.peak) : 0;
       const target = Math.min(MAX_AMPLITUDE, rms * 0.85 + peak * 0.15);
       const attack = 1 - Math.exp(-dtSec / (ATTACK_MS / 1000));
       const release = 1 - Math.exp(-dtSec / (RELEASE_MS / 1000));

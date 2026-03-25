@@ -121,8 +121,7 @@ export function useEqualizer() {
   // Smooth ramp time for parameter changes to prevent clicks/pops
   const RAMP_TIME = 0.02; // 20ms — fast enough to feel instant, slow enough to avoid clicks
   const applyNoiseReductionPreset = useCallback((mode: NoiseReductionMode) => {
-    const preset = NR_PRESETS[mode]; const ctx = ctxRef.current;
-    const t = ctx?.currentTime ?? 0;
+    const preset = NR_PRESETS[mode]; const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
 
     if (nrHighpassRef.current) nrHighpassRef.current.frequency.setTargetAtTime(preset.hpfHz, t, RAMP_TIME);
     if (nrGateRef.current) {
@@ -244,8 +243,7 @@ export function useEqualizer() {
         const x = (i * 2) / curveLen - 1;
         curve[i] = (Math.PI + 2) * x / (Math.PI + 2 * Math.abs(x));
       }
-      bassShaper.curve = curve;
-      bassShaper.oversample = '2x';
+      bassShaper.curve = curve; bassShaper.oversample = '2x';
 
       const bassHp = ctx.createBiquadFilter();
       bassHp.type = 'highpass';
@@ -424,8 +422,7 @@ export function useEqualizer() {
         try {
           try { source.disconnect(normalizer); } catch { /* source may not be connected to normalizer */ }
           try { source.disconnect(nrHead); } catch { /* source may not be connected to NR head */ }
-          normalizer.disconnect();
-          normGain.disconnect();
+          normalizer.disconnect(); normGain.disconnect();
           const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
           if (next) {
             normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME);
@@ -482,8 +479,7 @@ export function useEqualizer() {
     setCompressorEnabled(prev => {
       const next = !prev;
       saveToStorage(STORAGE_KEYS.COMPRESSOR_ENABLED, next);
-      const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
-      const amount = compressorAmount;
+      const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0; const amount = compressorAmount;
       if (mbDryGainRef.current && mbWetGainRef.current) {
         if (next) {
           mbDryGainRef.current.gain.setTargetAtTime(1 - amount * 0.5, t, RAMP_TIME);

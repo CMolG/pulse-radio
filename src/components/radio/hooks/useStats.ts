@@ -69,8 +69,7 @@ export function useStats() {
   const dirtyRef = useRef(false);
   const persist = useCallback(() => {
     if (dirtyRef.current) {
-      const current = statsRef.current;
-      const pStations = pruneTop(current.stationListenTimes, MAX_STATIONS, 'totalMs');
+      const current = statsRef.current; const pStations = pruneTop(current.stationListenTimes, MAX_STATIONS, 'totalMs');
       const pSongs = pruneTop(current.songPlayCounts, MAX_SONGS, 'count');
       const pArtists = pruneTop(current.artistPlayCounts, MAX_ARTISTS, 'count');
       const pGenres = pruneTop(current.genrePlayCounts, MAX_GENRES, 'count');

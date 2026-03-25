@@ -53,8 +53,7 @@ export function useFavoriteSongs() {
   const remove = useCallback((id: string) => { setSongs(prev => prev.filter(s => s.id !== id)); }, []);
   const toggle = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => {
-      const key = songKey(song.title, song.artist);
-      const exists = prev.find(s => songKey(s.title, s.artist) === key);
+      const key = songKey(song.title, song.artist); const exists = prev.find(s => songKey(s.title, s.artist) === key);
       return exists ? prev.filter(s => s.id !== exists.id) : prepend(song, prev);
     });
   }, []);

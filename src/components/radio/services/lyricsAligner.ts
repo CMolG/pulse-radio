@@ -94,8 +94,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   let bestScore = 0;
 
   for (let i = start; i <= end; i++) {
-    const lineTokens = tokenize(lyrics.lines[i]?.text ?? '');
-    const score = scoreLine(lineTokens, hypoTokens);
+    const lineTokens = tokenize(lyrics.lines[i]?.text ?? ''); const score = scoreLine(lineTokens, hypoTokens);
     if (score > bestScore) { bestScore = score; bestIndex = i; }
   }
 
