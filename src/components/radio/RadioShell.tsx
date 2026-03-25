@@ -6544,7 +6544,7 @@ function SongContextMenu({
     window.addEventListener('scroll', onScroll, _EVT_CAPTURE_PASSIVE);
     return () => {
       window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('scroll', onScroll, { capture: true } as EventListenerOptions);
+      window.removeEventListener('scroll', onScroll, _EVT_CAPTURE_PASSIVE);
     };
   }, [menu, onClose]);
   if (!menu) return null;
