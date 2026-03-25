@@ -6540,10 +6540,10 @@ function SongContextMenu({
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     };
     const onScroll = () => onClose();
-    window.addEventListener('pointerdown', onPointerDown, true);
+    window.addEventListener('pointerdown', onPointerDown, _EVT_CAPTURE_PASSIVE);
     window.addEventListener('scroll', onScroll, _EVT_CAPTURE_PASSIVE);
     return () => {
-      window.removeEventListener('pointerdown', onPointerDown, true);
+      window.removeEventListener('pointerdown', onPointerDown, _EVT_CAPTURE_PASSIVE);
       window.removeEventListener('scroll', onScroll, _EVT_CAPTURE_PASSIVE);
     };
   }, [menu, onClose]);
