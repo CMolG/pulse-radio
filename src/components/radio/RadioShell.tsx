@@ -1295,8 +1295,10 @@ function useRadio() {
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bufferCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playSessionRef = useRef(0);
-  const proxyFallbackUrlsRef = useRef<Set<string>>(new Set());
-  const codecFallbackTriedRef = useRef<Set<string>>(new Set());
+  const proxyFallbackUrlsRef = useRef<Set<string>>(null!);
+  const codecFallbackTriedRef = useRef<Set<string>>(null!);
+  if (!proxyFallbackUrlsRef.current) proxyFallbackUrlsRef.current = new Set();
+  if (!codecFallbackTriedRef.current) codecFallbackTriedRef.current = new Set();
   const isReconnectingRef = useRef(false);
   const srcChangingRef = useRef(false);
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1728,7 +1730,8 @@ function useRadio() {
   const setVolume = useCallback((v: number) => {
     setVolumeState(Math.max(0, Math.min(1, v)));
   }, []);
-  const prefetchedUrlsRef = useRef<Set<string>>(new Set());
+  const prefetchedUrlsRef = useRef<Set<string>>(null!);
+  if (!prefetchedUrlsRef.current) prefetchedUrlsRef.current = new Set();
   const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
     if (prefetchedUrlsRef.current.size >= 500) {
