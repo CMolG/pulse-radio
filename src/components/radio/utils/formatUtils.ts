@@ -3,9 +3,7 @@ const WHITESPACE_RE = /\s+/;
 const ARTIST_SPLIT_RE = /[,;&]|feat\.|ft\.|featuring|vs\.?/i;
 
 export function stationInitials(name: string) {
-  return name .split(WHITESPACE_RE)
-    .slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
+  return name .split(WHITESPACE_RE) .slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("");
 }
 
 export function primaryArtist(artist: string): string { return artist.split(ARTIST_SPLIT_RE)[0].trim(); }

@@ -57,9 +57,7 @@ export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLy
 
   if (!lyrics.plainText) return [];
 
-  return lyrics.plainText .split(/\r?\n/)
-    .map((line) => line.trim()).filter(Boolean)
-    .map((text, index) => ({
+  return lyrics.plainText .split(/\r?\n/) .map((line) => line.trim()).filter(Boolean).map((text, index) => ({
       id: `plain-${index}`,
       text,
     }));

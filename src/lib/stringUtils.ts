@@ -4,10 +4,5 @@ const WHITESPACE_RE = /\s+/g;
 
 export function normalizeText(value: string | null | undefined): string {
   if (!value) return "";
-  return value .normalize("NFKD")
-    .replace(DIACRITIC_RE, "")
-    .replace(NON_ALPHANUM_RE, " ")
-    .replace(WHITESPACE_RE, " ")
-    .trim()
-    .toLowerCase();
+  return value.normalize("NFKD").replace(DIACRITIC_RE, "").replace(NON_ALPHANUM_RE, " ").replace(WHITESPACE_RE, " ").trim().toLowerCase();
 }
