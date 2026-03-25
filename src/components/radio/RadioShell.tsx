@@ -4005,24 +4005,48 @@ const MAX_COLOR_CACHE = 32;
           const r = data[i],
             g = data[i + 1],
             b = data[i + 2];
-          const max = Math.max(r, g, b),
-            min = Math.min(r, g, b);
-          if (max - min < 25) continue;
-          const s = (max - min) / max;
-          if (s < 0.2) continue;
+          const mx = r > g ? (r > b ? r : b) : g > b ? g : b;
+          const mn = r < g ? (r < b ? r : b) : g < b ? g : b;
+          const chroma = mx - mn;
+          if (chroma < 25) continue;
+          if (chroma / mx < 0.2) continue;
           let h = 0;
-          if (max === r) h = 60 * (((g - b) / (max - min)) % 6);
-          else if (max === g) h = 60 * ((b - r) / (max - min) + 2);
-          else h = 60 * ((r - g) / (max - min) + 4);
+          if (mx === r) h = 60 * (((g - b) / chroma) % 6);
+          else if (mx === g) h = 60 * ((b - r) / chroma + 2);
+          else h = 60 * ((r - g) / chroma + 4);
           if (h < 0) h += 360;
           const bucket = Math.round(h / 30) * 30;
           buckets[bucket] = (buckets[bucket] || 0) + 1;
         }
-        const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
-        if (sorted.length < 1) return resolve(FALLBACK_COLORS);
-        const h1 = parseInt(sorted[0][0]);
-        const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
-        const h3 = sorted.length > 2 ? parseInt(sorted[2][0]) : (h1 + 240) % 360;
+        // Top-3 linear scan instead of full sort
+        let h1 = -1,
+          h2 = -1,
+          h3 = -1,
+          c1 = 0,
+          c2 = 0,
+          c3 = 0;
+        for (const k in buckets) {
+          const v = buckets[k];
+          if (v > c1) {
+            h3 = h2;
+            c3 = c2;
+            h2 = h1;
+            c2 = c1;
+            h1 = +k;
+            c1 = v;
+          } else if (v > c2) {
+            h3 = h2;
+            c3 = c2;
+            h2 = +k;
+            c2 = v;
+          } else if (v > c3) {
+            h3 = +k;
+            c3 = v;
+          }
+        }
+        if (h1 < 0) return resolve(FALLBACK_COLORS);
+        if (h2 < 0) h2 = (h1 + 120) % 360;
+        if (h3 < 0) h3 = (h1 + 240) % 360;
         resolve([`hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`]);
       } catch {
         resolve(FALLBACK_COLORS);
