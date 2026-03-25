@@ -6610,9 +6610,9 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
     const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
       const artist = primaryArtist(song.artist);
-      const existing = groups.get(artist) ?? [];
-      existing.push(song);
-      groups.set(artist, existing);
+      let arr = groups.get(artist);
+      if (!arr) { arr = []; groups.set(artist, arr); }
+      arr.push(song);
     }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
@@ -6620,9 +6620,9 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
     const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
       const album = song.album || 'Unknown Album';
-      const existing = groups.get(album) ?? [];
-      existing.push(song);
-      groups.set(album, existing);
+      let arr = groups.get(album);
+      if (!arr) { arr = []; groups.set(album, arr); }
+      arr.push(song);
     }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
