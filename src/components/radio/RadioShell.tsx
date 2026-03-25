@@ -2973,6 +2973,9 @@ const _EVT_PASSIVE: AddEventListenerOptions = { passive: true };
 const _EVT_ONCE: AddEventListenerOptions = { once: true };
 const _EVT_CAPTURE_PASSIVE: AddEventListenerOptions = { capture: true, passive: true };
 const _NOOP = () => {};
+function _uid(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+}
 const _SKELETON_INDICES = [0, 1, 2, 3, 4];
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
@@ -8426,10 +8429,11 @@ function useFavoriteSongs() {
   }, [songs]);
   useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const prepend = (song: Omit<FavoriteSong, 'id' | 'timestamp'>, prev: FavoriteSong[]) => {
+    const now = Date.now();
     const entry: FavoriteSong = {
       ...song,
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      timestamp: Date.now(),
+      id: _uid(),
+      timestamp: now,
     };
     const next = [entry, ...prev];
     return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
@@ -8541,7 +8545,7 @@ function useHistory(
     if (key === lastTrackRef.current) return;
     lastTrackRef.current = key;
     const entry: HistoryEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      id: _uid(),
       stationName,
       stationUuid,
       artist: track.artist,
