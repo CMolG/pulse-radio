@@ -401,6 +401,6 @@ export function translate(
   if (!vars) return message;
   return message.replace(_TRANSLATE_VAR_RE, (_, token: string) => {
     const val = vars[token];
-    return val === undefined || val === null ? `{${token}}` : String(val);
+    return val === undefined || val === null ? `{${token}}` : `${val}`;
   });
 }

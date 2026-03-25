@@ -846,7 +846,7 @@ function searchBy(
 ): Promise<Station[]> {
   const params = new URLSearchParams({
     ...filter,
-    limit: String(limit),
+    limit: `${limit}`,
     order: 'votes',
     reverse: 'true',
   });
@@ -2425,7 +2425,7 @@ async function fetchLyricsForArtist(
 ): Promise<LyricsData | null> {
   const params = new URLSearchParams({ artist_name: artist, track_name: title });
   if (album) params.set('album_name', album);
-  if (duration) params.set('duration', String(Math.round(duration)));
+  if (duration) params.set('duration', `${Math.round(duration)}`);
   const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, (d) =>
     transform(d, artist, title),
   );
