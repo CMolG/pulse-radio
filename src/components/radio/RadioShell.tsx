@@ -406,21 +406,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (ss) return;
 
       switch (e.key) {
-        case " ": e.preventDefault();
-          r.togglePlay();
-          break;
-        case "ArrowLeft": e.preventDefault();
-          skipPrev();
-          break;
-        case "ArrowRight": e.preventDefault();
-          skipNext();
-          break;
-        case "ArrowUp": e.preventDefault();
-          r.setVolume(Math.min(1, r.volume + 0.05));
-          break;
-        case "ArrowDown": e.preventDefault();
-          r.setVolume(Math.max(0, r.volume - 0.05));
-          break;
+        case " ": e.preventDefault(); r.togglePlay(); break;
+        case "ArrowLeft": e.preventDefault(); skipPrev(); break;
+        case "ArrowRight": e.preventDefault(); skipNext(); break;
+        case "ArrowUp": e.preventDefault(); r.setVolume(Math.min(1, r.volume + 0.05)); break;
+        case "ArrowDown": e.preventDefault(); r.setVolume(Math.max(0, r.volume - 0.05)); break;
         case "m": case "M": r.toggleMute(); break;
         case "n": case "N": skipNext(); break;
         case "p": case "P": skipPrev(); break;
