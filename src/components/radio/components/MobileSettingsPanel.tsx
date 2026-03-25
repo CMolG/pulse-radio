@@ -38,8 +38,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
   const handleSetGain = useCallback((id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange(null); eq.setBandGain(id, gain);
   }, [eq, onPresetChange]); const handleSave = () => { const name = presetName.trim();
-    if (name) { eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false);
-    } };
+    if (name) { eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false); } };
   return ( <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

@@ -52,8 +52,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     searchStationsAria: "Sender suchen", retry: "Erneut versuchen",
     failedToLoad: "Laden fehlgeschlagen", noStationsFound: "Keine Sender gefunden", previous: "Zurück", next: "Weiter",
     addToFavorites: "Zu Favoriten hinzufügen", removeFromFavorites: "Aus Favoriten entfernen",
-    minimize: "Minimieren", expand: "Erweitern", },
-  "pt-BR": {
+    minimize: "Minimieren", expand: "Erweitern", }, "pt-BR": {
     loadingStations: "Carregando…", stationCount: "{count} estações", allCountries: "Todos", favorites: "Favoritos",
     recent: "Recentes", discover: "Descobrir", history: "Histórico", searchStations: "Buscar estações…",
     searchStationsAria: "Buscar estações", retry: "Tentar novamente",

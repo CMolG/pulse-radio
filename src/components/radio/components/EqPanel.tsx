@@ -25,8 +25,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
   const handleSetGain = (id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange?.(null); onSetGain(id, gain);
   }; const handleSave = () => { const name = presetName.trim();
-    if (name && onSaveCustomPreset) { onSaveCustomPreset(name); setPresetName(''); setShowSaveInput(false);
-    } };
+    if (name && onSaveCustomPreset) { onSaveCustomPreset(name); setPresetName(''); setShowSaveInput(false); } };
   return (<div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50">
       {/* Header */} <div className="flex-between mb-4">
         <div className="flex-row-2"><span className="text-[13px] font-semibold text-white">Equalizer</span>

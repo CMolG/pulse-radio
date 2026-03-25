@@ -236,8 +236,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => { const onKeyDown = (e: KeyboardEvent) => {
       const { radio: r, handleSkipNext: skipNext, handleSkipPrev: skipPrev, favs: f, favSongs: fs, enrichedTrack: et, theaterMode: tm, showEq: eq, showShortcuts: sc, selectedSong: ss, sleepTimer: st, showToast: toast, realtimeLyrics: rl } = keydownRef.current;
       const target = e.target as HTMLElement;
-      const isInput = target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" || target.isContentEditable;
+      const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
       // Allow Escape even from inputs (to close panels/modals)
       if (isInput && e.key !== "Escape") return;
       // When EQ panel is open, suppress single-letter shortcuts that could
@@ -254,8 +253,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "ArrowUp": e.preventDefault(); r.setVolume(Math.min(1, r.volume + 0.05)); break;
         case "ArrowDown": e.preventDefault(); r.setVolume(Math.max(0, r.volume - 0.05)); break;
         case "m": case "M": r.toggleMute(); break; case "n": case "N": skipNext(); break;
-        case "p": case "P": skipPrev(); break;
-        case "f": case "F": { e.preventDefault();
+        case "p": case "P": skipPrev(); break; case "f": case "F": { e.preventDefault();
           const searchInput = document.querySelector<HTMLInputElement>("[data-radio-search]") ??
             document.querySelector<HTMLInputElement>(".radio-search-input");
           if (searchInput) searchInput.focus(); break; }

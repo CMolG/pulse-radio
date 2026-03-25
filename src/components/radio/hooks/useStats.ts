@@ -45,8 +45,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       const pSongs = pruneTop(current.songPlayCounts, MAX_SONGS, 'count');
       const pArtists = pruneTop(current.artistPlayCounts, MAX_ARTISTS, 'count');
       const pGenres = pruneTop(current.genrePlayCounts, MAX_GENRES, 'count');
-      const didPrune = pStations !== current.stationListenTimes ||
-        pSongs !== current.songPlayCounts ||
+      const didPrune = pStations !== current.stationListenTimes || pSongs !== current.songPlayCounts ||
         pArtists !== current.artistPlayCounts || pGenres !== current.genrePlayCounts;
       if (didPrune) {
         const pruned: UsageStats = { ...current, stationListenTimes: pStations, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };

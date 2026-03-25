@@ -30,8 +30,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const resolvedTrackNumber = song?.trackNumber ?? albumMeta.trackNumber ?? null;
   const resolvedTrackCount = song?.trackCount ?? albumMeta.trackCount ?? null;
   const showMetaHydration = Boolean( song && (song.durationMs == null || song.genre == null ||
-      song.releaseDate == null || song.trackNumber == null || song.trackCount == null),
-  ) && albumMeta.isLoading;
+      song.releaseDate == null || song.trackNumber == null || song.trackCount == null), ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
     song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null, song?.stationName ?? null,);
   const plainLyrics = lyrics?.plainText?.trim() ||

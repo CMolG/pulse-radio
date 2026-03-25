@@ -35,8 +35,7 @@ function jaroDistance(a: string, b: string): number { if (a === b) return 1; if 
   for (let i = 0; i < a.length; i++) {
     if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++; }
   const transpositions = t / 2;
-  return ( matches / a.length + matches / b.length +
-    (matches - transpositions) / matches
+  return ( matches / a.length + matches / b.length + (matches - transpositions) / matches
   ) / 3; }
 function jaroWinkler(a: string, b: string): number {
   const jaro = jaroDistance(a, b); if (jaro < 0.7) return jaro; let prefix = 0; const maxPrefix = 4;

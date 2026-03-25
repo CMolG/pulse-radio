@@ -102,8 +102,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
         )}
         {streamQuality && isPlaying && ( <span
             className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
-              streamQuality === 'fair' ? 'bg-yellow-500' : streamQuality === 'poor' ? 'bg-red-500' :
-              'bg-gray-500'
+              streamQuality === 'fair' ? 'bg-yellow-500' : streamQuality === 'poor' ? 'bg-red-500' : 'bg-gray-500'
             }`}
             title={`Stream: ${streamQuality}`}
             aria-label={`Stream quality: ${streamQuality}`} />

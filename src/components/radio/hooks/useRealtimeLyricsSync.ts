@@ -47,8 +47,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
               hypothesesSeen: prev.diagnostics.hypothesesSeen + 1,
               confirmedTransitions: prev.diagnostics.confirmedTransitions + (step.confirmedIndex !== prev.activeLineIndex ? 1 : 0),
               rejectedJumps: prev.diagnostics.rejectedJumps + (step.jumpRejected ? 1 : 0),
-              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0), errorMessage: null, },
-          };});
+              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0), errorMessage: null, }, };});
       }, onFatalError: (errorMessage) => { setRuntimeState(prev => ({
           ...prev, status: 'error', activeLineIndex: -1, candidateLineIndex: -1,
           confidence: 0, effectiveCurrentTime: undefined, diagnostics: { ...prev.diagnostics, errorMessage, }, })); },
@@ -65,5 +64,4 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
     effectiveCurrentTime: isSyncing ? runtimeState.effectiveCurrentTime : undefined,
     diagnostics: { ...runtimeState.diagnostics, errorMessage: !supported
         ? 'Realtime lyrics sync is not supported in this browser.'
-        : runtimeState.diagnostics.errorMessage, }, toggle,
-  }; }
+        : runtimeState.diagnostics.errorMessage, }, toggle, }; }
