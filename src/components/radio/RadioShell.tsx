@@ -3660,7 +3660,7 @@ function BrowseView({
                             placeholder={t('filterBySong')}
                             value={songFilter}
                             onChange={(e) => setSongFilter(e.target.value)}
-                            className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                            className="bg-transparent text-white placeholder:text-white/40 outline-none w-full min-w-0"
                           />{' '}
                           {songFilter && (
                             <button
@@ -5495,7 +5495,7 @@ function _NowPlayingBar({
           {station && !theaterMode && (
             <button
               onClick={onToggleTheater}
-              className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
+              className="w-10 h-10 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95"
               title="Theater"
               aria-label="Theater mode"
             >
@@ -5976,7 +5976,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
                   <motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={_MOTION_T_02}
-                    className="text-white/30 text-[12px]"
+                    className="text-white/45 text-[12px]"
                   >
                     ▶
                   </motion.span>
@@ -6385,7 +6385,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                       <button
                         onClick={() => eq.removeCustomPreset(preset.name)}
                         aria-label={`Delete ${preset.name} preset`}
-                        className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors"
+                        className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/45 hover:text-red-400 transition-colors"
                       >
                         {' '}
                         <X size={10} />
@@ -6407,7 +6407,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                           if (e.key === 'Escape') setShowSaveInput(false);
                         }}
                         placeholder="Preset name…"
-                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/25 outline-none focus:border-sys-orange/50"
+                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/40 outline-none focus:border-sys-orange/50"
                         autoFocus
                       />{' '}
                       <button
@@ -6498,7 +6498,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     aria-label="Stereo width"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+                  <span className="text-[10px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.stereoWidth * 100)}%
                   </span>{' '}
                 </div>
@@ -6515,7 +6515,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     aria-label="Bass enhance"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+                  <span className="text-[10px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.bassEnhance * 100)}%
                   </span>{' '}
                 </div>
@@ -6538,7 +6538,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     aria-label="Compressor amount"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+                  <span className="text-[10px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.compressorAmount * 100)}%
                   </span>{' '}
                 </div>
@@ -6715,13 +6715,13 @@ function GroupStack({
         {' '}
         <Icon size={14} className="text-white/40" />{' '}
         <span className="text-[14px] font-semibold text-white/80">{label}</span>{' '}
-        <span className="text-[11px] text-white/30 bg-white/[0.06] px-2 py-0.5 rounded-full">
+        <span className="text-[11px] text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-full">
           {songs.length}
         </span>{' '}
         {hasMore && (
           <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={_MOTION_T_02}>
             {' '}
-            <ChevronDown size={14} className="text-white/30" />
+            <ChevronDown size={14} className="text-white/45" />
           </motion.span>
         )}
       </button>{' '}
@@ -7546,7 +7546,7 @@ const EqPanel = React.memo(function EqPanel({
                 }}
                 placeholder="Preset name…"
                 aria-label="Preset name"
-                className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/30 outline-none focus:border-sys-orange/50"
+                className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/40 outline-none focus:border-sys-orange/50"
                 autoFocus
               />{' '}
               <button
@@ -9960,7 +9960,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         ? t('removeFromFavorites')
                         : t('addToFavorites')
                     }
-                    className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? 'text-sys-orange' : 'text-white/30'}`}
+                    className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? 'text-sys-orange' : 'text-white/45'}`}
                   >
                     {' '}
                     <Star
@@ -10005,14 +10005,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   {' '}
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     {' '}
-                    <Search size={13} className="text-white/30 flex-shrink-0" />{' '}
+                    <Search size={13} className="text-white/45 flex-shrink-0" />{' '}
                     <input
                       type="search"
                       placeholder={t('searchStations')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t('searchStationsAria')}
-                      className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
+                      className="bg-transparent text-white text-[13px] placeholder:text-white/40 outline-none w-full min-w-0"
                       data-radio-search
                     />
                   </div>
@@ -10133,7 +10133,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label={t('searchStationsAria')}
-                        className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                        className="bg-transparent text-white placeholder:text-white/40 outline-none w-full min-w-0"
                         data-radio-search
                       />
                     </div>
