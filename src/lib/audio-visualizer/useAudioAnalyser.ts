@@ -100,10 +100,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
     waveDataRef.current = null;
   }, []);
 
-  useEffect(
-    () => () => { cancelAnimationFrame(rafRef.current); },
-    [],
-  );
+  useEffect(() => () => { cancelAnimationFrame(rafRef.current); }, [],);
 
   return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect };
 }

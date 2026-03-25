@@ -45,9 +45,7 @@ export async function fetchLyrics(
   fallbackArtist?: string,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
-  const artistCandidates = [...new Set(
-    [artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),
-  )];
+  const artistCandidates = [...new Set([artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),)];
 
   if (!artistCandidates.length || !title?.trim()) return null;
 

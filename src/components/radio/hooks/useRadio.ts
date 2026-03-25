@@ -151,11 +151,7 @@ export function useRadio(): UseRadioReturn {
   }, []);
 
   const startPlayback = useCallback(
-    (
-      audio: HTMLAudioElement,
-      streamUrl: string,
-      onRejected: (err: unknown) => void,
-    ) => {
+    (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void,) => {
       // Force proxy when the Web Audio graph is connected to this element.
       // On iOS Safari, a cross-origin audio element with crossOrigin=null routed
       // through Web Audio produces silence (CORS taint). Using the proxy ensures

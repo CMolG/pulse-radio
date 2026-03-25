@@ -88,8 +88,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     score += 30;
     score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };
-  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score)
-    .map((item) => item.code);
+  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.code);
 }
 
 function uniquePush(target: string[], values: string[]) {

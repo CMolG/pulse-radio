@@ -41,10 +41,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.
       const a = Math.max(0, Math.min(1, audioAmplitudeRef.current));
-      audioOffsetRef.current = {
-        x: a * 2.2,
-        y: -a * 6.5,
-      };
+      audioOffsetRef.current = { x: a * 2.2, y: -a * 6.5, };
       const nextX = pointerOffsetRef.current.x + audioOffsetRef.current.x;
       const nextY = pointerOffsetRef.current.y + audioOffsetRef.current.y;
       // Skip setState when values haven't meaningfully changed to avoid ~60fps re-renders

@@ -2,12 +2,7 @@
 
 import { useRef, useEffect } from "react";
 
-export type PaintFn = (
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-  freqData: Uint8Array | null,
-) => void;
+export type PaintFn = (ctx: CanvasRenderingContext2D, w: number, h: number, freqData: Uint8Array | null,) => void;
 
 /** Shared RAF-driven canvas loop with DPR-aware sizing. */
 export function useCanvasLoop(
@@ -31,10 +26,7 @@ export function useCanvasLoop(
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2) * dprScale;
-      sizeRef.current = {
-        w: Math.round(rect.width * dpr),
-        h: Math.round(rect.height * dpr),
-      };
+      sizeRef.current = { w: Math.round(rect.width * dpr), h: Math.round(rect.height * dpr), };
     };
     updateSize();
     const ro = new ResizeObserver(updateSize);

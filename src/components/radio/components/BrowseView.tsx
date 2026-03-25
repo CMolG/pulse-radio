@@ -591,9 +591,7 @@ export default function BrowseView({
                         Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`} />
                         ))
-                      ) : (
-                        renderScrollStations(catStations)
-                      )}
+                      ) : (renderScrollStations(catStations))}
                     </ScrollRow>
                   );
                 })}

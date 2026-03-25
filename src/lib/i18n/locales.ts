@@ -45,9 +45,7 @@ const _LOCALES = [
 export type SupportedLocale = (typeof _LOCALES)[number]['code'];
 export type LocaleInfo = { code: SupportedLocale; nativeName: string; englishName: string; rtl?: boolean; };
 export const SUPPORTED_LOCALES: readonly LocaleInfo[] = _LOCALES;
-const SUPPORTED_SET = new Set<SupportedLocale>(
-  SUPPORTED_LOCALES.map((locale) => locale.code),
-);
+const SUPPORTED_SET = new Set<SupportedLocale>(SUPPORTED_LOCALES.map((locale) => locale.code),);
 
 export function isSupportedLocale(value: string): value is SupportedLocale {
   return SUPPORTED_SET.has(value as SupportedLocale);

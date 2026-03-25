@@ -161,20 +161,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`;
     if (key !== lastRecordedTrackRef.current) {
       lastRecordedTrackRef.current = key;
-      recordSongPlay(
-        enrichedTrack.title,
-        enrichedTrack.artist,
-        enrichedTrack.genre,
-        enrichedTrack.artworkUrl,
-      );
+      recordSongPlay(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);
     } else {
       // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
-      updateSongMeta(
-        enrichedTrack.title,
-        enrichedTrack.artist,
-        enrichedTrack.genre,
-        enrichedTrack.artworkUrl,
-      );
+      updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);
     }
   }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, recordSongPlay, updateSongMeta]);
 
@@ -292,11 +282,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     state.setMuted(radio.muted);
     state.setCurrentTime(radio.currentTime);
     if (enrichedTrack) {
-      state.setTrackInfo(
-        enrichedTrack.title,
-        enrichedTrack.artist,
-        enrichedTrack.artworkUrl ?? albumArt.artworkUrl,
-      );
+      state.setTrackInfo(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.artworkUrl ?? albumArt.artworkUrl,);
     }
   }, [radio.status, radio.volume, radio.muted, radio.currentTime, enrichedTrack, albumArt.artworkUrl, pbStore]);
 

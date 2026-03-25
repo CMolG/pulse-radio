@@ -60,10 +60,7 @@ export async function fetchIcyMeta(
   }
 
   try {
-    const res = await fetch(
-      `/api/icy-meta?url=${encodeURIComponent(streamUrl)}`,
-      { signal: controller.signal },
-    );
+    const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
 
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();

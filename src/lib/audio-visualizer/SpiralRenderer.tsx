@@ -59,10 +59,7 @@ export function SpiralRenderer({
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
       for (let i = 0; i < NUM_BARS; i++) {
-        const srcIdx = Math.min(
-          Math.floor((i / NUM_BARS) * frequencyData.length),
-          frequencyData.length - 1,
-        );
+        const srcIdx = Math.min(Math.floor((i / NUM_BARS) * frequencyData.length), frequencyData.length - 1,);
         target[i] = (frequencyData[srcIdx] / 255) * sensitivity;
         data[i] += (target[i] - data[i]) * 0.15;
       }

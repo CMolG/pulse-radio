@@ -221,10 +221,7 @@ export function useAlbumArt(title: string | null, artist: string | null): UseAlb
 
     // Use server-side proxy to avoid CORS/CSP issues from the browser
     const term = artist ? `${artist} ${title}` : title;
-    fetch(
-      `/api/itunes?term=${encodeURIComponent(term)}`,
-      { signal: controller.signal },
-    ).then((r) => {
+    fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal },).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
