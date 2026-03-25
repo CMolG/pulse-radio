@@ -47,6 +47,7 @@ const _ERR_INVALID_PROTOCOL = JSON.stringify({ error: 'Invalid protocol' });
 const _ERR_INVALID_URL = JSON.stringify({ error: 'Invalid URL' });
 const _ERR_PRIVATE_IP = JSON.stringify({ error: 'Redirect to private IP not allowed' });
 const _ERR_TIMEOUT = JSON.stringify({ error: 'Stream timed out' });
+const _NOOP = () => {};
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
@@ -88,7 +89,7 @@ export async function GET(req: NextRequest) {
         const finalUrl = new URL(upstream.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
           if (timeout) clearTimeout(timeout);
-          upstream.body?.cancel().catch(() => {});
+          upstream.body?.cancel().catch(_NOOP);
           return new Response(_ERR_PRIVATE_IP, {
             status: 403,
             headers: _JSON_HDRS,
@@ -98,7 +99,7 @@ export async function GET(req: NextRequest) {
     }
     if (!upstream.ok || !upstream.body) {
       if (timeout) clearTimeout(timeout);
-      upstream.body?.cancel().catch(() => {});
+      upstream.body?.cancel().catch(_NOOP);
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: _JSON_R3_HDRS,
@@ -117,7 +118,7 @@ export async function GET(req: NextRequest) {
     if (icyName) responseHeaders['X-Stream-Name'] = icyName;
     if (req.method === 'HEAD') {
       if (timeout) clearTimeout(timeout);
-      upstream.body?.cancel().catch(() => {});
+      upstream.body?.cancel().catch(_NOOP);
       return new Response(null, { status: 200, headers: responseHeaders });
     }
     return new Response(upstream.body, { status: 200, headers: responseHeaders });

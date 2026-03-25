@@ -49,6 +49,7 @@ const _ERR_REDIRECT_PRIVATE = { error: 'Redirect to private IP not allowed' } as
 const _ERR_INVALID_URL = { error: 'Invalid URL' } as const;
 const _UTF8_DECODER = new TextDecoder('utf-8');
 const _ICY_FETCH_HDRS = { 'Icy-MetaData': '1' } as const;
+const _NOOP = () => {};
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
         const finalUrl = new URL(res.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
           clearTimeout(timeout);
-          res.body?.cancel().catch(() => {});
+          res.body?.cancel().catch(_NOOP);
           return NextResponse.json(_ERR_REDIRECT_PRIVATE, { status: 403 });
         }
       } catch {
@@ -86,7 +87,7 @@ export async function GET(req: NextRequest) {
     }
     if (!res.ok) {
       clearTimeout(timeout);
-      res.body?.cancel().catch(() => {});
+      res.body?.cancel().catch(_NOOP);
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
     }
     const icyMetaint = res.headers.get('icy-metaint');
@@ -95,7 +96,7 @@ export async function GET(req: NextRequest) {
     const icyBr = res.headers.get('icy-br');
     if (!icyMetaint || !res.body) {
       clearTimeout(timeout);
-      res.body?.cancel().catch(() => {});
+      res.body?.cancel().catch(_NOOP);
       return NextResponse.json({
         streamTitle: null,
         icyName: icyName || null,
@@ -107,7 +108,7 @@ export async function GET(req: NextRequest) {
     const MAX_METAINT = 131072;
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout);
-      res.body.cancel().catch(() => {});
+      res.body.cancel().catch(_NOOP);
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
     const reader = res.body.getReader();
@@ -123,7 +124,7 @@ export async function GET(req: NextRequest) {
       }
     } finally {
       clearTimeout(timeout);
-      reader.cancel().catch(() => {});
+      reader.cancel().catch(_NOOP);
     }
     const buffer = new Uint8Array(totalRead);
     let offset = 0;
