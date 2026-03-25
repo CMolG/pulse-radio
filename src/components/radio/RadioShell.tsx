@@ -3883,6 +3883,12 @@ interface SpiralRendererProps {
 }
 const NUM_BARS = 250;
 const _EMPTY_F64 = () => new Float64Array(NUM_BARS);
+const _BASS_CURVE_LEN = 4096;
+const _BASS_CURVE = new Float32Array(_BASS_CURVE_LEN);
+for (let i = 0; i < _BASS_CURVE_LEN; i++) {
+  const x = (i * 2) / _BASS_CURVE_LEN - 1;
+  _BASS_CURVE[i] = ((Math.PI + 2) * x) / (Math.PI + 2 * Math.abs(x));
+}
 const CYCLES = 4;
 const SMOOTH_PASSES = 3;
 function SpiralRenderer({
@@ -7947,13 +7953,7 @@ function useEqualizer() {
         bassLp.frequency.value = 200;
         bassLp.Q.value = 0.7;
         const bassShaper = ctx.createWaveShaper();
-        const curveLen = 4096;
-        const curve = new Float32Array(curveLen);
-        for (let i = 0; i < curveLen; i++) {
-          const x = (i * 2) / curveLen - 1;
-          curve[i] = ((Math.PI + 2) * x) / (Math.PI + 2 * Math.abs(x));
-        }
-        bassShaper.curve = curve;
+        bassShaper.curve = _BASS_CURVE;
         bassShaper.oversample = '2x';
         const bassHp = ctx.createBiquadFilter();
         bassHp.type = 'highpass';
