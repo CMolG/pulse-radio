@@ -1,4 +1,5 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import type {
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+import type {
   Metadata,
   Viewport,
 } from 'next';
@@ -100,7 +101,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       dir="ltr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}
     >
-      {' '}
       <body className="h-full bg-[#0a0f1a] text-white">
         <JsonLd /> {children} <ServiceWorkerRegistrar />
       </body>

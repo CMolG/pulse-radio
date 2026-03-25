@@ -2934,6 +2934,7 @@ const _GENRE_TO_CAT: Record<string, string> = {
   'hip-hop': 'hiphop',
   'lo-fi': 'lofi',
 };
+const _GENRE_NORMALIZE_RE = /[\s-]/g;
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
@@ -3064,7 +3065,7 @@ function BrowseView({
     const ordered: string[] = ['trending'];
     boostedIds.add('trending');
     for (const genre of userGenreOrder) {
-      const catId = _GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
+      const catId = _GENRE_TO_CAT[genre] ?? genre.replace(_GENRE_NORMALIZE_RE, '').toLowerCase();
       if (_BROWSE_SET.has(catId) && !boostedIds.has(catId)) {
         ordered.push(catId);
         boostedIds.add(catId);
