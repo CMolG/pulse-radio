@@ -4166,6 +4166,18 @@ const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto', trans
 const _IMAGE_RENDER_STYLE: React.CSSProperties = { imageRendering: 'auto' };
 const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = { height: 'env(safe-area-inset-bottom, 0px)' };
 const _OBJECT_COVER_STYLE: React.CSSProperties = { objectFit: 'cover' };
+const _GLASS_SETTINGS_STYLE: React.CSSProperties = {
+  background: 'rgba(22, 24, 35, 0.92)',
+  backdropFilter: 'blur(24px) saturate(1.6)',
+  WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+};
+const _GLASS_PANEL_STYLE: React.CSSProperties = {
+  background: 'rgba(20, 22, 35, 0.75)',
+  backdropFilter: 'blur(32px) saturate(1.6)',
+  WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
+  border: '1px solid rgba(255,255,255,0.12)',
+};
+const _MAX_WIDTH_200_STYLE: React.CSSProperties = { maxWidth: '200px' };
 const _MOTION_FADE_IN = { opacity: 0 } as const;
 const _MOTION_FADE_VISIBLE = { opacity: 1 } as const;
 const _MOTION_FADE_OUT = { opacity: 0 } as const;
@@ -6113,11 +6125,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
         exit={_MOTION_SLIDE_UP_EXIT}
         transition={_MOTION_T_SPRING}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
-        style={{
-          background: 'rgba(22, 24, 35, 0.92)',
-          backdropFilter: 'blur(24px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
-        }}
+        style={_GLASS_SETTINGS_STYLE}
         data-testid="mobile-settings-panel"
       >
         {' '}
@@ -6437,12 +6445,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
               exit={_MOTION_SLIDE_UP_EXIT}
               transition={_MOTION_T_SPRING}
               className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
-              style={{
-                background: 'rgba(20, 22, 35, 0.75)',
-                backdropFilter: 'blur(32px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
-                border: '1px solid rgba(255,255,255,0.12)',
-              }}
+              style={_GLASS_PANEL_STYLE}
             >
               {' '}
               <div className="flex justify-center pt-3 pb-1">
@@ -6626,7 +6629,7 @@ function GroupStack({
           ))}{' '}
           <div
             className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-            style={{ maxWidth: '200px' }}
+            style={_MAX_WIDTH_200_STYLE}
           >
             {' '}
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
