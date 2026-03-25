@@ -6,6 +6,8 @@ const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKET_START_RE = /^\[/;
 const _IPV6_BRACKET_END_RE = /\]$/;
+const _TRAILING_NULLS_RE = /\0+$/;
+const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ function isPrivateHost(
   hostname: string,
 ): boolean {
@@ -133,9 +135,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength);
-    const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(/\0+$/, '');
-    const match = metaString.match(/StreamTitle='([^']*)'/);
-    const streamTitle = match?.[1]?.trim() || null;
+    const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(_TRAILING_NULLS_RE, '');
+    const match = metaString.match(_STREAM_TITLE_RE);    const streamTitle = match?.[1]?.trim() || null;
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
     clearTimeout(timeout);
