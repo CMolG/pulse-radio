@@ -41,6 +41,7 @@ const MAX_DURATION_MS = 0;
 const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
 const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
 const _JSON_R5_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '5' } as const;
+const _UPSTREAM_HDRS = { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0' } as const;
 const _ERR_MISSING_URL = JSON.stringify({ error: 'Missing or invalid url parameter' });
 const _ERR_INVALID_PROTOCOL = JSON.stringify({ error: 'Invalid protocol' });
 const _ERR_INVALID_URL = JSON.stringify({ error: 'Invalid URL' });
@@ -79,7 +80,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const upstream = await fetch(parsed.toString(), {
-      headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0' },
+      headers: _UPSTREAM_HDRS,
       signal: controller.signal,
     });
     if (upstream.url) {

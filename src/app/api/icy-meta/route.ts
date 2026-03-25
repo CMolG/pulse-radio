@@ -48,6 +48,7 @@ const _ERR_PRIVATE_IP = { error: 'Private/internal URLs not allowed' } as const;
 const _ERR_REDIRECT_PRIVATE = { error: 'Redirect to private IP not allowed' } as const;
 const _ERR_INVALID_URL = { error: 'Invalid URL' } as const;
 const _UTF8_DECODER = new TextDecoder('utf-8');
+const _ICY_FETCH_HDRS = { 'Icy-MetaData': '1' } as const;
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const res = await fetch(streamUrl, {
-      headers: { 'Icy-MetaData': '1' },
+      headers: _ICY_FETCH_HDRS,
       signal: controller.signal,
     });
     if (res.url) {
