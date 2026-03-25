@@ -9325,8 +9325,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case 'F': {
           e.preventDefault();
           const searchInput =
-            document.querySelector<HTMLInputElement>('[data-radio-search]') ??
-            document.querySelector<HTMLInputElement>('.radio-search-input');
+            document.querySelector<HTMLInputElement>('[data-radio-search], .radio-search-input');
           if (searchInput) searchInput.focus();
           break;
         }
