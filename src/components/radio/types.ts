@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 export type Station = { stationuuid: string; name: string; url_resolved: string; favicon: string;
   country: string; countrycode: string; tags: string; votes: number;
   codec: string; bitrate: number; language?: string; homepage?: string; };

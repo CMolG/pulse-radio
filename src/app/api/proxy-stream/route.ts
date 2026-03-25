@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';

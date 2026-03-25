@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 /** Format milliseconds to mm:ss */
 export function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return '0:00'; const totalSeconds = Math.round(ms / 1000);

@@ -1,15 +1,8 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
 import { apiFetch } from '@/lib/apiUtils';
 export const runtime = 'nodejs';
-/**
- * Server-side proxy for iTunes Search API.
- * Avoids any browser-side CORS/CSP issues and allows server caching.
- */
+/* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */
 export async function GET(req: NextRequest) { const term = req.nextUrl.searchParams.get('term');
   if (!term || term.length > 200) {
     return NextResponse.json({ error: 'Missing or invalid term parameter', results: [] }, { status: 400 }); }

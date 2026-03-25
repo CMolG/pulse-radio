@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 "use client";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";

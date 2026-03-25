@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { COUNTRY_BY_CODE } from "@/lib/i18n/countries";
 type CountryHeadProps = { params: Promise<{ countryCode: string }> };
 export default async function Head({ params }: CountryHeadProps) {

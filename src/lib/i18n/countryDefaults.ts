@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { COUNTRY_BY_CODE } from "./countries";
 import { LANG3_TO_LOCALE } from "./languageMap";
 import type { SupportedLocale } from "./locales";

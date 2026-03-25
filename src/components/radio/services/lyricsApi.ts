@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import type { LyricsData, LrcLibResponse } from '../types';
 import { parseLrc } from '../lrcParser';
 const LRCLIB_BASE = 'https://lrclib.net/api';

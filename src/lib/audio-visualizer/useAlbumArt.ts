@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { normalizeText } from '@/lib/stringUtils';
 const FETCH_TIMEOUT = 8_000;

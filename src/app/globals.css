@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 @import "tailwindcss";
 :root { --background: #ffffff; --foreground: #171717; --accent-color: #3478f6; --accent-rgb: 52, 120, 246; }
 @theme inline {

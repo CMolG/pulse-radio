@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import Link from "next/link";
 export default function CountryNotFound() { return (
     <main className="h-full min-h-screen bg-[#0a0f1a] text-white flex items-center justify-center px-6">

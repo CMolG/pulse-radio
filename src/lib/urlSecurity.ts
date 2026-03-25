@@ -1,8 +1,4 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 /**
  * Checks whether a hostname resolves to a private/internal address.
  * Blocks loopback, link-local, and RFC 1918 private ranges to prevent SSRF.
