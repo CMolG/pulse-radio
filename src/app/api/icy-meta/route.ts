@@ -2,6 +2,7 @@
   NextRequest,
   NextResponse,
 } from 'next/server';
+import { isStationBlacklisted, recordStationFailure } from '@/lib/server-cache';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKETS_RE = /^\[|\]$/g;
@@ -41,29 +42,41 @@ const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
   return false;
 }
 export const runtime = 'nodejs';
+export const maxDuration = 10;
 const _ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const _ERR_INVALID_PARAM = { error: 'Missing or invalid url parameter' } as const;
 const _ERR_INVALID_PROTO = { error: 'Invalid protocol' } as const;
 const _ERR_PRIVATE_IP = { error: 'Private/internal URLs not allowed' } as const;
 const _ERR_REDIRECT_PRIVATE = { error: 'Redirect to private IP not allowed' } as const;
 const _ERR_INVALID_URL = { error: 'Invalid URL' } as const;
+const _CACHE_OK = { 'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=10' } as const;
+const _CACHE_ERR = { 'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30' } as const;
+const _CACHE_BLACKLIST = { 'Cache-Control': 'public, s-maxage=30' } as const;
+const _CACHE_BAD_REQ = { 'Cache-Control': 'public, s-maxage=60' } as const;
 const _UTF8_DECODER = new TextDecoder('utf-8');
 const _ICY_FETCH_HDRS = { 'Icy-MetaData': '1' } as const;
 const _NOOP = () => {};
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
-    return NextResponse.json(_ERR_INVALID_PARAM, { status: 400 });
+    return NextResponse.json(_ERR_INVALID_PARAM, { status: 400, headers: _CACHE_BAD_REQ });
   }
   try {
     const url = new URL(streamUrl);
     if (!_ALLOWED_PROTOCOLS.has(url.protocol)) {
-      return NextResponse.json(_ERR_INVALID_PROTO, { status: 400 });
+      return NextResponse.json(_ERR_INVALID_PROTO, { status: 400, headers: _CACHE_BAD_REQ });
     }
     if (isPrivateHost(url.hostname))
-      return NextResponse.json(_ERR_PRIVATE_IP, { status: 400 });
+      return NextResponse.json(_ERR_PRIVATE_IP, { status: 400, headers: _CACHE_BAD_REQ });
   } catch {
-    return NextResponse.json(_ERR_INVALID_URL, { status: 400 });
+    return NextResponse.json(_ERR_INVALID_URL, { status: 400, headers: _CACHE_BAD_REQ });
+  }
+  // Blacklist check: if station is known to be unreachable, skip immediately
+  if (isStationBlacklisted(streamUrl)) {
+    return NextResponse.json(
+      { error: 'Station temporarily unavailable', blacklisted: true },
+      { status: 503, headers: { 'X-Station-Blacklisted': 'true', ..._CACHE_BLACKLIST } },
+    );
   }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
@@ -78,7 +91,7 @@ export async function GET(req: NextRequest) {
         if (isPrivateHost(finalUrl.hostname)) {
           clearTimeout(timeout);
           res.body?.cancel().catch(_NOOP);
-          return NextResponse.json(_ERR_REDIRECT_PRIVATE, { status: 403 });
+      return NextResponse.json(_ERR_REDIRECT_PRIVATE, { status: 403, headers: _CACHE_BAD_REQ });
         }
       } catch {
         /* URL parse failed — continue */
@@ -87,7 +100,8 @@ export async function GET(req: NextRequest) {
     if (!res.ok) {
       clearTimeout(timeout);
       res.body?.cancel().catch(_NOOP);
-      return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
+      recordStationFailure(streamUrl);
+      return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502, headers: _CACHE_ERR });
     }
     const icyMetaint = res.headers.get('icy-metaint');
     const icyName = res.headers.get('icy-name');
@@ -101,14 +115,14 @@ export async function GET(req: NextRequest) {
         icyName: icyName || null,
         icyGenre: icyGenre || null,
         icyBr: icyBr || null,
-      });
+      }, { headers: _CACHE_OK });
     }
     const metaint = parseInt(icyMetaint, 10);
     const MAX_METAINT = 131072;
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout);
       res.body.cancel().catch(_NOOP);
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
+      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
     }
     const reader = res.body.getReader();
     const chunks: Uint8Array[] = [];
@@ -132,20 +146,23 @@ export async function GET(req: NextRequest) {
       offset += chunk.length;
     }
     if (buffer.length <= metaint)
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
+      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
     const metaLength = buffer[metaint] * 16;
     if (metaLength === 0 || buffer.length < metaint + 1 + metaLength) {
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
+      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
     }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength);
     const metaString = _UTF8_DECODER.decode(metaBytes).replace(_TRAILING_NULLS_RE, '');
     const match = metaString.match(_STREAM_TITLE_RE);    const streamTitle = match?.[1]?.trim() || null;
-    return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
+    return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
   } catch (err) {
     clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
+    if (isTimeout) {
+      recordStationFailure(streamUrl);
+      return NextResponse.json({ error: 'Request timed out' }, { status: 504, headers: _CACHE_ERR });
+    }
     const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500, headers: _CACHE_ERR });
   }
 }
