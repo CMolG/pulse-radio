@@ -34,9 +34,10 @@ export const runtime = 'nodejs';
       { status: 400 },
     );
   }
-  const media = req.nextUrl.searchParams.get('media') === 'podcast' ? 'podcast' : 'music';
-  const entity = media === 'podcast' ? 'podcast' : 'song';
-  const limit = media === 'podcast' ? '20' : '3';
+  const isPodcast = req.nextUrl.searchParams.get('media') === 'podcast';
+  const media = isPodcast ? 'podcast' : 'music';
+  const entity = isPodcast ? 'podcast' : 'song';
+  const limit = isPodcast ? '20' : '3';
   try {
     const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
     const res = await apiFetch(url, {
