@@ -300,6 +300,12 @@ function primaryArtist(artist: string): string {
   const i = artist.search(ARTIST_SPLIT_RE);
   return (i < 0 ? artist : artist.slice(0, i)).trim();
 }
+/** Strip feat./ft./featuring suffixes from a track title, e.g. "Title (feat. X)" → "Title" */
+const _FEAT_PARENS_RE = /\s*[\(\[](feat|ft|featuring)\.?\s+[^\)\]]*[\)\]]/gi;
+const _FEAT_BARE_RE = /\s+(feat|ft|featuring)\.?\s+.*/i;
+function cleanFeatFromTitle(title: string): string {
+  return title.replace(_FEAT_PARENS_RE, '').replace(_FEAT_BARE_RE, '').trim();
+}
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
   if (diff < 60) return 'now';
@@ -502,7 +508,12 @@ type PaintFn = (
   h: number,
   freqData: Uint8Array | null,
 ) => void;
-/** Shared RAF-driven canvas loop with DPR-aware sizing. */ function useCanvasLoop(
+/** Returns true on touch-capable devices (mobile/tablet). Used to throttle canvas FPS. */
+const _isTouchDevice =
+  typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+/** Shared RAF-driven canvas loop with DPR-aware sizing.
+ *  Pauses when document is hidden; throttles to ~30fps on touch devices. */
+function useCanvasLoop(
   frequencyDataRef: React.RefObject<Uint8Array | null> | undefined,
   paint: PaintFn,
   dprScale = 1,
@@ -512,6 +523,9 @@ type PaintFn = (
   const paintRef = useRef(paint);
   const freqRef = useRef(frequencyDataRef);
   const sizeRef = useRef({ w: 0, h: 0 });
+  const lastPaintRef = useRef(0);
+  // ~30fps on mobile (33ms), uncapped on desktop
+  const minFrameMs = _isTouchDevice ? 33 : 0;
   useEffect(() => {
     paintRef.current = paint;
   });
@@ -532,26 +546,28 @@ type PaintFn = (
     return () => ro.disconnect();
   }, [dprScale]);
   useEffect(() => {
-    const loop = () => {
+    const loop = (now: number) => {
+      frameRef.current = requestAnimationFrame(loop);
+      // Pause rendering when tab/PWA is hidden
+      if (document.hidden) return;
+      // Throttle to target FPS on mobile
+      if (minFrameMs > 0 && now - lastPaintRef.current < minFrameMs) return;
+      lastPaintRef.current = now;
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       const { w, h } = sizeRef.current;
-      if (w < 1 || h < 1) {
-        frameRef.current = requestAnimationFrame(loop);
-        return;
-      }
+      if (w < 1 || h < 1) return;
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
       }
       paintRef.current(ctx, w, h, freqRef.current?.current ?? null);
-      frameRef.current = requestAnimationFrame(loop);
     };
     frameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameRef.current);
-  }, [dprScale]);
+  }, [dprScale, minFrameMs]);
   return canvasRef;
 }
 const FETCH_TIMEOUT = 8_000;
@@ -642,8 +658,8 @@ function selectBestItunesResult(
   requestedArtist: string | null,
 ): ItunesResult | null {
   if (!results.length) return null;
-  const normalizedRequestedTitle = normalizeText(requestedTitle);
-  const normalizedRequestedArtist = normalizeText(requestedArtist);
+  const normalizedRequestedTitle = normalizeText(cleanFeatFromTitle(requestedTitle));
+  const normalizedRequestedArtist = normalizeText(requestedArtist ? primaryArtist(requestedArtist) : '');
   if (!normalizedRequestedTitle) return null;
   const normTitles = new Array<string>(results.length);
   const normArtists = new Array<string>(results.length);
@@ -732,7 +748,9 @@ function useAlbumArt(title: string | null, artist: string | null) {
     const controller = new AbortController();
     abortRef.current = controller;
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-    const term = artist ? `${artist} ${title}` : title;
+    const cleanArtist = artist ? primaryArtist(artist) : '';
+    const cleanTitle = cleanFeatFromTitle(title);
+    const term = cleanArtist ? `${cleanArtist} ${cleanTitle}` : cleanTitle;
     fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -794,6 +812,42 @@ function useAlbumArt(title: string | null, artist: string | null) {
       isLoading,
     ],
   );
+}
+// ---------------------------------------------------------------------------
+// useConcerts — fetch upcoming concerts for the current artist via Bandsintown
+// ---------------------------------------------------------------------------
+interface ConcertEvent {
+  id: string;
+  date: string;
+  venue: string;
+  city: string;
+  country: string;
+  lineup: string[];
+  ticketUrl: string | null;
+}
+const _concertsCache = new LRU<ConcertEvent[]>(64);
+function useConcerts(artist: string | null | undefined, enabled: boolean) {
+  const [concerts, setConcerts] = useState<ConcertEvent[]>([]);
+  const [loading, setLoading] = useState(false);
+  const key = artist ? primaryArtist(artist).toLowerCase().trim() : null;
+  useEffect(() => {
+    if (!enabled || !key) { setConcerts([]); return; }
+    const cached = _concertsCache.get(key);
+    if (cached) { setConcerts(cached); return; }
+    const controller = new AbortController();
+    setLoading(true);
+    fetch(`/api/concerts?artist=${encodeURIComponent(key)}`, { signal: controller.signal })
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: ConcertEvent[]) => {
+        const list = Array.isArray(data) ? data : [];
+        _concertsCache.set(key, list);
+        setConcerts(list);
+      })
+      .catch(() => { /* silently ignore */ })
+      .finally(() => setLoading(false));
+    return () => controller.abort();
+  }, [key, enabled]);
+  return { concerts, loading };
 }
 const SERVERS = [
   'https://de1.api.radio-browser.info/json',
@@ -1155,7 +1209,7 @@ function isAdContent(text: string): boolean {
 async function fetchIcyMeta(
   streamUrl: string,
   signal?: AbortSignal,
-): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+): Promise<{ streamTitle: string | null; icyBr: string | null; blacklisted?: boolean }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), STATION_META_FETCH_TIMEOUT_MS);
   if (signal) {
@@ -1178,6 +1232,11 @@ async function fetchIcyMeta(
     const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, {
       signal: controller.signal,
     });
+    if (res.status === 503) {
+      const data = await res.json().catch(() => ({}));
+      if (data?.blacklisted) return { streamTitle: null, icyBr: null, blacklisted: true };
+      return { streamTitle: null, icyBr: null };
+    }
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
@@ -1209,6 +1268,7 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const [streamCodec, setStreamCodec] = useState<string | null>(null);
+  const [stationBlacklisted, setStationBlacklisted] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastTitleRef = useRef<string>('');
   const prevStationUrlRef = useRef<string | null>(null);
@@ -1230,6 +1290,7 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (!station) {
       lastTitleRef.current = '';
       prevStationUrlRef.current = null;
+      setStationBlacklisted(false);
       return;
     }
     const stationChanged = station.url_resolved !== prevStationUrlRef.current;
@@ -1240,11 +1301,16 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     const abortController = new AbortController();
     const poll = async () => {
       if (abortController.signal.aborted || document.hidden) return;
-      const { streamTitle, icyBr } = await fetchIcyMeta(
+      const { streamTitle, icyBr, blacklisted } = await fetchIcyMeta(
         station.url_resolved,
         abortController.signal,
       );
       if (abortController.signal.aborted) return;
+      if (blacklisted) {
+        setStationBlacklisted(true);
+        return;
+      }
+      setStationBlacklisted(false);
       if (icyBr) setIcyBitrate(icyBr);
       if (station.codec) {
         const c = station.codec.toUpperCase();
@@ -1285,6 +1351,7 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     track: station ? track : null,
     icyBitrate: station ? icyBitrate : null,
     streamCodec: station ? streamCodec : null,
+    stationBlacklisted,
   };
 }
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */ function proxyUrl(
@@ -2395,7 +2462,11 @@ async function fetchLyricsApi(
   const a1 = artist?.trim();
   const a2 = fallbackArtist?.trim();
   const artistCandidates: string[] = [];
-  if (a1) artistCandidates.push(a1);
+  if (a1) {
+    artistCandidates.push(a1);
+    const primary = primaryArtist(a1);
+    if (primary && primary !== a1) artistCandidates.push(primary);
+  }
   if (a2 && a2 !== a1) artistCandidates.push(a2);
   if (!artistCandidates.length || !title?.trim()) return null;
   for (const artistCandidate of artistCandidates) {
@@ -2430,18 +2501,14 @@ async function fetchLyricsForArtist(
   duration?: number,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
-  const params = new URLSearchParams({ artist_name: artist, track_name: title });
-  if (album) params.set('album_name', album);
+  const cleanTitle = cleanFeatFromTitle(title);
+  const params = new URLSearchParams({ artist, title: cleanTitle });
+  if (album) params.set('album', album);
   if (duration) params.set('duration', `${Math.round(duration)}`);
-  const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, (d) =>
-    transform(d, artist, title),
-  );
-  if (exact) return exact;
-  if (signal?.aborted) return null;
-  return tryFetch<LrcLibResponse[]>(
-    `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+  return tryFetch<LrcLibResponse>(
+    `/api/lyrics?${params}`,
     signal,
-    (r) => (r.length > 0 ? transform(r[0], artist, title) : null),
+    (d) => (d && (d.syncedLyrics || d.plainLyrics) ? transform(d, artist, title) : null),
   );
 }
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
@@ -3887,7 +3954,7 @@ interface SpiralRendererProps {
   sensitivity?: number;
   demo?: boolean;
 }
-const NUM_BARS = 250;
+const NUM_BARS = 128;
 const _EMPTY_F64 = () => new Float64Array(NUM_BARS);
 const _BASS_CURVE_LEN = 4096;
 const _BASS_CURVE = new Float32Array(_BASS_CURVE_LEN);
@@ -3896,7 +3963,7 @@ for (let i = 0; i < _BASS_CURVE_LEN; i++) {
   _BASS_CURVE[i] = ((Math.PI + 2) * x) / (Math.PI + 2 * Math.abs(x));
 }
 const CYCLES = 4;
-const SMOOTH_PASSES = 3;
+const SMOOTH_PASSES = 1;
 function SpiralRenderer({
   frequencyDataRef,
   className = '',
@@ -3928,7 +3995,11 @@ function SpiralRenderer({
   const colorsRef = useRef({ color1, color2, color3 });
   useEffect(() => {
     colorsRef.current = { color1, color2, color3 };
+    // Invalidate cached gradient when colors change
+    gradientCacheRef.current = null;
   }, [color1, color2, color3]);
+  // Cached gradient — recreated only when colors or canvas size changes
+  const gradientCacheRef = useRef<{ grad: CanvasGradient; w: number; h: number } | null>(null);
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2;
     const centerY = h / 2;
@@ -3980,20 +4051,27 @@ function SpiralRenderer({
     const rotation = rotationRef.current;
     ctx.clearRect(0, 0, w, h);
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current;
+    // Reuse cached gradient unless canvas size changed
     let fillStyle: string | CanvasGradient = c1;
-    try {
-      const gradient = ctx.createLinearGradient(
-        centerX - maxRadius,
-        centerY - maxRadius,
-        centerX + maxRadius,
-        centerY + maxRadius,
-      );
-      gradient.addColorStop(0, c1);
-      gradient.addColorStop(0.5, c2);
-      gradient.addColorStop(1, c3);
-      fillStyle = gradient;
-    } catch {
-      /* fallback to solid color */
+    const gc = gradientCacheRef.current;
+    if (gc && gc.w === w && gc.h === h) {
+      fillStyle = gc.grad;
+    } else {
+      try {
+        const gradient = ctx.createLinearGradient(
+          centerX - maxRadius,
+          centerY - maxRadius,
+          centerX + maxRadius,
+          centerY + maxRadius,
+        );
+        gradient.addColorStop(0, c1);
+        gradient.addColorStop(0.5, c2);
+        gradient.addColorStop(1, c3);
+        fillStyle = gradient;
+        gradientCacheRef.current = { grad: gradient, w, h };
+      } catch {
+        /* fallback to solid color */
+      }
     }
     const outerX = outerXRef.current;
     const outerY = outerYRef.current;
@@ -4014,8 +4092,8 @@ function SpiralRenderer({
       outerY[i] = centerY + sin * (radius + barHeight + 2);
     }
     ctx.fillStyle = fillStyle;
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = `${c1}66`;
+    // shadowBlur removed — extremely expensive on iOS Safari (forces Gaussian blur on every fill)
+    ctx.shadowBlur = 0;
     ctx.globalAlpha = 0.85;
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
     for (let c = 0; c < CYCLES; c++) {
@@ -4171,23 +4249,19 @@ const MAX_COLOR_CACHE = 32;
   _colorCache.set(imgUrl, p);
   return p;
 }
-const _CRT_SCANLINE_STYLE: React.CSSProperties = {
+/** Merged CRT overlay: scanlines + vignette + glare in a single DOM node (saves 2 composite layers). */
+const _CRT_COMBINED_STYLE: React.CSSProperties = {
   background:
-    'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-  backgroundSize: '100% 4px, 6px 100%',
-  mixBlendMode: 'overlay' as const,
-  opacity: 0.6,
-};
-const _CRT_VIGNETTE_STYLE: React.CSSProperties = {
-  background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
-  boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
-};
-const _CRT_GLARE_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
+    'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%), ' +
+    'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 40%), ' +
+    'linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%), ' +
+    'linear-gradient(90deg, rgba(255,0,0,0.04), rgba(0,255,0,0.01), rgba(0,0,255,0.04))',
+  backgroundSize: '100% 100%, 100% 100%, 100% 4px, 6px 100%',
+  boxShadow: 'inset 0 0 40px rgba(0,0,0,0.7)',
 };
 const _SAFE_AREA_TOP_STYLE: React.CSSProperties = { top: 'env(safe-area-inset-top, 0px)' };
-const _BLUR_6_STYLE: React.CSSProperties = { WebkitFilter: 'blur(6px)', filter: 'blur(6px)' };
-const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto', transform: 'scale(1.12)' };
+const _BLUR_6_STYLE: React.CSSProperties = { opacity: 0.75 };
+const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto' };
 const _IMAGE_RENDER_STYLE: React.CSSProperties = { imageRendering: 'auto' };
 const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = { height: 'env(safe-area-inset-bottom, 0px)' };
 const _OBJECT_COVER_STYLE: React.CSSProperties = { objectFit: 'cover' };
@@ -4254,6 +4328,7 @@ function TheaterView({
   }, [artworkUrl]);
   const [color1, color2, color3] = colors;
   const theaterTags = useMemo(() => _tagsDisplay(station.tags), [station.tags]);
+  const { concerts } = useConcerts(track?.artist, !compact);
   return (
     <motion.div
       initial={_MOTION_FADE_IN}
@@ -4270,7 +4345,7 @@ function TheaterView({
           <UiImage
             src={coverUrl}
             alt=""
-            className="object-cover animate-ambient-drift blur-lg opacity-25"
+            className="object-cover animate-ambient-drift blur-sm opacity-20"
             sizes="100vw"
             onError={() => setFailedCoverUrl(coverUrl)}
           />{' '}
@@ -4291,18 +4366,10 @@ function TheaterView({
           />
         </ErrorBoundary>
       </div>{' '}
-      {/* ── Layer 3: CRT scanlines + vignette overlay ── */}{' '}
+      {/* ── Layer 3: CRT scanlines + vignette overlay (merged into one div) ── */}{' '}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_SCANLINE_STYLE}
-      />{' '}
-      <div
-        className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_VIGNETTE_STYLE}
-      />{' '}
-      <div
-        className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_GLARE_STYLE}
+        style={_CRT_COMBINED_STYLE}
       />{' '}
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}{' '}
       {!compact && (
@@ -4347,8 +4414,8 @@ function TheaterView({
           className={`flex flex-col items-center ${compact ? 'gap-2 px-4 py-3' : 'gap-3 px-6 py-5'} rounded-3xl max-w-sm w-full`}
           style={{
             background: 'rgba(0, 0, 0, 0.35)',
-            backdropFilter: 'blur(24px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
+            backdropFilter: 'blur(12px) saturate(1.3)',
+            WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
             border: '1px solid rgba(255,255,255,0.08)',
             boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
           }}
@@ -4478,6 +4545,45 @@ function TheaterView({
             >
               <ExternalLink size={11} /> Listen on Apple Music
             </a>
+          )}{' '}
+          {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
+          {!compact && concerts.length > 0 && (
+            <div className="w-full mt-2">
+              <p className="text-[9px] font-semibold tracking-widest uppercase text-white/40 text-center mb-1.5">
+                Upcoming Shows
+              </p>
+              <div className="flex flex-col gap-1 w-full">
+                {concerts.slice(0, 3).map((ev) => {
+                  const d = new Date(ev.date);
+                  const dateStr = isNaN(d.getTime())
+                    ? ev.date
+                    : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                  const content = (
+                    <div className="flex items-start justify-between gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[11px] font-medium text-white/80 truncate">{ev.venue}</span>
+                        <span className="text-[10px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                      </div>
+                      <span className="text-[10px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
+                    </div>
+                  );
+                  return ev.ticketUrl ? (
+                    <a
+                      key={ev.id}
+                      href={ev.ticketUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block min-h-[44px]"
+                      aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={ev.id} className="min-h-[44px]">{content}</div>
+                  );
+                })}
+              </div>
+            </div>
           )}{' '}
           {/* ── Lyrics reel inside glass panel ── */}{' '}
           {!compact && (
@@ -8996,7 +9102,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const layout: LayoutMode = isPipProp ? 'pip' : containerSize.w <= 640 ? 'mobile' : 'desktop';
   const radio = useRadio();
   const eq = useEqualizer();
-  const { track, icyBitrate } = useStationMeta(radio.station, radio.status === 'playing');
+  const { track, icyBitrate, stationBlacklisted } = useStationMeta(radio.station, radio.status === 'playing');
   const {
     lyrics,
     effectiveCurrentTime,
@@ -9086,14 +9192,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
-  const [toast, setToast] = useState<{ msg: string; icon: 'star' | 'heart'; key: number } | null>(
+  const [toast, setToast] = useState<{ msg: string; icon: 'star' | 'heart' | 'info'; key: number } | null>(
     null,
   );
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const duckOrigVolRef = useRef<number | null>(null);
   const duckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback(
-    (msg: string, icon: 'star' | 'heart') => {
+    (msg: string, icon: 'star' | 'heart' | 'info') => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       setToast({ msg, icon, key: Date.now() });
       const audio = radio.audioRef.current;
@@ -9241,6 +9347,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const nextIdx = sq.queue.findIndex((s) => s.stationuuid === station.stationuuid) + 1;
     if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
   }, []);
+  useEffect(() => {
+    if (stationBlacklisted && radio.station) {
+      showToast('This station is temporarily unavailable', 'info');
+    }
+  }, [stationBlacklisted, radio.station?.stationuuid]);
   useEffect(() => {
     let cancelled = false;
     if (radio.status === 'error') {
@@ -9617,8 +9728,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {' '}
         {toast.icon === 'star' ? (
           <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
-        ) : (
+        ) : toast.icon === 'heart' ? (
           <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
+        ) : (
+          <span className="text-[13px] flex-shrink-0">⚠️</span>
         )}{' '}
         <span className="truncate">{toast.msg}</span>
       </div>

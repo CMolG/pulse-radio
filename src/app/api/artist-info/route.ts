@@ -2,7 +2,9 @@
   NextRequest,
   NextResponse,
 } from 'next/server';
+import { cacheGet, cacheSet } from '@/lib/server-cache';
 export const runtime = 'nodejs';
+export const maxDuration = 10;
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
 const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)';
@@ -48,6 +50,13 @@ export async function GET(req: NextRequest) {
   if (!artist || artist.length > 200) {
     return NextResponse.json(_ERR_400, { status: 400 });
   }
+  const cacheKey = artist.toLowerCase().trim();
+  const cached = cacheGet<unknown>('artist-info', cacheKey);
+  if (cached !== undefined) {
+    return NextResponse.json(cached, {
+      headers: { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800' },
+    });
+  }
   try {
     const [mbResult, wikiResult] = await Promise.allSettled([
       searchMusicBrainz(artist),
@@ -75,21 +84,21 @@ export async function GET(req: NextRequest) {
     const cacheHeader = hasData
       ? 'public, max-age=86400, stale-while-revalidate=604800'
       : 'public, max-age=3600, stale-while-revalidate=7200';
-    return NextResponse.json(
-      {
-        name: mb?.name ?? artist,
-        disambiguation: mb?.disambiguation ?? null,
-        type: mb?.type ?? null,
-        country: mb?.country ?? null,
-        beginArea: mb?.['begin-area']?.name ?? null,
-        lifeSpan: mb?.['life-span'] ?? null,
-        tags,
-        bio: wiki?.extract ?? null,
-        imageUrl: wiki?.thumbnail?.source ?? null,
-        wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
-      },
-      { headers: { 'Cache-Control': cacheHeader } },
-    );
+    const payload = {
+      name: mb?.name ?? artist,
+      disambiguation: mb?.disambiguation ?? null,
+      type: mb?.type ?? null,
+      country: mb?.country ?? null,
+      beginArea: mb?.['begin-area']?.name ?? null,
+      lifeSpan: mb?.['life-span'] ?? null,
+      tags,
+      bio: wiki?.extract ?? null,
+      imageUrl: wiki?.thumbnail?.source ?? null,
+      wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
+    };
+    const ttlMs = hasData ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
+    cacheSet('artist-info', cacheKey, payload, ttlMs);
+    return NextResponse.json(payload, { headers: { 'Cache-Control': cacheHeader } });
   } catch (err) {
     console.error('[Pulse Radio] Artist info fetch error:', err);
     return NextResponse.json(_ERR_500, { status: 500 });
