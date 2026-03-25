@@ -8,8 +8,7 @@ type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: numbe
   /** Audio metering: peak level 0-1, RMS level 0-1 (updated every frame) */
   meterRef: React.RefObject<{ peak: number; rms: number }>; isActive: boolean; disconnect: () => void; }
 export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
-  const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts; const analyserRef = useRef<AnalyserNode | null>(null);
-  const rafRef = useRef<number>(0); const connectedRef = useRef<HTMLAudioElement | null>(null);
+  const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts; const analyserRef = useRef<AnalyserNode | null>(null); const rafRef = useRef<number>(0); const connectedRef = useRef<HTMLAudioElement | null>(null);
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null); const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 }); const [isActive, setIsActive] = useState(false); const connectAudio = useCallback((audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return; cancelAnimationFrame(rafRef.current); // Cancel any existing animation loop before starting a new one
@@ -19,8 +18,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         // Allocate buffers once — reused across all frames (zero per-frame allocation)
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount); waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true); const tick = () => {
           if (!document.hidden) { // Skip expensive analyser reads when tab is hidden to save CPU
-            if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
-            if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
+            if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current); if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
               // to avoid 256 float divisions per frame — normalize once at the end
               const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0; for (let i = 0; i < buf.length; i++) {

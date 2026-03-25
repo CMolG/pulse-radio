@@ -3,12 +3,10 @@
 import AnimatedBars from "./AnimatedBars"; import UiImage from "@/components/common/UiImage"; import { ParallaxAlbumBackground } from "@/lib/audio-visualizer";
 import { stationInitials } from "../utils/formatUtils"; type Props = { station: Station; track: NowPlayingTrack | null;
   isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>; artworkUrl?: string | null; icyBitrate?: string | null; onTheater?: () => void; };
-export default React.memo(function NowPlayingHero({ station, track, isPlaying, artworkUrl, icyBitrate, onTheater,
-}: Props) { const [imgError, setImgError] = useState(false); const coverUrl = artworkUrl ?? station.favicon;
+export default React.memo(function NowPlayingHero({ station, track, isPlaying, artworkUrl, icyBitrate, onTheater, }: Props) { const [imgError, setImgError] = useState(false); const coverUrl = artworkUrl ?? station.favicon;
   // Reset error state when cover URL changes so new artwork gets a chance to load
   const [prevCoverUrl, setPrevCoverUrl] = useState(coverUrl); if (coverUrl !== prevCoverUrl) { setPrevCoverUrl(coverUrl); setImgError(false); } const showFallback = !coverUrl || imgError;
-  const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]);
-  return ( <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden"><ParallaxAlbumBackground
+  const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]); return ( <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden"><ParallaxAlbumBackground
         imageUrl={artworkUrl ?? null} fallbackUrl={station.favicon || undefined} overlayClass="bg-black/60" />
       {onTheater && ( <button onClick={onTheater}
           className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
@@ -20,7 +18,6 @@ export default React.memo(function NowPlayingHero({ station, track, isPlaying, a
           )}</div><div className="flex-fill pr-20"> <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3> {track?.title ? (
             <p className="text-[13px] text-secondary truncate mt-0.5"> {track.artist ? `${track.artist} — ${track.title}` : track.title}</p>
           ) : ( <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p> )} {track?.album && ( <p className="text-[11px] text-dim truncate">{track.album}</p>
-          )} {isPlaying && ( <div className="flex-row-1.5 mt-1"><span className="dot-1.5 bg-sys-orange" />
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-sys-orange">LIVE</span> <AnimatedBars size="small" /> {icyBitrate && (
+          )} {isPlaying && ( <div className="flex-row-1.5 mt-1"><span className="dot-1.5 bg-sys-orange" /> <span className="text-[10px] font-semibold tracking-wider uppercase text-sys-orange">LIVE</span> <AnimatedBars size="small" /> {icyBitrate && (
                 <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1"> {icyBitrate}kbps</span>)}</div>)}</div></div></div>
   );});

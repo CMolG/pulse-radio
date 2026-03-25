@@ -13,7 +13,6 @@ function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure f
     // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
     const timeout = setTimeout(() => controller.abort(), 15_000); fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();
-      }).then((data: ArtistInfo) => { if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); }
-      }).catch(() => { if (!cancelled) setFetched({ key, info: null }); }).finally(() => { clearTimeout(timeout); });
+      }).then((data: ArtistInfo) => { if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); } }).catch(() => { if (!cancelled) setFetched({ key, info: null }); }).finally(() => { clearTimeout(timeout); });
     return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
   }, [artist, key, cachedInfo]); const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null); return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) }; }

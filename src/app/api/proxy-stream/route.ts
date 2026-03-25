@@ -18,8 +18,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       status: 400, headers: { 'Content-Type': 'application/json' },});
   } const controller = new AbortController(); const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
   // Propagate client disconnect to upstream so we don't leak connections
-  if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); }
-  try { const upstream = await fetch(parsed.toString(), {
+  if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); } try { const upstream = await fetch(parsed.toString(), {
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     // Validate the final URL after redirects to prevent SSRF via redirect
     if (upstream.url) { try { const finalUrl = new URL(upstream.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
@@ -37,8 +36,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(null, { status: 200, headers: responseHeaders }); }
     return new Response(upstream.body, { status: 200, headers: responseHeaders, });
   } catch (err) {
-    if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) { return new Response(JSON.stringify({ error: 'Stream timed out' }), {
+    if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError'; if (isTimeout) { return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504, headers: { 'Content-Type': 'application/json' },});
     } const message = err instanceof Error ? err.message : 'Unknown error'; return new Response(JSON.stringify({ error: message }), {
       status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },});

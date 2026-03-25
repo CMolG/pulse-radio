@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 "use client"; import React from "react"; import { X } from "lucide-react"; const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: "Previous station" },
   { key: "→", desc: "Next station" }, { key: "↑", desc: "Volume up" }, { key: "↓", desc: "Volume down" }, { key: "M", desc: "Mute / Unmute" },
-  { key: "F", desc: "Focus search" }, { key: "S", desc: "Favorite station" }, { key: "L", desc: "Like current song" }, { key: "R", desc: "Toggle realtime lyrics sync" },
-  { key: "T", desc: "Theater mode" }, { key: "E", desc: "Equalizer" },
+  { key: "F", desc: "Focus search" }, { key: "S", desc: "Favorite station" }, { key: "L", desc: "Like current song" }, { key: "R", desc: "Toggle realtime lyrics sync" }, { key: "T", desc: "Theater mode" }, { key: "E", desc: "Equalizer" },
   { key: "Z", desc: "Cycle sleep timer" }, { key: "Esc", desc: "Close panel / exit theater" }, { key: "?", desc: "Toggle this help" },];
 interface Props { onClose: () => void; } export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) { return ( <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm" role="dialog"

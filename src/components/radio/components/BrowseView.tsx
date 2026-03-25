@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client"; import React, { useState, useEffect, useRef, useCallback, useMemo, } from "react";
-import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
+"use client"; import React, { useState, useEffect, useRef, useCallback, useMemo, } from "react"; import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts"; import type { Station, ViewState, BrowseCategory } from "../types"; import { GENRE_CATEGORIES, GENRE_LABEL_KEYS } from "../constants";
-import { searchStations, stationsByTag, stationsByCountry, trendingStations, localStations } from "../services/radioApi";
-import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta"; import StationCard from "./StationCard";
+import { searchStations, stationsByTag, stationsByCountry, trendingStations, localStations } from "../services/radioApi"; import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta"; import StationCard from "./StationCard";
 import { useLocale } from "@/context/LocaleContext"; import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 /** Order in which category sections appear on the home screen */
 const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic', 'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world', ] as const;
@@ -11,8 +9,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = { trending: <Zap size={1
   view: ViewState; currentStation: Station | null; isPlaying: boolean; isFavorite: (uuid: string) => boolean; onPlay: (station: Station) => void; onToggleFav: (station: Station) => void;
   onPrefetch?: (streamUrl: string) => void; favorites?: Station[]; recent?: Station[]; onSelectGenre?: (cat: BrowseCategory) => void;
   onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void; onGoHome?: () => void; userGenreOrder?: string[]; };
-const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
-function ScrollRow({ title, icon, children, isMobile, className, }: {
+const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"; function ScrollRow({ title, icon, children, isMobile, className, }: {
   title?: string; icon?: React.ReactNode; children: React.ReactNode; isMobile: boolean; className?: string;
 }) { const ref = useRef<HTMLDivElement>(null); const [canLeft, setCanLeft] = useState(false); const [canRight, setCanRight] = useState(false);
   const check = useCallback(() => { const el = ref.current; if (!el) return; setCanLeft(el.scrollLeft > 4); setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
@@ -29,8 +26,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   ); }
 export default function BrowseView({
   view, currentStation, isPlaying, isFavorite, onPlay, onToggleFav, onPrefetch, favorites, recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder, }: Props) {
-  const { t, locale } = useLocale(); const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
-  const translatedGenreCategories = useMemo(() => GENRE_CATEGORIES.map((category) => {
+  const { t, locale } = useLocale(); const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]); const translatedGenreCategories = useMemo(() => GENRE_CATEGORIES.map((category) => {
         const key = GENRE_LABEL_KEYS[category.id]; return key ? { ...category, label: t(key) } : category;
       }), [t],);
   const effectiveBrowseOrder = useMemo(() => { // Reorder browse sections based on user listening stats
@@ -47,8 +43,7 @@ export default function BrowseView({
   }, [userGenreOrder]); const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
   const [stations, setStations] = useState<Station[]>([]); const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
   const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set()); const [loading, setLoading] = useState(false); const [error, setError] = useState<string | null>(null);
-  const [discoveryMode, setDiscoveryMode] = useState(false); const [retryKey, setRetryKey] = useState(0);
-  const [page, setPage] = useState(0); const PAGE_SIZE = 20; const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [discoveryMode, setDiscoveryMode] = useState(false); const [retryKey, setRetryKey] = useState(0); const [page, setPage] = useState(0); const PAGE_SIZE = 20; const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Tracks whether the initial immediate play has fired for the current
   const discoveryFiredRef = useRef(false); // discovery-mode session.  Reset when discovery mode is turned off.
   // Live track scanning
@@ -73,10 +68,8 @@ export default function BrowseView({
       if (stale?.()) return; setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
     }}, []);
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
-    const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen; const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); };
-    await Promise.all(Array.from({ length: 3 }, worker));
-  }, [fetchMeta]); const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
-  useEffect(() => { let cancelled = false; const flags = { cancelled: false }; setError(null); if (view.mode !== "top") {
+    const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen; const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); }; await Promise.all(Array.from({ length: 3 }, worker));
+  }, [fetchMeta]); const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]); useEffect(() => { let cancelled = false; const flags = { cancelled: false }; setError(null); if (view.mode !== "top") {
       setLoading(true); // Search, genre, country modes — single list
       const load = async () => { try {
           let result: Station[]; switch (view.mode) { case "search": result = await searchStations(view.query); break; case "genre": result = await stationsByTag(view.tag); break;
@@ -85,15 +78,13 @@ export default function BrowseView({
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
       }; load();} else {
       // Top view — progressively load categories (3 concurrent max)
-      setLoading(false); setCategorySections({}); setFailedCategories(new Set()); const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
-      const runBatch = async () => { while (queue.length > 0 && !flags.cancelled) {
+      setLoading(false); setCategorySections({}); setFailedCategories(new Set()); const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder]; const runBatch = async () => { while (queue.length > 0 && !flags.cancelled) {
           const batch = queue.splice(0, CONCURRENCY); await Promise.allSettled(batch.map(catId => loadCategory(catId, flags))); }
       }; runBatch(); }
     return () => { cancelled = true; flags.cancelled = true; };
   }, [view, retryKey]); // eslint-disable-next-line react-hooks/exhaustive-deps
   // All loaded category stations for discovery mode & station count in top view
-  const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]);
-  const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
+  const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]); const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
   // Discovery mode: auto-play random station every 30s
   useEffect(() => { const pool = view.mode === "top" ? allCategoryStations : stations; if (!discoveryMode) { discoveryFiredRef.current = false; return; } if (pool.length > 0) {
       // Play a random station immediately the first time discovery mode
@@ -106,8 +97,7 @@ export default function BrowseView({
     return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]); const itemWidth = isMobile ? "w-[140px]" : "w-[160px]"; const renderScrollStations = (list: Station[]) =>
     list.map((s) => ( <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard station={s} isCurrent={s.stationuuid === currentStation?.stationuuid}
-          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid} isFavorite={isFavorite(s.stationuuid)}
-          onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div> ));
+          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid} isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div> ));
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => { return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE); }, [stations, page, PAGE_SIZE]);
   // Trigger scan when enabled or page changes (non-top modes only)
@@ -115,18 +105,15 @@ export default function BrowseView({
     return () => { if (scanGenRef.current === gen) scanGenRef.current++; };
   }, [scanEnabled, pageStations, view.mode, startScan]);
   // Derived scan stats
-  const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length;
-  const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
+  const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length; const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
   // Reset page synchronously during render when songFilter changes.
   // Using the "adjusting state during render" pattern avoids a one-frame
   // flash of empty results that the useEffect approach would cause.
   const [prevSongFilter, setPrevSongFilter] = useState(songFilter); if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
   const allSongFilteredStations = useMemo(() => { // Filter grid by song/artist when songFilter is active — paginated
     const trimmed = songFilter.trim(); if (!trimmed) return []; const q = trimmed.toLowerCase(); return stations.filter(s => {
-      const live = liveData[s.stationuuid]; if (!live?.track) return false; const { title, artist } = live.track;
-      return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));});
-  }, [stations, songFilter, liveData]); const songFilteredStations = useMemo(() => { if (!songFilter.trim()) return pageStations;
-    return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+      const live = liveData[s.stationuuid]; if (!live?.track) return false; const { title, artist } = live.track; return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));});
+  }, [stations, songFilter, liveData]); const songFilteredStations = useMemo(() => { if (!songFilter.trim()) return pageStations; return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   }, [allSongFilteredStations, pageStations, songFilter, page, PAGE_SIZE]);
   // Chip active states based on current view (chips trigger view changes, not local filters)
   const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag; const countryChipActive = (countryCode: string) => view.mode === "country" && view.countryCode === countryCode;
@@ -135,8 +122,7 @@ export default function BrowseView({
             {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div><button
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
-          title={t("discoveryModeTitle")} aria-pressed={discoveryMode} aria-label={t("discoveryModeAria")}><Sparkles size={12} />
-          {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}</button></div>
+          title={t("discoveryModeTitle")} aria-pressed={discoveryMode} aria-label={t("discoveryModeAria")}><Sparkles size={12} /> {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}</button></div>
       {/* Genre chips — wrapping, limited on mobile */} {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !genreChipsExpanded;
         const visibleGenres = collapsed ? translatedGenreCategories.slice(0, MOBILE_LIMIT) : translatedGenreCategories;
         return ( <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}><button onClick={() => onGoHome?.()}
@@ -147,12 +133,10 @@ export default function BrowseView({
             ))} {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && ( <button onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>)}</div> );
-      })()} {/* Country chips — wrapping, limited on mobile */} {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
-        const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
+      })()} {/* Country chips — wrapping, limited on mobile */} {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded; const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
         return ( <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}><button onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >{`🌐 ${t("allCountries")}`}</button> {visibleCountries.map((c) => ( <button key={c.code}
-                onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)} aria-current={countryChipActive(c.code) || undefined}
+            >{`🌐 ${t("allCountries")}`}</button> {visibleCountries.map((c) => ( <button key={c.code} onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)} aria-current={countryChipActive(c.code) || undefined}
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
               ><span>{c.flag}</span><span>{c.displayName}</span></button>
             ))} {collapsed && countryChips.length > MOBILE_LIMIT && ( <button onClick={() => setCountryChipsExpanded(true)}
@@ -160,20 +144,16 @@ export default function BrowseView({
               >{t("seeMore")}</button>)}</div> );
       })()} {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>{loading && (
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
-        )} {error && ( <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" />
-            <p className="text-[13px] text-secondary">{t("failedToLoad")}</p><button onClick={() => setRetryKey((k) => k + 1)}
+        )} {error && ( <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" /> <p className="text-[13px] text-secondary">{t("failedToLoad")}</p><button onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
             >{t("retry")}</button></div>
         )} {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16"><Radio size={32} className="text-muted mb-2" /> <p className="text-[13px] text-secondary">{t("noStationsFound")}</p></div>
         )} {!loading && !error && ( <> {/* Category rows for top view */} {view.mode === "top" && ( <> {/* Favorites row */}
-                {favorites && favorites.length > 0 && ( <ScrollRow title={t("favorites")} icon={<Star size={14} className="text-sys-orange/70" />}
-                      isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
-                )} {/* Recent stations row */} {recent && recent.length > 0 && ( <ScrollRow title={t("recent")}
-                      icon={<Clock size={14} className="text-blue-400/70" />} isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
+                {favorites && favorites.length > 0 && ( <ScrollRow title={t("favorites")} icon={<Star size={14} className="text-sys-orange/70" />} isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
+                )} {/* Recent stations row */} {recent && recent.length > 0 && ( <ScrollRow title={t("recent")} icon={<Clock size={14} className="text-blue-400/70" />} isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
                 )} {effectiveBrowseOrder.map((catId) => {
-                  const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return null;
-                  const catStations = categorySections[catId]; if (catStations?.length === 0) return null; const icon = CATEGORY_ICONS[catId] ?? ( catStations
+                  const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return null; const catStations = categorySections[catId]; if (catStations?.length === 0) return null; const icon = CATEGORY_ICONS[catId] ?? ( catStations
                       ? <span className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`} /> : <Music size={14} className="text-dim" /> );
                   return ( <ScrollRow key={catId} title={cat.label} icon={icon} isMobile={isMobile}> {!catStations && failedCategories.has(catId) ? (
                         <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}> <Radio size={18} className="text-muted" />
@@ -200,13 +180,11 @@ export default function BrowseView({
                           <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0"> <X size={11} /></button>)}</div>
                     )} {scanEnabled && songFilter && ( <span className="text-[11px] text-dim shrink-0"> {t("stationCount", { count: allSongFilteredStations.length })}</span>)}</div>
                   {/* Station grid */} <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}> {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
-                      const live = liveData[s.stationuuid]; return ( <StationCard key={s.stationuuid} station={s}
-                          isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid} isCurrent={currentStation?.stationuuid === s.stationuuid}
+                      const live = liveData[s.stationuuid]; return ( <StationCard key={s.stationuuid} station={s} isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid} isCurrent={currentStation?.stationuuid === s.stationuuid}
                           isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} onPrefetch={() => onPrefetch?.(s.url_resolved)}
                           liveStatus={live?.status} liveTrack={live?.track} onPeek={!scanEnabled ? () => peekStation(s) : undefined} /> );
                     })}</div>
-                  {/* Pagination */} {totalPages > 1 && ( <div className="flex items-center justify-center gap-3 pt-2 pb-6"><button
-                        onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
+                  {/* Pagination */} {totalPages > 1 && ( <div className="flex items-center justify-center gap-3 pt-2 pb-6"><button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       ><ChevronLeft size={14} /> {t("previous")}</button><span className="text-[12px] text-dim tabular-nums">
                         {t("pageFraction", { current: page + 1, total: totalPages })}</span><button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}

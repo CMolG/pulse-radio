@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-function tryLoad(key: string): string | null { if (typeof window === 'undefined') return null; try { return localStorage.getItem(key); } catch { return null; } }
-function isQuotaExceeded(e: unknown): boolean {
+function tryLoad(key: string): string | null { if (typeof window === 'undefined') return null; try { return localStorage.getItem(key); } catch { return null; } } function isQuotaExceeded(e: unknown): boolean {
   return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22); }
 function trySave(key: string, raw: string): boolean { try { localStorage.setItem(key, raw); return true; } catch (e) {
     if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`); return false; }

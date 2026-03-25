@@ -1,15 +1,12 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import React, { useState } from 'react'; import { X, Power, Plus, Save } from 'lucide-react';
-import type { EqBand, EqPreset, NoiseReductionMode } from '../types'; import { EQ_PRESETS } from '../constants';
-type Props = { bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; stereoWidth: number;
-  bassEnhance: number; compressorEnabled: boolean; compressorAmount: number; noiseReductionMode: NoiseReductionMode;
+'use client'; import React, { useState } from 'react'; import { X, Power, Plus, Save } from 'lucide-react'; import type { EqBand, EqPreset, NoiseReductionMode } from '../types'; import { EQ_PRESETS } from '../constants';
+type Props = { bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; stereoWidth: number; bassEnhance: number; compressorEnabled: boolean; compressorAmount: number; noiseReductionMode: NoiseReductionMode;
   customPresets?: EqPreset[]; onSetGain: (id: string, gain: number) => void; onApplyPreset: (gains: number[]) => void; onToggleEnabled: () => void;
   onToggleNormalizer: () => void; onSetStereoWidth: (w: number) => void; onSetBassEnhance: (v: number) => void; onToggleCompressor: () => void;
   onSetCompressorAmount: (v: number) => void; onSetNoiseReductionMode: (mode: NoiseReductionMode) => void; onClose: () => void; onSaveCustomPreset?: (name: string) => void;
   onRemoveCustomPreset?: (name: string) => void; onPresetChange?: (name: string | null) => void; };
 export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
-  const [showSaveInput, setShowSaveInput] = useState(false); const [presetName, setPresetName] = useState('');
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null); const handleSelectPreset = (name: string, gains: number[]) => {
+  const [showSaveInput, setShowSaveInput] = useState(false); const [presetName, setPresetName] = useState(''); const [selectedPreset, setSelectedPreset] = useState<string | null>(null); const handleSelectPreset = (name: string, gains: number[]) => {
     setSelectedPreset(name); onApplyPreset(gains); onPresetChange?.(name); };
   const handleSetGain = (id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange?.(null); onSetGain(id, gain);
@@ -29,13 +26,11 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             {onRemoveCustomPreset && ( <button onClick={() => onRemoveCustomPreset(preset.name)} aria-label={`Delete ${preset.name} preset`}
                 className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors"> <X size={8} /></button>)}</div>))}</div>
       {/* Save custom preset */} {onSaveCustomPreset && ( <div className="mb-4"> {showSaveInput ? ( <div className="flex-row-1.5">
- <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }}
-                placeholder="Preset name…" aria-label="Preset name"
+ <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }} placeholder="Preset name…" aria-label="Preset name"
                 className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/30 outline-none focus:border-sys-orange/50" autoFocus/>
  <button onClick={handleSave} aria-label="Save preset" className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors" ><Save size={10} /></button>
               <button onClick={() => setShowSaveInput(false)} aria-label="Cancel" className="p-1 rounded-md bg-surface-2 text-subtle-hover"><X size={10} /></button></div>
-          ) : ( <button onClick={() => setShowSaveInput(true)} className="flex-row-1 px-2 py-1 text-[10px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors">
-              <Plus size={10} /> Save Custom</button>)}</div>
+          ) : ( <button onClick={() => setShowSaveInput(true)} className="flex-row-1 px-2 py-1 text-[10px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors"> <Plus size={10} /> Save Custom</button>)}</div>
       )} {/* Band sliders */} <div className="flex items-end justify-between gap-2"> {bands.map(band => ( <div key={band.id} className="col-center gap-1">
             <span className="text-[9px] text-dim tabular-nums">{band.gain > 0 ? `+${band.gain}` : band.gain}</span>
  <input type="range" min={-12} max={12} step={1} value={band.gain} onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))} disabled={!enabled} aria-label={`${band.label} gain`}
@@ -56,8 +51,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
           /> <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(bassEnhance * 100)}%</span>
         </div><div className="flex items-center gap-2 mt-2">
           <button onClick={onToggleCompressor} aria-label={compressorEnabled ? 'Disable compressor' : 'Enable compressor'} title="Multiband Compressor" className={`text-[10px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}>Comp</button>
-          <input type="range" min={0} max={100} step={5} value={Math.round(compressorAmount * 100)}
-            onChange={e => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)} disabled={!compressorEnabled} aria-label="Compressor amount"
+          <input type="range" min={0} max={100} step={5} value={Math.round(compressorAmount * 100)} onChange={e => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)} disabled={!compressorEnabled} aria-label="Compressor amount"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           /> <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(compressorAmount * 100)}%</span>
         </div>

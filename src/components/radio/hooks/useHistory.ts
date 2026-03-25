@@ -13,8 +13,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     if (stationUuid !== lastStationRef.current) {
       lastStationRef.current = stationUuid; lastTrackRef.current = ''; return; }
     const key = `${stationUuid}::${track.artist}::${track.title}`; if (key === lastTrackRef.current) return; lastTrackRef.current = key; const entry: HistoryEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName, stationUuid, artist: track.artist,
-      title: track.title, album: track.album, artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName, stationUuid, artist: track.artist, title: track.title, album: track.album, artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl,
       durationMs: track.durationMs, genre: track.genre, releaseDate: track.releaseDate, trackNumber: track.trackNumber, trackCount: track.trackCount, timestamp: Date.now(), };
     setHistory(prev => {
       const deduped = prev.filter( // Active dedup: remove older entries with same title+artist+station
@@ -23,10 +22,8 @@ export function useHistory( stationName: string | undefined, stationUuid: string
   // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
   }, [track?.title, track?.artist, stationUuid, stationName]); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
-    if (!track?.title || !stationUuid) return; const artworkUrl = track.artworkUrl; const album = track.album;
-    const itunesUrl = track.itunesUrl; const durationMs = track.durationMs; const genre = track.genre; const releaseDate = track.releaseDate;
-    const trackNumber = track.trackNumber; const trackCount = track.trackCount;
-    if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
+    if (!track?.title || !stationUuid) return; const artworkUrl = track.artworkUrl; const album = track.album; const itunesUrl = track.itunesUrl; const durationMs = track.durationMs; const genre = track.genre; const releaseDate = track.releaseDate;
+    const trackNumber = track.trackNumber; const trackCount = track.trackCount; if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
     setHistory(prev => { const head = prev[0]; if (!head) return prev; if ( head.stationUuid === stationUuid && head.title === track.title && head.artist === track.artist &&
         (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl || head.durationMs !== durationMs || head.genre !== genre || head.releaseDate !== releaseDate ||
          head.trackNumber !== trackNumber || head.trackCount !== trackCount)
@@ -34,5 +31,4 @@ export function useHistory( stationName: string | undefined, stationUuid: string
         return [{ ...head, artworkUrl, album, itunesUrl, durationMs, genre, releaseDate, trackNumber, trackCount }, ...prev.slice(1)];
       } return prev;});
   }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
-  const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
-  const clear = useCallback(() => { setHistory([]); lastTrackRef.current = ''; }, []); return { history, remove, clear }; }
+  const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []); const clear = useCallback(() => { setHistory([]); lastTrackRef.current = ''; }, []); return { history, remove, clear }; }

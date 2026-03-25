@@ -18,16 +18,13 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
   try { const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist), fetchWikiSummary(artist),
     ]); const mb = mbResult.status === 'fulfilled' ? mbResult.value : null; let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
     // If Wikipedia didn't find the artist or result isn't music-related, try common disambiguations
-    if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) { const suffixes = mb?.type === 'Person'
-          ? ['(singer)', '(musician)', '(rapper)'] : ['(band)', '(musical group)', '(singer)', '(musician)'];
+    if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) { const suffixes = mb?.type === 'Person' ? ['(singer)', '(musician)', '(rapper)'] : ['(band)', '(musical group)', '(singer)', '(musician)'];
       for (const suffix of suffixes) { const attempt = await fetchWikiSummary(`${artist} ${suffix}`); if (attempt?.extract) { wiki = attempt; break; } }
     }
-    const tags = mb?.tags ?.filter((t: { count: number }) => t.count > 0)
-        ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)?.slice(0, 8) ?.map((t: { name: string }) => t.name) ?? [];
+    const tags = mb?.tags ?.filter((t: { count: number }) => t.count > 0) ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)?.slice(0, 8) ?.map((t: { name: string }) => t.name) ?? [];
     const hasData = !!(mb || wiki?.extract); const cacheHeader = hasData ? 'public, max-age=86400, stale-while-revalidate=604800' : 'public, max-age=3600, stale-while-revalidate=7200';
     return NextResponse.json( { name: mb?.name ?? artist, disambiguation: mb?.disambiguation ?? null, type: mb?.type ?? null, country: mb?.country ?? null,
-        beginArea: mb?.['begin-area']?.name ?? null, lifeSpan: mb?.['life-span'] ?? null, tags, bio: wiki?.extract ?? null,
-        imageUrl: wiki?.thumbnail?.source ?? null, wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
+        beginArea: mb?.['begin-area']?.name ?? null, lifeSpan: mb?.['life-span'] ?? null, tags, bio: wiki?.extract ?? null, imageUrl: wiki?.thumbnail?.source ?? null, wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
       }, { headers: { 'Cache-Control': cacheHeader, }, },);
   } catch (err) { console.error('[Pulse Radio] Artist info fetch error:', err); return NextResponse.json({ error: 'Internal error' }, { status: 500 }); }
 }

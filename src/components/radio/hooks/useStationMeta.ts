@@ -9,10 +9,8 @@ function isAdContent(text: string): boolean { let result = _adCache.get(text); i
   if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result); return result; }
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
 export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal, ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
-  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  if (signal) { if (signal.aborted) { clearTimeout(timeout); controller.abort();} else {
-      const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
-      controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort); }, { once: true }); }
+  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS); if (signal) { if (signal.aborted) { clearTimeout(timeout); controller.abort();} else {
+      const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true }); controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort); }, { once: true }); }
   } try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json(); return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch { return { streamTitle: null, icyBr: null }; } finally { clearTimeout(timeout); } }
@@ -21,8 +19,7 @@ let _lastStation = ''; let _lastStationLower = ''; export function parseTrack(ra
   // Cache lowercase station name to avoid recomputing on every poll
   if (stationName !== _lastStation) { _lastStation = stationName; _lastStationLower = stationName.toLowerCase(); } if (raw.toLowerCase() === _lastStationLower) return null;
   // Common separators: " - ", " — ", " – "
-  const separators = [' - ', ' — ', ' – ', ' | ']; for (const sep of separators) { const idx = raw.indexOf(sep);
-    if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() }; }
+  const separators = [' - ', ' — ', ' – ', ' | ']; for (const sep of separators) { const idx = raw.indexOf(sep); if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() }; }
   return { title: raw.trim(), artist: '' }; }
 export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null); const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
@@ -51,8 +48,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (isPlaying) intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     // When the tab returns from background, poll immediately so the user
     // doesn't see stale metadata for up to POLL_INTERVAL_MS.
-    const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); };
-    document.addEventListener('visibilitychange', onVisible); return () => { if (intervalRef.current) clearInterval(intervalRef.current);
+    const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); }; document.addEventListener('visibilitychange', onVisible); return () => { if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', onVisible); abortController.abort(); };
   }, [station, isPlaying]); return {
     // Keep showing track/bitrate as long as a station is selected.

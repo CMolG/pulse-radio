@@ -3,8 +3,7 @@
   const [offset, setOffset] = useState({ x: 0, y: 0 }); const containerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef(0); const pointerOffsetRef = useRef({ x: 0, y: 0 }); const audioOffsetRef = useRef({ x: 0, y: 0 }); const tickRafRef = useRef(0);
   // Ref avoids re-running the effect (and tearing down RAF + listener) on every amplitude change
-  const audioAmplitudeRef = useRef(audioAmplitude); useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]);
-  const handleMouseMove = useCallback((e: MouseEvent) => { const el = containerRef.current; if (!el) return;
+  const audioAmplitudeRef = useRef(audioAmplitude); useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]); const handleMouseMove = useCallback((e: MouseEvent) => { const el = containerRef.current; if (!el) return;
     cancelAnimationFrame(rafRef.current); // Coalesce rapid mouse events into a single rAF update
     rafRef.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;

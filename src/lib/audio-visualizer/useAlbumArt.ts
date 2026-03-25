@@ -1,16 +1,13 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { useState, useEffect, useRef, useMemo } from 'react'; import { normalizeText } from '@/lib/stringUtils'; const FETCH_TIMEOUT = 8_000; interface AlbumInfo {
-  artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null;
-  durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null; }
-const CACHE = new Map<string, AlbumInfo>(); const MAX_CACHE = 200; const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
-  durationMs: null, genre: null, trackNumber: null, trackCount: null, };
+  artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null; durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null; }
+const CACHE = new Map<string, AlbumInfo>(); const MAX_CACHE = 200; const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null, durationMs: null, genre: null, trackNumber: null, trackCount: null, };
 type ItunesResult = { trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
   collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number; primaryGenreName?: string; trackNumber?: number; trackCount?: number; };
 let _aMatches: boolean[] = []; // Reusable match arrays for Jaro distance — avoids allocation per call
 let _bMatches: boolean[] = []; function jaroDistance(a: string, b: string): number { if (a === b) return 1; if (!a.length || !b.length) return 0;
   const matchDistance = Math.floor(Math.max(a.length, b.length) / 2) - 1; if (_aMatches.length < a.length) _aMatches = new Array(a.length); // Grow and reset reusable arrays
-  if (_bMatches.length < b.length) _bMatches = new Array(b.length); for (let i = 0; i < a.length; i++) _aMatches[i] = false; for (let i = 0; i < b.length; i++) _bMatches[i] = false;
-  let matches = 0; for (let i = 0; i < a.length; i++) {
+  if (_bMatches.length < b.length) _bMatches = new Array(b.length); for (let i = 0; i < a.length; i++) _aMatches[i] = false; for (let i = 0; i < b.length; i++) _bMatches[i] = false; let matches = 0; for (let i = 0; i < a.length; i++) {
     const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length); for (let j = start; j < end; j++) {
       if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break; }
   } if (!matches) return 0; let t = 0; let k = 0; for (let i = 0; i < a.length; i++) {
@@ -20,8 +17,7 @@ function jaroWinkler(a: string, b: string): number {
   const jaro = jaroDistance(a, b); if (jaro < 0.7) return jaro; let prefix = 0; const maxPrefix = 4;
   for (let i = 0; i < Math.min(maxPrefix, a.length, b.length); i++) { if (a[i] === b[i]) prefix++; else break; } return jaro + prefix * 0.1 * (1 - jaro); }
 function selectBestItunesResult(results: ItunesResult[], requestedTitle: string, requestedArtist: string | null): ItunesResult | null {
-  if (!results.length) return null; const normalizedRequestedTitle = normalizeText(requestedTitle);
-  const normalizedRequestedArtist = normalizeText(requestedArtist); if (!normalizedRequestedTitle) return null;
+  if (!results.length) return null; const normalizedRequestedTitle = normalizeText(requestedTitle); const normalizedRequestedArtist = normalizeText(requestedArtist); if (!normalizedRequestedTitle) return null;
   // Pre-normalize all candidates once to avoid redundant normalizeText calls in loop
   const normTitles = new Array<string>(results.length); const normArtists = new Array<string>(results.length); for (let i = 0; i < results.length; i++) {
     normTitles[i] = normalizeText(results[i].trackName); normArtists[i] = normalizeText(results[i].artistName); }
@@ -30,10 +26,8 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     if (!exactArtist || exactArtist === normalizedRequestedArtist || exactArtist.includes(normalizedRequestedArtist) || normalizedRequestedArtist.includes(exactArtist)) {
       return results[exactIdx]; }
   } let best: ItunesResult | null = null; let bestScore = 0; for (let i = 0; i < results.length; i++) { const candidateTitle = normTitles[i]; if (!candidateTitle) continue;
-    const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length);
-    const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length); if (maxLen > 0 && lenDiff / maxLen > 0.35) continue;
-    const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle); if (titleScore < 0.94) continue;
-    let score = titleScore; if (normalizedRequestedArtist) { const candidateArtist = normArtists[i]; if (candidateArtist) {
+    const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length); const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length); if (maxLen > 0 && lenDiff / maxLen > 0.35) continue;
+    const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle); if (titleScore < 0.94) continue; let score = titleScore; if (normalizedRequestedArtist) { const candidateArtist = normArtists[i]; if (candidateArtist) {
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist); if (artistScore < 0.85) continue; score = (titleScore * 0.85) + (artistScore * 0.15); }
     }
     if (score > bestScore) { bestScore = score; best = results[i]; } }
@@ -48,12 +42,10 @@ function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) { const img = new Image(); img.crossOrigin = 'anonymous'; img.onerror = () => { img.src = ''; }; // release failed load
   img.src = url; }
-export function useAlbumArt(title: string | null, artist: string | null) { const hasTitle = Boolean(title);
-  const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
+export function useAlbumArt(title: string | null, artist: string | null) { const hasTitle = Boolean(title); const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
   const cachedInfo = useMemo(() => { if (!cacheKey) return null; return cacheGet(cacheKey) ?? null; }, [cacheKey]);
   const [fetched, setFetched] = useState<{ key: string; info: AlbumInfo } | null>(null); const abortRef = useRef<AbortController | null>(null); useEffect(() => {
-    if (!title || !cacheKey || cachedInfo) return; abortRef.current?.abort(); const controller = new AbortController();
-    abortRef.current = controller; const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    if (!title || !cacheKey || cachedInfo) return; abortRef.current?.abort(); const controller = new AbortController(); abortRef.current = controller; const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
     // Use server-side proxy to avoid CORS/CSP issues from the browser
     const term = artist ? `${artist} ${title}` : title; fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal },).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();

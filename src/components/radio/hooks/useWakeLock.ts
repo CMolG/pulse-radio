@@ -3,8 +3,7 @@
 /* Prevents the screen from dimming/locking while audio is playing. Uses the Screen Wake Lock API (supported in C
  * hrome, Edge, Safari 16.4+). Automatically re-acquires the lock when the tab becomes visible again. */
 export function useWakeLock(shouldLock: boolean) {
-  const lockRef = useRef<WakeLockSentinel | null>(null); const [isActive, setIsActive] = useState(false);
-  const requestingRef = useRef(false); const wantReleaseRef = useRef(false); const request = useCallback(async () => {
+  const lockRef = useRef<WakeLockSentinel | null>(null); const [isActive, setIsActive] = useState(false); const requestingRef = useRef(false); const wantReleaseRef = useRef(false); const request = useCallback(async () => {
     if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
     requestingRef.current = true; wantReleaseRef.current = false; try { const lock = await navigator.wakeLock.request('screen'); if (wantReleaseRef.current) {
         // release() was called while we were awaiting — honour it immediately

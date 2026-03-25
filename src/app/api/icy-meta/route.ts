@@ -14,8 +14,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 }); }
       } catch { /* URL parse failed — continue */ } }
     if (!res.ok) { clearTimeout(timeout); res.body?.cancel().catch(() => {}); return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 }); }
-    const icyMetaint = res.headers.get('icy-metaint'); const icyName = res.headers.get('icy-name'); const icyGenre = res.headers.get('icy-genre');
-    const icyBr = res.headers.get('icy-br'); if (!icyMetaint || !res.body) {
+    const icyMetaint = res.headers.get('icy-metaint'); const icyName = res.headers.get('icy-name'); const icyGenre = res.headers.get('icy-genre'); const icyBr = res.headers.get('icy-br'); if (!icyMetaint || !res.body) {
       // No ICY support — return whatever headers are available
       clearTimeout(timeout); res.body?.cancel().catch(() => {}); return NextResponse.json({
         streamTitle: null, icyName: icyName || null, icyGenre: icyGenre || null, icyBr: icyBr || null,});
@@ -27,13 +26,11 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     } finally { clearTimeout(timeout); reader.cancel().catch(() => {}); } const buffer = new Uint8Array(totalRead); let offset = 0; // Concatenate chunks
     for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.length; }
     // ICY metadata starts at position metaint
-    if (buffer.length <= metaint) return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
-    const metaLength = buffer[metaint] * 16; if (metaLength === 0 || buffer.length < metaint + 1 + metaLength) {
+    if (buffer.length <= metaint) return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); const metaLength = buffer[metaint] * 16; if (metaLength === 0 || buffer.length < metaint + 1 + metaLength) {
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength); const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(/\0+$/, '');
     // Parse StreamTitle='Artist - Title';
     const match = metaString.match(/StreamTitle='([^']*)'/); const streamTitle = match?.[1]?.trim() || null; return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
-  } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
+  } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError'; if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     const message = err instanceof Error ? err.message : 'Unknown error'; return NextResponse.json({ error: message }, { status: 500 }); }
 }
