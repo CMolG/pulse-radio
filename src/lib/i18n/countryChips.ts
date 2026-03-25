@@ -98,11 +98,8 @@ export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36)
   return capped.map((code) => {
     const country = COUNTRY_BY_CODE[code]!;
     const displayName = getCountryDisplayName(locale, code);
-    const reason: CountryChip["reason"] = languageSet.has(code)
-      ? "language"
-      : proximitySet.has(code)
-      ? "proximity"
-      : "global";
+    const reason: CountryChip["reason"] = languageSet.has(code)? "language"
+      : proximitySet.has(code) ? "proximity" : "global";
 
     return { code, queryName: country.name, displayName, flag: countryFlag(code), reason };
   });

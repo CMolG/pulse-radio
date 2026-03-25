@@ -43,16 +43,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
-    song
-      ? { title: song.title, artist: song.artist, album: resolvedAlbum, }
-      : null,
+    song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null,
     song?.stationName ?? null,
   );
 
   const plainLyrics =
     lyrics?.plainText?.trim() ||
-    lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean)
-      .join('\n')
+    lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n')
       .trim() || '';
 
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];

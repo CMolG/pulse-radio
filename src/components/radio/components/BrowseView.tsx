@@ -131,8 +131,7 @@ export default function BrowseView({
 }: Props) {
   const { t, locale } = useLocale();
   const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
-  const translatedGenreCategories = useMemo(
-    () =>
+  const translatedGenreCategories = useMemo(() =>
       GENRE_CATEGORIES.map((category) => {
         const key = GENRE_LABEL_KEYS[category.id];
         return key ? { ...category, label: t(key) } : category;
@@ -557,8 +556,7 @@ export default function BrowseView({
                             {t("retry")}
                           </button>
                         </div>
-                      ) : !catStations ? (
-                        Array.from({ length: 5 }).map((_, i) => (
+                      ) : !catStations ? (Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`} />
                         ))
                       ) : (renderScrollStations(catStations))}

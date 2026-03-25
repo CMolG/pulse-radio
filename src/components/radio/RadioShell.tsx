@@ -286,8 +286,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser };
   }, [radio, recent, stationQueue, eqConnectSource, analyser]);
 
-  const handlePlay = useCallback(
-    (station: Station) => {
+  const handlePlay = useCallback((station: Station) => {
       const { radio: r, recent: rec, stationQueue: sq, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
       // Pre-create audio element and set up the Web Audio graph BEFORE calling play().
       // On iOS Safari, createMediaElementSource() must be called BEFORE audio.src is
@@ -480,8 +479,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (pathname !== "/") window.history.pushState(null, "", "/");
   }, [pathname, t, resetNav]);
 
-  const handleSearchSubmit = useCallback(
-    (e: React.FormEvent) => {
+  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
       e.preventDefault();
       if (searchQuery.trim()) handleSearch(searchQuery.trim());
       else handleGoHome();

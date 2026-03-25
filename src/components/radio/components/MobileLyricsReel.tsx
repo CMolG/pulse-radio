@@ -64,8 +64,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     [activeLineOverride, currentTime, lyrics],
   );
 
-  const scrollToIndex = useCallback(
-    (index: number, behavior: ScrollBehavior = "smooth") => {
+  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
       const scroller = scrollerRef.current;
       const line = lineRefs.current[index];
       if (!scroller || !line) return;
