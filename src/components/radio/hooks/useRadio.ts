@@ -14,8 +14,7 @@ export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline'; export type St
   const volumeRef = useRef(volume); const mutedRef = useRef(muted); volumeRef.current = volume; mutedRef.current = muted; // Latest volume/muted refs so crossfade intervals read current values
   const userPausedRef = useRef(false); // Tracks whether the user explicitly requested a pause (vs stall/src-change pauses)
   const bcRef = useRef<BroadcastChannel | null>(null); const tabIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`); useEffect(() => { if (typeof BroadcastChannel === 'undefined') return; const bc = new BroadcastChannel('pulse-radio-playback'); bcRef.current = bc; bc.onmessage = (e: MessageEvent) => { if (e.data?.type === 'playing' && e.data?.tabId !== tabIdRef.current) { // Cross-tab coordination: pause this tab when another tab starts playing
-        const audio = audioRef.current; if (audio && !audio.paused) { userPausedRef.current = true; audio.pause(); }
-        clearTimer(fadeTimerRef); } // calls startPlayback() and overrides the pause from the other tab. // after the cross-tab pause. Without this, the crossfade completion // Cancel any in-progress crossfade so it doesn't restart playback
+        const audio = audioRef.current; if (audio && !audio.paused) { userPausedRef.current = true; audio.pause(); } clearTimer(fadeTimerRef); } // calls startPlayback() and overrides the pause from the other tab. // after the cross-tab pause. Without this, the crossfade completion // Cancel any in-progress crossfade so it doesn't restart playback
     }; return () => { bc.close(); bcRef.current = null; };}, []);
   useEffect(() => { return () => { // Clean up timers on unmount to prevent orphaned intervals
       clearTimer(fadeTimerRef); clearTimer(pauseTimerRef); clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
@@ -29,15 +28,13 @@ export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline'; export type St
     (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void,) => {
       const webAudioConnected = hasAudioSource(audio); const shouldUseProxy = !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected; const setSourceAndPlay = (useProxy: boolean) => { // the response has CORS headers so the Web Audio pipeline outputs sound. // Force proxy when the Web Audio graph is connected to this element. On iOS Safari, a cross-origin audio element with crossOrigin=null routed through Web Audio produces silence (CORS taint). Using the proxy ensures
         srcChangingRef.current = true; // event on src change, and onPause must ignore that synthetic pause. // Set flag before assigning src — the browser fires a synchronous 'pause'
-        audio.crossOrigin = useProxy ? 'anonymous' : null; audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
-        Promise.resolve().then(() => { srcChangingRef.current = false; }); return audio.play(); }; // Clear in a microtask (after the synchronous pause event has fired)
+        audio.crossOrigin = useProxy ? 'anonymous' : null; audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl; Promise.resolve().then(() => { srcChangingRef.current = false; }); return audio.play(); }; // Clear in a microtask (after the synchronous pause event has fired)
       setSourceAndPlay(shouldUseProxy).catch((err) => {
         if (!shouldUseProxy && preferDirectStream && !isAutoplayBlocked(err)) { // If direct fails for non-autoplay reasons, fallback to proxy for this station. // On iOS, direct playback is more stable in background.
           if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear(); proxyFallbackUrlsRef.current.add(streamUrl); setSourceAndPlay(true).catch(onRejected); return; }
         onRejected(err);});
     }, [preferDirectStream], ); useEffect(() => { const audio = getAudio(); const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); }; const sessionId = playSessionRef.current; const reconnect = (delay: number) => {
-      if (playSessionRef.current !== sessionId || !station || userPausedRef.current) return;
-      if (typeof navigator !== 'undefined' && !navigator.onLine) return; if (isReconnectingRef.current) return; // Prevent concurrent reconnects — only one attempt at a time // Don't retry when browser is offline — onOnline will resume
+      if (playSessionRef.current !== sessionId || !station || userPausedRef.current) return; if (typeof navigator !== 'undefined' && !navigator.onLine) return; if (isReconnectingRef.current) return; // Prevent concurrent reconnects — only one attempt at a time // Don't retry when browser is offline — onOnline will resume
       if (retryRef.current >= 10) { setStatus('error'); isReconnectingRef.current = false; return; } isReconnectingRef.current = true; retryRef.current++; setStatus('loading'); clearReconnectTimer(); let adaptedDelay = delay; // Adapt reconnect delay based on network quality (Network Information API)
       const conn = typeof navigator !== 'undefined' ? (navigator as Navigator & { connection?: { effectiveType?: string; downlink?: number; saveData?: boolean } }).connection : undefined; if (conn) { if (conn.saveData) {
           adaptedDelay = Math.max(delay, 5000); // User opted into data saving — longer delays to reduce bandwidth
@@ -97,28 +94,21 @@ export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline'; export type St
         setStreamQuality(conn?.saveData ? 'fair' : 'good'); // saveData means the user opted into reduced bandwidth; cap at 'fair'
       } else if (ahead >= MIN_BUFFER_AHEAD_S) {
         setStreamQuality(growth > 0 ? 'fair' : 'poor'); // Healthy buffer but thin — check if it's growing
-      } else setStreamQuality('poor'); if (ahead < MIN_BUFFER_AHEAD_S) { lowBufferStreak++;
-        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); } // from momentary dips during normal streaming // Require 2 consecutive low-buffer readings to avoid false positives
+      } else setStreamQuality('poor'); if (ahead < MIN_BUFFER_AHEAD_S) { lowBufferStreak++; if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); } // from momentary dips during normal streaming // Require 2 consecutive low-buffer readings to avoid false positives
       } else lowBufferStreak = 0;
     }, BUFFER_CHECK_MS); const pairs: [EventTarget, string, EventListener][] = [ [audio, 'playing', onPlaying], [audio, 'pause', onPause], [audio, 'waiting', onWaiting], [audio, 'error', onError], [audio, 'stalled', onStalled], [audio, 'ended', onEnded], [audio, 'timeupdate', onTimeUpdate], [audio, 'canplay', onCanPlay], [document, 'visibilitychange', onVisibilityResume], [window, 'pageshow', onVisibilityResume], [window, 'online', onOnline], [window, 'offline', onOffline], ]; pairs.forEach(([t, e, h]) => t.addEventListener(e, h)); return () => {
       clearTimer(stallTimerRef); clearTimer(pauseTimerRef); clearReconnectTimer(); clearTimer(bufferCheckRef); pairs.forEach(([t, e, h]) => t.removeEventListener(e, h)); };
-  }, [station, getAudio, startPlayback, handlePlayRejected]); useEffect(() => { saveToStorage(STORAGE_KEYS.VOLUME, volume); const audio = audioRef.current;
-    if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume; // Skip direct volume set while crossfade is in progress — the interval controls audio.volume
-  }, [volume, muted]); const play = useCallback((s: Station) => { if (!isValidStreamUrl(s.url_resolved)) { setStatus('error'); return; } const audio = getAudio();
-    resumeAudioContext(audio); playSessionRef.current++; retryRef.current = 0; userPausedRef.current = false; // Resume Web Audio context from user gesture (required on mobile)
+  }, [station, getAudio, startPlayback, handlePlayRejected]); useEffect(() => { saveToStorage(STORAGE_KEYS.VOLUME, volume); const audio = audioRef.current; if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume; // Skip direct volume set while crossfade is in progress — the interval controls audio.volume
+  }, [volume, muted]); const play = useCallback((s: Station) => { if (!isValidStreamUrl(s.url_resolved)) { setStatus('error'); return; } const audio = getAudio(); resumeAudioContext(audio); playSessionRef.current++; retryRef.current = 0; userPausedRef.current = false; // Resume Web Audio context from user gesture (required on mobile)
     isReconnectingRef.current = false; proxyFallbackUrlsRef.current.delete(s.url_resolved); codecFallbackTriedRef.current.delete(s.url_resolved); setStation(s); setStatus('loading'); setStreamQuality('good'); lastBufferEndRef.current = 0; // A user-initiated play always overrides any in-progress reconnect
     clearTimer(fadeTimerRef); if (!audio.paused && audio.src) { const steps = 8; const interval = 40; // 320ms total // Crossfade: fade out with ease-out curve before switching
-      let step = 0; const startVol = audio.volume; fadeTimerRef.current = setInterval(() => { step++;
-        const t = step / steps; const eased = 1 - (1 - t) * (1 - t) * (1 - t); audio.volume = Math.max(0, startVol * (1 - eased)); if (step >= steps) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; // Ease-out cubic: rapid initial drop, gentle tail
+      let step = 0; const startVol = audio.volume; fadeTimerRef.current = setInterval(() => { step++; const t = step / steps; const eased = 1 - (1 - t) * (1 - t) * (1 - t); audio.volume = Math.max(0, startVol * (1 - eased)); if (step >= steps) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; // Ease-out cubic: rapid initial drop, gentle tail
           audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected); } // Read current volume/muted from refs — user may have changed them during fade
       }, interval);} else { audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected); }
-  }, [getAudio, startPlayback, handlePlayRejected]); const pause = useCallback(() => { userPausedRef.current = true;
-    clearTimer(fadeTimerRef); audioRef.current?.pause(); // startPlayback() and resume audio after this explicit pause. // Cancel any in-progress crossfade so its completion doesn't call
-  }, []); const resume = useCallback(() => { userPausedRef.current = false; const audio = audioRef.current; if (audio) { resumeAudioContext(audio);
-      audio.volume = mutedRef.current ? 0 : volumeRef.current; } // set it to 0 directly, bypassing React state. // Restore audio.volume from React state — sleep timer fade may have
+  }, [getAudio, startPlayback, handlePlayRejected]); const pause = useCallback(() => { userPausedRef.current = true; clearTimer(fadeTimerRef); audioRef.current?.pause(); // startPlayback() and resume audio after this explicit pause. // Cancel any in-progress crossfade so its completion doesn't call
+  }, []); const resume = useCallback(() => { userPausedRef.current = false; const audio = audioRef.current; if (audio) { resumeAudioContext(audio); audio.volume = mutedRef.current ? 0 : volumeRef.current; } // set it to 0 directly, bypassing React state. // Restore audio.volume from React state — sleep timer fade may have
     audio?.play().catch(() => {});
-  }, []); const togglePlay = useCallback(() => { const audio = audioRef.current; if (!audio || !audio.src) return; if (audio.paused) { userPausedRef.current = false; resumeAudioContext(audio);
-      audio.volume = mutedRef.current ? 0 : volumeRef.current; audio.play().catch(() => {}); // Restore audio.volume from React state — sleep timer fade may have set it to 0 directly, bypassing React state.
+  }, []); const togglePlay = useCallback(() => { const audio = audioRef.current; if (!audio || !audio.src) return; if (audio.paused) { userPausedRef.current = false; resumeAudioContext(audio); audio.volume = mutedRef.current ? 0 : volumeRef.current; audio.play().catch(() => {}); // Restore audio.volume from React state — sleep timer fade may have set it to 0 directly, bypassing React state.
     } else { userPausedRef.current = true; clearTimer(fadeTimerRef); audio.pause(); // Cancel any in-progress crossfade (same reason as pause())
     }}, []);
   const stop = useCallback(() => {

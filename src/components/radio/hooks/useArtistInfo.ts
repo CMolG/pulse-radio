@@ -7,8 +7,7 @@ function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure f
     const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
 } export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
   const key = artist ? artist.toLowerCase().trim() : ''; const cachedInfo = useMemo(() => { if (!key) return null; return cacheGet(key) ?? null; }, [key]); const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null); useEffect(() => {
-    if (!key || !artist || cachedInfo) return; let cancelled = false; const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15_000); fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => { // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
+    if (!key || !artist || cachedInfo) return; let cancelled = false; const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15_000); fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => { // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
         if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();
       }).then((data: ArtistInfo) => { if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); } }).catch(() => { if (!cancelled) setFetched({ key, info: null }); }).finally(() => { clearTimeout(timeout); });
     return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };

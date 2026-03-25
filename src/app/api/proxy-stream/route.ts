@@ -14,8 +14,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     }
   } catch { return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },});
-  } const controller = new AbortController(); const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
-  if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); } try { const upstream = await fetch(parsed.toString(), { // Propagate client disconnect to upstream so we don't leak connections
+  } const controller = new AbortController(); const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null; if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); } try { const upstream = await fetch(parsed.toString(), { // Propagate client disconnect to upstream so we don't leak connections
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     if (upstream.url) { try { const finalUrl = new URL(upstream.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) { // Validate the final URL after redirects to prevent SSRF via redirect
           if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
@@ -25,8 +24,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     if (!upstream.ok || !upstream.body) { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '3' },});
-    } const contentType = upstream.headers.get('content-type') || 'audio/mpeg'; const icyBr = upstream.headers.get('icy-br'); const icyName = upstream.headers.get('icy-name'); const responseHeaders: Record<string, string> = { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache, no-store', 'Transfer-Encoding': 'chunked', }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr; if (icyName) responseHeaders['X-Stream-Name'] = icyName;
-    if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(null, { status: 200, headers: responseHeaders }); } return new Response(upstream.body, { status: 200, headers: responseHeaders, }); // HEAD requests: return headers only (for prefetch / codec sniffing)
+    } const contentType = upstream.headers.get('content-type') || 'audio/mpeg'; const icyBr = upstream.headers.get('icy-br'); const icyName = upstream.headers.get('icy-name'); const responseHeaders: Record<string, string> = { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache, no-store', 'Transfer-Encoding': 'chunked', }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr; if (icyName) responseHeaders['X-Stream-Name'] = icyName; if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(null, { status: 200, headers: responseHeaders }); } return new Response(upstream.body, { status: 200, headers: responseHeaders, }); // HEAD requests: return headers only (for prefetch / codec sniffing)
   } catch (err) {
     if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError'; if (isTimeout) { return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504, headers: { 'Content-Type': 'application/json' },});
