@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     if (upstream.url) {
       try {
         const finalUrl = new URL(upstream.url);
-        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+        if (isPrivateHost(finalUrl.hostname)) {
           if (timeout) clearTimeout(timeout);
           upstream.body?.cancel().catch(_NOOP);
           return new Response(_ERR_PRIVATE_IP, {
