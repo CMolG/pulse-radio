@@ -870,8 +870,9 @@ function trendingStations(limit = 20): Promise<Station[]> {
   return topStations(limit);
 }
 async function localStations(limit = 20): Promise<Station[]> {
-  const countryCode =
-    typeof navigator !== 'undefined' ? navigator.language?.split('-')[1]?.toUpperCase() || '' : '';
+  const lang = typeof navigator !== 'undefined' ? navigator.language : '';
+  const di = lang ? lang.indexOf('-') : -1;
+  const countryCode = di > 0 ? lang.slice(di + 1).toUpperCase() : '';
   if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit);
   return fetchCached(
     `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`,
@@ -2790,15 +2791,13 @@ const StationCard = React.memo(
   }: StationCardProps) {
     const [imgError, setImgError] = useState(false);
     const showFallback = !station.favicon || imgError;
-    const tags = useMemo(
-      () =>
-        station.tags
-          ?.split(',')
-          .slice(0, 1)
-          .map((t) => t.trim())
-          .filter(Boolean) ?? [],
-      [station.tags],
-    );
+    const tags = useMemo(() => {
+      const raw = station.tags;
+      if (!raw) return [];
+      const ci = raw.indexOf(',');
+      const first = (ci < 0 ? raw : raw.slice(0, ci)).trim();
+      return first ? [first] : [];
+    }, [station.tags]);
     return (
       <div
         role="button"
