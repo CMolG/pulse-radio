@@ -437,18 +437,19 @@ function getProximityCountries(seedCodes: string[]): string[] {
     .sort((a, b) => b.score - a.score)
     .map((item) => item.code);
 }
-function uniquePush(target: string[], values: string[]) {
+function uniquePush(target: string[], seen: Set<string>, values: string[]) {
   for (const value of values) {
-    if (!target.includes(value)) target.push(value);
+    if (!seen.has(value)) { seen.add(value); target.push(value); }
   }
 }
 function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36): CountryChip[] {
   const languageCodes = getSameLanguageCountries(locale);
   const proximityCodes = getProximityCountries(languageCodes);
   const ordered: string[] = [];
-  uniquePush(ordered, languageCodes);
-  uniquePush(ordered, proximityCodes);
-  uniquePush(ordered, GLOBAL_INTEREST_CODES);
+  const seen = new Set<string>();
+  uniquePush(ordered, seen, languageCodes);
+  uniquePush(ordered, seen, proximityCodes);
+  uniquePush(ordered, seen, GLOBAL_INTEREST_CODES);
   const capped = ordered
     .filter((code) => COUNTRY_BY_CODE[code] && !EXCLUDED_LOW_RELEVANCE_CODES.has(code))
     .slice(0, maxChips);
