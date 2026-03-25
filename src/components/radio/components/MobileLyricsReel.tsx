@@ -59,8 +59,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); });
     return () => cancelAnimationFrame(frame);
   // Only react to lyrics changing, not to activeIdx
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderableLines.length]);
+  }, [renderableLines.length]); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return; let frame = 0;
     const handleScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(updateFocusedIdx); };

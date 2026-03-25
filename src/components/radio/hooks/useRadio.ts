@@ -41,8 +41,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
   const [volume, setVolumeState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.VOLUME, 0.8)
   ); const [muted, setMuted] = useState(false); const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good'); const lastBufferEndRef = useRef<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const clearTimer = (ref: React.MutableRefObject<any>) => {
+  const clearTimer = (ref: React.MutableRefObject<any>) => { // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (ref.current != null) { clearTimeout(ref.current); ref.current = null; } };
   // Latest volume/muted refs so crossfade intervals read current values
   const volumeRef = useRef(volume); const mutedRef = useRef(muted);

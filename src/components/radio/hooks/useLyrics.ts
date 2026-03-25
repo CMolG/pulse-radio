@@ -56,8 +56,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     }
     const controller = new AbortController(); abortRef.current = controller; doFetch(key, cached, controller);
     return () => { controller.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [track?.artist, track?.title, track?.album, stationName]);
+  }, [track?.artist, track?.title, track?.album, stationName]); // eslint-disable-next-line react-hooks/exhaustive-deps
   const retry = () => { if (!track?.title) return; const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase(); const cached = loadCache();
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);

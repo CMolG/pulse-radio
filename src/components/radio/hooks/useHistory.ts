@@ -39,8 +39,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
         e => !(e.title === entry.title && e.artist === entry.artist && e.stationUuid === entry.stationUuid)
       ); return [entry, ...deduped].slice(0, MAX_HISTORY);});
   // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [track?.title, track?.artist, stationUuid, stationName]);
+  }, [track?.title, track?.artist, stationUuid, stationName]); // eslint-disable-next-line react-hooks/exhaustive-deps
   // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
   useEffect(() => {
     if (!track?.title || !stationUuid) return; const artworkUrl = track.artworkUrl; const album = track.album;

@@ -23,8 +23,7 @@ async function searchMusicBrainz(artist: string) {
   const data = await fetchJson<{ artists?: any[] }>(url, { 'User-Agent': USER_AGENT, Accept: 'application/json' });
   return data?.artists?.[0] ?? null; }
 async function fetchWikiSummary(title: string) { const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT });
+  const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT }); // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (data?.type === 'disambiguation') return null; return data; }
 export async function GET(req: NextRequest) { const artist = req.nextUrl.searchParams.get('artist');
   if (!artist || artist.length > 200) {

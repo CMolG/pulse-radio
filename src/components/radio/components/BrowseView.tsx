@@ -30,7 +30,6 @@ type Props = {
   onGoHome?: () => void; userGenreOrder?: string[]; };
 const SCROLL_CLASS =
   "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
-/* ── Scroll row with left/right arrow buttons (desktop only) ── */
 function ScrollRow({ title, icon, children, isMobile, className, }: {
   title?: string; icon?: React.ReactNode; children: React.ReactNode; isMobile: boolean; className?: string;
 }) { const ref = useRef<HTMLDivElement>(null); const [canLeft, setCanLeft] = useState(false);
@@ -145,8 +144,7 @@ export default function BrowseView({
           await Promise.allSettled(batch.map(catId => loadCategory(catId, flags))); }
       }; runBatch(); }
     return () => { cancelled = true; flags.cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, retryKey]);
+  }, [view, retryKey]); // eslint-disable-next-line react-hooks/exhaustive-deps
   // All loaded category stations for discovery mode & station count in top view
   const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]);
   const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;

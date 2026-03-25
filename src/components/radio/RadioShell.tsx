@@ -175,8 +175,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
   useEffect(() => { if (radio.station && radio.audioRef.current) {
       eqConnectSource(radio.audioRef.current); analyser.connectAudio(radio.audioRef.current); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radio.station]);
+  }, [radio.station]); // eslint-disable-next-line react-hooks/exhaustive-deps
   // Keep EQ outputGain at unity — audio.volume already handles user volume.
   // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
   useEffect(() => { setOutputVolume(1, false); }, [setOutputVolume]);
@@ -210,8 +209,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           }).catch(() => {});});
       } }
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radio.status]); const skipDepsRef = useRef({ radio, favs, stationQueue });
+  }, [radio.status]); const skipDepsRef = useRef({ radio, favs, stationQueue }); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { skipDepsRef.current = { radio, favs, stationQueue }; }, [radio, favs, stationQueue]);
   const handleSkipNext = useCallback(() => { const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     // Prefer queue if it has entries
@@ -397,7 +395,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false, songLiked: isSongLiked,
     eqPresetActive: eqPreset !== null, showEq, theaterMode,
   };
-  /* ─── Shared tab content elements (used by mobile + desktop) ─── */
   const browseViewElement = ( <BrowseView
       view={view}
       currentStation={radio.station}
@@ -455,7 +452,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   );
   const emptyStation = useMemo((): Station => ({ name: t("discover"), url_resolved: "", stationuuid: "", favicon: "", tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0 }), [t]);
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
-  /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") { return ( <div
         ref={containerRef}
         className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"> {parallaxElement}
@@ -464,7 +460,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <NowPlayingBar {...nowPlayingBaseProps} onToggleEq={() => {}} showEq={false} theaterMode={true} compact />
         {sharedModals}</div>
     ); }
-  /* ─── Mobile layout: drawer sidebar, overlay lyrics ─── */
   if (layout === "mobile") { return (
       <div ref={containerRef} className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none">
         {parallaxElement}
@@ -530,7 +525,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={glassStyle}>
           <NowPlayingBar {...nowPlayingFullProps} compact /></div>{sharedModals}</div>
     ); }
-  /* ─── Desktop layout (default) ─── */
   return ( <div
       ref={containerRef}
       className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"> {parallaxElement}

@@ -10,11 +10,9 @@ interface FerrofluidRendererProps {
   colorSecondary?: string; colorAccent?: string; sensitivity?: number;
   /** standalone demo mode — generates its own animation without audio */
   demo?: boolean; }
-/* ─── helpers ─── */
 import { hexToRgb } from './colorUtils';
 import { useCanvasLoop } from './useCanvasLoop';
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
-/* ─── blob state ─── */
 interface Blob { x: number; y: number; baseRadius: number;
   /** Per-blob random size factor (0–1), assigned once at creation */
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number;
@@ -29,7 +27,6 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
       freqBand: Math.floor((i / count) * 128),});
   }
   return blobs; }
-/* ─── drawing ─── */
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
 let _offscreen: OffscreenCanvas | null = null;
 let _imgData: ImageData | undefined;
@@ -86,7 +83,6 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h);
   } catch { /* skip frame on canvas error */ } }
-/* ─── component ─── */
 export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
   colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false,
 }: FerrofluidRendererProps) {
