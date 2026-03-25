@@ -3159,7 +3159,7 @@ function BrowseView({
           await fetchMeta(stationsToScan[i], stale);
         }
       };
-      await Promise.all(Array.from({ length: 3 }, worker));
+      await Promise.all([worker(), worker(), worker()]);
     },
     [fetchMeta],
   );
