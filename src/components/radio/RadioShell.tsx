@@ -3079,7 +3079,7 @@ function BrowseView({
   const isMobile = useMediaQuery('(max-width: 768px)', { initializeWithValue: false });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
-  const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set());
+  const [failedCategories, setFailedCategories] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
