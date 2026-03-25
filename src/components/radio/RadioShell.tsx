@@ -3612,11 +3612,13 @@ function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLyricLine
     }));
   }
   if (!lyrics.plainText) return [];
-  return lyrics.plainText
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((text, index) => ({ id: `plain-${index}`, text }));
+  const raw = lyrics.plainText.split(/\r?\n/);
+  const result: RenderableLyricLine[] = [];
+  for (let i = 0; i < raw.length; i++) {
+    const text = raw[i].trim();
+    if (text) result.push({ id: `plain-${result.length}`, text });
+  }
+  return result;
 }
 type LyricsReelProps = {
   lyrics: LyricsData | null;
