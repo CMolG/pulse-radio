@@ -48,6 +48,7 @@ const _ERR_INVALID_URL = JSON.stringify({ error: 'Invalid URL' });
 const _ERR_PRIVATE_IP = JSON.stringify({ error: 'Redirect to private IP not allowed' });
 const _ERR_TIMEOUT = JSON.stringify({ error: 'Stream timed out' });
 const _NOOP = () => {};
+const _EVT_ONCE = { once: true } as const;
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
@@ -77,7 +78,7 @@ export async function GET(req: NextRequest) {
     MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
   if (req.signal) {
     if (req.signal.aborted) controller.abort();
-    else req.signal.addEventListener('abort', () => controller.abort(), { once: true });
+    else req.signal.addEventListener('abort', () => controller.abort(), _EVT_ONCE);
   }
   try {
     const upstream = await fetch(parsed.toString(), {
