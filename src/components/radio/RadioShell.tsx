@@ -17,7 +17,7 @@ import UiImage from "@/components/common/UiImage";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Minimize2, Maximize2, Radio as RadioIcon, Search, Clock, Heart, Star, Settings } from "lucide-react";
-import type { Station, ViewState, BrowseCategory, HistoryEntry, FavoriteSong, SongDetailData } from "./types";
+import type { Station, ViewState, BrowseCategory, HistoryEntry, FavoriteSong, SongDetailData, NowPlayingTrack } from "./types";
 import { GENRE_LABEL_KEYS } from "./constants";
 import { useRadio } from "./hooks/useRadio";
 import { useEqualizer } from "./hooks/useEqualizer";
@@ -54,15 +54,8 @@ import { getCountryDisplayName } from "@/lib/i18n/countryChips";
 
 type LayoutMode = "desktop" | "mobile" | "pip";
 
-function buildFavInput(
-  t: { title: string; artist?: string; album?: string; artworkUrl?: string; itunesUrl?: string; durationMs?: number; genre?: string; releaseDate?: string; trackNumber?: number; trackCount?: number },
-  s: { name: string; stationuuid: string },
-): Omit<FavoriteSong, 'id' | 'timestamp'> {
-  return {
-    title: t.title, artist: t.artist ?? '', album: t.album, artworkUrl: t.artworkUrl,
-    itunesUrl: t.itunesUrl, durationMs: t.durationMs, genre: t.genre, releaseDate: t.releaseDate,
-    trackNumber: t.trackNumber, trackCount: t.trackCount, stationName: s.name, stationUuid: s.stationuuid,
-  };
+function buildFavInput(t: NowPlayingTrack, s: Station): Omit<FavoriteSong, 'id' | 'timestamp'> {
+  return { ...t, artist: t.artist ?? '', stationName: s.name, stationUuid: s.stationuuid };
 }
 
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
