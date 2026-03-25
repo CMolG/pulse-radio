@@ -161,8 +161,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     // Timeout adapts to remaining buffer: more buffer → wait longer for recovery
     let stallCount = 0; const onStalled = () => { clearTimer(stallTimerRef); stallCount++; let bufferAhead = 0;
       if (audio.buffered.length > 0) bufferAhead = audio.buffered.end(audio.buffered.length - 1) - audio.currentTime;
-      // Adapt timeout: empty buffer → 1s, low → 2s, healthy → 6s
-      // Consecutive stalls reduce patience (exponential decay)
+      // Adapt timeout: empty buffer → 1s, low → 2s, healthy → 6s Consecutive stalls reduce patience (exponential decay)
       const baseTimeout = bufferAhead <= 0 ? 1000 : bufferAhead < 2 ? 2000 : 6000;
       const timeout = Math.max(500, baseTimeout / Math.min(stallCount, 4));
       stallTimerRef.current = setTimeout(() => { stallTimerRef.current = null;
@@ -284,8 +283,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     audio?.play().catch(() => {});
   }, []); const togglePlay = useCallback(() => { const audio = audioRef.current; if (!audio || !audio.src) return;
     if (audio.paused) { userPausedRef.current = false; resumeAudioContext(audio);
-      // Restore audio.volume from React state — sleep timer fade may have
-      // set it to 0 directly, bypassing React state.
+      // Restore audio.volume from React state — sleep timer fade may have set it to 0 directly, bypassing React state.
       audio.volume = mutedRef.current ? 0 : volumeRef.current; audio.play().catch(() => {});
     } else { userPausedRef.current = true;
       clearTimer(fadeTimerRef); audio.pause(); // Cancel any in-progress crossfade (same reason as pause())

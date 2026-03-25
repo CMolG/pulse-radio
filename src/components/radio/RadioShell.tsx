@@ -171,8 +171,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
   useEffect(() => { setOutputVolume(1, false); }, [setOutputVolume]);
   // Ref holds fresh deps so handlePlay can use [] and remain referentially
-  // stable.  Prevents child components receiving onPlay={handlePlay} from
-  // re-rendering on every frame during playback.
+  // stable.  Prevents child components receiving onPlay={handlePlay} from re-rendering on every frame during playback.
   const handlePlayRef = useRef({ radio, recent, stationQueue, eqConnectSource, analyser });
   useEffect(() => { handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser };
   }, [radio, recent, stationQueue, eqConnectSource, analyser]);

@@ -17,7 +17,6 @@ const filterBtnClass = (active: boolean) =>
   `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
     active ? "bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30" : "bg-white/5 text-white/40 border border-white/8 hover:text-white/60"
   }`;
-// ── Context Menu ─────────────────────────────────────────────────────────────
 function SongContextMenu({ menu, onRemove, onClose, }: {
   menu: ContextMenuState; onRemove: (id: string) => void; onClose: () => void;
 }) { const ref = useRef<HTMLDivElement>(null);
@@ -41,7 +40,6 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
         Borrar de favoritos</button>
     </div>, document.body,);
 }
-// ── Group Stack ───────────────────────────────────────────────────────────────
 function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
   label: string; icon: React.ElementType; songs: FavoriteSong[]; onRemove: (id: string) => void;
   onSelect?: (song: SongDetailData) => void; onContextMenu: (e: React.MouseEvent, songId: string) => void;
@@ -99,7 +97,6 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           <ChevronDown size={12} className="rotate-180" />
           Collapse</button>)}</div>
   ); }
-// ── Main View ─────────────────────────────────────────────────────────────────
 export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>("none");
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
