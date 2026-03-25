@@ -5021,7 +5021,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
               {/* ── Lyrics (mobile) ── */}{' '}
               <div className="px-5 md:hidden">
                 {' '}
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
+                <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
                   Lyrics (plain)
                 </h3>{' '}
                 {lyricsLoading && lyricsSkeleton(4)}{' '}
@@ -5057,7 +5057,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                 <div className="flex items-center gap-2">
                   {' '}
                   <RadioIcon size={12} className="text-dim flex-shrink-0" />{' '}
-                  <p className="text-[11px] text-dim">
+                  <p className="text-[12px] text-dim">
                     {' '}
                     Played on <span className="text-secondary">{song.stationName}</span>
                   </p>
@@ -5069,10 +5069,10 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
               {' '}
               <div className="px-5 pt-5 pb-3 border-b border-border-default">
                 {' '}
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider">
+                <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider">
                   Lyrics (plain)
                 </h3>{' '}
-                <p className="text-[11px] text-dim mt-1 line-clamp-1">
+                <p className="text-[12px] text-dim mt-1 line-clamp-1">
                   {song.title} · {song.artist}
                 </p>
               </div>{' '}
@@ -5481,7 +5481,7 @@ function _NowPlayingBar({
                     </span>
                   </>
                 )}{' '}
-                <span className="text-[11px] text-secondary truncate">
+                <span className="text-[12px] text-secondary truncate">
                   {track?.artist || compactTags || ''}
                 </span>
               </div>{' '}
@@ -6069,7 +6069,7 @@ const BarRow = React.memo(function BarRow({
           style={{ width: `${pct}%` }}
         />{' '}
       </div>
-      <span className="text-[11px] text-white/50 tabular-nums w-[50px] text-right shrink-0">
+      <span className="text-[12px] text-white/50 tabular-nums w-[50px] text-right shrink-0">
         {suffix}
       </span>
     </div>
@@ -6105,7 +6105,7 @@ const StatsView = React.memo(function StatsView({
         {' '}
         <IoTimeOutline size={20} className="text-[#3478f6]" />{' '}
         <div>
-          <p className="text-[11px] text-white/50 uppercase tracking-wider">Total Listen Time</p>{' '}
+          <p className="text-[12px] text-white/50 uppercase tracking-wider">Total Listen Time</p>{' '}
           <p className="text-[18px] font-bold text-white tabular-nums">
             {formatListenTime(totalListenMs)}
           </p>
@@ -6361,7 +6361,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               </div>{' '}
               {/* Presets */}{' '}
               <div>
-                <span className="text-[11px] text-white/50 uppercase tracking-wider mb-2 block">
+                <span className="text-[12px] text-white/50 uppercase tracking-wider mb-2 block">
                   Presets
                 </span>{' '}
                 <div className="flex flex-wrap gap-1.5">
@@ -6441,7 +6441,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               </div>{' '}
               {/* Band sliders — horizontal scroll */}{' '}
               <div>
-                <span className="text-[11px] text-white/50 uppercase tracking-wider mb-2 block">
+                <span className="text-[12px] text-white/50 uppercase tracking-wider mb-2 block">
                   Bands
                 </span>{' '}
                 <div className="flex items-end justify-between gap-1.5 px-1">
@@ -6449,7 +6449,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {eq.bands.map((band) => (
                     <div key={band.id} className="flex flex-col items-center gap-1">
                       {' '}
-                      <span className="text-[11px] text-white/50 tabular-nums">
+                      <span className="text-[12px] text-white/50 tabular-nums">
                         {band.gain > 0 ? `+${band.gain}` : band.gain}
                       </span>{' '}
                       <input
@@ -6463,7 +6463,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                         aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />{' '}
-                      <span className="text-[11px] text-white/50">{band.label}</span>
+                      <span className="text-[12px] text-white/50">{band.label}</span>
                     </div>
                   ))}
                 </div>
@@ -6471,7 +6471,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               {/* Noise Reduction */}{' '}
               <div>
                 {' '}
-                <span className="text-[11px] text-white/50 uppercase tracking-wider mb-2 block">
+                <span className="text-[12px] text-white/50 uppercase tracking-wider mb-2 block">
                   Noise Reduction
                 </span>{' '}
                 <div className="flex gap-1.5">
@@ -6490,7 +6490,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   {' '}
-                  <span className="text-[11px] text-white/50 w-10 shrink-0">Width</span>{' '}
+                  <span className="text-[12px] text-white/50 w-10 shrink-0">Width</span>{' '}
                   <input
                     type="range"
                     min={0}
@@ -6501,13 +6501,13 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     aria-label="Stereo width"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[11px] text-white/50 tabular-nums w-8 text-right">
+                  <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.stereoWidth * 100)}%
                   </span>{' '}
                 </div>
                 <div className="flex items-center gap-3">
                   {' '}
-                  <span className="text-[11px] text-white/50 w-10 shrink-0">Bass+</span>{' '}
+                  <span className="text-[12px] text-white/50 w-10 shrink-0">Bass+</span>{' '}
                   <input
                     type="range"
                     min={0}
@@ -6518,7 +6518,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     aria-label="Bass enhance"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[11px] text-white/50 tabular-nums w-8 text-right">
+                  <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.bassEnhance * 100)}%
                   </span>{' '}
                 </div>
@@ -6526,7 +6526,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {' '}
                   <button
                     onClick={eq.toggleCompressor}
-                    className={`text-[11px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? 'text-sys-orange' : 'text-white/50'}`}
+                    className={`text-[12px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? 'text-sys-orange' : 'text-white/50'}`}
                   >
                     Comp
                   </button>{' '}
@@ -6541,7 +6541,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     aria-label="Compressor amount"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[11px] text-white/50 tabular-nums w-8 text-right">
+                  <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.compressorAmount * 100)}%
                   </span>{' '}
                 </div>
