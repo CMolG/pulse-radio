@@ -49,7 +49,6 @@ export default React.memo(function NowPlayingHero({
         fallbackUrl={station.favicon || undefined}
         overlayClass="bg-black/60"
       />
-
       {onTheater && (
         <button
           onClick={onTheater}
@@ -60,7 +59,6 @@ export default React.memo(function NowPlayingHero({
           Theater
         </button>
       )}
-
       <div className="relative z-10 flex-row-4 w-full">
         <div className="relative w-16 h-16 rounded-xl bg-surface-2 flex-center-row shrink-0 overflow-hidden">
           {showFallback ? (

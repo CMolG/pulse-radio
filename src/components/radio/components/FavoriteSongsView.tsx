@@ -106,7 +106,6 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           </motion.span>
         )}
       </button>
-
       {/* Stacked/expanded cards */}
       {!expanded && hasMore ? (
         <div
@@ -171,7 +170,6 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           </div>
         </AnimatePresence>
       )}
-
       {expanded && hasMore && (
         <button
           onClick={() => setExpanded(false)}
@@ -231,18 +229,15 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   return (
     <div className="p-4">
       <SongContextMenu menu={contextMenu} onRemove={onRemove} onClose={closeContextMenu} />
-
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <p className="text-[12px] text-dim">{songs.length} songs</p>
-
           {/* By Artist */}
           <button onClick={() => toggleFilter("artist")} className={filterBtnClass(filterMode === "artist")}>
             <Users size={10} />
             By Artist
             {filterMode === "artist" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
           </button>
-
           {/* By Album */}
           <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
             <Disc3 size={10} />
@@ -250,7 +245,6 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
           </button>
         </div>
-
         <button
           onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
@@ -259,7 +253,6 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
           Clear all
         </button>
       </div>
-
       {filterMode === "artist" ? (
         <div>
           {artistGroups.map(([artistName, artistSongs]) => (

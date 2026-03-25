@@ -85,7 +85,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     const focusable = modal.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     ); focusable[0]?.focus();
-
     const onTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
       const nodes = modal.querySelectorAll<HTMLElement>(
@@ -135,7 +134,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   <X size={16} />
                 </button>
               </div>
-
               {/* ── Song Info ── */}
               <div className="px-5 -mt-2">
                 {/* Artwork */}
@@ -154,7 +152,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     </div>
                   )}
                 </div>
-
                 {/* Title & artist */}
                 <div className="mt-5 text-center">
                   <h2 className="text-[17px] font-bold text-white leading-snug line-clamp-2">
@@ -166,7 +163,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   {resolvedAlbum && (
                     <p className="text-[12px] text-dim mt-0.5">{resolvedAlbum}</p>
                   )}
-
                   {/* Extended metadata: corner-style row + release line + context badges */}
                   {(resolvedDurationMs || resolvedTrackNumber != null || resolvedReleaseDate || resolvedGenre) && (
                     <div className="mt-2 space-y-1.5">
@@ -182,13 +178,11 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                           )}
                         </div>
                       </div>
-
                       {resolvedReleaseDate && (
                         <p className="text-[10px] text-white/50">
                           Released on: {formatReleaseDate(resolvedReleaseDate)}
                         </p>
                       )}
-
                       <div className="flex flex-wrap justify-center gap-1.5">
                         {resolvedGenre && <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">{resolvedGenre}</MetaBadge>}
                       {showMetaHydration && <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">Fetching metadata…</MetaBadge>}
@@ -196,7 +190,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     </div>
                   )}
                 </div>
-
                 {/* Apple Music button */}
                 <a
                   href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
@@ -208,16 +201,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   Listen on Apple Music
                 </a>
               </div>
-
               {/* Divider */}
               <div className="mx-5 my-5 border-t border-border-default" />
-
               {/* ── Artist Info ── */}
               <div className="px-5">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   About {song.artist}
                 </h3>
-
                 {/* Loading skeleton */}
                 {loading && (
                   <div className="space-y-3 animate-pulse">
@@ -235,7 +225,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     </div>
                   </div>
                 )}
-
                 {/* Loaded artist data */}
                 {!loading && info && (
                   <div className="space-y-3">
@@ -281,14 +270,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         </div>
                       </div>
                     </div>
-
                     {/* Bio */}
                     {info.bio && (
                       <p className="text-[12px] text-secondary/90 leading-relaxed">
                         {info.bio}
                       </p>
                     )}
-
                     {/* Genre tags */}
                     {info.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
@@ -302,7 +289,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         ))}
                       </div>
                     )}
-
                     {/* Wikipedia link */}
                     {info.wikipediaUrl && (
                       <a
@@ -317,7 +303,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     )}
                   </div>
                 )}
-
                 {/* No data */}
                 {!loading && !info && (
                   <p className="text-[12px] text-dim">
@@ -325,16 +310,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   </p>
                 )}
               </div>
-
               {/* Divider */}
               <div className="mx-5 my-5 border-t border-border-default" />
-
               {/* ── Lyrics (mobile) ── */}
               <div className="px-5 md:hidden">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   Lyrics (plain)
                 </h3>
-
                 {lyricsLoading && lyricsSkeleton(4)}
                 {!lyricsLoading && plainLyrics && (
                   <div className="max-h-52 overflow-y-auto rounded-xl bg-surface-3/50 border border-border-subtle p-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
@@ -345,10 +327,8 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 )}
                 {!lyricsLoading && !plainLyrics && lyricsEmpty}
               </div>
-
               {/* Divider (mobile) */}
               <div className="mx-5 my-5 border-t border-border-default md:hidden" />
-
               {/* ── Remove from favorites ── */}
               {onRemoveFromFavorites && (
                 <>
@@ -364,7 +344,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   </div>
                 </>
               )}
-
               {/* ── Station ── */}
               <div className="px-5 pb-6 pt-4">
                 <div className="flex items-center gap-2">
@@ -376,7 +355,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 </div>
               </div>
             </div>
-
             {/* ── Lyrics side panel (desktop) ── */}
             <div className="hidden md:flex md:flex-col bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-[420px] max-h-[85vh]">
               <div className="px-5 pt-5 pb-3 border-b border-border-default">
@@ -387,7 +365,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   {song.title} · {song.artist}
                 </p>
               </div>
-
               <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
                 {lyricsLoading && lyricsSkeleton(7)}
                 {!lyricsLoading && plainLyrics && (

@@ -66,25 +66,20 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   useEffect(() => {
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
-
     if (!track || !track.title) {
       setLoading(false); setLyrics(null); setError(false);
       lastKeyRef.current = ''; return;
     }
-
     const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase();
     if (key === lastKeyRef.current) return; lastKeyRef.current = key;
-
     const cached = loadCache(); const hit = cached.find(e => e.key === key);
     if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
       setLoading(false); setLyrics(hit.data); setError(false);
       return;
     }
-
     const controller = new AbortController(); abortRef.current = controller;
     doFetch(key, cached, controller);
-
     return () => { controller.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.artist, track?.title, track?.album, stationName]);

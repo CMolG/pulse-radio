@@ -48,7 +48,6 @@ export function VisualizerCanvas({
       const canvas = canvasRef.current; const frequencyData = frequencyDataRef?.current;
       if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; }
       const ctx = canvas.getContext('2d'); if (!ctx) return;
-
       // Resolve CSS variable once and cache
       if (!resolvedColorRef.current) {
         if (color.startsWith('var(')) {
@@ -64,11 +63,9 @@ export function VisualizerCanvas({
         canvas.width = targetW; canvas.height = targetH; gradientCacheRef.current = null;
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height);
-
       if (mode === 'bars') {
         const step = Math.max(1, Math.floor(frequencyData.length / barCount));
         const barWidth = width / barCount; const gap = barWidth * 0.2;
-
         // Cache gradient — only recreate on height or color change
         const gradKey = `${height}_${resolvedColor}`; let fillStyle: string | CanvasGradient = resolvedColor;
         if (gradientCacheRef.current?.key === gradKey) {
@@ -81,12 +78,10 @@ export function VisualizerCanvas({
           } catch { /* fallback to solid color */ }
         }
         ctx.fillStyle = fillStyle;
-
         // Feature-detect roundRect once instead of try-catch per bar
         if (supportsRoundRectRef.current === null) supportsRoundRectRef.current = typeof ctx.roundRect === 'function';
         const useRoundRect = supportsRoundRectRef.current; const radius = barWidth * 0.3;
         const radii: [number, number, number, number] = [radius, radius, 0, 0];
-
         for (let i = 0; i < barCount; i++) {
           const idx = Math.min(i * step, frequencyData.length - 1);
           const value = frequencyData[idx] / 255; const barHeight = value * height * 0.8;
@@ -105,10 +100,8 @@ export function VisualizerCanvas({
         }
         ctx.stroke();
       }
-
       frameRef.current = requestAnimationFrame(draw);
     };
-
     frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
   }, [frequencyDataRef, mode, barCount, color]);
 

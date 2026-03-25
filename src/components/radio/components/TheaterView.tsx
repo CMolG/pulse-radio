@@ -133,7 +133,6 @@ export default function TheaterView({
     >
       {/* ── Layer 1: solid dark background ── */}
       <div className="absolute inset-0 bg-[#0f172a]" />
-
       {/* ── Layer 1.5: album art background with ambient drift ── */}
       {coverUrl && failedCoverUrl !== coverUrl && (
         <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden">
@@ -147,7 +146,6 @@ export default function TheaterView({
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" />
         </div>
       )}
-
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none">
         <ErrorBoundary fallback={null}>
@@ -162,7 +160,6 @@ export default function TheaterView({
         />
         </ErrorBoundary>
       </div>
-
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
@@ -184,7 +181,6 @@ export default function TheaterView({
         className="absolute inset-0 z-6 pointer-events-none"
         style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }}
       />
-
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}
       {!compact && (
         <div
@@ -222,7 +218,6 @@ export default function TheaterView({
           </div>
         </div>
       )}
-
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
       <div className="flex-1 flex items-center justify-center relative z-10 px-4">
         <div
@@ -255,7 +250,6 @@ export default function TheaterView({
               </div>
             </div>
           )}
-
           {/* Cover art */}
           <div
             className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} relative overflow-hidden flex-center-row flex-shrink-0`}
@@ -282,14 +276,12 @@ export default function TheaterView({
               />
             )}
           </div>
-
           {/* Station name */}
           <h2
             className={`${compact ? "text-[11px] mb-0" : "text-lg sm:text-xl mb-0"} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
           >
             {station.name}
           </h2>
-
           {/* Track info */}
           {track?.title ? (
             <p
@@ -302,19 +294,16 @@ export default function TheaterView({
               {theaterTags}
             </p>
           )}
-
           {track?.album && (
             <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}>
               {track.album}
             </p>
           )}
-
           {!compact && track?.releaseDate && (
             <p className="text-[10px] text-white/40 text-center -mt-1">
               Released on: {formatReleaseDate(track.releaseDate)}
             </p>
           )}
-
           {/* LIVE badge */}
           {isPlaying && (
             <div className={`flex-row-2 ${compact ? "mt-0" : "mt-1"}`}>
@@ -327,7 +316,6 @@ export default function TheaterView({
               {!compact && <AnimatedBars size="small" />}
             </div>
           )}
-
           {/* Station details badges */}
           {!compact && (
             <div className="flex flex-wrap justify-center gap-1.5 mt-1">
@@ -337,7 +325,6 @@ export default function TheaterView({
               {track?.genre && <Badge>{track.genre}</Badge>}
             </div>
           )}
-
           {/* Listen on Apple Music */}
           {!compact && track && (
             <a
@@ -350,7 +337,6 @@ export default function TheaterView({
               Listen on Apple Music
             </a>
           )}
-
           {/* ── Lyrics reel inside glass panel ── */}
           {!compact && (
             <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}>

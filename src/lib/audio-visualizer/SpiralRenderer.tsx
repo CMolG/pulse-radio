@@ -49,10 +49,8 @@ export function SpiralRenderer({
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2; const centerY = h / 2;
-
     // Update mock/frequency data
     const data = dataArrayRef.current; const target = targetArrayRef.current; const frequencyData = freqData;
-
     if (frequencyData && frequencyData.length > 0) {
       // Map real frequency data to our bars
       for (let i = 0; i < NUM_BARS; i++) {
@@ -72,7 +70,6 @@ export function SpiralRenderer({
       // No data: decay
       for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; }
     }
-
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
@@ -88,16 +85,12 @@ export function SpiralRenderer({
     }
     // After SMOOTH_PASSES iterations, result is in `src`
     const result = src;
-
     // Spiral configuration
     const maxAngle = CYCLES * Math.PI * 2; const minRadius = Math.max(w, h) * 0.01;
     const maxRadius = Math.sqrt(w * w + h * h) * 0.8; const b = Math.log(maxRadius / minRadius) / maxAngle;
-
     rotationRef.current += 0.0015; const rotation = rotationRef.current;
-
     // Clear
     ctx.clearRect(0, 0, w, h);
-
     // Gradient
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current; let fillStyle: string | CanvasGradient = c1;
     try {
@@ -107,32 +100,24 @@ export function SpiralRenderer({
       gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3);
       fillStyle = gradient;
     } catch { /* fallback to solid color */ }
-
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
     const outerX = outerXRef.current; const outerY = outerYRef.current;
     const innerX = innerXRef.current; const innerY = innerYRef.current;
-
     for (let i = 0; i < NUM_BARS; i++) {
       const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
       const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle;
       const radius = minRadius * Math.exp(b * baseAngle);
       const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle);
-
       innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
       outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2);
     }
-
     // Draw slime shapes per cycle
     ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
-
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
-
     for (let c = 0; c < CYCLES; c++) {
       const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
       if (startIdx >= NUM_BARS) break;
-
       ctx.beginPath();
-
       // Outer edge with quadratic curves
       ctx.moveTo(outerX[startIdx], outerY[startIdx]);
       for (let i = startIdx + 1; i < endIdx - 1; i++) {
@@ -140,7 +125,6 @@ export function SpiralRenderer({
         ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc);
       }
       if (endIdx - 1 > startIdx) ctx.lineTo(outerX[endIdx - 1], outerY[endIdx - 1]);
-
       // Inner edge reversed
       ctx.lineTo(innerX[endIdx - 1], innerY[endIdx - 1]);
       for (let i = endIdx - 2; i > startIdx; i--) {
@@ -148,10 +132,8 @@ export function SpiralRenderer({
         ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc);
       }
       ctx.lineTo(innerX[startIdx], innerY[startIdx]);
-
       ctx.closePath(); ctx.fill();
     }
-
     ctx.globalAlpha = 1.0;
   });
 

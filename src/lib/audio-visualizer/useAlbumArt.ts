@@ -125,14 +125,11 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   for (let i = 0; i < results.length; i++) {
     const candidateTitle = normTitles[i];
     if (!candidateTitle) continue;
-
     const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length);
     const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length);
     if (maxLen > 0 && lenDiff / maxLen > 0.35) continue;
-
     const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle);
     if (titleScore < 0.94) continue;
-
     let score = titleScore;
     if (normalizedRequestedArtist) {
       const candidateArtist = normArtists[i];
@@ -142,7 +139,6 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
         score = (titleScore * 0.85) + (artistScore * 0.15);
       }
     }
-
     if (score > bestScore) { bestScore = score; best = results[i]; }
   }
 
@@ -193,12 +189,9 @@ export function useAlbumArt(title: string | null, artist: string | null) {
 
   useEffect(() => {
     if (!title || !cacheKey || cachedInfo) return;
-
     abortRef.current?.abort(); const controller = new AbortController();
     abortRef.current = controller;
-
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-
     // Use server-side proxy to avoid CORS/CSP issues from the browser
     const term = artist ? `${artist} ${title}` : title;
     fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal },).then((r) => {
@@ -229,7 +222,6 @@ export function useAlbumArt(title: string | null, artist: string | null) {
         }
       })
       .finally(() => { clearTimeout(timeout); });
-
     return () => { clearTimeout(timeout); controller.abort(); };
   }, [title, artist, cacheKey, cachedInfo]);
 

@@ -107,32 +107,23 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
     for (let px = 0; px < sw; px++) {
       const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0;
       let totalWeight = 0;
-
       for (let b = 0; b < blobCount; b++) {
         const blob = blobs[b]; const dx = x - blob.x; const dy = y - blob.y; const distSq = dx * dx + dy * dy;
-
         // Early-exit: skip blobs too far to contribute meaningfully
         if (distSq > blobMaxDistSq[b]) continue;
-
         const r = blob.baseRadius; const field = (r * r) / (distSq + 1); sum += field;
-
         if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; }
       }
-
       const idx = (py * sw + px) * 4;
-
       if (sum > threshold) {
         const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
-
         // color based on proximity to center vs edge, and energy
         const coreIntensity = Math.min(1, (sum - threshold) * 2);
         const edgeGlow = 1 - coreIntensity; const brightnessMul = 0.3 + coreIntensity * 0.7;
-
         // blend primary → secondary based on frequency band
         const r = (lerp(colors.primary[0], colors.secondary[0], bandNorm) * brightnessMul) | 0;
         const g = (lerp(colors.primary[1], colors.secondary[1], bandNorm) * brightnessMul) | 0;
         const b = (lerp(colors.primary[2], colors.secondary[2], bandNorm) * brightnessMul) | 0;
-
         // add accent glow at edges
         const accentMix = edgeGlow * energy * 0.6; sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0);
         sd[idx + 1] = Math.min(255, g + (colors.accent[1] * accentMix) | 0);
@@ -179,10 +170,8 @@ export function FerrofluidRenderer({
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
       blobsRef.current = createBlobs(blobCount, w, h); sizeRef.current = { w, h };
     }
-
     timeRef.current += 0.016; const t = timeRef.current;
     const blobs = blobsRef.current; const cx = w / 2; const cy = h / 2;
-
     // compute overall energy
     let energy = 0; const frequencyData = freqData;
     if (frequencyData) {
@@ -190,17 +179,14 @@ export function FerrofluidRenderer({
       for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
       energy = (sum / frequencyData.length / 255) * sensitivity;
     } else if (demo) energy = 0.3 + Math.sin(t * 0.5) * 0.2;
-
     // update blobs
     const minWH = Math.min(w, h);
     for (let i = 0; i < blobs.length; i++) {
       const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5;
       const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127);
-
       // base orbit
       const orbitRadius = minWH * (0.1 + energy * 0.25);
       blob.targetX = cx + Math.cos(angle) * orbitRadius; blob.targetY = cy + Math.sin(angle * 0.7) * orbitRadius * 0.8;
-
       // frequency-driven displacement
       let bandVal: number;
       if (frequencyData) {
@@ -211,18 +197,14 @@ export function FerrofluidRenderer({
         bandVal = 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3; const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08;
         blob.targetX += Math.cos(angle * 1.3) * demoDisp; blob.targetY += Math.sin(angle * 1.7) * demoDisp;
       } else bandVal = 0.3;
-
       // smooth follow
       blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08;
       blob.vx *= 0.85; blob.vy *= 0.85; blob.x += blob.vx; blob.y += blob.vy;
-
       // pulse radius with energy (reuses cached bandVal and minWH)
       blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity;
     }
-
     // clear
     ctx.clearRect(0, 0, w, h);
-
     // draw metaballs
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
   }, 0.5);

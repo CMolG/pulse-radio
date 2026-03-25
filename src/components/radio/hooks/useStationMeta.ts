@@ -55,7 +55,6 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 
   try {
     const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
-
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
@@ -106,11 +105,9 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
 
   useEffect(() => {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-
     if (!station) {
       lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
     }
-
     const stationChanged = station.url_resolved !== prevStationUrlRef.current;
     if (stationChanged) {
       prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
@@ -118,43 +115,32 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
       // The previous station's data stays visible until the new station's
       // first ICY response arrives — this is the "ICY swap" for smooth transitions.
     }
-
     const abortController = new AbortController();
     const poll = async () => {
       if (abortController.signal.aborted || document.hidden) return;
-
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
       if (abortController.signal.aborted) return;
-
       if (icyBr) setIcyBitrate(icyBr);
-
       // Derive codec from station data for display
       if (station.codec) { const c = station.codec.toUpperCase(); setStreamCodec(CODEC_MAP[c] ?? c); }
-
       if (streamTitle && streamTitle !== lastTitleRef.current) {
         lastTitleRef.current = streamTitle;
         // Reject ad content in raw title or parsed title (artist names may look like domains)
         const parsed = !isAdContent(streamTitle) ? parseTrack(streamTitle, station.name) : null;
         setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return;
       }
-
       if (streamTitle) return;
-
       if (!lastTitleRef.current) setTrack(null);
     };
-
     // Fetch immediately on station change or when resuming playback,
     // so we don't wait a full poll interval for fresh metadata.
     if (stationChanged || isPlaying) poll();
-
     // Continuous polling only while actively playing
     if (isPlaying) intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
-
     // When the tab returns from background, poll immediately so the user
     // doesn't see stale metadata for up to POLL_INTERVAL_MS.
     const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); };
     document.addEventListener('visibilitychange', onVisible);
-
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', onVisible); abortController.abort();

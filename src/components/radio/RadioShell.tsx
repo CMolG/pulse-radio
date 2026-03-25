@@ -219,9 +219,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     const onPopState = () => {
       const segment = window.location.pathname.replace(/^\//, "").toUpperCase();
-
       if (!segment) { resetNav(mkView("top", t("topStations"))); return; }
-
       if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     }; window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
   }, [locale, t, resetNav]);
@@ -357,10 +355,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const isInput =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" || target.isContentEditable;
-
       // Allow Escape even from inputs (to close panels/modals)
       if (isInput && e.key !== "Escape") return;
-
       // When EQ panel is open, suppress single-letter shortcuts that could
       // trigger unintended actions (theater, favorites, search, etc.).
       // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
@@ -368,11 +364,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
         if (!allowed.has(e.key)) return;
       }
-
       // When song detail modal is open, let it handle its own Escape;
       // block all keys here to prevent shortcuts from firing behind the modal
       if (ss) return;
-
       switch (e.key) {
         case " ": e.preventDefault(); r.togglePlay(); break;
         case "ArrowLeft": e.preventDefault(); skipPrev(); break;
@@ -474,7 +468,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const isLandingNavigation = !theaterMode;
   const theaterAudioBadges = useMemo(() => {
     if (!theaterMode || !radio.station) return [] as string[];
-
     const badges: string[] = [];
       if (eq.noiseReductionMode !== 'off') badges.push(t("noiseReduction"));
       if (eq.normalizerEnabled) badges.push(t("audioNormalizer"));
@@ -709,7 +702,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return (
       <div ref={containerRef} className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none">
         {parallaxElement}
-
         {/* Single scrollable area — content scrolls behind sticky header */}
         <div className="h-full overflow-y-auto relative z-10">
           {/* Sticky header — glassmorphism (content scrolls underneath) */}
@@ -741,7 +733,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               </div>
             </div>
           )}
-
           {theaterMode && radio.station ? (
             <div className="h-full flex flex-col">
               <div className="flex-1 min-h-0">
@@ -788,10 +779,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             </div>
           )}
         </div>
-
         {/* EQ panel overlay */}
         {eqPanelElement}
-
         {/* Mobile settings panel */}
         <AnimatePresence>
           {showMobileSettings && (
@@ -809,12 +798,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             />
           )}
         </AnimatePresence>
-
         {/* Toast notification */}
         <AnimatePresence>
           {toastElement}
         </AnimatePresence>
-
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={glassStyle}>
           <NowPlayingBar {...nowPlayingFullProps} compact />
@@ -928,17 +915,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             )}
           </AnimatePresence>
         </div>
-
       </div>
-
       {/* EQ panel overlay */}
       {eqPanelElement}
-
       {/* Toast notification */}
       <AnimatePresence>
         {toastElement}
       </AnimatePresence>
-
       {/* Bottom bar */}
       <div className="relative z-10">
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
@@ -962,7 +945,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
           </button>
         </div>
-
         <NowPlayingBar {...nowPlayingFullProps} />
       </div>
       {sharedModals}

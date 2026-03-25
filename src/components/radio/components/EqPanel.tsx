@@ -65,7 +65,6 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
  <button onClick={onToggleEnabled} aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'} className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`} ><Power size={13} /></button>
  <button onClick={onToggleNormalizer} aria-label={normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'} title="Loudness Normalizer" className={`px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}>NORM</button></div>
         <button onClick={onClose} aria-label="Close equalizer" className="p-1 text-subtle-hover"><X size={14} /></button></div>
-
       {/* Presets */}
       <div className="flex-wrap-1.5 mb-2">
         {EQ_PRESETS.map(preset => (
@@ -90,7 +89,6 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
           </div>
         ))}
       </div>
-
       {/* Save custom preset */}
       {onSaveCustomPreset && (
         <div className="mb-4">
@@ -117,7 +115,6 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
           )}
         </div>
       )}
-
       {/* Band sliders */}
       <div className="flex items-end justify-between gap-2">
         {bands.map(band => (
@@ -132,7 +129,6 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
           </div>
         ))}
       </div>
-
       {/* Stereo width */}
       <div className="mt-3 pt-3 border-t border-white/10">
         <div className="mb-2">

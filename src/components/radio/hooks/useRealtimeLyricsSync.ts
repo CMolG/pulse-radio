@@ -43,7 +43,6 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   useEffect(() => {
     if (!realtimeActive) { engineRef.current?.stop(); return; }
     engineRef.current?.destroy(); stableSamplesRef.current = 0;
-
     const engine = createRealtimeSpeechEngine({
       onHypothesis: (hypothesis) => {
         if (!lyrics || !isRealtimeEligible(lyrics)) return;
@@ -56,9 +55,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
             stableSamples: stableSamplesRef.current,
             policy: DEFAULT_REALTIME_ALIGN_POLICY,
           }); stableSamplesRef.current = step.stableSamples;
-
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
-
           // Early bail — skip spread+setState when nothing observable changed
           if (
             prev.status === 'listening' &&
@@ -68,7 +65,6 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
             !step.jumpRejected &&
             !step.relockTriggered
           ) { return prev; }
-
           return {
             ...prev,
             status: 'listening',
@@ -100,9 +96,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
         }));
       },
     });
-
     engineRef.current = engine; engine.start(languageHint);
-
     return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
 

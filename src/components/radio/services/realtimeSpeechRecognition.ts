@@ -51,18 +51,13 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
   const wireRecognition = (lang: 'en' | 'es') => {
     const Ctor = getRecognitionCtor();
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
-
     recognition = new Ctor(); recognition.continuous = true; recognition.interimResults = true;
     recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
-
     recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
       // Reset restart counter on any successful recognition — proves engine is alive.
       restartCount = 0;
-
-      const index = event.resultIndex; const result = event.results[index];
-      if (!result || !result[0]) return;
+      const index = event.resultIndex; const result = event.results[index]; if (!result || !result[0]) return;
       const transcript = result[0].transcript.trim().toLowerCase(); if (!transcript) return;
-
       callbacks.onHypothesis({
         text: transcript,
         confidence: typeof result[0].confidence === 'number' && Number.isFinite(result[0].confidence)
@@ -72,7 +67,6 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
         tsMs: performance.now(),
       });
     };
-
     recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => {
       if (destroyed || !running) return;
       const fatal = event.error === 'not-allowed'
@@ -83,7 +77,6 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
         return;
       }
     };
-
     recognition.onend = () => {
       if (destroyed || !running) return;
       if (restartCount >= MAX_RESTARTS) {

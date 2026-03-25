@@ -74,7 +74,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
       {/* Panel slides up from bottom */}
       <motion.div
         initial={{ y: "100%" }}
@@ -93,7 +92,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-white/20" />
         </div>
-
         {/* Header */}
         <div className="flex items-center justify-between px-5 pb-3">
           <h2 className="text-[17px] font-semibold text-white">Settings</h2>
@@ -105,9 +103,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             <X size={16} />
           </button>
         </div>
-
         <div className="border-t border-white/8" />
-
         {/* Language section */}
         <div className="px-5 py-4">
           <div className="flex items-center gap-2 mb-3">
@@ -130,9 +126,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             ))}
           </div>
         </div>
-
         <div className="border-t border-white/8" />
-
         {/* Equalizer section — fully inline */}
         <div className="px-5 py-4">
           <button onClick={() => setShowEq((s) => !s)} className="flex items-center justify-between w-full">
@@ -149,7 +143,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
               {showEq ? <ChevronUp size={14} className="text-white/40" /> : <ChevronDown size={14} className="text-white/40" />}
             </div>
           </button>
-
           {showEq && (
             <div className="mt-4 space-y-4">
               {/* Power + Normalizer toggles */}
@@ -162,7 +155,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   NORM
                 </button>
               </div>
-
               {/* Presets */}
               <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Presets</span>
@@ -207,7 +199,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   )}
                 </div>
               </div>
-
               {/* Band sliders — horizontal scroll */}
               <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Bands</span>
@@ -226,7 +217,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   ))}
                 </div>
               </div>
-
               {/* Noise Reduction */}
               <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Noise Reduction</span>
@@ -243,7 +233,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   ))}
                 </div>
               </div>
-
               {/* Sliders: Width, Bass, Compressor */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -275,7 +264,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             </div>
           )}
         </div>
-
         {/* Usage guide & Stats */}
         <div className="border-t border-white/8" />
         <div className="px-5 py-4 space-y-2">
@@ -294,16 +282,13 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             <span className="text-[14px] font-medium text-white/70">Your Statistics</span>
           </button>
         </div>
-
         {/* Bottom safe area padding */}
         <div className="h-6" />
       </motion.div>
-
       {/* Usage Guide overlay */}
       <AnimatePresence>
         {showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}
       </AnimatePresence>
-
       {/* Stats overlay */}
       <AnimatePresence>
         {showStats && (

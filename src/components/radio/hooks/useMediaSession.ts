@@ -31,14 +31,11 @@ export function useMediaSession(config: MediaSessionConfig): void {
 
   useEffect(() => {
     if (!('mediaSession' in navigator) || !station) return;
-
     const trackTitle = track?.title || station.name; const trackArtist = track?.artist || 'Internet Radio';
     const artSrc = track?.artworkUrl || station.favicon; const album = station.tags?.split(',')[0] || 'Live';
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return; lastMetaRef.current = metaKey;
-
     const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : [];
-
     try {
       navigator.mediaSession.metadata = new MediaMetadata({ title: trackTitle, artist: trackArtist, album, artwork, });
     } catch { /* MediaMetadata constructor can throw on malformed artwork data */ }
@@ -51,7 +48,6 @@ export function useMediaSession(config: MediaSessionConfig): void {
 
   const setupHandlers = useCallback(() => {
     if (!('mediaSession' in navigator)) return;
-
     const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [ ['play', () => configRef.current.onPlay()],
       ['pause', () => configRef.current.onPause()],
       ['nexttrack', () => configRef.current.onNext()],
@@ -60,12 +56,10 @@ export function useMediaSession(config: MediaSessionConfig): void {
       ['seekbackward', () => { if (configRef.current.onSeekBackward) configRef.current.onSeekBackward(); }],
       ['seekforward', () => { if (configRef.current.onSeekForward) configRef.current.onSeekForward(); }],
     ];
-
     for (const [action, handler] of handlers) {
       try { navigator.mediaSession.setActionHandler(action, handler); }
       catch { /* not supported */ }
     }
-
     return () => {
       for (const [action] of handlers) {
         try { navigator.mediaSession.setActionHandler(action, null); }

@@ -109,7 +109,6 @@ export function useStats() {
   const recordSongPlay = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return;
     const songKey = `${title}|||${artist}`; const primary = primaryArtist(artist);
-
     setStats(prev => {
       const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
       const artistEntry = prev.artistPlayCounts[primary] ?? { name: primary, count: 0 };
@@ -122,7 +121,6 @@ export function useStats() {
         },
         artistPlayCounts: { ...prev.artistPlayCounts, [primary]: { ...artistEntry, count: artistEntry.count + 1 }, },
       };
-
       if (normalizedGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
@@ -130,7 +128,6 @@ export function useStats() {
           [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
         };
       }
-
       return next;
     }); dirtyRef.current = true;
   }, []);
@@ -149,18 +146,14 @@ export function useStats() {
   const updateSongMeta = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return;
     const key = `${title}|||${artist}`;
-
     setStats(prev => {
       const songEntry = prev.songPlayCounts[key];
       if (!songEntry) return prev;
-
       const needsArtwork = artworkUrl && songEntry.artworkUrl !== artworkUrl;
       const normalizedGenre = genre ? genre.toLowerCase().trim() : '';
       // Count genre if this song didn't already have its genre recorded
       const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre;
-
       if (!needsArtwork && !needsGenre) return prev;
-
       const next: UsageStats = {
         ...prev,
         songPlayCounts: {

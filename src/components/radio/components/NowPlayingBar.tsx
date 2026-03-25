@@ -120,7 +120,6 @@ function NowPlayingBar({
             <Play size={18} className="ml-0.5" />
           )}
         </button>
-
         {/* Track info + LIVE indicator */}
         <div className="flex-1 min-w-0">
           {station ? (
@@ -146,7 +145,6 @@ function NowPlayingBar({
             <p className="text-[13px] text-dim">No station selected</p>
           )}
         </div>
-
         {/* Action buttons — 44px touch targets */}
         <div className="flex items-center gap-0.5 shrink-0">
           {station && !theaterMode && (
@@ -160,7 +158,6 @@ function NowPlayingBar({
             </button>
           )}
         </div>
-
         {/* Fill iPhone safe-area inset below the bar without adding layout height */}
         <div
           aria-hidden
@@ -232,7 +229,6 @@ function NowPlayingBar({
           />
         )}
       </div>
-
       {/* Controls */}
       <div className="flex-row-0.5">
         <button
@@ -251,7 +247,6 @@ function NowPlayingBar({
           )}
         </button>
       </div>
-
       {/* LIVE indicator + mini ferrofluid */}
       <div className="flex-1 flex-row-2 min-w-0 relative">
         {station && isPlaying && (
@@ -280,7 +275,6 @@ function NowPlayingBar({
           </>
         )}
       </div>
-
       {/* Toggles */}
       <div className="flex-row-0.5">
         {station && !theaterMode && (
@@ -338,7 +332,6 @@ function NowPlayingBar({
           <SlidersHorizontal size={14} />
         </button>
       </div>
-
       {/* Volume */}
       <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
         <button

@@ -91,7 +91,6 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
           <p className="text-[18px] font-bold text-white tabular-nums">{formatListenTime(totalListenMs)}</p>
         </div>
       </div>
-
       {/* Top Stations */}
       {topStations.length > 0 && (
         <StatSection title="Top Stations" icon={<IoRadioOutline size={16} className="text-amber-400/70" />}>
@@ -100,7 +99,6 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
           ))}
         </StatSection>
       )}
-
       {/* Top Songs */}
       {topSongs.length > 0 && (
         <StatSection title="Most Played Songs" icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" />}>
@@ -109,7 +107,6 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
           ))}
         </StatSection>
       )}
-
       {/* Top Artists */}
       {topArtists.length > 0 && (
         <StatSection title="Top Artists" icon={<IoPersonOutline size={16} className="text-purple-400/70" />}>
@@ -118,7 +115,6 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
           ))}
         </StatSection>
       )}
-
       {/* Top Genres */}
       {topGenres.length > 0 && (
         <StatSection title="Top Genres" icon={<IoDiscOutline size={16} className="text-emerald-400/70" />}>

@@ -39,10 +39,8 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
       if (Math.abs(valueRef.current - lastPublishedRef.current) >= 0.002) {
         lastPublishedRef.current = valueRef.current; setAmplitude(valueRef.current);
       }
-
       rafRef.current = requestAnimationFrame(loop);
     };
-
     rafRef.current = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(rafRef.current); lastTsRef.current = 0; };
   }, [enabled, meterRef]);

@@ -33,23 +33,18 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
   const [isActive, setIsActive] = useState(false);
   const connectAudio = useCallback((audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
-
       // Cancel any existing animation loop before starting a new one
       cancelAnimationFrame(rafRef.current);
-
       try {
         const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
-
         if (!analyserRef.current) {
           const analyser = ctx.createAnalyser();
           analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
-
         // Allocate buffers once — reused across all frames (zero per-frame allocation)
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
         waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true);
-
         const tick = () => {
           // Skip expensive analyser reads when tab is hidden to save CPU
           if (!document.hidden) {

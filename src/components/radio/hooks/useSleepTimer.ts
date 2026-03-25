@@ -38,7 +38,6 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   const startFade = useCallback(() => {
     if (!audioRef?.current || fadeTimerRef.current) return; const audio = audioRef.current;
     savedVolumeRef.current = audio.volume; setIsFading(true);
-
     const fadeStart = Date.now(); let baseVol = audio.volume; let lastSetVol = audio.volume;
     fadeTimerRef.current = setInterval(() => {
       // Detect external volume changes (user adjusted volume during fade).
@@ -56,7 +55,6 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     if (timerRef.current) clearInterval(timerRef.current);
     stopFade(); endTimeRef.current = Date.now() + minutes * 60_000;
     setRemainingMin(minutes);
-
     timerRef.current = setInterval(() => {
       const left = Math.max(0, endTimeRef.current - Date.now()); const mins = Math.ceil(left / 60_000);
       if (left <= 0) {

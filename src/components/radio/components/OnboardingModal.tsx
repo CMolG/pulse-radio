@@ -89,7 +89,6 @@ function PWAStep() {
       <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
         Install Pulse on your device for the best experience — instant access, offline support, and no browser bars.
       </p>
-
       {deferredPrompt ? (
         <button
           onClick={handleInstall}
@@ -142,7 +141,6 @@ function OnboardingModal() {
         >
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/70" onClick={handleClose} />
-
           {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -175,7 +173,6 @@ function OnboardingModal() {
                 </motion.div>
               </AnimatePresence>
             </div>
-
             {/* Progress dots + navigation */}
             <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */}
@@ -191,7 +188,6 @@ function OnboardingModal() {
                   />
                 ))}
               </div>
-
               {/* Buttons */}
               <div className="flex items-center justify-between gap-3">
                 <button

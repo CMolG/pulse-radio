@@ -57,7 +57,6 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             onError={() => setImgError(true)}
           />
         )}
-
         {/* Play overlay */}
         <motion.button
           aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
@@ -69,7 +68,6 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             {isCurrent && isPlaying ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
           </div>
         </motion.button>
-
         {/* Favorite badge */}
         <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -78,14 +76,11 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
         >
  <Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} />
         </button>
-
         {/* Now-playing indicator */}
         {isCurrent && isPlaying && <span className="absolute bottom-1.5 left-1.5 dot-2 bg-sys-orange animate-pulse" />}
       </div>
-
       {/* Name */}
       <p className="text-[12px] font-medium text-white truncate leading-tight">{station.name}</p>
-
       {/* Tags / Country / Format */}
       <div className="flex-row-1 mt-1 flex-wrap">
         {station.codec && (
@@ -100,7 +95,6 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>
         )}
       </div>
-
       {/* Live track preview */}
       {liveStatus === 'loading' && (
         <div className="flex items-center gap-1 mt-1.5">

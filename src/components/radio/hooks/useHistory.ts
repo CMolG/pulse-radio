@@ -33,15 +33,12 @@ export function useHistory( stationName: string | undefined, stationUuid: string
   // to prevent the race between station-reset and track-add
   useEffect(() => {
     if (!track?.title || !stationUuid || !stationName) return;
-
     // Station just changed — skip this render's potentially stale metadata
     if (stationUuid !== lastStationRef.current) {
       lastStationRef.current = stationUuid; lastTrackRef.current = ''; return;
     }
-
     const key = `${stationUuid}::${track.artist}::${track.title}`;
     if (key === lastTrackRef.current) return; lastTrackRef.current = key;
-
     const entry: HistoryEntry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       stationName,
@@ -58,7 +55,6 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       trackCount: track.trackCount,
       timestamp: Date.now(),
     };
-
     setHistory(prev => {
       // Active dedup: remove older entries with same title+artist+station
       const deduped = prev.filter(
@@ -78,7 +74,6 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     const genre = track.genre; const releaseDate = track.releaseDate;
     const trackNumber = track.trackNumber; const trackCount = track.trackCount;
     if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
-
     setHistory(prev => {
       const head = prev[0];
       if (!head) return prev;

@@ -77,7 +77,6 @@ function UsageGuide({ onClose }: Props) {
       className="absolute inset-0 z-50 flex flex-col"
     >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
@@ -90,7 +89,6 @@ function UsageGuide({ onClose }: Props) {
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-white/20" />
         </div>
-
         {/* Header */}
         <div className="flex items-center gap-3 px-5 pb-3">
           <button
@@ -102,9 +100,7 @@ function UsageGuide({ onClose }: Props) {
           </button>
           <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2>
         </div>
-
         <div className="border-t border-white/8" />
-
         {/* Guide sections */}
         <div className="px-5 py-4 space-y-2">
           {GUIDE_SECTIONS.map((section, idx) => {
@@ -144,7 +140,6 @@ function UsageGuide({ onClose }: Props) {
             );
           })}
         </div>
-
         <div className="h-6" />
       </motion.div>
     </motion.div>

@@ -141,17 +141,14 @@ export default function BrowseView({
     const GENRE_TO_CAT: Record<string, string> = { 'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi' };
     const boostedIds = new Set<string>();
     const ordered: string[] = [];
-
     // Always keep trending first
     ordered.push('trending'); boostedIds.add('trending');
-
     for (const genre of userGenreOrder) {
       const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
       if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
         ordered.push(catId); boostedIds.add(catId);
       }
     }
-
     // Append remaining in default order
     for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); }
     return ordered;
@@ -217,8 +214,7 @@ export default function BrowseView({
   const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => {
     setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
     try {
-      const result = await fetchIcyMeta(s.url_resolved);
-      if (stale?.()) return;
+      const result = await fetchIcyMeta(s.url_resolved); if (stale?.()) return;
       const raw = result.streamTitle; const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
       setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
     } catch {
@@ -238,7 +234,6 @@ export default function BrowseView({
   useEffect(() => {
     let cancelled = false; const flags = { cancelled: false };
     setError(null);
-
     if (view.mode !== "top") {
       // Search, genre, country modes — single list
       setLoading(true);
@@ -257,7 +252,6 @@ export default function BrowseView({
     } else {
       // Top view — progressively load categories (3 concurrent max)
       setLoading(false); setCategorySections({}); setFailedCategories(new Set());
-
       const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
       const runBatch = async () => {
         while (queue.length > 0 && !flags.cancelled) {
@@ -266,7 +260,6 @@ export default function BrowseView({
         }
       }; runBatch();
     }
-
     return () => { cancelled = true; flags.cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
@@ -379,7 +372,6 @@ export default function BrowseView({
           {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}
         </button>
       </div>
-
       {/* Genre chips — wrapping, limited on mobile */}
       {(() => {
         const MOBILE_LIMIT = 7; const collapsed = isMobile && !genreChipsExpanded;
@@ -413,7 +405,6 @@ export default function BrowseView({
           </div>
         );
       })()}
-
       {/* Country chips — wrapping, limited on mobile */}
       {(() => {
         const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
@@ -448,7 +439,6 @@ export default function BrowseView({
           </div>
         );
       })()}
-
       {/* Content */}
       <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
         {loading && (
@@ -456,7 +446,6 @@ export default function BrowseView({
             <Loader2 size={24} className="text-dim animate-spin" />
           </div>
         )}
-
         {error && (
           <div className="flex-center-col gap-3 py-16">
             <Radio size={32} className="text-muted" />
@@ -469,14 +458,12 @@ export default function BrowseView({
             </button>
           </div>
         )}
-
         {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16">
             <Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">{t("noStationsFound")}</p>
           </div>
         )}
-
         {!loading && !error && (
           <>
             {/* Category rows for top view */}
@@ -492,7 +479,6 @@ export default function BrowseView({
                     {renderScrollStations(favorites)}
                   </ScrollRow>
                 )}
-
                 {/* Recent stations row */}
                 {recent && recent.length > 0 && (
                     <ScrollRow
@@ -503,19 +489,16 @@ export default function BrowseView({
                     {renderScrollStations(recent)}
                   </ScrollRow>
                 )}
-
                 {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId);
                   if (!cat) return null;
                   const catStations = categorySections[catId];
                   if (catStations?.length === 0) return null;
-
                   const icon = CATEGORY_ICONS[catId] ?? (
                     catStations
                       ? <span className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`} />
                       : <Music size={14} className="text-dim" />
                   );
-
                   return (
                     <ScrollRow key={catId} title={cat.label} icon={icon} isMobile={isMobile}>
                       {!catStations && failedCategories.has(catId) ? (
@@ -538,7 +521,6 @@ export default function BrowseView({
                 })}
               </>
             )}
-
             {/* Grid column for search / genre / country views — paginated */}
             {view.mode !== "top" && stations.length > 0 && (() => {
               const filterActive = !!songFilter.trim();
@@ -563,7 +545,6 @@ export default function BrowseView({
                             ? t("nowPlayingProgress", { current: scannedCount, total: pageStations.length })
                             : t("scanNowPlaying")}
                       </button>
-
                     {scanEnabled && (
                       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                         <Music2 size={11} className="text-dim shrink-0" />
@@ -587,7 +568,6 @@ export default function BrowseView({
                       </span>
                     )}
                   </div>
-
                   {/* Station grid */}
                   <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
                     {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
@@ -609,7 +589,6 @@ export default function BrowseView({
                       );
                     })}
                   </div>
-
                   {/* Pagination */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-3 pt-2 pb-6">

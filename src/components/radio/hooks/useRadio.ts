@@ -139,7 +139,6 @@ export function useRadio() {
         Promise.resolve().then(() => { srcChangingRef.current = false; });
         return audio.play();
       };
-
       setSourceAndPlay(shouldUseProxy).catch((err) => {
         // On iOS, direct playback is more stable in background.
         // If direct fails for non-autoplay reasons, fallback to proxy for this station.
@@ -170,7 +169,6 @@ export function useRadio() {
       }
       isReconnectingRef.current = true; retryRef.current++; setStatus('loading');
       clearReconnectTimer();
-
       // Adapt reconnect delay based on network quality (Network Information API)
       let adaptedDelay = delay;
       const conn = typeof navigator !== 'undefined'
@@ -185,7 +183,6 @@ export function useRadio() {
         } else if (conn.effectiveType === '3g') adaptedDelay = Math.max(delay, 2000);
         // 4g or better: use original delay
       }
-
       // Add ±30% random jitter to prevent thundering-herd reconnects
       // when a station recovers and all clients try simultaneously
       const jitter = adaptedDelay * (0.7 + Math.random() * 0.6);
@@ -199,7 +196,6 @@ export function useRadio() {
         });
       }, jitter);
     };
-
     const onPause = () => {
       // Case 1: user explicitly paused — just show paused state
       if (userPausedRef.current) { setStatus('paused'); return; }
@@ -228,7 +224,6 @@ export function useRadio() {
         });
       }, 300);
     };
-
     const onWaiting = () => setStatus('loading');
     const onError = () => {
       const err = audio.error;
@@ -255,7 +250,6 @@ export function useRadio() {
       }
       reconnect(1000 * Math.min(retryRef.current + 1, 5));
     };
-
     // Stalled: the browser stopped receiving data but hasn't errored
     // Timeout adapts to remaining buffer: more buffer → wait longer for recovery
     let stallCount = 0;
@@ -274,7 +268,6 @@ export function useRadio() {
         }
       }, timeout);
     };
-
     const onPlaying = () => {
       setStatus('playing'); retryRef.current = 0;
       stallCount = 0; // Reset stall counter on successful playback
@@ -282,12 +275,10 @@ export function useRadio() {
       isReconnectingRef.current = false; // Clear gate — reconnect path succeeded
       bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current });
     };
-
     // Ended: connection dropped — seamlessly reconnect
     const onEnded = () => { if (!userPausedRef.current && station) reconnect(500); };
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onCanPlay = () => { if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {}); };
-
     // Single debounced handler for both visibilitychange and pageshow.
     // On iOS, both events fire on the same resume (screen unlock / tab switch),
     // so without debouncing we get two parallel reconnect attempts.
@@ -297,7 +288,6 @@ export function useRadio() {
       const now = Date.now();
       if (now - lastResumeAttempt < RESUME_DEBOUNCE_MS) return;
       lastResumeAttempt = now;
-
       if (audio.paused || audio.readyState < 2) {
         retryRef.current = 0;
         isReconnectingRef.current = false; // Reset gate for fresh visibility-triggered resume
@@ -310,7 +300,6 @@ export function useRadio() {
         });
       }
     };
-
     // Network status: pause retries when offline, auto-reconnect when back online
     const onOffline = () => { clearReconnectTimer(); };
     const onOnline = () => {
@@ -318,31 +307,25 @@ export function useRadio() {
         retryRef.current = 0; reconnect(500);
       }
     };
-
     // Proactive buffer health monitor: check every 2s whether the buffered-ahead
     // audio is dangerously low. If less than 2s of audio remains in the buffer
     // while playing, trigger a preemptive reconnect before the user hears a gap.
     // Also measures stream quality based on buffer growth rate.
     const BUFFER_CHECK_MS = 2000; const MIN_BUFFER_AHEAD_S = 2; let lowBufferStreak = 0;
-
     clearTimer(bufferCheckRef);
-
     bufferCheckRef.current = setInterval(() => {
       // Update stream quality based on network and buffer state
       if (typeof navigator !== 'undefined' && !navigator.onLine) { setStreamQuality('offline'); return; }
-
       // Use Network Information API to detect poor connections proactively
       const conn = typeof navigator !== 'undefined'
         ? (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } }).connection
         : undefined;
       if (conn?.saveData) setStreamQuality('fair');
-
       if (userPausedRef.current || audio.paused || !station) { lowBufferStreak = 0; return; }
       // Skip check when tab is hidden — browser throttles network
       if (document.hidden) return;
       // Skip quality/reconnect logic during an active reconnect to avoid cascade
       if (isReconnectingRef.current) return;
-
       const { buffered, currentTime: ct } = audio;
       if (buffered.length === 0) {
         // No buffer ranges at all while playing — treat as underrun
@@ -350,7 +333,6 @@ export function useRadio() {
         if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
         return;
       }
-
       // Find the buffer range containing currentTime
       let ahead = 0; let bufferEnd = 0;
       for (let i = 0; i < buffered.length; i++) {
@@ -359,12 +341,10 @@ export function useRadio() {
           break;
         }
       }
-
       // Stream quality: based on buffer-ahead and growth rate
       const prevEnd = lastBufferEndRef.current;
       const growth = bufferEnd - prevEnd; // how much buffer grew since last check
       lastBufferEndRef.current = bufferEnd;
-
       if (ahead >= 5) {
         // saveData means the user opted into reduced bandwidth; cap at 'fair'
         setStreamQuality(conn?.saveData ? 'fair' : 'good');
@@ -372,7 +352,6 @@ export function useRadio() {
         // Healthy buffer but thin — check if it's growing
         setStreamQuality(growth > 0 ? 'fair' : 'poor');
       } else setStreamQuality('poor');
-
       if (ahead < MIN_BUFFER_AHEAD_S) {
         lowBufferStreak++;
         // Require 2 consecutive low-buffer readings to avoid false positives
@@ -380,7 +359,6 @@ export function useRadio() {
         if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
       } else lowBufferStreak = 0;
     }, BUFFER_CHECK_MS);
-
     const pairs: [EventTarget, string, EventListener][] = [ [audio, 'playing', onPlaying], [audio, 'pause', onPause],
       [audio, 'waiting', onWaiting], [audio, 'error', onError],
       [audio, 'stalled', onStalled], [audio, 'ended', onEnded],
@@ -389,7 +367,6 @@ export function useRadio() {
       [window, 'pageshow', onVisibilityResume],
       [window, 'online', onOnline], [window, 'offline', onOffline],
     ]; pairs.forEach(([t, e, h]) => t.addEventListener(e, h));
-
     return () => {
       clearTimer(stallTimerRef); clearTimer(pauseTimerRef);
       clearReconnectTimer(); clearTimer(bufferCheckRef);
@@ -405,7 +382,6 @@ export function useRadio() {
 
   const play = useCallback((s: Station) => {
     if (!isValidStreamUrl(s.url_resolved)) { setStatus('error'); return; }
-
     const audio = getAudio();
     // Resume Web Audio context from user gesture (required on mobile)
     resumeAudioContext(audio); playSessionRef.current++; retryRef.current = 0;
@@ -414,10 +390,8 @@ export function useRadio() {
     isReconnectingRef.current = false; proxyFallbackUrlsRef.current.delete(s.url_resolved);
     codecFallbackTriedRef.current.delete(s.url_resolved); setStation(s); setStatus('loading');
     setStreamQuality('good'); lastBufferEndRef.current = 0;
-
     // Crossfade: fade out with ease-out curve before switching
     clearTimer(fadeTimerRef);
-
     if (!audio.paused && audio.src) {
       const steps = 8;
       const interval = 40; // 320ms total
@@ -474,7 +448,6 @@ export function useRadio() {
   const stop = useCallback(() => {
     clearTimer(fadeTimerRef); clearTimer(pauseTimerRef);
     clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
-
     const audio = audioRef.current;
     if (audio) { audio.pause(); audio.src = ''; }
     setStation(null); setStatus('idle'); setStreamQuality('good');
