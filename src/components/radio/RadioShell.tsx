@@ -7503,8 +7503,12 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserR
           source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
-        frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
-        waveDataRef.current = new Uint8Array(analyserRef.current.fftSize);
+        const binCount = analyserRef.current.frequencyBinCount;
+        const fftLen = analyserRef.current.fftSize;
+        if (!frequencyDataRef.current || frequencyDataRef.current.length !== binCount)
+          frequencyDataRef.current = new Uint8Array(binCount);
+        if (!waveDataRef.current || waveDataRef.current.length !== fftLen)
+          waveDataRef.current = new Uint8Array(fftLen);
         setIsActive(true);
         const tick = () => {
           if (!document.hidden) {
