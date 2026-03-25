@@ -413,12 +413,14 @@ function getCountryDisplayName(locale: SupportedLocale, code: string): string {
 }
 function getSameLanguageCountries(locale: SupportedLocale): string[] {
   const candidates = new Set(localeCandidates(locale));
-  return SOVEREIGN_COUNTRIES.filter((country) =>
-    country.lang3.some((lang3) => {
+  const result: string[] = [];
+  for (const country of SOVEREIGN_COUNTRIES) {
+    for (const lang3 of country.lang3) {
       const mapped = localeFromLang3(lang3);
-      return mapped ? candidates.has(mapped) : false;
-    }),
-  ).map((country) => country.code);
+      if (mapped && candidates.has(mapped)) { result.push(country.code); break; }
+    }
+  }
+  return result;
 }
 function _tagsDisplay(tags: string | undefined): string {
   if (!tags) return 'Internet RadioIcon';
