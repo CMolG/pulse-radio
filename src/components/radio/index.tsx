@@ -20,8 +20,6 @@ export default function RadioApp({ isPip, initialCountryCode }: { isPip?: boolea
   return (
     <ErrorBoundary>
       <LocaleProvider countryCode={initialCountryCode}>
-        <RadioShell isPip={isPip} initialCountryCode={initialCountryCode} />
-      </LocaleProvider>
-    </ErrorBoundary>
+        <RadioShell isPip={isPip} initialCountryCode={initialCountryCode} /></LocaleProvider></ErrorBoundary>
   );
 }

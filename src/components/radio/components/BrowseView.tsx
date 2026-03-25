@@ -74,8 +74,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
         <div className={`flex items-center justify-between mb-2 ${isMobile ? "px-4" : ""}`}>
           <div className="flex-row-1.5">
             {icon}
-            <h3 className="text-[13px] font-semibold text-soft">{title}</h3>
-          </div>
+            <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
           {!isMobile && (
             <div className="flex gap-1">
               <button
@@ -87,11 +86,9 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
                 onClick={() => scroll(1)}
                 className={`p-1 rounded-md transition-colors ${canRight ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canRight}
-                aria-label="Scroll right"><ChevronRight size={14} /></button>
-            </div>)}</div>
+                aria-label="Scroll right"><ChevronRight size={14} /></button></div>)}</div>
       )}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div>
-    </div>
+      <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div></div>
   );
 }
 
@@ -275,8 +272,7 @@ export default function BrowseView({
           isFavorite={isFavorite(s.stationuuid)}
           onPlay={() => onPlay(s)}
           onToggleFav={() => onToggleFav(s)}
-          onPrefetch={() => onPrefetch?.(s.url_resolved)} />
-      </div>
+          onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div>
     ));
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => {
@@ -322,9 +318,7 @@ export default function BrowseView({
         <div>
           <h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2>
           <p className="text-[12px] text-muted mt-0.5">
-            {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}
-          </p>
-        </div>
+            {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div>
         <button
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
@@ -332,9 +326,7 @@ export default function BrowseView({
           aria-pressed={discoveryMode}
           aria-label={t("discoveryModeAria")}>
           <Sparkles size={12} />
-          {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}
-        </button>
-      </div>
+          {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}</button></div>
       {/* Genre chips — wrapping, limited on mobile */}
       {(() => {
         const MOBILE_LIMIT = 7; const collapsed = isMobile && !genreChipsExpanded;
@@ -358,8 +350,7 @@ export default function BrowseView({
                 onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>
-            )}
-          </div>
+            )}</div>
         );
       })()}
       {/* Country chips — wrapping, limited on mobile */}
@@ -386,8 +377,7 @@ export default function BrowseView({
                 onClick={() => setCountryChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>
-            )}
-          </div>
+            )}</div>
         );
       })()}
       {/* Content */}
@@ -402,14 +392,12 @@ export default function BrowseView({
             <button
               onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
-            >{t("retry")}</button>
-          </div>
+            >{t("retry")}</button></div>
         )}
         {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16">
             <Radio size={32} className="text-muted mb-2" />
-            <p className="text-[13px] text-secondary">{t("noStationsFound")}</p>
-          </div>
+            <p className="text-[13px] text-secondary">{t("noStationsFound")}</p></div>
         )}
         {!loading && !error && (
           <>
@@ -449,16 +437,13 @@ export default function BrowseView({
                           <button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
-                          >{t("retry")}</button>
-                        </div>
+                          >{t("retry")}</button></div>
                       ) : !catStations ? (Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`} />
                         ))
-                      ) : (renderScrollStations(catStations))}
-                    </ScrollRow>
+                      ) : (renderScrollStations(catStations))}</ScrollRow>
                   );
-                })}
-              </>
+                })}</>
             )}
             {/* Grid column for search / genre / country views — paginated */}
             {view.mode !== "top" && stations.length > 0 && (() => {
@@ -481,8 +466,7 @@ export default function BrowseView({
                         {isScanning ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
                           : scannedCount > 0
                             ? t("nowPlayingProgress", { current: scannedCount, total: pageStations.length })
-                            : t("scanNowPlaying")}
-                      </button>
+                            : t("scanNowPlaying")}</button>
                     {scanEnabled && (
                       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                         <Music2 size={11} className="text-dim shrink-0" />
@@ -494,13 +478,11 @@ export default function BrowseView({
                           className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0" />
                         {songFilter && (
                           <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
-                            <X size={11} />
-                          </button>)}</div>
+                            <X size={11} /></button>)}</div>
                     )}
                     {scanEnabled && songFilter && (
                       <span className="text-[11px] text-dim shrink-0">
-                        {t("stationCount", { count: allSongFilteredStations.length })}
-                      </span>)}</div>
+                        {t("stationCount", { count: allSongFilteredStations.length })}</span>)}</div>
                   {/* Station grid */}
                   <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
                     {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
@@ -519,8 +501,7 @@ export default function BrowseView({
                           liveTrack={live?.track}
                           onPeek={!scanEnabled ? () => peekStation(s) : undefined} />
                       );
-                    })}
-                  </div>
+                    })}</div>
                   {/* Pagination */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-3 pt-2 pb-6">
@@ -530,25 +511,18 @@ export default function BrowseView({
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       >
                         <ChevronLeft size={14} />
-                        {t("previous")}
-                      </button>
+                        {t("previous")}</button>
                       <span className="text-[12px] text-dim tabular-nums">
-                        {t("pageFraction", { current: page + 1, total: totalPages })}
-                      </span>
+                        {t("pageFraction", { current: page + 1, total: totalPages })}</span>
                       <button
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page === totalPages - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       >
                         {t("next")}
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>)}</>
+                        <ChevronRight size={14} /></button></div>)}</>
               );
-            })()}
-          </>
-        )}
-      </div>
-    </div>
+            })()}</>
+        )}</div></div>
   );
 }

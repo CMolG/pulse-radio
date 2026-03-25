@@ -51,8 +51,7 @@ export default React.memo(function NowPlayingHero({
           className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
           title="Theater mode">
           <Maximize2 size={12} />
-          Theater
-        </button>
+          Theater</button>
       )}
       <div className="relative z-10 flex-row-4 w-full">
         <div className="relative w-16 h-16 rounded-xl bg-surface-2 flex-center-row shrink-0 overflow-hidden">
@@ -61,9 +60,7 @@ export default React.memo(function NowPlayingHero({
               <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {stationInitials(station.name) || (
                   <Radio size={24} className="text-white/60" />
-                )}
-              </span>
-            </div>
+                )}</span></div>
           ) : (
             <UiImage
               src={coverUrl}
@@ -72,14 +69,12 @@ export default React.memo(function NowPlayingHero({
               sizes="64px"
               loading="lazy"
               onError={() => setImgError(true)} />
-          )}
-        </div>
+          )}</div>
         <div className="flex-fill pr-20">
           <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3>
           {track?.title ? (
             <p className="text-[13px] text-secondary truncate mt-0.5">
-              {track.artist ? `${track.artist} — ${track.title}` : track.title}
-            </p>
+              {track.artist ? `${track.artist} — ${track.title}` : track.title}</p>
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )}
@@ -93,9 +88,7 @@ export default React.memo(function NowPlayingHero({
               <AnimatedBars size="small" />
               {icyBitrate && (
                 <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1">
-                  {icyBitrate}kbps
-                </span>)}</div>
-          )}
-        </div></div></div>
+                  {icyBitrate}kbps</span>)}</div>
+          )}</div></div></div>
   );
 });

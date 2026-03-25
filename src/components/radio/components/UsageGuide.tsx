@@ -91,8 +91,7 @@ function UsageGuide({ onClose }: Props) {
             aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           ><IoChevronBack size={16} /></button>
-          <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2>
-        </div>
+          <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2></div>
         <div className="border-t border-white/8" />
         {/* Guide sections */}
         <div className="px-5 py-4 space-y-2">
@@ -109,8 +108,7 @@ function UsageGuide({ onClose }: Props) {
                   <motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-white/30 text-[12px]">▶</motion.span>
-                </button>
+                    className="text-white/30 text-[12px]">▶</motion.span></button>
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
@@ -120,12 +118,9 @@ function UsageGuide({ onClose }: Props) {
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden">
                       <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">{section.content}</p>
-                    </motion.div>)}</AnimatePresence>
-              </div>
+                    </motion.div>)}</AnimatePresence></div>
             );
-          })}
-        </div><div className="h-6" /></motion.div>
-    </motion.div>
+          })}</div><div className="h-6" /></motion.div></motion.div>
   );
 }
 

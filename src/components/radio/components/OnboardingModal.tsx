@@ -73,9 +73,7 @@ function PWAStep() {
         <IoCheckmarkCircleOutline size={48} className="text-emerald-400" />
         <h2 className="text-xl font-bold text-white">Already Installed!</h2>
         <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
-          You&apos;re using Pulse as an app. Enjoy the full experience!
-        </p>
-      </div>
+          You&apos;re using Pulse as an app. Enjoy the full experience!</p></div>
     );
   }
   return (
@@ -83,8 +81,7 @@ function PWAStep() {
       <IoPhonePortraitOutline size={48} className="text-[#3478f6]" />
       <h2 className="text-xl font-bold text-white">Install as App</h2>
       <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
-        Install Pulse on your device for the best experience — instant access, offline support, and no browser bars.
-      </p>
+        Install Pulse on your device for the best experience — instant access, offline support, and no browser bars.</p>
       {deferredPrompt ? (
         <button
           onClick={handleInstall}
@@ -95,12 +92,10 @@ function PWAStep() {
           <div className="flex items-center gap-2 text-[13px] text-white/70">
             <IoShareOutline size={18} className="text-[#3478f6] flex-shrink-0" />
             <span>Tap <strong className="text-white">Share</strong> → <strong className="text-white">Add to Home Screen</strong></span>
-          </div>
-        </div>
+          </div></div>
       ) : (
         <p className="text-[12px] text-white/40 mt-1">
-          Use Chrome or Edge for the install option, or add this page to your home screen.
-        </p>)}</div>
+          Use Chrome or Edge for the install option, or add this page to your home screen.</p>)}</div>
   );
 }
 
@@ -149,12 +144,10 @@ function OnboardingModal() {
                     <>
                       <div className="p-4 rounded-2xl bg-white/[0.06]">{currentStep.icon}</div>
                       <h2 className="text-xl font-bold text-white">{currentStep.title}</h2>
-                      <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">{currentStep.description}</p>
-                    </>
+                      <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">{currentStep.description}</p></>
                   ) : isPWAStep ? (
                     <PWAStep />
-                  ) : null}
-                </motion.div></AnimatePresence></div>
+                  ) : null}</motion.div></AnimatePresence></div>
             {/* Progress dots + navigation */}
             <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */}
@@ -167,8 +160,7 @@ function OnboardingModal() {
                       i === step ? 'w-6 h-2 bg-[#3478f6]' : 'w-2 h-2 bg-white/20 hover:bg-white/30'
                     }`}
                     aria-label={`Step ${i + 1}`} />
-                ))}
-              </div>
+                ))}</div>
               {/* Buttons */}
               <div className="flex items-center justify-between gap-3">
                 <button
@@ -178,9 +170,7 @@ function OnboardingModal() {
                 <button
                   onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
-                >{isLast ? "Let's Go!" : 'Next'}</button>
-              </div></div></motion.div>
-        </motion.div>)}</AnimatePresence>
+                >{isLast ? "Let's Go!" : 'Next'}</button></div></div></motion.div></motion.div>)}</AnimatePresence>
   );
 }
 

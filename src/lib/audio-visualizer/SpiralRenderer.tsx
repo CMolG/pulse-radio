@@ -141,8 +141,7 @@ export function SpiralRenderer({
       <canvas
         ref={canvasRef}
         className="absolute inset-0 size-full"
-        style={{ imageRendering: "auto", transform: "scale(1.12)" }} />
-    </div>
+        style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div>
   );
 }
 

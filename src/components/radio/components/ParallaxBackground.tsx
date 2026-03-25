@@ -53,9 +53,7 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
               alt=""
               className={`object-cover ${landingMode ? 'opacity-10' : 'opacity-20'}`}
               sizes="100vw"
-              style={BLUR_STYLE} />
-          </div>
-        </div>
+              style={BLUR_STYLE} /></div></div>
       )}
     </div>);
 }

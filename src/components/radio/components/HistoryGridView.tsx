@@ -26,8 +26,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
       <div className="flex-center-col py-20 px-4">
         <Clock size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No listening history yet</p>
-        <p className="text-[12px] text-dim mt-1">Songs you listen to will appear here</p>
-      </div>
+        <p className="text-[12px] text-dim mt-1">Songs you listen to will appear here</p></div>
     );
   }
   return (
@@ -38,9 +37,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
           onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} />
-          Clear all
-        </button>
-      </div>
+          Clear all</button></div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
         {history.map((entry, i) => (
           <SongCard
@@ -54,8 +51,6 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
               onClick: () => onToggleFavSong(entry),
               label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song',
             } : null} />
-        ))}
-      </div>
-    </div>
+        ))}</div></div>
   );
 });

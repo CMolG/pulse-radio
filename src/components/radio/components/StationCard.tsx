@@ -64,8 +64,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           onClick={e => { e.stopPropagation(); onPlay(); }}>
           <div className="dot-10 bg-sys-orange flex-center-row shadow-lg shadow-black/30">
             {isCurrent && isPlaying ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
-          </div>
-        </motion.button>
+          </div></motion.button>
         {/* Favorite badge */}
         <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -81,8 +80,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       <div className="flex-row-1 mt-1 flex-wrap">
         {station.codec && (
           <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">
-            {station.codec}{station.bitrate > 0 ? ` ${station.bitrate}k` : ''}
-          </span>
+            {station.codec}{station.bitrate > 0 ? ` ${station.bitrate}k` : ''}</span>
         )}
         {tags.map(tag => (
           <span key={tag} className="pad-xs-full bg-surface-2 text-[9px] text-secondary truncate max-w-[80px]">{tag}</span>
@@ -93,8 +91,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       {liveStatus === 'loading' && (
         <div className="flex items-center gap-1 mt-1.5">
           <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />
-          <span className="text-[9px] text-dim">Checking…</span>
-        </div>
+          <span className="text-[9px] text-dim">Checking…</span></div>
       )}
       {liveStatus === 'loaded' && (
         <div className="flex items-center gap-1 mt-1.5 min-w-0">
@@ -102,9 +99,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             <>
               <Music2 size={9} className="text-sys-orange flex-shrink-0" />
               <span className="text-[9px] text-white/60 truncate leading-tight">
-                {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}
-              </span>
-            </>
+                {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}</span></>
           ) : (
             <span className="text-[9px] text-white/20">No track info</span>)}</div>
       )}
@@ -113,8 +108,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           onClick={e => { e.stopPropagation(); onPeek(); }}
           className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors">
           <Music2 size={9} />
-          Check track
-        </button>
+          Check track</button>
       )}
     </div>);
 }, (prev, next) =>

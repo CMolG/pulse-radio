@@ -125,8 +125,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
                     lineRefs={lineRefs}
                     scrollToIndex={scrollToIndex} />
                 );
-              })}
-            </div></div></div>
-    </div>
+              })}</div></div></div></div>
   );
 }

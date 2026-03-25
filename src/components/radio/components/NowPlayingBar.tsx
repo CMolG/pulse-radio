@@ -113,26 +113,21 @@ function NowPlayingBar({
             <Pause size={18} />
           ) : (
             <Play size={18} className="ml-0.5" />
-          )}
-        </button>
+          )}</button>
         {/* Track info + LIVE indicator */}
         <div className="flex-1 min-w-0">
           {station ? (
             <>
               <p className="text-[13px] font-medium text-white truncate leading-tight">
-                {track?.title || station.name}
-              </p>
+                {track?.title || station.name}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {isPlaying && (
                   <>
                     <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
                     <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
-                      LIVE
-                    </span>
-                  </>
+                      LIVE</span></>
                 )}
-                <span className="text-[11px] text-secondary truncate">{track?.artist || compactTags || ""}</span>
-              </div>
+                <span className="text-[11px] text-secondary truncate">{track?.artist || compactTags || ""}</span></div>
             </>
           ) : (
             <p className="text-[13px] text-dim">No station selected</p>)}</div>
@@ -144,14 +139,12 @@ function NowPlayingBar({
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
               aria-label="Theater mode"><Maximize2 size={18} /></button>
-          )}
-        </div>
+          )}</div>
         {/* Fill iPhone safe-area inset below the bar without adding layout height */}
         <div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
-          style={{ height: "env(safe-area-inset-bottom, 0px)" }} />
-      </div>
+          style={{ height: "env(safe-area-inset-bottom, 0px)" }} /></div>
     );
   }
   return (
@@ -169,9 +162,7 @@ function NowPlayingBar({
                   )
                 ) : (
                   <Radio size={14} className="text-white/60" />
-                )}
-              </span>
-            </div>
+                )}</span></div>
           ) : (
             <UiImage
               src={coverUrl}
@@ -180,20 +171,17 @@ function NowPlayingBar({
               sizes="36px"
               loading="lazy"
               onError={() => setImgError(true)} />
-          )}
-        </div>
+          )}</div>
         {/* TODO replace upper img with next image */}
         <div className="min-w-0">
           <p className="text-[12px] font-medium text-white truncate">{station?.name || "Not Playing"}</p>
           <p className="text-[10px] text-secondary truncate">
-            {track?.title ? (track.artist ? `${track.artist} — ${track.title}` : track.title) : firstTag}
-          </p>
+            {track?.title ? (track.artist ? `${track.artist} — ${track.title}` : track.title) : firstTag}</p>
           {track?.album && (
             <p className="text-[9px] text-dim truncate">{track.album}</p>)}</div>
         {icyBitrate && (
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
-            {icyBitrate}kbps
-          </span>
+            {icyBitrate}kbps</span>
         )}
         {streamQuality && isPlaying && (
           <span
@@ -205,8 +193,7 @@ function NowPlayingBar({
             }`}
             title={`Stream: ${streamQuality}`}
             aria-label={`Stream quality: ${streamQuality}`} />
-        )}
-      </div>
+        )}</div>
       {/* Controls */}
       <div className="flex-row-0.5">
         <button
@@ -222,9 +209,7 @@ function NowPlayingBar({
             <Pause size={16} />
           ) : (
             <Play size={16} className="ml-0.5" />
-          )}
-        </button>
-      </div>
+          )}</button></div>
       {/* LIVE indicator + mini ferrofluid */}
       <div className="flex-1 flex-row-2 min-w-0 relative">
         {station && isPlaying && (
@@ -239,17 +224,12 @@ function NowPlayingBar({
                 colorSecondary="#16213e"
                 colorAccent="#0f3460"
                 sensitivity={1.0}
-                demo />
-              </ErrorBoundary>
-            </div>
+                demo /></ErrorBoundary></div>
             <div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />
               <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
-              <AnimatedBars size="small" />
-            </div>
-          </>
-        )}
-      </div>
+              <AnimatedBars size="small" /></div></>
+        )}</div>
       {/* Toggles */}
       <div className="flex-row-0.5">
         {station && !theaterMode && (
@@ -284,15 +264,13 @@ function NowPlayingBar({
             <Clock size={14} />
             {sleepTimerMin != null && (
               <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
-                {sleepTimerMin}
-              </span>)}</button>
+                {sleepTimerMin}</span>)}</button>
         )}
         <button
           onClick={onToggleEq}
           aria-label="Toggle equalizer"
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
-        ><SlidersHorizontal size={14} /></button>
-      </div>
+        ><SlidersHorizontal size={14} /></button></div>
       {/* Volume */}
       <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
         <button
@@ -304,8 +282,7 @@ function NowPlayingBar({
             <VolumeX size={14} />
           ) : (
             <Volume2 size={14} />
-          )}
-        </button>
+          )}</button>
         <input
           type="range"
           min={0}
@@ -315,9 +292,7 @@ function NowPlayingBar({
           onChange={handleVolumeChange}
           aria-label="Volume"
           className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
-        />
-      </div>
-    </div>
+        /></div></div>
   );
 }
 

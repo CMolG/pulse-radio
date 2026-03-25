@@ -64,8 +64,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
         className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors rounded-lg"
       >
         <Trash2 size={13} />
-        Borrar de favoritos
-      </button>
+        Borrar de favoritos</button>
     </div>,
     document.body,
   );
@@ -95,8 +94,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
         <span className="text-[11px] text-white/30 bg-white/[0.06] px-2 py-0.5 rounded-full">{songs.length}</span>
         {hasMore && (
           <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronDown size={14} className="text-white/30" />
-          </motion.span>)}</button>
+            <ChevronDown size={14} className="text-white/30" /></motion.span>)}</button>
       {/* Stacked/expanded cards */}
       {!expanded && hasMore ? (
         <div
@@ -123,19 +121,16 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                     <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="200px" loading="lazy" />
                   ) : (
                     <div className="size-full flex items-center justify-center"><Music size={28} className="text-dim" /></div>
-                  )}
-                </div>
+                  )}</div>
                 <div className="p-2.5">
                   <p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>
-                  <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p></div></div>
-            </div>
+                  <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p></div></div></div>
           ))}
           <div
             className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
             style={{ maxWidth: "200px" }}>
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
-              +{songs.length - VISIBLE_COUNT} more
-            </span></div></div>
+              +{songs.length - VISIBLE_COUNT} more</span></div></div>
       ) : (
         <AnimatePresence>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
@@ -147,17 +142,14 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                   onSelect={onSelect}
                   delay={i}
                   heart={null}
-                  hideRemove />
-              </div>))}</div>
-        </AnimatePresence>
+                  hideRemove /></div>))}</div></AnimatePresence>
       )}
       {expanded && hasMore && (
         <button
           onClick={() => setExpanded(false)}
           className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
           <ChevronDown size={12} className="rotate-180" />
-          Collapse
-        </button>)}</div>
+          Collapse</button>)}</div>
   );
 }
 
@@ -193,8 +185,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
       <div className="flex-center-col py-20 px-4">
         <Heart size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No favorite songs yet</p>
-        <p className="text-[12px] text-dim mt-1">Tap the heart icon to save songs you love</p>
-      </div>
+        <p className="text-[12px] text-dim mt-1">Tap the heart icon to save songs you love</p></div>
     );
   }
   const toggleFilter = (mode: FilterMode) => setFilterMode(prev => (prev === mode ? "none" : mode));
@@ -215,15 +206,12 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             <Disc3 size={10} />
             By Album
             {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
-          </button>
-        </div>
+          </button></div>
         <button
           onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} />
-          Clear all
-        </button>
-      </div>
+          Clear all</button></div>
       {filterMode === "artist" ? (
         <div>
           {artistGroups.map(([artistName, artistSongs]) => (
@@ -235,8 +223,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               onRemove={onRemove}
               onSelect={onSelect}
               onContextMenu={handleContextMenu} />
-          ))}
-        </div>
+          ))}</div>
       ) : filterMode === "album" ? (
         <div>
           {albumGroups.map(([albumName, albumSongs]) => (
@@ -248,8 +235,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               onRemove={onRemove}
               onSelect={onSelect}
               onContextMenu={handleContextMenu} />
-          ))}
-        </div>
+          ))}</div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
           {songs.map((song, i) => (
@@ -260,9 +246,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
                 onSelect={onSelect}
                 delay={i}
                 heart={null}
-                hideRemove />
-            </div>))}</div>
-      )}
-    </div>
+                hideRemove /></div>))}</div>
+      )}</div>
   );
 }

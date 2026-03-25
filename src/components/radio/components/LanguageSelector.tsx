@@ -24,9 +24,7 @@ function LanguageSelector() {
         data-language-selector>
         {locales.map((item) => (
           <option key={item.code} value={item.code} className="bg-[#0a0f1a] text-white">{item.nativeName}</option>
-        ))}
-      </select>
-    </label>
+        ))}</select></label>
   );
 }
 

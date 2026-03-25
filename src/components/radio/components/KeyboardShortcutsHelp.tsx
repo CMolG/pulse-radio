@@ -43,17 +43,12 @@ export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({
           <button
             onClick={onClose}
             className="p-1 rounded-lg hover:bg-surface-3 transition-colors text-secondary"
-            aria-label="Close shortcuts help"><X size={16} /></button>
-        </div>
+            aria-label="Close shortcuts help"><X size={16} /></button></div>
         <div className="space-y-1.5">
           {SHORTCUTS.map(({ key, desc }) => (
             <div key={key} className="flex items-center justify-between py-1 px-1">
               <span className="text-[13px] text-secondary">{desc}</span>
               <kbd className="text-[12px] font-mono bg-surface-3 text-white px-2 py-0.5 rounded-md min-w-[2rem] text-center">
-                {key}
-              </kbd>
-            </div>))}</div>
-      </div>
-    </div>
+                {key}</kbd></div>))}</div></div></div>
   );
 });

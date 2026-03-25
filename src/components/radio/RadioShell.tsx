@@ -456,8 +456,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   ) : null;
   const offlineBanner = !isOnline ? (
     <div className="fixed top-0 inset-x-0 z-[250] bg-yellow-600 text-white text-center text-[12px] font-medium py-1 select-none" role="alert">
-      {t("offlineBanner")}
-    </div>
+      {t("offlineBanner")}</div>
   ) : null;
   const eqPanelElement = showEq ? (
     <EqPanel
@@ -606,8 +605,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {songDetailModal}
       {shortcutsOverlay}
       {offlineBanner}
-      <OnboardingModal />
-    </>
+      <OnboardingModal /></>
   );
   const pulseLogoButton = (
     <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
@@ -625,11 +623,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative">
         {parallaxElement}
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
-          <TheaterView {...theaterBaseProps} station={radio.station ?? emptyStation} onBack={() => {}} compact />
-        </div>
+          <TheaterView {...theaterBaseProps} station={radio.station ?? emptyStation} onBack={() => {}} compact /></div>
         <NowPlayingBar {...nowPlayingBaseProps} onToggleEq={() => {}} showEq={false} theaterMode={true} compact />
-        {sharedModals}
-      </div>
+        {sharedModals}</div>
     );
   }
   /* ─── Mobile layout: drawer sidebar, overlay lyrics ─── */
@@ -660,15 +656,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}
                   >
                     <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
-                  </button>)}</div>
-            </div>
+                  </button>)}</div></div>
           )}
           {theaterMode && radio.station ? (
             <div className="h-full flex flex-col">
               <div className="flex-1 min-h-0"><TheaterView {...theaterFullProps} lyricsVariant="mobile" /></div>
               {/* Spacer for absolute bottom bar */}
-              <div className="h-20 shrink-0" />
-            </div>
+              <div className="h-20 shrink-0" /></div>
           ) : (
             <div className="flex flex-col min-h-full pb-24">
               {nowPlayingHeroElement}
@@ -681,8 +675,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}
                   >
                     {tab.icon}
-                    {tab.label}
-                  </button>))}</div>
+                    {tab.label}</button>))}</div>
               <div className="flex-shrink-0 px-4 pb-2">
                 <form onSubmit={handleSearchSubmit}>
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
@@ -694,12 +687,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t("searchStationsAria")}
                       className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
-                      data-radio-search />
-                  </div></form></div>
+                      data-radio-search /></div></form></div>
               <div className="flex-1 min-h-0">
                 {activeTab === "discover" ? browseViewElement : activeTab === "history" ? historyViewElement : favsViewElement}
-              </div>
-            </div>)}</div>
+              </div></div>)}</div>
         {/* EQ panel overlay */}
         {eqPanelElement}
         {/* Mobile settings panel */}
@@ -716,14 +707,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 topGenres: usageStats.topGenres,
                 totalListenMs: usageStats.stats.totalListenMs,
               }} />
-          )}
-        </AnimatePresence>
+          )}</AnimatePresence>
         {/* Toast notification */}
         <AnimatePresence>{toastElement}</AnimatePresence>
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={glassStyle}>
-          <NowPlayingBar {...nowPlayingFullProps} compact />
-        </div>{sharedModals}</div>
+          <NowPlayingBar {...nowPlayingFullProps} compact /></div>{sharedModals}</div>
     );
   }
   /* ─── Desktop layout (default) ─── */
@@ -751,9 +740,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   <div className="flex items-center gap-3">
                     {pulseLogoButton}
                     <div className="flex-1" />
-                    <LanguageSelector />
-                  </div>
-                </div>
+                    <LanguageSelector /></div></div>
                 {nowPlayingHeroElement}
                 {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
@@ -782,8 +769,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label={t("searchStationsAria")}
                         className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
-                        data-radio-search />
-                    </div></form></div>
+                        data-radio-search /></div></form></div>
                 {/* ── Tab content ── */}
                 <AnimatePresence mode="wait">
                   {(() => {
@@ -792,12 +778,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       : ["favorites-tab", favsViewElement, " overflow-y-auto"];
                     return (
                       <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className={`flex-1 min-h-0${extra}`}>
-                        {content}
-                      </motion.div>
+                        {content}</motion.div>
                     );
-                  })()}
-                </AnimatePresence>
-              </React.Fragment>
+                  })()}</AnimatePresence></React.Fragment>
             ) : (
               radio.station && (
                 <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
@@ -810,14 +793,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="text-[14px] font-medium text-white truncate">
-                      {enrichedTrack?.title || radio.station.name}
-                    </p>
+                      {enrichedTrack?.title || radio.station.name}</p>
                     <p className="text-[12px] text-muted truncate">{enrichedTrack?.artist || t("internetRadio")}</p>
-                  </div>
-                </div>
+                  </div></div>
               )
-            )}
-          </AnimatePresence></div></div>
+            )}</AnimatePresence></div></div>
       {/* EQ panel overlay */}
       {eqPanelElement}
       {/* Toast notification */}
@@ -831,18 +811,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 <span className="text-white/70 shrink-0">{t("autoAudioEnhancements")}</span>
                 {theaterAudioBadges.map(label => (
                   <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
-                    {label}
-                  </span>))}</div>
-            )}
-          </div>
+                    {label}</span>))}</div>
+            )}</div>
           <button
             onClick={() => setMiniMode((m) => !m)}
             className="pointer-events-auto shrink-0 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
             title={miniMode ? t("expand") : t("minimize")}>
-            {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
-          </button>
+            {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}</button>
         </div><NowPlayingBar {...nowPlayingFullProps} /></div>
-      {sharedModals}
-    </div>
+      {sharedModals}</div>
   );
 }

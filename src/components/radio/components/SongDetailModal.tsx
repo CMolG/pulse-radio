@@ -53,16 +53,14 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => (
     <div className="space-y-2 animate-pulse">
-      {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}
-    </div>
+      {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}</div>
   );
   const lyricsEmpty = (
     <div>
       <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
       {lyricsError && (
         <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
-          Retry
-        </button>)}</div>
+          Retry</button>)}</div>
   );
   // Close on Escape
   useEffect(() => {
@@ -121,8 +119,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   onClick={onClose}
                   aria-label="Close song details"
                   className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
-                ><X size={16} /></button>
-              </div>
+                ><X size={16} /></button></div>
               {/* ── Song Info ── */}
               <div className="px-5 -mt-2">
                 {/* Artwork */}
@@ -136,8 +133,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       loading="lazy" />
                   ) : (
                     <div className="size-full flex items-center justify-center">
-                      <Music size={56} className="text-dim" />
-                    </div>)}</div>
+                      <Music size={56} className="text-dim" /></div>)}</div>
                 {/* Title & artist */}
                 <div className="mt-5 text-center">
                   <h2 className="text-[17px] font-bold text-white leading-snug line-clamp-2">{song.title}</h2>
@@ -152,24 +148,19 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         <div className="justify-self-start">
                           {resolvedDurationMs && (
                             <MetaBadge icon={Clock} cls="bg-white/[0.08] border border-white/10 font-mono text-white/70">{formatDuration(resolvedDurationMs)}</MetaBadge>
-                          )}
-                        </div>
+                          )}</div>
                         <div className="justify-self-end">
                           {resolvedTrackNumber != null && resolvedTrackCount != null && (
                             <MetaBadge icon={Disc3} cls="bg-white/[0.08] border border-white/10 text-white/70">#{resolvedTrackNumber}/{resolvedTrackCount}</MetaBadge>
-                          )}
-                        </div>
-                      </div>
+                          )}</div></div>
                       {resolvedReleaseDate && (
                         <p className="text-[10px] text-white/50">
-                          Released on: {formatReleaseDate(resolvedReleaseDate)}
-                        </p>
+                          Released on: {formatReleaseDate(resolvedReleaseDate)}</p>
                       )}
                       <div className="flex flex-wrap justify-center gap-1.5">
                         {resolvedGenre && <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">{resolvedGenre}</MetaBadge>}
                       {showMetaHydration && <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">Fetching metadata…</MetaBadge>}
-                      </div>
-                    </div>)}</div>
+                      </div></div>)}</div>
                 {/* Apple Music button */}
                 <a
                   href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
@@ -178,16 +169,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
                 >
                   <ExternalLink size={14} />
-                  Listen on Apple Music
-                </a>
-              </div>
+                  Listen on Apple Music</a></div>
               {/* Divider */}
               <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Artist Info ── */}
               <div className="px-5">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
-                  About {song.artist}
-                </h3>
+                  About {song.artist}</h3>
                 {/* Loading skeleton */}
                 {loading && (
                   <div className="space-y-3 animate-pulse">
@@ -195,15 +183,11 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0" />
                       <div className="flex-1 space-y-2 pt-1">
                         <div className="h-3 bg-surface-3 rounded w-2/3" />
-                        <div className="h-2.5 bg-surface-3 rounded w-1/2" />
-                      </div>
-                    </div>
+                        <div className="h-2.5 bg-surface-3 rounded w-1/2" /></div></div>
                     <div className="space-y-2">
                       <div className="h-2.5 bg-surface-3 rounded w-full" />
                       <div className="h-2.5 bg-surface-3 rounded w-5/6" />
-                      <div className="h-2.5 bg-surface-3 rounded w-4/6" />
-                    </div>
-                  </div>
+                      <div className="h-2.5 bg-surface-3 rounded w-4/6" /></div></div>
                 )}
                 {/* Loaded artist data */}
                 {!loading && info && (
@@ -217,16 +201,14 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                             alt={info.name}
                             className="object-cover bg-surface-3"
                             sizes="64px"
-                            loading="lazy" />
-                        </div>
+                            loading="lazy" /></div>
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">
                           {info.type === 'Group' ? (
                             <Users size={24} className="text-dim" />
                           ) : (
                             <User size={24} className="text-dim" />
-                          )}
-                        </div>
+                          )}</div>
                       )}
                       <div className="flex-1 min-w-0 pt-0.5">
                         <p className="text-[14px] font-semibold text-white truncate">{info.name}</p>
@@ -240,9 +222,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                           {info.lifeSpan?.begin && (
                             <MetaBadge icon={Calendar} cls="bg-surface-3 text-secondary">
                               {info.lifeSpan.begin}{info.lifeSpan.ended && info.lifeSpan.end ? ` – ${info.lifeSpan.end}` : ' – present'}
-                            </MetaBadge>)}</div>
-                      </div>
-                    </div>
+                            </MetaBadge>)}</div></div></div>
                     {/* Bio */}
                     {info.bio && (
                       <p className="text-[12px] text-secondary/90 leading-relaxed">{info.bio}</p>
@@ -254,8 +234,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                           <span
                             key={tag}
                             className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50">
-                            {tag}
-                          </span>))}</div>
+                            {tag}</span>))}</div>
                     )}
                     {/* Wikipedia link */}
                     {info.wikipediaUrl && (
@@ -266,14 +245,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         className="inline-flex items-center gap-1.5 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
                       >
                         <Globe size={11} />
-                        Read more on Wikipedia
-                      </a>)}</div>
+                        Read more on Wikipedia</a>)}</div>
                 )}
                 {/* No data */}
                 {!loading && !info && (
                   <p className="text-[12px] text-dim">No artist information available</p>
-                )}
-              </div>
+                )}</div>
               {/* Divider */}
               <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Lyrics (mobile) ── */}
@@ -283,12 +260,9 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {!lyricsLoading && plainLyrics && (
                   <div className="max-h-52 overflow-y-auto rounded-xl bg-surface-3/50 border border-border-subtle p-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
                     <pre className="whitespace-pre-wrap break-words font-sans text-[12px] leading-relaxed text-secondary/90">
-                      {plainLyrics}
-                    </pre>
-                  </div>
+                      {plainLyrics}</pre></div>
                 )}
-                {!lyricsLoading && !plainLyrics && lyricsEmpty}
-              </div>
+                {!lyricsLoading && !plainLyrics && lyricsEmpty}</div>
               {/* Divider (mobile) */}
               <div className="mx-5 my-5 border-t border-border-default md:hidden" />
               {/* ── Remove from favorites ── */}
@@ -301,8 +275,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"
                     >
                       <Trash2 size={14} />
-                      Borrar de favoritos
-                    </button></div></>
+                      Borrar de favoritos</button></div></>
               )}
               {/* ── Station ── */}
               <div className="px-5 pb-6 pt-4">
@@ -310,24 +283,19 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   <Radio size={12} className="text-dim flex-shrink-0" />
                   <p className="text-[11px] text-dim">
                     Played on{' '}
-                    <span className="text-secondary">{song.stationName}</span></p></div>
-              </div>
-            </div>
+                    <span className="text-secondary">{song.stationName}</span></p></div></div></div>
             {/* ── Lyrics side panel (desktop) ── */}
             <div className="hidden md:flex md:flex-col bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-[420px] max-h-[85vh]">
               <div className="px-5 pt-5 pb-3 border-b border-border-default">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider">Lyrics (plain)</h3>
-                <p className="text-[11px] text-dim mt-1 line-clamp-1">{song.title} · {song.artist}</p>
-              </div>
+                <p className="text-[11px] text-dim mt-1 line-clamp-1">{song.title} · {song.artist}</p></div>
               <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
                 {lyricsLoading && lyricsSkeleton(7)}
                 {!lyricsLoading && plainLyrics && (
                   <pre className="whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed text-secondary/90">
-                    {plainLyrics}
-                  </pre>
+                    {plainLyrics}</pre>
                 )}
-                {!lyricsLoading && !plainLyrics && lyricsEmpty}
-              </div></div></motion.div>
+                {!lyricsLoading && !plainLyrics && lyricsEmpty}</div></div></motion.div>
         </motion.div>)}</AnimatePresence>
   );
 }

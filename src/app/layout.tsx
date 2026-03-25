@@ -71,8 +71,6 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
       <body className="h-full bg-[#0a0f1a] text-white">
         <JsonLd />
         {children}
-        <ServiceWorkerRegistrar />
-      </body>
-    </html>
+        <ServiceWorkerRegistrar /></body></html>
   );
 }

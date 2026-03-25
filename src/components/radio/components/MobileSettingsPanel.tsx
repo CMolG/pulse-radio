@@ -92,15 +92,13 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             onClick={onClose}
             aria-label="Close settings"
             className="w-8 h-8 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
-          ><X size={16} /></button>
-        </div>
+          ><X size={16} /></button></div>
         <div className="border-t border-white/8" />
         {/* Language section */}
         <div className="px-5 py-4">
           <div className="flex items-center gap-2 mb-3">
             <Languages size={16} className="text-white/60" />
-            <span className="text-[14px] font-medium text-white/80">Language</span>
-          </div>
+            <span className="text-[14px] font-medium text-white/80">Language</span></div>
           <div className="grid grid-cols-3 gap-2">
             {locales.map((item) => (
               <button
@@ -111,36 +109,29 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                     ? "bg-sys-orange/20 border border-sys-orange/50 text-sys-orange"
                     : "bg-white/5 border border-white/8 text-white/60 hover:text-white/80"
                 }`}>{item.nativeName}</button>
-            ))}
-          </div>
-        </div>
+            ))}</div></div>
         <div className="border-t border-white/8" />
         {/* Equalizer section — fully inline */}
         <div className="px-5 py-4">
           <button onClick={() => setShowEq((s) => !s)} className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
               <Sliders size={16} className="text-white/60" />
-              <span className="text-[14px] font-medium text-white/80">Equalizer</span>
-            </div>
+              <span className="text-[14px] font-medium text-white/80">Equalizer</span></div>
             <div className="flex items-center gap-2">
               <span className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${
                 eq.enabled ? "bg-sys-orange/20 text-sys-orange" : "bg-white/5 text-white/40"
               }`}>{eq.enabled ? "ON" : "OFF"}</span>
               {showEq ? <ChevronUp size={14} className="text-white/40" /> : <ChevronDown size={14} className="text-white/40" />}
-            </div>
-          </button>
+            </div></button>
           {showEq && (
             <div className="mt-4 space-y-4">
               {/* Power + Normalizer toggles */}
               <div className="flex items-center gap-2">
                 <button onClick={eq.toggleEnabled} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 text-white/40 border border-white/8"}`}>
                   <Power size={12} />
-                  {eq.enabled ? "Enabled" : "Disabled"}
-                </button>
+                  {eq.enabled ? "Enabled" : "Disabled"}</button>
                 <button onClick={eq.toggleNormalizer} className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 text-white/40 border border-white/8"}`}>
-                  NORM
-                </button>
-              </div>
+                  NORM</button></div>
               {/* Presets */}
               <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Presets</span>
@@ -148,21 +139,17 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   {EQ_PRESETS.map(preset => (
                     <button key={preset.name} onClick={() => handleSelectPreset(preset.name, preset.gains)}
                       className={`px-2.5 py-1.5 text-[11px] rounded-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 border border-white/8 text-white/50 hover:text-white/80"}`}>
-                      {preset.name}
-                    </button>
+                      {preset.name}</button>
                   ))}
                   {eq.customPresets.map(preset => (
                     <div key={`custom-${preset.name}`} className="flex">
                       <button onClick={() => handleSelectPreset(preset.name, preset.gains)}
                         className={`px-2.5 py-1.5 text-[11px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40" : "bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8"}`}>
-                        {preset.name}
-                      </button>
+                        {preset.name}</button>
                       <button onClick={() => eq.removeCustomPreset(preset.name)}
                         aria-label={`Delete ${preset.name} preset`}
                         className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors">
-                        <X size={10} />
-                      </button>
-                    </div>))}</div>
+                        <X size={10} /></button></div>))}</div>
                 {/* Save custom */}
                 <div className="mt-2">
                   {showSaveInput ? (
@@ -178,9 +165,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   ) : (
                     <button onClick={() => setShowSaveInput(true)}
                       className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/40 hover:text-white/60 transition-colors">
-                      <Plus size={10} /> Save Custom
-                    </button>)}</div>
-              </div>
+                      <Plus size={10} /> Save Custom</button>)}</div></div>
               {/* Band sliders — horizontal scroll */}
               <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Bands</span>
@@ -194,9 +179,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />
-                      <span className="text-[8px] text-white/40">{band.label}</span>
-                    </div>))}</div>
-              </div>
+                      <span className="text-[8px] text-white/40">{band.label}</span></div>))}</div></div>
               {/* Noise Reduction */}
               <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Noise Reduction</span>
@@ -208,9 +191,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                           ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40"
                           : "bg-white/5 border border-white/8 text-white/50"
                       }`}>{mode.charAt(0).toUpperCase() + mode.slice(1)}</button>
-                  ))}
-                </div>
-              </div>
+                  ))}</div></div>
               {/* Sliders: Width, Bass, Compressor */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -238,8 +219,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.compressorAmount * 100)}%</span>
                 </div></div></div>
-          )}
-        </div>
+          )}</div>
         {/* Usage guide & Stats */}
         <div className="border-t border-white/8" />
         <div className="px-5 py-4 space-y-2">
@@ -248,8 +228,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:bg-white/[0.06] transition-colors text-left"
           >
             <IoHelpCircleOutline size={18} className="text-[#3478f6] flex-shrink-0" />
-            <span className="text-[14px] font-medium text-white/70">How to use Pulse</span>
-          </button>
+            <span className="text-[14px] font-medium text-white/70">How to use Pulse</span></button>
           <button
             onClick={() => setShowStats(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:bg-white/[0.06] transition-colors text-left"
@@ -257,8 +236,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             <IoStatsChartOutline size={18} className="text-emerald-400 flex-shrink-0" />
             <span className="text-[14px] font-medium text-white/70">Your Statistics</span></button></div>
         {/* Bottom safe area padding */}
-        <div className="h-6" />
-      </motion.div>
+        <div className="h-6" /></motion.div>
       {/* Usage Guide overlay */}
       <AnimatePresence>{showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}</AnimatePresence>
       {/* Stats overlay */}
@@ -289,9 +267,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   onClick={() => setShowStats(false)}
                   aria-label="Close statistics"
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
-                ><X size={16} /></button>
-                <h2 className="text-[17px] font-semibold text-white">Your Statistics</h2>
-              </div>
+                ><X size={16} /></button><h2 className="text-[17px] font-semibold text-white">Your Statistics</h2></div>
               <div className="border-t border-white/8" />
               {statsData && (
                 <StatsView
@@ -301,9 +277,6 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   topGenres={statsData.topGenres}
                   totalListenMs={statsData.totalListenMs} />
               )}
-              <div className="h-6" />
-            </motion.div>
-          </motion.div>)}</AnimatePresence>
-    </motion.div>
+              <div className="h-6" /></motion.div></motion.div>)}</AnimatePresence></motion.div>
   );
 }

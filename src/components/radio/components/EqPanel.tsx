@@ -67,23 +67,19 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
         {EQ_PRESETS.map(preset => (
  <button key={preset.name} onClick={() => handleSelectPreset(preset.name, preset.gains)}
             className={`px-2 py-1 text-[10px] rounded-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}>
-            {preset.name}
-          </button>
+            {preset.name}</button>
         ))}
         {customPresets.map(preset => (
           <div key={`custom-${preset.name}`} className="flex-row-0.5">
             <button onClick={() => handleSelectPreset(preset.name, preset.gains)}
               className={`px-2 py-1 text-[10px] rounded-l-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 hover:bg-sys-orange/20 text-sys-orange hover:text-white'}`}>
-              {preset.name}
-            </button>
+              {preset.name}</button>
             {onRemoveCustomPreset && (
               <button onClick={() => onRemoveCustomPreset(preset.name)}
                 aria-label={`Delete ${preset.name} preset`}
                 className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors">
-                <X size={8} />
-              </button>)}</div>
-        ))}
-      </div>
+                <X size={8} /></button>)}</div>
+        ))}</div>
       {/* Save custom preset */}
       {onSaveCustomPreset && (
         <div className="mb-4">
@@ -103,8 +99,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             <button onClick={() => setShowSaveInput(true)}
               className="flex-row-1 px-2 py-1 text-[10px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors">
               <Plus size={10} />
-              Save Custom
-            </button>)}</div>
+              Save Custom</button>)}</div>
       )}
       {/* Band sliders */}
       <div className="flex items-end justify-between gap-2">
@@ -116,8 +111,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
               aria-label={`${band.label} gain`}
               className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />
-            <span className="text-[9px] text-secondary">{band.label}</span>
-          </div>))}</div>
+            <span className="text-[9px] text-secondary">{band.label}</span></div>))}</div>
       {/* Stereo width */}
       <div className="mt-3 pt-3 border-t border-white/10">
         <div className="mb-2">
@@ -133,9 +127,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                     : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'
                 }`}
                 aria-label={`Noise reduction ${mode}`}>{mode.toUpperCase()}</button>
-            ))}
-          </div>
-        </div>
+            ))}</div></div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-secondary shrink-0 w-12">Width</span>
           <input type="range" min={0} max={200} step={5} value={Math.round(stereoWidth * 100)}

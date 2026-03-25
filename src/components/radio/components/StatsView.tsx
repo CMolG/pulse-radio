@@ -65,8 +65,7 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
       <div className="flex flex-col items-center justify-center py-16 px-4">
         <IoTimeOutline size={40} className="text-white/20 mb-3" />
         <p className="text-[14px] text-white/40">No listening data yet</p>
-        <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p>
-      </div>
+        <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p></div>
     );
   }
   const maxStationTime = topStations[0]?.totalMs ?? 1;
@@ -86,31 +85,27 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
         <StatSection title="Top Stations" icon={<IoRadioOutline size={16} className="text-amber-400/70" />}>
           {topStations.slice(0, 5).map(s => (
             <BarRow key={s.uuid} label={s.name} value={s.totalMs} maxValue={maxStationTime} suffix={formatListenTime(s.totalMs)} />
-          ))}
-        </StatSection>
+          ))}</StatSection>
       )}
       {/* Top Songs */}
       {topSongs.length > 0 && (
         <StatSection title="Most Played Songs" icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" />}>
           {topSongs.slice(0, 5).map(s => (
             <BarRow key={`${s.title}|||${s.artist}`} label={`${s.artist} — ${s.title}`} value={s.count} maxValue={maxSongCount} suffix={`${s.count}×`} />
-          ))}
-        </StatSection>
+          ))}</StatSection>
       )}
       {/* Top Artists */}
       {topArtists.length > 0 && (
         <StatSection title="Top Artists" icon={<IoPersonOutline size={16} className="text-purple-400/70" />}>
           {topArtists.slice(0, 5).map(a => (
             <BarRow key={a.name} label={a.name} value={a.count} maxValue={maxArtistCount} suffix={`${a.count}×`} />
-          ))}
-        </StatSection>
+          ))}</StatSection>
       )}
       {/* Top Genres */}
       {topGenres.length > 0 && (
         <StatSection title="Top Genres" icon={<IoDiscOutline size={16} className="text-emerald-400/70" />}>
           {topGenres.slice(0, 5).map(g => (
             <BarRow key={g.genre} label={g.genre} value={g.count} maxValue={maxGenreCount} suffix={`${g.count}×`} />
-          ))}
-        </StatSection>)}</div>
+          ))}</StatSection>)}</div>
   );
 });

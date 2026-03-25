@@ -138,8 +138,7 @@ export default function TheaterView({
             className="object-cover animate-ambient-drift blur-lg opacity-25"
             sizes="100vw"
             onError={() => setFailedCoverUrl(coverUrl)} />
-          <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" />
-        </div>
+          <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" /></div>
       )}
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none">
@@ -151,9 +150,7 @@ export default function TheaterView({
           color2={color2}
           color3={color3}
           sensitivity={compact ? 0.8 : 1.2}
-          demo />
-        </ErrorBoundary>
-      </div>
+          demo /></ErrorBoundary></div>
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
@@ -195,9 +192,7 @@ export default function TheaterView({
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
                 aria-label="Favorite song"
                 aria-pressed={!!isSongLiked}><Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} /></button>
-            )}
-          </div>
-        </div>
+            )}</div></div>
       )}
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
       <div className="flex-1 flex items-center justify-center relative z-10 px-4">
@@ -217,14 +212,11 @@ export default function TheaterView({
                 {track?.durationMs && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
                     <Clock size={10} />
-                    {formatDuration(track.durationMs)}
-                  </span>)}</div>
+                    {formatDuration(track.durationMs)}</span>)}</div>
               <div className="justify-self-end">
                 {track?.trackNumber != null && track?.trackCount != null && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
-                    #{track.trackNumber}/{track.trackCount}
-                  </span>)}</div>
-            </div>
+                    #{track.trackNumber}/{track.trackCount}</span>)}</div></div>
           )}
           {/* Cover art */}
           <div
@@ -237,9 +229,7 @@ export default function TheaterView({
                 >
                   {stationInitials(station.name) || (
                     <Radio size={compact ? 24 : 52} className="text-white/60" />
-                  )}
-                </span>
-              </div>
+                  )}</span></div>
             ) : (
               <UiImage
                 src={coverUrl}
@@ -248,8 +238,7 @@ export default function TheaterView({
                 sizes={compact ? "56px" : "176px"}
                 loading="lazy"
                 onError={() => setFailedCoverUrl(coverUrl)} />
-            )}
-          </div>
+            )}</div>
           {/* Station name */}
           <h2
             className={`${compact ? "text-[11px] mb-0" : "text-lg sm:text-xl mb-0"} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
@@ -264,13 +253,11 @@ export default function TheaterView({
           )}
           {track?.album && (
             <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}>
-              {track.album}
-            </p>
+              {track.album}</p>
           )}
           {!compact && track?.releaseDate && (
             <p className="text-[10px] text-white/40 text-center -mt-1">
-              Released on: {formatReleaseDate(track.releaseDate)}
-            </p>
+              Released on: {formatReleaseDate(track.releaseDate)}</p>
           )}
           {/* LIVE badge */}
           {isPlaying && (
@@ -279,8 +266,7 @@ export default function TheaterView({
               <span
                 className={`${compact ? "text-[8px]" : "text-[11px]"} font-semibold tracking-wider uppercase text-red-400`}
               >LIVE</span>
-              {!compact && <AnimatedBars size="small" />}
-            </div>
+              {!compact && <AnimatedBars size="small" />}</div>
           )}
           {/* Station details badges */}
           {!compact && (
@@ -288,8 +274,7 @@ export default function TheaterView({
               {station.codec && <Badge mono upper>{station.codec}</Badge>}
               {(icyBitrate || station.bitrate > 0) && <Badge mono>{icyBitrate ?? station.bitrate}kbps</Badge>}
               {station.country && <Badge>{station.country}</Badge>}
-              {track?.genre && <Badge>{track.genre}</Badge>}
-            </div>
+              {track?.genre && <Badge>{track.genre}</Badge>}</div>
           )}
           {/* Listen on Apple Music */}
           {!compact && track && (
@@ -300,8 +285,7 @@ export default function TheaterView({
               className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
             >
               <ExternalLink size={11} />
-              Listen on Apple Music
-            </a>
+              Listen on Apple Music</a>
           )}
           {/* ── Lyrics reel inside glass panel ── */}
           {!compact && (
@@ -310,9 +294,6 @@ export default function TheaterView({
                 lyrics={lyrics ?? null}
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
-                variant={lyricsVariant} />
-            </div>)}</div>
-      </div>
-    </motion.div>
+                variant={lyricsVariant} /></div>)}</div></div></motion.div>
   );
 }

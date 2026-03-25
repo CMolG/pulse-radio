@@ -51,7 +51,6 @@ export function ParallaxAlbumBackground({
       {showTopGlow && (
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
       )}
-      {children}
-    </div>
+      {children}</div>
   );
 }

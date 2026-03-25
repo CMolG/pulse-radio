@@ -52,8 +52,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             aria-label="Remove"
             className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
           ><Trash2 size={12} /></button>
-        )}
-      </div>
+        )}</div>
       <div className="p-3 space-y-0.5">
         <p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>
         <p className="text-[12px] text-secondary line-clamp-1">{item.artist}</p>
@@ -63,10 +62,8 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             {item.genre && <span>{item.genre}</span>}
             {item.durationMs && (
               <span className="inline-flex items-center gap-0.5">
-                <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}
-              </span>)}</p>
-        )}
-      </div>
+                <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}</span>)}</p>
+        )}</div>
       <div className="px-3 pb-2.5 space-y-1.5">
         <a
           href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
@@ -78,8 +75,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         <div className="flex items-center gap-1.5">
           <Radio size={9} className="text-dim flex-shrink-0" />
           <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
-          <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div>
-    </motion.div>
+          <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div>
   );
 }, (prev, next) =>
   prev.item === next.item &&
