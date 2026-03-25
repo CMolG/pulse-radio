@@ -1,74 +1,53 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
-
-"use client";
-
-import React from "react";
-import { AlertTriangle, RotateCcw } from "lucide-react";
-
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ 'use client';
+import React from 'react';
+import { AlertTriangle, RotateCcw } from 'lucide-react';
 interface Props {
   children: React.ReactNode;
-  /** Optional fallback to render instead of the default error UI */
-  fallback?: React.ReactNode;
+  /** Optional fallback to render instead of the default error UI */ fallback?: React.ReactNode;
 }
-
-interface State {
-  hasError: boolean;
-  error: Error | null;
-}
-
+type State = { hasError: boolean; error: Error | null };
 export class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false, error: null };
-
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
-
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("[Pulse Radio] Component error caught by boundary:", error, info.componentStack);
+    console.error('[Pulse Radio] Component error caught by boundary:', error, info.componentStack);
   }
-
   private handleReset = () => {
     this.setState({ hasError: false, error: null });
   };
-
   render() {
     if (this.state.hasError) {
       if (this.props.fallback !== undefined) return this.props.fallback;
-
       return (
         <div className="flex-center-col gap-4 p-8 h-full bg-surface-1 text-center select-none">
+          {' '}
           <div className="p-3 rounded-full bg-sys-red/10">
             <AlertTriangle size={28} className="text-sys-red" />
-          </div>
+          </div>{' '}
           <div>
-            <h2 className="text-[15px] font-semibold text-white mb-1">
-              Something went wrong
-            </h2>
+            <h2 className="text-[15px] font-semibold text-white mb-1">Something went wrong</h2>{' '}
             <p className="text-[13px] text-secondary max-w-xs">
-              An unexpected error occurred. Your playback may still be running
-              in the background.
+              {' '}
+              An unexpected error occurred. Your playback may still be running in the background.
             </p>
-          </div>
+          </div>{' '}
           {this.state.error && (
             <pre className="text-[11px] text-muted bg-surface-2 rounded-lg px-4 py-2 max-w-sm overflow-auto max-h-24">
+              {' '}
               {this.state.error.message}
             </pre>
-          )}
+          )}{' '}
           <button
             onClick={this.handleReset}
             className="flex-row-2 px-4 py-2 rounded-lg bg-surface-3 text-[13px] font-medium text-white hover:bg-surface-4 transition-colors"
           >
-            <RotateCcw size={14} />
-            Try Again
+            <RotateCcw size={14} /> Try Again
           </button>
         </div>
       );
     }
-
     return this.props.children;
   }
 }

@@ -1,47 +1,59 @@
-/*
- * Copyright (c) 2026 Carlos Molina Galindo.
- * Open source project: Pulse Radio.
- * Created by Carlos Molina Galindo (CMolG on GitHub).
- */
-
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ const _NOOP = () => {};
+async function apiFetch(
+  url: string,
+  opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string },
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
+  try {
+    const res = await fetch(url, { ...opts.init, signal: controller.signal });
+    if (!res.ok) {
+      await res.text().catch(_NOOP);
+      throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`);
+    }
+    if (opts.maxBytes) {
+      const cl = res.headers.get('content-length');
+      if (cl && parseInt(cl, 10) > opts.maxBytes) {
+        await res.body?.cancel().catch(_NOOP);
+        throw new Error('Response too large');
+      }
+    }
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 import { NextRequest, NextResponse } from 'next/server';
-import { apiFetch } from '@/lib/apiUtils';
-
 export const runtime = 'nodejs';
-
-/**
- * Server-side proxy for iTunes Search API.
- * Avoids any browser-side CORS/CSP issues and allows server caching.
- */
-export async function GET(req: NextRequest) {
+const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' };
+/* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
+  req: NextRequest,
+) {
   const term = req.nextUrl.searchParams.get('term');
   if (!term || term.length > 200) {
-    return NextResponse.json({ error: 'Missing or invalid term parameter', results: [] }, { status: 400 });
+    return NextResponse.json(_ERR_400, { status: 400 });
   }
-
-  // Support podcast search via ?media=podcast (defaults to music for backward compat)
-  const media = req.nextUrl.searchParams.get('media') === 'podcast' ? 'podcast' : 'music';
-  const entity = media === 'podcast' ? 'podcast' : 'song';
-  const limit = media === 'podcast' ? '20' : '3';
-
+  const isPodcast = req.nextUrl.searchParams.get('media') === 'podcast';
+  const media = isPodcast ? 'podcast' : 'music';
+  const entity = isPodcast ? 'podcast' : 'song';
+  const limit = isPodcast ? '20' : '3';
   try {
-    const url = `https://itunes.apple.com/search?${new URLSearchParams({
-      term,
-      media,
-      entity,
-      limit,
-    })}`;
-
-    const res = await apiFetch(url, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes API' });
-
-    const data = await res.json();
-    return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
+    const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
+    const res = await apiFetch(url, {
+      timeoutMs: 8_000,
+      maxBytes: 2 * 1024 * 1024,
+      label: 'iTunes API',
     });
+    const data = await res.json();
+    return NextResponse.json(data, { headers: _CACHE_HDRS });
   } catch (e) {
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     return NextResponse.json(
-      { error: isTimeout ? 'Request timed out' : (e instanceof Error ? e.message : 'Internal error'), results: [] },
+      {
+        error: isTimeout ? 'Request timed out' : e instanceof Error ? e.message : 'Internal error',
+        results: [],
+      },
       { status: isTimeout ? 504 : 500 },
     );
   }
