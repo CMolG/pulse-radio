@@ -288,11 +288,13 @@ const FORMAT_UTILS_ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 const FORMAT_UTILS_WHITESPACE_RE = /\s+/;
 const ARTIST_SPLIT_RE = /[,;&]|feat\.|ft\.|featuring|vs\.?/i;
 function stationInitials(name: string) {
-  return name
-    .split(FORMAT_UTILS_WHITESPACE_RE)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
+  const words = name.split(FORMAT_UTILS_WHITESPACE_RE);
+  let result = '';
+  for (let i = 0; i < 2 && i < words.length; i++) {
+    const ch = words[i][0];
+    if (ch) result += ch.toUpperCase();
+  }
+  return result;
 }
 function primaryArtist(artist: string): string {
   return artist.split(ARTIST_SPLIT_RE)[0].trim();
@@ -8149,7 +8151,8 @@ function useEqualizer() {
     (name: string) => {
       const preset: EqPreset = { name, gains: bands.map((b) => b.gain) };
       setCustomPresets((prev) => {
-        const next = [...prev.filter((p) => p.name !== name), preset];
+        const next = prev.filter((p) => p.name !== name);
+        next.push(preset);
         saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next);
         return next;
       });
@@ -8475,7 +8478,11 @@ function useFavorites() {
     saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
   }, [favorites]);
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
-  const favUuids = useMemo(() => new Set(favorites.map((s) => s.stationuuid)), [favorites]);
+  const favUuids = useMemo(() => {
+    const s = new Set<string>();
+    for (const f of favorites) s.add(f.stationuuid);
+    return s;
+  }, [favorites]);
   const add = useCallback((station: Station) => {
     setFavorites((prev) => {
       if (prev.some((s) => s.stationuuid === station.stationuuid)) return prev;
