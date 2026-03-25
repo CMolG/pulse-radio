@@ -6,13 +6,7 @@
 
 "use client";
 
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef, } from "react";
 import UiImage from "@/components/common/UiImage";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -92,11 +86,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const radio = useRadio();
   const eq = useEqualizer();
   const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
-  const {
-    lyrics,
-    effectiveCurrentTime,
-    realtime: realtimeLyrics,
-  } = useLyrics(track, radio.station?.name, {
+  const { lyrics, effectiveCurrentTime, realtime: realtimeLyrics, } = useLyrics(track, radio.station?.name, {
     currentTime: radio.currentTime,
     enableRealtime: Boolean(track?.title),
     languageHint: locale === 'es' ? 'es' : 'en',

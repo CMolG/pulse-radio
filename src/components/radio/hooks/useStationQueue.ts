@@ -23,10 +23,7 @@ export function useStationQueue() {
   useEffect(() => { queueRef.current = queue; }, [queue]);
 
   // Persist queue to storage on changes (skip initial mount)
-  useEffect(() => {
-    if (persistRef.current) saveToStorage(STORAGE_KEY, queue);
-    persistRef.current = true;
-  }, [queue]);
+  useEffect(() => { if (persistRef.current) saveToStorage(STORAGE_KEY, queue); persistRef.current = true; }, [queue]);
 
   const add = useCallback((station: Station) => {
     setQueue(prev => {

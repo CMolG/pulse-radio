@@ -121,10 +121,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
         recognition.start();
         running = true;
         restartCount = 0;
-      } catch {
-        running = false;
-        callbacks.onFatalError('Speech recognition failed to start.');
-      }
+      } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
     },
     stop: () => { running = false; teardown(); },
     destroy: () => { destroyed = true; running = false; teardown(); },

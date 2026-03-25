@@ -186,10 +186,7 @@ export function useStats() {
     dirtyRef.current = true;
   }, []);
 
-  const clearStats = useCallback(() => {
-    setStats(EMPTY_STATS);
-    saveToStorage(STORAGE_KEY, EMPTY_STATS);
-  }, []);
+  const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
 
   return {
     stats,

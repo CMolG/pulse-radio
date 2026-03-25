@@ -6,13 +6,7 @@
 
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import type { Station, ViewState, BrowseCategory } from "../types";
@@ -172,9 +166,7 @@ export default function BrowseView({
     return ordered;
   }, [userGenreOrder]);
 
-  const isMobile = useMediaQuery("(max-width: 768px)", {
-    initializeWithValue: false,
-  });
+  const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
   const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set());
@@ -204,9 +196,7 @@ export default function BrowseView({
       let result: Station[];
       if (cat.id === "trending") {
         result = await trendingStations(15);
-      } else if (cat.id === "local") {
-        result = await localStations(15);
-      } else if (cat.tag) {
+      } else if (cat.id === "local") { result = await localStations(15); } else if (cat.tag) {
         result = await stationsByTag(cat.tag, 15);
       } else return;
       if (!flags?.cancelled) {
@@ -281,11 +271,7 @@ export default function BrowseView({
               result = [];
           }
           if (!cancelled) setStations(result);
-        } catch {
-          if (!cancelled) setError("Failed to load stations");
-        } finally {
-          if (!cancelled) setLoading(false);
-        }
+        } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
       };
       load();
     } else {

@@ -108,10 +108,7 @@ export async function GET(req: NextRequest) {
       return new Response(null, { status: 200, headers: responseHeaders });
     }
 
-    return new Response(upstream.body, {
-      status: 200,
-      headers: responseHeaders,
-    });
+    return new Response(upstream.body, { status: 200, headers: responseHeaders, });
   } catch (err) {
     if (timeout) clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';

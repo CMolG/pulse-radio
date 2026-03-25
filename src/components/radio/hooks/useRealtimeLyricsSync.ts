@@ -70,9 +70,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
             prev.confidence === step.score &&
             !step.jumpRejected &&
             !step.relockTriggered
-          ) {
-            return prev;
-          }
+          ) { return prev; }
 
           return {
             ...prev,

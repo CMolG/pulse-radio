@@ -66,9 +66,7 @@ export async function fetchIcyMeta(
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch {
     return { streamTitle: null, icyBr: null };
-  } finally {
-    clearTimeout(timeout);
-  }
+  } finally { clearTimeout(timeout); }
 }
 
 let _lastStation = '';

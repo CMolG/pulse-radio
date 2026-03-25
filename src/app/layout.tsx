@@ -46,13 +46,7 @@ export const metadata: Metadata = {
   other: { "mobile-web-app-capable": "yes", },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#0a0f1a",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  viewportFit: "cover",
-};
+export const viewport: Viewport = { themeColor: "#0a0f1a", width: "device-width", initialScale: 1, maximumScale: 5, viewportFit: "cover" };
 
 function JsonLd() {
   const schema = {

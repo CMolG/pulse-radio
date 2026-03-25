@@ -124,10 +124,7 @@ function OnboardingModal() {
     if (!done) { const timer = setTimeout(() => setShow(true), 800); return () => clearTimeout(timer); }
   }, []);
 
-  const handleClose = useCallback(() => {
-    setShow(false);
-    saveToStorage(ONBOARDING_KEY, true);
-  }, []);
+  const handleClose = useCallback(() => { setShow(false); saveToStorage(ONBOARDING_KEY, true); }, []);
 
   if (!show) return null;
 

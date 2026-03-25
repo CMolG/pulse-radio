@@ -33,10 +33,7 @@ export async function GET(req: NextRequest) {
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
-    const res = await fetch(streamUrl, {
-      headers: { 'Icy-MetaData': '1' },
-      signal: controller.signal,
-    });
+    const res = await fetch(streamUrl, { headers: { 'Icy-MetaData': '1' }, signal: controller.signal, });
 
     // Validate the final URL after redirects to prevent SSRF via redirect
     if (res.url) {

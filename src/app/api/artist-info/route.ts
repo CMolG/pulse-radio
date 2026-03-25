@@ -89,9 +89,7 @@ export async function GET(req: NextRequest) {
         imageUrl: wiki?.thumbnail?.source ?? null,
         wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
       },
-      {
-        headers: { 'Cache-Control': cacheHeader, },
-      },
+      { headers: { 'Cache-Control': cacheHeader, }, },
     );
   } catch (err) {
     console.error('[Pulse Radio] Artist info fetch error:', err);

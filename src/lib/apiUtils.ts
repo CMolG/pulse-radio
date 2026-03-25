@@ -19,7 +19,5 @@ export async function apiFetch(
       }
     }
     return res;
-  } finally {
-    clearTimeout(timer);
-  }
+  } finally { clearTimeout(timer); }
 }

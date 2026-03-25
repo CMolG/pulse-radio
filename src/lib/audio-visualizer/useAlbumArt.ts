@@ -191,10 +191,7 @@ function preloadImage(url: string) {
 export function useAlbumArt(title: string | null, artist: string | null) {
   const hasTitle = Boolean(title);
   const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
-  const cachedInfo = useMemo(() => {
-    if (!cacheKey) return null;
-    return cacheGet(cacheKey) ?? null;
-  }, [cacheKey]);
+  const cachedInfo = useMemo(() => { if (!cacheKey) return null; return cacheGet(cacheKey) ?? null; }, [cacheKey]);
   const [fetched, setFetched] = useState<{ key: string; info: AlbumInfo } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 

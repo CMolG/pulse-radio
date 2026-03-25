@@ -73,14 +73,7 @@ function windowBounds(total: number, center: number, relockWindow: number): [num
 }
 
 export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
-  const {
-    lyrics,
-    hypothesisText,
-    previousConfirmedIndex,
-    previousCandidateIndex,
-    stableSamples,
-    policy,
-  } = input;
+  const { lyrics, hypothesisText, previousConfirmedIndex, previousCandidateIndex, stableSamples, policy, } = input;
 
   const hypoTokens = tokenize(hypothesisText);
   if (!hypoTokens.length) {

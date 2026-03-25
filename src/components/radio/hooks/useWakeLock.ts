@@ -35,9 +35,7 @@ export function useWakeLock(shouldLock: boolean) {
       lock.addEventListener('release', () => { lockRef.current = null; setIsActive(false); });
     } catch {
       // Wake lock request failed (e.g., low battery, or permission denied)
-    } finally {
-      requestingRef.current = false;
-    }
+    } finally { requestingRef.current = false; }
   }, []);
 
   const release = useCallback(async () => {
@@ -55,10 +53,7 @@ export function useWakeLock(shouldLock: boolean) {
   }, []);
 
   // Auto-acquire/release based on shouldLock
-  useEffect(() => {
-    if (shouldLock) request();
-    else release();
-  }, [shouldLock, request, release]);
+  useEffect(() => { if (shouldLock) request(); else release(); }, [shouldLock, request, release]);
 
   // Re-acquire when tab becomes visible (browser releases lock on hide)
   useEffect(() => {

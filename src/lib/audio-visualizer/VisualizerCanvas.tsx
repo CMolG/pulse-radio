@@ -32,10 +32,7 @@ export function VisualizerCanvas({
   const supportsRoundRectRef = useRef<boolean | null>(null);
 
   // Invalidate cached color when prop changes
-  useEffect(() => {
-    resolvedColorRef.current = null;
-    gradientCacheRef.current = null;
-  }, [color]);
+  useEffect(() => { resolvedColorRef.current = null; gradientCacheRef.current = null; }, [color]);
 
   // Track size via ResizeObserver instead of getBoundingClientRect per frame
   useEffect(() => {

@@ -196,9 +196,7 @@ export default function TheaterView({
       />
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
-        }}
+        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }}
       />
 
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}
@@ -275,9 +273,7 @@ export default function TheaterView({
           {/* Cover art */}
           <div
             className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} relative overflow-hidden flex-center-row flex-shrink-0`}
-            style={{
-              boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`,
-            }}
+            style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`, }}
           >
             {showFallback ? (
               <div className="size-full dawn-gradient flex-center-row">

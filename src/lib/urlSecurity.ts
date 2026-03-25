@@ -17,9 +17,7 @@ export function isPrivateHost(hostname: string): boolean {
     host === '127.0.0.1' ||
     host === '::1' ||
     host === '0.0.0.0' || host.endsWith('.localhost')
-  ) {
-    return true;
-  }
+  ) { return true; }
 
   // IPv4 private ranges (RFC 1918 + link-local + shared address space)
   const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);

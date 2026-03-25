@@ -44,11 +44,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
     song
-      ? {
-          title: song.title,
-          artist: song.artist,
-          album: resolvedAlbum,
-        }
+      ? { title: song.title, artist: song.artist, album: resolvedAlbum, }
       : null,
     song?.stationName ?? null,
   );
@@ -212,9 +208,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
 
                 {/* Apple Music button */}
                 <a
-                  href={
-                    resolvedItunesUrl || itunesSearchUrl(song.title, song.artist)
-                  }
+                  href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
