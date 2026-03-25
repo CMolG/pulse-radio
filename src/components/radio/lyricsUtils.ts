@@ -10,5 +10,4 @@ export function getEffectiveActiveLyricIndex( lyrics: LyricsData | null, current
 export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLyricLine[] { if (!lyrics) return []; if (lyrics.synced && lyrics.lines.length > 0) {
     return lyrics.lines.map((line, index) => ({ id: `synced-${index}-${line.time}`, text: line.text || "♪", })); }
   if (!lyrics.plainText) return []; return lyrics.plainText .split(/\r?\n/) .map((line) => line.trim()).filter(Boolean).map((text, index) => ({
-      id: `plain-${index}`, text, }));
-}
+      id: `plain-${index}`, text, })); }

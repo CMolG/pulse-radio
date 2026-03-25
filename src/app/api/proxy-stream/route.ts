@@ -10,8 +10,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
         status: 400, headers: { 'Content-Type': 'application/json' },});
     } const host = parsed.hostname.toLowerCase(); // Block loopback and private/internal IPs to prevent SSRF
     if (isPrivateHost(host)) { return new Response(JSON.stringify({ error: 'Private/internal URLs not allowed' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },});
-    }
+        status: 400, headers: { 'Content-Type': 'application/json' },}); }
   } catch { return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },});
   } const controller = new AbortController(); const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null; if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); } try { const upstream = await fetch(parsed.toString(), { // Propagate client disconnect to upstream so we don't leak connections

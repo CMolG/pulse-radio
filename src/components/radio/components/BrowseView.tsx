@@ -21,8 +21,7 @@ const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-we
     const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return; try { let result: Station[]; if (cat.id === "trending") { result = await trendingStations(15); } else if (cat.id === "local") { result = await localStations(15); } else if (cat.tag) {
         result = await stationsByTag(cat.tag, 15);
       } else return; if (!flags?.cancelled) { setCategorySections((prev) => ({ ...prev, [cat.id]: result })); setFailedCategories((prev) => {
-          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;});
-      }
+          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;}); }
     } catch { if (!flags?.cancelled) { setFailedCategories((prev) => {
           if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;});
       } }

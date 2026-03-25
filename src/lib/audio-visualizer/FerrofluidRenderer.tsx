@@ -23,8 +23,7 @@ let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefin
         const accentMix = edgeGlow * energy * 0.6; sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0); sd[idx + 1] = Math.min(255, g + (colors.accent[1] * accentMix) | 0); sd[idx + 2] = Math.min(255, b + (colors.accent[2] * accentMix) | 0); sd[idx + 3] = Math.min(255, (180 + coreIntensity * 75) | 0); // add accent glow at edges
       } else if (sum > thresholdLow) {
         const glowIntensity = (sum - thresholdLow) / glowRange; sd[idx] = (colors.accent[0] * glowIntensity * 0.4) | 0; sd[idx + 1] = (colors.accent[1] * glowIntensity * 0.4) | 0; sd[idx + 2] = (colors.accent[2] * glowIntensity * 0.4) | 0; sd[idx + 3] = (glowIntensity * 60) | 0; // outer glow
-      } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0; }
-  }
+      } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0; } }
   try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h); } catch { /* skip frame on canvas error */ } } // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing // Put image data into offscreen canvas, then draw upscaled with
 export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e', colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false, }: FerrofluidRendererProps) {
   const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 }); const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) }); const colors = useRef(mkColors()); useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]); const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {

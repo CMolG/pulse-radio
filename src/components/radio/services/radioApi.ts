@@ -17,8 +17,7 @@ export function stationsByCountry(country: string, limit = 30): Promise<Station[
   return searchBy({ country }, `country:${country}`, limit); }
 export function trendingStations(limit = 20): Promise<Station[]> { return topStations(limit); } export async function localStations(limit = 20): Promise<Station[]> {
   const countryCode = typeof navigator !== 'undefined' ? navigator.language?.split('-')[1]?.toUpperCase() || '' : ''; if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit); return fetchCached(
-    `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`, `local-${countryCode}-${limit}`,);
-}
+    `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`, `local-${countryCode}-${limit}`,); }
 /* Find similar stations by matching the first tag of the current station. Used for automatic failover when the c
  * urrent station goes down. */
 export async function similarStations(station: Station, limit = 5): Promise<Station[]> {
