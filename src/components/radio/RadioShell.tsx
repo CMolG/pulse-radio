@@ -2279,6 +2279,8 @@ function useRealtimeLyricsSync({ lyrics, enabled, languageHint }: Params): Realt
 const TS_REGEX = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
 function parseLrc(lrcText: string): LyricLine[] {
   const lines: LyricLine[] = [];
+  let sorted = true;
+  let prevTime = -1;
   for (const raw of lrcText.split('\n')) {
     const timestamps: number[] = [];
     let lastIndex = 0;
@@ -2296,10 +2298,12 @@ function parseLrc(lrcText: string): LyricLine[] {
     const text = raw.slice(lastIndex).trim();
     if (!text) continue;
     for (const time of timestamps) {
+      if (time < prevTime) sorted = false;
+      prevTime = time;
       lines.push({ time, text });
     }
   }
-  return lines.sort((a, b) => a.time - b.time);
+  return sorted ? lines : lines.sort((a, b) => a.time - b.time);
 }
 const LRCLIB_BASE = 'https://lrclib.net/api';
 const LYRICS_FETCH_TIMEOUT_MS = 8_000;
