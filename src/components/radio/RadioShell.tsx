@@ -4485,20 +4485,20 @@ function TheaterView({
               {track.artist ? `${track.artist} — ${track.title}` : track.title}
             </p>
           ) : (
-            <p className={`${compact ? 'text-[11px]' : 'text-[12px]'} text-white/40 text-center`}>
+            <p className={`${compact ? 'text-[11px]' : 'text-[12px]'} text-white/50 text-center`}>
               {theaterTags}
             </p>
           )}{' '}
           {track?.album && (
             <p
-              className={`${compact ? 'text-[11px]' : 'text-[11px]'} text-white/40 text-center line-clamp-1`}
+              className={`${compact ? 'text-[11px]' : 'text-[11px]'} text-white/50 text-center line-clamp-1`}
             >
               {' '}
               {track.album}
             </p>
           )}{' '}
           {!compact && track?.releaseDate && (
-            <p className="text-[11px] text-white/40 text-center -mt-1">
+            <p className="text-[11px] text-white/50 text-center -mt-1">
               {' '}
               Released on: {formatReleaseDate(track.releaseDate)}
             </p>
@@ -4549,7 +4549,7 @@ function TheaterView({
           {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
           {!compact && concerts.length > 0 && (
             <div className="w-full mt-2">
-              <p className="text-[11px] font-semibold tracking-widest uppercase text-white/40 text-center mb-1.5">
+              <p className="text-[11px] font-semibold tracking-widest uppercase text-white/50 text-center mb-1.5">
                 Upcoming Shows
               </p>
               <div className="flex flex-col gap-1 w-full">
@@ -6068,7 +6068,7 @@ const BarRow = React.memo(function BarRow({
           style={{ width: `${pct}%` }}
         />{' '}
       </div>
-      <span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">
+      <span className="text-[11px] text-white/50 tabular-nums w-[50px] text-right shrink-0">
         {suffix}
       </span>
     </div>
@@ -6104,7 +6104,7 @@ const StatsView = React.memo(function StatsView({
         {' '}
         <IoTimeOutline size={20} className="text-[#3478f6]" />{' '}
         <div>
-          <p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>{' '}
+          <p className="text-[11px] text-white/50 uppercase tracking-wider">Total Listen Time</p>{' '}
           <p className="text-[18px] font-bold text-white tabular-nums">
             {formatListenTime(totalListenMs)}
           </p>
@@ -6358,7 +6358,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               </div>{' '}
               {/* Presets */}{' '}
               <div>
-                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">
+                <span className="text-[11px] text-white/50 uppercase tracking-wider mb-2 block">
                   Presets
                 </span>{' '}
                 <div className="flex flex-wrap gap-1.5">
@@ -6438,7 +6438,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               </div>{' '}
               {/* Band sliders — horizontal scroll */}{' '}
               <div>
-                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">
+                <span className="text-[11px] text-white/50 uppercase tracking-wider mb-2 block">
                   Bands
                 </span>{' '}
                 <div className="flex items-end justify-between gap-1.5 px-1">
@@ -6446,7 +6446,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {eq.bands.map((band) => (
                     <div key={band.id} className="flex flex-col items-center gap-1">
                       {' '}
-                      <span className="text-[11px] text-white/40 tabular-nums">
+                      <span className="text-[11px] text-white/50 tabular-nums">
                         {band.gain > 0 ? `+${band.gain}` : band.gain}
                       </span>{' '}
                       <input
@@ -6460,7 +6460,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                         aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />{' '}
-                      <span className="text-[11px] text-white/40">{band.label}</span>
+                      <span className="text-[11px] text-white/50">{band.label}</span>
                     </div>
                   ))}
                 </div>
@@ -6468,7 +6468,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               {/* Noise Reduction */}{' '}
               <div>
                 {' '}
-                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">
+                <span className="text-[11px] text-white/50 uppercase tracking-wider mb-2 block">
                   Noise Reduction
                 </span>{' '}
                 <div className="flex gap-1.5">
@@ -6713,7 +6713,7 @@ function GroupStack({
         className={`flex items-center gap-2 mb-3 group ${hasMore ? 'cursor-pointer' : 'cursor-default'}`}
       >
         {' '}
-        <Icon size={14} className="text-white/40" />{' '}
+        <Icon size={14} className="text-white/50" />{' '}
         <span className="text-[14px] font-semibold text-white/80">{label}</span>{' '}
         <span className="text-[11px] text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-full">
           {songs.length}
@@ -6811,7 +6811,7 @@ function GroupStack({
       {expanded && hasMore && (
         <button
           onClick={() => setExpanded(false)}
-          className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors"
+          className="mt-3 flex items-center gap-1 text-[11px] text-white/50 hover:text-white/60 transition-colors"
         >
           {' '}
           <ChevronDown size={12} className="rotate-180" /> Collapse
@@ -7137,7 +7137,7 @@ function PWAStep() {
           </div>
         </div>
       ) : (
-        <p className="text-[12px] text-white/40 mt-1">
+        <p className="text-[12px] text-white/50 mt-1">
           {' '}
           Use Chrome or Edge for the install option, or add this page to your home screen.
         </p>
