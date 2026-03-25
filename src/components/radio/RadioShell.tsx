@@ -1155,6 +1155,7 @@ async function fetchIcyMeta(
 }
 let _lastStation = '';
 let _lastStationLower = '';
+const _TRACK_SEPARATORS = [' - ', ' — ', ' – ', ' | '];
 function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null;
   if (raw === stationName) return null;
@@ -1163,8 +1164,7 @@ function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
     _lastStationLower = stationName.toLowerCase();
   }
   if (raw.toLowerCase() === _lastStationLower) return null;
-  const separators = [' - ', ' — ', ' – ', ' | '];
-  for (const sep of separators) {
+  for (const sep of _TRACK_SEPARATORS) {
     const idx = raw.indexOf(sep);
     if (idx > 0)
       return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() };
