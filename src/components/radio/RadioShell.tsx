@@ -665,12 +665,20 @@ function appendReferrer(url: string): string {
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}${ITUNES_REFERRER}`;
 }
+const _preloadedUrls = new Set<string>();
 /** Preload an image so it's already in the browser cache when rendered. */ function preloadImage(
   url: string,
 ) {
+  if (_preloadedUrls.has(url)) return;
+  _preloadedUrls.add(url);
+  if (_preloadedUrls.size > 200) {
+    const oldest = _preloadedUrls.values().next().value;
+    if (oldest !== undefined) _preloadedUrls.delete(oldest);
+  }
   const img = new window.Image();
   img.crossOrigin = 'anonymous';
   img.onerror = () => {
+    _preloadedUrls.delete(url);
     img.src = '';
   };
   img.src = url;
