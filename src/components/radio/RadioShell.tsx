@@ -5584,7 +5584,7 @@ function _NowPlayingBar({
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           aria-pressed={isPlaying}
-          className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
+          className="w-10 h-10 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >
           {isLoading ? (
             <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -5950,7 +5950,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
           <button
             onClick={onClose}
             aria-label="Close guide"
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <IoChevronBack size={16} />
           </button>{' '}
@@ -6286,7 +6286,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
           <button
             onClick={onClose}
             aria-label="Close settings"
-            className="w-8 h-8 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
+            className="w-10 h-10 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <X size={16} />
           </button>
@@ -6603,7 +6603,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                 <button
                   onClick={() => setShowStats(false)}
                   aria-label="Close statistics"
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -9950,7 +9950,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 {pulseLogoButton} <div className="flex-1" />{' '}
                 <button
                   onClick={() => setShowMobileSettings(true)}
-                  className="w-9 h-9 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
+                  className="w-11 h-11 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
                   title="Settings"
                   data-testid="mobile-settings-btn"
                 >
@@ -9964,7 +9964,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         ? t('removeFromFavorites')
                         : t('addToFavorites')
                     }
-                    className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? 'text-sys-orange' : 'text-white/45'}`}
+                    className={`w-11 h-11 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? 'text-sys-orange' : 'text-white/45'}`}
                   >
                     {' '}
                     <Star
@@ -10098,7 +10098,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {pulseLogoButton} <div className="flex-1" /> <LanguageSelector />
                     <button
                       onClick={() => setShowDesktopSettings(true)}
-                      className="w-9 h-9 flex items-center justify-center rounded-xl text-white/45 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
+                      className="w-11 h-11 flex items-center justify-center rounded-xl text-white/45 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
                       title="Settings"
                       data-testid="desktop-settings-btn"
                     >
