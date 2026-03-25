@@ -1,14 +1,10 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useState, useCallback } from "react";
+"use client"; import React, { useState, useCallback } from "react";
 import { X, Languages, Sliders, Power, ChevronDown, ChevronUp, Plus, Save } from "lucide-react";
 import { IoHelpCircleOutline, IoStatsChartOutline } from "react-icons/io5";
-import { motion, AnimatePresence } from "motion/react";
-import { useLocale } from "@/context/LocaleContext";
-import { EQ_PRESETS } from "../constants";
-import type { EqBand, EqPreset, NoiseReductionMode } from "../types";
-import UsageGuide from "./UsageGuide";
-import StatsView from "./StatsView";
+import { motion, AnimatePresence } from "motion/react"; import { useLocale } from "@/context/LocaleContext";
+import { EQ_PRESETS } from "../constants"; import type { EqBand, EqPreset, NoiseReductionMode } from "../types";
+import UsageGuide from "./UsageGuide"; import StatsView from "./StatsView";
 import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from "../hooks/useStats";
 type Props = { onClose: () => void;
   eq: { bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; stereoWidth: number;

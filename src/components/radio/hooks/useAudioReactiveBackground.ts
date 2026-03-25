@@ -1,10 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useEffect, useRef, useState } from 'react';
-type MeterRef = React.RefObject<{ peak: number; rms: number }>;
-const ATTACK_MS = 80;
-const RELEASE_MS = 350;
-const MAX_AMPLITUDE = 0.35;
+'use client'; import { useEffect, useRef, useState } from 'react';
+type MeterRef = React.RefObject<{ peak: number; rms: number }>; const ATTACK_MS = 80;
+const RELEASE_MS = 350; const MAX_AMPLITUDE = 0.35;
 function clamp01(value: number): number { return Math.max(0, Math.min(1, value)); }
 /* Produces a smoothed audio-reactive amplitude suitable for background motion. Uses fast attack + slower release
  *  to track energy while avoiding jitter. */

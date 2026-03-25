@@ -1,13 +1,11 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useRef, useEffect } from 'react';
+'use client'; import React, { useRef, useEffect } from 'react';
 interface FerrofluidRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; blobCount?: number; colorPrimary?: string;
   colorSecondary?: string; colorAccent?: string; sensitivity?: number;
   /** standalone demo mode — generates its own animation without audio */
   demo?: boolean; }
-import { hexToRgb } from './colorUtils';
-import { useCanvasLoop } from './useCanvasLoop';
+import { hexToRgb } from './colorUtils'; import { useCanvasLoop } from './useCanvasLoop';
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 interface Blob { x: number; y: number; baseRadius: number;
   /** Per-blob random size factor (0–1), assigned once at creation */
@@ -24,8 +22,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
   }
   return blobs; }
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
-let _offscreen: OffscreenCanvas | null = null;
-let _imgData: ImageData | undefined;
+let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefined;
 function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number, h: number,
   colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] },
   energy: number, ) {

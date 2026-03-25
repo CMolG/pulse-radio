@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useRef, useCallback, useEffect } from 'react';
-import type { Station, PlaybackStatus } from '../types';
-import { STORAGE_KEYS } from '../constants';
+'use client'; import { useState, useRef, useCallback, useEffect } from 'react';
+import type { Station, PlaybackStatus } from '../types'; import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { resumeAudioContext, hasAudioSource } from '@/lib/audio-visualizer';
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */

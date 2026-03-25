@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useEffect, useRef, useCallback } from 'react';
+'use client'; import { useEffect, useRef, useCallback } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 type MediaSessionConfig = {
   station: Station | null; track: NowPlayingTrack | null; isPlaying: boolean; onPlay: () => void;

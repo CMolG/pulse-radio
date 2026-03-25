@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { BrowseCategory, EqBand, EqPreset } from './types';
-import type { MessageKey } from '@/lib/i18n/messages';
+import type { BrowseCategory, EqBand, EqPreset } from './types'; import type { MessageKey } from '@/lib/i18n/messages';
 export const STORAGE_KEYS = {
   FAVORITES: 'radio-favorites', RECENT: 'radio-recent', VOLUME: 'radio-volume', EQ_BANDS: 'radio-eq-bands',
   LYRICS_CACHE: 'radio-lyrics-cache', CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
@@ -10,8 +9,7 @@ export const STORAGE_KEYS = {
   COMPRESSOR_AMOUNT: 'radio-compressor-amount', NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
   REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled', LOCALE: 'radio-locale',
   USAGE_STATS: 'radio-usage-stats', ONBOARDING_DONE: 'radio-onboarding-done', } as const;
-export const MAX_RECENT = 15;
-export const MAX_HISTORY = 100;
+export const MAX_RECENT = 15; export const MAX_HISTORY = 100;
 export const GENRE_CATEGORIES: BrowseCategory[] = [
   { id: 'pop',        label: 'Pop',        tag: 'pop',        gradient: 'from-pink-500 to-rose-600' },
   { id: 'rock',       label: 'Rock',       tag: 'rock',       gradient: 'from-red-600 to-orange-600' },

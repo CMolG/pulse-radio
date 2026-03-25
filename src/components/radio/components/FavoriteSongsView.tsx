@@ -1,17 +1,13 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+"use client"; import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Music, Heart, Trash2, Users, X, ChevronDown, Disc3 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import type { FavoriteSong, SongDetailData } from "../types";
-import UiImage from "@/components/common/UiImage";
-import { primaryArtist } from "../utils/formatUtils";
+import { motion, AnimatePresence } from "motion/react"; import type { FavoriteSong, SongDetailData } from "../types";
+import UiImage from "@/components/common/UiImage"; import { primaryArtist } from "../utils/formatUtils";
 import SongCard from "./SongCard";
 type Props = {
   songs: FavoriteSong[]; onRemove: (id: string) => void; onClear: () => void; onSelect?: (song: SongDetailData) => void;
-};
-type ContextMenuState = { x: number; y: number; songId: string } | null;
+}; type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = "none" | "artist" | "album";
 const filterBtnClass = (active: boolean) =>
   `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${

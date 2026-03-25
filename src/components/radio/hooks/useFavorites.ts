@@ -1,11 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useCallback, useEffect } from 'react';
-import type { Station } from '../types';
-import { STORAGE_KEYS } from '../constants';
+'use client'; import { useState, useCallback, useEffect } from 'react';
+import type { Station } from '../types'; import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { useStorageSync } from '@/lib/useStorageSync';
-const MAX_FAVORITES = 500;
+import { useStorageSync } from '@/lib/useStorageSync'; const MAX_FAVORITES = 500;
 export function useFavorites() { const [favorites, setFavorites] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []);
     const seen = new Set<string>(); // Dedup on load in case of corrupted storage

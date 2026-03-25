@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { STORAGE_KEYS } from '../constants';
-import type { LyricsData } from '../types';
+'use client'; import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { STORAGE_KEYS } from '../constants'; import type { LyricsData } from '../types';
 import { defaultRealtimeState, DEFAULT_REALTIME_ALIGN_POLICY, isRealtimeEligible, type RealtimeSyncResult } from '../services/realtimeLyricsTypes';
 import { alignHypothesis, mapLineToEffectiveTime } from '../services/lyricsAligner';
 import { createRealtimeSpeechEngine, isRealtimeSpeechSupported, type RealtimeSpeechEngine } from '../services/realtimeSpeechRecognition';

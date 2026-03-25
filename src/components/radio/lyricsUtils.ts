@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import type { LyricsData } from "./types";
+"use client"; import type { LyricsData } from "./types";
 export type RenderableLyricLine = { id: string; text: string; };
 /* Binary search for the last lyric line whose time ≤ currentTime. Lines are sorted ascending by time, so binary 
  * search is O(log n) vs O(n). */

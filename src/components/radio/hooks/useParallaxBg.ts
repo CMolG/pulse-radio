@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+'use client'; import { useState, useEffect, useCallback, useRef } from 'react';
 import { GENRE_GRADIENTS } from '../constants';
 export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   const [offset, setOffset] = useState({ x: 0, y: 0 }); const containerRef = useRef<HTMLDivElement | null>(null);

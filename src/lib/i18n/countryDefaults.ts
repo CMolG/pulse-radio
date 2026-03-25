@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { COUNTRY_BY_CODE } from "./countries";
-import { LANG3_TO_LOCALE } from "./languageMap";
+import { COUNTRY_BY_CODE } from "./countries"; import { LANG3_TO_LOCALE } from "./languageMap";
 import type { SupportedLocale } from "./locales";
 const COUNTRY_LOCALE_OVERRIDES: Partial<Record<string, SupportedLocale>> = {
   BR: "pt-BR", TW: "zh-TW", HK: "zh-TW", MO: "zh-TW", };

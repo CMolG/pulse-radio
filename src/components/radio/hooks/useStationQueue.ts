@@ -1,10 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useCallback, useRef, useEffect } from 'react';
-import type { Station } from '../types';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-const STORAGE_KEY = 'radio-station-queue';
-const MAX_QUEUE_SIZE = 20;
+'use client'; import { useState, useCallback, useRef, useEffect } from 'react';
+import type { Station } from '../types'; import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+const STORAGE_KEY = 'radio-station-queue'; const MAX_QUEUE_SIZE = 20;
 export function useStationQueue() { const [queue, setQueue] = useState<Station[]>(() =>
     loadFromStorage<Station[]>(STORAGE_KEY, [])
   ); const [currentIndex, setCurrentIndex] = useState(-1); const persistRef = useRef(false);

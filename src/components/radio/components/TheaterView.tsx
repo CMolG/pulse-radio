@@ -1,28 +1,21 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useState, useRef, useEffect, useMemo } from "react";
+"use client"; import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";
-import { motion } from "motion/react";
-import type { Station, NowPlayingTrack, LyricsData } from "../types";
-import AnimatedBars from "./AnimatedBars";
-import LyricsReel from "./MobileLyricsReel";
-import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer";
-import { ErrorBoundary } from "./ErrorBoundary";
+import { motion } from "motion/react"; import type { Station, NowPlayingTrack, LyricsData } from "../types";
+import AnimatedBars from "./AnimatedBars"; import LyricsReel from "./MobileLyricsReel";
+import { SpiralRenderer } from "@/lib/audio-visualizer/SpiralRenderer"; import { ErrorBoundary } from "./ErrorBoundary";
 import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
-import { stationInitials } from "../utils/formatUtils";
-import UiImage from "@/components/common/UiImage";
+import { stationInitials } from "../utils/formatUtils"; import UiImage from "@/components/common/UiImage";
 // Fallback spiral colors — warm orange/red gradient
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];
 const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; children: React.ReactNode }) => (
   <span className={`px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50${mono ? " font-mono" : ""}${upper ? " uppercase" : ""}`}>{children}</span>
-);
-type Props = { station: Station; track: NowPlayingTrack | null;
+); type Props = { station: Station; track: NowPlayingTrack | null;
   isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null; icyBitrate?: string | null; onBack: () => void; onToggleFav?: () => void;
   isFavorite?: boolean; onFavSong?: () => void; isSongLiked?: boolean; lyrics?: LyricsData | null;
   currentTime?: number; activeLineOverride?: number; lyricsVariant?: "mobile" | "desktop"; compact?: boolean; };
-const _colorCache = new Map<string, Promise<[string, string, string]>>();
-const MAX_COLOR_CACHE = 32;
+const _colorCache = new Map<string, Promise<[string, string, string]>>(); const MAX_COLOR_CACHE = 32;
 /** Extract the top-2 saturated hues from an artwork image for use as spiral colors. */
 function extractColors(imgUrl: string): Promise<[string, string, string]> {
   const cached = _colorCache.get(imgUrl); if (cached) return cached;

@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { normalizeLocale, type SupportedLocale } from "./locales";
 import { loadStringFromStorage, saveStringToStorage } from "@/lib/storageUtils";
-import { getDefaultLocaleForCountry } from "./countryDefaults";
-export const LOCALE_STORAGE_KEY = "radio-locale";
+import { getDefaultLocaleForCountry } from "./countryDefaults"; export const LOCALE_STORAGE_KEY = "radio-locale";
 export function getBrowserLocale(): SupportedLocale {
   if (typeof navigator === "undefined") return "en"; const nav = navigator as Navigator & { languages?: string[] };
   if (Array.isArray(nav.languages) && nav.languages.length > 0) return normalizeLocale(nav.languages[0]);

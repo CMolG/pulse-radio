@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+'use client'; import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { getOrCreateAudioSource } from './audioSourceCache';
 type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: number; };
 interface UseAudioAnalyserReturn { connectAudio: (audio: HTMLAudioElement) => void;

@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useCallback, useEffect } from 'react';
-import type { Station } from '../types';
-import { STORAGE_KEYS, MAX_RECENT } from '../constants';
+'use client'; import { useState, useCallback, useEffect } from 'react';
+import type { Station } from '../types'; import { STORAGE_KEYS, MAX_RECENT } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 export function useRecent() { const [recent, setRecent] = useState<Station[]>(() => {

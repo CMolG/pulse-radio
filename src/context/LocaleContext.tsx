@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+"use client"; import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getInitialLocale, getInitialLocaleForCountry, saveLocale } from "@/lib/i18n/localeStorage";
 import { isRtlLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/i18n/locales";
 import { type MessageKey, translate } from "@/lib/i18n/messages";

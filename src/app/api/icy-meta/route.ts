@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { NextRequest, NextResponse } from 'next/server';
-import { isPrivateHost } from '@/lib/urlSecurity';
+import { NextRequest, NextResponse } from 'next/server'; import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';
 /* Server-side ICY metadata proxy. Fetches the first metadata block from an internet radio stream using the ICY p
  * rotocol, which browsers can't do directly due to CORS. */

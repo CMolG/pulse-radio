@@ -1,12 +1,10 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { normalizeText } from '@/lib/stringUtils';
+import { useState, useEffect, useRef, useMemo } from 'react'; import { normalizeText } from '@/lib/stringUtils';
 const FETCH_TIMEOUT = 8_000;
 interface AlbumInfo {
   artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null;
   durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null; }
-const CACHE = new Map<string, AlbumInfo>();
-const MAX_CACHE = 200;
+const CACHE = new Map<string, AlbumInfo>(); const MAX_CACHE = 200;
 const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
   durationMs: null, genre: null, trackNumber: null, trackCount: null, };
 type ItunesResult = { trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;

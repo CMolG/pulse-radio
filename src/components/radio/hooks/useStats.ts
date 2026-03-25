@@ -1,15 +1,9 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+'use client'; import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { useStorageSync } from '@/lib/useStorageSync';
-import { primaryArtist } from '../utils/formatUtils';
-const STORAGE_KEY = 'radio-usage-stats';
-const SAVE_INTERVAL_MS = 10_000;
-const MAX_STATIONS = 300;
-const MAX_SONGS = 500;
-const MAX_ARTISTS = 200;
-const MAX_GENRES = 100;
+import { useStorageSync } from '@/lib/useStorageSync'; import { primaryArtist } from '../utils/formatUtils';
+const STORAGE_KEY = 'radio-usage-stats'; const SAVE_INTERVAL_MS = 10_000;
+const MAX_STATIONS = 300; const MAX_SONGS = 500; const MAX_ARTISTS = 200; const MAX_GENRES = 100;
 export type StationListenTime = { name: string; uuid: string; totalMs: number; };
 export type SongPlayCount = { title: string; artist: string; count: number; artworkUrl?: string; genre?: string; };
 export type ArtistPlayCount = { name: string; count: number; };

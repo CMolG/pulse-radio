@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { LyricLine } from './types';
-const TS_REGEX = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
+import type { LyricLine } from './types'; const TS_REGEX = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
 export function parseLrc(lrcText: string): LyricLine[] { const lines: LyricLine[] = [];
   for (const raw of lrcText.split('\n')) {
     const timestamps: number[] = []; let lastIndex = 0; let m; TS_REGEX.lastIndex = 0;

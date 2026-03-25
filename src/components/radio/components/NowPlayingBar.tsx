@@ -1,13 +1,10 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useState, useMemo, useCallback } from "react";
+"use client"; import React, { useState, useMemo, useCallback } from "react";
 import { Play, Pause, Volume2, VolumeX, Radio, SlidersHorizontal, Maximize2, Star, Heart, Clock } from "lucide-react";
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
-import type { StreamQuality } from "../hooks/useRadio";
-import AnimatedBars from "./AnimatedBars";
+import type { StreamQuality } from "../hooks/useRadio"; import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
-import { ErrorBoundary } from "./ErrorBoundary";
-import UiImage from "@/components/common/UiImage";
+import { ErrorBoundary } from "./ErrorBoundary"; import UiImage from "@/components/common/UiImage";
 import { stationInitials } from "../utils/formatUtils";
 type Props = { station: Station | null; track: NowPlayingTrack | null; status: PlaybackStatus; volume: number;
   muted: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;

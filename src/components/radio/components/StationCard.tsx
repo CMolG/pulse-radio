@@ -1,12 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useState, useMemo } from 'react';
-import { Play, Pause, Heart, Radio, Music2, Loader2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import type { Station } from '../types';
-import { countryFlag } from '../constants';
-import UiImage from '@/components/common/UiImage';
-import { stationInitials } from '../utils/formatUtils';
+'use client'; import React, { useState, useMemo } from 'react';
+import { Play, Pause, Heart, Radio, Music2, Loader2 } from 'lucide-react'; import { motion } from 'motion/react';
+import type { Station } from '../types'; import { countryFlag } from '../constants';
+import UiImage from '@/components/common/UiImage'; import { stationInitials } from '../utils/formatUtils';
 type Props = { station: Station; isPlaying: boolean; isCurrent: boolean; isFavorite: boolean;
   onPlay: () => void; onToggleFav: () => void;
   liveStatus?: 'loading' | 'loaded' | 'error'; liveTrack?: { title: string; artist: string } | null;

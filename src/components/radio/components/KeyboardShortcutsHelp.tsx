@@ -1,7 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React from "react";
-import { X } from "lucide-react";
+"use client"; import React from "react"; import { X } from "lucide-react";
 const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: "Previous station" },
   { key: "→", desc: "Next station" }, { key: "↑", desc: "Volume up" },
   { key: "↓", desc: "Volume down" }, { key: "M", desc: "Mute / Unmute" },

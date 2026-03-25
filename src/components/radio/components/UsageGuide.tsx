@@ -1,7 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+'use client'; import React, { useState } from 'react'; import { motion, AnimatePresence } from 'motion/react';
 import { IoRadioOutline, IoHeartOutline, IoMusicalNotesOutline, IoStatsChartOutline, IoSearchOutline,
   IoColorPaletteOutline, IoTimerOutline, IoGlobeOutline, IoChevronBack } from 'react-icons/io5';
 const GLASS_STYLE: React.CSSProperties = {

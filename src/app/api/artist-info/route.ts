@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { NextRequest, NextResponse } from 'next/server';
-export const runtime = 'nodejs';
-const MB_BASE = 'https://musicbrainz.org/ws/2';
-const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
+import { NextRequest, NextResponse } from 'next/server'; export const runtime = 'nodejs';
+const MB_BASE = 'https://musicbrainz.org/ws/2'; const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
 const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)';
 const MUSIC_KEYWORDS =
   /band|singer|musician|artist|rapper|group|duo|dj|producer|composer|vocalist|songwriter|hip.hop|rock|pop|jazz|classical|electronic|country|metal|r&b|soul|blues|funk|reggae|punk|folk/i;

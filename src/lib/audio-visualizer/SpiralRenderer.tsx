@@ -1,13 +1,9 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useRef, useEffect } from "react";
+"use client"; import React, { useRef, useEffect } from "react";
 interface SpiralRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string;
   color3?: string; sensitivity?: number; demo?: boolean; }
-import { useCanvasLoop } from './useCanvasLoop';
-const NUM_BARS = 250;
-const CYCLES = 4;
-const SMOOTH_PASSES = 3;
+import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYCLES = 4; const SMOOTH_PASSES = 3;
 export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068",
   color3 = "#f9d423", sensitivity = 1.0, demo = false,
 }: SpiralRendererProps) { const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS));

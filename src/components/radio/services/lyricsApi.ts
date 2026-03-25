@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { LyricsData, LrcLibResponse } from '../types';
-import { parseLrc } from '../lrcParser';
-const LRCLIB_BASE = 'https://lrclib.net/api';
-const FETCH_TIMEOUT_MS = 8_000;
+import type { LyricsData, LrcLibResponse } from '../types'; import { parseLrc } from '../lrcParser';
+const LRCLIB_BASE = 'https://lrclib.net/api'; const FETCH_TIMEOUT_MS = 8_000;
 function isTransientError(err: unknown): boolean {
   if (err instanceof DOMException && err.name === 'TimeoutError') return true;
   if (err instanceof TypeError) return true; // fetch network failure

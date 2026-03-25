@@ -1,15 +1,11 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useState, useEffect, useRef, useCallback, useMemo, } from "react";
+"use client"; import React, { useState, useEffect, useRef, useCallback, useMemo, } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
-import { useMediaQuery } from "usehooks-ts";
-import type { Station, ViewState, BrowseCategory } from "../types";
+import { useMediaQuery } from "usehooks-ts"; import type { Station, ViewState, BrowseCategory } from "../types";
 import { GENRE_CATEGORIES, GENRE_LABEL_KEYS } from "../constants";
 import { searchStations, stationsByTag, stationsByCountry, trendingStations, localStations } from "../services/radioApi";
-import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
-import StationCard from "./StationCard";
-import { useLocale } from "@/context/LocaleContext";
-import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
+import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta"; import StationCard from "./StationCard";
+import { useLocale } from "@/context/LocaleContext"; import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 /** Order in which category sections appear on the home screen */
 const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
   'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world', ] as const;

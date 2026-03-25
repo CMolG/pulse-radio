@@ -21,8 +21,7 @@ const BASE_MESSAGES = {
   genreClassical: "Classical", genreElectronic: "Electronic", genreHiphop: "Hip-Hop", genreCountry: "Country",
   genreAmbient: "Ambient", genreLofi: "Lo-Fi", genreNews: "News", genreLatin: "Latin",
   genreMetal: "Metal", genreLocal: "Local", genreWorld: "World", seeMore: "See more", } as const;
-export type MessageKey = keyof typeof BASE_MESSAGES;
-export type MessageBundle = Record<MessageKey, string>;
+export type MessageKey = keyof typeof BASE_MESSAGES; export type MessageBundle = Record<MessageKey, string>;
 const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = { es: {
     topStations: "Top Stations", loadingStations: "Cargando…", stationCount: "{count} emisoras", discovery: "Descubrir",
     all: "Todo", allCountries: "Todos", favorites: "Favoritos", recent: "Recientes",

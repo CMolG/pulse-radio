@@ -1,7 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useState } from 'react';
-import Image from 'next/image';
+'use client'; import React, { useState } from 'react'; import Image from 'next/image';
 interface ParallaxAlbumBackgroundProps {
   imageUrl: string | null; fallbackUrl?: string; blurClass?: string; overlayClass?: string;
   enableDrift?: boolean; showTopGlow?: boolean; children?: React.ReactNode; }

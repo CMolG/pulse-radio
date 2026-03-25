@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { NextRequest, NextResponse } from 'next/server';
-import { apiFetch } from '@/lib/apiUtils';
+import { NextRequest, NextResponse } from 'next/server'; import { apiFetch } from '@/lib/apiUtils';
 export const runtime = 'nodejs';
 /* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */
 export async function GET(req: NextRequest) { const term = req.nextUrl.searchParams.get('term');

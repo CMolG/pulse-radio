@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { NextRequest } from 'next/server';
-import { isPrivateHost } from '@/lib/urlSecurity';
-export const runtime = 'nodejs';
-const ALLOWED_PROTOCOLS = ['http:', 'https:'];
+import { NextRequest } from 'next/server'; import { isPrivateHost } from '@/lib/urlSecurity';
+export const runtime = 'nodejs'; const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
 /* Proxies an internet radio stream, adding CORS headers so the browser can use it with <audio crossOrigin="anony
  * mous"> + Web Audio API. */

@@ -1,14 +1,10 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+'use client'; import React, { useEffect, useRef } from 'react'; import { motion, AnimatePresence } from 'motion/react';
 import { X, ExternalLink, Radio, Globe, Calendar, Music, User, Users, Clock, Disc3, Tag, Trash2 } from 'lucide-react';
-import type { SongDetailData } from '../types';
-import { useArtistInfo } from '../hooks/useArtistInfo';
+import type { SongDetailData } from '../types'; import { useArtistInfo } from '../hooks/useArtistInfo';
 import { useLyrics } from '../hooks/useLyrics';
 import { formatDuration, formatReleaseDate } from '../utils/formatDuration';
-import { useAlbumArt } from '@/lib/audio-visualizer';
-import UiImage from '@/components/common/UiImage';
+import { useAlbumArt } from '@/lib/audio-visualizer'; import UiImage from '@/components/common/UiImage';
 import { itunesSearchUrl } from '../utils/formatUtils';
 const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]';
 const MetaBadge = ({ icon: Icon, cls, children }: { icon: typeof Clock; cls: string; children: React.ReactNode }) => (

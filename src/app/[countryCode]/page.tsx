@@ -1,10 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import Radio from "@/components/radio";
-import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRY_CODES } from "@/lib/i18n/countries";
-type CountryPageProps = { params: Promise<{ countryCode: string }> };
-const SITE_URL = "https://www.pulse-radio.online";
+import type { Metadata } from "next"; import { notFound } from "next/navigation";
+import Radio from "@/components/radio"; import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRY_CODES } from "@/lib/i18n/countries";
+type CountryPageProps = { params: Promise<{ countryCode: string }> }; const SITE_URL = "https://www.pulse-radio.online";
 function normalizeCountryCode(raw: string): string { return raw.toUpperCase(); }
 export async function generateStaticParams() { return SOVEREIGN_COUNTRY_CODES.map((countryCode) => ({ countryCode })); }
 export async function generateMetadata({ params }: CountryPageProps): Promise<Metadata> {

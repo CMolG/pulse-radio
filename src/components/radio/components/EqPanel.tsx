@@ -1,9 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useState } from 'react';
-import { X, Power, Plus, Save } from 'lucide-react';
-import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
-import { EQ_PRESETS } from '../constants';
+'use client'; import React, { useState } from 'react'; import { X, Power, Plus, Save } from 'lucide-react';
+import type { EqBand, EqPreset, NoiseReductionMode } from '../types'; import { EQ_PRESETS } from '../constants';
 type Props = { bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; stereoWidth: number;
   bassEnhance: number; compressorEnabled: boolean; compressorAmount: number; noiseReductionMode: NoiseReductionMode;
   customPresets?: EqPreset[]; onSetGain: (id: string, gain: number) => void;

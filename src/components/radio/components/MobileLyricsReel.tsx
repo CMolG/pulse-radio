@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+"use client"; import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
 type Props = { lyrics: LyricsData | null; currentTime?: number;

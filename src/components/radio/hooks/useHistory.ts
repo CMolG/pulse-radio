@@ -1,8 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useCallback, useEffect, useRef } from 'react';
-import type { NowPlayingTrack, HistoryEntry } from '../types';
-import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
+'use client'; import { useState, useCallback, useEffect, useRef } from 'react';
+import type { NowPlayingTrack, HistoryEntry } from '../types'; import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 export function useHistory( stationName: string | undefined, stationUuid: string | undefined,

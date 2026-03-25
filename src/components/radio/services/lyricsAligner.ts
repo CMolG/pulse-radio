@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { LyricsData } from '../types';
-import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
+import type { LyricsData } from '../types'; import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
 import { normalizeText } from '@/lib/stringUtils';
 export type AlignerStepInput = {
   lyrics: LyricsData; hypothesisText: string; previousConfirmedIndex: number; previousCandidateIndex: number;

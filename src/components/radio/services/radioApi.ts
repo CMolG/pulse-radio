@@ -6,9 +6,7 @@ const SERVERS = [ 'https://de1.api.radio-browser.info/json', 'https://de2.api.ra
 let serverIndex = 0;
 function getBase(): string { return SERVERS[serverIndex % SERVERS.length]; }
 function rotateServer(): void { serverIndex = (serverIndex + 1) % SERVERS.length; }
-const cache = new Map<string, { data: Station[]; ts: number }>();
-const TTL = 60_000;
-const MAX_CACHE = 100;
+const cache = new Map<string, { data: Station[]; ts: number }>(); const TTL = 60_000; const MAX_CACHE = 100;
 async function fetchCached(path: string, key: string): Promise<Station[]> { const hit = cache.get(key);
   if (hit && Date.now() - hit.ts < TTL) { cache.delete(key); cache.set(key, hit); return hit.data;
   }

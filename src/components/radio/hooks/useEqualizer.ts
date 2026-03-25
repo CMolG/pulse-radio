@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useRef, useCallback, useEffect } from 'react';
+'use client'; import { useState, useRef, useCallback, useEffect } from 'react';
 import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
-import { EQ_BANDS, STORAGE_KEYS } from '../constants';
-import { getOrCreateAudioSource } from '@/lib/audio-visualizer';
+import { EQ_BANDS, STORAGE_KEYS } from '../constants'; import { getOrCreateAudioSource } from '@/lib/audio-visualizer';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: number; gateRatio: number; deEsserCenterHz: number; deEsserGain: number }> = {
   off: { hpfHz: 20, gateThreshold: -90, gateRatio: 1.0, deEsserCenterHz: 6000, deEsserGain: 0 },

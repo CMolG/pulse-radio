@@ -1,13 +1,9 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client";
-import React, { useState, useMemo } from "react";
-import { Radio, Maximize2 } from "lucide-react";
-import type { Station, NowPlayingTrack } from "../types";
-import AnimatedBars from "./AnimatedBars";
-import UiImage from "@/components/common/UiImage";
+"use client"; import React, { useState, useMemo } from "react";
+import { Radio, Maximize2 } from "lucide-react"; import type { Station, NowPlayingTrack } from "../types";
+import AnimatedBars from "./AnimatedBars"; import UiImage from "@/components/common/UiImage";
 import { ParallaxAlbumBackground } from "@/lib/audio-visualizer";
-import { stationInitials } from "../utils/formatUtils";
-type Props = { station: Station; track: NowPlayingTrack | null;
+import { stationInitials } from "../utils/formatUtils"; type Props = { station: Station; track: NowPlayingTrack | null;
   isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null; icyBitrate?: string | null; onTheater?: () => void; };
 export default React.memo(function NowPlayingHero({ station, track, isPlaying, artworkUrl, icyBitrate, onTheater,

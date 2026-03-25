@@ -1,11 +1,9 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+'use client'; import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { IoRadioOutline, IoMusicalNotesOutline, IoHeartOutline, IoStatsChartOutline,
   IoColorPaletteOutline, IoPhonePortraitOutline, IoShareOutline, IoCheckmarkCircleOutline } from 'react-icons/io5';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-const ONBOARDING_KEY = 'radio-onboarding-done';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; const ONBOARDING_KEY = 'radio-onboarding-done';
 const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
   WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',

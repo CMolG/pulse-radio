@@ -1,9 +1,6 @@
-import React from "react";
-import { Music, Radio, Clock, Trash2, Heart, ExternalLink } from "lucide-react";
-import { motion } from "motion/react";
-import type { SongDetailData } from "../types";
-import { formatDuration } from "../utils/formatDuration";
-import UiImage from "@/components/common/UiImage";
+import React from "react"; import { Music, Radio, Clock, Trash2, Heart, ExternalLink } from "lucide-react";
+import { motion } from "motion/react"; import type { SongDetailData } from "../types";
+import { formatDuration } from "../utils/formatDuration"; import UiImage from "@/components/common/UiImage";
 import { formatTimeAgo, itunesSearchUrl } from "../utils/formatUtils";
 export type SongCardItem = SongDetailData & { id: string; timestamp: number };
 type HeartAction = { filled: boolean; onClick: () => void; label: string };

@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import React, { useRef, useEffect } from 'react';
+'use client'; import React, { useRef, useEffect } from 'react';
 interface VisualizerCanvasProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
   opacity?: number; className?: string; }

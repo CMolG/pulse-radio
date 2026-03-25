@@ -1,7 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { create } from 'zustand';
-export type PlaybackSource = 'radio' | null;
+'use client'; import { create } from 'zustand'; export type PlaybackSource = 'radio' | null;
 interface PlaybackState { source: PlaybackSource; isPlaying: boolean; currentTime: number; volume: number;
   muted: boolean; trackTitle: string; trackArtist: string; artworkUrl: string | null;
   setSource: (s: PlaybackSource) => void; setPlaying: (p: boolean) => void;

@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client';
-import { useState, useRef, useEffect } from 'react';
+'use client'; import { useState, useRef, useEffect } from 'react';
 import type { NowPlayingTrack, LyricsData } from '../types';
-import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi';
-import { STORAGE_KEYS } from '../constants';
+import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi'; import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useRealtimeLyricsSync } from './useRealtimeLyricsSync';
 import type { RealtimeSyncDiagnostics, RealtimeSyncStatus } from '../services/realtimeLyricsTypes';
