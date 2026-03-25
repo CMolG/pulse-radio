@@ -3716,7 +3716,7 @@ function LyricsReel({
     setFocusedIdx((prev) => (prev === closestIdx ? prev : closestIdx));
   }, [renderableLines.length]);
   useEffect(() => {
-    lineRefs.current = lineRefs.current.slice(0, renderableLines.length);
+    lineRefs.current.length = renderableLines.length;
   }, [renderableLines.length]);
   useEffect(() => {
     if (!renderableLines.length) return;
