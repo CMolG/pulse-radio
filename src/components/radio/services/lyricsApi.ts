@@ -78,10 +78,7 @@ async function fetchLyricsForArtist( artist: string,
   duration?: number,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
-  const params = new URLSearchParams({
-    artist_name: artist,
-    track_name: title,
-  });
+  const params = new URLSearchParams({ artist_name: artist, track_name: title, });
   if (album) params.set('album_name', album);
   if (duration) params.set('duration', String(Math.round(duration)));
 

@@ -59,10 +59,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const upstream = await fetch(parsed.toString(), {
-      headers: {
-        'User-Agent': 'JavadabaRadio/1.0',
-        'Icy-MetaData': '0',
-      },
+      headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', },
       signal: controller.signal,
     });
 

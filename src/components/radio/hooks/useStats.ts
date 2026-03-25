@@ -125,10 +125,7 @@ export function useStats() {
           ...prev.songPlayCounts,
           [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         },
-        artistPlayCounts: {
-          ...prev.artistPlayCounts,
-          [primary]: { ...artistEntry, count: artistEntry.count + 1 },
-        },
+        artistPlayCounts: { ...prev.artistPlayCounts, [primary]: { ...artistEntry, count: artistEntry.count + 1 }, },
       };
 
       if (normalizedGenre) {

@@ -114,10 +114,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const sleepTimer = useSleepTimer(radio.pause, radio.audioRef);
   const stationQueue = useStationQueue();
   useWakeLock(radio.status === "playing");
-  const analyser = useAudioAnalyser({
-    fftSize: 2048,
-    smoothingTimeConstant: 0.8,
-  });
+  const analyser = useAudioAnalyser({ fftSize: 2048, smoothingTimeConstant: 0.8, });
   const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === "playing");
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
   const usageStats = useStats();

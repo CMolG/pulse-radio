@@ -48,10 +48,7 @@ export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLy
   if (!lyrics) return [];
 
   if (lyrics.synced && lyrics.lines.length > 0) {
-    return lyrics.lines.map((line, index) => ({
-      id: `synced-${index}-${line.time}`,
-      text: line.text || "♪",
-    }));
+    return lyrics.lines.map((line, index) => ({ id: `synced-${index}-${line.time}`, text: line.text || "♪", }));
   }
 
   if (!lyrics.plainText) return [];

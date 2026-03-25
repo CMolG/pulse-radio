@@ -29,21 +29,9 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
   return {
     title,
     description,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url: canonical,
-      siteName: "Pulse Radio",
-    },
-    twitter: {
-      card: "summary",
-      title,
-      description,
-    },
+    alternates: { canonical, },
+    openGraph: { title, description, type: "website", url: canonical, siteName: "Pulse Radio", },
+    twitter: { card: "summary", title, description, },
   };
 }
 

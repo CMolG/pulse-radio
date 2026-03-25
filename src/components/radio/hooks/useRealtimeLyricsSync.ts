@@ -105,10 +105,7 @@ export function useRealtimeLyricsSync({
           candidateLineIndex: -1,
           confidence: 0,
           effectiveCurrentTime: undefined,
-          diagnostics: {
-            ...prev.diagnostics,
-            errorMessage,
-          },
+          diagnostics: { ...prev.diagnostics, errorMessage, },
         }));
       },
     });

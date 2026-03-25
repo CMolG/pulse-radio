@@ -9,15 +9,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistrar } from "./ServiceWorkerRegistrar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], });
 
 const SITE_URL = "https://www.pulse-radio.online";
 const SITE_TITLE = "Pulse Radio — Free Internet Radio with Visualizer";
@@ -26,10 +20,7 @@ const SITE_DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_TITLE,
-    template: "%s | Pulse Radio",
-  },
+  title: { default: SITE_TITLE, template: "%s | Pulse Radio", },
   description: SITE_DESCRIPTION,
   manifest: "/site.webmanifest",
   applicationName: "Pulse Radio",
@@ -54,11 +45,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Pulse Radio",
-  },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pulse Radio", },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -84,20 +71,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, },
   },
-  alternates: {
-    canonical: SITE_URL,
-  },
+  alternates: { canonical: SITE_URL, },
   category: "music",
-  other: {
-    "mobile-web-app-capable": "yes",
-  },
+  other: { "mobile-web-app-capable": "yes", },
 };
 
 export const viewport: Viewport = {
@@ -117,11 +95,7 @@ function JsonLd() {
     description: SITE_DESCRIPTION,
     applicationCategory: "MultimediaApplication",
     operatingSystem: "Any",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", },
     browserRequirements: "Requires JavaScript. Requires HTML5.",
     softwareVersion: "1.0",
     screenshot: `${SITE_URL}/android-chrome-512x512.png`,

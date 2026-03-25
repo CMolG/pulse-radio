@@ -91,9 +91,7 @@ export async function GET(req: NextRequest) {
         wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
       },
       {
-        headers: {
-          'Cache-Control': cacheHeader,
-        },
+        headers: { 'Cache-Control': cacheHeader, },
       },
     );
   } catch (err) {

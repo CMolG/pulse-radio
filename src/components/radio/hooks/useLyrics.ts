@@ -48,11 +48,7 @@ export type UseLyricsReturn = {
 export function useLyrics(
   track: NowPlayingTrack | null,
   stationName?: string | null,
-  options?: {
-    currentTime?: number;
-    enableRealtime?: boolean;
-    languageHint?: 'en' | 'es';
-  },
+  options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
 ): UseLyricsReturn {
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
   const [loading, setLoading] = useState(false);

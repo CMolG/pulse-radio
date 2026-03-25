@@ -43,12 +43,7 @@ export function useMediaSession(config: MediaSessionConfig): void {
     const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : [];
 
     try {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: trackTitle,
-        artist: trackArtist,
-        album,
-        artwork,
-      });
+      navigator.mediaSession.metadata = new MediaMetadata({ title: trackTitle, artist: trackArtist, album, artwork, });
     } catch { /* MediaMetadata constructor can throw on malformed artwork data */ }
   }, [station, track]);
 
