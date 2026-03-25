@@ -2985,7 +2985,7 @@ const StationCard = React.memo(
                 </span>
               </>
             ) : (
-              <span className="text-[9px] text-white/20">No track info</span>
+              <span className="text-[9px] text-white/50">No track info</span>
             )}
           </div>
         )}{' '}
@@ -3123,7 +3123,7 @@ function ScrollRow({
             <div className="flex gap-1">
               <button
                 onClick={() => scroll(-1)}
-                className={`p-1 rounded-md transition-colors ${canLeft ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/10 cursor-default'}`}
+                className={`p-1 rounded-md transition-colors ${canLeft ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
                 disabled={!canLeft}
                 aria-label="Scroll left"
               >
@@ -3131,7 +3131,7 @@ function ScrollRow({
               </button>
               <button
                 onClick={() => scroll(1)}
-                className={`p-1 rounded-md transition-colors ${canRight ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/10 cursor-default'}`}
+                className={`p-1 rounded-md transition-colors ${canRight ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
                 disabled={!canRight}
                 aria-label="Scroll right"
               >
@@ -3710,7 +3710,7 @@ function BrowseView({
                         <button
                           onClick={() => setPage((p) => Math.max(0, p - 1))}
                           disabled={page === 0}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? 'text-white/20 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? 'text-white/35 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
                         >
                           <ChevronLeft size={14} /> {t('previous')}
                         </button>
@@ -3721,7 +3721,7 @@ function BrowseView({
                         <button
                           onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                           disabled={page === totalPages - 1}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? 'text-white/20 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? 'text-white/35 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
                         >
                           {t('next')} <ChevronRight size={14} />
                         </button>
@@ -3790,8 +3790,8 @@ const EMPHASIS: [string, string, string][] = [
   ['text-white font-bold opacity-100 scale-100', 'text-[22px]', 'text-[28px]'],
   ['text-white/82 font-semibold opacity-100 scale-[0.985]', 'text-[18px]', 'text-[23px]'],
   ['text-white/50 font-medium opacity-100 scale-95', 'text-[15px]', 'text-[19px]'],
-  ['text-white/26 font-medium opacity-100 scale-[0.92]', 'text-[13px]', 'text-[17px]'],
-  ['text-white/14 font-medium opacity-100 scale-[0.88]', 'text-[12px]', 'text-[16px]'],
+  ['text-white/35 font-medium opacity-100 scale-[0.92]', 'text-[13px]', 'text-[17px]'],
+  ['text-white/30 font-medium opacity-100 scale-[0.88]', 'text-[12px]', 'text-[16px]'],
 ];
 const LyricReelLine = React.memo(
   function LyricReelLine({
@@ -6086,9 +6086,9 @@ const StatsView = React.memo(function StatsView({
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
         {' '}
-        <IoTimeOutline size={40} className="text-white/20 mb-3" />{' '}
-        <p className="text-[14px] text-white/40">No listening data yet</p>{' '}
-        <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p>
+        <IoTimeOutline size={40} className="text-white/35 mb-3" />{' '}
+        <p className="text-[14px] text-white/55">No listening data yet</p>{' '}
+        <p className="text-[12px] text-white/50 mt-1">Start playing stations to see your stats</p>
       </div>
     );
   }
