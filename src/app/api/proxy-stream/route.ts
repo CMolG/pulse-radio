@@ -66,7 +66,6 @@ export async function GET(req: NextRequest) {
         headers: _JSON_HDRS,
       });
     }
-    const host = parsed.hostname.toLowerCase();
   } catch {
     return new Response(_ERR_INVALID_URL, {
       status: 400,
