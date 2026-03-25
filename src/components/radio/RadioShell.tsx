@@ -3104,6 +3104,11 @@ function BrowseView({
       }),
     [t],
   );
+  const categoryById = useMemo(() => {
+    const m = new Map<string, (typeof translatedGenreCategories)[number]>();
+    for (const c of translatedGenreCategories) m.set(c.id, c);
+    return m;
+  }, [translatedGenreCategories]);
   const effectiveBrowseOrder = useMemo(() => {
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
     const boostedIds = new Set<string>();
@@ -3146,7 +3151,7 @@ function BrowseView({
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
   const loadCategory = useCallback(
     async (catId: string, flags?: { cancelled: boolean }) => {
-      const cat = translatedGenreCategories.find((c) => c.id === catId);
+      const cat = categoryById.get(catId);
       if (!cat) return;
       try {
         let result: Station[];
@@ -3177,7 +3182,7 @@ function BrowseView({
         }
       }
     },
-    [translatedGenreCategories],
+    [categoryById],
   );
   useEffect(() => {
     setPage(0);
@@ -3281,11 +3286,11 @@ function BrowseView({
     if (pool.length > 0) {
       if (!discoveryFiredRef.current) {
         discoveryFiredRef.current = true;
-        const random = pool[Math.floor(Math.random() * pool.length)];
+        const random = pool[(Math.random() * pool.length) | 0];
         if (random) onPlay(random);
       }
       discoveryRef.current = setInterval(() => {
-        const random = pool[Math.floor(Math.random() * pool.length)];
+        const random = pool[(Math.random() * pool.length) | 0];
         if (random) onPlay(random);
       }, 30_000);
     }
@@ -3503,7 +3508,7 @@ function BrowseView({
                   </ScrollRow>
                 )}{' '}
                 {effectiveBrowseOrder.map((catId) => {
-                  const cat = translatedGenreCategories.find((c) => c.id === catId);
+                  const cat = categoryById.get(catId);
                   if (!cat) return null;
                   const catStations = categorySections[catId];
                   if (catStations?.length === 0) return null;
