@@ -3227,7 +3227,11 @@ function BrowseView({
     };
   }, [view, retryKey]);
   const allCategoryStations = useMemo(() => {
-    return Object.values(categorySections).flat();
+    const result: Station[] = [];
+    for (const arr of Object.values(categorySections)) {
+      for (let i = 0; i < arr.length; i++) result.push(arr[i]);
+    }
+    return result;
   }, [categorySections]);
   const displayCount = view.mode === 'top' ? allCategoryStations.length : stations.length;
   useEffect(() => {
