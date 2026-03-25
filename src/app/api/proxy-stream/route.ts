@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
     else req.signal.addEventListener('abort', () => controller.abort(), _EVT_ONCE);
   }
   try {
-    const upstream = await fetch(parsed.toString(), {
+    const upstream = await fetch(parsed.href, {
       headers: _UPSTREAM_HDRS,
       signal: controller.signal,
     });
