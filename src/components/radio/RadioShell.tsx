@@ -4118,6 +4118,12 @@ const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto', trans
 const _IMAGE_RENDER_STYLE: React.CSSProperties = { imageRendering: 'auto' };
 const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = { height: 'env(safe-area-inset-bottom, 0px)' };
 const _OBJECT_COVER_STYLE: React.CSSProperties = { objectFit: 'cover' };
+const _MOTION_FADE_IN = { opacity: 0 } as const;
+const _MOTION_FADE_VISIBLE = { opacity: 1 } as const;
+const _MOTION_FADE_OUT = { opacity: 0 } as const;
+const _MOTION_SLIDE_UP_INIT = { y: '100%' } as const;
+const _MOTION_SLIDE_UP_VISIBLE = { y: 0 } as const;
+const _MOTION_SLIDE_UP_EXIT = { y: '100%' } as const;
 function TheaterView({
   station,
   track,
@@ -4159,9 +4165,9 @@ function TheaterView({
   );
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={_MOTION_FADE_IN}
+      animate={_MOTION_FADE_VISIBLE}
+      exit={_MOTION_FADE_OUT}
       transition={{ duration: 0.3 }}
       className="flex flex-col h-full w-full relative overflow-hidden"
     >
@@ -4567,9 +4573,9 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
       {song && (
         <motion.div
           key="song-detail-backdrop"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={_MOTION_FADE_IN}
+          animate={_MOTION_FADE_VISIBLE}
+          exit={_MOTION_FADE_OUT}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
           onClick={onClose}
         >
@@ -5721,17 +5727,17 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={_MOTION_FADE_IN}
+      animate={_MOTION_FADE_VISIBLE}
+      exit={_MOTION_FADE_OUT}
       transition={{ duration: 0.2 }}
       className="absolute inset-0 z-50 flex flex-col"
     >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />{' '}
       <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
+        initial={_MOTION_SLIDE_UP_INIT}
+        animate={_MOTION_SLIDE_UP_VISIBLE}
+        exit={_MOTION_SLIDE_UP_EXIT}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}
@@ -6049,9 +6055,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
   };
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={_MOTION_FADE_IN}
+      animate={_MOTION_FADE_VISIBLE}
+      exit={_MOTION_FADE_OUT}
       transition={{ duration: 0.2 }}
       className="absolute inset-0 z-50 flex flex-col"
     >
@@ -6059,9 +6065,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
       {/* Backdrop */} <div className="absolute inset-0 bg-black/50" onClick={onClose} />{' '}
       {/* Panel slides up from bottom */}{' '}
       <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
+        initial={_MOTION_SLIDE_UP_INIT}
+        animate={_MOTION_SLIDE_UP_VISIBLE}
+        exit={_MOTION_SLIDE_UP_EXIT}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={{
@@ -6371,9 +6377,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
       <AnimatePresence>
         {showStats && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={_MOTION_FADE_IN}
+            animate={_MOTION_FADE_VISIBLE}
+            exit={_MOTION_FADE_OUT}
             transition={{ duration: 0.2 }}
             className="absolute inset-0 z-50 flex flex-col"
           >
@@ -6383,9 +6389,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
               onClick={() => setShowStats(false)}
             />{' '}
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
+              initial={_MOTION_SLIDE_UP_INIT}
+              animate={_MOTION_SLIDE_UP_VISIBLE}
+              exit={_MOTION_SLIDE_UP_EXIT}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
               className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
               style={{
@@ -6970,9 +6976,9 @@ function _OnboardingModal() {
       {' '}
       {show && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={_MOTION_FADE_IN}
+          animate={_MOTION_FADE_VISIBLE}
+          exit={_MOTION_FADE_OUT}
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"
         >
           {' '}
@@ -9849,9 +9855,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             {theaterMode && radio.station && !miniMode ? (
               <motion.div
                 key="theater"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={_MOTION_FADE_IN}
+                animate={_MOTION_FADE_VISIBLE}
+                exit={_MOTION_FADE_OUT}
                 transition={{ duration: 0.3 }}
                 className="flex-1 min-h-0"
               >
@@ -9917,9 +9923,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     return (
                       <motion.div
                         key={key}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={_MOTION_FADE_IN}
+                        animate={_MOTION_FADE_VISIBLE}
+                        exit={_MOTION_FADE_OUT}
                         transition={{ duration: 0.15 }}
                         className={`flex-1 min-h-0${extra}`}
                       >
