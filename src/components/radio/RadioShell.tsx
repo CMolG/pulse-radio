@@ -4428,7 +4428,7 @@ function TheaterView({
               <div className="justify-self-start">
                 {' '}
                 {track?.durationMs && (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-mono text-white/80 inline-flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-mono text-white/80 inline-flex items-center gap-1">
                     {' '}
                     <Clock size={10} /> {formatDuration(track.durationMs)}
                   </span>
@@ -4437,7 +4437,7 @@ function TheaterView({
               <div className="justify-self-end">
                 {' '}
                 {track?.trackNumber != null && track?.trackCount != null && (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[11px] font-medium text-white/80">
+                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-medium text-white/80">
                     {' '}
                     #{track.trackNumber}/{track.trackCount}
                   </span>
@@ -4499,7 +4499,7 @@ function TheaterView({
             </p>
           )}{' '}
           {!compact && track?.releaseDate && (
-            <p className="text-[11px] text-white/50 text-center -mt-1">
+            <p className="text-[12px] text-white/50 text-center -mt-1">
               {' '}
               Released on: {formatReleaseDate(track.releaseDate)}
             </p>
@@ -4542,7 +4542,7 @@ function TheaterView({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
+              className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
             >
               <ExternalLink size={11} /> Listen on Apple Music
             </a>
@@ -4550,7 +4550,7 @@ function TheaterView({
           {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
           {!compact && concerts.length > 0 && (
             <div className="w-full mt-2">
-              <p className="text-[11px] font-semibold tracking-widest uppercase text-white/50 text-center mb-1.5">
+              <p className="text-[12px] font-semibold tracking-widest uppercase text-white/50 text-center mb-1.5">
                 Upcoming Shows
               </p>
               <div className="flex flex-col gap-1 w-full">
@@ -4562,10 +4562,10 @@ function TheaterView({
                   const content = (
                     <div className="flex items-start justify-between gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
                       <div className="flex flex-col min-w-0">
-                        <span className="text-[11px] font-medium text-white/80 truncate">{ev.venue}</span>
-                        <span className="text-[11px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                        <span className="text-[12px] font-medium text-white/80 truncate">{ev.venue}</span>
+                        <span className="text-[12px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
                       </div>
-                      <span className="text-[11px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
+                      <span className="text-[12px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
                     </div>
                   );
                   return ev.ticketUrl ? (
@@ -4718,7 +4718,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
       {lyricsError && (
         <button
           onClick={retryLyrics}
-          className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
+          className="mt-2 px-3 py-1 text-[12px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
         >
           {' '}
           Retry
@@ -4859,7 +4859,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         </div>
                       </div>{' '}
                       {resolvedReleaseDate && (
-                        <p className="text-[11px] text-white/50">
+                        <p className="text-[12px] text-white/50">
                           {' '}
                           Released on: {formatReleaseDate(resolvedReleaseDate)}
                         </p>
@@ -5005,7 +5005,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         href={info.wikipediaUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
+                        className="inline-flex items-center gap-1.5 text-[12px] text-blue-400/70 hover:text-blue-400 transition-colors"
                       >
                         <Globe size={11} /> Read more on Wikipedia
                       </a>
@@ -5841,7 +5841,7 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )}{' '}
-          {track?.album && <p className="text-[11px] text-dim truncate">{track.album}</p>}{' '}
+          {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}{' '}
           {isPlaying && (
             <div className="flex-row-1.5 mt-1">
               <span className="dot-1.5 bg-sys-orange" />{' '}
