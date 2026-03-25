@@ -1,4 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest } from 'next/server';
+const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
+const _IPV6_BRACKET_START_RE = /^\[/;
+const _IPV6_BRACKET_END_RE = /\]$/;
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ function isPrivateHost(
   hostname: string,
 ): boolean {
@@ -12,9 +16,10 @@
   ) {
     return true;
   }
-  const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  const ipv4Match = host.match(_IPV4_RE);
   if (ipv4Match) {
-    const [, a, b] = ipv4Match.map(Number);
+    const a = Number(ipv4Match[1]);
+    const b = Number(ipv4Match[2]);
     if (a === 10) return true;
     if (a === 172 && b >= 16 && b <= 31) return true;
     if (a === 192 && b === 168) return true;
@@ -23,11 +28,11 @@
     if (a === 127) return true;
     if (a === 0) return true;
   }
-  const ipv6 = host.replace(/^\[/, '').replace(/\]$/, '');
+  const ipv6 = host.replace(_IPV6_BRACKET_START_RE, '').replace(_IPV6_BRACKET_END_RE, '');
   if (ipv6.startsWith('fe80:')) return true;
   if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true;
   if (ipv6 === '::1' || ipv6 === '::') return true;
-  const mappedMatch = ipv6.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i);
+  const mappedMatch = ipv6.match(_IPV6_MAPPED_RE);
   if (mappedMatch) return isPrivateHost(mappedMatch[1]);
   return false;
 }
