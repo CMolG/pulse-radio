@@ -41,18 +41,17 @@ function trySave(key: string, raw: string): boolean {
   (key: string, defaultValue = '') => tryLoad(key) ?? defaultValue;
 /** Save a plain string value to localStorage. Returns false if quota is exceeded. */ export const saveStringToStorage =
   (key: string, value: string) => trySave(key, value);
-const STORAGE_SCHEMA_VERSION = 1;
+const STORAGE_SCHEMA_VERSION = '1';
 const VERSION_KEY = 'radio-schema-version';
 export function ensureStorageVersion(managedKeys: readonly string[]): void {
   if (typeof window === 'undefined') return;
   try {
     const stored = localStorage.getItem(VERSION_KEY);
-    const current = String(STORAGE_SCHEMA_VERSION);
-    if (stored === current) return;
+    if (stored === STORAGE_SCHEMA_VERSION) return;
     for (const key of managedKeys) {
       localStorage.removeItem(key);
     }
-    localStorage.setItem(VERSION_KEY, current);
+    localStorage.setItem(VERSION_KEY, STORAGE_SCHEMA_VERSION);
   } catch {
     /* ignore in SSR / restricted environments */
   }
