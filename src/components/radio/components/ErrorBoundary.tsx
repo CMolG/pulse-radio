@@ -21,10 +21,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback !== undefined) return this.props.fallback;
       return (
-        <div className="flex-center-col gap-4 p-8 h-full bg-surface-1 text-center select-none">
+        <div role="alert" className="flex-center-col gap-4 p-8 h-full bg-surface-1 text-center select-none">
           {' '}
           <div className="p-3 rounded-full bg-sys-red/10">
-            <AlertTriangle size={28} className="text-sys-red" />
+            <AlertTriangle size={28} className="text-sys-red" aria-hidden="true" />
           </div>{' '}
           <div>
             <h2 className="text-[15px] font-semibold text-white mb-1">Something went wrong</h2>{' '}
@@ -34,14 +34,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
             </p>
           </div>{' '}
           {this.state.error && (
-            <pre className="text-[11px] text-muted bg-surface-2 rounded-lg px-4 py-2 max-w-sm overflow-auto max-h-24">
+            <pre className="text-[12px] text-muted bg-surface-2 rounded-lg px-4 py-2 max-w-sm overflow-auto max-h-24">
               {' '}
               {this.state.error.message}
             </pre>
           )}{' '}
           <button
             onClick={this.handleReset}
-            className="flex-row-2 px-4 py-2 rounded-lg bg-surface-3 text-[13px] font-medium text-white hover:bg-surface-4 transition-colors"
+            className="flex-row-2 px-5 py-3 rounded-lg bg-surface-3 text-[13px] font-medium text-white hover:bg-surface-4 transition-colors"
           >
             <RotateCcw size={14} /> Try Again
           </button>
