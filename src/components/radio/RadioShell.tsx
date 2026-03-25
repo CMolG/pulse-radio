@@ -2020,9 +2020,9 @@ function tokenize(value: string): string[] {
   const matches = normalized.match(WORD_RE) ?? [];
   return matches.filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
-function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
+function scoreLine(lineTokens: string[], hypoTokens: string[], prebuiltLineSet?: Set<string>): number {
   if (!lineTokens.length || !hypoTokens.length) return 0;
-  const lineSet = new Set(lineTokens);
+  const lineSet = prebuiltLineSet ?? new Set(lineTokens);
   let overlaps = 0;
   for (const token of hypoTokens) {
     if (lineSet.has(token)) overlaps++;
@@ -2051,13 +2051,22 @@ function windowBounds(total: number, center: number, relockWindow: number): [num
   return [start, end];
 }
 const _lyricsTokenCache = new WeakMap<LyricsData, string[][]>();
+const _lyricsSetCache = new WeakMap<LyricsData, Set<string>[]>();
 function getCachedLineTokens(lyrics: LyricsData): string[][] {
   let cached = _lyricsTokenCache.get(lyrics);
   if (!cached) {
     cached = lyrics.lines.map((line) => tokenize(line.text));
     _lyricsTokenCache.set(lyrics, cached);
+    _lyricsSetCache.set(
+      lyrics,
+      cached.map((tokens) => new Set(tokens)),
+    );
   }
   return cached;
+}
+function getCachedLineSets(lyrics: LyricsData): Set<string>[] {
+  getCachedLineTokens(lyrics);
+  return _lyricsSetCache.get(lyrics)!;
 }
 function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const {
@@ -2080,13 +2089,15 @@ function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     };
   }
   const allLineTokens = getCachedLineTokens(lyrics);
+  const allLineSets = getCachedLineSets(lyrics);
   const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex;
   const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow);
   let bestIndex = -1;
   let bestScore = 0;
   for (let i = start; i <= end; i++) {
     const lineTokens = allLineTokens[i] ?? [];
-    const score = scoreLine(lineTokens, hypoTokens);
+    const lineSet = allLineSets[i];
+    const score = scoreLine(lineTokens, hypoTokens, lineSet);
     if (score > bestScore) {
       bestScore = score;
       bestIndex = i;
