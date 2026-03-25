@@ -19,9 +19,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
         {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
             <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{stationInitials(station.name) || <Radio size={20} className="text-white/60" />}</span></div>
-        ) : ( <UiImage src={station.favicon} alt="" className="object-cover"
-            sizes="180px"
-            loading="lazy"
+        ) : ( <UiImage src={station.favicon} alt="" className="object-cover" sizes="180px" loading="lazy"
             onError={() => setImgError(true)} />
         )}
         {/* Play overlay */} <motion.button aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}

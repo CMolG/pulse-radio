@@ -72,9 +72,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
                 {station ? ( stationInitials(station.name) || ( <Radio size={14} className="text-white/60" />)
                 ) : ( <Radio size={14} className="text-white/60" />
                 )}</span></div>
-          ) : ( <UiImage src={coverUrl} alt="" className="object-cover"
-              sizes="36px"
-              loading="lazy"
+          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="36px" loading="lazy"
               onError={() => setImgError(true)} />
           )}</div>
         {/* TODO replace upper img with next image */} <div className="min-w-0">

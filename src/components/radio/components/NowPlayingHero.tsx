@@ -27,9 +27,7 @@ export default React.memo(function NowPlayingHero({ station, track, isPlaying, a
               <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {stationInitials(station.name) || ( <Radio size={24} className="text-white/60" />
                 )}</span></div>
-          ) : ( <UiImage src={coverUrl} alt="" className="object-cover"
-              sizes="64px"
-              loading="lazy"
+          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="64px" loading="lazy"
               onError={() => setImgError(true)} />
           )}</div><div className="flex-fill pr-20">
           <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3> {track?.title ? (

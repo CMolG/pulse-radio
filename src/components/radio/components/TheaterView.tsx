@@ -122,8 +122,7 @@ export default function TheaterView({
                   className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
                 >{stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" />
                   )}</span></div>
-            ) : ( <UiImage src={coverUrl} alt="" className="object-cover"
-                sizes={compact ? "56px" : "176px"}
+            ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes={compact ? "56px" : "176px"}
                 loading="lazy"
                 onError={() => setFailedCoverUrl(coverUrl)} />
             )}</div>

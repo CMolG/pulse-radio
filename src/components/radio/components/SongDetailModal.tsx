@@ -59,8 +59,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-          onClick={onClose}><motion.div key="song-detail-modal" ref={modalRef} role="dialog"
-            aria-modal="true"
+          onClick={onClose}><motion.div key="song-detail-modal" ref={modalRef} role="dialog" aria-modal="true"
             aria-label={`Song details: ${song.title} by ${song.artist}`}
             initial={{ y: 30, opacity: 0, scale: 0.96 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}

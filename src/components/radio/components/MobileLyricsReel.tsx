@@ -70,9 +70,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
             maskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}><div className="flex min-h-full flex-col justify-center py-14"> {renderableLines.map((line, index) => {
                 const ei = (activeIdx >= 0 && index === activeIdx) ? 0 : Math.min(Math.abs(index - focusedIdx), 3) + 1;
-                return ( <LyricReelLine key={line.id} lineId={line.id} index={index}
-                    text={line.text}
-                    emphasisIdx={ei}
+                return ( <LyricReelLine key={line.id} lineId={line.id} index={index} text={line.text} emphasisIdx={ei}
                     isDesktop={isDesktop}
                     lineRefs={lineRefs}
                     scrollToIndex={scrollToIndex} />
