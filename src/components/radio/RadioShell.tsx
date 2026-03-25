@@ -3278,9 +3278,9 @@ function BrowseView({
     });
   }, [stations, songFilter, liveData]);
   const songFilteredStations = useMemo(() => {
-    if (!songFilter.trim()) return pageStations;
+    if (allSongFilteredStations.length === 0) return pageStations;
     return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  }, [allSongFilteredStations, pageStations, songFilter, page, PAGE_SIZE]);
+  }, [allSongFilteredStations, pageStations, page, PAGE_SIZE]);
   const genreChipActive = (tag: string) => view.mode === 'genre' && view.tag === tag;
   const countryChipActive = (countryCode: string) =>
     view.mode === 'country' && view.countryCode === countryCode;
