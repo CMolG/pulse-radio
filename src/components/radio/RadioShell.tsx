@@ -259,7 +259,7 @@ const audioSourceCache = new WeakMap<
 let sharedCtx: AudioContext | null = null;
 function getSharedContext(): AudioContext {
   if (!sharedCtx || sharedCtx.state === 'closed') sharedCtx = new AudioContext();
-  if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {});
+  if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(_NOOP);
   return sharedCtx;
 }
 function getOrCreateAudioSource(audio: HTMLAudioElement): {
@@ -268,7 +268,7 @@ function getOrCreateAudioSource(audio: HTMLAudioElement): {
 } {
   const existing = audioSourceCache.get(audio);
   if (existing) {
-    if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {});
+    if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(_NOOP);
     return existing;
   }
   const ctx = getSharedContext();
@@ -279,7 +279,7 @@ function getOrCreateAudioSource(audio: HTMLAudioElement): {
 }
 function resumeAudioContext(audio: HTMLAudioElement): void {
   const entry = audioSourceCache.get(audio);
-  if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {});
+  if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(_NOOP);
 }
 function hasAudioSource(audio: HTMLAudioElement): boolean {
   return audioSourceCache.has(audio);
@@ -817,7 +817,7 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
       const url = `${getBase()}${path}`;
       const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) {
-        await res.text().catch(() => {});
+        await res.text().catch(_NOOP);
         rotateServer();
         continue;
       }
@@ -1549,7 +1549,7 @@ function useRadio() {
     };
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onCanPlay = () => {
-      if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {});
+      if (!userPausedRef.current && station && audio.paused) audio.play().catch(_NOOP);
     };
     let lastResumeAttempt = 0;
     const RESUME_DEBOUNCE_MS = 1000;
@@ -1720,7 +1720,7 @@ function useRadio() {
       resumeAudioContext(audio);
       audio.volume = mutedRef.current ? 0 : volumeRef.current;
     }
-    audio?.play().catch(() => {});
+    audio?.play().catch(_NOOP);
   }, []);
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -1729,7 +1729,7 @@ function useRadio() {
       userPausedRef.current = false;
       resumeAudioContext(audio);
       audio.volume = mutedRef.current ? 0 : volumeRef.current;
-      audio.play().catch(() => {});
+      audio.play().catch(_NOOP);
     } else {
       userPausedRef.current = true;
       clearTimer(fadeTimerRef);
@@ -2410,7 +2410,7 @@ async function tryFetch<T>(
   try {
     const res = await fetchWithCancel(url, signal);
     if (res.ok) return parse(await res.json());
-    await res.text().catch(() => {});
+    await res.text().catch(_NOOP);
   } catch (err) {
     if (isTransientError(err)) throw err;
   }
@@ -2972,6 +2972,7 @@ const _EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>();
 const _EVT_PASSIVE: AddEventListenerOptions = { passive: true };
 const _EVT_ONCE: AddEventListenerOptions = { once: true };
 const _EVT_CAPTURE_PASSIVE: AddEventListenerOptions = { capture: true, passive: true };
+const _NOOP = () => {};
 const _SKELETON_INDICES = [0, 1, 2, 3, 4];
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
@@ -9211,7 +9212,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             .then((alts) => {
               if (alts.length > 0 && !cancelled) handlePlay(alts[0]);
             })
-            .catch(() => {});
+            .catch(_NOOP);
         });
       }
     }
@@ -9748,13 +9749,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           <TheaterView
             {...theaterBaseProps}
             station={radio.station ?? emptyStation}
-            onBack={() => {}}
+            onBack={_NOOP}
             compact
           />
         </div>{' '}
         <NowPlayingBar
           {...nowPlayingBaseProps}
-          onToggleEq={() => {}}
+          onToggleEq={_NOOP}
           showEq={false}
           theaterMode={true}
           compact
