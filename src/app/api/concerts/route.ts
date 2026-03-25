@@ -7,9 +7,9 @@ export const maxDuration = 10;
 const BANDSINTOWN_APP_ID = 'pulse-radio';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
 const TIMEOUT_MS = 8_000;
-const CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
-const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=14400, stale-while-revalidate=86400' };
-const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' };
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=14400, s-maxage=43200, stale-while-revalidate=86400' };
+const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200' };
 const _NOOP = () => {};
 const MAX_EVENTS = 5;
 

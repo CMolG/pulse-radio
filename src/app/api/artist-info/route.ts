@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
   const cached = cacheGet<unknown>('artist-info', cacheKey);
   if (cached !== undefined) {
     return NextResponse.json(cached, {
-      headers: { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800' },
+      headers: { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800' },
     });
   }
   try {
@@ -82,8 +82,8 @@ export async function GET(req: NextRequest) {
         ?.map((t: { name: string }) => t.name) ?? [];
     const hasData = !!(mb || wiki?.extract);
     const cacheHeader = hasData
-      ? 'public, max-age=86400, stale-while-revalidate=604800'
-      : 'public, max-age=3600, stale-while-revalidate=7200';
+      ? 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800'
+      : 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200';
     const payload = {
       name: mb?.name ?? artist,
       disambiguation: mb?.disambiguation ?? null,

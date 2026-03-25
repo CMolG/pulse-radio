@@ -7,8 +7,8 @@ export const maxDuration = 10;
 const LRCLIB_BASE = 'https://lrclib.net/api';
 const LRCLIB_TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800' };
-const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=7200' };
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800' };
+const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200' };
 const _NOOP = () => {};
 
 interface LrcLibResponse {
