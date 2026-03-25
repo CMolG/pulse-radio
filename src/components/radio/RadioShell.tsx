@@ -3956,12 +3956,12 @@ function SpiralRenderer({
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ WebkitFilter: 'blur(6px)', filter: 'blur(6px)' }}
+      style={_BLUR_6_STYLE}
     >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 size-full"
-        style={{ imageRendering: 'auto', transform: 'scale(1.12)' }}
+        style={_CANVAS_SCALE_STYLE}
       />
     </div>
   );
@@ -4097,6 +4097,11 @@ const _CRT_GLARE_STYLE: React.CSSProperties = {
   background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
 };
 const _SAFE_AREA_TOP_STYLE: React.CSSProperties = { top: 'env(safe-area-inset-top, 0px)' };
+const _BLUR_6_STYLE: React.CSSProperties = { WebkitFilter: 'blur(6px)', filter: 'blur(6px)' };
+const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto', transform: 'scale(1.12)' };
+const _IMAGE_RENDER_STYLE: React.CSSProperties = { imageRendering: 'auto' };
+const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = { height: 'env(safe-area-inset-bottom, 0px)' };
+const _OBJECT_COVER_STYLE: React.CSSProperties = { objectFit: 'cover' };
 function TheaterView({
   station,
   track,
@@ -5103,7 +5108,7 @@ function FerrofluidRenderer({
   return (
     <div className={`relative ${className}`}>
       {' '}
-      <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />{' '}
+      <canvas ref={canvasRef} className="size-full" style={_IMAGE_RENDER_STYLE} />{' '}
       {/* SVG filter for smoothing the metaballs */}{' '}
       <svg className="absolute w-0 h-0" aria-hidden="true">
         <defs>
@@ -5280,7 +5285,7 @@ function _NowPlayingBar({
         <div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
-          style={{ height: 'env(safe-area-inset-bottom, 0px)' }}
+          style={_SAFE_AREA_BOTTOM_STYLE}
         />
       </div>
     );
@@ -5520,7 +5525,7 @@ function ParallaxAlbumBackground({
           src={src}
           alt=""
           fill
-          style={{ objectFit: 'cover' }}
+          style={_OBJECT_COVER_STYLE}
           className={`${blurClass} ${enableDrift ? 'animate-ambient-drift scale-105' : 'scale-110'} transition-[filter] duration-1000`}
           onError={() => setImgError(true)}
           unoptimized={src.startsWith('http')}
