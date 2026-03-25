@@ -1,0 +1,2 @@
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+export class LRU<T> { private m = new Map<string, T>(); constructor(private max: number) {} get(k: string) { const v = this.m.get(k); if (v !== undefined) { this.m.delete(k); this.m.set(k, v); } return v; } set(k: string, v: T) { this.m.delete(k); this.m.set(k, v); while (this.m.size > this.max) { const oldest = this.m.keys().next().value; if (oldest !== undefined) this.m.delete(oldest); else break; } } }
