@@ -6902,6 +6902,8 @@ const STEPS: OnboardingStep[] = [
       'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
   },
 ];
+const _TOTAL_STEPS = STEPS.length + 1;
+const _STEP_INDICES = Array.from({ length: _TOTAL_STEPS }, (_, i) => i);
 function PWAStep() {
   const [deferredPrompt, setDeferredPrompt] = useState<{ prompt: () => Promise<void> } | null>(
     null,
@@ -6984,7 +6986,6 @@ function PWAStep() {
 function _OnboardingModal() {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
-  const totalSteps = STEPS.length + 1;
   useEffect(() => {
     const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
     if (!done) {
@@ -6999,7 +7000,7 @@ function _OnboardingModal() {
   if (!show) return null;
   const currentStep = step < STEPS.length ? STEPS[step] : null;
   const isPWAStep = step >= STEPS.length;
-  const isLast = step === totalSteps - 1;
+  const isLast = step === _TOTAL_STEPS - 1;
   return (
     <AnimatePresence>
       {' '}
@@ -7055,7 +7056,7 @@ function _OnboardingModal() {
               {/* Dots */}{' '}
               <div className="flex justify-center gap-2">
                 {' '}
-                {Array.from({ length: totalSteps }, (_, i) => (
+                {_STEP_INDICES.map((i) => (
                   <button
                     key={i}
                     onClick={() => setStep(i)}
@@ -7073,7 +7074,7 @@ function _OnboardingModal() {
                   {step > 0 ? 'Back' : 'Skip'}
                 </button>
                 <button
-                  onClick={() => (step < totalSteps - 1 ? setStep((s) => s + 1) : handleClose())}
+                  onClick={() => (step < _TOTAL_STEPS - 1 ? setStep((s) => s + 1) : handleClose())}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
                 >
                   {isLast ? "Let's Go!" : 'Next'}
