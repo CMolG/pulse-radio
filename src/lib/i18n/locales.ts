@@ -388,6 +388,7 @@ function mergeBundle(locale: SupportedLocale): MessageBundle {
   return { ...BASE_MESSAGES, ...patch };
 }
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};
+const _TRANSLATE_VAR_RE = /\{([a-zA-Z0-9_]+)\}/g;
 export function getMessages(locale: SupportedLocale): MessageBundle {
   if (!MESSAGE_CACHE[locale]) MESSAGE_CACHE[locale] = mergeBundle(locale);
   return MESSAGE_CACHE[locale] as MessageBundle;
@@ -399,7 +400,7 @@ export function translate(
 ): string {
   const message = getMessages(locale)[key] ?? BASE_MESSAGES[key];
   if (!vars) return message;
-  return message.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, token: string) => {
+  return message.replace(_TRANSLATE_VAR_RE, (_, token: string) => {
     const val = vars[token];
     return val === undefined || val === null ? `{${token}}` : String(val);
   });
