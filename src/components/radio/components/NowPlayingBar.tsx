@@ -80,8 +80,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
         <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
           {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
-                {station ? ( stationInitials(station.name) || (
-                    <Radio size={14} className="text-white/60" />)
+                {station ? ( stationInitials(station.name) || ( <Radio size={14} className="text-white/60" />)
                 ) : ( <Radio size={14} className="text-white/60" />
                 )}</span></div>
           ) : ( <UiImage

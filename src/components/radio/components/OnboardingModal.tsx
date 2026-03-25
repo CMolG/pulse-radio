@@ -39,8 +39,7 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
       try { await deferredPrompt.prompt(); } catch { /* user dismissed install prompt */ }
       setDeferredPrompt(null); }
   };
-  if (isStandalone) { return (
-      <div className="flex flex-col items-center gap-4 text-center">
+  if (isStandalone) { return ( <div className="flex flex-col items-center gap-4 text-center">
         <IoCheckmarkCircleOutline size={48} className="text-emerald-400" />
         <h2 className="text-xl font-bold text-white">Already Installed!</h2>
         <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">

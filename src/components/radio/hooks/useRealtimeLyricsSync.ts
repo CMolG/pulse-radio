@@ -30,8 +30,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
     engineRef.current?.destroy(); stableSamplesRef.current = 0;
     const engine = createRealtimeSpeechEngine({ onHypothesis: (hypothesis) => {
         if (!lyrics || !isRealtimeEligible(lyrics)) return;
-        setRuntimeState(prev => { const step = alignHypothesis({
-            lyrics, hypothesisText: hypothesis.text,
+        setRuntimeState(prev => { const step = alignHypothesis({ lyrics, hypothesisText: hypothesis.text,
             previousConfirmedIndex: prev.activeLineIndex, previousCandidateIndex: prev.candidateLineIndex,
             stableSamples: stableSamplesRef.current, policy: DEFAULT_REALTIME_ALIGN_POLICY,
           }); stableSamplesRef.current = step.stableSamples;

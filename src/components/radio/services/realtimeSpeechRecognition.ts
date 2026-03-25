@@ -57,8 +57,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.');
       }
     }; };
-  return { start: (lang) => {
-      if (destroyed || running) return; wireRecognition(lang); if (!recognition) return;
+  return { start: (lang) => { if (destroyed || running) return; wireRecognition(lang); if (!recognition) return;
       try { recognition.start(); running = true; restartCount = 0;
       } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
     }, stop: () => { running = false; teardown(); }, destroy: () => { destroyed = true; running = false; teardown(); },

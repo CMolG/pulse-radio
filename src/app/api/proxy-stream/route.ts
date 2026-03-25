@@ -38,8 +38,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   try { const upstream = await fetch(parsed.toString(), {
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     // Validate the final URL after redirects to prevent SSRF via redirect
-    if (upstream.url) { try {
-        const finalUrl = new URL(upstream.url);
+    if (upstream.url) { try { const finalUrl = new URL(upstream.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
           if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {

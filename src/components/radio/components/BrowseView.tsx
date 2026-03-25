@@ -61,8 +61,7 @@ export default function BrowseView({
   recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder,
 }: Props) {
   const { t, locale } = useLocale(); const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
-  const translatedGenreCategories = useMemo(() =>
-      GENRE_CATEGORIES.map((category) => {
+  const translatedGenreCategories = useMemo(() => GENRE_CATEGORIES.map((category) => {
         const key = GENRE_LABEL_KEYS[category.id]; return key ? { ...category, label: t(key) } : category;
       }),
     [t],);
@@ -108,8 +107,7 @@ export default function BrowseView({
         setFailedCategories((prev) => {
           if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;});
       }
-    } catch { if (!flags?.cancelled) {
-        setFailedCategories((prev) => {
+    } catch { if (!flags?.cancelled) { setFailedCategories((prev) => {
           if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;});
       } }
   }, [translatedGenreCategories]);
@@ -273,15 +271,13 @@ export default function BrowseView({
             {/* Category rows for top view */}
             {view.mode === "top" && ( <>
                 {/* Favorites row */}
-                {favorites && favorites.length > 0 && (
-                    <ScrollRow
+                {favorites && favorites.length > 0 && ( <ScrollRow
                       title={t("favorites")}
                       icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
                 )}
                 {/* Recent stations row */}
-                {recent && recent.length > 0 && (
-                    <ScrollRow
+                {recent && recent.length > 0 && ( <ScrollRow
                       title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />}
                       isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>

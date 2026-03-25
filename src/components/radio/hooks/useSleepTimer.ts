@@ -49,8 +49,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade(); }
     }, 1000); // check every second for smooth fade timing
   }, [clear, stopFade, startFade]);
-  const cycle = useCallback(() => { if (remainingMin === null) {
-      start(PRESETS_MIN[0]);
+  const cycle = useCallback(() => { if (remainingMin === null) { start(PRESETS_MIN[0]);
     } else { const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin); const nextIdx = currentIdx + 1;
       if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear(); }
   }, [remainingMin, start, clear]);

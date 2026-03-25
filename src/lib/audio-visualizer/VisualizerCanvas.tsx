@@ -26,8 +26,7 @@ export function VisualizerCanvas({
       if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; }
       const ctx = canvas.getContext('2d'); if (!ctx) return;
       // Resolve CSS variable once and cache
-      if (!resolvedColorRef.current) { if (color.startsWith('var(')) {
-          const varName = color.slice(4, -1).trim();
+      if (!resolvedColorRef.current) { if (color.startsWith('var(')) { const varName = color.slice(4, -1).trim();
           const computed = getComputedStyle(canvas).getPropertyValue(varName).trim();
           resolvedColorRef.current = computed || '#34d399';
         } else resolvedColorRef.current = color; }

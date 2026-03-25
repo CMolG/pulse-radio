@@ -201,8 +201,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);}, [],);
   // Auto-advance to next queued station on error, or failover to similar station
   useEffect(() => { let cancelled = false;
-    if (radio.status === 'error') { if (stationQueue.hasNext) {
-        const next = stationQueue.skipToNext();
+    if (radio.status === 'error') { if (stationQueue.hasNext) { const next = stationQueue.skipToNext();
         if (next) { radio.play(next); recent.add(next); }
       } else if (radio.station) {
         // No queue entries — find a similar station by genre tag
@@ -267,8 +266,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             document.querySelector<HTMLInputElement>(".radio-search-input");
           if (searchInput) searchInput.focus(); break; }
         case "s":
-        case "S": if (r.station) {
-            const wasFav = f.has(r.station.stationuuid); f.toggle(r.station);
+        case "S": if (r.station) { const wasFav = f.has(r.station.stationuuid); f.toggle(r.station);
             toast(wasFav ? "Removed from favorites" : r.station.name, "star"); }
           break;
         case "Escape":
@@ -458,8 +456,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const emptyStation = useMemo((): Station => ({ name: t("discover"), url_resolved: "", stationuuid: "", favicon: "", tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0 }), [t]);
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
-  if (layout === "pip") { return (
-      <div
+  if (layout === "pip") { return ( <div
         ref={containerRef}
         className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"> {parallaxElement}
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
@@ -585,8 +582,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         {content}</motion.div>
                     );
                   })()}</AnimatePresence></React.Fragment>
-            ) : ( radio.station && (
-                <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
+            ) : ( radio.station && ( <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
                   {albumArt.artworkUrl ? ( <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
                       <UiImage src={albumArt.artworkUrl} alt="" className="object-cover" sizes="56px" loading="lazy" />
                     </div>

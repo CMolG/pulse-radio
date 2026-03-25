@@ -23,8 +23,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 8000);
   try { const res = await fetch(streamUrl, { headers: { 'Icy-MetaData': '1' }, signal: controller.signal, });
     // Validate the final URL after redirects to prevent SSRF via redirect
-    if (res.url) { try {
-        const finalUrl = new URL(res.url);
+    if (res.url) { try { const finalUrl = new URL(res.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 }); }
       } catch { /* URL parse failed — continue */ } }
@@ -47,8 +46,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
     const reader = res.body.getReader(); const chunks: Uint8Array[] = []; let totalRead = 0;
     const bytesNeeded = metaint + 4096;
-    try { while (totalRead < bytesNeeded) {
-        const { done, value } = await reader.read(); if (done || !value) break;
+    try { while (totalRead < bytesNeeded) { const { done, value } = await reader.read(); if (done || !value) break;
         chunks.push(value); totalRead += value.length; }
     } finally { clearTimeout(timeout); reader.cancel().catch(() => {});
     }

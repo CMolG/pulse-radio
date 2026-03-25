@@ -48,8 +48,7 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
     const cacheHeader = hasData
       ? 'public, max-age=86400, stale-while-revalidate=604800'
       : 'public, max-age=3600, stale-while-revalidate=7200';
-    return NextResponse.json( {
-        name: mb?.name ?? artist, disambiguation: mb?.disambiguation ?? null,
+    return NextResponse.json( { name: mb?.name ?? artist, disambiguation: mb?.disambiguation ?? null,
         type: mb?.type ?? null, country: mb?.country ?? null,
         beginArea: mb?.['begin-area']?.name ?? null, lifeSpan: mb?.['life-span'] ?? null,
         tags, bio: wiki?.extract ?? null,

@@ -69,8 +69,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
       : options?.currentTime,
     realtime: enableRealtime
-      ? {
-          enabled: realtimeSync.enabled, supported: realtimeSync.supported,
+      ? { enabled: realtimeSync.enabled, supported: realtimeSync.supported,
           status: realtimeSync.status, activeLineIndex: realtimeSync.activeLineIndex,
           candidateLineIndex: realtimeSync.candidateLineIndex, confidence: realtimeSync.confidence,
           diagnostics: realtimeSync.diagnostics, toggle: realtimeSync.toggle,

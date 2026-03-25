@@ -26,8 +26,7 @@ function isAdContent(text: string): boolean { let result = _adCache.get(text); i
 export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  if (signal) { if (signal.aborted) {
-      clearTimeout(timeout); controller.abort();} else {
+  if (signal) { if (signal.aborted) { clearTimeout(timeout); controller.abort();} else {
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
       controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort);
       }, { once: true }); }

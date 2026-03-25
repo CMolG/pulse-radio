@@ -15,8 +15,7 @@ const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: 
   { key: "Z", desc: "Cycle sleep timer" }, { key: "Esc", desc: "Close panel / exit theater" },
   { key: "?", desc: "Toggle this help" },];
 interface Props { onClose: () => void; }
-export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) { return (
-    <div
+export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) { return ( <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"

@@ -16,8 +16,7 @@ export class ErrorBoundary extends React.Component<Props, State> { state: State 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("[Pulse Radio] Component error caught by boundary:", error, info.componentStack); }
   private handleReset = () => { this.setState({ hasError: false, error: null }); };
-  render() { if (this.state.hasError) {
-      if (this.props.fallback !== undefined) return this.props.fallback;
+  render() { if (this.state.hasError) { if (this.props.fallback !== undefined) return this.props.fallback;
       return ( <div className="flex-center-col gap-4 p-8 h-full bg-surface-1 text-center select-none">
           <div className="p-3 rounded-full bg-sys-red/10"><AlertTriangle size={28} className="text-sys-red" /></div>
           <div><h2 className="text-[15px] font-semibold text-white mb-1">Something went wrong</h2>

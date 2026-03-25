@@ -17,8 +17,7 @@ type Props = { topStations: StationListenTime[]; topSongs: SongPlayCount[];
   topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number; };
 const StatSection = React.memo(function StatSection({ title, icon, children, }: {
   title: string; icon: React.ReactNode; children: React.ReactNode;
-}) { return (
-    <div><div className="flex items-center gap-2 mb-2">
+}) { return ( <div><div className="flex items-center gap-2 mb-2">
         {icon} <span className="text-[13px] font-semibold text-white/80">{title}</span>
       </div><div className="space-y-1">{children}</div></div>
   );});
@@ -33,8 +32,7 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
   );});
 export default React.memo(function StatsView({ topStations, topSongs, topArtists, topGenres, totalListenMs }: Props) {
   const hasData = totalListenMs > 0 || topSongs.length > 0;
-  if (!hasData) { return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
+  if (!hasData) { return ( <div className="flex flex-col items-center justify-center py-16 px-4">
         <IoTimeOutline size={40} className="text-white/20 mb-3" />
         <p className="text-[14px] text-white/40">No listening data yet</p>
         <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p></div>
