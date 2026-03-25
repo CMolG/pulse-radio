@@ -24,15 +24,14 @@
 }
 import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
+const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' };
 /* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
   req: NextRequest,
 ) {
   const term = req.nextUrl.searchParams.get('term');
   if (!term || term.length > 200) {
-    return NextResponse.json(
-      { error: 'Missing or invalid term parameter', results: [] },
-      { status: 400 },
-    );
+    return NextResponse.json(_ERR_400, { status: 400 });
   }
   const isPodcast = req.nextUrl.searchParams.get('media') === 'podcast';
   const media = isPodcast ? 'podcast' : 'music';
@@ -46,9 +45,7 @@ export const runtime = 'nodejs';
       label: 'iTunes API',
     });
     const data = await res.json();
-    return NextResponse.json(data, {
-      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
-    });
+    return NextResponse.json(data, { headers: _CACHE_HDRS });
   } catch (e) {
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     return NextResponse.json(

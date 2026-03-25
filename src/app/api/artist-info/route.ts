@@ -10,6 +10,8 @@ const MUSIC_KEYWORDS =
   /band|singer|musician|artist|rapper|group|duo|dj|producer|composer|vocalist|songwriter|hip.hop|rock|pop|jazz|classical|electronic|country|metal|r&b|soul|blues|funk|reggae|punk|folk/i;
 const _PERSON_SUFFIXES = ['(singer)', '(musician)', '(rapper)'] as const;
 const _BAND_SUFFIXES = ['(band)', '(musical group)', '(singer)', '(musician)'] as const;
+const _ERR_400 = { error: 'Missing or invalid artist parameter' };
+const _ERR_500 = { error: 'Internal error' };
 async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T | null> {
   try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(8_000) });
@@ -44,7 +46,7 @@ async function fetchWikiSummary(title: string) {
 export async function GET(req: NextRequest) {
   const artist = req.nextUrl.searchParams.get('artist');
   if (!artist || artist.length > 200) {
-    return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
+    return NextResponse.json(_ERR_400, { status: 400 });
   }
   try {
     const [mbResult, wikiResult] = await Promise.allSettled([
@@ -90,6 +92,6 @@ export async function GET(req: NextRequest) {
     );
   } catch (err) {
     console.error('[Pulse Radio] Artist info fetch error:', err);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json(_ERR_500, { status: 500 });
   }
 }
