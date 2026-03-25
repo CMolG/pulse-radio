@@ -8194,21 +8194,29 @@ function useStationQueue() {
     let removedIdx = -1;
     setCurrentIndex((prevIdx) => {
       const q = queueRef.current;
-      removedIdx = q.findIndex((s) => s.stationuuid === station.stationuuid);
-      const filtered = q.filter((s) => s.stationuuid !== station.stationuuid);
+      removedIdx = -1;
+      const filtered: Station[] = [];
+      for (let i = 0; i < q.length; i++) {
+        if (q[i].stationuuid === station.stationuuid) { removedIdx = i; } else { filtered.push(q[i]); }
+      }
       if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;
       let adjusted = prevIdx;
       if (removedIdx >= 0 && removedIdx < prevIdx) adjusted--;
       const insertAt = adjusted >= 0 ? Math.min(adjusted + 1, filtered.length) : 0;
-      setQueue([...filtered.slice(0, insertAt), station, ...filtered.slice(insertAt)]);
+      filtered.splice(insertAt, 0, station);
+      setQueue(filtered);
       return adjusted;
     });
   }, []);
   const remove = useCallback((stationuuid: string) => {
     let removedIdx = -1;
     setQueue((prev) => {
-      removedIdx = prev.findIndex((s) => s.stationuuid === stationuuid);
-      return prev.filter((s) => s.stationuuid !== stationuuid);
+      const result: Station[] = [];
+      removedIdx = -1;
+      for (let i = 0; i < prev.length; i++) {
+        if (prev[i].stationuuid === stationuuid) { removedIdx = i; } else { result.push(prev[i]); }
+      }
+      return removedIdx < 0 ? prev : result;
     });
     setCurrentIndex((prev) => {
       if (removedIdx < 0) return prev;
