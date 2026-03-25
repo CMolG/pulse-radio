@@ -21,8 +21,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
       return results[exactIdx]; }
   } let best: ItunesResult | null = null; let bestScore = 0; for (let i = 0; i < results.length; i++) { const candidateTitle = normTitles[i]; if (!candidateTitle) continue; const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length); const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length); if (maxLen > 0 && lenDiff / maxLen > 0.35) continue; const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle); if (titleScore < 0.94) continue; let score = titleScore; if (normalizedRequestedArtist) { const candidateArtist = normArtists[i]; if (candidateArtist) {
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist); if (artistScore < 0.85) continue; score = (titleScore * 0.85) + (artistScore * 0.15); }
-    }
-    if (score > bestScore) { bestScore = score; best = results[i]; } }
+    } if (score > bestScore) { bestScore = score; best = results[i]; } }
   return best ?? null; }
 function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key); if (val !== undefined) {
     CACHE.delete(key); CACHE.set(key, val); } // Move to end for LRU ordering
@@ -43,5 +42,4 @@ export function useAlbumArt(title: string | null, artist: string | null) { const
           cacheSet(cacheKey, EMPTY_ALBUM_INFO); setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO }); }
       }).finally(() => { clearTimeout(timeout); });
     return () => { clearTimeout(timeout); controller.abort(); };
-  }, [title, artist, cacheKey, cachedInfo]); const info = !cacheKey ? EMPTY_ALBUM_INFO : cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO); const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey); return useMemo(() => ({ ...info, isLoading }), [ info.artworkUrl, info.albumName, info.itunesUrl, info.durationMs, info.genre, info.releaseDate, info.trackNumber, info.trackCount, isLoading,]);
-}
+  }, [title, artist, cacheKey, cachedInfo]); const info = !cacheKey ? EMPTY_ALBUM_INFO : cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO); const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey); return useMemo(() => ({ ...info, isLoading }), [ info.artworkUrl, info.albumName, info.itunesUrl, info.durationMs, info.genre, info.releaseDate, info.trackNumber, info.trackCount, isLoading,]); }

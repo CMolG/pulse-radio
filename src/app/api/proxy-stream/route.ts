@@ -8,8 +8,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   } let parsed: URL; try { parsed = new URL(streamUrl); if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
       return new Response(JSON.stringify({ error: 'Invalid protocol' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },});
-    }
-    const host = parsed.hostname.toLowerCase(); // Block loopback and private/internal IPs to prevent SSRF
+    } const host = parsed.hostname.toLowerCase(); // Block loopback and private/internal IPs to prevent SSRF
     if (isPrivateHost(host)) { return new Response(JSON.stringify({ error: 'Private/internal URLs not allowed' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },});
     }

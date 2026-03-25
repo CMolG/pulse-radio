@@ -24,5 +24,4 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength); const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(/\0+$/, '');
     // Parse StreamTitle='Artist - Title';
     const match = metaString.match(/StreamTitle='([^']*)'/); const streamTitle = match?.[1]?.trim() || null; return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
-  } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError'; if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 }); const message = err instanceof Error ? err.message : 'Unknown error'; return NextResponse.json({ error: message }, { status: 500 }); }
-}
+  } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError'; if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 }); const message = err instanceof Error ? err.message : 'Unknown error'; return NextResponse.json({ error: message }, { status: 500 }); } }

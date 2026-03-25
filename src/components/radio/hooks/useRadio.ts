@@ -139,8 +139,7 @@ export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline'; export type St
       let ahead = 0; let bufferEnd = 0; // Find the buffer range containing currentTime
       for (let i = 0; i < buffered.length; i++) { if (ct >= buffered.start(i) && ct <= buffered.end(i)) {
           ahead = buffered.end(i) - ct; bufferEnd = buffered.end(i); break; }
-      }
-      const prevEnd = lastBufferEndRef.current; // Stream quality: based on buffer-ahead and growth rate
+      } const prevEnd = lastBufferEndRef.current; // Stream quality: based on buffer-ahead and growth rate
       const growth = bufferEnd - prevEnd; // how much buffer grew since last check
       lastBufferEndRef.current = bufferEnd; if (ahead >= 5) {
         // saveData means the user opted into reduced bandwidth; cap at 'fair'
@@ -169,8 +168,7 @@ export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline'; export type St
         const t = step / steps; const eased = 1 - (1 - t) * (1 - t) * (1 - t); audio.volume = Math.max(0, startVol * (1 - eased)); if (step >= steps) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null;
           // Read current volume/muted from refs — user may have changed them during fade
           audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected); }
-      }, interval);} else { audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected);
-    }
+      }, interval);} else { audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected); }
   }, [getAudio, startPlayback, handlePlayRejected]); const pause = useCallback(() => { userPausedRef.current = true;
     // Cancel any in-progress crossfade so its completion doesn't call
     clearTimer(fadeTimerRef); audioRef.current?.pause(); // startPlayback() and resume audio after this explicit pause.

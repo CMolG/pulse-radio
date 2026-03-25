@@ -16,8 +16,7 @@ const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-we
     for (const genre of userGenreOrder) {
       const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase(); if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
         ordered.push(catId); boostedIds.add(catId); }
-    }
-    for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); } // Append remaining in default order
+    } for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); } // Append remaining in default order
     return ordered;
   }, [userGenreOrder]); const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, }); const [stations, setStations] = useState<Station[]>([]); const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({}); const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set()); const [loading, setLoading] = useState(false); const [error, setError] = useState<string | null>(null); const [discoveryMode, setDiscoveryMode] = useState(false); const [retryKey, setRetryKey] = useState(0); const [page, setPage] = useState(0); const PAGE_SIZE = 20; const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Tracks whether the initial immediate play has fired for the current
