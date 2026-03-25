@@ -406,37 +406,29 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (ss) return;
 
       switch (e.key) {
-        case " ":
-          e.preventDefault();
+        case " ": e.preventDefault();
           r.togglePlay();
           break;
-        case "ArrowLeft":
-          e.preventDefault();
+        case "ArrowLeft": e.preventDefault();
           skipPrev();
           break;
-        case "ArrowRight":
-          e.preventDefault();
+        case "ArrowRight": e.preventDefault();
           skipNext();
           break;
-        case "ArrowUp":
-          e.preventDefault();
+        case "ArrowUp": e.preventDefault();
           r.setVolume(Math.min(1, r.volume + 0.05));
           break;
-        case "ArrowDown":
-          e.preventDefault();
+        case "ArrowDown": e.preventDefault();
           r.setVolume(Math.max(0, r.volume - 0.05));
           break;
         case "m":
-        case "M":
-          r.toggleMute();
+        case "M": r.toggleMute();
           break;
         case "n":
-        case "N":
-          skipNext();
+        case "N": skipNext();
           break;
         case "p":
-        case "P":
-          skipPrev();
+        case "P": skipPrev();
           break;
         case "f":
         case "F": {
@@ -462,12 +454,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           else if (tm) setTheaterMode(false);
           break;
         case "t":
-        case "T":
-          setTheaterMode(prev => !prev);
+        case "T": setTheaterMode(prev => !prev);
           break;
         case "e":
-        case "E":
-          setShowEq(prev => !prev);
+        case "E": setShowEq(prev => !prev);
           break;
         case "l":
         case "L":
@@ -478,14 +468,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           }
           break;
         case "r":
-        case "R":
-          if (rl) rl.toggle();
+        case "R": if (rl) rl.toggle();
           break;
         case "z":
         case "Z":           // Z: cycle sleep timer st.cycle();
           break;
-        case "?":
-          setShowShortcuts(prev => !prev);
+        case "?": setShowShortcuts(prev => !prev);
           break;
       }
     };

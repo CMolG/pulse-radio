@@ -72,8 +72,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
 let _offscreen: OffscreenCanvas | null = null;
 let _imgData: ImageData | undefined;
 
-function drawMetaballs( ctx: CanvasRenderingContext2D,
-  blobs: Blob[],
+function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[],
   w: number,
   h: number,
   colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] },
