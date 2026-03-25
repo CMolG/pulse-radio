@@ -2,8 +2,7 @@
 "use client"; import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
-type Props = { lyrics: LyricsData | null; currentTime?: number;
-   activeLineOverride?: number;
+type Props = { lyrics: LyricsData | null; currentTime?: number; activeLineOverride?: number;
   variant?: "mobile" | "desktop"; };
 const EMPHASIS: [string, string, string][] = [ // [base classes, mobile size, desktop size]
   ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],
@@ -15,8 +14,7 @@ const LyricReelLine = React.memo(function LyricReelLine({
   lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
 }: { lineId: string; index: number; text: string; emphasisIdx: number;
   isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>; scrollToIndex: (i: number) => void;
-}) { const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`;
-  return ( <button
+}) { const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`; return ( <button
       key={lineId}
       ref={(node) => { lineRefs.current[index] = node; }}
       type="button"
@@ -70,13 +68,9 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
           style={{
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
             maskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
-          }}><div className="flex min-h-full flex-col justify-center py-14">
-              {renderableLines.map((line, index) => {
+          }}><div className="flex min-h-full flex-col justify-center py-14"> {renderableLines.map((line, index) => {
                 const ei = (activeIdx >= 0 && index === activeIdx) ? 0 : Math.min(Math.abs(index - focusedIdx), 3) + 1;
-                return ( <LyricReelLine
-                    key={line.id}
-                    lineId={line.id}
-                    index={index}
+                return ( <LyricReelLine key={line.id} lineId={line.id} index={index}
                     text={line.text}
                     emphasisIdx={ei}
                     isDesktop={isDesktop}

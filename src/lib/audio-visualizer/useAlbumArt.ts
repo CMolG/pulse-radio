@@ -59,8 +59,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     }
     if (score > bestScore) { bestScore = score; best = results[i]; } }
   return best ?? null; }
-function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key);
-  if (val !== undefined) {
+function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key); if (val !== undefined) {
     CACHE.delete(key); CACHE.set(key, val); } // Move to end for LRU ordering
   return val; }
 function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(key, value);
@@ -103,8 +102,7 @@ export function useAlbumArt(title: string | null, artist: string | null) { const
       }).finally(() => { clearTimeout(timeout); });
     return () => { clearTimeout(timeout); controller.abort(); };
   }, [title, artist, cacheKey, cachedInfo]);
-  const info = !cacheKey
-    ? EMPTY_ALBUM_INFO
+  const info = !cacheKey ? EMPTY_ALBUM_INFO
     : cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO);
   const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey);
   return useMemo(() => ({ ...info, isLoading }), [ info.artworkUrl, info.albumName, info.itunesUrl, info.durationMs,

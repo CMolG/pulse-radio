@@ -10,10 +10,7 @@ export function ParallaxAlbumBackground({ imageUrl, fallbackUrl, blurClass = 'bl
   const [prevImageUrl, setPrevImageUrl] = useState(imageUrl);
   if (imageUrl !== prevImageUrl) { setPrevImageUrl(imageUrl); setImgError(false); }
   const src = (!imgError && imageUrl) || fallbackUrl || null;
-  return ( <div className="absolute inset-0 overflow-hidden">
-      {src && ( <Image
-          src={src}
-          alt=""
+  return ( <div className="absolute inset-0 overflow-hidden"> {src && ( <Image src={src} alt=""
           fill
           style={{ objectFit: 'cover' }}
           className={`${blurClass} ${enableDrift ? 'animate-ambient-drift scale-105' : 'scale-110'} transition-[filter] duration-1000`}

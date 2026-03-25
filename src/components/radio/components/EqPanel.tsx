@@ -39,8 +39,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                 className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors">
                 <X size={8} /></button>)}</div>))}</div>
       {/* Save custom preset */}
-      {onSaveCustomPreset && ( <div className="mb-4">
-          {showSaveInput ? ( <div className="flex-row-1.5">
+      {onSaveCustomPreset && ( <div className="mb-4"> {showSaveInput ? ( <div className="flex-row-1.5">
  <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }}
                 placeholder="Preset name…"
@@ -48,8 +47,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                 className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/30 outline-none focus:border-sys-orange/50"
                 autoFocus/>
  <button onClick={handleSave} aria-label="Save preset" className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors" ><Save size={10} /></button>
-              <button onClick={() => setShowSaveInput(false)}
-                aria-label="Cancel"
+              <button onClick={() => setShowSaveInput(false)} aria-label="Cancel"
                 className="p-1 rounded-md bg-surface-2 text-subtle-hover"><X size={10} /></button></div>
           ) : ( <button onClick={() => setShowSaveInput(true)}
               className="flex-row-1 px-2 py-1 text-[10px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors">
@@ -67,8 +65,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             <span className="text-[9px] text-secondary">{band.label}</span></div>))}</div>
       {/* Stereo width */} <div className="mt-3 pt-3 border-t border-white/10">
         <div className="mb-2"><div className="text-[10px] text-secondary mb-1">Noise Reduction</div>
-          <div className="flex-wrap-1.5">{(['off', 'low', 'medium', 'high'] as const).map(mode => ( <button
-                key={mode}
+          <div className="flex-wrap-1.5">{(['off', 'low', 'medium', 'high'] as const).map(mode => ( <button key={mode}
                 onClick={() => onSetNoiseReductionMode(mode)}
                 className={`px-2 py-1 text-[10px] rounded-md transition-colors ${ noiseReductionMode === mode
                     ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40'

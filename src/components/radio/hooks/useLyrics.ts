@@ -29,8 +29,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
           const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
         } else setLyrics(null);
-      }).catch(() => { if (controller.signal.aborted) return;
-        if (retryCountRef.current < MAX_RETRIES) {
+      }).catch(() => { if (controller.signal.aborted) return; if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++; const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
           retryTimerRef.current = setTimeout(() => doFetch(key, cached, controller), delay);
         } else { setLyrics(null); setError(true); retryCountRef.current = 0; }

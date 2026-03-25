@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useState, useEffect, useMemo } from 'react';
 import type { ArtistInfo } from '../types'; const MAX_CACHE = 200; const cache = new Map<string, ArtistInfo>();
-function cacheGet(key: string): ArtistInfo | undefined { const val = cache.get(key);
-  if (val !== undefined) {
+function cacheGet(key: string): ArtistInfo | undefined { const val = cache.get(key); if (val !== undefined) {
     cache.delete(key); cache.set(key, val); } // Move to end (most recently used)
   return val; }
 function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure fresh insertion order

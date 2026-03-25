@@ -11,8 +11,7 @@ function getSharedContext(): AudioContext {
   if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {}); return sharedCtx; }
 export function getOrCreateAudioSource(audio: HTMLAudioElement): {
   ctx: AudioContext; source: MediaElementAudioSourceNode;
-} { const existing = cache.get(audio);
-  if (existing) {
+} { const existing = cache.get(audio); if (existing) {
     // Resume if suspended (Chrome autoplay policy)
     if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {}); return existing; }
   const ctx = getSharedContext(); const source = ctx.createMediaElementSource(audio);

@@ -55,17 +55,11 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     }; window.addEventListener('keydown', onTab);
     return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
   }, [song]);
-  return ( <AnimatePresence>
-      {song && ( <motion.div
-          key="song-detail-backdrop"
-          initial={{ opacity: 0 }}
+  return ( <AnimatePresence> {song && ( <motion.div key="song-detail-backdrop" initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-          onClick={onClose}><motion.div
-            key="song-detail-modal"
-            ref={modalRef}
-            role="dialog"
+          onClick={onClose}><motion.div key="song-detail-modal" ref={modalRef} role="dialog"
             aria-modal="true"
             aria-label={`Song details: ${song.title} by ${song.artist}`}
             initial={{ y: 30, opacity: 0, scale: 0.96 }}
@@ -75,15 +69,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
             className="w-full max-w-[860px] mx-4 md:flex md:items-stretch md:gap-4"
             onClick={(e) => e.stopPropagation()}>
             <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-              {/* Close button */} <div className="sticky top-0 z-10 flex justify-end p-3"><button
-                  onClick={onClose}
+              {/* Close button */} <div className="sticky top-0 z-10 flex justify-end p-3"><button onClick={onClose}
                   aria-label="Close song details"
                   className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
                 ><X size={16} /></button></div>
               {/* ── Song Info ── */} <div className="px-5 -mt-2">{/* Artwork */}
                 <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
-                  {resolvedArtworkUrl ? ( <UiImage
-                      src={resolvedArtworkUrl}
+                  {resolvedArtworkUrl ? ( <UiImage src={resolvedArtworkUrl}
                       alt={`Album art for ${song.title} by ${song.artist}`}
                       className="object-cover"
                       sizes="240px"
@@ -110,13 +102,11 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         {resolvedGenre && <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">{resolvedGenre}</MetaBadge>}
                       {showMetaHydration && <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">Fetching metadata…</MetaBadge>}
                       </div></div>)}</div>
-                {/* Apple Music button */} <a
-                  href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
+                {/* Apple Music button */} <a href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
-                ><ExternalLink size={14} />
-                  Listen on Apple Music</a></div>
+                ><ExternalLink size={14} /> Listen on Apple Music</a></div>
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" /> {/* ── Artist Info ── */}
               <div className="px-5"><h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   About {song.artist}</h3>
@@ -158,20 +148,15 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     {info.bio && ( <p className="text-[12px] text-secondary/90 leading-relaxed">{info.bio}</p>
                     )}
                     {/* Genre tags */}
-                    {info.tags.length > 0 && ( <div className="flex flex-wrap gap-1.5">
-                        {info.tags.map((tag) => ( <span
+                    {info.tags.length > 0 && ( <div className="flex flex-wrap gap-1.5"> {info.tags.map((tag) => ( <span
                             key={tag}
                             className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50">
                             {tag}</span>))}</div>
                     )}
                     {/* Wikipedia link */}
-                    {info.wikipediaUrl && ( <a
-                        href={info.wikipediaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {info.wikipediaUrl && ( <a href={info.wikipediaUrl} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
-                      ><Globe size={11} />
-                        Read more on Wikipedia</a>)}</div>
+                      ><Globe size={11} /> Read more on Wikipedia</a>)}</div>
                 )}
                 {/* No data */}
                 {!loading && !info && ( <p className="text-[12px] text-dim">No artist information available</p>)}</div>
@@ -188,11 +173,9 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
               {/* Divider (mobile) */} <div className="mx-5 my-5 border-t border-border-default md:hidden" />
               {/* ── Remove from favorites ── */}
               {onRemoveFromFavorites && ( <><div className="mx-5 my-5 border-t border-border-default" />
-                  <div className="px-5 pb-2"><button
-                      onClick={onRemoveFromFavorites}
+                  <div className="px-5 pb-2"><button onClick={onRemoveFromFavorites}
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"
-                    ><Trash2 size={14} />
-                      Borrar de favoritos</button></div></>
+                    ><Trash2 size={14} /> Borrar de favoritos</button></div></>
               )}
               {/* ── Station ── */} <div className="px-5 pb-6 pt-4"><div className="flex items-center gap-2">
                   <Radio size={12} className="text-dim flex-shrink-0" /> <p className="text-[11px] text-dim">

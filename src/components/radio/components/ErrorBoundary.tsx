@@ -20,11 +20,9 @@ export class ErrorBoundary extends React.Component<Props, State> { state: State 
           {this.state.error && (
             <pre className="text-[11px] text-muted bg-surface-2 rounded-lg px-4 py-2 max-w-sm overflow-auto max-h-24">
               {this.state.error.message}</pre>
-          )} <button
-            onClick={this.handleReset}
+          )} <button onClick={this.handleReset}
             className="flex-row-2 px-4 py-2 rounded-lg bg-surface-3 text-[13px] font-medium text-white hover:bg-surface-4 transition-colors"
-          ><RotateCcw size={14} />
-            Try Again</button></div>
+          ><RotateCcw size={14} /> Try Again</button></div>
       ); }
     return this.props.children; }
 }

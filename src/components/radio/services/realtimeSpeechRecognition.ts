@@ -40,8 +40,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
         || event.error === 'language-not-supported';
       if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return;
       }
-    }; recognition.onend = () => { if (destroyed || !running) return;
-      if (restartCount >= MAX_RESTARTS) {
+    }; recognition.onend = () => { if (destroyed || !running) return; if (restartCount >= MAX_RESTARTS) {
         running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return; }
       restartCount++;
       // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,

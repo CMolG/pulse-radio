@@ -17,14 +17,11 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
           opacity: landingMode ? 0.85 : 0.15, willChange: 'transform', }}/>
       {landingMode && ( <div className="absolute inset-0" style={RADIAL_OVERLAY} />
       )}
-      {faviconUrl && ( <div
-          className="absolute inset-[-40px] transition-transform duration-300 ease-out"
+      {faviconUrl && ( <div className="absolute inset-[-40px] transition-transform duration-300 ease-out"
           style={{ transform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`,
             WebkitTransform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`, willChange: 'transform',
           }}> {/* Separate blur layer for iOS GPU compositing */}
-          <div className="absolute inset-0" style={BF_STYLE}><UiImage
-              src={faviconUrl}
-              alt=""
+          <div className="absolute inset-0" style={BF_STYLE}><UiImage src={faviconUrl} alt=""
               className={`object-cover ${landingMode ? 'opacity-10' : 'opacity-20'}`}
               sizes="100vw"
               style={BLUR_STYLE} /></div></div>

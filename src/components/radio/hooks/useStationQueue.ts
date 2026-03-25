@@ -12,8 +12,7 @@ export function useStationQueue() { const [queue, setQueue] = useState<Station[]
   const add = useCallback((station: Station) => { setQueue(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
       if (prev.length >= MAX_QUEUE_SIZE) return prev; return [...prev, station];});
-  }, []); const addNext = useCallback((station: Station) => { let removedIdx = -1;
-    setCurrentIndex(prevIdx => {
+  }, []); const addNext = useCallback((station: Station) => { let removedIdx = -1; setCurrentIndex(prevIdx => {
       const q = queueRef.current; removedIdx = q.findIndex(s => s.stationuuid === station.stationuuid);
       const filtered = q.filter(s => s.stationuuid !== station.stationuuid);
       if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;

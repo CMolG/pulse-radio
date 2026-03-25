@@ -258,8 +258,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     codecFallbackTriedRef.current.delete(s.url_resolved); setStation(s); setStatus('loading');
     setStreamQuality('good'); lastBufferEndRef.current = 0;
     // Crossfade: fade out with ease-out curve before switching
-    clearTimer(fadeTimerRef); if (!audio.paused && audio.src) { const steps = 8;
-      const interval = 40; // 320ms total
+    clearTimer(fadeTimerRef); if (!audio.paused && audio.src) { const steps = 8; const interval = 40; // 320ms total
       let step = 0; const startVol = audio.volume; fadeTimerRef.current = setInterval(() => { step++;
         // Ease-out cubic: rapid initial drop, gentle tail
         const t = step / steps; const eased = 1 - (1 - t) * (1 - t) * (1 - t);

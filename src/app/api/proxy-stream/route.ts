@@ -9,8 +9,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },});
   }
-  let parsed: URL; try { parsed = new URL(streamUrl);
-    if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
+  let parsed: URL; try { parsed = new URL(streamUrl); if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
       return new Response(JSON.stringify({ error: 'Invalid protocol' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },});
     }

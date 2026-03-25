@@ -7,9 +7,7 @@ type HeartAction = { filled: boolean; onClick: () => void; label: string };
 type Props = { item: SongCardItem; delay: number; onRemove: () => void; onSelect?: (song: SongDetailData) => void;
   heart?: HeartAction | null; hideRemove?: boolean; };
 export default React.memo(function SongCard({ item, delay, onRemove, onSelect, heart, hideRemove }: Props) { return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(delay * 0.03, 0.5) }}
       className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
       role="button"
@@ -23,15 +21,11 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
           <UiImage src={item.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />
         ) : ( <div className="size-full flex items-center justify-center"><Music size={32} className="text-dim" /></div>
         )}
-        {heart && ( <button
-            onClick={(e) => { e.stopPropagation(); heart.onClick(); }}
-            aria-label={heart.label}
+        {heart && ( <button onClick={(e) => { e.stopPropagation(); heart.onClick(); }} aria-label={heart.label}
             className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? "bg-pink-500/20 text-pink-400" : "bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400"}`}
           ><Heart size={12} className={heart.filled ? "fill-pink-400" : ""} /></button>
         )}
-        {!hideRemove && ( <button
-            onClick={(e) => { e.stopPropagation(); onRemove(); }}
-            aria-label="Remove"
+        {!hideRemove && ( <button onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label="Remove"
             className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
           ><Trash2 size={12} /></button>)}</div>
       <div className="p-3 space-y-0.5"><p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>
@@ -41,8 +35,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             {item.genre && <span>{item.genre}</span>}
             {item.durationMs && ( <span className="inline-flex items-center gap-0.5">
                 <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}</span>)}</p>)}</div>
-      <div className="px-3 pb-2.5 space-y-1.5"><a
-          href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
+      <div className="px-3 pb-2.5 space-y-1.5"><a href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}

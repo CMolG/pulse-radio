@@ -54,17 +54,12 @@ export default function TheaterView({
   }, [artworkUrl]); const [color1, color2, color3] = colors;
   const theaterTags = useMemo( () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
     [station.tags],);
-  return ( <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="flex flex-col h-full w-full relative overflow-hidden"> {/* ── Layer 1: solid dark background ── */}
       <div className="absolute inset-0 bg-[#0f172a]" /> {/* ── Layer 1.5: album art background with ambient drift ── */}
       {coverUrl && failedCoverUrl !== coverUrl && (
-        <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden"><UiImage
-            src={coverUrl}
-            alt=""
+        <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden"><UiImage src={coverUrl} alt=""
             className="object-cover animate-ambient-drift blur-lg opacity-25"
             sizes="100vw"
             onError={() => setFailedCoverUrl(coverUrl)} />
@@ -79,33 +74,26 @@ export default function TheaterView({
           color3={color3}
           sensitivity={compact ? 0.8 : 1.2}
           demo /></ErrorBoundary></div>
-      {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div
-        className="absolute inset-0 z-6 pointer-events-none"
+      {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div className="absolute inset-0 z-6 pointer-events-none"
         style={{
           background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
           backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay', opacity: 0.6, }} />
-      <div
-        className="absolute inset-0 z-6 pointer-events-none"
+      <div className="absolute inset-0 z-6 pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
           boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)', }} />
-      <div
-        className="absolute inset-0 z-6 pointer-events-none"
+      <div className="absolute inset-0 z-6 pointer-events-none"
         style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }} />
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}
-      {!compact && ( <div
-          className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
-          style={{ top: "env(safe-area-inset-top, 0px)" }}><button
-            onClick={onBack}
+      {!compact && ( <div className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
+          style={{ top: "env(safe-area-inset-top, 0px)" }}><button onClick={onBack}
             className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
             aria-label="Exit theater mode"><ArrowLeft size={16} /></button>
-          <div className="flex flex-row gap-2 sm:flex-col">{onToggleFav && ( <button
-                onClick={onToggleFav}
+          <div className="flex flex-row gap-2 sm:flex-col">{onToggleFav && ( <button onClick={onToggleFav}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
                 aria-label="Favorite station"
                 aria-pressed={!!isFavorite}><Star size={16} className={isFavorite ? "fill-sys-orange" : ""} /></button>
             )}
-            {onFavSong && track && ( <button
-                onClick={onFavSong}
+            {onFavSong && track && ( <button onClick={onFavSong}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
                 aria-label="Favorite song"
                 aria-pressed={!!isSongLiked}><Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} /></button>
@@ -134,10 +122,7 @@ export default function TheaterView({
                   className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
                 >{stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" />
                   )}</span></div>
-            ) : ( <UiImage
-                src={coverUrl}
-                alt=""
-                className="object-cover"
+            ) : ( <UiImage src={coverUrl} alt="" className="object-cover"
                 sizes={compact ? "56px" : "176px"}
                 loading="lazy"
                 onError={() => setFailedCoverUrl(coverUrl)} />
@@ -176,8 +161,7 @@ export default function TheaterView({
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
-            ><ExternalLink size={11} />
-              Listen on Apple Music</a>
+            ><ExternalLink size={11} /> Listen on Apple Music</a>
           )}
           {/* ── Lyrics reel inside glass panel ── */}
           {!compact && (

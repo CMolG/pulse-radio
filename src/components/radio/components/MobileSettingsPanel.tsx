@@ -31,10 +31,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
     setSelectedPreset(null); onPresetChange(null); eq.setBandGain(id, gain);
   }, [eq, onPresetChange]); const handleSave = () => { const name = presetName.trim();
     if (name) { eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false); } };
-  return ( <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       className="absolute inset-0 z-50 flex flex-col"> {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} /> {/* Panel slides up from bottom */} <motion.div
@@ -48,16 +45,14 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         data-testid="mobile-settings-panel"> {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
         {/* Header */} <div className="flex items-center justify-between px-5 pb-3">
-          <h2 className="text-[17px] font-semibold text-white">Settings</h2><button
-            onClick={onClose}
+          <h2 className="text-[17px] font-semibold text-white">Settings</h2><button onClick={onClose}
             aria-label="Close settings"
             className="w-8 h-8 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           ><X size={16} /></button></div><div className="border-t border-white/8" />
         {/* Language section */} <div className="px-5 py-4"><div className="flex items-center gap-2 mb-3">
             <Languages size={16} className="text-white/60" />
             <span className="text-[14px] font-medium text-white/80">Language</span></div>
-          <div className="grid grid-cols-3 gap-2">{locales.map((item) => ( <button
-                key={item.code}
+          <div className="grid grid-cols-3 gap-2">{locales.map((item) => ( <button key={item.code}
                 onClick={() => setLocale(item.code as typeof locale)}
                 className={`px-3 py-2 rounded-xl text-[13px] font-medium transition-colors ${ locale === item.code
                     ? "bg-sys-orange/20 border border-sys-orange/50 text-sys-orange"
@@ -122,8 +117,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                 <div className="flex gap-1.5">{(["off", "low", "medium", "high"] as const).map(mode => (
                     <button key={mode} onClick={() => eq.setNoiseReductionMode(mode)}
                       className={`flex-1 py-1.5 text-[11px] rounded-lg font-medium transition-colors ${
-                        eq.noiseReductionMode === mode
-                          ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40"
+                        eq.noiseReductionMode === mode ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40"
                           : "bg-white/5 border border-white/8 text-white/50"
                       }`}>{mode.charAt(0).toUpperCase() + mode.slice(1)}</button>))}</div></div>
               {/* Sliders: Width, Bass, Compressor */}
@@ -151,8 +145,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.compressorAmount * 100)}%</span>
                 </div></div></div>)}</div>
         {/* Usage guide & Stats */} <div className="border-t border-white/8" />
-        <div className="px-5 py-4 space-y-2"><button
-            onClick={() => setShowGuide(true)}
+        <div className="px-5 py-4 space-y-2"><button onClick={() => setShowGuide(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:bg-white/[0.06] transition-colors text-left"
           ><IoHelpCircleOutline size={18} className="text-[#3478f6] flex-shrink-0" />
             <span className="text-[14px] font-medium text-white/70">How to use Pulse</span></button><button
@@ -163,8 +156,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         {/* Bottom safe area padding */} <div className="h-6" /></motion.div>
       {/* Usage Guide overlay */}
       <AnimatePresence>{showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}</AnimatePresence>
-      {/* Stats overlay */} <AnimatePresence>{showStats && ( <motion.div
-            initial={{ opacity: 0 }}
+      {/* Stats overlay */} <AnimatePresence>{showStats && ( <motion.div initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
@@ -178,13 +170,11 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
               style={{ background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
                 WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)', }}>
               <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
-              <div className="flex items-center gap-3 px-5 pb-3"><button
-                  onClick={() => setShowStats(false)}
+              <div className="flex items-center gap-3 px-5 pb-3"><button onClick={() => setShowStats(false)}
                   aria-label="Close statistics"
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
                 ><X size={16} /></button><h2 className="text-[17px] font-semibold text-white">Your Statistics</h2></div>
-              <div className="border-t border-white/8" /> {statsData && ( <StatsView
-                  topStations={statsData.topStations}
+              <div className="border-t border-white/8" /> {statsData && ( <StatsView topStations={statsData.topStations}
                   topSongs={statsData.topSongs}
                   topArtists={statsData.topArtists}
                   topGenres={statsData.topGenres}

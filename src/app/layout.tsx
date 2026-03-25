@@ -31,6 +31,5 @@ function JsonLd() { const schema = {
   }; return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />; }
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) { return (
     <html lang="en" dir="ltr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}>
-      <body className="h-full bg-[#0a0f1a] text-white"><JsonLd />
-        {children} <ServiceWorkerRegistrar /></body></html>
+      <body className="h-full bg-[#0a0f1a] text-white"><JsonLd /> {children} <ServiceWorkerRegistrar /></body></html>
   ); }

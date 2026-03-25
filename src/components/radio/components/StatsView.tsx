@@ -34,8 +34,7 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
     ); }
   const maxStationTime = topStations[0]?.totalMs ?? 1; const maxSongCount = topSongs[0]?.count ?? 1;
   const maxArtistCount = topArtists[0]?.count ?? 1; const maxGenreCount = topGenres[0]?.count ?? 1;
-  return ( <div className="p-4 space-y-6">
-      {/* Total listen time */}
+  return ( <div className="p-4 space-y-6"> {/* Total listen time */}
       <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/8">
         <IoTimeOutline size={20} className="text-[#3478f6]" />
         <div><p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>

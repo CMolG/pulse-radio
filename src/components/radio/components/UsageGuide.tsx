@@ -27,22 +27,15 @@ const GUIDE_SECTIONS: GuideSection[] = [
   },];
 type Props = { onClose: () => void };
 function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  return ( <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       className="absolute inset-0 z-50 flex flex-col"><div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
+      <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}> {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
-        {/* Header */} <div className="flex items-center gap-3 px-5 pb-3"><button
-            onClick={onClose}
+        {/* Header */} <div className="flex items-center gap-3 px-5 pb-3"><button onClick={onClose}
             aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           ><IoChevronBack size={16} /></button>
@@ -57,8 +50,7 @@ function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = 
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.2 }}
                     className="text-white/30 text-[12px]">▶</motion.span></button><AnimatePresence>
-                  {isExpanded && ( <motion.div
-                      initial={{ height: 0, opacity: 0 }}
+                  {isExpanded && ( <motion.div initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}

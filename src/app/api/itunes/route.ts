@@ -13,8 +13,7 @@ export async function GET(req: NextRequest) { const term = req.nextUrl.searchPar
     const data = await res.json();
     return NextResponse.json(data, { headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
     });
-  } catch (e) { const isTimeout = e instanceof DOMException && e.name === 'AbortError';
-    return NextResponse.json(
+  } catch (e) { const isTimeout = e instanceof DOMException && e.name === 'AbortError'; return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : (e instanceof Error ? e.message : 'Internal error'), results: [] },
       { status: isTimeout ? 504 : 500 },);
   } }

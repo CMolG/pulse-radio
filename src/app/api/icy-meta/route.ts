@@ -6,8 +6,7 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
     return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 }); }
-  try { const url = new URL(streamUrl);
-    if (!['http:', 'https:'].includes(url.protocol)) {
+  try { const url = new URL(streamUrl); if (!['http:', 'https:'].includes(url.protocol)) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 }); }
     const host = url.hostname.toLowerCase();
     if (isPrivateHost(host)) return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });

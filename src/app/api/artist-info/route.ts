@@ -36,8 +36,7 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
         ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)?.slice(0, 8)
         ?.map((t: { name: string }) => t.name) ?? [];
     const hasData = !!(mb || wiki?.extract);
-    const cacheHeader = hasData
-      ? 'public, max-age=86400, stale-while-revalidate=604800'
+    const cacheHeader = hasData ? 'public, max-age=86400, stale-while-revalidate=604800'
       : 'public, max-age=3600, stale-while-revalidate=7200';
     return NextResponse.json( { name: mb?.name ?? artist, disambiguation: mb?.disambiguation ?? null,
         type: mb?.type ?? null, country: mb?.country ?? null,

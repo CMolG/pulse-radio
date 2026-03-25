@@ -34,8 +34,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   return ( <div className={`mb-4 ${className ?? ""}`}>
       {title && ( <div className={`flex items-center justify-between mb-2 ${isMobile ? "px-4" : ""}`}>
           <div className="flex-row-1.5">{icon} <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
-          {!isMobile && ( <div className="flex gap-1"><button
-                onClick={() => scroll(-1)}
+          {!isMobile && ( <div className="flex gap-1"><button onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canLeft}
                 aria-label="Scroll left"><ChevronLeft size={14} /></button><button
@@ -147,8 +146,7 @@ export default function BrowseView({
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
   const renderScrollStations = (list: Station[]) =>
-    list.map((s) => ( <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard
-          station={s}
+    list.map((s) => ( <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard station={s}
           isCurrent={s.stationuuid === currentStation?.stationuuid}
           isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
           isFavorite={isFavorite(s.stationuuid)}
@@ -201,9 +199,7 @@ export default function BrowseView({
         return ( <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}><button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >{t("all")}</button> {visibleGenres.map((cat) => ( <button
-                key={cat.id}
-                onClick={() => onSelectGenre?.(cat)}
+            >{t("all")}</button> {visibleGenres.map((cat) => ( <button key={cat.id} onClick={() => onSelectGenre?.(cat)}
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
                 className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
               >{cat.label}</button>
@@ -220,15 +216,13 @@ export default function BrowseView({
         return ( <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}><button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >{`🌐 ${t("allCountries")}`}</button> {visibleCountries.map((c) => ( <button
-                key={c.code}
+            >{`🌐 ${t("allCountries")}`}</button> {visibleCountries.map((c) => ( <button key={c.code}
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
                 aria-current={countryChipActive(c.code) || undefined}
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
               ><span>{c.flag}</span><span>{c.displayName}</span></button>
             ))}
-            {collapsed && countryChips.length > MOBILE_LIMIT && ( <button
-                onClick={() => setCountryChipsExpanded(true)}
+            {collapsed && countryChips.length > MOBILE_LIMIT && ( <button onClick={() => setCountryChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>)}</div>
         );
@@ -246,18 +240,14 @@ export default function BrowseView({
           <div className="flex-center-col py-16"><Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">{t("noStationsFound")}</p></div>
         )}
-        {!loading && !error && ( <>
-            {/* Category rows for top view */}
-            {view.mode === "top" && ( <>
-                {/* Favorites row */}
-                {favorites && favorites.length > 0 && ( <ScrollRow
-                      title={t("favorites")}
+        {!loading && !error && ( <> {/* Category rows for top view */}
+            {view.mode === "top" && ( <> {/* Favorites row */}
+                {favorites && favorites.length > 0 && ( <ScrollRow title={t("favorites")}
                       icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
                 )}
                 {/* Recent stations row */}
-                {recent && recent.length > 0 && ( <ScrollRow
-                      title={t("recent")}
+                {recent && recent.length > 0 && ( <ScrollRow title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />}
                       isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
                 )}
@@ -287,24 +277,20 @@ export default function BrowseView({
             {view.mode !== "top" && stations.length > 0 && (() => { const filterActive = !!songFilter.trim();
               const paginationSource = filterActive ? allSongFilteredStations : stations;
               const totalPages = Math.ceil(paginationSource.length / PAGE_SIZE);
-              return ( <>
-                  {/* Scan now-playing bar */}
+              return ( <> {/* Scan now-playing bar */}
                   <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}><button
                       onClick={() => setScanEnabled(v => !v)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${
-                        scanEnabled
-                          ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
+                        scanEnabled ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
                           : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
-                      }`}
-                        title={t("scanNowPlaying")}><ScanSearch size={12} />
+                      }`} title={t("scanNowPlaying")}><ScanSearch size={12} />
                         {isScanning ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
                           : scannedCount > 0
                             ? t("nowPlayingProgress", { current: scannedCount, total: pageStations.length })
                             : t("scanNowPlaying")}</button>
                     {scanEnabled && (
                       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
-                        <Music2 size={11} className="text-dim shrink-0" /> <input
-                          type="text"
+                        <Music2 size={11} className="text-dim shrink-0" /> <input type="text"
                           placeholder={t("filterBySong")}
                           value={songFilter}
                           onChange={e => setSongFilter(e.target.value)}
@@ -319,9 +305,7 @@ export default function BrowseView({
                   <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
                     {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
                       const live = liveData[s.stationuuid];
-                      return ( <StationCard
-                          key={s.stationuuid}
-                          station={s}
+                      return ( <StationCard key={s.stationuuid} station={s}
                           isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
                           isCurrent={currentStation?.stationuuid === s.stationuuid}
                           isFavorite={isFavorite(s.stationuuid)}

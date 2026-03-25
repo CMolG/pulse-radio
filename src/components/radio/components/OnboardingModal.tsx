@@ -43,8 +43,7 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
       <h2 className="text-xl font-bold text-white">Install as App</h2>
       <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
         Install Pulse on your device for the best experience — instant access, offline support, and no browser bars.</p>
-      {deferredPrompt ? ( <button
-          onClick={handleInstall}
+      {deferredPrompt ? ( <button onClick={handleInstall}
           className="mt-2 px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
         >Install Now</button>
       ) : isIos ? ( <div className="mt-2 p-3 rounded-xl bg-white/5 border border-white/10">
@@ -62,10 +61,7 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
   }, []); const handleClose = useCallback(() => { setShow(false); saveToStorage(ONBOARDING_KEY, true); }, []);
   if (!show) return null; const currentStep = step < STEPS.length ? STEPS[step] : null;
   const isPWAStep = step >= STEPS.length; const isLast = step === totalSteps - 1;
-  return ( <AnimatePresence>
-      {show && ( <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+  return ( <AnimatePresence> {show && ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"> {/* Backdrop */}
           <div className="absolute inset-0 bg-black/70" onClick={handleClose} /> {/* Modal */} <motion.div
@@ -74,8 +70,7 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
-            style={GLASS_STYLE}> {/* Content */} <div className="p-8"><AnimatePresence mode="wait">
-                <motion.div
+            style={GLASS_STYLE}> {/* Content */} <div className="p-8"><AnimatePresence mode="wait"> <motion.div
                   key={step}
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -89,9 +84,7 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
                   ) : null}</motion.div></AnimatePresence></div>
             {/* Progress dots + navigation */} <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */} <div className="flex justify-center gap-2">
-                {Array.from({ length: totalSteps }, (_, i) => ( <button
-                    key={i}
-                    onClick={() => setStep(i)}
+                {Array.from({ length: totalSteps }, (_, i) => ( <button key={i} onClick={() => setStep(i)}
                     className={`rounded-full transition-all ${
                       i === step ? 'w-6 h-2 bg-[#3478f6]' : 'w-2 h-2 bg-white/20 hover:bg-white/30'
                     }`}

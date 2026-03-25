@@ -36,9 +36,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
     }, [muted, onSetVolume, onToggleMute],);
   if (compact) { return (
       <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
-        {/* Play/Pause — 48px touch target */} <button
-          onClick={onTogglePlay}
-          disabled={!station}
+        {/* Play/Pause — 48px touch target */} <button onClick={onTogglePlay} disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >{isLoading ? ( <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -56,13 +54,11 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
             </>
           ) : ( <p className="text-[13px] text-dim">No station selected</p>)}</div>
         {/* Action buttons — 44px touch targets */} <div className="flex items-center gap-0.5 shrink-0">
-          {station && !theaterMode && ( <button
-              onClick={onToggleTheater}
+          {station && !theaterMode && ( <button onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
               aria-label="Theater mode"><Maximize2 size={18} /></button>)}</div>
-        {/* Fill iPhone safe-area inset below the bar without adding layout height */} <div
-          aria-hidden
+        {/* Fill iPhone safe-area inset below the bar without adding layout height */} <div aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
           style={{ height: "env(safe-area-inset-bottom, 0px)" }} /></div>
     ); }
@@ -76,10 +72,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
                 {station ? ( stationInitials(station.name) || ( <Radio size={14} className="text-white/60" />)
                 ) : ( <Radio size={14} className="text-white/60" />
                 )}</span></div>
-          ) : ( <UiImage
-              src={coverUrl}
-              alt=""
-              className="object-cover"
+          ) : ( <UiImage src={coverUrl} alt="" className="object-cover"
               sizes="36px"
               loading="lazy"
               onError={() => setImgError(true)} />
@@ -100,9 +93,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
             title={`Stream: ${streamQuality}`}
             aria-label={`Stream quality: ${streamQuality}`} />
         )}</div>
-      {/* Controls */} <div className="flex-row-0.5"><button
-          onClick={onTogglePlay}
-          disabled={!station}
+      {/* Controls */} <div className="flex-row-0.5"><button onClick={onTogglePlay} disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
@@ -113,8 +104,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
       {/* LIVE indicator + mini ferrofluid */} <div className="flex-1 flex-row-2 min-w-0 relative">
         {station && isPlaying && (
           <><div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
-              <ErrorBoundary fallback={null}><FerrofluidRenderer
-                frequencyDataRef={frequencyDataRef}
+              <ErrorBoundary fallback={null}><FerrofluidRenderer frequencyDataRef={frequencyDataRef}
                 className="size-full"
                 blobCount={6}
                 colorPrimary="#1a1a2e"
@@ -126,37 +116,30 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
               <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
               <AnimatedBars size="small" /></div></>
         )}</div>
-      {/* Toggles */} <div className="flex-row-0.5">{station && !theaterMode && ( <button
-            onClick={onToggleTheater}
+      {/* Toggles */} <div className="flex-row-0.5">{station && !theaterMode && ( <button onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
             aria-label="Theater mode"><Maximize2 size={14} /></button>
         )}
-        {onToggleFav && ( <button
-            onClick={onToggleFav}
+        {onToggleFav && ( <button onClick={onToggleFav}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
         )}
-        {onFavSong && ( <button
-            onClick={onFavSong}
-            aria-label={songLiked ? 'Unlike song' : 'Like song'}
+        {onFavSong && ( <button onClick={onFavSong} aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
             title="Me gusta canción"><Heart size={14} className={songLiked ? "fill-pink-400" : ""} /></button>
         )}
-        {onCycleSleepTimer && ( <button
-            onClick={onCycleSleepTimer}
+        {onCycleSleepTimer && ( <button onClick={onCycleSleepTimer}
             className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
             aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}>
             <Clock size={14} /> {sleepTimerMin != null && (
               <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
                 {sleepTimerMin}</span>)}</button>
-        )} <button
-          onClick={onToggleEq}
-          aria-label="Toggle equalizer"
+        )} <button onClick={onToggleEq} aria-label="Toggle equalizer"
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         ><SlidersHorizontal size={14} /></button></div>
       {/* Volume */} <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2"><button

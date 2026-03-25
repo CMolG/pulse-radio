@@ -11,10 +11,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
   const [imgError, setImgError] = useState(false); const showFallback = !station.favicon || imgError;
   const tags = useMemo( () => station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean) ?? [],
     [station.tags],);
-  return (<div
-      role="button"
-      tabIndex={0}
-      aria-label={`${station.name}${isCurrent && isPlaying ? ' (playing)' : ''}`}
+  return (<div role="button" tabIndex={0} aria-label={`${station.name}${isCurrent && isPlaying ? ' (playing)' : ''}`}
       className={`group cursor-pointer rounded-xl p-2 transition-all duration-150 ${isCurrent ? 'bg-surface-3 ring-1 ring-border-strong' : 'hover:bg-surface-2' }`}
       onClick={onPlay}
       onMouseEnter={onPrefetch}
@@ -22,16 +19,12 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
         {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
             <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{stationInitials(station.name) || <Radio size={20} className="text-white/60" />}</span></div>
-        ) : ( <UiImage
-            src={station.favicon}
-            alt=""
-            className="object-cover"
+        ) : ( <UiImage src={station.favicon} alt="" className="object-cover"
             sizes="180px"
             loading="lazy"
             onError={() => setImgError(true)} />
         )}
-        {/* Play overlay */} <motion.button
-          aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
+        {/* Play overlay */} <motion.button aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ scale: 1.1 }}
           className={`app-overlay-center bg-black/40 transition-opacity duration-200 ${isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
@@ -67,8 +60,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
                 {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}</span></>
           ) : ( <span className="text-[9px] text-white/20">No track info</span>)}</div>
       )}
-      {onPeek && !liveStatus && ( <button
-          onClick={e => { e.stopPropagation(); onPeek(); }}
+      {onPeek && !liveStatus && ( <button onClick={e => { e.stopPropagation(); onPeek(); }}
           className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors">
           <Music2 size={9} />
           Check track</button>

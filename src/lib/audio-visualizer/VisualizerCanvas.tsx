@@ -12,8 +12,7 @@ export function VisualizerCanvas({
   // Invalidate cached color when prop changes
   useEffect(() => { resolvedColorRef.current = null; gradientCacheRef.current = null; }, [color]);
   // Track size via ResizeObserver instead of getBoundingClientRect per frame
-  useEffect(() => { const canvas = canvasRef.current; if (!canvas) return;
-    const updateSize = () => {
+  useEffect(() => { const canvas = canvasRef.current; if (!canvas) return; const updateSize = () => {
       const rect = canvas.getBoundingClientRect(); sizeRef.current = { width: rect.width, height: rect.height };
     }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();}, []);
   useEffect(() => { const draw = () => {
