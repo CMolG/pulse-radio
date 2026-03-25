@@ -1727,9 +1727,12 @@ function useRadio() {
   const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
     if (prefetchedUrlsRef.current.size >= 500) {
-      const keep = Array.from(prefetchedUrlsRef.current).slice(-250);
-      prefetchedUrlsRef.current.clear();
-      for (const url of keep) prefetchedUrlsRef.current.add(url);
+      const evictCount = prefetchedUrlsRef.current.size - 250;
+      let i = 0;
+      for (const url of prefetchedUrlsRef.current) {
+        if (i++ >= evictCount) break;
+        prefetchedUrlsRef.current.delete(url);
+      }
     }
     prefetchedUrlsRef.current.add(streamUrl);
     const controller = new AbortController();
