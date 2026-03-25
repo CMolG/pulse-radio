@@ -2307,7 +2307,12 @@ function parseLrc(lrcText: string): LyricLine[] {
       const minutes = parseInt(m[1], 10);
       const seconds = parseInt(m[2], 10);
       if (seconds >= 60) continue;
-      const centiseconds = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
+      let centiseconds = 0;
+      if (m[3]) {
+        centiseconds = parseInt(m[3], 10);
+        if (m[3].length === 1) centiseconds *= 100;
+        else if (m[3].length === 2) centiseconds *= 10;
+      }
       timestamps.push(minutes * 60 + seconds + centiseconds / 1000);
       lastIndex = TS_REGEX.lastIndex;
     }
