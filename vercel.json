@@ -1,0 +1,72 @@
+{
+  "functions": {
+    "src/app/api/icy-meta/route.ts": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "src/app/api/itunes/route.ts": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "src/app/api/artist-info/route.ts": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "src/app/api/concerts/route.ts": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "src/app/api/lyrics/route.ts": {
+      "memory": 256,
+      "maxDuration": 10
+    },
+    "src/app/api/proxy-stream/route.ts": {
+      "memory": 256,
+      "maxDuration": 25
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/icy-meta",
+      "headers": [
+        { "key": "CDN-Cache-Control", "value": "public, s-maxage=5, stale-while-revalidate=10" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.css",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.woff2",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.svg",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.ico",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
+      ]
+    }
+  ]
+}
