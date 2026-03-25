@@ -28,8 +28,7 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
 
   useEffect(() => {
     const loop = (ts: number) => {
-      const lastTs = lastTsRef.current || ts;
-      lastTsRef.current = ts;
+      const lastTs = lastTsRef.current || ts; lastTsRef.current = ts;
       const dtSec = Math.max(0.001, (ts - lastTs) / 1000);
       const meter = meterRef.current;
       const rms = enabled && meter ? clamp01(meter.rms) : 0;
@@ -40,8 +39,7 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
       const alpha = target > valueRef.current ? attack : release;
       valueRef.current += (target - valueRef.current) * alpha;
       if (Math.abs(valueRef.current - lastPublishedRef.current) >= 0.002) {
-        lastPublishedRef.current = valueRef.current;
-        setAmplitude(valueRef.current);
+        lastPublishedRef.current = valueRef.current; setAmplitude(valueRef.current);
       }
 
       rafRef.current = requestAnimationFrame(loop);

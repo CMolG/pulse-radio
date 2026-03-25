@@ -59,20 +59,17 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
   const check = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
+    const el = ref.current; if (!el) return;
     setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   }, []);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const el = ref.current; if (!el) return;
     check();
     el.addEventListener("scroll", check, { passive: true });
     const ro = new ResizeObserver(check);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
+    ro.observe(el); return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [check, children]);
 
   const scroll = (dir: -1 | 1) => { ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" }); };
@@ -189,8 +186,7 @@ export default function BrowseView({
   const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
-    const cat = translatedGenreCategories.find((c) => c.id === catId);
-    if (!cat) return;
+    const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return;
     try {
       let result: Station[];
       if (cat.id === "trending") {
@@ -220,10 +216,8 @@ export default function BrowseView({
   }, [translatedGenreCategories]);
 
   useEffect(() => {
-    setPage(0);
-    setLiveData({});
-    setScanEnabled(false);
-    setSongFilter("");
+    setPage(0); setLiveData({});
+    setScanEnabled(false); setSongFilter("");
     scanGenRef.current++;
   }, [view]);
 
@@ -243,8 +237,7 @@ export default function BrowseView({
   }, []);
 
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
-    const queue = [...stationsToScan];
-    const stale = () => scanGenRef.current !== gen;
+    const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen;
     const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); };
     await Promise.all(Array.from({ length: 3 }, worker));
   }, [fetchMeta]);
@@ -274,12 +267,10 @@ export default function BrowseView({
       load();
     } else {
       // Top view — progressively load categories (3 concurrent max)
-      setLoading(false);
-      setCategorySections({});
+      setLoading(false); setCategorySections({});
       setFailedCategories(new Set());
 
-      const CONCURRENCY = 3;
-      const queue = [...effectiveBrowseOrder];
+      const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
       const runBatch = async () => {
         while (queue.length > 0 && !flags.cancelled) {
           const batch = queue.splice(0, CONCURRENCY);
@@ -343,8 +334,7 @@ export default function BrowseView({
   // Trigger scan when enabled or page changes (non-top modes only)
   useEffect(() => {
     if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return;
-    const gen = scanGenRef.current + 1;
-    scanGenRef.current = gen;
+    const gen = scanGenRef.current + 1; scanGenRef.current = gen;
     startScan(pageStations, gen);
     return () => { if (scanGenRef.current === gen) scanGenRef.current++; };
   }, [scanEnabled, pageStations, view.mode, startScan]);

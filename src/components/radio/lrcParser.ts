@@ -15,8 +15,7 @@ export function parseLrc(lrcText: string): LyricLine[] {
     let m;
     TS_REGEX.lastIndex = 0;
     while ((m = TS_REGEX.exec(raw)) !== null) {
-      const minutes = parseInt(m[1], 10);
-      const seconds = parseInt(m[2], 10);
+      const minutes = parseInt(m[1], 10); const seconds = parseInt(m[2], 10);
       if (seconds >= 60) continue; // invalid timestamp
       const centiseconds = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
       timestamps.push(minutes * 60 + seconds + centiseconds / 1000);

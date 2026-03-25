@@ -41,8 +41,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   const enableRealtime = Boolean(options?.enableRealtime && track?.title);
   const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
     if (controller.signal.aborted || !track?.title) return;
-    setLoading(true);
-    setError(false);
+    setLoading(true); setError(false);
     fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined,
       controller.signal,
     ).then(result => {
@@ -57,8 +56,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
       .catch(() => {
         if (controller.signal.aborted) return;
         if (retryCountRef.current < MAX_RETRIES) {
-          retryCountRef.current++;
-          const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
+          retryCountRef.current++; const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
           retryTimerRef.current = setTimeout(() => doFetch(key, cached, controller), delay);
         } else { setLyrics(null); setError(true); retryCountRef.current = 0; }
       })
@@ -66,13 +64,11 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   };
 
   useEffect(() => {
-    if (abortRef.current) abortRef.current.abort();
-    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
 
     if (!track || !track.title) {
-      setLoading(false);
-      setLyrics(null);
+      setLoading(false); setLyrics(null);
       setError(false);
       lastKeyRef.current = '';
       return;
@@ -80,14 +76,11 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
 
     const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase();
-    if (key === lastKeyRef.current) return;
-    lastKeyRef.current = key;
+    if (key === lastKeyRef.current) return; lastKeyRef.current = key;
 
-    const cached = loadCache();
-    const hit = cached.find(e => e.key === key);
+    const cached = loadCache(); const hit = cached.find(e => e.key === key);
     if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
-      setLoading(false);
-      setLyrics(hit.data);
+      setLoading(false); setLyrics(hit.data);
       setError(false);
       return;
     }
@@ -105,8 +98,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase();
     const cached = loadCache();
-    if (abortRef.current) abortRef.current.abort();
-    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
     const controller = new AbortController();
     abortRef.current = controller;

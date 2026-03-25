@@ -58,8 +58,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
     h: typeof window !== 'undefined' ? window.innerHeight : 600,
   }));
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const el = ref.current; if (!el) return;
     // Synchronous measurement replaces the window-based initial guess
     // one frame earlier than waiting for the ResizeObserver callback.
     const rect = el.getBoundingClientRect();
@@ -69,8 +68,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
       if (width <= 0 || height <= 0) return;
       setSize({ w: Math.round(width), h: Math.round(height) });
     });
-    ro.observe(el);
-    return () => ro.disconnect();
+    ro.observe(el); return () => ro.disconnect();
   }, [ref]);
   return size;
 }
@@ -124,8 +122,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (radio.status !== 'playing' || !radio.station) { lastTickRef.current = Date.now(); return; }
     const interval = setInterval(() => {
-      const now = Date.now();
-      const delta = now - lastTickRef.current;
+      const now = Date.now(); const delta = now - lastTickRef.current;
       lastTickRef.current = now;
       if (radio.station) tickListenTime(radio.station.stationuuid, radio.station.name, delta);
     }, 5000);
@@ -170,8 +167,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       audio.volume = duckOrigVolRef.current * 0.4;
       duckTimerRef.current = setTimeout(() => {
         if (audio && duckOrigVolRef.current !== null) audio.volume = duckOrigVolRef.current;
-        duckOrigVolRef.current = null;
-        duckTimerRef.current = null;
+        duckOrigVolRef.current = null; duckTimerRef.current = null;
       }, 400);
     }
     toastTimerRef.current = setTimeout(() => setToast(null), 2500);
@@ -198,10 +194,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }
 
   const resetNav = useCallback((v: ViewState) => {
-    setView(v);
-    setActiveTab("discover");
-    setTheaterMode(false);
-    setSearchQuery("");
+    setView(v); setActiveTab("discover");
+    setTheaterMode(false); setSearchQuery("");
   }, []);
 
   const [view, setView] = useState<ViewState>(() => {
@@ -234,8 +228,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
       if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
   }, [locale, t, resetNav]);
 
   // Reset compact state on layout change
@@ -243,8 +236,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   // Track network connectivity for offline indicator
   useEffect(() => {
-    const goOnline = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
+    const goOnline = () => setIsOnline(true); const goOffline = () => setIsOnline(false);
     window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
     return () => { window.removeEventListener('online', goOnline); window.removeEventListener('offline', goOffline); };
@@ -268,8 +260,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
-      eqConnectSource(radio.audioRef.current);
-      analyser.connectAudio(radio.audioRef.current);
+      eqConnectSource(radio.audioRef.current); analyser.connectAudio(radio.audioRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
@@ -441,8 +432,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "?": setShowShortcuts(prev => !prev); break;
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const isSongLiked = enrichedTrack?.title ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "") : false;
@@ -470,8 +460,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleSearch = useCallback((query: string) => {
     const sanitized = query.trim();
     setView(mkView("search", t("searchResultLabel", { query: sanitized }), { query: sanitized }));
-    setActiveTab("discover");
-    setTheaterMode(false);
+    setActiveTab("discover"); setTheaterMode(false);
   }, [t]);
 
   const handleGoHome = useCallback(() => {
@@ -490,14 +479,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleSelectGenre = useCallback((cat: BrowseCategory) => {
     const key = GENRE_LABEL_KEYS[cat.id];
     setView(mkView("genre", key ? t(key) : cat.label, { tag: cat.tag || cat.id }));
-    setTheaterMode(false);
-    setSearchQuery("");
+    setTheaterMode(false); setSearchQuery("");
   }, [t]);
 
   const handleSelectCountry = useCallback((countryCode: string, countryQueryName: string, countryDisplayName: string) => {
     setView(mkView("country", countryDisplayName, { countryCode, countryQueryName }));
-    setTheaterMode(false);
-    setSearchQuery("");
+    setTheaterMode(false); setSearchQuery("");
     const newPath = `/${countryCode}`;
     if (pathname !== newPath) window.history.pushState(null, "", newPath);
   }, [pathname]);

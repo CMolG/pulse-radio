@@ -44,8 +44,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
 
   const teardown = () => {
     if (!recognition) return;
-    recognition.onresult = null;
-    recognition.onerror = null;
+    recognition.onresult = null; recognition.onerror = null;
     recognition.onend = null;
     recognition.stop();
     recognition = null;
@@ -65,11 +64,9 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       // Reset restart counter on any successful recognition — proves engine is alive.
       restartCount = 0;
 
-      const index = event.resultIndex;
-      const result = event.results[index];
+      const index = event.resultIndex; const result = event.results[index];
       if (!result || !result[0]) return;
-      const transcript = result[0].transcript.trim().toLowerCase();
-      if (!transcript) return;
+      const transcript = result[0].transcript.trim().toLowerCase(); if (!transcript) return;
 
       callbacks.onHypothesis({
         text: transcript,
@@ -103,8 +100,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       restartCount++;
       // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,
       // this is a stale onend firing and we should not restart.
-      const current = recognition;
-      if (!current) return;
+      const current = recognition; if (!current) return;
       try { current.start(); } catch {
         running = false;
         callbacks.onFatalError('Speech recognition failed to restart.');

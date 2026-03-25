@@ -37,8 +37,7 @@ export function useMediaSession(config: MediaSessionConfig): void {
     const artSrc = track?.artworkUrl || station.favicon;
     const album = station.tags?.split(',')[0] || 'Live';
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
-    if (metaKey === lastMetaRef.current) return;
-    lastMetaRef.current = metaKey;
+    if (metaKey === lastMetaRef.current) return; lastMetaRef.current = metaKey;
 
     const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : [];
 

@@ -202,8 +202,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const artistGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
-      const artist = primaryArtist(song.artist);
-      const existing = groups.get(artist) ?? [];
+      const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? [];
       existing.push(song);
       groups.set(artist, existing);
     }
@@ -214,8 +213,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const albumGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
-      const album = song.album || "Unknown Album";
-      const existing = groups.get(album) ?? [];
+      const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? [];
       existing.push(song);
       groups.set(album, existing);
     }

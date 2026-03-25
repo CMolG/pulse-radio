@@ -21,15 +21,12 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    const el = containerRef.current;
-    if (!el) return;
+    const el = containerRef.current; if (!el) return;
     // Coalesce rapid mouse events into a single rAF update
     cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
-      const rect = el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const x = ((e.clientX - cx) / rect.width) * 20;
+      const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;
       const y = ((e.clientY - cy) / rect.height) * 20;
       pointerOffsetRef.current = { x, y };
     });
@@ -49,8 +46,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
         Math.abs(nextX - lastPublishedRef.current.x) >= 0.05 ||
         Math.abs(nextY - lastPublishedRef.current.y) >= 0.05
       ) {
-        lastPublishedRef.current = { x: nextX, y: nextY };
-        setOffset(lastPublishedRef.current);
+        lastPublishedRef.current = { x: nextX, y: nextY }; setOffset(lastPublishedRef.current);
       }
       tickRafRef.current = requestAnimationFrame(tick);
     };
@@ -59,8 +55,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(rafRef.current);
-      cancelAnimationFrame(tickRafRef.current);
+      cancelAnimationFrame(rafRef.current); cancelAnimationFrame(tickRafRef.current);
     };
   }, [handleMouseMove]);
 

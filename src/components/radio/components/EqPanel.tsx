@@ -56,8 +56,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
     const name = presetName.trim();
     if (name && onSaveCustomPreset) {
       onSaveCustomPreset(name);
-      setPresetName('');
-      setShowSaveInput(false);
+      setPresetName(''); setShowSaveInput(false);
     }
   };
 

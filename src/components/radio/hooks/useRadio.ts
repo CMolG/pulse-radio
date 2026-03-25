@@ -176,8 +176,7 @@ export function useRadio() {
         isReconnectingRef.current = false;
         return;
       }
-      isReconnectingRef.current = true;
-      retryRef.current++;
+      isReconnectingRef.current = true; retryRef.current++;
       setStatus('loading');
       clearReconnectTimer();
 
@@ -344,8 +343,7 @@ export function useRadio() {
     // audio is dangerously low. If less than 2s of audio remains in the buffer
     // while playing, trigger a preemptive reconnect before the user hears a gap.
     // Also measures stream quality based on buffer growth rate.
-    const BUFFER_CHECK_MS = 2000;
-    const MIN_BUFFER_AHEAD_S = 2;
+    const BUFFER_CHECK_MS = 2000; const MIN_BUFFER_AHEAD_S = 2;
     let lowBufferStreak = 0;
 
     clearTimer(bufferCheckRef);
@@ -439,15 +437,12 @@ export function useRadio() {
     const audio = getAudio();
     // Resume Web Audio context from user gesture (required on mobile)
     resumeAudioContext(audio);
-    playSessionRef.current++;
-    retryRef.current = 0;
+    playSessionRef.current++; retryRef.current = 0;
     userPausedRef.current = false;
     // A user-initiated play always overrides any in-progress reconnect
-    isReconnectingRef.current = false;
-    proxyFallbackUrlsRef.current.delete(s.url_resolved);
+    isReconnectingRef.current = false; proxyFallbackUrlsRef.current.delete(s.url_resolved);
     codecFallbackTriedRef.current.delete(s.url_resolved);
-    setStation(s);
-    setStatus('loading');
+    setStation(s); setStatus('loading');
     setStreamQuality('good');
     lastBufferEndRef.current = 0;
 
@@ -462,12 +457,10 @@ export function useRadio() {
       fadeTimerRef.current = setInterval(() => {
         step++;
         // Ease-out cubic: rapid initial drop, gentle tail
-        const t = step / steps;
-        const eased = 1 - (1 - t) * (1 - t) * (1 - t);
+        const t = step / steps; const eased = 1 - (1 - t) * (1 - t) * (1 - t);
         audio.volume = Math.max(0, startVol * (1 - eased));
         if (step >= steps) {
-          clearInterval(fadeTimerRef.current!);
-          fadeTimerRef.current = null;
+          clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null;
           // Read current volume/muted from refs — user may have changed them during fade
           audio.volume = mutedRef.current ? 0 : volumeRef.current;
           startPlayback(audio, s.url_resolved, handlePlayRejected);
@@ -488,8 +481,7 @@ export function useRadio() {
   }, []);
 
   const resume = useCallback(() => {
-    userPausedRef.current = false;
-    const audio = audioRef.current;
+    userPausedRef.current = false; const audio = audioRef.current;
     if (audio) {
       resumeAudioContext(audio);
       // Restore audio.volume from React state — sleep timer fade may have
@@ -500,8 +492,7 @@ export function useRadio() {
   }, []);
 
   const togglePlay = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio || !audio.src) return;
+    const audio = audioRef.current; if (!audio || !audio.src) return;
     if (audio.paused) {
       userPausedRef.current = false;
       resumeAudioContext(audio);
@@ -525,8 +516,7 @@ export function useRadio() {
 
     const audio = audioRef.current;
     if (audio) { audio.pause(); audio.src = ''; }
-    setStation(null);
-    setStatus('idle');
+    setStation(null); setStatus('idle');
     setStreamQuality('good');
     lastBufferEndRef.current = 0;
   }, []);
@@ -547,8 +537,7 @@ export function useRadio() {
 
   const toggleMute = useCallback(() => setMuted(m => !m), []);
   const seek = useCallback((t: number) => {
-    const audio = audioRef.current;
-    if (!audio || !isFinite(t)) return;
+    const audio = audioRef.current; if (!audio || !isFinite(t)) return;
     const duration = audio.duration || 0;
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);

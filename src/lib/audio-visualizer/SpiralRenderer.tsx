@@ -48,12 +48,10 @@ export function SpiralRenderer({
   useEffect(() => { colorsRef.current = { color1, color2, color3 }; }, [color1, color2, color3]);
 
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
-    const centerX = w / 2;
-    const centerY = h / 2;
+    const centerX = w / 2; const centerY = h / 2;
 
     // Update mock/frequency data
-    const data = dataArrayRef.current;
-    const target = targetArrayRef.current;
+    const data = dataArrayRef.current; const target = targetArrayRef.current;
     const frequencyData = freqData;
 
     if (frequencyData && frequencyData.length > 0) {
@@ -79,8 +77,7 @@ export function SpiralRenderer({
 
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
-    const smoothed = smoothedRef.current;
-    const temp = tempRef.current;
+    const smoothed = smoothedRef.current; const temp = tempRef.current;
     let src = data;
     let dst = smoothed;
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
@@ -98,13 +95,11 @@ export function SpiralRenderer({
     const result = src;
 
     // Spiral configuration
-    const maxAngle = CYCLES * Math.PI * 2;
-    const minRadius = Math.max(w, h) * 0.01;
+    const maxAngle = CYCLES * Math.PI * 2; const minRadius = Math.max(w, h) * 0.01;
     const maxRadius = Math.sqrt(w * w + h * h) * 0.8;
     const b = Math.log(maxRadius / minRadius) / maxAngle;
 
-    rotationRef.current += 0.0015;
-    const rotation = rotationRef.current;
+    rotationRef.current += 0.0015; const rotation = rotationRef.current;
 
     // Clear
     ctx.clearRect(0, 0, w, h);
@@ -123,19 +118,15 @@ export function SpiralRenderer({
     } catch { /* fallback to solid color */ }
 
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
-    const outerX = outerXRef.current;
-    const outerY = outerYRef.current;
-    const innerX = innerXRef.current;
-    const innerY = innerYRef.current;
+    const outerX = outerXRef.current; const outerY = outerYRef.current;
+    const innerX = innerXRef.current; const innerY = innerYRef.current;
 
     for (let i = 0; i < NUM_BARS; i++) {
-      const val = result[i];
-      const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
+      const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
       const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor;
       const baseAngle = (i / NUM_BARS) * maxAngle;
       const radius = minRadius * Math.exp(b * baseAngle);
-      const finalAngle = baseAngle + rotation;
-      const cos = Math.cos(finalAngle);
+      const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle);
       const sin = Math.sin(finalAngle);
 
       innerX[i] = centerX + cos * radius;
@@ -162,8 +153,7 @@ export function SpiralRenderer({
       // Outer edge with quadratic curves
       ctx.moveTo(outerX[startIdx], outerY[startIdx]);
       for (let i = startIdx + 1; i < endIdx - 1; i++) {
-        const xc = (outerX[i] + outerX[i + 1]) / 2;
-        const yc = (outerY[i] + outerY[i + 1]) / 2;
+        const xc = (outerX[i] + outerX[i + 1]) / 2; const yc = (outerY[i] + outerY[i + 1]) / 2;
         ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc);
       }
       if (endIdx - 1 > startIdx) ctx.lineTo(outerX[endIdx - 1], outerY[endIdx - 1]);
@@ -171,8 +161,7 @@ export function SpiralRenderer({
       // Inner edge reversed
       ctx.lineTo(innerX[endIdx - 1], innerY[endIdx - 1]);
       for (let i = endIdx - 2; i > startIdx; i--) {
-        const xc = (innerX[i] + innerX[i - 1]) / 2;
-        const yc = (innerY[i] + innerY[i - 1]) / 2;
+        const xc = (innerX[i] + innerX[i - 1]) / 2; const yc = (innerY[i] + innerY[i - 1]) / 2;
         ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc);
       }
       ctx.lineTo(innerX[startIdx], innerY[startIdx]);

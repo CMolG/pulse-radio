@@ -20,8 +20,7 @@ export function useWakeLock(shouldLock: boolean) {
   const wantReleaseRef = useRef(false);
   const request = useCallback(async () => {
     if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
-    requestingRef.current = true;
-    wantReleaseRef.current = false;
+    requestingRef.current = true; wantReleaseRef.current = false;
     try {
       const lock = await navigator.wakeLock.request('screen');
       if (wantReleaseRef.current) {

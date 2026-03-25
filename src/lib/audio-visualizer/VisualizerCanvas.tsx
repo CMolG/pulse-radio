@@ -36,25 +36,21 @@ export function VisualizerCanvas({
 
   // Track size via ResizeObserver instead of getBoundingClientRect per frame
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = canvasRef.current; if (!canvas) return;
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect();
       sizeRef.current = { width: rect.width, height: rect.height };
     };
     updateSize();
     const ro = new ResizeObserver(updateSize);
-    ro.observe(canvas);
-    return () => ro.disconnect();
+    ro.observe(canvas); return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
     const draw = () => {
-      const canvas = canvasRef.current;
-      const frequencyData = frequencyDataRef?.current;
+      const canvas = canvasRef.current; const frequencyData = frequencyDataRef?.current;
       if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; }
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      const ctx = canvas.getContext('2d'); if (!ctx) return;
 
       // Resolve CSS variable once and cache
       if (!resolvedColorRef.current) {
@@ -64,11 +60,9 @@ export function VisualizerCanvas({
           resolvedColorRef.current = computed || '#34d399';
         } else resolvedColorRef.current = color;
       }
-      const resolvedColor = resolvedColorRef.current;
-      const { width, height } = sizeRef.current;
+      const resolvedColor = resolvedColorRef.current; const { width, height } = sizeRef.current;
       if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
-      const dpr = devicePixelRatio;
-      const targetW = Math.round(width * dpr);
+      const dpr = devicePixelRatio; const targetW = Math.round(width * dpr);
       const targetH = Math.round(height * dpr);
       if (canvas.width !== targetW || canvas.height !== targetH) {
         canvas.width = targetW;
@@ -80,8 +74,7 @@ export function VisualizerCanvas({
 
       if (mode === 'bars') {
         const step = Math.max(1, Math.floor(frequencyData.length / barCount));
-        const barWidth = width / barCount;
-        const gap = barWidth * 0.2;
+        const barWidth = width / barCount; const gap = barWidth * 0.2;
 
         // Cache gradient — only recreate on height or color change
         const gradKey = `${height}_${resolvedColor}`;
@@ -107,10 +100,8 @@ export function VisualizerCanvas({
 
         for (let i = 0; i < barCount; i++) {
           const idx = Math.min(i * step, frequencyData.length - 1);
-          const value = frequencyData[idx] / 255;
-          const barHeight = value * height * 0.8;
-          const x = i * barWidth + gap / 2;
-          const y = height - barHeight;
+          const value = frequencyData[idx] / 255; const barHeight = value * height * 0.8;
+          const x = i * barWidth + gap / 2; const y = height - barHeight;
           const w = barWidth - gap;
           ctx.beginPath();
           if (useRoundRect) {
@@ -134,8 +125,7 @@ export function VisualizerCanvas({
       frameRef.current = requestAnimationFrame(draw);
     };
 
-    frameRef.current = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(frameRef.current);
+    frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
   }, [frequencyDataRef, mode, barCount, color]);
 
   return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />;

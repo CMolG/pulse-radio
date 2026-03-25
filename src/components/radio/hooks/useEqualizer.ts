@@ -111,20 +111,17 @@ export function useEqualizer() {
 
   function teardownGraph(includeSource: boolean) {
     try {
-      sourceRef.current?.disconnect();
-      filtersRef.current.forEach(f => f.disconnect());
+      sourceRef.current?.disconnect(); filtersRef.current.forEach(f => f.disconnect());
       for (const ref of graphNodeRefs) ref.current?.disconnect();
     } catch { /* ok */ }
-    filtersRef.current = [];
-    for (const ref of graphNodeRefs) ref.current = null;
+    filtersRef.current = []; for (const ref of graphNodeRefs) ref.current = null;
     if (includeSource) { sourceRef.current = null; connectedAudioRef.current = null; }
   }
 
   // Smooth ramp time for parameter changes to prevent clicks/pops
   const RAMP_TIME = 0.02; // 20ms — fast enough to feel instant, slow enough to avoid clicks
   const applyNoiseReductionPreset = useCallback((mode: NoiseReductionMode) => {
-    const preset = NR_PRESETS[mode];
-    const ctx = ctxRef.current;
+    const preset = NR_PRESETS[mode]; const ctx = ctxRef.current;
     const t = ctx?.currentTime ?? 0;
 
     if (nrHighpassRef.current) nrHighpassRef.current.frequency.setTargetAtTime(preset.hpfHz, t, RAMP_TIME);
@@ -140,10 +137,8 @@ export function useEqualizer() {
 
   const setOutputVolume = useCallback((volume: number, muted: boolean) => {
     const clamped = Math.max(0, Math.min(1, volume));
-    outputVolumeRef.current = clamped;
-    outputMutedRef.current = muted;
-    const next = muted ? 0 : clamped;
-    const ctx = ctxRef.current;
+    outputVolumeRef.current = clamped; outputMutedRef.current = muted;
+    const next = muted ? 0 : clamped; const ctx = ctxRef.current;
 
     if (outputGainRef.current && ctx) {
       outputGainRef.current.gain.setTargetAtTime(next, ctx.currentTime, RAMP_TIME);
@@ -170,11 +165,9 @@ export function useEqualizer() {
 
     try {
       const { ctx, source } = getOrCreateAudioSource(audio);
-      ctxRef.current = ctx;
-      sourceRef.current = source;
+      ctxRef.current = ctx; sourceRef.current = source;
       connectedAudioRef.current = audio;
-      const nrPreset = NR_PRESETS[noiseReductionMode];
-      const nyquist = ctx.sampleRate / 2;
+      const nrPreset = NR_PRESETS[noiseReductionMode]; const nyquist = ctx.sampleRate / 2;
       const filters = bands.map(band => {
         const filter = ctx.createBiquadFilter();
         filter.type = band.type;
@@ -221,10 +214,8 @@ export function useEqualizer() {
       const nrDeEssGain = ctx.createGain();
       nrDeEssGain.gain.value = 1;
 
-      nrHighpassRef.current = nrHighpass;
-      nrGateRef.current = nrGate;
-      nrDeEsserRef.current = nrDeEsser;
-      nrDeEssGainRef.current = nrDeEssGain;
+      nrHighpassRef.current = nrHighpass; nrGateRef.current = nrGate;
+      nrDeEsserRef.current = nrDeEsser; nrDeEssGainRef.current = nrDeEssGain;
 
       if (normalizerEnabled) {
         source.connect(normalizer);
@@ -248,8 +239,7 @@ export function useEqualizer() {
 
       const bassShaper = ctx.createWaveShaper();
       // Soft-clip curve that generates even and odd harmonics
-      const curveLen = 4096;
-      const curve = new Float32Array(curveLen);
+      const curveLen = 4096; const curve = new Float32Array(curveLen);
       for (let i = 0; i < curveLen; i++) {
         const x = (i * 2) / curveLen - 1;
         curve[i] = (Math.PI + 2) * x / (Math.PI + 2 * Math.abs(x));
@@ -271,10 +261,8 @@ export function useEqualizer() {
       bassShaper.connect(bassHp);
       bassHp.connect(bassMix);
 
-      bassLpRef.current = bassLp;
-      bassShaperRef.current = bassShaper;
-      bassHpRef.current = bassHp;
-      bassMixRef.current = bassMix;
+      bassLpRef.current = bassLp; bassShaperRef.current = bassShaper;
+      bassHpRef.current = bassHp; bassMixRef.current = bassMix;
 
       // Multiband dynamics compressor: splits audio into 3 bands (low/mid/high),
       // compresses each independently, then mixes back. This preserves dynamics
@@ -350,16 +338,11 @@ export function useEqualizer() {
       mbWet.connect(mbMerge);
       bassMix.connect(mbMerge);
 
-      mbLowLpRef.current = mbLowLp;
-      mbLowCompRef.current = mbLowComp;
-      mbMidBpLpRef.current = mbMidBpLp;
-      mbMidBpHpRef.current = mbMidBpHp;
-      mbMidCompRef.current = mbMidComp;
-      mbHighHpRef.current = mbHighHp;
-      mbHighCompRef.current = mbHighComp;
-      mbDryGainRef.current = mbDry;
-      mbWetGainRef.current = mbWet;
-      mbMergeRef.current = mbMerge;
+      mbLowLpRef.current = mbLowLp; mbLowCompRef.current = mbLowComp;
+      mbMidBpLpRef.current = mbMidBpLp; mbMidBpHpRef.current = mbMidBpHp;
+      mbMidCompRef.current = mbMidComp; mbHighHpRef.current = mbHighHp;
+      mbHighCompRef.current = mbHighComp; mbDryGainRef.current = mbDry;
+      mbWetGainRef.current = mbWet; mbMergeRef.current = mbMerge;
 
       // Safety limiter to prevent digital clipping from cumulative EQ gains
       const limiter = ctx.createDynamicsCompressor();
@@ -375,16 +358,11 @@ export function useEqualizer() {
       // Width 1.0 = original, 0.0 = mono, 2.0 = max width
       // L_out = L * direct + R * cross, R_out = R * direct + L * cross
       // where direct = (1+w)/2, cross = (1-w)/2
-      const w = stereoWidth;
-      const direct = (1 + w) / 2;
-      const cross = (1 - w) / 2;
-      const splitter = ctx.createChannelSplitter(2);
-      const merger = ctx.createChannelMerger(2);
-      const outputGain = ctx.createGain();
-      const directL = ctx.createGain();
-      const directR = ctx.createGain();
-      const crossL = ctx.createGain();
-      const crossR = ctx.createGain();
+      const w = stereoWidth; const direct = (1 + w) / 2;
+      const cross = (1 - w) / 2; const splitter = ctx.createChannelSplitter(2);
+      const merger = ctx.createChannelMerger(2); const outputGain = ctx.createGain();
+      const directL = ctx.createGain(); const directR = ctx.createGain();
+      const crossL = ctx.createGain(); const crossR = ctx.createGain();
       directL.gain.value = direct;
       directR.gain.value = direct;
       crossL.gain.value = cross;
@@ -403,23 +381,18 @@ export function useEqualizer() {
       crossL.connect(merger, 0, 1);
       merger.connect(outputGain);
       outputGain.connect(ctx.destination);
-      outputGainRef.current = outputGain;
-      const initialOutput = outputMutedRef.current ? 0 : outputVolumeRef.current;
+      outputGainRef.current = outputGain; const initialOutput = outputMutedRef.current ? 0 : outputVolumeRef.current;
       outputGain.gain.value = initialOutput;
 
-      splitterRef.current = splitter;
-      mergerRef.current = merger;
-      directGainLRef.current = directL;
-      directGainRRef.current = directR;
-      crossGainLRef.current = crossL;
-      crossGainRRef.current = crossR;
+      splitterRef.current = splitter; mergerRef.current = merger;
+      directGainLRef.current = directL; directGainRRef.current = directR;
+      crossGainLRef.current = crossL; crossGainRRef.current = crossR;
 
       filtersRef.current = filters;
     } catch {
       // Keep playback alive when WebAudio graph creation fails (observed on
       // some iOS background/resume paths for cross-origin streams).
-      sourceRef.current = null;
-      filtersRef.current = [];
+      sourceRef.current = null; filtersRef.current = [];
       connectedAudioRef.current = audio;
     }
   }, [bands, bassEnhance, compressorAmount, compressorEnabled, enabled, noiseReductionMode, normalizerEnabled, stereoWidth]);
@@ -445,18 +418,15 @@ export function useEqualizer() {
       const next = !prev;
       saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, next);
       // Live-toggle: rewire audio graph without full reconnect
-      const source = sourceRef.current;
-      const normalizer = normalizerRef.current;
-      const normGain = normGainRef.current;
-      const nrHead = nrHighpassRef.current;
+      const source = sourceRef.current; const normalizer = normalizerRef.current;
+      const normGain = normGainRef.current; const nrHead = nrHighpassRef.current;
       if (source && normalizer && normGain && nrHead) {
         try {
           try { source.disconnect(normalizer); } catch { /* source may not be connected to normalizer */ }
           try { source.disconnect(nrHead); } catch { /* source may not be connected to NR head */ }
           normalizer.disconnect();
           normGain.disconnect();
-          const ctx = ctxRef.current;
-          const t = ctx?.currentTime ?? 0;
+          const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
           if (next) {
             normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME);
             source.connect(normalizer);
@@ -490,10 +460,8 @@ export function useEqualizer() {
     const clamped = Math.max(0, Math.min(2, w));
     setStereoWidthState(clamped);
     saveToStorage(STORAGE_KEYS.STEREO_WIDTH, clamped);
-    const direct = (1 + clamped) / 2;
-    const cross = (1 - clamped) / 2;
-    const ctx = ctxRef.current;
-    const t = ctx?.currentTime ?? 0;
+    const direct = (1 + clamped) / 2; const cross = (1 - clamped) / 2;
+    const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
     if (directGainLRef.current) directGainLRef.current.gain.setTargetAtTime(direct, t, RAMP_TIME);
     if (directGainRRef.current) directGainRRef.current.gain.setTargetAtTime(direct, t, RAMP_TIME);
     if (crossGainLRef.current) crossGainLRef.current.gain.setTargetAtTime(cross, t, RAMP_TIME);
@@ -514,8 +482,7 @@ export function useEqualizer() {
     setCompressorEnabled(prev => {
       const next = !prev;
       saveToStorage(STORAGE_KEYS.COMPRESSOR_ENABLED, next);
-      const ctx = ctxRef.current;
-      const t = ctx?.currentTime ?? 0;
+      const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
       const amount = compressorAmount;
       if (mbDryGainRef.current && mbWetGainRef.current) {
         if (next) {
@@ -535,8 +502,7 @@ export function useEqualizer() {
     setCompressorAmountState(clamped);
     saveToStorage(STORAGE_KEYS.COMPRESSOR_AMOUNT, clamped);
     if (!compressorEnabled) return;
-    const ctx = ctxRef.current;
-    const t = ctx?.currentTime ?? 0;
+    const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
     if (mbDryGainRef.current) mbDryGainRef.current.gain.setTargetAtTime(1 - clamped * 0.5, t, RAMP_TIME);
     if (mbWetGainRef.current) mbWetGainRef.current.gain.setTargetAtTime(clamped, t, RAMP_TIME);
   }, [compressorEnabled]);

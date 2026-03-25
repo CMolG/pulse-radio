@@ -44,8 +44,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   if (signal) {
     if (signal.aborted) {
-      clearTimeout(timeout);
-      controller.abort();
+      clearTimeout(timeout); controller.abort();
     } else {
       const onParentAbort = () => controller.abort();
       signal.addEventListener('abort', onParentAbort, { once: true });
@@ -102,8 +101,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   if (currentStationId !== prevStationId) {
     setPrevStationId(currentStationId);
     if (!station) {
-      setTrack(null);
-      setIcyBitrate(null);
+      setTrack(null); setIcyBitrate(null);
       setStreamCodec(null);
     }
   }
@@ -112,15 +110,13 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
 
     if (!station) {
-      lastTitleRef.current = '';
-      prevStationUrlRef.current = null;
+      lastTitleRef.current = ''; prevStationUrlRef.current = null;
       return;
     }
 
     const stationChanged = station.url_resolved !== prevStationUrlRef.current;
     if (stationChanged) {
-      prevStationUrlRef.current = station.url_resolved;
-      lastTitleRef.current = '';
+      prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
       // Intentionally NOT clearing track/icyBitrate/streamCodec here.
       // The previous station's data stays visible until the new station's
       // first ICY response arrives — this is the "ICY swap" for smooth transitions.

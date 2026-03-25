@@ -55,8 +55,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
     img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
-        const canvas = document.createElement("canvas");
-        const size = 48;
+        const canvas = document.createElement("canvas"); const size = 48;
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext("2d");
@@ -123,8 +122,7 @@ export default function TheaterView({
   const showFallback = !coverUrl || failedCoverUrl === coverUrl;
 
   useEffect(() => {
-    if (!artworkUrl || artworkUrl === lastUrlRef.current) return;
-    lastUrlRef.current = artworkUrl;
+    if (!artworkUrl || artworkUrl === lastUrlRef.current) return; lastUrlRef.current = artworkUrl;
     let cancelled = false;
     extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); });
     return () => { cancelled = true; };

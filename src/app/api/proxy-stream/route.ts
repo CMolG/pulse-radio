@@ -68,8 +68,7 @@ export async function GET(req: NextRequest) {
       try {
         const finalUrl = new URL(upstream.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
-          if (timeout) clearTimeout(timeout);
-          upstream.body?.cancel().catch(() => {});
+          if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403,
             headers: { 'Content-Type': 'application/json' },
@@ -90,8 +89,7 @@ export async function GET(req: NextRequest) {
     }
 
     const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
-    const icyBr = upstream.headers.get('icy-br');
-    const icyName = upstream.headers.get('icy-name');
+    const icyBr = upstream.headers.get('icy-br'); const icyName = upstream.headers.get('icy-name');
     const responseHeaders: Record<string, string> = {
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*',
@@ -103,8 +101,7 @@ export async function GET(req: NextRequest) {
 
     // HEAD requests: return headers only (for prefetch / codec sniffing)
     if (req.method === 'HEAD') {
-      if (timeout) clearTimeout(timeout);
-      upstream.body?.cancel().catch(() => {});
+      if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
       return new Response(null, { status: 200, headers: responseHeaders });
     }
 

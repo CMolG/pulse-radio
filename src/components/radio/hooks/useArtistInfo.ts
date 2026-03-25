@@ -16,8 +16,7 @@ function cacheGet(key: string): ArtistInfo | undefined {
   const val = cache.get(key);
   if (val !== undefined) {
     // Move to end (most recently used)
-    cache.delete(key);
-    cache.set(key, val);
+    cache.delete(key); cache.set(key, val);
   }
   return val;
 }
@@ -27,8 +26,7 @@ function cacheSet(key: string, val: ArtistInfo) {
   cache.set(key, val);
   // Evict oldest entries beyond capacity
   while (cache.size > MAX_CACHE) {
-    const oldest = cache.keys().next().value;
-    if (oldest !== undefined) cache.delete(oldest);
+    const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest);
     else break;
   }
 }

@@ -65,8 +65,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   );
 
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
-      const scroller = scrollerRef.current;
-      const line = lineRefs.current[index];
+      const scroller = scrollerRef.current; const line = lineRefs.current[index];
       if (!scroller || !line) return;
 
       const top = line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2;
@@ -77,8 +76,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   );
 
   const updateFocusedIdx = useCallback(() => {
-    const scroller = scrollerRef.current;
-    if (!scroller || !renderableLines.length) return;
+    const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
 
     const scrollerRect = scroller.getBoundingClientRect();
     const centerY = scrollerRect.top + scrollerRect.height / 2;
@@ -88,8 +86,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     lineRefs.current.forEach((line, index) => {
       if (!line) return;
 
-      const rect = line.getBoundingClientRect();
-      const lineCenter = rect.top + rect.height / 2;
+      const rect = line.getBoundingClientRect(); const lineCenter = rect.top + rect.height / 2;
       const distance = Math.abs(centerY - lineCenter);
 
       if (distance < closestDistance) { closestDistance = distance; closestIdx = index; }
@@ -111,8 +108,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   }, [renderableLines.length]);
 
   useEffect(() => {
-    const scroller = scrollerRef.current;
-    if (!scroller || !renderableLines.length) return;
+    const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
 
     let frame = 0;
     const handleScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(updateFocusedIdx); };

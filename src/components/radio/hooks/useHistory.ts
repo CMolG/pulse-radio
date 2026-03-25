@@ -36,14 +36,12 @@ export function useHistory( stationName: string | undefined, stationUuid: string
 
     // Station just changed — skip this render's potentially stale metadata
     if (stationUuid !== lastStationRef.current) {
-      lastStationRef.current = stationUuid;
-      lastTrackRef.current = '';
+      lastStationRef.current = stationUuid; lastTrackRef.current = '';
       return;
     }
 
     const key = `${stationUuid}::${track.artist}::${track.title}`;
-    if (key === lastTrackRef.current) return;
-    lastTrackRef.current = key;
+    if (key === lastTrackRef.current) return; lastTrackRef.current = key;
 
     const entry: HistoryEntry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -76,14 +74,10 @@ export function useHistory( stationName: string | undefined, stationUuid: string
   // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
   useEffect(() => {
     if (!track?.title || !stationUuid) return;
-    const artworkUrl = track.artworkUrl;
-    const album = track.album;
-    const itunesUrl = track.itunesUrl;
-    const durationMs = track.durationMs;
-    const genre = track.genre;
-    const releaseDate = track.releaseDate;
-    const trackNumber = track.trackNumber;
-    const trackCount = track.trackCount;
+    const artworkUrl = track.artworkUrl; const album = track.album;
+    const itunesUrl = track.itunesUrl; const durationMs = track.durationMs;
+    const genre = track.genre; const releaseDate = track.releaseDate;
+    const trackNumber = track.trackNumber; const trackCount = track.trackCount;
     if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
 
     setHistory(prev => {

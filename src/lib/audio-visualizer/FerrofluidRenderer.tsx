@@ -47,8 +47,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
   const cx = w / 2;
   const cy = h / 2;
   for (let i = 0; i < count; i++) {
-    const angle = (i / count) * Math.PI * 2;
-    const dist = Math.min(w, h) * 0.15;
+    const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
     blobs.push({
       x: cx + Math.cos(angle) * dist,
       y: cy + Math.sin(angle) * dist,
@@ -107,23 +106,19 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
 
   for (let py = 0; py < sh; py++) {
     for (let px = 0; px < sw; px++) {
-      const x = px * scale;
-      const y = py * scale;
+      const x = px * scale; const y = py * scale;
       let sum = 0;
       let weightedBand = 0;
       let totalWeight = 0;
 
       for (let b = 0; b < blobCount; b++) {
-        const blob = blobs[b];
-        const dx = x - blob.x;
-        const dy = y - blob.y;
-        const distSq = dx * dx + dy * dy;
+        const blob = blobs[b]; const dx = x - blob.x;
+        const dy = y - blob.y; const distSq = dx * dx + dy * dy;
 
         // Early-exit: skip blobs too far to contribute meaningfully
         if (distSq > blobMaxDistSq[b]) continue;
 
-        const r = blob.baseRadius;
-        const field = (r * r) / (distSq + 1);
+        const r = blob.baseRadius; const field = (r * r) / (distSq + 1);
         sum += field;
 
         if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; }
@@ -137,8 +132,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
 
         // color based on proximity to center vs edge, and energy
         const coreIntensity = Math.min(1, (sum - threshold) * 2);
-        const edgeGlow = 1 - coreIntensity;
-        const brightnessMul = 0.3 + coreIntensity * 0.7;
+        const edgeGlow = 1 - coreIntensity; const brightnessMul = 0.3 + coreIntensity * 0.7;
 
         // blend primary → secondary based on frequency band
         const r = (lerp(colors.primary[0], colors.secondary[0], bandNorm) * brightnessMul) | 0;
@@ -194,14 +188,11 @@ export function FerrofluidRenderer({
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
-      blobsRef.current = createBlobs(blobCount, w, h);
-      sizeRef.current = { w, h };
+      blobsRef.current = createBlobs(blobCount, w, h); sizeRef.current = { w, h };
     }
 
-    timeRef.current += 0.016;
-    const t = timeRef.current;
-    const blobs = blobsRef.current;
-    const cx = w / 2;
+    timeRef.current += 0.016; const t = timeRef.current;
+    const blobs = blobsRef.current; const cx = w / 2;
     const cy = h / 2;
 
     // compute overall energy
@@ -216,8 +207,7 @@ export function FerrofluidRenderer({
     // update blobs
     const minWH = Math.min(w, h);
     for (let i = 0; i < blobs.length; i++) {
-      const blob = blobs[i];
-      const angle = blob.phase + t * blob.speed * 0.5;
+      const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5;
       const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127);
 
       // base orbit

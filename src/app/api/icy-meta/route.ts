@@ -40,28 +40,24 @@ export async function GET(req: NextRequest) {
       try {
         const finalUrl = new URL(res.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
-          clearTimeout(timeout);
-          res.body?.cancel().catch(() => {});
+          clearTimeout(timeout); res.body?.cancel().catch(() => {});
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 });
         }
       } catch { /* URL parse failed — continue */ }
     }
 
     if (!res.ok) {
-      clearTimeout(timeout);
-      res.body?.cancel().catch(() => {});
+      clearTimeout(timeout); res.body?.cancel().catch(() => {});
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
     }
 
     const icyMetaint = res.headers.get('icy-metaint');
-    const icyName = res.headers.get('icy-name');
-    const icyGenre = res.headers.get('icy-genre');
+    const icyName = res.headers.get('icy-name'); const icyGenre = res.headers.get('icy-genre');
     const icyBr = res.headers.get('icy-br');
 
     if (!icyMetaint || !res.body) {
       // No ICY support — return whatever headers are available
-      clearTimeout(timeout);
-      res.body?.cancel().catch(() => {});
+      clearTimeout(timeout); res.body?.cancel().catch(() => {});
       return NextResponse.json({
         streamTitle: null,
         icyName: icyName || null,
@@ -74,13 +70,11 @@ export async function GET(req: NextRequest) {
     // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
     const MAX_METAINT = 131072;
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
-      clearTimeout(timeout);
-      res.body.cancel().catch(() => {});
+      clearTimeout(timeout); res.body.cancel().catch(() => {});
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
 
-    const reader = res.body.getReader();
-    const chunks: Uint8Array[] = [];
+    const reader = res.body.getReader(); const chunks: Uint8Array[] = [];
     let totalRead = 0;
     const bytesNeeded = metaint + 4096;
 
@@ -92,8 +86,7 @@ export async function GET(req: NextRequest) {
         totalRead += value.length;
       }
     } finally {
-      clearTimeout(timeout);
-      reader.cancel().catch(() => {});
+      clearTimeout(timeout); reader.cancel().catch(() => {});
     }
 
     // Concatenate chunks

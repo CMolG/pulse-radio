@@ -24,8 +24,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
     // Restore original volume if we saved it
     if (savedVolumeRef.current !== null && audioRef?.current) {
-      audioRef.current.volume = savedVolumeRef.current;
-      savedVolumeRef.current = null;
+      audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null;
     }
     setIsFading(false);
   }, []);
@@ -38,8 +37,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   }, [stopFade]);
 
   const startFade = useCallback(() => {
-    if (!audioRef?.current || fadeTimerRef.current) return;
-    const audio = audioRef.current;
+    if (!audioRef?.current || fadeTimerRef.current) return; const audio = audioRef.current;
     savedVolumeRef.current = audio.volume;
     setIsFading(true);
 
@@ -53,8 +51,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       const elapsed = Date.now() - fadeStart;
       const progress = Math.min(1, elapsed / FADE_DURATION_MS);
       // Ease-out quadratic for gentle fade
-      const factor = 1 - progress * progress;
-      const target = Math.max(0, baseVol * factor);
+      const factor = 1 - progress * progress; const target = Math.max(0, baseVol * factor);
       audio.volume = target;
       lastSetVol = target;
       if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; }

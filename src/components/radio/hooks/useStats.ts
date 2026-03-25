@@ -112,8 +112,7 @@ export function useStats() {
   // Record a song play
   const recordSongPlay = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return;
-    const songKey = `${title}|||${artist}`;
-    const primary = primaryArtist(artist);
+    const songKey = `${title}|||${artist}`; const primary = primaryArtist(artist);
 
     setStats(prev => {
       const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };

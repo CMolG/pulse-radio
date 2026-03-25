@@ -64,8 +64,7 @@ export function useStationQueue() {
   }, []);
 
   const clear = useCallback(() => {
-    setQueue([]);
-    setCurrentIndex(-1);
+    setQueue([]); setCurrentIndex(-1);
   }, []);
 
   const moveUp = useCallback((stationuuid: string) => {
@@ -110,8 +109,7 @@ export function useStationQueue() {
     let result: Station | null = null;
     setCurrentIndex(prev => {
       const nextIdx = prev + 1;
-      if (nextIdx >= queueRef.current.length) return prev;
-      result = queueRef.current[nextIdx];
+      if (nextIdx >= queueRef.current.length) return prev; result = queueRef.current[nextIdx];
       return nextIdx;
     });
     return result;

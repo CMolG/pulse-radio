@@ -21,8 +21,7 @@ const MAX_CACHE = 100;
 async function fetchCached(path: string, key: string): Promise<Station[]> {
   const hit = cache.get(key);
   if (hit && Date.now() - hit.ts < TTL) {
-    cache.delete(key);
-    cache.set(key, hit);
+    cache.delete(key); cache.set(key, hit);
     return hit.data;
   }
 
@@ -40,8 +39,7 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
       const filtered = data.filter(s => s.url_resolved);
       cache.set(key, { data: filtered, ts: Date.now() });
       while (cache.size > MAX_CACHE) {
-        const oldest = cache.keys().next().value;
-        if (oldest !== undefined) cache.delete(oldest);
+        const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest);
         else break;
       }
       return filtered;

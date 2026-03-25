@@ -33,8 +33,7 @@ type Props = {
     applyPreset: (gains: number[]) => void;
     toggleEnabled: () => void;
     toggleNormalizer: () => void;
-    setStereoWidth: (w: number) => void;
-    setBassEnhance: (v: number) => void;
+    setStereoWidth: (w: number) => void; setBassEnhance: (v: number) => void;
     toggleCompressor: () => void;
     setCompressorAmount: (v: number) => void;
     setNoiseReductionMode: (mode: NoiseReductionMode) => void;
@@ -75,8 +74,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
     const name = presetName.trim();
     if (name) {
       eq.saveCustomPreset(name);
-      setPresetName("");
-      setShowSaveInput(false);
+      setPresetName(""); setShowSaveInput(false);
     }
   };
 

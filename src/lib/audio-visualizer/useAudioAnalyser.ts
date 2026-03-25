@@ -71,8 +71,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
                 const a = s < 0 ? -s : s;
                 if (a > maxAbsInt) maxAbsInt = a;
               }
-              meterRef.current.peak = maxAbsInt / 128;
-              meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128;
+              meterRef.current.peak = maxAbsInt / 128; meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128;
             }
           }
           rafRef.current = requestAnimationFrame(tick);
@@ -84,19 +83,16 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         // alive and just disable analyser updates.
         cancelAnimationFrame(rafRef.current);
         setIsActive(false);
-        frequencyDataRef.current = null;
-        waveDataRef.current = null;
+        frequencyDataRef.current = null; waveDataRef.current = null;
       }
     },
     [fftSize, smoothingTimeConstant],
   );
 
   const disconnect = useCallback(() => {
-    cancelAnimationFrame(rafRef.current);
-    connectedRef.current = null;
+    cancelAnimationFrame(rafRef.current); connectedRef.current = null;
     setIsActive(false);
-    frequencyDataRef.current = null;
-    waveDataRef.current = null;
+    frequencyDataRef.current = null; waveDataRef.current = null;
   }, []);
 
   useEffect(() => () => { cancelAnimationFrame(rafRef.current); }, [],);

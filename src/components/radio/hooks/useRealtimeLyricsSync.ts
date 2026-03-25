@@ -43,8 +43,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
 
   useEffect(() => {
     if (!realtimeActive) { engineRef.current?.stop(); return; }
-    engineRef.current?.destroy();
-    stableSamplesRef.current = 0;
+    engineRef.current?.destroy(); stableSamplesRef.current = 0;
 
     const engine = createRealtimeSpeechEngine({
       onHypothesis: (hypothesis) => {
