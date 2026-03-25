@@ -2358,9 +2358,11 @@ async function fetchLyricsApi(
   fallbackArtist?: string,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
-  const artistCandidates = [
-    ...new Set([artist, fallbackArtist].map((v) => v?.trim()).filter((v): v is string => !!v)),
-  ];
+  const a1 = artist?.trim();
+  const a2 = fallbackArtist?.trim();
+  const artistCandidates: string[] = [];
+  if (a1) artistCandidates.push(a1);
+  if (a2 && a2 !== a1) artistCandidates.push(a2);
   if (!artistCandidates.length || !title?.trim()) return null;
   for (const artistCandidate of artistCandidates) {
     if (signal?.aborted) return null;
