@@ -675,8 +675,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}
                   >
                     {tab.icon}
-                    {tab.label}</button>))}</div>
-              <div className="flex-shrink-0 px-4 pb-2">
+                    {tab.label}</button>))}</div><div className="flex-shrink-0 px-4 pb-2">
                 <form onSubmit={handleSearchSubmit}>
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     <Search size={13} className="text-white/30 flex-shrink-0" />
@@ -687,8 +686,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t("searchStationsAria")}
                       className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
-                      data-radio-search /></div></form></div>
-              <div className="flex-1 min-h-0">
+                      data-radio-search /></div></form></div><div className="flex-1 min-h-0">
                 {activeTab === "discover" ? browseViewElement : activeTab === "history" ? historyViewElement : favsViewElement}
               </div></div>)}</div>
         {/* EQ panel overlay */}
@@ -723,8 +721,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {parallaxElement}
       <div className="flex flex-1 min-h-0 relative z-10">
         {/* Main content */}
-        <div className="col-fill min-w-0">
-          <AnimatePresence mode="wait">
+        <div className="col-fill min-w-0"><AnimatePresence mode="wait">
             {theaterMode && radio.station && !miniMode ? (
               <motion.div
                 key="theater"
@@ -736,8 +733,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             ) : !miniMode ? (
               <React.Fragment key="browse">
                 {/* ── Pulse branding header ── */}
-                <div className="shrink-0 px-5 py-3">
-                  <div className="flex items-center gap-3">
+                <div className="shrink-0 px-5 py-3"><div className="flex items-center gap-3">
                     {pulseLogoButton}
                     <div className="flex-1" />
                     <LanguageSelector /></div></div>
@@ -791,8 +787,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   ) : (
                     <div className="w-14 h-14 rounded-lg bg-surface-2 flex-shrink-0" />
                   )}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-medium text-white truncate">
+                  <div className="min-w-0 flex-1"><p className="text-[14px] font-medium text-white truncate">
                       {enrichedTrack?.title || radio.station.name}</p>
                     <p className="text-[12px] text-muted truncate">{enrichedTrack?.artist || t("internetRadio")}</p>
                   </div></div>
@@ -811,14 +806,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 <span className="text-white/70 shrink-0">{t("autoAudioEnhancements")}</span>
                 {theaterAudioBadges.map(label => (
                   <span key={label} className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0">
-                    {label}</span>))}</div>
-            )}</div>
-          <button
+                    {label}</span>))}</div>)}</div><button
             onClick={() => setMiniMode((m) => !m)}
             className="pointer-events-auto shrink-0 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
             title={miniMode ? t("expand") : t("minimize")}>
             {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}</button>
-        </div><NowPlayingBar {...nowPlayingFullProps} /></div>
-      {sharedModals}</div>
+        </div><NowPlayingBar {...nowPlayingFullProps} /></div>{sharedModals}</div>
   );
 }

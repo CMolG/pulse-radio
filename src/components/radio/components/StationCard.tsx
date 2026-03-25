@@ -96,8 +96,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       {liveStatus === 'loaded' && (
         <div className="flex items-center gap-1 mt-1.5 min-w-0">
           {liveTrack ? (
-            <>
-              <Music2 size={9} className="text-sys-orange flex-shrink-0" />
+            <><Music2 size={9} className="text-sys-orange flex-shrink-0" />
               <span className="text-[9px] text-white/60 truncate leading-tight">
                 {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}</span></>
           ) : (

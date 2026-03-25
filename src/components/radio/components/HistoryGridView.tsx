@@ -23,22 +23,18 @@ type Props = {
 export default React.memo(function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
   if (history.length === 0) {
     return (
-      <div className="flex-center-col py-20 px-4">
-        <Clock size={40} className="text-dim mb-3" />
+      <div className="flex-center-col py-20 px-4"><Clock size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No listening history yet</p>
         <p className="text-[12px] text-dim mt-1">Songs you listen to will appear here</p></div>
     );
   }
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-[12px] text-dim">{history.length} songs</p>
-        <button
+    <div className="p-4"><div className="flex items-center justify-between mb-4">
+        <p className="text-[12px] text-dim">{history.length} songs</p><button
           onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} />
-          Clear all</button></div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+          Clear all</button></div><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
         {history.map((entry, i) => (
           <SongCard
             key={entry.id}

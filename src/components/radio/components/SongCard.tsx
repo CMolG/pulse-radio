@@ -32,8 +32,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         artworkUrl: item.artworkUrl, itunesUrl: item.itunesUrl, durationMs: item.durationMs,
         genre: item.genre, releaseDate: item.releaseDate, trackNumber: item.trackNumber,
         trackCount: item.trackCount, stationName: item.stationName,
-      })}>
-      <div className="w-full aspect-square bg-surface-3 relative">
+      })}><div className="w-full aspect-square bg-surface-3 relative">
         {item.artworkUrl ? (
           <UiImage src={item.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />
         ) : (
@@ -51,10 +50,8 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
             aria-label="Remove"
             className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-          ><Trash2 size={12} /></button>
-        )}</div>
-      <div className="p-3 space-y-0.5">
-        <p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>
+          ><Trash2 size={12} /></button>)}</div>
+      <div className="p-3 space-y-0.5"><p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>
         <p className="text-[12px] text-secondary line-clamp-1">{item.artist}</p>
         {item.album && <p className="text-[11px] text-dim line-clamp-1">{item.album}</p>}
         {(item.genre || item.durationMs) && (
@@ -62,17 +59,14 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             {item.genre && <span>{item.genre}</span>}
             {item.durationMs && (
               <span className="inline-flex items-center gap-0.5">
-                <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}</span>)}</p>
-        )}</div>
-      <div className="px-3 pb-2.5 space-y-1.5">
-        <a
+                <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}</span>)}</p>)}</div>
+      <div className="px-3 pb-2.5 space-y-1.5"><a
           href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
-        ><ExternalLink size={10} />Listen on Apple Music</a>
-        <div className="flex items-center gap-1.5">
+        ><ExternalLink size={10} />Listen on Apple Music</a><div className="flex items-center gap-1.5">
           <Radio size={9} className="text-dim flex-shrink-0" />
           <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
           <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div>

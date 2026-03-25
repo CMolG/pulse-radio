@@ -73,8 +73,7 @@ function UsageGuide({ onClose }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="absolute inset-0 z-50 flex flex-col">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      className="absolute inset-0 z-50 flex flex-col"><div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
@@ -85,8 +84,7 @@ function UsageGuide({ onClose }: Props) {
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 pb-3">
-          <button
+        <div className="flex items-center gap-3 px-5 pb-3"><button
             onClick={onClose}
             aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
@@ -98,18 +96,14 @@ function UsageGuide({ onClose }: Props) {
           {GUIDE_SECTIONS.map((section, idx) => {
             const isExpanded = expandedIdx === idx;
             return (
-              <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]">
-                <button
+              <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]"><button
                   onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
-                >
-                  <div className="flex-shrink-0">{section.icon}</div>
-                  <span className="text-[14px] font-medium text-white/80 flex-1">{section.title}</span>
-                  <motion.span
+                ><div className="flex-shrink-0">{section.icon}</div>
+                  <span className="text-[14px] font-medium text-white/80 flex-1">{section.title}</span><motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-white/30 text-[12px]">▶</motion.span></button>
-                <AnimatePresence>
+                    className="text-white/30 text-[12px]">▶</motion.span></button><AnimatePresence>
                   {isExpanded && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}

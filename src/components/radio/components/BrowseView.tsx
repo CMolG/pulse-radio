@@ -76,13 +76,11 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
             {icon}
             <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
           {!isMobile && (
-            <div className="flex gap-1">
-              <button
+            <div className="flex gap-1"><button
                 onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canLeft}
-                aria-label="Scroll left"><ChevronLeft size={14} /></button>
-              <button
+                aria-label="Scroll left"><ChevronLeft size={14} /></button><button
                 onClick={() => scroll(1)}
                 className={`p-1 rounded-md transition-colors ${canRight ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canRight}
@@ -264,8 +262,7 @@ export default function BrowseView({
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
   const renderScrollStations = (list: Station[]) =>
     list.map((s) => (
-      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}>
-        <StationCard
+      <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard
           station={s}
           isCurrent={s.stationuuid === currentStation?.stationuuid}
           isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
@@ -315,25 +312,21 @@ export default function BrowseView({
     <div className="col-fill min-w-0 h-full">
       {/* Header */}
       <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
-        <div>
-          <h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2>
+        <div><h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2>
           <p className="text-[12px] text-muted mt-0.5">
-            {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div>
-        <button
+            {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div><button
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
           title={t("discoveryModeTitle")}
           aria-pressed={discoveryMode}
-          aria-label={t("discoveryModeAria")}>
-          <Sparkles size={12} />
+          aria-label={t("discoveryModeAria")}><Sparkles size={12} />
           {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}</button></div>
       {/* Genre chips — wrapping, limited on mobile */}
       {(() => {
         const MOBILE_LIMIT = 7; const collapsed = isMobile && !genreChipsExpanded;
         const visibleGenres = collapsed ? translatedGenreCategories.slice(0, MOBILE_LIMIT) : translatedGenreCategories;
         return (
-          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}>
-            <button
+          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}><button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
             >{t("all")}</button>
@@ -349,8 +342,7 @@ export default function BrowseView({
               <button
                 onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-              >{t("seeMore")}</button>
-            )}</div>
+              >{t("seeMore")}</button>)}</div>
         );
       })()}
       {/* Country chips — wrapping, limited on mobile */}
@@ -358,8 +350,7 @@ export default function BrowseView({
         const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
         const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
         return (
-          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}>
-            <button
+          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}><button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
             >{`🌐 ${t("allCountries")}`}</button>
@@ -369,15 +360,13 @@ export default function BrowseView({
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
                 aria-current={countryChipActive(c.code) || undefined}
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-              >
-                <span>{c.flag}</span><span>{c.displayName}</span></button>
+              ><span>{c.flag}</span><span>{c.displayName}</span></button>
             ))}
             {collapsed && countryChips.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setCountryChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-              >{t("seeMore")}</button>
-            )}</div>
+              >{t("seeMore")}</button>)}</div>
         );
       })()}
       {/* Content */}
@@ -386,17 +375,14 @@ export default function BrowseView({
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
         )}
         {error && (
-          <div className="flex-center-col gap-3 py-16">
-            <Radio size={32} className="text-muted" />
-            <p className="text-[13px] text-secondary">{t("failedToLoad")}</p>
-            <button
+          <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" />
+            <p className="text-[13px] text-secondary">{t("failedToLoad")}</p><button
               onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
             >{t("retry")}</button></div>
         )}
         {!loading && !error && view.mode !== "top" && stations.length === 0 && (
-          <div className="flex-center-col py-16">
-            <Radio size={32} className="text-muted mb-2" />
+          <div className="flex-center-col py-16"><Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">{t("noStationsFound")}</p></div>
         )}
         {!loading && !error && (
@@ -433,8 +419,7 @@ export default function BrowseView({
                       {!catStations && failedCategories.has(catId) ? (
                         <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
                           <Radio size={18} className="text-muted" />
-                          <p className="text-[11px] text-muted">{t("failedToLoadStations")}</p>
-                          <button
+                          <p className="text-[11px] text-muted">{t("failedToLoadStations")}</p><button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
                           >{t("retry")}</button></div>
@@ -453,16 +438,14 @@ export default function BrowseView({
               return (
                 <>
                   {/* Scan now-playing bar */}
-                  <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}>
-                    <button
+                  <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}><button
                       onClick={() => setScanEnabled(v => !v)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${
                         scanEnabled
                           ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
                           : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
                       }`}
-                        title={t("scanNowPlaying")}>
-                        <ScanSearch size={12} />
+                        title={t("scanNowPlaying")}><ScanSearch size={12} />
                         {isScanning ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
                           : scannedCount > 0
                             ? t("nowPlayingProgress", { current: scannedCount, total: pageStations.length })
@@ -504,17 +487,13 @@ export default function BrowseView({
                     })}</div>
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-3 pt-2 pb-6">
-                      <button
+                    <div className="flex items-center justify-center gap-3 pt-2 pb-6"><button
                         onClick={() => setPage((p) => Math.max(0, p - 1))}
                         disabled={page === 0}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
-                      >
-                        <ChevronLeft size={14} />
-                        {t("previous")}</button>
-                      <span className="text-[12px] text-dim tabular-nums">
-                        {t("pageFraction", { current: page + 1, total: totalPages })}</span>
-                      <button
+                      ><ChevronLeft size={14} />
+                        {t("previous")}</button><span className="text-[12px] text-dim tabular-nums">
+                        {t("pageFraction", { current: page + 1, total: totalPages })}</span><button
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page === totalPages - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}

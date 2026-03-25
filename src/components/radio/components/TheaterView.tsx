@@ -131,8 +131,7 @@ export default function TheaterView({
       <div className="absolute inset-0 bg-[#0f172a]" />
       {/* ── Layer 1.5: album art background with ambient drift ── */}
       {coverUrl && failedCoverUrl !== coverUrl && (
-        <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden">
-          <UiImage
+        <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden"><UiImage
             src={coverUrl}
             alt=""
             className="object-cover animate-ambient-drift blur-lg opacity-25"
@@ -141,8 +140,7 @@ export default function TheaterView({
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" /></div>
       )}
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
-      <div className="absolute inset-0 z-5 pointer-events-none">
-        <ErrorBoundary fallback={null}>
+      <div className="absolute inset-0 z-5 pointer-events-none"><ErrorBoundary fallback={null}>
         <SpiralRenderer
           frequencyDataRef={frequencyDataRef}
           className="size-full"
@@ -173,8 +171,7 @@ export default function TheaterView({
       {!compact && (
         <div
           className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
-          style={{ top: "env(safe-area-inset-top, 0px)" }}>
-          <button
+          style={{ top: "env(safe-area-inset-top, 0px)" }}><button
             onClick={onBack}
             className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
             aria-label="Exit theater mode"><ArrowLeft size={16} /></button>
@@ -195,8 +192,7 @@ export default function TheaterView({
             )}</div></div>
       )}
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
-      <div className="flex-1 flex items-center justify-center relative z-10 px-4">
-        <div
+      <div className="flex-1 flex items-center justify-center relative z-10 px-4"><div
           className={`flex flex-col items-center ${compact ? "gap-2 px-4 py-3" : "gap-3 px-6 py-5"} rounded-3xl max-w-sm w-full`}
           style={{
             background: "rgba(0, 0, 0, 0.35)",
@@ -207,13 +203,11 @@ export default function TheaterView({
           }}>
           {/* Corner metadata badges (panel corners, never over album art) */}
           {!compact && (
-            <div className="w-full grid grid-cols-2 items-start">
-              <div className="justify-self-start">
+            <div className="w-full grid grid-cols-2 items-start"><div className="justify-self-start">
                 {track?.durationMs && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
                     <Clock size={10} />
-                    {formatDuration(track.durationMs)}</span>)}</div>
-              <div className="justify-self-end">
+                    {formatDuration(track.durationMs)}</span>)}</div><div className="justify-self-end">
                 {track?.trackNumber != null && track?.trackCount != null && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
                     #{track.trackNumber}/{track.trackCount}</span>)}</div></div>
@@ -223,8 +217,7 @@ export default function TheaterView({
             className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} relative overflow-hidden flex-center-row flex-shrink-0`}
             style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`, }}>
             {showFallback ? (
-              <div className="size-full dawn-gradient flex-center-row">
-                <span
+              <div className="size-full dawn-gradient flex-center-row"><span
                   className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
                 >
                   {stationInitials(station.name) || (
@@ -265,8 +258,7 @@ export default function TheaterView({
               <span className={`${compact ? "dot-1.5" : "dot-2"} bg-red-500 animate-pulse`} />
               <span
                 className={`${compact ? "text-[8px]" : "text-[11px]"} font-semibold tracking-wider uppercase text-red-400`}
-              >LIVE</span>
-              {!compact && <AnimatedBars size="small" />}</div>
+              >LIVE</span>{!compact && <AnimatedBars size="small" />}</div>
           )}
           {/* Station details badges */}
           {!compact && (
@@ -283,14 +275,12 @@ export default function TheaterView({
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
-            >
-              <ExternalLink size={11} />
+            ><ExternalLink size={11} />
               Listen on Apple Music</a>
           )}
           {/* ── Lyrics reel inside glass panel ── */}
           {!compact && (
-            <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}>
-              <LyricsReel
+            <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}><LyricsReel
                 lyrics={lyrics ?? null}
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}

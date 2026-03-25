@@ -62,8 +62,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
       <button
         onClick={() => { onRemove(menu.songId); onClose(); }}
         className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors rounded-lg"
-      >
-        <Trash2 size={13} />
+      ><Trash2 size={13} />
         Borrar de favoritos</button>
     </div>,
     document.body,
@@ -114,16 +113,14 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                 transform: `scale(${1 - i * 0.03})`,
                 opacity: 1 - i * 0.15,
                 maxWidth: "200px",
-              }}>
-              <div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
+              }}><div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
                 <div className="w-full aspect-square bg-surface-3 relative">
                   {song.artworkUrl ? (
                     <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="200px" loading="lazy" />
                   ) : (
                     <div className="size-full flex items-center justify-center"><Music size={28} className="text-dim" /></div>
                   )}</div>
-                <div className="p-2.5">
-                  <p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>
+                <div className="p-2.5"><p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>
                   <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p></div></div></div>
           ))}
           <div
@@ -132,11 +129,9 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
               +{songs.length - VISIBLE_COUNT} more</span></div></div>
       ) : (
-        <AnimatePresence>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+        <AnimatePresence><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             {visibleSongs.map((song, i) => (
-              <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}>
-                <SongCard
+              <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}><SongCard
                   item={song}
                   onRemove={() => onRemove(song.id)}
                   onSelect={onSelect}
@@ -182,19 +177,16 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   }, [songs]);
   if (songs.length === 0) {
     return (
-      <div className="flex-center-col py-20 px-4">
-        <Heart size={40} className="text-dim mb-3" />
+      <div className="flex-center-col py-20 px-4"><Heart size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No favorite songs yet</p>
         <p className="text-[12px] text-dim mt-1">Tap the heart icon to save songs you love</p></div>
     );
   }
   const toggleFilter = (mode: FilterMode) => setFilterMode(prev => (prev === mode ? "none" : mode));
   return (
-    <div className="p-4">
-      <SongContextMenu menu={contextMenu} onRemove={onRemove} onClose={closeContextMenu} />
+    <div className="p-4"><SongContextMenu menu={contextMenu} onRemove={onRemove} onClose={closeContextMenu} />
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <p className="text-[12px] text-dim">{songs.length} songs</p>
+        <div className="flex items-center gap-2"><p className="text-[12px] text-dim">{songs.length} songs</p>
           {/* By Artist */}
           <button onClick={() => toggleFilter("artist")} className={filterBtnClass(filterMode === "artist")}>
             <Users size={10} />
@@ -206,8 +198,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             <Disc3 size={10} />
             By Album
             {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
-          </button></div>
-        <button
+          </button></div><button
           onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} />
@@ -239,14 +230,12 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
           {songs.map((song, i) => (
-            <div key={song.id} onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}>
-              <SongCard
+            <div key={song.id} onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}><SongCard
                 item={song}
                 onRemove={() => onRemove(song.id)}
                 onSelect={onSelect}
                 delay={i}
                 heart={null}
-                hideRemove /></div>))}</div>
-      )}</div>
+                hideRemove /></div>))}</div>)}</div>
   );
 }

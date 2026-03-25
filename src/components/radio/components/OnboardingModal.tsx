@@ -131,8 +131,7 @@ function OnboardingModal() {
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
             style={GLASS_STYLE}>
             {/* Content */}
-            <div className="p-8">
-              <AnimatePresence mode="wait">
+            <div className="p-8"><AnimatePresence mode="wait">
                 <motion.div
                   key={step}
                   initial={{ opacity: 0, x: 30 }}
@@ -141,8 +140,7 @@ function OnboardingModal() {
                   transition={{ duration: 0.2 }}
                   className="flex flex-col items-center gap-4 text-center min-h-[200px] justify-center">
                   {currentStep ? (
-                    <>
-                      <div className="p-4 rounded-2xl bg-white/[0.06]">{currentStep.icon}</div>
+                    <><div className="p-4 rounded-2xl bg-white/[0.06]">{currentStep.icon}</div>
                       <h2 className="text-xl font-bold text-white">{currentStep.title}</h2>
                       <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">{currentStep.description}</p></>
                   ) : isPWAStep ? (
@@ -162,12 +160,10 @@ function OnboardingModal() {
                     aria-label={`Step ${i + 1}`} />
                 ))}</div>
               {/* Buttons */}
-              <div className="flex items-center justify-between gap-3">
-                <button
+              <div className="flex items-center justify-between gap-3"><button
                   onClick={step > 0 ? () => setStep(s => s - 1) : handleClose}
                   className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
-                >{step > 0 ? 'Back' : 'Skip'}</button>
-                <button
+                >{step > 0 ? 'Back' : 'Skip'}</button><button
                   onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
                 >{isLast ? "Let's Go!" : 'Next'}</button></div></div></motion.div></motion.div>)}</AnimatePresence>

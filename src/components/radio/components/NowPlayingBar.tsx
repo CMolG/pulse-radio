@@ -117,13 +117,10 @@ function NowPlayingBar({
         {/* Track info + LIVE indicator */}
         <div className="flex-1 min-w-0">
           {station ? (
-            <>
-              <p className="text-[13px] font-medium text-white truncate leading-tight">
-                {track?.title || station.name}</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
+            <><p className="text-[13px] font-medium text-white truncate leading-tight">
+                {track?.title || station.name}</p><div className="flex items-center gap-1.5 mt-0.5">
                 {isPlaying && (
-                  <>
-                    <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
+                  <><span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
                     <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
                       LIVE</span></>
                 )}
@@ -138,8 +135,7 @@ function NowPlayingBar({
               onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
-              aria-label="Theater mode"><Maximize2 size={18} /></button>
-          )}</div>
+              aria-label="Theater mode"><Maximize2 size={18} /></button>)}</div>
         {/* Fill iPhone safe-area inset below the bar without adding layout height */}
         <div
           aria-hidden
@@ -195,8 +191,7 @@ function NowPlayingBar({
             aria-label={`Stream quality: ${streamQuality}`} />
         )}</div>
       {/* Controls */}
-      <div className="flex-row-0.5">
-        <button
+      <div className="flex-row-0.5"><button
           onClick={onTogglePlay}
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
@@ -213,10 +208,8 @@ function NowPlayingBar({
       {/* LIVE indicator + mini ferrofluid */}
       <div className="flex-1 flex-row-2 min-w-0 relative">
         {station && isPlaying && (
-          <>
-            <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
-              <ErrorBoundary fallback={null}>
-              <FerrofluidRenderer
+          <><div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
+              <ErrorBoundary fallback={null}><FerrofluidRenderer
                 frequencyDataRef={frequencyDataRef}
                 className="size-full"
                 blobCount={6}
@@ -224,8 +217,7 @@ function NowPlayingBar({
                 colorSecondary="#16213e"
                 colorAccent="#0f3460"
                 sensitivity={1.0}
-                demo /></ErrorBoundary></div>
-            <div className="flex-row-1.5 relative z-10">
+                demo /></ErrorBoundary></div><div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />
               <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
               <AnimatedBars size="small" /></div></>
@@ -272,8 +264,7 @@ function NowPlayingBar({
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         ><SlidersHorizontal size={14} /></button></div>
       {/* Volume */}
-      <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
-        <button
+      <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2"><button
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
@@ -282,8 +273,7 @@ function NowPlayingBar({
             <VolumeX size={14} />
           ) : (
             <Volume2 size={14} />
-          )}</button>
-        <input
+          )}</button><input
           type="range"
           min={0}
           max={1}

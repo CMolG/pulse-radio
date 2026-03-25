@@ -56,8 +56,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}</div>
   );
   const lyricsEmpty = (
-    <div>
-      <p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
+    <div><p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
       {lyricsError && (
         <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
           Retry</button>)}</div>
@@ -99,8 +98,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-          onClick={onClose}>
-          <motion.div
+          onClick={onClose}><motion.div
             key="song-detail-modal"
             ref={modalRef}
             role="dialog"
@@ -114,8 +112,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
             onClick={(e) => e.stopPropagation()}>
             <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
               {/* Close button */}
-              <div className="sticky top-0 z-10 flex justify-end p-3">
-                <button
+              <div className="sticky top-0 z-10 flex justify-end p-3"><button
                   onClick={onClose}
                   aria-label="Close song details"
                   className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
@@ -143,13 +140,11 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   )}
                   {/* Extended metadata: corner-style row + release line + context badges */}
                   {(resolvedDurationMs || resolvedTrackNumber != null || resolvedReleaseDate || resolvedGenre) && (
-                    <div className="mt-2 space-y-1.5">
-                      <div className="grid grid-cols-2 items-start">
+                    <div className="mt-2 space-y-1.5"><div className="grid grid-cols-2 items-start">
                         <div className="justify-self-start">
                           {resolvedDurationMs && (
                             <MetaBadge icon={Clock} cls="bg-white/[0.08] border border-white/10 font-mono text-white/70">{formatDuration(resolvedDurationMs)}</MetaBadge>
-                          )}</div>
-                        <div className="justify-self-end">
+                          )}</div><div className="justify-self-end">
                           {resolvedTrackNumber != null && resolvedTrackCount != null && (
                             <MetaBadge icon={Disc3} cls="bg-white/[0.08] border border-white/10 text-white/70">#{resolvedTrackNumber}/{resolvedTrackCount}</MetaBadge>
                           )}</div></div>
@@ -167,24 +162,19 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
-                >
-                  <ExternalLink size={14} />
+                ><ExternalLink size={14} />
                   Listen on Apple Music</a></div>
               {/* Divider */}
               <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Artist Info ── */}
-              <div className="px-5">
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
+              <div className="px-5"><h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   About {song.artist}</h3>
                 {/* Loading skeleton */}
                 {loading && (
-                  <div className="space-y-3 animate-pulse">
-                    <div className="flex gap-3">
+                  <div className="space-y-3 animate-pulse"><div className="flex gap-3">
                       <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0" />
-                      <div className="flex-1 space-y-2 pt-1">
-                        <div className="h-3 bg-surface-3 rounded w-2/3" />
-                        <div className="h-2.5 bg-surface-3 rounded w-1/2" /></div></div>
-                    <div className="space-y-2">
+                      <div className="flex-1 space-y-2 pt-1"><div className="h-3 bg-surface-3 rounded w-2/3" />
+                        <div className="h-2.5 bg-surface-3 rounded w-1/2" /></div></div><div className="space-y-2">
                       <div className="h-2.5 bg-surface-3 rounded w-full" />
                       <div className="h-2.5 bg-surface-3 rounded w-5/6" />
                       <div className="h-2.5 bg-surface-3 rounded w-4/6" /></div></div>
@@ -195,8 +185,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     {/* Artist header with image */}
                     <div className="flex gap-3">
                       {info.imageUrl ? (
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                          <UiImage
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"><UiImage
                             src={info.imageUrl}
                             alt={info.name}
                             className="object-cover bg-surface-3"
@@ -243,14 +232,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
-                      >
-                        <Globe size={11} />
+                      ><Globe size={11} />
                         Read more on Wikipedia</a>)}</div>
                 )}
                 {/* No data */}
                 {!loading && !info && (
-                  <p className="text-[12px] text-dim">No artist information available</p>
-                )}</div>
+                  <p className="text-[12px] text-dim">No artist information available</p>)}</div>
               {/* Divider */}
               <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Lyrics (mobile) ── */}
@@ -267,19 +254,15 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
               <div className="mx-5 my-5 border-t border-border-default md:hidden" />
               {/* ── Remove from favorites ── */}
               {onRemoveFromFavorites && (
-                <>
-                  <div className="mx-5 my-5 border-t border-border-default" />
-                  <div className="px-5 pb-2">
-                    <button
+                <><div className="mx-5 my-5 border-t border-border-default" />
+                  <div className="px-5 pb-2"><button
                       onClick={onRemoveFromFavorites}
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"
-                    >
-                      <Trash2 size={14} />
+                    ><Trash2 size={14} />
                       Borrar de favoritos</button></div></>
               )}
               {/* ── Station ── */}
-              <div className="px-5 pb-6 pt-4">
-                <div className="flex items-center gap-2">
+              <div className="px-5 pb-6 pt-4"><div className="flex items-center gap-2">
                   <Radio size={12} className="text-dim flex-shrink-0" />
                   <p className="text-[11px] text-dim">
                     Played on{' '}

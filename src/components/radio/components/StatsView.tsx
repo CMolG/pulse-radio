@@ -37,8 +37,7 @@ const StatSection = React.memo(function StatSection({ title, icon, children, }: 
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-2">
+    <div><div className="flex items-center gap-2 mb-2">
         {icon}
         <span className="text-[13px] font-semibold text-white/80">{title}</span>
       </div><div className="space-y-1">{children}</div></div>
@@ -50,8 +49,7 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
   return (
     <div className="flex items-center gap-2 group">
       <span className="text-[12px] text-white/50 w-[100px] truncate shrink-0">{label}</span>
-      <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden relative">
-        <div
+      <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden relative"><div
           className="h-full rounded-full bg-gradient-to-r from-[#3478f6]/60 to-[#3478f6]/30 transition-all duration-500"
           style={{ width: `${pct}%` }} />
       </div><span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span></div>
@@ -77,8 +75,7 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
       {/* Total listen time */}
       <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/8">
         <IoTimeOutline size={20} className="text-[#3478f6]" />
-        <div>
-          <p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>
+        <div><p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>
           <p className="text-[18px] font-bold text-white tabular-nums">{formatListenTime(totalListenMs)}</p></div></div>
       {/* Top Stations */}
       {topStations.length > 0 && (

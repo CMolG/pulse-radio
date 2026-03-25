@@ -40,8 +40,7 @@ export default React.memo(function NowPlayingHero({
   const showFallback = !coverUrl || imgError;
   const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]);
   return (
-    <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
-      <ParallaxAlbumBackground
+    <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden"><ParallaxAlbumBackground
         imageUrl={artworkUrl ?? null}
         fallbackUrl={station.favicon || undefined}
         overlayClass="bg-black/60" />
@@ -49,8 +48,7 @@ export default React.memo(function NowPlayingHero({
         <button
           onClick={onTheater}
           className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
-          title="Theater mode">
-          <Maximize2 size={12} />
+          title="Theater mode"><Maximize2 size={12} />
           Theater</button>
       )}
       <div className="relative z-10 flex-row-4 w-full">
@@ -69,8 +67,7 @@ export default React.memo(function NowPlayingHero({
               sizes="64px"
               loading="lazy"
               onError={() => setImgError(true)} />
-          )}</div>
-        <div className="flex-fill pr-20">
+          )}</div><div className="flex-fill pr-20">
           <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3>
           {track?.title ? (
             <p className="text-[13px] text-secondary truncate mt-0.5">
@@ -82,13 +79,11 @@ export default React.memo(function NowPlayingHero({
             <p className="text-[11px] text-dim truncate">{track.album}</p>
           )}
           {isPlaying && (
-            <div className="flex-row-1.5 mt-1">
-              <span className="dot-1.5 bg-sys-orange" />
+            <div className="flex-row-1.5 mt-1"><span className="dot-1.5 bg-sys-orange" />
               <span className="text-[10px] font-semibold tracking-wider uppercase text-sys-orange">LIVE</span>
               <AnimatedBars size="small" />
               {icyBitrate && (
                 <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1">
-                  {icyBitrate}kbps</span>)}</div>
-          )}</div></div></div>
+                  {icyBitrate}kbps</span>)}</div>)}</div></div></div>
   );
 });
