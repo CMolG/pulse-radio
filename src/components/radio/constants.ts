@@ -89,11 +89,9 @@ export function countryFlag(code: string): string {
   const cached = _flagCache.get(code);
   if (cached) return cached;
   const upper = code.toUpperCase();
-  if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
-  const flag = String.fromCodePoint(
-    0x1f1e6 + upper.charCodeAt(0) - 65,
-    0x1f1e6 + upper.charCodeAt(1) - 65,
-  );
+  const c0 = upper.charCodeAt(0), c1 = upper.charCodeAt(1);
+  if (c0 < 65 || c0 > 90 || c1 < 65 || c1 > 90) return '🌐';
+  const flag = String.fromCodePoint(0x1f1e6 + c0 - 65, 0x1f1e6 + c1 - 65);
   _flagCache.set(code, flag);
   return flag;
 }
