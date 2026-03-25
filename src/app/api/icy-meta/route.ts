@@ -35,6 +35,7 @@
   return false;
 }
 export const runtime = 'nodejs';
+const _ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const url = new URL(streamUrl);
-    if (!['http:', 'https:'].includes(url.protocol)) {
+    if (!_ALLOWED_PROTOCOLS.has(url.protocol)) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
     }
     const host = url.hostname.toLowerCase();
