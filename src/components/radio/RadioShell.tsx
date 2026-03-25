@@ -1196,7 +1196,7 @@ const AD_PATTERNS = [
   /\b(www\.)/i,
 ];
 const STATION_META_FETCH_TIMEOUT_MS = 10_000;
-const POLL_INTERVAL_MS = 5_000;
+const POLL_INTERVAL_MS = 10_000;
 const MAX_TITLE_LENGTH = 500;
 const _adCache = new LRU<boolean>(256);
 function isAdContent(text: string): boolean {
