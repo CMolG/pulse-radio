@@ -418,7 +418,23 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
     }),
   ).map((country) => country.code);
 }
+function _tagsDisplay(tags: string | undefined): string {
+  if (!tags) return 'Internet RadioIcon';
+  let result = '';
+  let count = 0;
+  let start = 0;
+  for (let i = 0; i <= tags.length; i++) {
+    if (i === tags.length || tags[i] === ',') {
+      if (count > 0) result += ' · ';
+      result += tags.slice(start, i);
+      if (++count === 3) return result;
+      start = i + 1;
+    }
+  }
+  return result || 'Internet RadioIcon';
+}
 function getProximityCountries(seedCodes: string[]): string[] {
+
   if (seedCodes.length === 0) return [];
   const seed: (typeof SOVEREIGN_COUNTRIES)[number][] = [];
   for (let i = 0; i < seedCodes.length; i++) {
@@ -4194,10 +4210,7 @@ function TheaterView({
     };
   }, [artworkUrl]);
   const [color1, color2, color3] = colors;
-  const theaterTags = useMemo(
-    () => station.tags?.split(',').slice(0, 3).join(' · ') ?? 'Internet RadioIcon',
-    [station.tags],
-  );
+  const theaterTags = useMemo(() => _tagsDisplay(station.tags), [station.tags]);
   return (
     <motion.div
       initial={_MOTION_FADE_IN}
@@ -5622,10 +5635,7 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
     setImgError(false);
   }
   const showFallback = !coverUrl || imgError;
-  const heroTags = useMemo(
-    () => station.tags?.split(',').slice(0, 3).join(' · ') ?? 'Internet RadioIcon',
-    [station.tags],
-  );
+  const heroTags = useMemo(() => _tagsDisplay(station.tags), [station.tags]);
   return (
     <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden">
       <ParallaxAlbumBackground
