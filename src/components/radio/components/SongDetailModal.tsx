@@ -38,8 +38,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   // Close on Escape
   useEffect(() => { if (!song) return; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
-  }, [song, onClose]);
-  const modalRef = useRef<HTMLDivElement>(null); // Focus trap: keep Tab cycling within the modal
+  }, [song, onClose]); const modalRef = useRef<HTMLDivElement>(null); // Focus trap: keep Tab cycling within the modal
   useEffect(() => { if (!song || !modalRef.current) return; const modal = modalRef.current;
     const prev = document.activeElement as HTMLElement | null;
     const focusable = modal.querySelectorAll<HTMLElement>( // Focus first focusable element
@@ -52,8 +51,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }; window.addEventListener('keydown', onTab);
     return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
-  }, [song]);
-  return ( <AnimatePresence> {song && ( <motion.div key="song-detail-backdrop" initial={{ opacity: 0 }}
+  }, [song]); return ( <AnimatePresence> {song && ( <motion.div key="song-detail-backdrop" initial={{ opacity: 0 }}
           animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
           onClick={onClose}><motion.div key="song-detail-modal" ref={modalRef} role="dialog" aria-modal="true"
@@ -78,8 +76,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   <h2 className="text-[17px] font-bold text-white leading-snug line-clamp-2">{song.title}</h2>
                   <p className="text-[14px] text-secondary mt-1">{song.artist}</p> {resolvedAlbum && (
                     <p className="text-[12px] text-dim mt-0.5">{resolvedAlbum}</p>
-                  )}
-                  {/* Extended metadata: corner-style row + release line + context badges */}
+                  )} {/* Extended metadata: corner-style row + release line + context badges */}
                   {(resolvedDurationMs || resolvedTrackNumber != null || resolvedReleaseDate || resolvedGenre) && (
                     <div className="mt-2 space-y-1.5"><div className="grid grid-cols-2 items-start">
                         <div className="justify-self-start">{resolvedDurationMs && (
@@ -129,26 +126,22 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                               {info.lifeSpan.begin}{info.lifeSpan.ended && info.lifeSpan.end ? ` – ${info.lifeSpan.end}` : ' – present'}
                             </MetaBadge>)}</div></div></div>
                     {/* Bio */}
-                    {info.bio && ( <p className="text-[12px] text-secondary/90 leading-relaxed">{info.bio}</p>
-                    )}
+                    {info.bio && ( <p className="text-[12px] text-secondary/90 leading-relaxed">{info.bio}</p> )}
                     {/* Genre tags */}
                     {info.tags.length > 0 && ( <div className="flex flex-wrap gap-1.5"> {info.tags.map((tag) => ( <span
                             key={tag}
                             className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50">
                             {tag}</span>))}</div>
-                    )}
-                    {/* Wikipedia link */}
+                    )} {/* Wikipedia link */}
                     {info.wikipediaUrl && ( <a href={info.wikipediaUrl} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
                       ><Globe size={11} /> Read more on Wikipedia</a>)}</div>
-                )}
-                {/* No data */}
+                )} {/* No data */}
                 {!loading && !info && ( <p className="text-[12px] text-dim">No artist information available</p>)}</div>
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Lyrics (mobile) ── */} <div className="px-5 md:hidden">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">Lyrics (plain)</h3>
-                {lyricsLoading && lyricsSkeleton(4)}
-                {!lyricsLoading && plainLyrics && (
+                {lyricsLoading && lyricsSkeleton(4)} {!lyricsLoading && plainLyrics && (
                   <div className="max-h-52 overflow-y-auto rounded-xl bg-surface-3/50 border border-border-subtle p-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
                     <pre className="whitespace-pre-wrap break-words font-sans text-[12px] leading-relaxed text-secondary/90">
                       {plainLyrics}</pre></div>
@@ -168,8 +161,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider">Lyrics (plain)</h3>
                 <p className="text-[11px] text-dim mt-1 line-clamp-1">{song.title} · {song.artist}</p></div>
               <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-                {lyricsLoading && lyricsSkeleton(7)}
-                {!lyricsLoading && plainLyrics && (
+                {lyricsLoading && lyricsSkeleton(7)} {!lyricsLoading && plainLyrics && (
                   <pre className="whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed text-secondary/90">
                     {plainLyrics}</pre>
                 )} {!lyricsLoading && !plainLyrics && lyricsEmpty}</div></div></motion.div>

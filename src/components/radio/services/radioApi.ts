@@ -3,13 +3,11 @@ import type { Station } from '../types';
 // Radio-Browser API mirrors for redundancy
 const SERVERS = [ 'https://de1.api.radio-browser.info/json', 'https://de2.api.radio-browser.info/json',
   'https://nl1.api.radio-browser.info/json',];
-let serverIndex = 0;
-function getBase(): string { return SERVERS[serverIndex % SERVERS.length]; }
+let serverIndex = 0; function getBase(): string { return SERVERS[serverIndex % SERVERS.length]; }
 function rotateServer(): void { serverIndex = (serverIndex + 1) % SERVERS.length; }
 const cache = new Map<string, { data: Station[]; ts: number }>(); const TTL = 60_000; const MAX_CACHE = 100;
 async function fetchCached(path: string, key: string): Promise<Station[]> { const hit = cache.get(key);
-  if (hit && Date.now() - hit.ts < TTL) { cache.delete(key); cache.set(key, hit); return hit.data;
-  }
+  if (hit && Date.now() - hit.ts < TTL) { cache.delete(key); cache.set(key, hit); return hit.data; }
   for (let attempt = 0; attempt < SERVERS.length; attempt++) { try { // Try current server, failover to next on error
       const url = `${getBase()}${path}`; const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) { await res.text().catch(() => {}); rotateServer(); continue;
@@ -33,8 +31,7 @@ export function stationsByCountry(country: string, limit = 30): Promise<Station[
 export function trendingStations(limit = 20): Promise<Station[]> { return topStations(limit); }
 export async function localStations(limit = 20): Promise<Station[]> {
   const countryCode = typeof navigator !== 'undefined' ? navigator.language?.split('-')[1]?.toUpperCase() || '' : '';
-  if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit);
-  return fetchCached(
+  if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit); return fetchCached(
     `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`,
     `local-${countryCode}-${limit}`,);
 }

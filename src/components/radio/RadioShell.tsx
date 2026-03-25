@@ -117,8 +117,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const code = (initialCountryCode ?? "").toUpperCase(); if (isSovereignCountryCode(code)) return countryView(code);
     return mkView("top", t("topStations"));});
   useEffect(() => { const newLabel = view.mode === "top" ? t("topStations")
-      : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode)
-      : null;
+      : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode) : null;
     if (newLabel && newLabel !== view.label) setView(prev => ({ ...prev, label: newLabel }));
   }, [locale, t, view.countryCode, view.label, view.mode]);
   useEffect(() => { const code = (initialCountryCode ?? "").toUpperCase();
@@ -276,18 +275,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (eq.enabled && eqPreset) badges.push(t("presetLabel", { name: eqPreset })); return badges;
   }, [eq.enabled, eq.noiseReductionMode, eq.normalizerEnabled, eqPreset, radio.station, theaterMode, t]);
   const selectedFavSong = selectedSong
-    ? favSongs.songs.find(s => s.title === selectedSong.title && s.artist === selectedSong.artist) ?? null
-    : null;
+    ? favSongs.songs.find(s => s.title === selectedSong.title && s.artist === selectedSong.artist) ?? null : null;
   const songDetailModal = ( <SongDetailModal song={selectedSong} onClose={() => setSelectedSong(null)}
       onRemoveFromFavorites={selectedFavSong ? () => { favSongs.remove(selectedFavSong.id); setSelectedSong(null);
       } : undefined} /> );
-  const shortcutsOverlay = showShortcuts ? ( <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />
-  ) : null;
+  const shortcutsOverlay = showShortcuts ? ( <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} /> ) : null;
   const offlineBanner = !isOnline ? (
     <div className="fixed top-0 inset-x-0 z-[250] bg-yellow-600 text-white text-center text-[12px] font-medium py-1 select-none" role="alert">
       {t("offlineBanner")}</div>
-  ) : null;
-  const eqPanelElement = showEq ? ( <EqPanel bands={eq.bands} enabled={eq.enabled}
+  ) : null; const eqPanelElement = showEq ? ( <EqPanel bands={eq.bands} enabled={eq.enabled}
       normalizerEnabled={eq.normalizerEnabled} stereoWidth={eq.stereoWidth}
       bassEnhance={eq.bassEnhance} compressorEnabled={eq.compressorEnabled}
       compressorAmount={eq.compressorAmount} noiseReductionMode={eq.noiseReductionMode}
@@ -298,8 +294,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSetCompressorAmount={eq.setCompressorAmount} onSetNoiseReductionMode={eq.setNoiseReductionMode}
       onSaveCustomPreset={eq.saveCustomPreset} onRemoveCustomPreset={eq.removeCustomPreset}
       onPresetChange={setEqPreset} onClose={() => setShowEq(false)} />
-  ) : null;
-  const toastElement = toast ? ( <motion.div key={toast.key} initial={{ opacity: 0, y: 8 }}
+  ) : null; const toastElement = toast ? ( <motion.div key={toast.key} initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} transition={{ duration: 0.18 }}
       className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
@@ -361,11 +356,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     ); }
   if (layout === "mobile") { return (
       <div ref={containerRef} className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none">
-        {parallaxElement}
-        {/* Single scrollable area — content scrolls behind sticky header */}
+        {parallaxElement} {/* Single scrollable area — content scrolls behind sticky header */}
         <div className="h-full overflow-y-auto relative z-10">
-          {/* Sticky header — glassmorphism (content scrolls underneath) */}
-          {!theaterMode && (
+          {/* Sticky header — glassmorphism (content scrolls underneath) */} {!theaterMode && (
             <div data-testid="mobile-header" className="sticky top-0 z-30 safe-top border-b border-white/10" style={glassStyle}>
                 <div className="flex items-center gap-2 px-4 pt-3 pb-2"> {pulseLogoButton}
                   <div className="flex-1" /> <button onClick={() => setShowMobileSettings(true)}
@@ -397,8 +390,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       data-radio-search /></div></form></div><div className="flex-1 min-h-0">
                 {activeTab === "discover" ? browseViewElement : activeTab === "history" ? historyViewElement : favsViewElement}
               </div></div>)}</div>
-        {/* EQ panel overlay */}
-        {eqPanelElement}
+        {/* EQ panel overlay */} {eqPanelElement}
         {/* Mobile settings panel */} <AnimatePresence>{showMobileSettings && ( <MobileSettingsPanel
               onClose={() => setShowMobileSettings(false)} eq={eq} onPresetChange={setEqPreset}
               statsData={{ topStations: usageStats.topStations, topSongs: usageStats.topSongs,
@@ -420,18 +412,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             ) : !miniMode ? ( <React.Fragment key="browse"> {/* ── Pulse branding header ── */}
                 <div className="shrink-0 px-5 py-3"><div className="flex items-center gap-3">
                     {pulseLogoButton} <div className="flex-1" /> <LanguageSelector /></div></div>
-                {nowPlayingHeroElement}
-                {/* ── Top nav: tabs + search ── */}
+                {nowPlayingHeroElement} {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">{navTabs13.map((tab) => ( <button
                       key={tab.id} onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors flex-shrink-0 ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
                     >{tab.icon} {tab.label} {tab.id === "history" && songHistory.history.length > 0 && (
                         <span className="text-[9px] text-dim ml-0.5">{songHistory.history.length}</span>
-                      )}
-                      {tab.id === "favorites" && favSongs.songs.length > 0 && (
+                      )} {tab.id === "favorites" && favSongs.songs.length > 0 && (
                         <span className="text-[9px] text-dim ml-0.5">{favSongs.songs.length}</span>)}</button>
-                  ))}
-                  {/* Search input — fills remaining space */}
+                  ))} {/* Search input — fills remaining space */}
                   <form onSubmit={handleSearchSubmit} className="flex-1 min-w-0 ml-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.05]">
                       <Search size={12} className="text-dim flex-shrink-0" /> <input type="search"

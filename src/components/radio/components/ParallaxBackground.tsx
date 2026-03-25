@@ -15,8 +15,7 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
         style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
           WebkitTransform: `translate3d(${offset.x}px, ${offset.y}px, 0)`, background: baseGradient,
           opacity: landingMode ? 0.85 : 0.15, willChange: 'transform', }}/>
-      {landingMode && ( <div className="absolute inset-0" style={RADIAL_OVERLAY} />
-      )}
+      {landingMode && ( <div className="absolute inset-0" style={RADIAL_OVERLAY} /> )}
       {faviconUrl && ( <div className="absolute inset-[-40px] transition-transform duration-300 ease-out"
           style={{ transform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`,
             WebkitTransform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`, willChange: 'transform',

@@ -47,8 +47,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
   useEffect(() => { if (typeof BroadcastChannel === 'undefined') return;
     const bc = new BroadcastChannel('pulse-radio-playback'); bcRef.current = bc;
     bc.onmessage = (e: MessageEvent) => { if (e.data?.type === 'playing' && e.data?.tabId !== tabIdRef.current) {
-        const audio = audioRef.current;
-        if (audio && !audio.paused) { userPausedRef.current = true; audio.pause(); }
+        const audio = audioRef.current; if (audio && !audio.paused) { userPausedRef.current = true; audio.pause(); }
         // Cancel any in-progress crossfade so it doesn't restart playback
         // after the cross-tab pause. Without this, the crossfade completion
         clearTimer(fadeTimerRef); } // calls startPlayback() and overrides the pause from the other tab.
@@ -165,8 +164,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       }, timeout);
     }; const onPlaying = () => { setStatus('playing'); retryRef.current = 0;
       stallCount = 0; // Reset stall counter on successful playback
-      userPausedRef.current = false;
-      isReconnectingRef.current = false; // Clear gate — reconnect path succeeded
+      userPausedRef.current = false; isReconnectingRef.current = false; // Clear gate — reconnect path succeeded
       bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current }); };
     // Ended: connection dropped — seamlessly reconnect
     const onEnded = () => { if (!userPausedRef.current && station) reconnect(500); };
@@ -206,8 +204,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       // Skip quality/reconnect logic during an active reconnect to avoid cascade
       if (isReconnectingRef.current) return; const { buffered, currentTime: ct } = audio; if (buffered.length === 0) {
         lowBufferStreak++; setStreamQuality('poor'); // No buffer ranges at all while playing — treat as underrun
-        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
-        return; }
+        if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); } return; }
       let ahead = 0; let bufferEnd = 0; // Find the buffer range containing currentTime
       for (let i = 0; i < buffered.length; i++) { if (ct >= buffered.start(i) && ct <= buffered.end(i)) {
           ahead = buffered.end(i) - ct; bufferEnd = buffered.end(i); break; }
@@ -277,8 +274,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     }}, []);
   const stop = useCallback(() => {
     clearTimer(fadeTimerRef); clearTimer(pauseTimerRef); clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
-    const audio = audioRef.current;
-    if (audio) { audio.pause(); audio.src = ''; }
+    const audio = audioRef.current; if (audio) { audio.pause(); audio.src = ''; }
     setStation(null); setStatus('idle'); setStreamQuality('good'); lastBufferEndRef.current = 0;
   }, []); const setVolume = useCallback((v: number) => { setVolumeState(Math.max(0, Math.min(1, v))); }, []);
   const prefetchedUrlsRef = useRef<Set<string>>(new Set()); const prefetchStream = useCallback((streamUrl: string) => {

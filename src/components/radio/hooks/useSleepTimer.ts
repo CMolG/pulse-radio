@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useState, useRef, useCallback, useEffect } from 'react';
-const PRESETS_MIN = [15, 30, 60] as const;
-const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
+const PRESETS_MIN = [15, 30, 60] as const; const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds
 export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>) {
   const [remainingMin, setRemainingMin] = useState<number | null>(null);
   const [isFading, setIsFading] = useState(false); const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -25,8 +24,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       const elapsed = Date.now() - fadeStart; const progress = Math.min(1, elapsed / FADE_DURATION_MS);
       // Ease-out quadratic for gentle fade
       const factor = 1 - progress * progress; const target = Math.max(0, baseVol * factor); audio.volume = target;
-      lastSetVol = target;
-      if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; }
+      lastSetVol = target; if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; }
     }, 200);
   }, []); const start = useCallback((minutes: number) => { if (timerRef.current) clearInterval(timerRef.current);
     stopFade(); endTimeRef.current = Date.now() + minutes * 60_000; setRemainingMin(minutes);

@@ -6,8 +6,7 @@ const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
   WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)', };
-type GuideSection = { icon: React.ReactNode; title: string; content: string; };
-const GUIDE_SECTIONS: GuideSection[] = [
+type GuideSection = { icon: React.ReactNode; title: string; content: string; }; const GUIDE_SECTIONS: GuideSection[] = [
   { icon: <IoRadioOutline size={22} className="text-[#3478f6]" />, title: 'Listening to Radio',
     content: 'Browse stations by genre, country or search. Tap any station card to start playing. The visualizer activates automatically with live audio-reactive effects.',
   }, { icon: <IoSearchOutline size={22} className="text-cyan-400" />, title: 'Search & Discover',

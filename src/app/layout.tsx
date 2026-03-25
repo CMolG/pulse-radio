@@ -4,8 +4,7 @@ import "./globals.css"; import { ServiceWorkerRegistrar } from "./ServiceWorkerR
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], });
 const SITE_URL = "https://www.pulse-radio.online";
-const SITE_TITLE = "Pulse Radio — Free Internet Radio with Visualizer";
-const SITE_DESCRIPTION =
+const SITE_TITLE = "Pulse Radio — Free Internet Radio with Visualizer"; const SITE_DESCRIPTION =
   "Stream thousands of free internet radio stations worldwide. Enjoy real-time audio visualizer, album art, song history, favorites, and theater mode. No sign-up required.";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL), title: { default: SITE_TITLE, template: "%s | Pulse Radio", },

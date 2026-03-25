@@ -14,8 +14,7 @@ export class ErrorBoundary extends React.Component<Props, State> { state: State 
           <div className="p-3 rounded-full bg-sys-red/10"><AlertTriangle size={28} className="text-sys-red" /></div>
           <div><h2 className="text-[15px] font-semibold text-white mb-1">Something went wrong</h2>
             <p className="text-[13px] text-secondary max-w-xs">
-              An unexpected error occurred. Your playback may still be running
-              in the background.</p></div>
+              An unexpected error occurred. Your playback may still be running in the background.</p></div>
           {this.state.error && (
             <pre className="text-[11px] text-muted bg-surface-2 rounded-lg px-4 py-2 max-w-sm overflow-auto max-h-24">
               {this.state.error.message}</pre>

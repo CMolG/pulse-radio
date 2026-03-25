@@ -21,8 +21,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     const saved = loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, defaults);
     // If stored band count doesn't match current config, reset to defaults
     return saved.length === defaults.length ? saved : defaults;
-  }); const [enabled, setEnabled] = useState(true);
-  const [customPresets, setCustomPresets] = useState<EqPreset[]>(() =>
+  }); const [enabled, setEnabled] = useState(true); const [customPresets, setCustomPresets] = useState<EqPreset[]>(() =>
     loadFromStorage<EqPreset[]>(STORAGE_KEYS.CUSTOM_EQ_PRESETS, [])
   ); const [normalizerEnabled, setNormalizerEnabled] = useState(getDefaultNormalizerEnabled);
   const [stereoWidth, setStereoWidthState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.STEREO_WIDTH, 1.0) );
@@ -169,8 +168,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       const mbHighHp = ctx.createBiquadFilter(); mbHighHp.type = 'highpass';
       mbHighHp.frequency.value = 3000; mbHighHp.Q.value = 0.7;
       const mbHighComp = ctx.createDynamicsCompressor(); mbHighComp.threshold.value = -16;
-      mbHighComp.knee.value = 6; mbHighComp.ratio.value = 3;
-      mbHighComp.attack.value = 0.002; // fast — catch sibilants
+      mbHighComp.knee.value = 6; mbHighComp.ratio.value = 3; mbHighComp.attack.value = 0.002; // fast — catch sibilants
       mbHighComp.release.value = 0.1;
       // Wire: lastFilter → [dry path, low band, mid band, high band] → wet mix → merge
       const lastFilter = filters[filters.length - 1]; lastFilter.connect(mbDry); mbDry.connect(mbMerge);
@@ -184,8 +182,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       mbHighCompRef.current = mbHighComp; mbDryGainRef.current = mbDry;
       mbWetGainRef.current = mbWet; mbMergeRef.current = mbMerge;
       // Safety limiter to prevent digital clipping from cumulative EQ gains
-      const limiter = ctx.createDynamicsCompressor();
-      limiter.threshold.value = -3;   // engage at -3dBFS
+      const limiter = ctx.createDynamicsCompressor(); limiter.threshold.value = -3;   // engage at -3dBFS
       limiter.knee.value = 6;         // soft knee
       limiter.ratio.value = 20;       // near-brick-wall limiting
       limiter.attack.value = 0.001;   // fast attack

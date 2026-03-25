@@ -5,8 +5,7 @@ function cacheGet(key: string): ArtistInfo | undefined { const val = cache.get(k
     cache.delete(key); cache.set(key, val); } // Move to end (most recently used)
   return val; }
 function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure fresh insertion order
-  cache.set(key, val);
-  while (cache.size > MAX_CACHE) { // Evict oldest entries beyond capacity
+  cache.set(key, val); while (cache.size > MAX_CACHE) { // Evict oldest entries beyond capacity
     const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
 } export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
   const key = artist ? artist.toLowerCase().trim() : '';

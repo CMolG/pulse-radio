@@ -77,8 +77,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
         {icyBitrate && (
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
             {icyBitrate}kbps</span>
-        )}
-        {streamQuality && isPlaying && ( <span
+        )} {streamQuality && isPlaying && ( <span
             className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
               streamQuality === 'fair' ? 'bg-yellow-500' : streamQuality === 'poor' ? 'bg-red-500' : 'bg-gray-500'
             }`} title={`Stream: ${streamQuality}`} aria-label={`Stream quality: ${streamQuality}`} />
@@ -102,18 +101,15 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
       {/* Toggles */} <div className="flex-row-0.5">{station && !theaterMode && ( <button onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50" title="Theater Mode"
             aria-label="Theater mode"><Maximize2 size={14} /></button>
-        )}
-        {onToggleFav && ( <button onClick={onToggleFav}
+        )} {onToggleFav && ( <button onClick={onToggleFav}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
-        )}
-        {onFavSong && ( <button onClick={onFavSong} aria-label={songLiked ? 'Unlike song' : 'Like song'}
+        )} {onFavSong && ( <button onClick={onFavSong} aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
             title="Me gusta canción"><Heart size={14} className={songLiked ? "fill-pink-400" : ""} /></button>
-        )}
-        {onCycleSleepTimer && ( <button onClick={onCycleSleepTimer}
+        )} {onCycleSleepTimer && ( <button onClick={onCycleSleepTimer}
             className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
             aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}>
@@ -128,8 +124,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           aria-pressed={muted || volume === 0}
           className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"> {muted || volume === 0 ? (
             <VolumeX size={14} />
-          ) : ( <Volume2 size={14} />
-          )}</button><input
+          ) : ( <Volume2 size={14} /> )}</button><input
           type="range" min={0} max={1} step={0.01} value={volume} onChange={handleVolumeChange} aria-label="Volume"
           className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         /></div></div>

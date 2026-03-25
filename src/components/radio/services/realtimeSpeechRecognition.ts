@@ -36,8 +36,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
     }; recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return;
       const fatal = event.error === 'not-allowed'|| event.error === 'service-not-allowed'
         || event.error === 'language-not-supported';
-      if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return;
-      }
+      if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return; }
     }; recognition.onend = () => { if (destroyed || !running) return; if (restartCount >= MAX_RESTARTS) {
         running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return; }
       restartCount++;

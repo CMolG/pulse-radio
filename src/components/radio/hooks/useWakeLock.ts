@@ -9,16 +9,14 @@ export function useWakeLock(shouldLock: boolean) {
     requestingRef.current = true; wantReleaseRef.current = false;
     try { const lock = await navigator.wakeLock.request('screen'); if (wantReleaseRef.current) {
         // release() was called while we were awaiting — honour it immediately
-        try { await lock.release(); } catch { /* already released */ }
-        setIsActive(false); return; }
+        try { await lock.release(); } catch { /* already released */ } setIsActive(false); return; }
       lockRef.current = lock; setIsActive(true);
       lock.addEventListener('release', () => { lockRef.current = null; setIsActive(false); });} catch {
       // Wake lock request failed (e.g., low battery, or permission denied)
     } finally { requestingRef.current = false; }}, []);
   const release = useCallback(async () => { if (requestingRef.current) {
       wantReleaseRef.current = true; return; } // request() is in-flight — flag so it releases on completion
-    if (!lockRef.current) return; try { await lockRef.current.release(); } catch {
-    } // Already released
+    if (!lockRef.current) return; try { await lockRef.current.release(); } catch { } // Already released
     lockRef.current = null; setIsActive(false);}, []);
   // Auto-acquire/release based on shouldLock
   useEffect(() => { if (shouldLock) request(); else release(); }, [shouldLock, request, release]);

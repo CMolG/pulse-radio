@@ -7,8 +7,7 @@ import UiImage from "@/components/common/UiImage"; import { primaryArtist } from
 import SongCard from "./SongCard"; type Props = {
   songs: FavoriteSong[]; onRemove: (id: string) => void; onClear: () => void; onSelect?: (song: SongDetailData) => void;
 }; type ContextMenuState = { x: number; y: number; songId: string } | null;
-type FilterMode = "none" | "artist" | "album";
-const filterBtnClass = (active: boolean) =>
+type FilterMode = "none" | "artist" | "album"; const filterBtnClass = (active: boolean) =>
   `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
     active ? "bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30" : "bg-white/5 text-white/40 border border-white/8 hover:text-white/60"
   }`;
@@ -67,8 +66,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
               <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}><SongCard
                   item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null}
                   hideRemove /></div>))}</div></AnimatePresence>
-      )}
-      {expanded && hasMore && ( <button onClick={() => setExpanded(false)}
+      )} {expanded && hasMore && ( <button onClick={() => setExpanded(false)}
           className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
           <ChevronDown size={12} className="rotate-180" /> Collapse</button>)}</div>
   ); }
@@ -83,14 +81,12 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
       const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? []; existing.push(song);
       groups.set(artist, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
-  }, [songs]);
-  const albumGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>(); // Group by album
+  }, [songs]); const albumGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>(); // Group by album
     for (const song of songs) {
       const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? []; existing.push(song);
       groups.set(album, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
-  }, [songs]);
-  if (songs.length === 0) { return (
+  }, [songs]); if (songs.length === 0) { return (
       <div className="flex-center-col py-20 px-4"><Heart size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No favorite songs yet</p>
         <p className="text-[12px] text-dim mt-1">Tap the heart icon to save songs you love</p></div>
@@ -101,16 +97,13 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
         <div className="flex items-center gap-2"><p className="text-[12px] text-dim">{songs.length} songs</p>
           {/* By Artist */}
           <button onClick={() => toggleFilter("artist")} className={filterBtnClass(filterMode === "artist")}>
-            <Users size={10} />
-            By Artist
+            <Users size={10} /> By Artist
             {filterMode === "artist" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
           </button> {/* By Album */}
           <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
-            <Disc3 size={10} />
-            By Album
+            <Disc3 size={10} /> By Album
             {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
-          </button></div><button
-          onClick={onClear}
+          </button></div><button onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} /> Clear all</button></div>
       {filterMode === "artist" ? ( <div> {artistGroups.map(([artistName, artistSongs]) => ( <GroupStack key={artistName}

@@ -23,8 +23,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
   } try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
-  } catch { return { streamTitle: null, icyBr: null };
-  } finally { clearTimeout(timeout); } }
+  } catch { return { streamTitle: null, icyBr: null }; } finally { clearTimeout(timeout); } }
 let _lastStation = ''; let _lastStationLower = '';
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null; if (raw === stationName) return null;
@@ -47,8 +46,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null);
   const currentStationId = station?.url_resolved ?? null;
   if (currentStationId !== prevStationId) { setPrevStationId(currentStationId);
-    if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null);
-    } }
+    if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null); } }
   useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
     } const stationChanged = station.url_resolved !== prevStationUrlRef.current;

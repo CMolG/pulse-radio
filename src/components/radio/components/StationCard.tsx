@@ -20,8 +20,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{stationInitials(station.name) || <Radio size={20} className="text-white/60" />}</span></div>
         ) : ( <UiImage src={station.favicon} alt="" className="object-cover" sizes="180px" loading="lazy"
             onError={() => setImgError(true)} />
-        )}
-        {/* Play overlay */} <motion.button aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
+        )} {/* Play overlay */} <motion.button aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
           initial={{ opacity: 0, scale: 0.8 }} whileHover={{ scale: 1.1 }}
           className={`app-overlay-center bg-black/40 transition-opacity duration-200 ${isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
           onClick={e => { e.stopPropagation(); onPlay(); }}>
@@ -38,11 +37,9 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       {/* Tags / Country / Format */} <div className="flex-row-1 mt-1 flex-wrap">{station.codec && (
           <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">
             {station.codec}{station.bitrate > 0 ? ` ${station.bitrate}k` : ''}</span>
-        )}
-        {tags.map(tag => (
+        )} {tags.map(tag => (
           <span key={tag} className="pad-xs-full bg-surface-2 text-[9px] text-secondary truncate max-w-[80px]">{tag}</span>
-        ))}
-        {station.countrycode && (
+        ))} {station.countrycode && (
           <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>)}</div>
       {/* Live track preview */} {liveStatus === 'loading' && ( <div className="flex items-center gap-1 mt-1.5">
           <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />
@@ -52,8 +49,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
               <span className="text-[9px] text-white/60 truncate leading-tight">
                 {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}</span></>
           ) : ( <span className="text-[9px] text-white/20">No track info</span>)}</div>
-      )}
-      {onPeek && !liveStatus && ( <button onClick={e => { e.stopPropagation(); onPeek(); }}
+      )} {onPeek && !liveStatus && ( <button onClick={e => { e.stopPropagation(); onPeek(); }}
           className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors">
           <Music2 size={9} /> Check track</button>
       )}

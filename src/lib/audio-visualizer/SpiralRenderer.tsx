@@ -25,8 +25,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       for (let i = 0; i < NUM_BARS; i++) { if (Math.random() < 0.08) { // Demo mode: organic simulated audio
           const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6; target[i] = Math.random() * maxVal * sensitivity; }
         data[i] += (target[i] - data[i]) * 0.1;
-      }} else {
-      for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; } } // No data: decay
+      }} else { for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; } } // No data: decay
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
@@ -37,8 +36,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     const result = src; // After SMOOTH_PASSES iterations, result is in `src`
     const maxAngle = CYCLES * Math.PI * 2; const minRadius = Math.max(w, h) * 0.01; // Spiral configuration
     const maxRadius = Math.sqrt(w * w + h * h) * 0.8; const b = Math.log(maxRadius / minRadius) / maxAngle;
-    rotationRef.current += 0.0015; const rotation = rotationRef.current;
-    ctx.clearRect(0, 0, w, h); // Clear
+    rotationRef.current += 0.0015; const rotation = rotationRef.current; ctx.clearRect(0, 0, w, h); // Clear
     // Gradient
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current; let fillStyle: string | CanvasGradient = c1;
     try { const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,

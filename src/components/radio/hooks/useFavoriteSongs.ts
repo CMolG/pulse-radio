@@ -6,8 +6,7 @@ import { useStorageSync } from '@/lib/useStorageSync';
 function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
 /** Build a Set of songKeys from a song array for O(1) lookups. */
 function buildKeySet(songs: FavoriteSong[]): Set<string> { const s = new Set<string>();
-  for (let i = 0; i < songs.length; i++) { s.add(songKey(songs[i].title, songs[i].artist)); }
-  return s; }
+  for (let i = 0; i < songs.length; i++) { s.add(songKey(songs[i].title, songs[i].artist)); } return s; }
 export function useFavoriteSongs() { const MAX_SONGS = 500; const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
     const seen = new Set<string>(); // Dedup on load in case of corrupted storage

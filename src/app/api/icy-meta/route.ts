@@ -35,8 +35,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     const bytesNeeded = metaint + 4096;
     try { while (totalRead < bytesNeeded) { const { done, value } = await reader.read(); if (done || !value) break;
         chunks.push(value); totalRead += value.length; }
-    } finally { clearTimeout(timeout); reader.cancel().catch(() => {});
-    }
+    } finally { clearTimeout(timeout); reader.cancel().catch(() => {}); }
     const buffer = new Uint8Array(totalRead); let offset = 0; // Concatenate chunks
     for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.length; }
     // ICY metadata starts at position metaint

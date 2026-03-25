@@ -49,8 +49,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
   const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
   return { ...runtimeState, enabled: manuallyEnabled, supported, status: !supported ? 'unsupported' : !realtimeActive
-        ? 'idle'
-        : runtimeState.status === 'idle' ? 'ready' : runtimeState.status,
+        ? 'idle' : runtimeState.status === 'idle' ? 'ready' : runtimeState.status,
     activeLineIndex: isSyncing ? runtimeState.activeLineIndex : -1,
     candidateLineIndex: isSyncing ? runtimeState.candidateLineIndex : -1,
     confidence: isSyncing ? runtimeState.confidence : 0,

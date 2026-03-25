@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server'; export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2'; const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
-const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)';
-const MUSIC_KEYWORDS =
+const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)'; const MUSIC_KEYWORDS =
   /band|singer|musician|artist|rapper|group|duo|dj|producer|composer|vocalist|songwriter|hip.hop|rock|pop|jazz|classical|electronic|country|metal|r&b|soul|blues|funk|reggae|punk|folk/i;
 async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T | null> { try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(8_000) });
@@ -26,8 +25,7 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
     let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
     // If Wikipedia didn't find the artist or result isn't music-related, try common disambiguations
     if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) { const suffixes = mb?.type === 'Person'
-          ? ['(singer)', '(musician)', '(rapper)']
-          : ['(band)', '(musical group)', '(singer)', '(musician)'];
+          ? ['(singer)', '(musician)', '(rapper)'] : ['(band)', '(musical group)', '(singer)', '(musician)'];
       for (const suffix of suffixes) { const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
         if (attempt?.extract) { wiki = attempt; break; } }
     }

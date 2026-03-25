@@ -141,8 +141,7 @@ export default function BrowseView({
       }, 30_000); }
     return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
-  const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
-  const renderScrollStations = (list: Station[]) =>
+  const itemWidth = isMobile ? "w-[140px]" : "w-[160px]"; const renderScrollStations = (list: Station[]) =>
     list.map((s) => ( <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard station={s}
           isCurrent={s.stationuuid === currentStation?.stationuuid}
           isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid} isFavorite={isFavorite(s.stationuuid)}
@@ -196,13 +195,11 @@ export default function BrowseView({
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
                 className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
               >{cat.label}</button>
-            ))}
-            {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && ( <button
+            ))} {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && ( <button
                 onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>)}</div> );
-      })()}
-      {/* Country chips — wrapping, limited on mobile */}
+      })()} {/* Country chips — wrapping, limited on mobile */}
       {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
         const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
         return ( <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}><button
@@ -217,27 +214,22 @@ export default function BrowseView({
             {collapsed && countryChips.length > MOBILE_LIMIT && ( <button onClick={() => setCountryChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>)}</div> );
-      })()}
-      {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>{loading && (
+      })()} {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>{loading && (
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
         )} {error && ( <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" />
             <p className="text-[13px] text-secondary">{t("failedToLoad")}</p><button
               onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
             >{t("retry")}</button></div>
-        )}
-        {!loading && !error && view.mode !== "top" && stations.length === 0 && (
+        )} {!loading && !error && view.mode !== "top" && stations.length === 0 && (
           <div className="flex-center-col py-16"><Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">{t("noStationsFound")}</p></div>
-        )}
-        {!loading && !error && ( <> {/* Category rows for top view */}
+        )} {!loading && !error && ( <> {/* Category rows for top view */}
             {view.mode === "top" && ( <> {/* Favorites row */}
                 {favorites && favorites.length > 0 && ( <ScrollRow title={t("favorites")}
                       icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
-                )}
-                {/* Recent stations row */}
-                {recent && recent.length > 0 && ( <ScrollRow title={t("recent")}
+                )} {/* Recent stations row */} {recent && recent.length > 0 && ( <ScrollRow title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />}
                       isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
                 )} {effectiveBrowseOrder.map((catId) => {
@@ -259,8 +251,7 @@ export default function BrowseView({
                         ))
                       ) : (renderScrollStations(catStations))}</ScrollRow> );
                 })}</>
-            )}
-            {/* Grid column for search / genre / country views — paginated */}
+            )} {/* Grid column for search / genre / country views — paginated */}
             {view.mode !== "top" && stations.length > 0 && (() => { const filterActive = !!songFilter.trim();
               const paginationSource = filterActive ? allSongFilteredStations : stations;
               const totalPages = Math.ceil(paginationSource.length / PAGE_SIZE);
@@ -289,8 +280,7 @@ export default function BrowseView({
                   {/* Station grid */}
                   <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
                     {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
-                      const live = liveData[s.stationuuid];
-                      return ( <StationCard key={s.stationuuid} station={s}
+                      const live = liveData[s.stationuuid]; return ( <StationCard key={s.stationuuid} station={s}
                           isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
                           isCurrent={currentStation?.stationuuid === s.stationuuid}
                           isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)}

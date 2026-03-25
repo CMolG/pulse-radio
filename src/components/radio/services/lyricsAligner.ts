@@ -15,8 +15,7 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
   for (const token of hypoTokens) { if (lineSet.has(token)) overlaps++; }
   const overlapScore = overlaps / Math.max(lineSet.size, 1); let ordered = 0; let lineIdx = 0;
   for (const token of hypoTokens) { for (let i = lineIdx; i < lineTokens.length; i++) {
-      if (lineTokens[i] === token) { ordered++; lineIdx = i + 1; break;
-      } }
+      if (lineTokens[i] === token) { ordered++; lineIdx = i + 1; break; } }
   } const orderScore = ordered / Math.max(hypoTokens.length, 1); const shortPenalty = lineTokens.length <= 2 ? 0.2 : 0;
   return Math.max(0, overlapScore * 0.7 + orderScore * 0.3 - shortPenalty); }
 function windowBounds(total: number, center: number, relockWindow: number): [number, number] {

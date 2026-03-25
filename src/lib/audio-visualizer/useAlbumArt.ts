@@ -22,8 +22,7 @@ function jaroDistance(a: string, b: string): number { if (a === b) return 1; if 
       if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break; }
   } if (!matches) return 0; let t = 0; let k = 0; for (let i = 0; i < a.length; i++) {
     if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++; }
-  const transpositions = t / 2;
-  return ( matches / a.length + matches / b.length + (matches - transpositions) / matches
+  const transpositions = t / 2; return ( matches / a.length + matches / b.length + (matches - transpositions) / matches
   ) / 3; }
 function jaroWinkler(a: string, b: string): number {
   const jaro = jaroDistance(a, b); if (jaro < 0.7) return jaro; let prefix = 0; const maxPrefix = 4;
@@ -92,8 +91,7 @@ export function useAlbumArt(title: string | null, artist: string | null) { const
           cacheSet(cacheKey, EMPTY_ALBUM_INFO); setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO }); }
       }).finally(() => { clearTimeout(timeout); });
     return () => { clearTimeout(timeout); controller.abort(); };
-  }, [title, artist, cacheKey, cachedInfo]);
-  const info = !cacheKey ? EMPTY_ALBUM_INFO
+  }, [title, artist, cacheKey, cachedInfo]); const info = !cacheKey ? EMPTY_ALBUM_INFO
     : cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO);
   const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey);
   return useMemo(() => ({ ...info, isLoading }), [ info.artworkUrl, info.albumName, info.itunesUrl, info.durationMs,

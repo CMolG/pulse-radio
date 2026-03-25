@@ -18,12 +18,10 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
       })}><div className="w-full aspect-square bg-surface-3 relative">{item.artworkUrl ? (
           <UiImage src={item.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />
         ) : ( <div className="size-full flex items-center justify-center"><Music size={32} className="text-dim" /></div>
-        )}
-        {heart && ( <button onClick={(e) => { e.stopPropagation(); heart.onClick(); }} aria-label={heart.label}
+        )} {heart && ( <button onClick={(e) => { e.stopPropagation(); heart.onClick(); }} aria-label={heart.label}
             className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? "bg-pink-500/20 text-pink-400" : "bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400"}`}
           ><Heart size={12} className={heart.filled ? "fill-pink-400" : ""} /></button>
-        )}
-        {!hideRemove && ( <button onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label="Remove"
+        )} {!hideRemove && ( <button onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label="Remove"
             className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
           ><Trash2 size={12} /></button>)}</div>
       <div className="p-3 space-y-0.5"><p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>

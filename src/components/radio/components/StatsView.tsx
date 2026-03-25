@@ -39,29 +39,22 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
         <IoTimeOutline size={20} className="text-[#3478f6]" />
         <div><p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>
           <p className="text-[18px] font-bold text-white tabular-nums">{formatListenTime(totalListenMs)}</p></div></div>
-      {/* Top Stations */}
-      {topStations.length > 0 && (
+      {/* Top Stations */} {topStations.length > 0 && (
         <StatSection title="Top Stations" icon={<IoRadioOutline size={16} className="text-amber-400/70" />}>
           {topStations.slice(0, 5).map(s => (
             <BarRow key={s.uuid} label={s.name} value={s.totalMs} maxValue={maxStationTime} suffix={formatListenTime(s.totalMs)} />
           ))}</StatSection>
-      )}
-      {/* Top Songs */}
-      {topSongs.length > 0 && (
+      )} {/* Top Songs */} {topSongs.length > 0 && (
         <StatSection title="Most Played Songs" icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" />}>
           {topSongs.slice(0, 5).map(s => (
             <BarRow key={`${s.title}|||${s.artist}`} label={`${s.artist} — ${s.title}`} value={s.count} maxValue={maxSongCount} suffix={`${s.count}×`} />
           ))}</StatSection>
-      )}
-      {/* Top Artists */}
-      {topArtists.length > 0 && (
+      )} {/* Top Artists */} {topArtists.length > 0 && (
         <StatSection title="Top Artists" icon={<IoPersonOutline size={16} className="text-purple-400/70" />}>
           {topArtists.slice(0, 5).map(a => (
             <BarRow key={a.name} label={a.name} value={a.count} maxValue={maxArtistCount} suffix={`${a.count}×`} />
           ))}</StatSection>
-      )}
-      {/* Top Genres */}
-      {topGenres.length > 0 && (
+      )} {/* Top Genres */} {topGenres.length > 0 && (
         <StatSection title="Top Genres" icon={<IoDiscOutline size={16} className="text-emerald-400/70" />}>
           {topGenres.slice(0, 5).map(g => (
             <BarRow key={g.genre} label={g.genre} value={g.count} maxValue={maxGenreCount} suffix={`${g.count}×`} />

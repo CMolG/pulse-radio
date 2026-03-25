@@ -36,8 +36,7 @@ function uniquePush(target: string[], values: string[]) {
 export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36): CountryChip[] {
   const languageCodes = getSameLanguageCountries(locale); const proximityCodes = getProximityCountries(languageCodes);
   const ordered: string[] = []; uniquePush(ordered, languageCodes);
-  uniquePush(ordered, proximityCodes); uniquePush(ordered, GLOBAL_INTEREST_CODES);
-  const capped = ordered
+  uniquePush(ordered, proximityCodes); uniquePush(ordered, GLOBAL_INTEREST_CODES); const capped = ordered
     .filter((code) => COUNTRY_BY_CODE[code] && !EXCLUDED_LOW_RELEVANCE_CODES.has(code)).slice(0, maxChips);
   const languageSet = new Set(languageCodes); const proximitySet = new Set(proximityCodes);
   return capped.map((code) => {

@@ -23,8 +23,7 @@ interface Blob { x: number; y: number; baseRadius: number;
 let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefined;
 function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number, h: number,
   colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] },
-  energy: number, ) {
-  const threshold = 1.0;
+  energy: number, ) { const threshold = 1.0;
   // downscale for performance — render at 1/3 resolution
   const scale = 3; const sw = Math.ceil(w / scale); const sh = Math.ceil(h / scale);
   // Use an offscreen canvas for smooth bilinear upscaling
@@ -88,8 +87,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
     let energy = 0; const frequencyData = freqData; // compute overall energy
     if (frequencyData) { let sum = 0; for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
       energy = (sum / frequencyData.length / 255) * sensitivity;
-    } else if (demo) energy = 0.3 + Math.sin(t * 0.5) * 0.2;
-    const minWH = Math.min(w, h); // update blobs
+    } else if (demo) energy = 0.3 + Math.sin(t * 0.5) * 0.2; const minWH = Math.min(w, h); // update blobs
     for (let i = 0; i < blobs.length; i++) { const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5;
       const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127);
       const orbitRadius = minWH * (0.1 + energy * 0.25); // base orbit
@@ -107,8 +105,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity; }
     ctx.clearRect(0, 0, w, h); // clear
     drawMetaballs(ctx, blobs, w, h, colors.current, energy); // draw metaballs
-  }, 0.5);
-  return ( <div className={`relative ${className}`}>
+  }, 0.5); return ( <div className={`relative ${className}`}>
       <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />
       {/* SVG filter for smoothing the metaballs */} <svg className="absolute w-0 h-0" aria-hidden="true"><defs>
           <filter id="ferrofluid-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />

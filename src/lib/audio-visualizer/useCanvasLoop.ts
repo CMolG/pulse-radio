@@ -15,8 +15,7 @@ export function useCanvasLoop(
     }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, [dprScale]); useEffect(() => { const loop = () => {
       const canvas = canvasRef.current; if (!canvas) return; const ctx = canvas.getContext("2d"); if (!ctx) return;
-      const { w, h } = sizeRef.current;
-      if (w < 1 || h < 1) { frameRef.current = requestAnimationFrame(loop); return; }
+      const { w, h } = sizeRef.current; if (w < 1 || h < 1) { frameRef.current = requestAnimationFrame(loop); return; }
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       paintRef.current(ctx, w, h, freqRef.current?.current ?? null); frameRef.current = requestAnimationFrame(loop);
     }; frameRef.current = requestAnimationFrame(loop); return () => cancelAnimationFrame(frameRef.current);
