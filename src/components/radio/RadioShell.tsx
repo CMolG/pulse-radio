@@ -449,8 +449,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           break;
         case "r": case "R": if (rl) rl.toggle(); break;
         case "z": case "Z":           // Z: cycle sleep timer st.cycle(); break;
-        case "?": setShowShortcuts(prev => !prev);
-          break;
+        case "?": setShowShortcuts(prev => !prev); break;
       }
     };
     window.addEventListener("keydown", onKeyDown);

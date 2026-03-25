@@ -274,12 +274,9 @@ export default function BrowseView({
         try {
           let result: Station[];
           switch (view.mode) {
-            case "search": result = await searchStations(view.query);
-              break;
-            case "genre": result = await stationsByTag(view.tag);
-              break;
-            case "country": result = await stationsByCountry(view.countryQueryName);
-              break;
+            case "search": result = await searchStations(view.query); break;
+            case "genre": result = await stationsByTag(view.tag); break;
+            case "country": result = await stationsByCountry(view.countryQueryName); break;
             default:
               result = [];
           }
