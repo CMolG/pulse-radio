@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getInitialLocale, getInitialLocaleForCountry, saveLocale } from "@/lib/i18n/localeStorage";
 import { isRtlLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/i18n/locales";

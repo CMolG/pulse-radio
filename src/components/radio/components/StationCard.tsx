@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import React, { useState, useMemo } from 'react';
 import { Play, Pause, Heart, Radio, Music2, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';

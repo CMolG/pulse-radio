@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { Station } from '../types';
-
 // Radio-Browser API mirrors for redundancy
 const SERVERS = [ 'https://de1.api.radio-browser.info/json', 'https://de2.api.radio-browser.info/json',
   'https://nl1.api.radio-browser.info/json',
@@ -63,7 +61,6 @@ export async function localStations(limit = 20): Promise<Station[]> {
     `local-${countryCode}-${limit}`,
   );
 }
-
 /**
  * Find similar stations by matching the first tag of the current station.
  * Used for automatic failover when the current station goes down.

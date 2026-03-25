@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
@@ -20,7 +18,6 @@ export type StationListenTime = { name: string; uuid: string; totalMs: number; }
 export type SongPlayCount = { title: string; artist: string; count: number; artworkUrl?: string; genre?: string; };
 export type ArtistPlayCount = { name: string; count: number; };
 export type GenrePlayCount = { genre: string; count: number; };
-
 export interface UsageStats {
   stationListenTimes: Record<string, StationListenTime>; songPlayCounts: Record<string, SongPlayCount>;
   artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>;
@@ -29,13 +26,11 @@ export interface UsageStats {
 const EMPTY_STATS: UsageStats = {
   stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0,
 };
-
 /** Keep only the top N entries by a numeric field, dropping the lowest */
 function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
   const entries = Object.entries(map); if (entries.length <= max) return map;
   return Object.fromEntries(entries.sort((a, b) => (b[1][key] as number) - (a[1][key] as number)).slice(0, max));
 }
-
 /** Return top N values from a record, sorted descending by a numeric field */
 function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
   return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n);

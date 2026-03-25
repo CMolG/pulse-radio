@@ -3,15 +3,12 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 const CODEC_MAP: Record<string, string> = {
   MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus', FLAC: 'FLAC', WMA: 'WMA',
 };
-
 // Patterns that indicate ads/spam rather than real song metadata
 const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i, /^https?:\/\//i,
   /\b(shopify|squarespace|wix|spotify\.com|instagram|facebook|twitter|tiktok|youtube)\b/i,
@@ -28,7 +25,6 @@ function isAdContent(text: string): boolean {
   if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result);
   return result;
 }
-
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
 export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
@@ -51,7 +47,6 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
     return { streamTitle: null, icyBr: null };
   } finally { clearTimeout(timeout); }
 }
-
 let _lastStation = '';
 let _lastStationLower = '';
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {

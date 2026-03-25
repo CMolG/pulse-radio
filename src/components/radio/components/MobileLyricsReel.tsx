@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
@@ -14,7 +12,6 @@ type Props = {
    activeLineOverride?: number;
   variant?: "mobile" | "desktop";
 };
-
 // [base classes, mobile size, desktop size]
 const EMPHASIS: [string, string, string][] = [
   ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],

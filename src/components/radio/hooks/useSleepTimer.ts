@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 const PRESETS_MIN = [15, 30, 60] as const;
 const FADE_DURATION_MS = 30_000; // fade volume over last 30 seconds

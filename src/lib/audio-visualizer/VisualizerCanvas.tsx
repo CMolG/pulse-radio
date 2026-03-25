@@ -3,10 +3,8 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
 import React, { useRef, useEffect } from 'react';
-
 interface VisualizerCanvasProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
   opacity?: number; className?: string;

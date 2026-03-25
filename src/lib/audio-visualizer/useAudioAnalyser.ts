@@ -3,12 +3,10 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { getOrCreateAudioSource } from './audioSourceCache';
 type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: number; };
-
 interface UseAudioAnalyserReturn {
   connectAudio: (audio: HTMLAudioElement) => void;
   /** Stable ref whose .current is updated in-place every frame — zero allocations */

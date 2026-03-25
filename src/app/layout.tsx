@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -14,7 +13,6 @@ const SITE_URL = "https://www.pulse-radio.online";
 const SITE_TITLE = "Pulse Radio — Free Internet Radio with Visualizer";
 const SITE_DESCRIPTION =
   "Stream thousands of free internet radio stations worldwide. Enjoy real-time audio visualizer, album art, song history, favorites, and theater mode. No sign-up required.";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL), title: { default: SITE_TITLE, template: "%s | Pulse Radio", },
   description: SITE_DESCRIPTION, manifest: "/site.webmanifest", applicationName: "Pulse Radio",

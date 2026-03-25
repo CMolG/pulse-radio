@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React, { useState, useCallback } from "react";
 import { X, Languages, Sliders, Power, ChevronDown, ChevronUp, Plus, Save } from "lucide-react";
 import { IoHelpCircleOutline, IoStatsChartOutline } from "react-icons/io5";

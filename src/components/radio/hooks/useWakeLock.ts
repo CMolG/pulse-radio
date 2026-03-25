@@ -3,11 +3,8 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useRef, useEffect, useCallback, useState } from 'react';
-
 /**
  * Prevents the screen from dimming/locking while audio is playing.
  * Uses the Screen Wake Lock API (supported in Chrome, Edge, Safari 16.4+).

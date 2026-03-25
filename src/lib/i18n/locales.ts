@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 const _LOCALES = [ { code: "en", nativeName: "English", englishName: "English" },
   { code: "es", nativeName: "Español", englishName: "Spanish" },
   { code: "fr", nativeName: "Français", englishName: "French" },

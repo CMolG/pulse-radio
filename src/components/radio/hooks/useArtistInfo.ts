@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useEffect, useMemo } from 'react';
 import type { ArtistInfo } from '../types';
 const MAX_CACHE = 200;

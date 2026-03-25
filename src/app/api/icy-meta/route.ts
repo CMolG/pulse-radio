@@ -3,11 +3,9 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';
-
 /**
  * Server-side ICY metadata proxy.
  * Fetches the first metadata block from an internet radio stream

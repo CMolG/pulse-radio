@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React from "react";
 import { Languages } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";

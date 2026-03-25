@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { SupportedLocale } from "./locales";
 export const LANG3_TO_LOCALE: Record<string, SupportedLocale> = {
   eng: "en", spa: "es", fra: "fr", deu: "de", por: "pt", ita: "it", nld: "nl", jpn: "ja",

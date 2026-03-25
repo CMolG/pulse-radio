@@ -3,19 +3,15 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
-
 interface Props {
   children: React.ReactNode;
   /** Optional fallback to render instead of the default error UI */
   fallback?: React.ReactNode;
 }
 type State = { hasError: boolean; error: Error | null; };
-
 export class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false, error: null };
   static getDerivedStateFromError(error: Error): State {

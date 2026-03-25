@@ -3,11 +3,9 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { normalizeText } from '@/lib/stringUtils';
 const FETCH_TIMEOUT = 8_000;
-
 interface AlbumInfo {
   artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null;
   durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null;
@@ -23,7 +21,6 @@ type ItunesResult = {
   collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number;
   primaryGenreName?: string; trackNumber?: number; trackCount?: number;
 };
-
 // Reusable match arrays for Jaro distance — avoids allocation per call
 let _aMatches: boolean[] = [];
 let _bMatches: boolean[] = [];
@@ -109,7 +106,6 @@ const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 function appendReferrer(url: string): string {
   if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`;
 }
-
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) {
   const img = new Image(); img.crossOrigin = 'anonymous';

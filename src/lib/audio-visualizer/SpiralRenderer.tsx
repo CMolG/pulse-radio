@@ -3,16 +3,12 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React, { useRef, useEffect } from "react";
-
 interface SpiralRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string;
   color3?: string; sensitivity?: number; demo?: boolean;
 }
-
 import { useCanvasLoop } from './useCanvasLoop';
 const NUM_BARS = 250;
 const CYCLES = 4;

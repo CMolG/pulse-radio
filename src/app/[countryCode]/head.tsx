@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import { COUNTRY_BY_CODE } from "@/lib/i18n/countries";
 type CountryHeadProps = { params: Promise<{ countryCode: string }> };
 export default async function Head({ params }: CountryHeadProps) {

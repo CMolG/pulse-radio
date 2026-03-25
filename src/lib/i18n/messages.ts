@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { SupportedLocale } from "./locales";
 const BASE_MESSAGES = {
   topStations: "Top Stations", loadingStations: "Loading…", stationCount: "{count} stations", discovery: "Discovery",

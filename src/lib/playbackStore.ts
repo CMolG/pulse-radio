@@ -3,12 +3,9 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { create } from 'zustand';
 export type PlaybackSource = 'radio' | null;
-
 interface PlaybackState {
   source: PlaybackSource; isPlaying: boolean; currentTime: number; volume: number;
   muted: boolean; trackTitle: string; trackArtist: string; artworkUrl: string | null;

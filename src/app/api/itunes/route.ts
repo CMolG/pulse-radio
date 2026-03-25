@@ -3,11 +3,9 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { apiFetch } from '@/lib/apiUtils';
 export const runtime = 'nodejs';
-
 /**
  * Server-side proxy for iTunes Search API.
  * Avoids any browser-side CORS/CSP issues and allows server caching.

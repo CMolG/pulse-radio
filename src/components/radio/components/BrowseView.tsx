@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React, { useState, useEffect, useRef, useCallback, useMemo, } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Radio, Sparkles, Zap, Music, MapPin, Star, Clock, Music2, ScanSearch, X } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
@@ -16,7 +14,6 @@ import { fetchIcyMeta, parseTrack } from "../hooks/useStationMeta";
 import StationCard from "./StationCard";
 import { useLocale } from "@/context/LocaleContext";
 import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
-
 /** Order in which category sections appear on the home screen */
 const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
   'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world',
@@ -35,7 +32,6 @@ type Props = {
 };
 const SCROLL_CLASS =
   "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
-
 /* ── Scroll row with left/right arrow buttons (desktop only) ── */
 function ScrollRow({ title, icon, children, isMobile, className, }: {
   title?: string; icon?: React.ReactNode; children: React.ReactNode; isMobile: boolean; className?: string;

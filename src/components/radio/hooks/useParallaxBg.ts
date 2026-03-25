@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GENRE_GRADIENTS } from '../constants';
 export function useParallaxBg(genre?: string, audioAmplitude = 0) {

@@ -3,14 +3,11 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { IoRadioOutline, IoHeartOutline, IoMusicalNotesOutline, IoStatsChartOutline, IoSearchOutline,
   IoColorPaletteOutline, IoTimerOutline, IoGlobeOutline, IoChevronBack } from 'react-icons/io5';
-
 const GLASS_STYLE: React.CSSProperties = {
   background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
   WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',

@@ -3,11 +3,9 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
 import React, { useState } from 'react';
 import Image from 'next/image';
-
 interface ParallaxAlbumBackgroundProps {
   imageUrl: string | null; fallbackUrl?: string; blurClass?: string; overlayClass?: string;
   enableDrift?: boolean; showTopGlow?: boolean; children?: React.ReactNode;

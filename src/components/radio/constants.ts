@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { BrowseCategory, EqBand, EqPreset } from './types';
 import type { MessageKey } from '@/lib/i18n/messages';
 export const STORAGE_KEYS = {

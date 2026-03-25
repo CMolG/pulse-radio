@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { LyricsData, LrcLibResponse } from '../types';
 import { parseLrc } from '../lrcParser';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -13,7 +12,6 @@ function isTransientError(err: unknown): boolean {
   if (err instanceof TypeError) return true; // fetch network failure
   return false;
 }
-
 // Fetch with combined cancellation: parent signal (caller abort) + per-request timeout.
 // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta.
 function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> {

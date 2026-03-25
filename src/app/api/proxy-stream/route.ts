@@ -3,13 +3,11 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import { NextRequest } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
-
 /**
  * Proxies an internet radio stream, adding CORS headers so the browser
  * can use it with <audio crossOrigin="anonymous"> + Web Audio API.

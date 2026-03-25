@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import { normalizeLocale, type SupportedLocale } from "./locales";
 import { loadStringFromStorage, saveStringToStorage } from "@/lib/storageUtils";
 import { getDefaultLocaleForCountry } from "./countryDefaults";

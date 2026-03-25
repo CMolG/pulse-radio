@@ -3,16 +3,13 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { FavoriteSong } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
-
 /** Build a Set of songKeys from a song array for O(1) lookups. */
 function buildKeySet(songs: FavoriteSong[]): Set<string> {
   const s = new Set<string>();

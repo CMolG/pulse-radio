@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { LyricsData } from '../types';
 export type RealtimeSyncStatus = 'idle' | 'unsupported' | 'ready' | 'listening' | 'recovering' | 'disabled' | 'error';
 export type RealtimeSyncQualityMode = 'high' | 'balanced' | 'conservative';
@@ -42,4 +41,3 @@ export function defaultRealtimeState(enabled: boolean): RealtimeSyncState {
 export function isRealtimeEligible(lyrics: LyricsData | null): boolean {
   return Boolean(lyrics?.synced && lyrics.lines.length > 0);
 }
-

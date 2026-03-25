@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_BANDS, STORAGE_KEYS } from '../constants';

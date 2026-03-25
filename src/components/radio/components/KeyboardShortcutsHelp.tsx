@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React from "react";
 import { X } from "lucide-react";
 const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: "Previous station" },
@@ -17,7 +15,6 @@ const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: 
   { key: "Z", desc: "Cycle sleep timer" }, { key: "Esc", desc: "Close panel / exit theater" },
   { key: "?", desc: "Toggle this help" },
 ];
-
 interface Props { onClose: () => void; }
 export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) {
   return (

@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import React from 'react';
 export default React.memo(function AnimatedBars({ size = 'default' }: { size?: 'small' | 'default' }) {
   const h = size === 'small' ? 10 : 16; const w = size === 'small' ? 2 : 3;

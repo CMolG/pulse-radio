@@ -3,23 +3,18 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import React, { useRef, useEffect } from 'react';
-
 interface FerrofluidRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; blobCount?: number; colorPrimary?: string;
   colorSecondary?: string; colorAccent?: string; sensitivity?: number;
   /** standalone demo mode — generates its own animation without audio */
   demo?: boolean;
 }
-
 /* ─── helpers ─── */
 import { hexToRgb } from './colorUtils';
 import { useCanvasLoop } from './useCanvasLoop';
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
-
 /* ─── blob state ─── */
 interface Blob {
   x: number; y: number; baseRadius: number;
@@ -40,9 +35,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
   }
   return blobs;
 }
-
 /* ─── drawing ─── */
-
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
 let _offscreen: OffscreenCanvas | null = null;
 let _imgData: ImageData | undefined;
@@ -107,9 +100,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
     ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h);
   } catch { /* skip frame on canvas error */ }
 }
-
 /* ─── component ─── */
-
 export function FerrofluidRenderer({
   frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
   colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false,

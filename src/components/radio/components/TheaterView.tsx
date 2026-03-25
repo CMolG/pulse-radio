@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 "use client";
-
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from "lucide-react";
 import { motion } from "motion/react";
@@ -17,7 +15,6 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { formatDuration, formatReleaseDate } from "../utils/formatDuration";
 import { stationInitials } from "../utils/formatUtils";
 import UiImage from "@/components/common/UiImage";
-
 // Fallback spiral colors — warm orange/red gradient
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];
 const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; children: React.ReactNode }) => (
@@ -32,7 +29,6 @@ type Props = {
 };
 const _colorCache = new Map<string, Promise<[string, string, string]>>();
 const MAX_COLOR_CACHE = 32;
-
 /** Extract the top-2 saturated hues from an artwork image for use as spiral colors. */
 function extractColors(imgUrl: string): Promise<[string, string, string]> {
   const cached = _colorCache.get(imgUrl); if (cached) return cached;

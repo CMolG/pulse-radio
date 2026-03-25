@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 import type { LyricsData } from '../types';
 import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
 import { normalizeText } from '@/lib/stringUtils';
@@ -83,4 +82,3 @@ export function mapLineToEffectiveTime(lyrics: LyricsData, lineIndex: number): n
   if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) return undefined;
   return lyrics.lines[lineIndex].time;
 }
-

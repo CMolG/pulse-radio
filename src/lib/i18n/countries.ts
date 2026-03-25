@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 export type SovereignCountry = {
   code: string; name: string; region: string; subregion: string; borders: string[]; lang3: string[];
 };

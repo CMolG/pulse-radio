@@ -3,15 +3,12 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 // Shared cache for MediaElementAudioSourceNode instances.
 // createMediaElementSource can only be called ONCE per HTMLAudioElement,
 // so all consumers (EQ, visualizer, etc.) must share the same source node.
-
 const cache = new WeakMap< HTMLAudioElement,
   { ctx: AudioContext; source: MediaElementAudioSourceNode }
 >();
-
 // Singleton AudioContext — browsers limit the number of contexts (~6-20).
 // Reusing one context avoids exhaustion after many station switches.
 let sharedCtx: AudioContext | null = null;
@@ -30,7 +27,6 @@ export function getOrCreateAudioSource(audio: HTMLAudioElement): {
   const ctx = getSharedContext(); const source = ctx.createMediaElementSource(audio);
   const entry = { ctx, source }; cache.set(audio, entry); return entry;
 }
-
 /**
  * Resume a suspended AudioContext bound to this audio element.
  * Must be called from a user-gesture handler (click/tap) on mobile browsers.
@@ -38,7 +34,6 @@ export function getOrCreateAudioSource(audio: HTMLAudioElement): {
 export function resumeAudioContext(audio: HTMLAudioElement): void {
   const entry = cache.get(audio); if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {});
 }
-
 /**
  * Returns true if a MediaElementAudioSourceNode has been created for this element.
  * Used to detect when the Web Audio graph is active and CORS-compatible streaming

@@ -3,15 +3,12 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Station, PlaybackStatus } from '../types';
 import { STORAGE_KEYS } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { resumeAudioContext, hasAudioSource } from '@/lib/audio-visualizer';
-
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */
 function proxyUrl(raw: string): string { return `/api/proxy-stream?url=${encodeURIComponent(raw)}`; }
 function isValidStreamUrl(url: string | undefined): url is string {
@@ -20,7 +17,6 @@ function isValidStreamUrl(url: string | undefined): url is string {
     const parsed = new URL(url); return parsed.protocol === 'http:' || parsed.protocol === 'https:';
   } catch { return false; }
 }
-
 /** Browser blocked autoplay — treat as paused, not error */
 function isAutoplayBlocked(err: unknown): boolean {
   return err instanceof DOMException && err.name === 'NotAllowedError';

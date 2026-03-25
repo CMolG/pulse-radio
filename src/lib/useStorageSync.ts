@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-
 /** Sync state from cross-tab StorageEvents for a given key. */
 export function useStorageSync<T>( key: string, setter: (val: T) => void,
   validate: (v: unknown) => boolean = Array.isArray,

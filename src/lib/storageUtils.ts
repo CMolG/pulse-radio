@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 function tryLoad(key: string): string | null {
   if (typeof window === 'undefined') return null;
   try { return localStorage.getItem(key); } catch { return null; }
@@ -18,22 +17,17 @@ function trySave(key: string, raw: string): boolean {
     if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`); return false;
   }
 }
-
 /** Load a JSON value from localStorage with a fallback default */
 export function loadFromStorage<T>(key: string, defaultValue: T): T {
   const raw = tryLoad(key); if (!raw) return defaultValue;
   try { return JSON.parse(raw); } catch { return defaultValue; }
 }
-
 /** Save a JSON value to localStorage. Returns false if quota is exceeded. */
 export const saveToStorage = <T,>(key: string, value: T) => trySave(key, JSON.stringify(value));
-
 /** Load a plain string value from localStorage with fallback */
 export const loadStringFromStorage = (key: string, defaultValue = "") => tryLoad(key) ?? defaultValue;
-
 /** Save a plain string value to localStorage. Returns false if quota is exceeded. */
 export const saveStringToStorage = (key: string, value: string) => trySave(key, value);
-
 /**
  * Storage schema version. Bump this when data structures change in a
  * backwards-incompatible way. On mismatch, stale keys are cleared so

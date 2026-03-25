@@ -3,9 +3,7 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 'use client';
-
 import { useEffect } from 'react';
 export function ServiceWorkerRegistrar() {
   useEffect(() => {

@@ -3,7 +3,6 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-
 @import "tailwindcss";
 :root { --background: #ffffff; --foreground: #171717; --accent-color: #3478f6; --accent-rgb: 52, 120, 246; }
 @theme inline {
@@ -33,7 +32,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
 @media (prefers-color-scheme: dark) { :root { --background: #0a0a0a; --foreground: #ededed; } }
 body {
   background: var(--background);
@@ -43,28 +41,22 @@ body {
     Helvetica, Arial, sans-serif;
   touch-action: manipulation;
 }
-
 /* Prevent iOS Safari PWA auto-zoom on input focus (requires font-size >= 16px) */
 input, select, textarea { font-size: max(16px, 1em); }
-
 /* macOS-style accent text cursor */
 input,
 textarea,
 [contenteditable] { caret-color: var(--accent-color); }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-
 /* Track */
 ::-webkit-scrollbar-track { background: transparent; }
-
 /* Handle */
 ::-webkit-scrollbar-thumb { border-radius: 10px; background: rgba(255, 255, 255, 0.1); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
-
 /* Prevent scroll chaining from inner scrollable areas */
 .custom-scrollbar { overscroll-behavior: contain; scroll-behavior: smooth; }
 .lyrics-reel { overscroll-behavior: contain; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
 .lyrics-reel::-webkit-scrollbar { display: none; }
-
 /* Range slider - macOS style */
 input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
 input[type="range"]::-webkit-slider-runnable-track {
@@ -93,7 +85,6 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
-
 /* Native select - dark mode styling */
 select {
   background-color: rgba(255, 255, 255, 0.06);
@@ -110,15 +101,12 @@ select {
 select:hover { background-color: rgba(255, 255, 255, 0.09); border-color: rgba(255, 255, 255, 0.12); }
 select:focus { outline: none; border-color: rgba(255, 255, 255, 0.25); }
 select option { background-color: #2c2c2e; color: rgba(255, 255, 255, 0.85); }
-
 /* Disable textarea resize handles in OS shell */
 textarea { resize: none; }
-
 /* Hide number input spinners (type values directly) */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
-
 /* Checkbox & radio - dark mode styling */
 input[type="checkbox"],
 input[type="radio"] {
@@ -137,7 +125,6 @@ input[type="radio"] {
     border-color 0.15s;
 }
 input[type="radio"] { border-radius: 50%; }
-
 input[type="checkbox"]:checked,
 input[type="radio"]:checked { background: var(--accent-color); border-color: var(--accent-color); }
 input[type="checkbox"]:checked::after {
@@ -161,13 +148,10 @@ input[type="radio"]:checked::after {
   border-radius: 50%;
   background: white;
 }
-
 input[type="checkbox"]:hover,
 input[type="radio"]:hover { border-color: rgba(255, 255, 255, 0.4); }
-
 input[type="checkbox"]:focus,
 input[type="radio"]:focus { outline: none; border-color: var(--accent-color); }
-
 /* Color picker input - minimal chrome */
 input[type="color"] {
   -webkit-appearance: none;
@@ -181,7 +165,6 @@ input[type="color"] {
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
 input[type="color"]:hover { border-color: rgba(255, 255, 255, 0.25); }
-
 /* Reduced motion: respect user preference */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -193,30 +176,20 @@ input[type="color"]:hover { border-color: rgba(255, 255, 255, 0.25); }
     scroll-behavior: auto !important;
   }
 }
-
 /* macOS-style text selection */
 ::selection { background-color: rgba(var(--accent-rgb), 0.3); color: inherit; }
-
 /* ── Reusable App Layout Classes ──────────────────────────────────────────── */
-
 .app-body { @apply flex-1 overflow-y-auto; }
-
 /* ── Reusable Panels & Glass Surfaces ────────────────────────────────────── */
-
 /* ── Reusable Typography ─────────────────────────────────────────────────── */
-
 .text-muted { @apply text-white/40; }
 .text-subtle { @apply text-white/30; }
 .text-secondary { @apply text-white/60; }
 .text-dim { @apply text-white/50; }
 .text-soft { @apply text-white/70; }
-
 /* ── Reusable Icon Sizes ─────────────────────────────────────────────────── */
-
 .icon-md { @apply w-4 h-4; }
-
 /* globals.css */
-
 @keyframes ambient-drift {
   0% { transform: scale(1.05) translate(0px, 0px); }
   33% { transform: scale(1.12) translate(-20px, 16px); }
@@ -245,20 +218,16 @@ input[type="color"]:hover { border-color: rgba(255, 255, 255, 0.25); }
 .abs-fill { @apply absolute inset-0; }
 .col-center { @apply flex flex-col items-center; }
 .glass-blur { @apply bg-sys-surface/80 backdrop-blur-xl backdrop-saturate-150; }
-
 /* ── Interactive text hover states ── */
 .text-muted-hover { @apply text-white/40 hover:text-white/70 transition-colors; }
 .text-subtle-hover { @apply text-white/30 hover:text-white/60 transition-colors; }
-
 /* ── Padding + rounding combos ── */
 .pad-xs { @apply px-1.5 py-0.5 rounded; }
 .pad-xs-full { @apply px-1.5 py-0.5 rounded-full; }
-
 /* ── Border shortcuts ── */
 .bdr-b { @apply border-b border-border-subtle; }
 .bdr { @apply border border-border-subtle; }
 .flex-fill { @apply flex-1 min-w-0; }
-
 /* ── Dawn gradient – radio station fallback background ── */
 .dawn-gradient {
   background: linear-gradient(
@@ -270,11 +239,9 @@ input[type="color"]:hover { border-color: rgba(255, 255, 255, 0.25); }
     #ffd3a5 100%
   );
 }
-
 /* ── Vertical EQ sliders – center thumb on the track ── */
 /* In writing-mode:vertical-lr, margin-top controls horizontal offset of the thumb */
 .eq-slider::-webkit-slider-thumb { margin-top: -4px; /* (12px thumb - 3px track) / 2 ≈ 4px */ margin-left: 0; }
-
 /* ── Mobile responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* Prevent pull-to-refresh / bounce on mobile */
