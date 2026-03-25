@@ -6,16 +6,12 @@ export type PaintFn = (ctx: CanvasRenderingContext2D, w: number, h: number, freq
 
 /** Shared RAF-driven canvas loop with DPR-aware sizing. */
 export function useCanvasLoop(
-  frequencyDataRef: React.RefObject<Uint8Array | null> | undefined,
-  paint: PaintFn,
+  frequencyDataRef: React.RefObject<Uint8Array | null> | undefined, paint: PaintFn,
   dprScale = 1,
 ): React.RefObject<HTMLCanvasElement | null> {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
-  const paintRef = useRef(paint);
-  const freqRef = useRef(frequencyDataRef);
-  const sizeRef = useRef({ w: 0, h: 0 });
-  useEffect(() => { paintRef.current = paint; });
+  const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
+  const paintRef = useRef(paint); const freqRef = useRef(frequencyDataRef);
+  const sizeRef = useRef({ w: 0, h: 0 }); useEffect(() => { paintRef.current = paint; });
   useEffect(() => { freqRef.current = frequencyDataRef; }, [frequencyDataRef]);
   // Track canvas size via ResizeObserver instead of getBoundingClientRect() per frame
   useEffect(() => {
@@ -23,8 +19,7 @@ export function useCanvasLoop(
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect(); const dpr = Math.min(window.devicePixelRatio || 1, 2) * dprScale;
       sizeRef.current = { w: Math.round(rect.width * dpr), h: Math.round(rect.height * dpr), };
-    }; updateSize();
-    const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
+    }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, [dprScale]);
   useEffect(() => {
     const loop = () => {
@@ -33,8 +28,6 @@ export function useCanvasLoop(
       if (w < 1 || h < 1) { frameRef.current = requestAnimationFrame(loop); return; }
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       paintRef.current(ctx, w, h, freqRef.current?.current ?? null); frameRef.current = requestAnimationFrame(loop);
-    };
-    frameRef.current = requestAnimationFrame(loop); return () => cancelAnimationFrame(frameRef.current);
-  }, [dprScale]);
-  return canvasRef;
+    }; frameRef.current = requestAnimationFrame(loop); return () => cancelAnimationFrame(frameRef.current);
+  }, [dprScale]); return canvasRef;
 }

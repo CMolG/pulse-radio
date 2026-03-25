@@ -8,26 +8,18 @@
 import React, { useRef, useEffect } from 'react';
 
 interface VisualizerCanvasProps {
-  frequencyDataRef?: React.RefObject<Uint8Array | null>;
-  mode?: 'bars' | 'wave';
-  barCount?: number;
-  color?: string;
-  opacity?: number;
-  className?: string;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave';
+  barCount?: number; color?: string;
+  opacity?: number; className?: string;
 }
 
 export function VisualizerCanvas({
-  frequencyDataRef,
-  mode = 'bars',
-  barCount = 64,
-  color = 'var(--accent-color)',
-  opacity = 0.4,
-  className = '',
+  frequencyDataRef, mode = 'bars',
+  barCount = 64, color = 'var(--accent-color)',
+  opacity = 0.4, className = '',
 }: VisualizerCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
-  const resolvedColorRef = useRef<string | null>(null);
-  const sizeRef = useRef({ width: 0, height: 0 });
+  const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
+  const resolvedColorRef = useRef<string | null>(null); const sizeRef = useRef({ width: 0, height: 0 });
   const gradientCacheRef = useRef<{ key: string; gradient: CanvasGradient } | null>(null);
   const supportsRoundRectRef = useRef<boolean | null>(null);
   // Invalidate cached color when prop changes
@@ -37,8 +29,7 @@ export function VisualizerCanvas({
     const canvas = canvasRef.current; if (!canvas) return;
     const updateSize = () => {
       const rect = canvas.getBoundingClientRect(); sizeRef.current = { width: rect.width, height: rect.height };
-    }; updateSize();
-    const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
+    }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, []);
   useEffect(() => {
     const draw = () => {
@@ -88,18 +79,15 @@ export function VisualizerCanvas({
           } else ctx.fillRect(x, y, w, barHeight);
         }
       } else {
-        const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2;
-        ctx.beginPath();
+        const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2; ctx.beginPath();
         for (let i = 0; i < frequencyData.length; i++) {
-          const y = height - (frequencyData[i] / 255) * height * 0.6;
-          if (i === 0) ctx.moveTo(0, y);
+          const y = height - (frequencyData[i] / 255) * height * 0.6; if (i === 0) ctx.moveTo(0, y);
           else ctx.lineTo(i * step, y);
         }
         ctx.stroke();
       }
       frameRef.current = requestAnimationFrame(draw);
-    };
-    frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
+    }; frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
   }, [frequencyDataRef, mode, barCount, color]);
   return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />;
 }

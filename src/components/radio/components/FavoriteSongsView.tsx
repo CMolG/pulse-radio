@@ -16,10 +16,8 @@ import { primaryArtist } from "../utils/formatUtils";
 import SongCard from "./SongCard";
 
 type Props = {
-  songs: FavoriteSong[];
-  onRemove: (id: string) => void;
-  onClear: () => void;
-  onSelect?: (song: SongDetailData) => void;
+  songs: FavoriteSong[]; onRemove: (id: string) => void;
+  onClear: () => void; onSelect?: (song: SongDetailData) => void;
 };
 
 type ContextMenuState = { x: number; y: number; songId: string } | null;
@@ -31,8 +29,7 @@ const filterBtnClass = (active: boolean) =>
 
 // ── Context Menu ─────────────────────────────────────────────────────────────
 function SongContextMenu({ menu, onRemove, onClose, }: {
-  menu: ContextMenuState;
-  onRemove: (id: string) => void;
+  menu: ContextMenuState; onRemove: (id: string) => void;
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -40,20 +37,16 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
     if (!menu) return;
     const onPointerDown = (e: PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    }; const onScroll = () => onClose();
-    window.addEventListener("pointerdown", onPointerDown, true);
+    }; const onScroll = () => onClose(); window.addEventListener("pointerdown", onPointerDown, true);
     window.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => {
       window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
     };
-  }, [menu, onClose]);
-  if (!menu) return null;
+  }, [menu, onClose]); if (!menu) return null;
   // Clamp so menu doesn't overflow viewport
-  const menuW = 200;
-  const menuH = 48;
-  const x = Math.min(menu.x, window.innerWidth - menuW - 8);
-  const y = Math.min(menu.y, window.innerHeight - menuH - 8);
+  const menuW = 200; const menuH = 48;
+  const x = Math.min(menu.x, window.innerWidth - menuW - 8); const y = Math.min(menu.y, window.innerHeight - menuH - 8);
   return createPortal(
     <div
       ref={ref}
@@ -64,28 +57,22 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
         className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors rounded-lg"
       ><Trash2 size={13} />
         Borrar de favoritos</button>
-    </div>,
-    document.body,
+    </div>, document.body,
   );
 }
 
 // ── Group Stack ───────────────────────────────────────────────────────────────
 function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
-  label: string;
-  icon: React.ElementType;
-  songs: FavoriteSong[];
-  onRemove: (id: string) => void;
-  onSelect?: (song: SongDetailData) => void;
-  onContextMenu: (e: React.MouseEvent, songId: string) => void;
+  label: string; icon: React.ElementType;
+  songs: FavoriteSong[]; onRemove: (id: string) => void;
+  onSelect?: (song: SongDetailData) => void; onContextMenu: (e: React.MouseEvent, songId: string) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const VISIBLE_COUNT = 3;
+  const [expanded, setExpanded] = useState(false); const VISIBLE_COUNT = 3;
   const hasMore = songs.length > VISIBLE_COUNT;
   const visibleSongs = useMemo(() => expanded ? songs : songs.slice(0, VISIBLE_COUNT), [expanded, songs]);
   return (
     <div className="mb-6">
-      {/* Group header */}
-      <button
+      {/* Group header */} <button
         onClick={() => hasMore && setExpanded(e => !e)}
         className={`flex items-center gap-2 mb-3 group ${hasMore ? "cursor-pointer" : "cursor-default"}`}>
         <Icon size={14} className="text-white/40" />
@@ -108,10 +95,8 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
               key={song.id}
               className="absolute left-0 right-0 transition-all duration-300"
               style={{
-                top: `${i * 16}px`,
-                zIndex: VISIBLE_COUNT - i,
-                transform: `scale(${1 - i * 0.03})`,
-                opacity: 1 - i * 0.15,
+                top: `${i * 16}px`, zIndex: VISIBLE_COUNT - i,
+                transform: `scale(${1 - i * 0.03})`, opacity: 1 - i * 0.15,
                 maxWidth: "200px",
               }}><div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
                 <div className="w-full aspect-square bg-surface-3 relative">
@@ -122,8 +107,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                   )}</div>
                 <div className="p-2.5"><p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>
                   <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p></div></div></div>
-          ))}
-          <div
+          ))} <div
             className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
             style={{ maxWidth: "200px" }}>
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
@@ -155,8 +139,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
   const handleContextMenu = useCallback((e: React.MouseEvent, songId: string) => {
     e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, songId });
-  }, []);
-  const closeContextMenu = useCallback(() => setContextMenu(null), []);
+  }, []); const closeContextMenu = useCallback(() => setContextMenu(null), []);
   // Group by primary artist
   const artistGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
@@ -192,8 +175,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
             <Users size={10} />
             By Artist
             {filterMode === "artist" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
-          </button>
-          {/* By Album */}
+          </button> {/* By Album */}
           <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
             <Disc3 size={10} />
             By Album

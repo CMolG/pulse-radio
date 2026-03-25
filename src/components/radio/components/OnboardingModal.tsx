@@ -14,38 +14,31 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 const ONBOARDING_KEY = 'radio-onboarding-done';
 const GLASS_STYLE: React.CSSProperties = {
-  background: 'rgba(20, 22, 35, 0.75)',
-  backdropFilter: 'blur(32px) saturate(1.6)',
-  WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
-  border: '1px solid rgba(255,255,255,0.12)',
+  background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
+  WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
   boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
 };
 
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string; };
 const STEPS: OnboardingStep[] = [
   {
-    icon: <IoRadioOutline size={48} className="text-[#3478f6]" />,
-    title: 'Welcome to Pulse',
+    icon: <IoRadioOutline size={48} className="text-[#3478f6]" />, title: 'Welcome to Pulse',
     description: 'Your free internet radio experience. Discover thousands of stations, genres and artists from around the world.',
   },
   {
-    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" />,
-    title: 'Live Radio & Lyrics',
+    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" />, title: 'Live Radio & Lyrics',
     description: 'Listen to live radio with real-time song detection, synchronized lyrics, and detailed track information.',
   },
   {
-    icon: <IoHeartOutline size={48} className="text-red-400" />,
-    title: 'Favorites & History',
+    icon: <IoHeartOutline size={48} className="text-red-400" />, title: 'Favorites & History',
     description: 'Save your favorite stations and songs. Browse your listening history and rediscover music you loved.',
   },
   {
-    icon: <IoColorPaletteOutline size={48} className="text-purple-400" />,
-    title: 'Immersive Visualizer',
+    icon: <IoColorPaletteOutline size={48} className="text-purple-400" />, title: 'Immersive Visualizer',
     description: 'Enjoy a reactive audio visualizer with CRT effects. Customize the sound with the built-in equalizer.',
   },
   {
-    icon: <IoStatsChartOutline size={48} className="text-emerald-400" />,
-    title: 'Your Stats',
+    icon: <IoStatsChartOutline size={48} className="text-emerald-400" />, title: 'Your Stats',
     description: 'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
   },
 ];
@@ -56,8 +49,7 @@ function PWAStep() {
   const [isStandalone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches);
   useEffect(() => {
     const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as unknown as { prompt: () => Promise<void> });
+      e.preventDefault(); setDeferredPrompt(e as unknown as { prompt: () => Promise<void> });
     }; window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
@@ -100,18 +92,14 @@ function PWAStep() {
 }
 
 function OnboardingModal() {
-  const [show, setShow] = useState(false);
-  const [step, setStep] = useState(0);
+  const [show, setShow] = useState(false); const [step, setStep] = useState(0);
   const totalSteps = STEPS.length + 1; // +1 for PWA step
   useEffect(() => {
     const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
     if (!done) { const timer = setTimeout(() => setShow(true), 800); return () => clearTimeout(timer); }
-  }, []);
-  const handleClose = useCallback(() => { setShow(false); saveToStorage(ONBOARDING_KEY, true); }, []);
-  if (!show) return null;
-  const currentStep = step < STEPS.length ? STEPS[step] : null;
-  const isPWAStep = step >= STEPS.length;
-  const isLast = step === totalSteps - 1;
+  }, []); const handleClose = useCallback(() => { setShow(false); saveToStorage(ONBOARDING_KEY, true); }, []);
+  if (!show) return null; const currentStep = step < STEPS.length ? STEPS[step] : null;
+  const isPWAStep = step >= STEPS.length; const isLast = step === totalSteps - 1;
   return (
     <AnimatePresence>
       {show && (
@@ -119,18 +107,15 @@ function OnboardingModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/70" onClick={handleClose} />
-          {/* Modal */}
+          className="fixed inset-0 z-[300] flex items-center justify-center p-4"> {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70" onClick={handleClose} /> {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
-            style={GLASS_STYLE}>
-            {/* Content */}
+            style={GLASS_STYLE}> {/* Content */}
             <div className="p-8"><AnimatePresence mode="wait">
                 <motion.div
                   key={step}
@@ -146,10 +131,8 @@ function OnboardingModal() {
                   ) : isPWAStep ? (
                     <PWAStep />
                   ) : null}</motion.div></AnimatePresence></div>
-            {/* Progress dots + navigation */}
-            <div className="px-8 pb-6 flex flex-col gap-4">
-              {/* Dots */}
-              <div className="flex justify-center gap-2">
+            {/* Progress dots + navigation */} <div className="px-8 pb-6 flex flex-col gap-4">
+              {/* Dots */} <div className="flex justify-center gap-2">
                 {Array.from({ length: totalSteps }, (_, i) => (
                   <button
                     key={i}
@@ -159,8 +142,7 @@ function OnboardingModal() {
                     }`}
                     aria-label={`Step ${i + 1}`} />
                 ))}</div>
-              {/* Buttons */}
-              <div className="flex items-center justify-between gap-3"><button
+              {/* Buttons */} <div className="flex items-center justify-between gap-3"><button
                   onClick={step > 0 ? () => setStep(s => s - 1) : handleClose}
                   className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
                 >{step > 0 ? 'Back' : 'Skip'}</button><button

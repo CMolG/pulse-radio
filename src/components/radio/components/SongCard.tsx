@@ -9,12 +9,9 @@ import { formatTimeAgo, itunesSearchUrl } from "../utils/formatUtils";
 export type SongCardItem = SongDetailData & { id: string; timestamp: number };
 type HeartAction = { filled: boolean; onClick: () => void; label: string };
 type Props = {
-  item: SongCardItem;
-  delay: number;
-  onRemove: () => void;
-  onSelect?: (song: SongDetailData) => void;
-  heart?: HeartAction | null;
-  hideRemove?: boolean;
+  item: SongCardItem; delay: number;
+  onRemove: () => void; onSelect?: (song: SongDetailData) => void;
+  heart?: HeartAction | null; hideRemove?: boolean;
 };
 
 export default React.memo(function SongCard({ item, delay, onRemove, onSelect, heart, hideRemove }: Props) {

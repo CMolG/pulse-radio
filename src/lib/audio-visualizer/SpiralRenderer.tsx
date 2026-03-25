@@ -9,12 +9,9 @@
 import React, { useRef, useEffect } from "react";
 
 interface SpiralRendererProps {
-  frequencyDataRef?: React.RefObject<Uint8Array | null>;
-  className?: string;
-  color1?: string;
-  color2?: string;
-  color3?: string;
-  sensitivity?: number;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string;
+  color1?: string; color2?: string;
+  color3?: string; sensitivity?: number;
   demo?: boolean;
 }
 
@@ -25,24 +22,17 @@ const CYCLES = 4;
 const SMOOTH_PASSES = 3;
 
 export function SpiralRenderer({
-  frequencyDataRef,
-  className = "",
-  color1 = "#ff4b1f",
-  color2 = "#ff9068",
-  color3 = "#f9d423",
-  sensitivity = 1.0,
+  frequencyDataRef, className = "",
+  color1 = "#ff4b1f", color2 = "#ff9068",
+  color3 = "#f9d423", sensitivity = 1.0,
   demo = false,
 }: SpiralRendererProps) {
-  const rotationRef = useRef(0);
-  const dataArrayRef = useRef(new Float64Array(NUM_BARS));
-  const targetArrayRef = useRef(new Float64Array(NUM_BARS));
-  const smoothedRef = useRef(new Float64Array(NUM_BARS));
+  const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS));
+  const targetArrayRef = useRef(new Float64Array(NUM_BARS)); const smoothedRef = useRef(new Float64Array(NUM_BARS));
   const tempRef = useRef(new Float64Array(NUM_BARS));
   // Pre-allocated coordinate arrays — avoids 500+ object allocations per frame
-  const outerXRef = useRef(new Float64Array(NUM_BARS));
-  const outerYRef = useRef(new Float64Array(NUM_BARS));
-  const innerXRef = useRef(new Float64Array(NUM_BARS));
-  const innerYRef = useRef(new Float64Array(NUM_BARS));
+  const outerXRef = useRef(new Float64Array(NUM_BARS)); const outerYRef = useRef(new Float64Array(NUM_BARS));
+  const innerXRef = useRef(new Float64Array(NUM_BARS)); const innerYRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 });
   useEffect(() => { colorsRef.current = { color1, color2, color3 }; }, [color1, color2, color3]);
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
@@ -59,8 +49,7 @@ export function SpiralRenderer({
       // Demo mode: organic simulated audio
       for (let i = 0; i < NUM_BARS; i++) {
         if (Math.random() < 0.08) {
-          const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6;
-          target[i] = Math.random() * maxVal * sensitivity;
+          const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6; target[i] = Math.random() * maxVal * sensitivity;
         }
         data[i] += (target[i] - data[i]) * 0.1;
       }
@@ -73,13 +62,11 @@ export function SpiralRenderer({
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
       for (let i = 0; i < NUM_BARS; i++) {
-        const prev = src[i > 0 ? i - 1 : 0];
-        const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
+        const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
         dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25;
       }
       // Swap: previous dst becomes next src
-      const swap = src === data ? temp : src; src = dst;
-      dst = swap;
+      const swap = src === data ? temp : src; src = dst; dst = swap;
     }
     // After SMOOTH_PASSES iterations, result is in `src`
     const result = src;
@@ -94,8 +81,7 @@ export function SpiralRenderer({
     try {
       const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,
         centerY + maxRadius,
-      ); gradient.addColorStop(0, c1);
-      gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3);
+      ); gradient.addColorStop(0, c1); gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3);
       fillStyle = gradient;
     } catch { /* fallback to solid color */ }
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
@@ -114,8 +100,7 @@ export function SpiralRenderer({
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
     for (let c = 0; c < CYCLES; c++) {
       const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
-      if (startIdx >= NUM_BARS) break;
-      ctx.beginPath();
+      if (startIdx >= NUM_BARS) break; ctx.beginPath();
       // Outer edge with quadratic curves
       ctx.moveTo(outerX[startIdx], outerY[startIdx]);
       for (let i = startIdx + 1; i < endIdx - 1; i++) {
@@ -129,8 +114,7 @@ export function SpiralRenderer({
         const xc = (innerX[i] + innerX[i - 1]) / 2; const yc = (innerY[i] + innerY[i - 1]) / 2;
         ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc);
       }
-      ctx.lineTo(innerX[startIdx], innerY[startIdx]);
-      ctx.closePath(); ctx.fill();
+      ctx.lineTo(innerX[startIdx], innerY[startIdx]); ctx.closePath(); ctx.fill();
     }
     ctx.globalAlpha = 1.0;
   });

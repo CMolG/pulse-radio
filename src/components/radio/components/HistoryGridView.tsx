@@ -12,12 +12,9 @@ import type { HistoryEntry, SongDetailData } from "../types";
 import SongCard from "./SongCard";
 
 type Props = {
-  history: HistoryEntry[];
-  onRemove: (id: string) => void;
-  onClear: () => void;
-  onToggleFavSong?: (entry: HistoryEntry) => void;
-  isSongFavorite?: (title: string, artist: string) => boolean;
-  onSelect?: (song: SongDetailData) => void;
+  history: HistoryEntry[]; onRemove: (id: string) => void;
+  onClear: () => void; onToggleFavSong?: (entry: HistoryEntry) => void;
+  isSongFavorite?: (title: string, artist: string) => boolean; onSelect?: (song: SongDetailData) => void;
 };
 
 export default React.memo(function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
@@ -43,8 +40,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
             onRemove={() => onRemove(entry.id)}
             onSelect={onSelect}
             heart={onToggleFavSong ? {
-              filled: !!isSongFavorite?.(entry.title, entry.artist),
-              onClick: () => onToggleFavSong(entry),
+              filled: !!isSongFavorite?.(entry.title, entry.artist), onClick: () => onToggleFavSong(entry),
               label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song',
             } : null} />
         ))}</div></div>

@@ -8,24 +8,15 @@ import type { BrowseCategory, EqBand, EqPreset } from './types';
 import type { MessageKey } from '@/lib/i18n/messages';
 
 export const STORAGE_KEYS = {
-  FAVORITES: 'radio-favorites',
-  RECENT: 'radio-recent',
-  VOLUME: 'radio-volume',
-  EQ_BANDS: 'radio-eq-bands',
-  LYRICS_CACHE: 'radio-lyrics-cache',
-  CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
-  HISTORY: 'radio-history',
-  FAVORITE_SONGS: 'radio-favorite-songs',
-  NORMALIZER_ENABLED: 'radio-normalizer-enabled',
-  STEREO_WIDTH: 'radio-stereo-width',
-  BASS_ENHANCE: 'radio-bass-enhance',
-  COMPRESSOR_ENABLED: 'radio-compressor-enabled',
-  COMPRESSOR_AMOUNT: 'radio-compressor-amount',
-  NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
-  REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled',
-  LOCALE: 'radio-locale',
-  USAGE_STATS: 'radio-usage-stats',
-  ONBOARDING_DONE: 'radio-onboarding-done',
+  FAVORITES: 'radio-favorites', RECENT: 'radio-recent',
+  VOLUME: 'radio-volume', EQ_BANDS: 'radio-eq-bands',
+  LYRICS_CACHE: 'radio-lyrics-cache', CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
+  HISTORY: 'radio-history', FAVORITE_SONGS: 'radio-favorite-songs',
+  NORMALIZER_ENABLED: 'radio-normalizer-enabled', STEREO_WIDTH: 'radio-stereo-width',
+  BASS_ENHANCE: 'radio-bass-enhance', COMPRESSOR_ENABLED: 'radio-compressor-enabled',
+  COMPRESSOR_AMOUNT: 'radio-compressor-amount', NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
+  REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled', LOCALE: 'radio-locale',
+  USAGE_STATS: 'radio-usage-stats', ONBOARDING_DONE: 'radio-onboarding-done',
 } as const;
 
 export const MAX_RECENT = 15;
@@ -49,22 +40,14 @@ export const GENRE_CATEGORIES: BrowseCategory[] = [
 ];
 
 export const GENRE_GRADIENTS: Record<string, string> = {
-  pop: 'linear-gradient(135deg, #ec4899, #e11d48)',
-  rock: 'linear-gradient(135deg, #dc2626, #ea580c)',
-  jazz: 'linear-gradient(135deg, #f59e0b, #ca8a04)',
-  classical: 'linear-gradient(135deg, #6366f1, #9333ea)',
-  electronic: 'linear-gradient(135deg, #06b6d4, #2563eb)',
-  hiphop: 'linear-gradient(135deg, #5a5a5a, #3a3a3a)',
-  country: 'linear-gradient(135deg, #d97706, #c2410c)',
-  ambient: 'linear-gradient(135deg, #14b8a6, #059669)',
-  lofi: 'linear-gradient(135deg, #64748b, #52525b)',
-  news: 'linear-gradient(135deg, #0ea5e9, #1d4ed8)',
-  latin: 'linear-gradient(135deg, #f97316, #ef4444)',
-  metal: 'linear-gradient(135deg, #4b5563, #27272a)',
-  trending: 'linear-gradient(135deg, #facc15, #f97316)',
-  local: 'linear-gradient(135deg, #4ade80, #10b981)',
-  world: 'linear-gradient(135deg, #60a5fa, #6366f1)',
-  default: 'linear-gradient(135deg, #34c759, #0a84ff)',
+  pop: 'linear-gradient(135deg, #ec4899, #e11d48)', rock: 'linear-gradient(135deg, #dc2626, #ea580c)',
+  jazz: 'linear-gradient(135deg, #f59e0b, #ca8a04)', classical: 'linear-gradient(135deg, #6366f1, #9333ea)',
+  electronic: 'linear-gradient(135deg, #06b6d4, #2563eb)', hiphop: 'linear-gradient(135deg, #5a5a5a, #3a3a3a)',
+  country: 'linear-gradient(135deg, #d97706, #c2410c)', ambient: 'linear-gradient(135deg, #14b8a6, #059669)',
+  lofi: 'linear-gradient(135deg, #64748b, #52525b)', news: 'linear-gradient(135deg, #0ea5e9, #1d4ed8)',
+  latin: 'linear-gradient(135deg, #f97316, #ef4444)', metal: 'linear-gradient(135deg, #4b5563, #27272a)',
+  trending: 'linear-gradient(135deg, #facc15, #f97316)', local: 'linear-gradient(135deg, #4ade80, #10b981)',
+  world: 'linear-gradient(135deg, #60a5fa, #6366f1)', default: 'linear-gradient(135deg, #34c759, #0a84ff)',
 };
 
 export const EQ_BANDS: EqBand[] = [ { id: 'low',     frequency: 60,    type: 'lowshelf',  gain: 0, label: '60' },
@@ -75,42 +58,29 @@ export const EQ_BANDS: EqBand[] = [ { id: 'low',     frequency: 60,    type: 'lo
 ];
 
 export const EQ_PRESETS: EqPreset[] = [ { name: 'Flat',       gains: [0, 0, 0, 0, 0] },
-  { name: 'Bass Boost', gains: [6, 4, 0, 0, 0] },
-  { name: 'Treble',     gains: [0, 0, 0, 3, 6] },
-  { name: 'V-Shape',    gains: [5, 2, -2, 2, 5] },
-  { name: 'Vocal',      gains: [-2, 0, 4, 3, 0] },
-  { name: 'Rock',       gains: [4, 2, -1, 3, 4] },
-  { name: 'Electronic', gains: [5, 3, -1, 2, 6] },
+  { name: 'Bass Boost', gains: [6, 4, 0, 0, 0] }, { name: 'Treble',     gains: [0, 0, 0, 3, 6] },
+  { name: 'V-Shape',    gains: [5, 2, -2, 2, 5] }, { name: 'Vocal',      gains: [-2, 0, 4, 3, 0] },
+  { name: 'Rock',       gains: [4, 2, -1, 3, 4] }, { name: 'Electronic', gains: [5, 3, -1, 2, 6] },
   { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },
 ];
 
 const _flagCache = new Map<string, string>();
 
 export function countryFlag(code: string): string {
-  if (!code || code.length !== 2) return '🌐';
-  const cached = _flagCache.get(code);
-  if (cached) return cached;
-  const upper = code.toUpperCase();
+  if (!code || code.length !== 2) return '🌐'; const cached = _flagCache.get(code);
+  if (cached) return cached; const upper = code.toUpperCase();
   if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
   const flag = String.fromCodePoint(0x1F1E6 + upper.charCodeAt(0) - 65, 0x1F1E6 + upper.charCodeAt(1) - 65,);
-  _flagCache.set(code, flag);
-  return flag;
+  _flagCache.set(code, flag); return flag;
 }
 
 export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
-  trending: "genreTrending",
-  pop: "genrePop",
-  rock: "genreRock",
-  jazz: "genreJazz",
-  classical: "genreClassical",
-  electronic: "genreElectronic",
-  hiphop: "genreHiphop",
-  country: "genreCountry",
-  ambient: "genreAmbient",
-  lofi: "genreLofi",
-  news: "genreNews",
-  latin: "genreLatin",
-  metal: "genreMetal",
-  local: "genreLocal",
+  trending: "genreTrending", pop: "genrePop",
+  rock: "genreRock", jazz: "genreJazz",
+  classical: "genreClassical", electronic: "genreElectronic",
+  hiphop: "genreHiphop", country: "genreCountry",
+  ambient: "genreAmbient", lofi: "genreLofi",
+  news: "genreNews", latin: "genreLatin",
+  metal: "genreMetal", local: "genreLocal",
   world: "genreWorld",
 };

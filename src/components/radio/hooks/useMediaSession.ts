@@ -10,23 +10,16 @@ import { useEffect, useRef, useCallback } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 
 type MediaSessionConfig = {
-  station: Station | null;
-  track: NowPlayingTrack | null;
-  isPlaying: boolean;
-  onPlay: () => void;
-  onPause: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  onStop: () => void;
-  onSeekBackward?: () => void;
-  onSeekForward?: () => void;
+  station: Station | null; track: NowPlayingTrack | null;
+  isPlaying: boolean; onPlay: () => void;
+  onPause: () => void; onNext: () => void;
+  onPrev: () => void; onStop: () => void;
+  onSeekBackward?: () => void; onSeekForward?: () => void;
 };
 
 export function useMediaSession(config: MediaSessionConfig): void {
-  const configRef = useRef(config);
-  useEffect(() => { configRef.current = config; }, [config]);
-  const { station, track, isPlaying } = config;
-  const lastMetaRef = useRef('');
+  const configRef = useRef(config); useEffect(() => { configRef.current = config; }, [config]);
+  const { station, track, isPlaying } = config; const lastMetaRef = useRef('');
   useEffect(() => {
     if (!('mediaSession' in navigator) || !station) return;
     const trackTitle = track?.title || station.name; const trackArtist = track?.artist || 'Internet Radio';
@@ -39,16 +32,13 @@ export function useMediaSession(config: MediaSessionConfig): void {
     } catch { /* MediaMetadata constructor can throw on malformed artwork data */ }
   }, [station, track]);
   useEffect(() => {
-    if (!('mediaSession' in navigator)) return;
-    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    if (!('mediaSession' in navigator)) return; navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [isPlaying]);
   const setupHandlers = useCallback(() => {
     if (!('mediaSession' in navigator)) return;
     const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [ ['play', () => configRef.current.onPlay()],
-      ['pause', () => configRef.current.onPause()],
-      ['nexttrack', () => configRef.current.onNext()],
-      ['previoustrack', () => configRef.current.onPrev()],
-      ['stop', () => configRef.current.onStop()],
+      ['pause', () => configRef.current.onPause()], ['nexttrack', () => configRef.current.onNext()],
+      ['previoustrack', () => configRef.current.onPrev()], ['stop', () => configRef.current.onStop()],
       ['seekbackward', () => { if (configRef.current.onSeekBackward) configRef.current.onSeekBackward(); }],
       ['seekforward', () => { if (configRef.current.onSeekForward) configRef.current.onSeekForward(); }],
     ];
@@ -62,6 +52,5 @@ export function useMediaSession(config: MediaSessionConfig): void {
         catch { /* ok */ }
       }
     };
-  }, []);
-  useEffect(setupHandlers, [setupHandlers]);
+  }, []); useEffect(setupHandlers, [setupHandlers]);
 }

@@ -11,35 +11,26 @@ import { IoRadioOutline, IoMusicalNotesOutline, IoPersonOutline, IoDiscOutline, 
 import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from '../hooks/useStats';
 
 function formatListenTime(ms: number): string {
-  const totalSec = Math.floor(ms / 1000);
-  if (totalSec < 60) return `${totalSec}s`;
-  const mins = Math.floor(totalSec / 60);
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  const remMins = mins % 60;
-  if (hours < 24) return `${hours}h ${remMins}m`;
-  const days = Math.floor(hours / 24);
-  const remHours = hours % 24;
-  return `${days}d ${remHours}h`;
+  const totalSec = Math.floor(ms / 1000); if (totalSec < 60) return `${totalSec}s`;
+  const mins = Math.floor(totalSec / 60); if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60); const remMins = mins % 60;
+  if (hours < 24) return `${hours}h ${remMins}m`; const days = Math.floor(hours / 24);
+  const remHours = hours % 24; return `${days}d ${remHours}h`;
 }
 
 type Props = {
-  topStations: StationListenTime[];
-  topSongs: SongPlayCount[];
-  topArtists: ArtistPlayCount[];
-  topGenres: GenrePlayCount[];
+  topStations: StationListenTime[]; topSongs: SongPlayCount[];
+  topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[];
   totalListenMs: number;
 };
 
 const StatSection = React.memo(function StatSection({ title, icon, children, }: {
-  title: string;
-  icon: React.ReactNode;
+  title: string; icon: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div><div className="flex items-center gap-2 mb-2">
-        {icon}
-        <span className="text-[13px] font-semibold text-white/80">{title}</span>
+        {icon} <span className="text-[13px] font-semibold text-white/80">{title}</span>
       </div><div className="space-y-1">{children}</div></div>
   );
 });
@@ -66,10 +57,8 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
         <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p></div>
     );
   }
-  const maxStationTime = topStations[0]?.totalMs ?? 1;
-  const maxSongCount = topSongs[0]?.count ?? 1;
-  const maxArtistCount = topArtists[0]?.count ?? 1;
-  const maxGenreCount = topGenres[0]?.count ?? 1;
+  const maxStationTime = topStations[0]?.totalMs ?? 1; const maxSongCount = topSongs[0]?.count ?? 1;
+  const maxArtistCount = topArtists[0]?.count ?? 1; const maxGenreCount = topGenres[0]?.count ?? 1;
   return (
     <div className="p-4 space-y-6">
       {/* Total listen time */}

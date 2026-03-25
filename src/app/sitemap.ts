@@ -11,6 +11,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base: MetadataRoute.Sitemap = [{ url: "https://www.pulse-radio.online", lastModified: new Date(), changeFrequency: "weekly", priority: 1 }];
   const countryEntries: MetadataRoute.Sitemap = SOVEREIGN_COUNTRY_CODES.map((countryCode) => ({
     url: `https://www.pulse-radio.online/${countryCode}`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9,
-  }));
-  return [...base, ...countryEntries];
+  })); return [...base, ...countryEntries];
 }

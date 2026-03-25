@@ -20,12 +20,10 @@ export function useFavorites() {
     // Dedup on load in case of corrupted storage
     const seen = new Set<string>();
     return loaded.filter(s => {
-      if (!s.stationuuid || seen.has(s.stationuuid)) return false;
-      seen.add(s.stationuuid);
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid);
       return true;
     });
-  });
-  useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITES, favorites); }, [favorites]);
+  }); useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITES, favorites); }, [favorites]);
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
   const add = useCallback((station: Station) => {
     setFavorites(prev => {
@@ -40,17 +38,13 @@ export function useFavorites() {
       if (exists) return prev.filter(s => s.stationuuid !== station.stationuuid);
       return [station, ...prev].slice(0, MAX_FAVORITES);
     });
-  }, []);
-  const has = useCallback((uuid: string) => favorites.some(s => s.stationuuid === uuid), [favorites]);
+  }, []); const has = useCallback((uuid: string) => favorites.some(s => s.stationuuid === uuid), [favorites]);
   const playNext = useCallback((currentUuid: string): Station | null => {
     const idx = favorites.findIndex(s => s.stationuuid === currentUuid);
-    if (idx < 0 || favorites.length < 2) return null;
-    return favorites[(idx + 1) % favorites.length];
+    if (idx < 0 || favorites.length < 2) return null; return favorites[(idx + 1) % favorites.length];
   }, [favorites]);
   const playPrev = useCallback((currentUuid: string): Station | null => {
     const idx = favorites.findIndex(s => s.stationuuid === currentUuid);
-    if (idx < 0 || favorites.length < 2) return null;
-    return favorites[(idx - 1 + favorites.length) % favorites.length];
-  }, [favorites]);
-  return { favorites, add, remove, toggle, has, playNext, playPrev };
+    if (idx < 0 || favorites.length < 2) return null; return favorites[(idx - 1 + favorites.length) % favorites.length];
+  }, [favorites]); return { favorites, add, remove, toggle, has, playNext, playPrev };
 }

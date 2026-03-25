@@ -9,10 +9,8 @@ export function stationInitials(name: string) {
 export function primaryArtist(artist: string): string { return artist.split(ARTIST_SPLIT_RE)[0].trim(); }
 
 export function formatTimeAgo(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60) return "now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  const diff = Math.floor((Date.now() - ts) / 1000); if (diff < 60) return "now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`; if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
   return `${Math.floor(diff / 86400)}d`;
 }
 

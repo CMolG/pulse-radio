@@ -20,12 +20,9 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   const initialEnabled = useMemo(() => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false), []);
   const [manuallyEnabled, setManuallyEnabled] = useState<boolean>(initialEnabled);
   const [runtimeState, setRuntimeState] = useState(() => defaultRealtimeState(initialEnabled));
-  const engineRef = useRef<RealtimeSpeechEngine | null>(null);
-  const stableSamplesRef = useRef(0);
-  const eligible = isRealtimeEligible(lyrics);
-  const supported = isRealtimeSpeechSupported();
-  const realtimeAllowed = enabled && manuallyEnabled;
-  const realtimeActive = supported && eligible && realtimeAllowed;
+  const engineRef = useRef<RealtimeSpeechEngine | null>(null); const stableSamplesRef = useRef(0);
+  const eligible = isRealtimeEligible(lyrics); const supported = isRealtimeSpeechSupported();
+  const realtimeAllowed = enabled && manuallyEnabled; const realtimeActive = supported && eligible && realtimeAllowed;
   // Reset sync state during render when dependencies change, so stale
   // activeLineIndex from a previous song doesn't bleed into new lyrics.
   const [prevResetKey, setPrevResetKey] = useState('');
@@ -33,8 +30,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   if (resetKey !== prevResetKey) { setPrevResetKey(resetKey); setRuntimeState(defaultRealtimeState(manuallyEnabled)); }
   const toggle = useCallback(() => {
     setManuallyEnabled(prev => {
-      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next);
-      return next;
+      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next); return next;
     });
   }, []);
   useEffect(() => {
@@ -45,12 +41,9 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
         if (!lyrics || !isRealtimeEligible(lyrics)) return;
         setRuntimeState(prev => {
           const step = alignHypothesis({
-            lyrics,
-            hypothesisText: hypothesis.text,
-            previousConfirmedIndex: prev.activeLineIndex,
-            previousCandidateIndex: prev.candidateLineIndex,
-            stableSamples: stableSamplesRef.current,
-            policy: DEFAULT_REALTIME_ALIGN_POLICY,
+            lyrics, hypothesisText: hypothesis.text,
+            previousConfirmedIndex: prev.activeLineIndex, previousCandidateIndex: prev.candidateLineIndex,
+            stableSamples: stableSamplesRef.current, policy: DEFAULT_REALTIME_ALIGN_POLICY,
           }); stableSamplesRef.current = step.stableSamples;
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
           // Early bail — skip spread+setState when nothing observable changed
@@ -63,44 +56,34 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
             !step.relockTriggered
           ) { return prev; }
           return {
-            ...prev,
-            status: 'listening',
-            activeLineIndex: step.confirmedIndex,
-            candidateLineIndex: step.candidateIndex,
-            confidence: step.score,
-            effectiveCurrentTime,
+            ...prev, status: 'listening',
+            activeLineIndex: step.confirmedIndex, candidateLineIndex: step.candidateIndex,
+            confidence: step.score, effectiveCurrentTime,
             diagnostics: {
-              ...prev.diagnostics,
-              lastHypothesisMs: hypothesis.tsMs,
+              ...prev.diagnostics, lastHypothesisMs: hypothesis.tsMs,
               hypothesesSeen: prev.diagnostics.hypothesesSeen + 1,
               confirmedTransitions: prev.diagnostics.confirmedTransitions + (step.confirmedIndex !== prev.activeLineIndex ? 1 : 0),
               rejectedJumps: prev.diagnostics.rejectedJumps + (step.jumpRejected ? 1 : 0),
-              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0),
-              errorMessage: null,
+              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0), errorMessage: null,
             },
           };
         });
       },
       onFatalError: (errorMessage) => {
         setRuntimeState(prev => ({
-          ...prev,
-          status: 'error',
-          activeLineIndex: -1,
-          candidateLineIndex: -1,
-          confidence: 0,
-          effectiveCurrentTime: undefined,
+          ...prev, status: 'error',
+          activeLineIndex: -1, candidateLineIndex: -1,
+          confidence: 0, effectiveCurrentTime: undefined,
           diagnostics: { ...prev.diagnostics, errorMessage, },
         }));
       },
-    });
-    engineRef.current = engine; engine.start(languageHint);
+    }); engineRef.current = engine; engine.start(languageHint);
     return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
   const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
   return {
-    ...runtimeState,
-    enabled: manuallyEnabled,
+    ...runtimeState, enabled: manuallyEnabled,
     supported,
     status: !supported ? 'unsupported' : !realtimeActive
         ? 'idle'
@@ -114,7 +97,6 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
       errorMessage: !supported
         ? 'Realtime lyrics sync is not supported in this browser.'
         : runtimeState.diagnostics.errorMessage,
-    },
-    toggle,
+    }, toggle,
   };
 }

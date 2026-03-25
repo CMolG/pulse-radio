@@ -15,6 +15,5 @@ export function ServiceWorkerRegistrar() {
           // SW registration failure is non-critical; silently ignored
         });
     }
-  }, []);
-  return null;
+  }, []); return null;
 }

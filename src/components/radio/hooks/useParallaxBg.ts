@@ -10,12 +10,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { GENRE_GRADIENTS } from '../constants';
 
 export function useParallaxBg(genre?: string, audioAmplitude = 0) {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const rafRef = useRef(0);
-  const pointerOffsetRef = useRef({ x: 0, y: 0 });
-  const audioOffsetRef = useRef({ x: 0, y: 0 });
-  const tickRafRef = useRef(0);
+  const [offset, setOffset] = useState({ x: 0, y: 0 }); const containerRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef(0); const pointerOffsetRef = useRef({ x: 0, y: 0 });
+  const audioOffsetRef = useRef({ x: 0, y: 0 }); const tickRafRef = useRef(0);
   // Ref avoids re-running the effect (and tearing down RAF + listener) on every amplitude change
   const audioAmplitudeRef = useRef(audioAmplitude);
   useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]);
@@ -28,8 +25,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
       const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;
       const y = ((e.clientY - cy) / rect.height) * 20; pointerOffsetRef.current = { x, y };
     });
-  }, []);
-  const lastPublishedRef = useRef({ x: 0, y: 0 });
+  }, []); const lastPublishedRef = useRef({ x: 0, y: 0 });
   useEffect(() => {
     const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.

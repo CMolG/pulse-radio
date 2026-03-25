@@ -15,18 +15,15 @@ function isQuotaExceeded(e: unknown): boolean {
 
 function trySave(key: string, raw: string): boolean {
   try {
-    localStorage.setItem(key, raw);
-    return true;
+    localStorage.setItem(key, raw); return true;
   } catch (e) {
-    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`);
-    return false;
+    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`); return false;
   }
 }
 
 /** Load a JSON value from localStorage with a fallback default */
 export function loadFromStorage<T>(key: string, defaultValue: T): T {
-  const raw = tryLoad(key);
-  if (!raw) return defaultValue;
+  const raw = tryLoad(key); if (!raw) return defaultValue;
   try { return JSON.parse(raw); } catch { return defaultValue; }
 }
 

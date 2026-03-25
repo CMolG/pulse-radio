@@ -18,24 +18,19 @@ let sharedCtx: AudioContext | null = null;
 
 function getSharedContext(): AudioContext {
   if (!sharedCtx || sharedCtx.state === 'closed') sharedCtx = new AudioContext();
-  if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {});
-  return sharedCtx;
+  if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {}); return sharedCtx;
 }
 
 export function getOrCreateAudioSource(audio: HTMLAudioElement): {
-  ctx: AudioContext;
-  source: MediaElementAudioSourceNode;
+  ctx: AudioContext; source: MediaElementAudioSourceNode;
 } {
   const existing = cache.get(audio);
   if (existing) {
     // Resume if suspended (Chrome autoplay policy)
-    if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {});
-    return existing;
+    if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {}); return existing;
   }
-  const ctx = getSharedContext();
-  const source = ctx.createMediaElementSource(audio);
-  const entry = { ctx, source };
-  cache.set(audio, entry);
+  const ctx = getSharedContext(); const source = ctx.createMediaElementSource(audio);
+  const entry = { ctx, source }; cache.set(audio, entry);
   return entry;
 }
 
@@ -44,8 +39,7 @@ export function getOrCreateAudioSource(audio: HTMLAudioElement): {
  * Must be called from a user-gesture handler (click/tap) on mobile browsers.
  */
 export function resumeAudioContext(audio: HTMLAudioElement): void {
-  const entry = cache.get(audio);
-  if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {});
+  const entry = cache.get(audio); if (entry && entry.ctx.state === 'suspended') entry.ctx.resume().catch(() => {});
 }
 
 /**

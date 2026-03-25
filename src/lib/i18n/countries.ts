@@ -5,12 +5,9 @@
  */
 
 export type SovereignCountry = {
-  code: string;
-  name: string;
-  region: string;
-  subregion: string;
-  borders: string[];
-  lang3: string[];
+  code: string; name: string;
+  region: string; subregion: string;
+  borders: string[]; lang3: string[];
 };
 
 export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
@@ -217,6 +214,5 @@ export const COUNTRY_BY_CODE: Record<string, SovereignCountry> = Object.fromEntr
 );
 
 export function isSovereignCountryCode(code: string): boolean {
-  if (!code || code.length !== 2) return false;
-  return Boolean(COUNTRY_BY_CODE[code.toUpperCase()]);
+  if (!code || code.length !== 2) return false; return Boolean(COUNTRY_BY_CODE[code.toUpperCase()]);
 }

@@ -43,8 +43,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
-    song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null,
-    song?.stationName ?? null,
+    song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null, song?.stationName ?? null,
   );
   const plainLyrics =
     lyrics?.plainText?.trim() ||
@@ -63,8 +62,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   );
   // Close on Escape
   useEffect(() => {
-    if (!song) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    if (!song) return; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
   }, [song, onClose]);
   // Focus trap: keep Tab cycling within the modal
@@ -80,8 +78,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       if (e.key !== 'Tab') return;
       const nodes = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (nodes.length === 0) return;
+      ); if (nodes.length === 0) return;
       const first = nodes[0]; const last = nodes[nodes.length - 1];
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault(); last.focus();
@@ -111,14 +108,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
             className="w-full max-w-[860px] mx-4 md:flex md:items-stretch md:gap-4"
             onClick={(e) => e.stopPropagation()}>
             <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-              {/* Close button */}
-              <div className="sticky top-0 z-10 flex justify-end p-3"><button
+              {/* Close button */} <div className="sticky top-0 z-10 flex justify-end p-3"><button
                   onClick={onClose}
                   aria-label="Close song details"
                   className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
                 ><X size={16} /></button></div>
-              {/* ── Song Info ── */}
-              <div className="px-5 -mt-2">
+              {/* ── Song Info ── */} <div className="px-5 -mt-2">
                 {/* Artwork */}
                 <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
                   {resolvedArtworkUrl ? (
@@ -131,11 +126,9 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   ) : (
                     <div className="size-full flex items-center justify-center">
                       <Music size={56} className="text-dim" /></div>)}</div>
-                {/* Title & artist */}
-                <div className="mt-5 text-center">
+                {/* Title & artist */} <div className="mt-5 text-center">
                   <h2 className="text-[17px] font-bold text-white leading-snug line-clamp-2">{song.title}</h2>
-                  <p className="text-[14px] text-secondary mt-1">{song.artist}</p>
-                  {resolvedAlbum && (
+                  <p className="text-[14px] text-secondary mt-1">{song.artist}</p> {resolvedAlbum && (
                     <p className="text-[12px] text-dim mt-0.5">{resolvedAlbum}</p>
                   )}
                   {/* Extended metadata: corner-style row + release line + context badges */}
@@ -151,21 +144,18 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       {resolvedReleaseDate && (
                         <p className="text-[10px] text-white/50">
                           Released on: {formatReleaseDate(resolvedReleaseDate)}</p>
-                      )}
-                      <div className="flex flex-wrap justify-center gap-1.5">
+                      )} <div className="flex flex-wrap justify-center gap-1.5">
                         {resolvedGenre && <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">{resolvedGenre}</MetaBadge>}
                       {showMetaHydration && <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">Fetching metadata…</MetaBadge>}
                       </div></div>)}</div>
-                {/* Apple Music button */}
-                <a
+                {/* Apple Music button */} <a
                   href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
                 ><ExternalLink size={14} />
                   Listen on Apple Music</a></div>
-              {/* Divider */}
-              <div className="mx-5 my-5 border-t border-border-default" />
+              {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Artist Info ── */}
               <div className="px-5"><h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   About {song.artist}</h3>
@@ -182,8 +172,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {/* Loaded artist data */}
                 {!loading && info && (
                   <div className="space-y-3">
-                    {/* Artist header with image */}
-                    <div className="flex gap-3">
+                    {/* Artist header with image */} <div className="flex gap-3">
                       {info.imageUrl ? (
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"><UiImage
                             src={info.imageUrl}
@@ -198,14 +187,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                           ) : (
                             <User size={24} className="text-dim" />
                           )}</div>
-                      )}
-                      <div className="flex-1 min-w-0 pt-0.5">
+                      )} <div className="flex-1 min-w-0 pt-0.5">
                         <p className="text-[14px] font-semibold text-white truncate">{info.name}</p>
                         {info.disambiguation && (
                           <p className="text-[11px] text-dim mt-0.5 line-clamp-1">{info.disambiguation}</p>
                         )}
-                        {/* Metadata badges */}
-                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {/* Metadata badges */} <div className="flex flex-wrap gap-1.5 mt-1.5">
                           {info.type && <MetaBadge icon={info.type === 'Group' ? Users : User} cls="bg-surface-3 text-secondary">{info.type}</MetaBadge>}
                           {info.country && <MetaBadge icon={Globe} cls="bg-surface-3 text-secondary">{info.country}</MetaBadge>}
                           {info.lifeSpan?.begin && (
@@ -238,10 +225,8 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {/* No data */}
                 {!loading && !info && (
                   <p className="text-[12px] text-dim">No artist information available</p>)}</div>
-              {/* Divider */}
-              <div className="mx-5 my-5 border-t border-border-default" />
-              {/* ── Lyrics (mobile) ── */}
-              <div className="px-5 md:hidden">
+              {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />
+              {/* ── Lyrics (mobile) ── */} <div className="px-5 md:hidden">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">Lyrics (plain)</h3>
                 {lyricsLoading && lyricsSkeleton(4)}
                 {!lyricsLoading && plainLyrics && (
@@ -250,8 +235,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       {plainLyrics}</pre></div>
                 )}
                 {!lyricsLoading && !plainLyrics && lyricsEmpty}</div>
-              {/* Divider (mobile) */}
-              <div className="mx-5 my-5 border-t border-border-default md:hidden" />
+              {/* Divider (mobile) */} <div className="mx-5 my-5 border-t border-border-default md:hidden" />
               {/* ── Remove from favorites ── */}
               {onRemoveFromFavorites && (
                 <><div className="mx-5 my-5 border-t border-border-default" />
@@ -261,12 +245,9 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                     ><Trash2 size={14} />
                       Borrar de favoritos</button></div></>
               )}
-              {/* ── Station ── */}
-              <div className="px-5 pb-6 pt-4"><div className="flex items-center gap-2">
-                  <Radio size={12} className="text-dim flex-shrink-0" />
-                  <p className="text-[11px] text-dim">
-                    Played on{' '}
-                    <span className="text-secondary">{song.stationName}</span></p></div></div></div>
+              {/* ── Station ── */} <div className="px-5 pb-6 pt-4"><div className="flex items-center gap-2">
+                  <Radio size={12} className="text-dim flex-shrink-0" /> <p className="text-[11px] text-dim">
+                    Played on{' '} <span className="text-secondary">{song.stationName}</span></p></div></div></div>
             {/* ── Lyrics side panel (desktop) ── */}
             <div className="hidden md:flex md:flex-col bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-[420px] max-h-[85vh]">
               <div className="px-5 pt-5 pb-3 border-b border-border-default">

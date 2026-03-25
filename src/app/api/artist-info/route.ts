@@ -34,8 +34,7 @@ async function fetchWikiSummary(title: string) {
   const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT });
-  if (data?.type === 'disambiguation') return null;
-  return data;
+  if (data?.type === 'disambiguation') return null; return data;
 }
 
 export async function GET(req: NextRequest) {
@@ -45,8 +44,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist), fetchWikiSummary(artist),
-    ]);
-    const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
+    ]); const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
     let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
     // If Wikipedia didn't find the artist or result isn't music-related, try common disambiguations
     if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) {
@@ -69,18 +67,12 @@ export async function GET(req: NextRequest) {
       : 'public, max-age=3600, stale-while-revalidate=7200';
     return NextResponse.json(
       {
-        name: mb?.name ?? artist,
-        disambiguation: mb?.disambiguation ?? null,
-        type: mb?.type ?? null,
-        country: mb?.country ?? null,
-        beginArea: mb?.['begin-area']?.name ?? null,
-        lifeSpan: mb?.['life-span'] ?? null,
-        tags,
-        bio: wiki?.extract ?? null,
-        imageUrl: wiki?.thumbnail?.source ?? null,
-        wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
-      },
-      { headers: { 'Cache-Control': cacheHeader, }, },
+        name: mb?.name ?? artist, disambiguation: mb?.disambiguation ?? null,
+        type: mb?.type ?? null, country: mb?.country ?? null,
+        beginArea: mb?.['begin-area']?.name ?? null, lifeSpan: mb?.['life-span'] ?? null,
+        tags, bio: wiki?.extract ?? null,
+        imageUrl: wiki?.thumbnail?.source ?? null, wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
+      }, { headers: { 'Cache-Control': cacheHeader, }, },
     );
   } catch (err) {
     console.error('[Pulse Radio] Artist info fetch error:', err);

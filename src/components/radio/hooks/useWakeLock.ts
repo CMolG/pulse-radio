@@ -14,10 +14,8 @@ import { useRef, useEffect, useCallback, useState } from 'react';
  * Automatically re-acquires the lock when the tab becomes visible again.
  */
 export function useWakeLock(shouldLock: boolean) {
-  const lockRef = useRef<WakeLockSentinel | null>(null);
-  const [isActive, setIsActive] = useState(false);
-  const requestingRef = useRef(false);
-  const wantReleaseRef = useRef(false);
+  const lockRef = useRef<WakeLockSentinel | null>(null); const [isActive, setIsActive] = useState(false);
+  const requestingRef = useRef(false); const wantReleaseRef = useRef(false);
   const request = useCallback(async () => {
     if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
     requestingRef.current = true; wantReleaseRef.current = false;
@@ -54,6 +52,5 @@ export function useWakeLock(shouldLock: boolean) {
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [shouldLock, request]);
   // Cleanup on unmount
-  useEffect(() => () => { release(); }, [release]);
-  return { isActive, request, release };
+  useEffect(() => () => { release(); }, [release]); return { isActive, request, release };
 }

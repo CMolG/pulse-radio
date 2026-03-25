@@ -9,25 +9,17 @@
 import Image from "next/image";
 
 type UiImageProps = {
-  src: string;
-  alt: string;
-  className?: string;
-  sizes?: string;
-  priority?: boolean;
-  loading?: "lazy" | "eager";
-  onError?: () => void;
-  style?: React.CSSProperties;
+  src: string; alt: string;
+  className?: string; sizes?: string;
+  priority?: boolean; loading?: "lazy" | "eager";
+  onError?: () => void; style?: React.CSSProperties;
 };
 
 export default function UiImage({
-  src,
-  alt,
-  className,
-  sizes = "100vw",
-  priority,
-  loading,
-  onError,
-  style,
+  src, alt,
+  className, sizes = "100vw",
+  priority, loading,
+  onError, style,
 }: UiImageProps) {
   return (
     <Image

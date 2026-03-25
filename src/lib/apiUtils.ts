@@ -2,19 +2,16 @@
 export async function apiFetch( url: string,
   opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string },
 ): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
+  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
   try {
     const res = await fetch(url, { ...opts.init, signal: controller.signal });
     if (!res.ok) {
-      await res.text().catch(() => {});
-      throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`);
+      await res.text().catch(() => {}); throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`);
     }
     if (opts.maxBytes) {
       const cl = res.headers.get('content-length');
       if (cl && parseInt(cl, 10) > opts.maxBytes) {
-        await res.body?.cancel().catch(() => {});
-        throw new Error('Response too large');
+        await res.body?.cancel().catch(() => {}); throw new Error('Response too large');
       }
     }
     return res;

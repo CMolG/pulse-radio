@@ -19,21 +19,16 @@ const SITE_DESCRIPTION =
   "Stream thousands of free internet radio stations worldwide. Enjoy real-time audio visualizer, album art, song history, favorites, and theater mode. No sign-up required.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: { default: SITE_TITLE, template: "%s | Pulse Radio", },
-  description: SITE_DESCRIPTION,
-  manifest: "/site.webmanifest",
+  metadataBase: new URL(SITE_URL), title: { default: SITE_TITLE, template: "%s | Pulse Radio", },
+  description: SITE_DESCRIPTION, manifest: "/site.webmanifest",
   applicationName: "Pulse Radio",
   keywords: ["internet radio", "online radio", "free radio", "radio player", "music streaming", "audio visualizer", "radio stations", "live radio", "web radio", "pulse radio"],
-  authors: [{ name: "Pulse Radio", url: SITE_URL }],
-  creator: "Pulse Radio",
+  authors: [{ name: "Pulse Radio", url: SITE_URL }], creator: "Pulse Radio",
   publisher: "Pulse Radio",
   icons: {
     icon: [{ url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" }, { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }],
-    shortcut: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pulse Radio", },
+    shortcut: "/favicon.ico", apple: "/apple-touch-icon.png",
+  }, appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pulse Radio", },
   openGraph: {
     type: "website", locale: "en_US", url: SITE_URL, siteName: "Pulse Radio",
     title: SITE_TITLE, description: SITE_DESCRIPTION,
@@ -41,8 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary", title: SITE_TITLE, description: SITE_DESCRIPTION, images: ["/android-chrome-512x512.png"] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
-  alternates: { canonical: SITE_URL, },
-  category: "music",
+  alternates: { canonical: SITE_URL, }, category: "music",
   other: { "mobile-web-app-capable": "yes", },
 };
 
@@ -50,26 +44,19 @@ export const viewport: Viewport = { themeColor: "#0a0f1a", width: "device-width"
 
 function JsonLd() {
   const schema = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "Pulse Radio",
-    url: SITE_URL,
-    description: SITE_DESCRIPTION,
-    applicationCategory: "MultimediaApplication",
-    operatingSystem: "Any",
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", },
-    browserRequirements: "Requires JavaScript. Requires HTML5.",
-    softwareVersion: "1.0",
+    "@context": "https://schema.org", "@type": "WebApplication",
+    name: "Pulse Radio", url: SITE_URL,
+    description: SITE_DESCRIPTION, applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", },
+    browserRequirements: "Requires JavaScript. Requires HTML5.", softwareVersion: "1.0",
     screenshot: `${SITE_URL}/android-chrome-512x512.png`,
-  };
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+  }; return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
 
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en" dir="ltr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}>
       <body className="h-full bg-[#0a0f1a] text-white"><JsonLd />
-        {children}
-        <ServiceWorkerRegistrar /></body></html>
+        {children} <ServiceWorkerRegistrar /></body></html>
   );
 }

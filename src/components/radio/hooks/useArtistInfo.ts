@@ -26,8 +26,7 @@ function cacheSet(key: string, val: ArtistInfo) {
   cache.set(key, val);
   // Evict oldest entries beyond capacity
   while (cache.size > MAX_CACHE) {
-    const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest);
-    else break;
+    const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break;
   }
 }
 
@@ -36,13 +35,11 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
   const cachedInfo = useMemo(() => { if (!key) return null; return cacheGet(key) ?? null; }, [key]);
   const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
   useEffect(() => {
-    if (!key || !artist || cachedInfo) return;
-    let cancelled = false; const controller = new AbortController();
+    if (!key || !artist || cachedInfo) return; let cancelled = false; const controller = new AbortController();
     // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
     const timeout = setTimeout(() => controller.abort(), 15_000);
     fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
+        if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();
       })
       .then((data: ArtistInfo) => {
         if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); }
@@ -50,7 +47,6 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
       .catch(() => { if (!cancelled) setFetched({ key, info: null }); })
       .finally(() => { clearTimeout(timeout); });
     return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
-  }, [artist, key, cachedInfo]);
-  const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
+  }, [artist, key, cachedInfo]); const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }

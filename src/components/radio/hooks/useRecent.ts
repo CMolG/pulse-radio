@@ -18,12 +18,10 @@ export function useRecent() {
     // Dedup by stationuuid on load in case of corrupted storage
     const seen = new Set<string>();
     return loaded.filter(s => {
-      if (!s.stationuuid || seen.has(s.stationuuid)) return false;
-      seen.add(s.stationuuid);
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid);
       return true;
     });
-  });
-  useEffect(() => { saveToStorage(STORAGE_KEYS.RECENT, recent); }, [recent]);
+  }); useEffect(() => { saveToStorage(STORAGE_KEYS.RECENT, recent); }, [recent]);
   useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
   const add = useCallback((station: Station) => {
     setRecent(prev => {
@@ -32,6 +30,5 @@ export function useRecent() {
     });
   }, []);
   const remove = useCallback((uuid: string) => { setRecent(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
-  const clear = useCallback(() => setRecent([]), []);
-  return { recent, add, remove, clear };
+  const clear = useCallback(() => setRecent([]), []); return { recent, add, remove, clear };
 }

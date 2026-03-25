@@ -19,8 +19,7 @@ import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 
 /** Order in which category sections appear on the home screen */
 const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
-  'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin',
-  'metal', 'local', 'world',
+  'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world',
 ] as const;
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -29,19 +28,13 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 type Props = {
-  view: ViewState;
-  currentStation: Station | null;
-  isPlaying: boolean;
-  isFavorite: (uuid: string) => boolean;
-  onPlay: (station: Station) => void;
-  onToggleFav: (station: Station) => void;
-  onPrefetch?: (streamUrl: string) => void;
-  favorites?: Station[];
-  recent?: Station[];
-  onSelectGenre?: (cat: BrowseCategory) => void;
+  view: ViewState; currentStation: Station | null;
+  isPlaying: boolean; isFavorite: (uuid: string) => boolean;
+  onPlay: (station: Station) => void; onToggleFav: (station: Station) => void;
+  onPrefetch?: (streamUrl: string) => void; favorites?: Station[];
+  recent?: Station[]; onSelectGenre?: (cat: BrowseCategory) => void;
   onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
-  onGoHome?: () => void;
-  userGenreOrder?: string[];
+  onGoHome?: () => void; userGenreOrder?: string[];
 };
 
 const SCROLL_CLASS =
@@ -49,14 +42,11 @@ const SCROLL_CLASS =
 
 /* ── Scroll row with left/right arrow buttons (desktop only) ── */
 function ScrollRow({ title, icon, children, isMobile, className, }: {
-  title?: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  isMobile: boolean;
+  title?: string; icon?: React.ReactNode;
+  children: React.ReactNode; isMobile: boolean;
   className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [canLeft, setCanLeft] = useState(false);
+  const ref = useRef<HTMLDivElement>(null); const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
   const check = useCallback(() => {
     const el = ref.current; if (!el) return; setCanLeft(el.scrollLeft > 4);
@@ -73,8 +63,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
       {title && (
         <div className={`flex items-center justify-between mb-2 ${isMobile ? "px-4" : ""}`}>
           <div className="flex-row-1.5">
-            {icon}
-            <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
+            {icon} <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
           {!isMobile && (
             <div className="flex gap-1"><button
                 onClick={() => scroll(-1)}
@@ -85,43 +74,32 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
                 className={`p-1 rounded-md transition-colors ${canRight ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canRight}
                 aria-label="Scroll right"><ChevronRight size={14} /></button></div>)}</div>
-      )}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div></div>
+      )} <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div></div>
   );
 }
 
 export default function BrowseView({
-  view,
-  currentStation,
-  isPlaying,
-  isFavorite,
-  onPlay,
-  onToggleFav,
-  onPrefetch,
-  favorites,
-  recent,
-  onSelectGenre,
-  onSelectCountry,
-  onGoHome,
+  view, currentStation,
+  isPlaying, isFavorite,
+  onPlay, onToggleFav,
+  onPrefetch, favorites,
+  recent, onSelectGenre,
+  onSelectCountry, onGoHome,
   userGenreOrder,
 }: Props) {
-  const { t, locale } = useLocale();
-  const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
+  const { t, locale } = useLocale(); const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
   const translatedGenreCategories = useMemo(() =>
       GENRE_CATEGORIES.map((category) => {
-        const key = GENRE_LABEL_KEYS[category.id];
-        return key ? { ...category, label: t(key) } : category;
+        const key = GENRE_LABEL_KEYS[category.id]; return key ? { ...category, label: t(key) } : category;
       }),
     [t],
   );
   // Reorder browse sections based on user listening stats
   const effectiveBrowseOrder = useMemo(() => {
-    if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
-    const defaultOrder = [...BROWSE_ORDER];
+    if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER; const defaultOrder = [...BROWSE_ORDER];
     // Map genre stats to category IDs (handle partial matches: "hip hop" → "hiphop")
     const GENRE_TO_CAT: Record<string, string> = { 'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi' };
-    const boostedIds = new Set<string>();
-    const ordered: string[] = [];
+    const boostedIds = new Set<string>(); const ordered: string[] = [];
     // Always keep trending first
     ordered.push('trending'); boostedIds.add('trending');
     for (const genre of userGenreOrder) {
@@ -133,17 +111,13 @@ export default function BrowseView({
     // Append remaining in default order
     for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); }
     return ordered;
-  }, [userGenreOrder]);
-  const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
+  }, [userGenreOrder]); const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
   const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [discoveryMode, setDiscoveryMode] = useState(false);
-  const [retryKey, setRetryKey] = useState(0);
-  const [page, setPage] = useState(0);
-  const PAGE_SIZE = 20;
+  const [loading, setLoading] = useState(false); const [error, setError] = useState<string | null>(null);
+  const [discoveryMode, setDiscoveryMode] = useState(false); const [retryKey, setRetryKey] = useState(0);
+  const [page, setPage] = useState(0); const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Tracks whether the initial immediate play has fired for the current
   // discovery-mode session.  Reset when discovery mode is turned off.
@@ -151,10 +125,8 @@ export default function BrowseView({
   // Live track scanning
   type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
   const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({});
-  const [scanEnabled, setScanEnabled] = useState(false);
-  const [songFilter, setSongFilter] = useState("");
-  const scanGenRef = useRef(0);
-  const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
+  const [scanEnabled, setScanEnabled] = useState(false); const [songFilter, setSongFilter] = useState("");
+  const scanGenRef = useRef(0); const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return;
@@ -168,24 +140,21 @@ export default function BrowseView({
       if (!flags?.cancelled) {
         setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {
-          if (!prev.has(catId)) return prev;
-          const next = new Set(prev); next.delete(catId);
+          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId);
           return next;
         });
       }
     } catch {
       if (!flags?.cancelled) {
         setFailedCategories((prev) => {
-          if (prev.has(catId)) return prev;
-          const next = new Set(prev); next.add(catId);
+          if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId);
           return next;
         });
       }
     }
   }, [translatedGenreCategories]);
   useEffect(() => {
-    setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter("");
-    scanGenRef.current++;
+    setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter(""); scanGenRef.current++;
   }, [view]);
   // Fetch ICY metadata for a single station, optionally guarded by a staleness check
   const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => {
@@ -195,19 +164,16 @@ export default function BrowseView({
       const raw = result.streamTitle; const track = raw ? (parseTrack(raw, s.name) ?? null) : null;
       setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));
     } catch {
-      if (stale?.()) return;
-      setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
+      if (stale?.()) return; setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
     }
   }, []);
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
     const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen;
     const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); };
     await Promise.all(Array.from({ length: 3 }, worker));
-  }, [fetchMeta]);
-  const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
+  }, [fetchMeta]); const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
   useEffect(() => {
-    let cancelled = false; const flags = { cancelled: false };
-    setError(null);
+    let cancelled = false; const flags = { cancelled: false }; setError(null);
     if (view.mode !== "top") {
       // Search, genre, country modes — single list
       setLoading(true);
@@ -217,8 +183,7 @@ export default function BrowseView({
           switch (view.mode) {
             case "search": result = await searchStations(view.query); break;
             case "genre": result = await stationsByTag(view.tag); break;
-            case "country": result = await stationsByCountry(view.countryQueryName); break;
-            default: result = [];
+            case "country": result = await stationsByCountry(view.countryQueryName); break; default: result = [];
           }
           if (!cancelled) setStations(result);
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
@@ -253,8 +218,7 @@ export default function BrowseView({
         if (random) onPlay(random);
       }
       discoveryRef.current = setInterval(() => {
-        const random = pool[Math.floor(Math.random() * pool.length)];
-        if (random) onPlay(random);
+        const random = pool[Math.floor(Math.random() * pool.length)]; if (random) onPlay(random);
       }, 30_000);
     }
     return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
@@ -291,12 +255,10 @@ export default function BrowseView({
   if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
   // Filter grid by song/artist when songFilter is active — paginated
   const allSongFilteredStations = useMemo(() => {
-    const trimmed = songFilter.trim();
-    if (!trimmed) return [];
+    const trimmed = songFilter.trim(); if (!trimmed) return [];
     const q = trimmed.toLowerCase();
     return stations.filter(s => {
-      const live = liveData[s.stationuuid];
-      if (!live?.track) return false;
+      const live = liveData[s.stationuuid]; if (!live?.track) return false;
       const { title, artist } = live.track;
       return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));
     });
@@ -310,8 +272,7 @@ export default function BrowseView({
   const countryChipActive = (countryCode: string) => view.mode === "country" && view.countryCode === countryCode;
   return (
     <div className="col-fill min-w-0 h-full">
-      {/* Header */}
-      <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
+      {/* Header */} <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
         <div><h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2>
           <p className="text-[12px] text-muted mt-0.5">
             {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div><button
@@ -329,8 +290,7 @@ export default function BrowseView({
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-2`}><button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >{t("all")}</button>
-            {visibleGenres.map((cat) => (
+            >{t("all")}</button> {visibleGenres.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => onSelectGenre?.(cat)}
@@ -353,8 +313,7 @@ export default function BrowseView({
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}><button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >{`🌐 ${t("allCountries")}`}</button>
-            {visibleCountries.map((c) => (
+            >{`🌐 ${t("allCountries")}`}</button> {visibleCountries.map((c) => (
               <button
                 key={c.code}
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
@@ -369,8 +328,7 @@ export default function BrowseView({
               >{t("seeMore")}</button>)}</div>
         );
       })()}
-      {/* Content */}
-      <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
+      {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
         {loading && (
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
         )}
@@ -405,10 +363,8 @@ export default function BrowseView({
                       isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
                 )}
                 {effectiveBrowseOrder.map((catId) => {
-                  const cat = translatedGenreCategories.find((c) => c.id === catId);
-                  if (!cat) return null;
-                  const catStations = categorySections[catId];
-                  if (catStations?.length === 0) return null;
+                  const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return null;
+                  const catStations = categorySections[catId]; if (catStations?.length === 0) return null;
                   const icon = CATEGORY_ICONS[catId] ?? (
                     catStations
                       ? <span className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`} />
@@ -452,8 +408,7 @@ export default function BrowseView({
                             : t("scanNowPlaying")}</button>
                     {scanEnabled && (
                       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
-                        <Music2 size={11} className="text-dim shrink-0" />
-                        <input
+                        <Music2 size={11} className="text-dim shrink-0" /> <input
                           type="text"
                           placeholder={t("filterBySong")}
                           value={songFilter}
@@ -498,8 +453,7 @@ export default function BrowseView({
                         disabled={page === totalPages - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       >
-                        {t("next")}
-                        <ChevronRight size={14} /></button></div>)}</>
+                        {t("next")} <ChevronRight size={14} /></button></div>)}</>
               );
             })()}</>
         )}</div></div>

@@ -11,15 +11,13 @@ import { getDefaultLocaleForCountry } from "./countryDefaults";
 export const LOCALE_STORAGE_KEY = "radio-locale";
 
 export function getBrowserLocale(): SupportedLocale {
-  if (typeof navigator === "undefined") return "en";
-  const nav = navigator as Navigator & { languages?: string[] };
+  if (typeof navigator === "undefined") return "en"; const nav = navigator as Navigator & { languages?: string[] };
   if (Array.isArray(nav.languages) && nav.languages.length > 0) return normalizeLocale(nav.languages[0]);
   return normalizeLocale(nav.language);
 }
 
 export function getStoredLocale(): SupportedLocale | null {
-  if (typeof window === "undefined") return null;
-  const raw = loadStringFromStorage(LOCALE_STORAGE_KEY, "");
+  if (typeof window === "undefined") return null; const raw = loadStringFromStorage(LOCALE_STORAGE_KEY, "");
   return raw ? normalizeLocale(raw) : null;
 }
 
@@ -30,6 +28,5 @@ export function getInitialLocaleForCountry(countryCode: string): SupportedLocale
 }
 
 export function saveLocale(locale: SupportedLocale): void {
-  if (typeof window === "undefined") return;
-  saveStringToStorage(LOCALE_STORAGE_KEY, locale);
+  if (typeof window === "undefined") return; saveStringToStorage(LOCALE_STORAGE_KEY, locale);
 }

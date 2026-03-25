@@ -15,21 +15,15 @@ import UiImage from '@/components/common/UiImage';
 import { stationInitials } from '../utils/formatUtils';
 
 type Props = {
-  station: Station;
-  isPlaying: boolean;
-  isCurrent: boolean;
-  isFavorite: boolean;
-  onPlay: () => void;
-  onToggleFav: () => void;
-  liveStatus?: 'loading' | 'loaded' | 'error';
-  liveTrack?: { title: string; artist: string } | null;
-  onPeek?: () => void;
-  onPrefetch?: () => void;
+  station: Station; isPlaying: boolean;
+  isCurrent: boolean; isFavorite: boolean;
+  onPlay: () => void; onToggleFav: () => void;
+  liveStatus?: 'loading' | 'loaded' | 'error'; liveTrack?: { title: string; artist: string } | null;
+  onPeek?: () => void; onPrefetch?: () => void;
 };
 
 export default React.memo(function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek, onPrefetch }: Props) {
-  const [imgError, setImgError] = useState(false);
-  const showFallback = !station.favicon || imgError;
+  const [imgError, setImgError] = useState(false); const showFallback = !station.favicon || imgError;
   const tags = useMemo( () => station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean) ?? [],
     [station.tags],
   );
@@ -40,8 +34,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       className={`group cursor-pointer rounded-xl p-2 transition-all duration-150 ${isCurrent ? 'bg-surface-3 ring-1 ring-border-strong' : 'hover:bg-surface-2' }`}
       onClick={onPlay}
       onMouseEnter={onPrefetch}
-      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPlay(); } }}>
-      {/* Artwork */}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPlay(); } }}> {/* Artwork */}
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
         {showFallback ? (
           <div className="size-full dawn-gradient flex-center-row">
@@ -55,8 +48,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             loading="lazy"
             onError={() => setImgError(true)} />
         )}
-        {/* Play overlay */}
-        <motion.button
+        {/* Play overlay */} <motion.button
           aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ scale: 1.1 }}
@@ -65,19 +57,16 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           <div className="dot-10 bg-sys-orange flex-center-row shadow-lg shadow-black/30">
             {isCurrent && isPlaying ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
           </div></motion.button>
-        {/* Favorite badge */}
-        <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
+        {/* Favorite badge */} <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-pressed={isFavorite}
           className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50' }`}
         ><Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} /></button>
         {/* Now-playing indicator */}
         {isCurrent && isPlaying && <span className="absolute bottom-1.5 left-1.5 dot-2 bg-sys-orange animate-pulse" />}
-      </div>
-      {/* Name */}
+      </div> {/* Name */}
       <p className="text-[12px] font-medium text-white truncate leading-tight">{station.name}</p>
-      {/* Tags / Country / Format */}
-      <div className="flex-row-1 mt-1 flex-wrap">
+      {/* Tags / Country / Format */} <div className="flex-row-1 mt-1 flex-wrap">
         {station.codec && (
           <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">
             {station.codec}{station.bitrate > 0 ? ` ${station.bitrate}k` : ''}</span>

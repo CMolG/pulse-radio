@@ -15,10 +15,8 @@ export type RenderableLyricLine = { id: string; text: string; };
  * Lines are sorted ascending by time, so binary search is O(log n) vs O(n).
  */
 function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
-  if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1;
-  const lines = lyrics.lines;
-  let lo = 0;
-  let hi = lines.length - 1;
+  if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1; const lines = lyrics.lines;
+  let lo = 0; let hi = lines.length - 1;
   let result = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >>> 1;
@@ -45,7 +43,6 @@ export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLy
   }
   if (!lyrics.plainText) return [];
   return lyrics.plainText .split(/\r?\n/) .map((line) => line.trim()).filter(Boolean).map((text, index) => ({
-      id: `plain-${index}`,
-      text,
+      id: `plain-${index}`, text,
     }));
 }

@@ -10,18 +10,12 @@ import React from "react";
 import { X } from "lucide-react";
 
 const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: "Previous station" },
-  { key: "→", desc: "Next station" },
-  { key: "↑", desc: "Volume up" },
-  { key: "↓", desc: "Volume down" },
-  { key: "M", desc: "Mute / Unmute" },
-  { key: "F", desc: "Focus search" },
-  { key: "S", desc: "Favorite station" },
-  { key: "L", desc: "Like current song" },
-  { key: "R", desc: "Toggle realtime lyrics sync" },
-  { key: "T", desc: "Theater mode" },
-  { key: "E", desc: "Equalizer" },
-  { key: "Z", desc: "Cycle sleep timer" },
-  { key: "Esc", desc: "Close panel / exit theater" },
+  { key: "→", desc: "Next station" }, { key: "↑", desc: "Volume up" },
+  { key: "↓", desc: "Volume down" }, { key: "M", desc: "Mute / Unmute" },
+  { key: "F", desc: "Focus search" }, { key: "S", desc: "Favorite station" },
+  { key: "L", desc: "Like current song" }, { key: "R", desc: "Toggle realtime lyrics sync" },
+  { key: "T", desc: "Theater mode" }, { key: "E", desc: "Equalizer" },
+  { key: "Z", desc: "Cycle sleep timer" }, { key: "Esc", desc: "Close panel / exit theater" },
   { key: "?", desc: "Toggle this help" },
 ];
 

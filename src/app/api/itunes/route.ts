@@ -20,8 +20,7 @@ export async function GET(req: NextRequest) {
   }
   // Support podcast search via ?media=podcast (defaults to music for backward compat)
   const media = req.nextUrl.searchParams.get('media') === 'podcast' ? 'podcast' : 'music';
-  const entity = media === 'podcast' ? 'podcast' : 'song';
-  const limit = media === 'podcast' ? '20' : '3';
+  const entity = media === 'podcast' ? 'podcast' : 'song'; const limit = media === 'podcast' ? '20' : '3';
   try {
     const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit, })}`;
     const res = await apiFetch(url, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes API' });

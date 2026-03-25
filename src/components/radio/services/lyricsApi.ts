@@ -20,8 +20,7 @@ function isTransientError(err: unknown): boolean {
 // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta.
 function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> {
   if (!parentSignal) return fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   const onParentAbort = () => controller.abort();
   if (parentSignal.aborted) {
     clearTimeout(timeout); controller.abort();
@@ -34,8 +33,7 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
 }
 
 export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
-  fallbackArtist?: string,
-  signal?: AbortSignal,
+  fallbackArtist?: string, signal?: AbortSignal,
 ): Promise<LyricsData | null> {
   const artistCandidates = [...new Set([artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),)];
   if (!artistCandidates.length || !title?.trim()) return null;
@@ -54,8 +52,7 @@ export async function fetchLyrics( artist: string, title: string, album?: string
 
 async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: (d: T) => LyricsData | null): Promise<LyricsData | null> {
   try {
-    const res = await fetchWithCancel(url, signal);
-    if (res.ok) return parse(await res.json());
+    const res = await fetchWithCancel(url, signal); if (res.ok) return parse(await res.json());
     await res.text().catch(() => {}); // drain body
   } catch (err) { if (isTransientError(err)) throw err; }
   return null;
@@ -65,11 +62,9 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
   const params = new URLSearchParams({ artist_name: artist, track_name: title, });
-  if (album) params.set('album_name', album);
-  if (duration) params.set('duration', String(Math.round(duration)));
+  if (album) params.set('album_name', album); if (duration) params.set('duration', String(Math.round(duration)));
   const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, d => transform(d, artist, title));
-  if (exact) return exact;
-  if (signal?.aborted) return null;
+  if (exact) return exact; if (signal?.aborted) return null;
   return tryFetch<LrcLibResponse[]>(
     `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
     signal, r => r.length > 0 ? transform(r[0], artist, title) : null,

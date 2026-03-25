@@ -20,10 +20,8 @@ function clamp01(value: number): number { return Math.max(0, Math.min(1, value))
  * Uses fast attack + slower release to track energy while avoiding jitter.
  */
 export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amplitude: number } {
-  const [amplitude, setAmplitude] = useState(0);
-  const valueRef = useRef(0);
-  const lastPublishedRef = useRef(0);
-  const rafRef = useRef(0);
+  const [amplitude, setAmplitude] = useState(0); const valueRef = useRef(0);
+  const lastPublishedRef = useRef(0); const rafRef = useRef(0);
   const lastTsRef = useRef(0);
   useEffect(() => {
     const loop = (ts: number) => {
@@ -39,10 +37,8 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
         lastPublishedRef.current = valueRef.current; setAmplitude(valueRef.current);
       }
       rafRef.current = requestAnimationFrame(loop);
-    };
-    rafRef.current = requestAnimationFrame(loop);
+    }; rafRef.current = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(rafRef.current); lastTsRef.current = 0; };
-  }, [enabled, meterRef]);
-  return { amplitude };
+  }, [enabled, meterRef]); return { amplitude };
 }
 

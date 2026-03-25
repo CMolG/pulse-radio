@@ -27,8 +27,7 @@ export async function GET(req: NextRequest) {
     const host = url.hostname.toLowerCase();
     if (isPrivateHost(host)) return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
   } catch { return NextResponse.json({ error: 'Invalid URL' }, { status: 400 }); }
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const res = await fetch(streamUrl, { headers: { 'Icy-MetaData': '1' }, signal: controller.signal, });
     // Validate the final URL after redirects to prevent SSRF via redirect
@@ -52,10 +51,8 @@ export async function GET(req: NextRequest) {
       // No ICY support — return whatever headers are available
       clearTimeout(timeout); res.body?.cancel().catch(() => {});
       return NextResponse.json({
-        streamTitle: null,
-        icyName: icyName || null,
-        icyGenre: icyGenre || null,
-        icyBr: icyBr || null,
+        streamTitle: null, icyName: icyName || null,
+        icyGenre: icyGenre || null, icyBr: icyBr || null,
       });
     }
     const metaint = parseInt(icyMetaint, 10);
@@ -69,8 +66,7 @@ export async function GET(req: NextRequest) {
     const bytesNeeded = metaint + 4096;
     try {
       while (totalRead < bytesNeeded) {
-        const { done, value } = await reader.read();
-        if (done || !value) break;
+        const { done, value } = await reader.read(); if (done || !value) break;
         chunks.push(value); totalRead += value.length;
       }
     } finally {
