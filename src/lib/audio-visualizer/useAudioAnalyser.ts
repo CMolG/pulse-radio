@@ -17,8 +17,7 @@ interface UseAudioAnalyserReturn {
   /** Stable ref whose .current is updated in-place every frame — zero allocations */
   waveDataRef: React.RefObject<Uint8Array<ArrayBuffer> | null>;
   /** Audio metering: peak level 0-1, RMS level 0-1 (updated every frame) */
-  meterRef: React.RefObject<{ peak: number; rms: number }>; isActive: boolean;
-  disconnect: () => void;
+  meterRef: React.RefObject<{ peak: number; rms: number }>; isActive: boolean; disconnect: () => void;
 }
 
 export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
@@ -52,8 +51,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
               // to avoid 256 float divisions per frame — normalize once at the end
               const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0;
               for (let i = 0; i < buf.length; i++) {
-                const s = buf[i] - 128; sumSqInt += s * s; const a = s < 0 ? -s : s;
-                if (a > maxAbsInt) maxAbsInt = a;
+                const s = buf[i] - 128; sumSqInt += s * s; const a = s < 0 ? -s : s; if (a > maxAbsInt) maxAbsInt = a;
               }
               meterRef.current.peak = maxAbsInt / 128; meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128;
             }

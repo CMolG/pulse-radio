@@ -8,15 +8,12 @@
 import React, { useRef, useEffect } from 'react';
 
 interface VisualizerCanvasProps {
-  frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave';
-  barCount?: number; color?: string;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
   opacity?: number; className?: string;
 }
 
 export function VisualizerCanvas({
-  frequencyDataRef, mode = 'bars',
-  barCount = 64, color = 'var(--accent-color)',
-  opacity = 0.4, className = '',
+  frequencyDataRef, mode = 'bars', barCount = 64, color = 'var(--accent-color)', opacity = 0.4, className = '',
 }: VisualizerCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
   const resolvedColorRef = useRef<string | null>(null); const sizeRef = useRef({ width: 0, height: 0 });

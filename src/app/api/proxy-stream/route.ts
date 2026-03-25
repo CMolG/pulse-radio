@@ -79,8 +79,7 @@ export async function GET(req: NextRequest) {
     const responseHeaders: Record<string, string> = {
       'Content-Type': contentType, 'Access-Control-Allow-Origin': '*',
       'Cache-Control': 'no-cache, no-store', 'Transfer-Encoding': 'chunked',
-    }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr;
-    if (icyName) responseHeaders['X-Stream-Name'] = icyName;
+    }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr; if (icyName) responseHeaders['X-Stream-Name'] = icyName;
     // HEAD requests: return headers only (for prefetch / codec sniffing)
     if (req.method === 'HEAD') {
       if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});

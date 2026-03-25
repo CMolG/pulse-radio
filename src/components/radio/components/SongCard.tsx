@@ -9,8 +9,7 @@ import { formatTimeAgo, itunesSearchUrl } from "../utils/formatUtils";
 export type SongCardItem = SongDetailData & { id: string; timestamp: number };
 type HeartAction = { filled: boolean; onClick: () => void; label: string };
 type Props = {
-  item: SongCardItem; delay: number;
-  onRemove: () => void; onSelect?: (song: SongDetailData) => void;
+  item: SongCardItem; delay: number; onRemove: () => void; onSelect?: (song: SongDetailData) => void;
   heart?: HeartAction | null; hideRemove?: boolean;
 };
 

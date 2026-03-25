@@ -17,35 +17,21 @@ import UiImage from "@/components/common/UiImage";
 import { stationInitials } from "../utils/formatUtils";
 
 type Props = {
-  station: Station | null; track: NowPlayingTrack | null;
-  status: PlaybackStatus; volume: number;
+  station: Station | null; track: NowPlayingTrack | null; status: PlaybackStatus; volume: number;
   muted: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
-  icyBitrate?: string | null; onTogglePlay: () => void;
-  onSetVolume: (v: number) => void; onToggleMute: () => void;
-  onToggleEq: () => void; onToggleTheater?: () => void;
-  onToggleFav?: () => void; onFavSong?: () => void;
-  isFavorite?: boolean; songLiked?: boolean;
-  eqPresetActive?: boolean; showEq: boolean;
-  theaterMode?: boolean; compact?: boolean;
-  sleepTimerMin?: number | null; onCycleSleepTimer?: () => void;
+  icyBitrate?: string | null; onTogglePlay: () => void; onSetVolume: (v: number) => void; onToggleMute: () => void;
+  onToggleEq: () => void; onToggleTheater?: () => void; onToggleFav?: () => void; onFavSong?: () => void;
+  isFavorite?: boolean; songLiked?: boolean; eqPresetActive?: boolean; showEq: boolean;
+  theaterMode?: boolean; compact?: boolean; sleepTimerMin?: number | null; onCycleSleepTimer?: () => void;
   streamQuality?: StreamQuality;
 };
 
 const SAFE_AREA_STYLE: React.CSSProperties = { paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' };
 
 function NowPlayingBar({
-  station, track,
-  status, volume,
-  muted, frequencyDataRef,
-  icyBitrate, onTogglePlay,
-  onSetVolume, onToggleMute,
-  onToggleEq, onToggleTheater,
-  onToggleFav, onFavSong,
-  isFavorite, songLiked,
-  eqPresetActive, showEq,
-  theaterMode, compact,
-  sleepTimerMin, onCycleSleepTimer,
-  streamQuality,
+  station, track, status, volume, muted, frequencyDataRef, icyBitrate, onTogglePlay,
+  onSetVolume, onToggleMute, onToggleEq, onToggleTheater, onToggleFav, onFavSong, isFavorite, songLiked,
+  eqPresetActive, showEq, theaterMode, compact, sleepTimerMin, onCycleSleepTimer, streamQuality,
 }: Props) {
   const isPlaying = status === "playing"; const isLoading = status === "loading";
   const [imgError, setImgError] = useState(false); const coverUrlForReset = track?.artworkUrl ?? station?.favicon;

@@ -5,9 +5,7 @@
  */
 
 export type SovereignCountry = {
-  code: string; name: string;
-  region: string; subregion: string;
-  borders: string[]; lang3: string[];
+  code: string; name: string; region: string; subregion: string; borders: string[]; lang3: string[];
 };
 
 export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [

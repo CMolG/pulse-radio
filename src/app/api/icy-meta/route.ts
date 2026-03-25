@@ -51,8 +51,7 @@ export async function GET(req: NextRequest) {
       // No ICY support — return whatever headers are available
       clearTimeout(timeout); res.body?.cancel().catch(() => {});
       return NextResponse.json({
-        streamTitle: null, icyName: icyName || null,
-        icyGenre: icyGenre || null, icyBr: icyBr || null,
+        streamTitle: null, icyName: icyName || null, icyGenre: icyGenre || null, icyBr: icyBr || null,
       });
     }
     const metaint = parseInt(icyMetaint, 10);

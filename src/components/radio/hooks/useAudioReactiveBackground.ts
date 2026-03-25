@@ -21,8 +21,7 @@ function clamp01(value: number): number { return Math.max(0, Math.min(1, value))
  */
 export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amplitude: number } {
   const [amplitude, setAmplitude] = useState(0); const valueRef = useRef(0);
-  const lastPublishedRef = useRef(0); const rafRef = useRef(0);
-  const lastTsRef = useRef(0);
+  const lastPublishedRef = useRef(0); const rafRef = useRef(0); const lastTsRef = useRef(0);
   useEffect(() => {
     const loop = (ts: number) => {
       const lastTs = lastTsRef.current || ts; lastTsRef.current = ts;

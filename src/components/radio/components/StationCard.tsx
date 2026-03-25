@@ -15,8 +15,7 @@ import UiImage from '@/components/common/UiImage';
 import { stationInitials } from '../utils/formatUtils';
 
 type Props = {
-  station: Station; isPlaying: boolean;
-  isCurrent: boolean; isFavorite: boolean;
+  station: Station; isPlaying: boolean; isCurrent: boolean; isFavorite: boolean;
   onPlay: () => void; onToggleFav: () => void;
   liveStatus?: 'loading' | 'loaded' | 'error'; liveTrack?: { title: string; artist: string } | null;
   onPeek?: () => void; onPrefetch?: () => void;
@@ -64,8 +63,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
         ><Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} /></button>
         {/* Now-playing indicator */}
         {isCurrent && isPlaying && <span className="absolute bottom-1.5 left-1.5 dot-2 bg-sys-orange animate-pulse" />}
-      </div> {/* Name */}
-      <p className="text-[12px] font-medium text-white truncate leading-tight">{station.name}</p>
+      </div> {/* Name */} <p className="text-[12px] font-medium text-white truncate leading-tight">{station.name}</p>
       {/* Tags / Country / Format */} <div className="flex-row-1 mt-1 flex-wrap">
         {station.codec && (
           <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">

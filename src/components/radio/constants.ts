@@ -8,8 +8,7 @@ import type { BrowseCategory, EqBand, EqPreset } from './types';
 import type { MessageKey } from '@/lib/i18n/messages';
 
 export const STORAGE_KEYS = {
-  FAVORITES: 'radio-favorites', RECENT: 'radio-recent',
-  VOLUME: 'radio-volume', EQ_BANDS: 'radio-eq-bands',
+  FAVORITES: 'radio-favorites', RECENT: 'radio-recent', VOLUME: 'radio-volume', EQ_BANDS: 'radio-eq-bands',
   LYRICS_CACHE: 'radio-lyrics-cache', CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
   HISTORY: 'radio-history', FAVORITE_SONGS: 'radio-favorite-songs',
   NORMALIZER_ENABLED: 'radio-normalizer-enabled', STEREO_WIDTH: 'radio-stereo-width',
@@ -68,19 +67,14 @@ const _flagCache = new Map<string, string>();
 
 export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐'; const cached = _flagCache.get(code);
-  if (cached) return cached; const upper = code.toUpperCase();
-  if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
+  if (cached) return cached; const upper = code.toUpperCase(); if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
   const flag = String.fromCodePoint(0x1F1E6 + upper.charCodeAt(0) - 65, 0x1F1E6 + upper.charCodeAt(1) - 65,);
   _flagCache.set(code, flag); return flag;
 }
 
 export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
-  trending: "genreTrending", pop: "genrePop",
-  rock: "genreRock", jazz: "genreJazz",
-  classical: "genreClassical", electronic: "genreElectronic",
-  hiphop: "genreHiphop", country: "genreCountry",
-  ambient: "genreAmbient", lofi: "genreLofi",
-  news: "genreNews", latin: "genreLatin",
-  metal: "genreMetal", local: "genreLocal",
-  world: "genreWorld",
+  trending: "genreTrending", pop: "genrePop", rock: "genreRock", jazz: "genreJazz",
+  classical: "genreClassical", electronic: "genreElectronic", hiphop: "genreHiphop", country: "genreCountry",
+  ambient: "genreAmbient", lofi: "genreLofi", news: "genreNews", latin: "genreLatin",
+  metal: "genreMetal", local: "genreLocal", world: "genreWorld",
 };

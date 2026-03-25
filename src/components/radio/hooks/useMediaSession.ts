@@ -10,10 +10,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 
 type MediaSessionConfig = {
-  station: Station | null; track: NowPlayingTrack | null;
-  isPlaying: boolean; onPlay: () => void;
-  onPause: () => void; onNext: () => void;
-  onPrev: () => void; onStop: () => void;
+  station: Station | null; track: NowPlayingTrack | null; isPlaying: boolean; onPlay: () => void;
+  onPause: () => void; onNext: () => void; onPrev: () => void; onStop: () => void;
   onSeekBackward?: () => void; onSeekForward?: () => void;
 };
 

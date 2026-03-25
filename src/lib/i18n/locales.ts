@@ -49,24 +49,10 @@ export function isSupportedLocale(value: string): value is SupportedLocale {
 }
 
 const BASE_LOCALE_MAP: Record<string, SupportedLocale> = {
-  en: "en", es: "es",
-  fr: "fr", de: "de",
-  pt: "pt", it: "it",
-  nl: "nl", ja: "ja",
-  ko: "ko", zh: "zh",
-  ar: "ar", hi: "hi",
-  bn: "bn", ru: "ru",
-  uk: "uk", pl: "pl",
-  tr: "tr", sv: "sv",
-  da: "da", nb: "nb",
-  no: "nb", fi: "fi",
-  el: "el", cs: "cs",
-  hu: "hu", ro: "ro",
-  th: "th", vi: "vi",
-  id: "id", ms: "ms",
-  fa: "fa", he: "he",
-  sw: "sw", tl: "tl",
-  fil: "tl",
+  en: "en", es: "es", fr: "fr", de: "de", pt: "pt", it: "it", nl: "nl", ja: "ja",
+  ko: "ko", zh: "zh", ar: "ar", hi: "hi", bn: "bn", ru: "ru", uk: "uk", pl: "pl",
+  tr: "tr", sv: "sv", da: "da", nb: "nb", no: "nb", fi: "fi", el: "el", cs: "cs",
+  hu: "hu", ro: "ro", th: "th", vi: "vi", id: "id", ms: "ms", fa: "fa", he: "he", sw: "sw", tl: "tl", fil: "tl",
 };
 
 export function normalizeLocale(input: string | null | undefined): SupportedLocale {

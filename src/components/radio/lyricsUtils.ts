@@ -16,8 +16,7 @@ export type RenderableLyricLine = { id: string; text: string; };
  */
 function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1; const lines = lyrics.lines;
-  let lo = 0; let hi = lines.length - 1;
-  let result = -1;
+  let lo = 0; let hi = lines.length - 1; let result = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >>> 1;
     if (lines[mid].time <= currentTime) {

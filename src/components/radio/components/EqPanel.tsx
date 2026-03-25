@@ -12,10 +12,8 @@ import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_PRESETS } from '../constants';
 
 type Props = {
-  bands: EqBand[]; enabled: boolean;
-  normalizerEnabled: boolean; stereoWidth: number;
-  bassEnhance: number; compressorEnabled: boolean;
-  compressorAmount: number; noiseReductionMode: NoiseReductionMode;
+  bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; stereoWidth: number;
+  bassEnhance: number; compressorEnabled: boolean; compressorAmount: number; noiseReductionMode: NoiseReductionMode;
   customPresets?: EqPreset[]; onSetGain: (id: string, gain: number) => void;
   onApplyPreset: (gains: number[]) => void; onToggleEnabled: () => void;
   onToggleNormalizer: () => void; onSetStereoWidth: (w: number) => void;

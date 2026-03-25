@@ -138,8 +138,7 @@ export function useEqualizer() {
       const filters = bands.map(band => {
         const filter = ctx.createBiquadFilter(); filter.type = band.type;
         filter.frequency.value = Math.max(20, Math.min(nyquist - 1, band.frequency));
-        filter.gain.value = enabled ? band.gain : 0; if (band.type === 'peaking') filter.Q.value = 1.0;
-        return filter;
+        filter.gain.value = enabled ? band.gain : 0; if (band.type === 'peaking') filter.Q.value = 1.0; return filter;
       });
       // Chain: source → normalizer → makeup gain → filter[0] → ... → limiter → destination
       // Normalizer: gentle compressor that levels loudness across stations
@@ -248,8 +247,7 @@ export function useEqualizer() {
       const merger = ctx.createChannelMerger(2); const outputGain = ctx.createGain();
       const directL = ctx.createGain(); const directR = ctx.createGain();
       const crossL = ctx.createGain(); const crossR = ctx.createGain(); directL.gain.value = direct;
-      directR.gain.value = direct; crossL.gain.value = cross; crossR.gain.value = cross;
-      limiter.connect(splitter);
+      directR.gain.value = direct; crossL.gain.value = cross; crossR.gain.value = cross; limiter.connect(splitter);
       // L channel: direct L + cross R
       splitter.connect(directL, 0); splitter.connect(crossR, 1);
       directL.connect(merger, 0, 0); crossR.connect(merger, 0, 0);
@@ -355,17 +353,11 @@ export function useEqualizer() {
   }, [applyNoiseReductionPreset]);
   useEffect(() => { applyNoiseReductionPreset(noiseReductionMode); }, [applyNoiseReductionPreset, noiseReductionMode]);
   return {
-    bands, enabled,
-    normalizerEnabled, stereoWidth,
-    bassEnhance, compressorEnabled,
-    compressorAmount, noiseReductionMode,
-    customPresets, setBandGain,
-    applyPreset, toggleEnabled,
-    toggleNormalizer, setStereoWidth,
-    setBassEnhance, toggleCompressor,
-    setCompressorAmount, setNoiseReductionMode,
-    setOutputVolume, connectSource,
-    disconnect, saveCustomPreset,
-    removeCustomPreset,
+    bands, enabled, normalizerEnabled, stereoWidth,
+    bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode,
+    customPresets, setBandGain, applyPreset, toggleEnabled,
+    toggleNormalizer, setStereoWidth, setBassEnhance, toggleCompressor,
+    setCompressorAmount, setNoiseReductionMode, setOutputVolume, connectSource,
+    disconnect, saveCustomPreset, removeCustomPreset,
   };
 }

@@ -56,8 +56,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
             !step.relockTriggered
           ) { return prev; }
           return {
-            ...prev, status: 'listening',
-            activeLineIndex: step.confirmedIndex, candidateLineIndex: step.candidateIndex,
+            ...prev, status: 'listening', activeLineIndex: step.confirmedIndex, candidateLineIndex: step.candidateIndex,
             confidence: step.score, effectiveCurrentTime,
             diagnostics: {
               ...prev.diagnostics, lastHypothesisMs: hypothesis.tsMs,
@@ -71,20 +70,16 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
       },
       onFatalError: (errorMessage) => {
         setRuntimeState(prev => ({
-          ...prev, status: 'error',
-          activeLineIndex: -1, candidateLineIndex: -1,
-          confidence: 0, effectiveCurrentTime: undefined,
-          diagnostics: { ...prev.diagnostics, errorMessage, },
+          ...prev, status: 'error', activeLineIndex: -1, candidateLineIndex: -1,
+          confidence: 0, effectiveCurrentTime: undefined, diagnostics: { ...prev.diagnostics, errorMessage, },
         }));
       },
-    }); engineRef.current = engine; engine.start(languageHint);
-    return () => { engine.stop(); };
+    }); engineRef.current = engine; engine.start(languageHint); return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
   const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
   return {
-    ...runtimeState, enabled: manuallyEnabled,
-    supported,
+    ...runtimeState, enabled: manuallyEnabled, supported,
     status: !supported ? 'unsupported' : !realtimeActive
         ? 'idle'
         : runtimeState.status === 'idle' ? 'ready' : runtimeState.status,

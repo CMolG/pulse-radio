@@ -27,12 +27,9 @@ const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; chi
 type Props = {
   station: Station; track: NowPlayingTrack | null;
   isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
-  artworkUrl?: string | null; icyBitrate?: string | null;
-  onBack: () => void; onToggleFav?: () => void;
-  isFavorite?: boolean; onFavSong?: () => void;
-  isSongLiked?: boolean; lyrics?: LyricsData | null;
-  currentTime?: number; activeLineOverride?: number;
-  lyricsVariant?: "mobile" | "desktop"; compact?: boolean;
+  artworkUrl?: string | null; icyBitrate?: string | null; onBack: () => void; onToggleFav?: () => void;
+  isFavorite?: boolean; onFavSong?: () => void; isSongLiked?: boolean; lyrics?: LyricsData | null;
+  currentTime?: number; activeLineOverride?: number; lyricsVariant?: "mobile" | "desktop"; compact?: boolean;
 };
 
 const _colorCache = new Map<string, Promise<[string, string, string]>>();
@@ -51,8 +48,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         const buckets: Record<number, number> = {};
         for (let i = 0; i < data.length; i += 12) {
           const r = data[i], g = data[i + 1], b = data[i + 2]; const max = Math.max(r, g, b), min = Math.min(r, g, b);
-          if (max - min < 25) continue; const s = (max - min) / max;
-          if (s < 0.2) continue; let h = 0;
+          if (max - min < 25) continue; const s = (max - min) / max; if (s < 0.2) continue; let h = 0;
           if (max === r) h = 60 * (((g - b) / (max - min)) % 6);
           else if (max === g) h = 60 * ((b - r) / (max - min) + 2); else h = 60 * ((r - g) / (max - min) + 4);
           if (h < 0) h += 360; const bucket = Math.round(h / 30) * 30; buckets[bucket] = (buckets[bucket] || 0) + 1;
@@ -73,14 +69,8 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
 }
 
 export default function TheaterView({
-  station, track,
-  isPlaying, frequencyDataRef,
-  artworkUrl, icyBitrate,
-  onBack, onToggleFav,
-  isFavorite, onFavSong,
-  isSongLiked, lyrics,
-  currentTime, activeLineOverride,
-  lyricsVariant = "mobile", compact,
+  station, track, isPlaying, frequencyDataRef, artworkUrl, icyBitrate, onBack, onToggleFav,
+  isFavorite, onFavSong, isSongLiked, lyrics, currentTime, activeLineOverride, lyricsVariant = "mobile", compact,
 }: Props) {
   const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
   const [colors, setColors] = useState<[string, string, string]>(FALLBACK_COLORS);
@@ -125,8 +115,7 @@ export default function TheaterView({
         className="absolute inset-0 z-6 pointer-events-none"
         style={{
           background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-          backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay',
-          opacity: 0.6,
+          backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay', opacity: 0.6,
         }} />
       <div
         className="absolute inset-0 z-6 pointer-events-none"

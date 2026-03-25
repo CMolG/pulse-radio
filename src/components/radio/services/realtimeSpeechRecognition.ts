@@ -85,12 +85,10 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
   };
   return {
     start: (lang) => {
-      if (destroyed || running) return; wireRecognition(lang);
-      if (!recognition) return;
+      if (destroyed || running) return; wireRecognition(lang); if (!recognition) return;
       try {
         recognition.start(); running = true; restartCount = 0;
       } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
-    }, stop: () => { running = false; teardown(); },
-    destroy: () => { destroyed = true; running = false; teardown(); },
+    }, stop: () => { running = false; teardown(); }, destroy: () => { destroyed = true; running = false; teardown(); },
   };
 }

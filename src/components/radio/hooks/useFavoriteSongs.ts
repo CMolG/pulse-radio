@@ -28,8 +28,7 @@ export function useFavoriteSongs() {
     // Dedup on load in case of corrupted storage
     const seen = new Set<string>();
     return loaded.filter(s => {
-      const key = songKey(s.title, s.artist); if (seen.has(key)) return false;
-      seen.add(key); return true;
+      const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;
     });
   });
   // O(1) lookup Set — rebuilt only when songs array changes

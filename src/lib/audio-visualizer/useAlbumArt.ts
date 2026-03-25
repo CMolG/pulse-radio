@@ -10,10 +10,8 @@ import { normalizeText } from '@/lib/stringUtils';
 const FETCH_TIMEOUT = 8_000;
 
 interface AlbumInfo {
-  artworkUrl: string | null; albumName: string | null;
-  releaseDate: string | null; itunesUrl: string | null;
-  durationMs: number | null; genre: string | null;
-  trackNumber: number | null; trackCount: number | null;
+  artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null;
+  durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null;
 }
 
 const CACHE = new Map<string, AlbumInfo>();
@@ -24,12 +22,9 @@ const EMPTY_ALBUM_INFO: AlbumInfo = {
 };
 
 type ItunesResult = {
-  trackName?: string; artistName?: string;
-  artworkUrl100?: string; trackViewUrl?: string;
-  collectionViewUrl?: string; collectionName?: string;
-  releaseDate?: string; trackTimeMillis?: number;
-  primaryGenreName?: string; trackNumber?: number;
-  trackCount?: number;
+  trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
+  collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number;
+  primaryGenreName?: string; trackNumber?: number; trackCount?: number;
 };
 
 // Reusable match arrays for Jaro distance — avoids allocation per call
@@ -47,15 +42,12 @@ function jaroDistance(a: string, b: string): number {
   for (let i = 0; i < a.length; i++) {
     const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
-      if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true;
-      matches++; break;
+      if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break;
     }
   }
-  if (!matches) return 0; let t = 0;
-  let k = 0;
+  if (!matches) return 0; let t = 0; let k = 0;
   for (let i = 0; i < a.length; i++) {
-    if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++;
-    if (a[i] !== b[k]) t++; k++;
+    if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++;
   }
   const transpositions = t / 2;
   return (
@@ -66,8 +58,7 @@ function jaroDistance(a: string, b: string): number {
 }
 
 function jaroWinkler(a: string, b: string): number {
-  const jaro = jaroDistance(a, b); if (jaro < 0.7) return jaro;
-  let prefix = 0; const maxPrefix = 4;
+  const jaro = jaroDistance(a, b); if (jaro < 0.7) return jaro; let prefix = 0; const maxPrefix = 4;
   for (let i = 0; i < Math.min(maxPrefix, a.length, b.length); i++) { if (a[i] === b[i]) prefix++; else break; }
   return jaro + prefix * 0.1 * (1 - jaro);
 }
@@ -119,16 +110,14 @@ function cacheGet(key: string): AlbumInfo | undefined {
 function cacheSet(key: string, value: AlbumInfo) {
   CACHE.delete(key); CACHE.set(key, value);
   while (CACHE.size > MAX_CACHE) {
-    const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest);
-    else break;
+    const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest); else break;
   }
 }
 
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 
 function appendReferrer(url: string): string {
-  if (!url) return url; const sep = url.includes('?') ? '&' : '?';
-  return `${url}${sep}${ITUNES_REFERRER}`;
+  if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`;
 }
 
 /** Preload an image so it's already in the browser cache when rendered. */

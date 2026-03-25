@@ -6,8 +6,7 @@ export type PaintFn = (ctx: CanvasRenderingContext2D, w: number, h: number, freq
 
 /** Shared RAF-driven canvas loop with DPR-aware sizing. */
 export function useCanvasLoop(
-  frequencyDataRef: React.RefObject<Uint8Array | null> | undefined, paint: PaintFn,
-  dprScale = 1,
+  frequencyDataRef: React.RefObject<Uint8Array | null> | undefined, paint: PaintFn, dprScale = 1,
 ): React.RefObject<HTMLCanvasElement | null> {
   const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
   const paintRef = useRef(paint); const freqRef = useRef(frequencyDataRef);

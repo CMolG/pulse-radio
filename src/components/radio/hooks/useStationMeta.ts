@@ -10,8 +10,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 
 const CODEC_MAP: Record<string, string> = {
-  MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus',
-  FLAC: 'FLAC', WMA: 'WMA',
+  MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus', FLAC: 'FLAC', WMA: 'WMA',
 };
 
 // Patterns that indicate ads/spam rather than real song metadata
@@ -135,7 +134,6 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     // Keep showing track/bitrate as long as a station is selected.
     // We do NOT null these out while loading — the ICY swap keeps the
     // previous station's data visible until new data arrives.
-    track: station ? track : null, icyBitrate: station ? icyBitrate : null,
-    streamCodec: station ? streamCodec : null,
+    track: station ? track : null, icyBitrate: station ? icyBitrate : null, streamCodec: station ? streamCodec : null,
   };
 }

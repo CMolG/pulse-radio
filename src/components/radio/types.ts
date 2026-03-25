@@ -5,36 +5,28 @@
  */
 
 export type Station = {
-  stationuuid: string; name: string;
-  url_resolved: string; favicon: string;
-  country: string; countrycode: string;
-  tags: string; votes: number;
-  codec: string; bitrate: number;
-  language?: string; homepage?: string;
+  stationuuid: string; name: string; url_resolved: string; favicon: string;
+  country: string; countrycode: string; tags: string; votes: number;
+  codec: string; bitrate: number; language?: string; homepage?: string;
 };
 
 type TrackFields = {
-  title: string; artist: string;
-  album?: string; artworkUrl?: string;
-  itunesUrl?: string; durationMs?: number;
-  genre?: string; releaseDate?: string;
+  title: string; artist: string; album?: string; artworkUrl?: string;
+  itunesUrl?: string; durationMs?: number; genre?: string; releaseDate?: string;
   trackNumber?: number; trackCount?: number;
 };
 
 export type NowPlayingTrack = TrackFields;
 export type LyricLine = { time: number; text: string };
 export type LyricsData = {
-  trackName: string; artistName: string;
-  albumName?: string; duration?: number;
-  synced: boolean; lines: LyricLine[];
-  plainText?: string; realtimeCapable?: boolean;
+  trackName: string; artistName: string; albumName?: string; duration?: number;
+  synced: boolean; lines: LyricLine[]; plainText?: string; realtimeCapable?: boolean;
   realtimeLanguage?: 'en' | 'es' | null;
 };
 
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 export type PlaybackState = {
-  station: Station | null; status: PlaybackStatus;
-  volume: number; muted: boolean;
+  station: Station | null; status: PlaybackStatus; volume: number; muted: boolean;
   track: NowPlayingTrack | null; errorMessage?: string;
 };
 
@@ -42,27 +34,22 @@ export type EqBand = { id: string; frequency: number; type: BiquadFilterType; ga
 export type EqPreset = { name: string; gains: number[] };
 export type BrowseCategory = { id: string; label: string; tag?: string; country?: string; gradient: string; };
 export type ViewState = {
-  mode: 'top' | 'search' | 'genre' | 'country'; query: string;
-  tag: string; countryCode: string;
+  mode: 'top' | 'search' | 'genre' | 'country'; query: string; tag: string; countryCode: string;
   countryQueryName: string; label: string;
 };
 
 export type LrcLibResponse = {
-  id: number; trackName: string;
-  artistName: string; albumName: string;
-  duration: number; instrumental: boolean;
-  plainLyrics: string | null; syncedLyrics: string | null;
+  id: number; trackName: string; artistName: string; albumName: string;
+  duration: number; instrumental: boolean; plainLyrics: string | null; syncedLyrics: string | null;
 };
 
 export type SongDetailData = TrackFields & { stationName: string };
 export type HistoryEntry = SongDetailData & { id: string; stationUuid: string; timestamp: number };
 export type FavoriteSong = HistoryEntry;
 export type ArtistInfo = {
-  name: string; disambiguation: string | null;
-  type: string | null; country: string | null;
+  name: string; disambiguation: string | null; type: string | null; country: string | null;
   beginArea: string | null; lifeSpan: { begin: string | null; end: string | null; ended: boolean } | null;
-  tags: string[]; bio: string | null;
-  imageUrl: string | null; wikipediaUrl: string | null;
+  tags: string[]; bio: string | null; imageUrl: string | null; wikipediaUrl: string | null;
 };
 
 export type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';

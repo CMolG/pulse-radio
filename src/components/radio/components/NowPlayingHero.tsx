@@ -17,14 +17,11 @@ import { stationInitials } from "../utils/formatUtils";
 type Props = {
   station: Station; track: NowPlayingTrack | null;
   isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
-  artworkUrl?: string | null; icyBitrate?: string | null;
-  onTheater?: () => void;
+  artworkUrl?: string | null; icyBitrate?: string | null; onTheater?: () => void;
 };
 
 export default React.memo(function NowPlayingHero({
-  station, track,
-  isPlaying, artworkUrl,
-  icyBitrate, onTheater,
+  station, track, isPlaying, artworkUrl, icyBitrate, onTheater,
 }: Props) {
   const [imgError, setImgError] = useState(false); const coverUrl = artworkUrl ?? station.favicon;
   // Reset error state when cover URL changes so new artwork gets a chance to load

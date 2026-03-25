@@ -20,8 +20,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     // Dedup by id on load in case of corrupted storage
     const seen = new Set<string>();
     return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
-  }); const lastTrackRef = useRef<string>('');
-  const lastStationRef = useRef<string | undefined>(stationUuid);
+  }); const lastTrackRef = useRef<string>(''); const lastStationRef = useRef<string | undefined>(stationUuid);
   useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]);
   useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
   // Add entry when track changes; handles station transitions in a single effect
@@ -35,12 +34,9 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     const key = `${stationUuid}::${track.artist}::${track.title}`;
     if (key === lastTrackRef.current) return; lastTrackRef.current = key;
     const entry: HistoryEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName,
-      stationUuid, artist: track.artist,
-      title: track.title, album: track.album,
-      artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl,
-      durationMs: track.durationMs, genre: track.genre,
-      releaseDate: track.releaseDate, trackNumber: track.trackNumber,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName, stationUuid, artist: track.artist,
+      title: track.title, album: track.album, artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl,
+      durationMs: track.durationMs, genre: track.genre, releaseDate: track.releaseDate, trackNumber: track.trackNumber,
       trackCount: track.trackCount, timestamp: Date.now(),
     };
     setHistory(prev => {

@@ -9,10 +9,8 @@
 import React, { useRef, useEffect } from 'react';
 
 interface FerrofluidRendererProps {
-  frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string;
-  blobCount?: number; colorPrimary?: string;
-  colorSecondary?: string; colorAccent?: string;
-  sensitivity?: number;
+  frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; blobCount?: number; colorPrimary?: string;
+  colorSecondary?: string; colorAccent?: string; sensitivity?: number;
   /** standalone demo mode — generates its own animation without audio */
   demo?: boolean;
 }
@@ -25,27 +23,20 @@ function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 /* ─── blob state ─── */
 interface Blob {
-  x: number; y: number;
-  baseRadius: number;
+  x: number; y: number; baseRadius: number;
   /** Per-blob random size factor (0–1), assigned once at creation */
-  sizeFactor: number; targetX: number;
-  targetY: number; vx: number;
-  vy: number; phase: number;
-  speed: number;
+  sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number;
   freqBand: number; // which frequency band drives this blob
 }
 
 function createBlobs(count: number, w: number, h: number): Blob[] {
-  const blobs: Blob[] = []; const cx = w / 2;
-  const cy = h / 2;
+  const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2;
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
     blobs.push({
       x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist,
-      baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(),
-      targetX: cx, targetY: cy,
-      vx: 0, vy: 0,
-      phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7,
+      baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy,
+      vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7,
       freqBand: Math.floor((i / count) * 128),
     });
   }
@@ -63,8 +54,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   energy: number, ) {
   const threshold = 1.0;
   // downscale for performance — render at 1/3 resolution
-  const scale = 3; const sw = Math.ceil(w / scale);
-  const sh = Math.ceil(h / scale);
+  const scale = 3; const sw = Math.ceil(w / scale); const sh = Math.ceil(h / scale);
   // Use an offscreen canvas for smooth bilinear upscaling
   if (!_offscreen || _offscreen.width !== sw || _offscreen.height !== sh) {
     _offscreen = new OffscreenCanvas(sw, sh); _imgData = undefined;
@@ -124,13 +114,10 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
 /* ─── component ─── */
 
 export function FerrofluidRenderer({
-  frequencyDataRef, className = '',
-  blobCount = 12, colorPrimary = '#1a1a2e',
-  colorSecondary = '#16213e', colorAccent = '#0f3460',
-  sensitivity = 1.0, demo = false,
+  frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
+  colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false,
 }: FerrofluidRendererProps) {
-  const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0);
-  const sizeRef = useRef({ w: 0, h: 0 });
+  const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 });
   const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
   const colors = useRef(mkColors());
   useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]);

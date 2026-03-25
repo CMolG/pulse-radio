@@ -53,8 +53,7 @@ export function useRadio() {
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() =>
     loadFromStorage<number>(STORAGE_KEYS.VOLUME, 0.8)
-  ); const [muted, setMuted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+  ); const [muted, setMuted] = useState(false); const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good'); const lastBufferEndRef = useRef<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clearTimer = (ref: React.MutableRefObject<any>) => {
@@ -422,14 +421,7 @@ export function useRadio() {
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []); const ensureAudio = useCallback(() => getAudio(), [getAudio]);
   return {
-    station, status,
-    volume, muted,
-    currentTime, streamQuality,
-    audioRef, ensureAudio,
-    play, pause,
-    resume, togglePlay,
-    stop, setVolume,
-    toggleMute, seek,
-    prefetchStream,
+    station, status, volume, muted, currentTime, streamQuality, audioRef, ensureAudio,
+    play, pause, resume, togglePlay, stop, setVolume, toggleMute, seek, prefetchStream,
   };
 }

@@ -16,8 +16,7 @@ import { primaryArtist } from "../utils/formatUtils";
 import SongCard from "./SongCard";
 
 type Props = {
-  songs: FavoriteSong[]; onRemove: (id: string) => void;
-  onClear: () => void; onSelect?: (song: SongDetailData) => void;
+  songs: FavoriteSong[]; onRemove: (id: string) => void; onClear: () => void; onSelect?: (song: SongDetailData) => void;
 };
 
 type ContextMenuState = { x: number; y: number; songId: string } | null;
@@ -29,8 +28,7 @@ const filterBtnClass = (active: boolean) =>
 
 // ── Context Menu ─────────────────────────────────────────────────────────────
 function SongContextMenu({ menu, onRemove, onClose, }: {
-  menu: ContextMenuState; onRemove: (id: string) => void;
-  onClose: () => void;
+  menu: ContextMenuState; onRemove: (id: string) => void; onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -63,8 +61,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
 
 // ── Group Stack ───────────────────────────────────────────────────────────────
 function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
-  label: string; icon: React.ElementType;
-  songs: FavoriteSong[]; onRemove: (id: string) => void;
+  label: string; icon: React.ElementType; songs: FavoriteSong[]; onRemove: (id: string) => void;
   onSelect?: (song: SongDetailData) => void; onContextMenu: (e: React.MouseEvent, songId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false); const VISIBLE_COUNT = 3;
@@ -96,8 +93,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
               className="absolute left-0 right-0 transition-all duration-300"
               style={{
                 top: `${i * 16}px`, zIndex: VISIBLE_COUNT - i,
-                transform: `scale(${1 - i * 0.03})`, opacity: 1 - i * 0.15,
-                maxWidth: "200px",
+                transform: `scale(${1 - i * 0.03})`, opacity: 1 - i * 0.15, maxWidth: "200px",
               }}><div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
                 <div className="w-full aspect-square bg-surface-3 relative">
                   {song.artworkUrl ? (

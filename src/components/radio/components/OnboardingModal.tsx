@@ -108,15 +108,13 @@ function OnboardingModal() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"> {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/70" onClick={handleClose} /> {/* Modal */}
-          <motion.div
+          <div className="absolute inset-0 bg-black/70" onClick={handleClose} /> {/* Modal */} <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
-            style={GLASS_STYLE}> {/* Content */}
-            <div className="p-8"><AnimatePresence mode="wait">
+            style={GLASS_STYLE}> {/* Content */} <div className="p-8"><AnimatePresence mode="wait">
                 <motion.div
                   key={step}
                   initial={{ opacity: 0, x: 30 }}

@@ -28,8 +28,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 type Props = {
-  view: ViewState; currentStation: Station | null;
-  isPlaying: boolean; isFavorite: (uuid: string) => boolean;
+  view: ViewState; currentStation: Station | null; isPlaying: boolean; isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void; onToggleFav: (station: Station) => void;
   onPrefetch?: (streamUrl: string) => void; favorites?: Station[];
   recent?: Station[]; onSelectGenre?: (cat: BrowseCategory) => void;
@@ -42,9 +41,7 @@ const SCROLL_CLASS =
 
 /* ── Scroll row with left/right arrow buttons (desktop only) ── */
 function ScrollRow({ title, icon, children, isMobile, className, }: {
-  title?: string; icon?: React.ReactNode;
-  children: React.ReactNode; isMobile: boolean;
-  className?: string;
+  title?: string; icon?: React.ReactNode; children: React.ReactNode; isMobile: boolean; className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null); const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -79,13 +76,8 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
 }
 
 export default function BrowseView({
-  view, currentStation,
-  isPlaying, isFavorite,
-  onPlay, onToggleFav,
-  onPrefetch, favorites,
-  recent, onSelectGenre,
-  onSelectCountry, onGoHome,
-  userGenreOrder,
+  view, currentStation, isPlaying, isFavorite, onPlay, onToggleFav, onPrefetch, favorites,
+  recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder,
 }: Props) {
   const { t, locale } = useLocale(); const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
   const translatedGenreCategories = useMemo(() =>
@@ -140,15 +132,13 @@ export default function BrowseView({
       if (!flags?.cancelled) {
         setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {
-          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId);
-          return next;
+          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;
         });
       }
     } catch {
       if (!flags?.cancelled) {
         setFailedCategories((prev) => {
-          if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId);
-          return next;
+          if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;
         });
       }
     }
@@ -255,11 +245,9 @@ export default function BrowseView({
   if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
   // Filter grid by song/artist when songFilter is active — paginated
   const allSongFilteredStations = useMemo(() => {
-    const trimmed = songFilter.trim(); if (!trimmed) return [];
-    const q = trimmed.toLowerCase();
+    const trimmed = songFilter.trim(); if (!trimmed) return []; const q = trimmed.toLowerCase();
     return stations.filter(s => {
-      const live = liveData[s.stationuuid]; if (!live?.track) return false;
-      const { title, artist } = live.track;
+      const live = liveData[s.stationuuid]; if (!live?.track) return false; const { title, artist } = live.track;
       return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));
     });
   }, [stations, songFilter, liveData]);

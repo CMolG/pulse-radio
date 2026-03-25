@@ -79,10 +79,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const radio = useRadio(); const eq = useEqualizer();
   const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing");
   const { lyrics, effectiveCurrentTime, realtime: realtimeLyrics, } = useLyrics(track, radio.station?.name, {
-    currentTime: radio.currentTime, enableRealtime: Boolean(track?.title),
-    languageHint: locale === 'es' ? 'es' : 'en',
-  }); const favs = useFavorites();
-  const favSongs = useFavoriteSongs(); const recent = useRecent();
+    currentTime: radio.currentTime, enableRealtime: Boolean(track?.title), languageHint: locale === 'es' ? 'es' : 'en',
+  }); const favs = useFavorites(); const favSongs = useFavoriteSongs(); const recent = useRecent();
   const sleepTimer = useSleepTimer(radio.pause, radio.audioRef); const stationQueue = useStationQueue();
   useWakeLock(radio.status === "playing");
   const analyser = useAudioAnalyser({ fftSize: 2048, smoothingTimeConstant: 0.8, });
@@ -276,10 +274,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (r.station) { const prev = f.playPrev(r.station.stationuuid); if (prev) handlePlay(prev); }
   }, [handlePlay]);
   useMediaSession({
-    station: radio.station, track: enrichedTrack,
-    isPlaying: radio.status === "playing", onPlay: radio.resume,
-    onPause: radio.pause, onNext: handleSkipNext,
-    onPrev: handleSkipPrev, onStop: radio.stop,
+    station: radio.station, track: enrichedTrack, isPlaying: radio.status === "playing", onPlay: radio.resume,
+    onPause: radio.pause, onNext: handleSkipNext, onPrev: handleSkipPrev, onStop: radio.stop,
     onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)),
     onSeekForward: () => radio.seek(radio.currentTime + 10),
   });
@@ -333,8 +329,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           break;
         case "Escape":
           // Priority: close topmost overlay first, then exit theater
-          if (sc) setShowShortcuts(false); else if (eq) setShowEq(false);
-          else if (tm) setTheaterMode(false); break;
+          if (sc) setShowShortcuts(false); else if (eq) setShowEq(false); else if (tm) setTheaterMode(false); break;
         case "t": case "T": setTheaterMode(prev => !prev); break; case "e": case "E": setShowEq(prev => !prev); break;
         case "l":
         case "L":
@@ -373,8 +368,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     resetNav(mkView("top", t("topStations"))); if (pathname !== "/") window.history.pushState(null, "", "/");
   }, [pathname, t, resetNav]);
   const handleSearchSubmit = useCallback((e: React.FormEvent) => {
-      e.preventDefault(); if (searchQuery.trim()) handleSearch(searchQuery.trim());
-      else handleGoHome();
+      e.preventDefault(); if (searchQuery.trim()) handleSearch(searchQuery.trim()); else handleGoHome();
     }, [searchQuery, handleSearch, handleGoHome],
   );
   const handleSelectGenre = useCallback((cat: BrowseCategory) => {
@@ -454,13 +448,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const mkNavTabs = (sz: number) => [ { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={sz} /> },
     { id: "history" as const, label: t("history"), icon: <Clock size={sz} /> },
     { id: "favorites" as const, label: t("favorites"), icon: <Heart size={sz} /> },
-  ]; const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
-  const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
+  ]; const navTabs14 = useMemo(() => mkNavTabs(14), [t]); const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
   const theaterBaseProps = {
     track: enrichedTrack, isPlaying: radio.status === "playing",
     frequencyDataRef: analyser.frequencyDataRef, artworkUrl: albumArt.artworkUrl,
-    icyBitrate, onFavSong: enrichedTrack?.title ? handleFavSong : undefined,
-    isSongLiked, lyrics,
+    icyBitrate, onFavSong: enrichedTrack?.title ? handleFavSong : undefined, isSongLiked, lyrics,
     currentTime: effectiveCurrentTime, activeLineOverride: realtimeLyrics?.activeLineIndex,
   };
   const theaterFullProps = {
@@ -469,21 +461,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false,
   };
   const nowPlayingBaseProps = {
-    station: radio.station, track: enrichedTrack,
-    status: radio.status, volume: radio.volume,
-    muted: radio.muted, frequencyDataRef: analyser.frequencyDataRef,
-    icyBitrate, streamQuality: radio.streamQuality,
+    station: radio.station, track: enrichedTrack, status: radio.status, volume: radio.volume,
+    muted: radio.muted, frequencyDataRef: analyser.frequencyDataRef, icyBitrate, streamQuality: radio.streamQuality,
     onTogglePlay: radio.togglePlay, onSetVolume: radio.setVolume,
-    onToggleMute: radio.toggleMute, sleepTimerMin: sleepTimer.remainingMin,
-    onCycleSleepTimer: sleepTimer.cycle,
+    onToggleMute: radio.toggleMute, sleepTimerMin: sleepTimer.remainingMin, onCycleSleepTimer: sleepTimer.cycle,
   };
   const nowPlayingFullProps = {
     ...nowPlayingBaseProps, onToggleEq: () => setShowEq((s) => !s),
     onToggleTheater: () => setTheaterMode(true), onToggleFav: radio.station ? handleToggleFav : undefined,
     onFavSong: enrichedTrack?.title ? handleFavSong : undefined,
     isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false, songLiked: isSongLiked,
-    eqPresetActive: eqPreset !== null, showEq,
-    theaterMode,
+    eqPresetActive: eqPreset !== null, showEq, theaterMode,
   };
   /* ─── Shared tab content elements (used by mobile + desktop) ─── */
   const browseViewElement = (

@@ -10,9 +10,7 @@ import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from "./languageMap";
 import type { SupportedLocale } from "./locales";
 
 export type CountryChip = {
-  code: string; queryName: string;
-  displayName: string; flag: string;
-  reason: "language" | "proximity" | "global";
+  code: string; queryName: string; displayName: string; flag: string; reason: "language" | "proximity" | "global";
 };
 
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
@@ -21,10 +19,7 @@ const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI
 ]);
 
 const REGION_PRIORITY: Record<string, number> = {
-  Europe: 1, Asia: 2,
-  Americas: 3, Africa: 4,
-  Oceania: 5, Antarctic: 6,
-  Other: 9,
+  Europe: 1, Asia: 2, Americas: 3, Africa: 4, Oceania: 5, Antarctic: 6, Other: 9,
 };
 
 function localeCandidates(locale: SupportedLocale): SupportedLocale[] {

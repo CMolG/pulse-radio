@@ -20,13 +20,11 @@ function formatListenTime(ms: number): string {
 
 type Props = {
   topStations: StationListenTime[]; topSongs: SongPlayCount[];
-  topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[];
-  totalListenMs: number;
+  topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number;
 };
 
 const StatSection = React.memo(function StatSection({ title, icon, children, }: {
-  title: string; icon: React.ReactNode;
-  children: React.ReactNode;
+  title: string; icon: React.ReactNode; children: React.ReactNode;
 }) {
   return (
     <div><div className="flex items-center gap-2 mb-2">

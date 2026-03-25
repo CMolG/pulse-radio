@@ -78,8 +78,7 @@ function UsageGuide({ onClose }: Props) {
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           ><IoChevronBack size={16} /></button>
           <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2></div>
-        <div className="border-t border-white/8" /> {/* Guide sections */}
-        <div className="px-5 py-4 space-y-2">
+        <div className="border-t border-white/8" /> {/* Guide sections */} <div className="px-5 py-4 space-y-2">
           {GUIDE_SECTIONS.map((section, idx) => {
             const isExpanded = expandedIdx === idx;
             return (

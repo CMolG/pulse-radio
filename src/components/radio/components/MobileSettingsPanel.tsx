@@ -59,8 +59,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       className="absolute inset-0 z-50 flex flex-col"> {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} /> {/* Panel slides up from bottom */}
-      <motion.div
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} /> {/* Panel slides up from bottom */} <motion.div
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}

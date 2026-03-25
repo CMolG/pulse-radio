@@ -20,8 +20,7 @@ export function useFavorites() {
     // Dedup on load in case of corrupted storage
     const seen = new Set<string>();
     return loaded.filter(s => {
-      if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid);
-      return true;
+      if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid); return true;
     });
   }); useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITES, favorites); }, [favorites]);
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);

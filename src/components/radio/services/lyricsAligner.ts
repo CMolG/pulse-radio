@@ -9,14 +9,12 @@ import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
 import { normalizeText } from '@/lib/stringUtils';
 
 export type AlignerStepInput = {
-  lyrics: LyricsData; hypothesisText: string;
-  previousConfirmedIndex: number; previousCandidateIndex: number;
+  lyrics: LyricsData; hypothesisText: string; previousConfirmedIndex: number; previousCandidateIndex: number;
   stableSamples: number; policy: RealtimeAlignPolicy;
 };
 
 export type AlignerStepResult = {
-  candidateIndex: number; confirmedIndex: number;
-  score: number; stableSamples: number;
+  candidateIndex: number; confirmedIndex: number; score: number; stableSamples: number;
   jumpRejected: boolean; relockTriggered: boolean;
 };
 
@@ -27,17 +25,14 @@ const STOPWORDS = new Set([ 'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'fo
 const WORD_RE = /[a-z0-9']+/g;
 
 function tokenize(value: string): string[] {
-  const normalized = normalizeText(value); if (!normalized) return [];
-  const matches = normalized.match(WORD_RE) ?? [];
+  const normalized = normalizeText(value); if (!normalized) return []; const matches = normalized.match(WORD_RE) ?? [];
   return matches.filter(token => token.length > 1 && !STOPWORDS.has(token));
 }
 
 function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
-  if (!lineTokens.length || !hypoTokens.length) return 0; const lineSet = new Set(lineTokens);
-  let overlaps = 0;
+  if (!lineTokens.length || !hypoTokens.length) return 0; const lineSet = new Set(lineTokens); let overlaps = 0;
   for (const token of hypoTokens) { if (lineSet.has(token)) overlaps++; }
-  const overlapScore = overlaps / Math.max(lineSet.size, 1); let ordered = 0;
-  let lineIdx = 0;
+  const overlapScore = overlaps / Math.max(lineSet.size, 1); let ordered = 0; let lineIdx = 0;
   for (const token of hypoTokens) {
     for (let i = lineIdx; i < lineTokens.length; i++) {
       if (lineTokens[i] === token) {
@@ -60,8 +55,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const hypoTokens = tokenize(hypothesisText);
   if (!hypoTokens.length) {
     return {
-      candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex,
-      score: 0, stableSamples,
+      candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: 0, stableSamples,
       jumpRejected: false, relockTriggered: false,
     };
   }
@@ -74,8 +68,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   }
   if (bestIndex < 0 || bestScore < policy.candidateMinScore) {
     return {
-      candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex,
-      score: bestScore, stableSamples,
+      candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: bestScore, stableSamples,
       jumpRejected: false, relockTriggered: false,
     };
   }
@@ -90,8 +83,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     confirmed = bestIndex; relockTriggered = true;
   }
   return {
-    candidateIndex: bestIndex, confirmedIndex: confirmed,
-    score: bestScore, stableSamples: nextStable,
+    candidateIndex: bestIndex, confirmedIndex: confirmed, score: bestScore, stableSamples: nextStable,
     jumpRejected, relockTriggered,
   };
 }

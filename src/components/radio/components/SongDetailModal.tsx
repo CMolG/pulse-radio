@@ -78,8 +78,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       if (e.key !== 'Tab') return;
       const nodes = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      ); if (nodes.length === 0) return;
-      const first = nodes[0]; const last = nodes[nodes.length - 1];
+      ); if (nodes.length === 0) return; const first = nodes[0]; const last = nodes[nodes.length - 1];
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault(); last.focus();
       } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
@@ -155,8 +154,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
                 ><ExternalLink size={14} />
                   Listen on Apple Music</a></div>
-              {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />
-              {/* ── Artist Info ── */}
+              {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" /> {/* ── Artist Info ── */}
               <div className="px-5"><h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   About {song.artist}</h3>
                 {/* Loading skeleton */}

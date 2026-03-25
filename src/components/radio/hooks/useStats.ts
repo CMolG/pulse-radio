@@ -29,9 +29,7 @@ export interface UsageStats {
 }
 
 const EMPTY_STATS: UsageStats = {
-  stationListenTimes: {}, songPlayCounts: {},
-  artistPlayCounts: {}, genrePlayCounts: {},
-  totalListenMs: 0,
+  stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0,
 };
 
 /** Keep only the top N entries by a numeric field, dropping the lowest */
@@ -48,8 +46,7 @@ function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
 export function useStats() {
   const [stats, setStats] = useState<UsageStats>(() =>
     loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
-  ); const statsRef = useRef(stats);
-  useEffect(() => { statsRef.current = stats; }, [stats]);
+  ); const statsRef = useRef(stats); useEffect(() => { statsRef.current = stats; }, [stats]);
   // Sync stats from other tabs — safe because BroadcastChannel ensures
   // only one tab plays at a time, so the writing tab always has the latest.
   useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats =>
@@ -147,10 +144,7 @@ export function useStats() {
     }); dirtyRef.current = true;
   }, []); const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
   return {
-    stats, tickListenTime,
-    recordSongPlay, updateSongMeta,
-    topStations, topSongs,
-    topArtists, topGenres,
+    stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres,
     genreOrder, clearStats,
   };
 }
