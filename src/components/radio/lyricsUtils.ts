@@ -2,10 +2,8 @@
 "use client";
 import type { LyricsData } from "./types";
 export type RenderableLyricLine = { id: string; text: string; };
-/**
- * Binary search for the last lyric line whose time ≤ currentTime.
- * Lines are sorted ascending by time, so binary search is O(log n) vs O(n).
- */
+/* Binary search for the last lyric line whose time ≤ currentTime. Lines are sorted ascending by time, so binary 
+ * search is O(log n) vs O(n). */
 function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1; const lines = lyrics.lines;
   let lo = 0; let hi = lines.length - 1; let result = -1; while (lo <= hi) { const mid = (lo + hi) >>> 1;

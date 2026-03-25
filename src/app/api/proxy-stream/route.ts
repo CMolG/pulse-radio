@@ -4,10 +4,8 @@ import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';
 const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
-/**
- * Proxies an internet radio stream, adding CORS headers so the browser
- * can use it with <audio crossOrigin="anonymous"> + Web Audio API.
- */
+/* Proxies an internet radio stream, adding CORS headers so the browser can use it with <audio crossOrigin="anony
+ * mous"> + Web Audio API. */
 export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
     return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {

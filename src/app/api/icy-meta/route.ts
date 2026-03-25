@@ -2,11 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isPrivateHost } from '@/lib/urlSecurity';
 export const runtime = 'nodejs';
-/**
- * Server-side ICY metadata proxy.
- * Fetches the first metadata block from an internet radio stream
- * using the ICY protocol, which browsers can't do directly due to CORS.
- */
+/* Server-side ICY metadata proxy. Fetches the first metadata block from an internet radio stream using the ICY p
+ * rotocol, which browsers can't do directly due to CORS. */
 export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
     return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 }); }

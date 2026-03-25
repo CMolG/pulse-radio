@@ -1,11 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client';
 import { useRef, useEffect, useCallback, useState } from 'react';
-/**
- * Prevents the screen from dimming/locking while audio is playing.
- * Uses the Screen Wake Lock API (supported in Chrome, Edge, Safari 16.4+).
- * Automatically re-acquires the lock when the tab becomes visible again.
- */
+/* Prevents the screen from dimming/locking while audio is playing. Uses the Screen Wake Lock API (supported in C
+ * hrome, Edge, Safari 16.4+). Automatically re-acquires the lock when the tab becomes visible again. */
 export function useWakeLock(shouldLock: boolean) {
   const lockRef = useRef<WakeLockSentinel | null>(null); const [isActive, setIsActive] = useState(false);
   const requestingRef = useRef(false); const wantReleaseRef = useRef(false);

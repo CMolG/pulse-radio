@@ -6,10 +6,8 @@ const ATTACK_MS = 80;
 const RELEASE_MS = 350;
 const MAX_AMPLITUDE = 0.35;
 function clamp01(value: number): number { return Math.max(0, Math.min(1, value)); }
-/**
- * Produces a smoothed audio-reactive amplitude suitable for background motion.
- * Uses fast attack + slower release to track energy while avoiding jitter.
- */
+/* Produces a smoothed audio-reactive amplitude suitable for background motion. Uses fast attack + slower release
+ *  to track energy while avoiding jitter. */
 export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amplitude: number } {
   const [amplitude, setAmplitude] = useState(0); const valueRef = useRef(0);
   const lastPublishedRef = useRef(0); const rafRef = useRef(0); const lastTsRef = useRef(0);

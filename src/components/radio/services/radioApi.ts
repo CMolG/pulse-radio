@@ -43,10 +43,8 @@ export async function localStations(limit = 20): Promise<Station[]> {
     `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`,
     `local-${countryCode}-${limit}`,);
 }
-/**
- * Find similar stations by matching the first tag of the current station.
- * Used for automatic failover when the current station goes down.
- */
+/* Find similar stations by matching the first tag of the current station. Used for automatic failover when the c
+ * urrent station goes down. */
 export async function similarStations(station: Station, limit = 5): Promise<Station[]> {
   const firstTag = station.tags?.split(',').map(t => t.trim()).filter(Boolean)[0];
   if (!firstTag) return topStations(limit); const results = await stationsByTag(firstTag, limit + 5);
