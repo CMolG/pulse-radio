@@ -562,17 +562,19 @@ let _aMatches: boolean[] = [];
 let _bMatches: boolean[] = [];
 function jaroDistance(a: string, b: string): number {
   if (a === b) return 1;
-  if (!a.length || !b.length) return 0;
-  const matchDistance = Math.floor(Math.max(a.length, b.length) / 2) - 1;
-  if (_aMatches.length < a.length) _aMatches = new Array(a.length);
-  if (_bMatches.length < b.length) _bMatches = new Array(b.length);
-  for (let i = 0; i < a.length; i++) _aMatches[i] = false;
-  for (let i = 0; i < b.length; i++) _bMatches[i] = false;
+  const la = a.length,
+    lb = b.length;
+  if (!la || !lb) return 0;
+  const matchDistance = ((la > lb ? la : lb) >> 1) - 1;
+  if (_aMatches.length < la) _aMatches = new Array(la);
+  if (_bMatches.length < lb) _bMatches = new Array(lb);
+  _aMatches.fill(false, 0, la);
+  _bMatches.fill(false, 0, lb);
   let matches = 0;
-  for (let i = 0; i < a.length; i++) {
-    const start = Math.max(0, i - matchDistance);
-    const end = Math.min(i + matchDistance + 1, b.length);
-    for (let j = start; j < end; j++) {
+  for (let i = 0; i < la; i++) {
+    const start = i - matchDistance;
+    const end = i + matchDistance + 1;
+    for (let j = start > 0 ? start : 0; j < (end < lb ? end : lb); j++) {
       if (_bMatches[j] || a[i] !== b[j]) continue;
       _aMatches[i] = true;
       _bMatches[j] = true;
@@ -583,21 +585,21 @@ function jaroDistance(a: string, b: string): number {
   if (!matches) return 0;
   let t = 0;
   let k = 0;
-  for (let i = 0; i < a.length; i++) {
+  for (let i = 0; i < la; i++) {
     if (!_aMatches[i]) continue;
-    while (k < b.length && !_bMatches[k]) k++;
-    if (a[i] !== b[k]) t++;
+    while (k < lb && !_bMatches[k]) k++;
+    if (k < lb && a[i] !== b[k]) t++;
     k++;
   }
   const transpositions = t / 2;
-  return (matches / a.length + matches / b.length + (matches - transpositions) / matches) / 3;
+  return (matches / la + matches / lb + (matches - transpositions) / matches) / 3;
 }
 function jaroWinkler(a: string, b: string): number {
   const jaro = jaroDistance(a, b);
   if (jaro < 0.7) return jaro;
   let prefix = 0;
-  const maxPrefix = 4;
-  for (let i = 0; i < Math.min(maxPrefix, a.length, b.length); i++) {
+  const maxLen = 4 < a.length ? (4 < b.length ? 4 : b.length) : a.length < b.length ? a.length : b.length;
+  for (let i = 0; i < maxLen; i++) {
     if (a[i] === b[i]) prefix++;
     else break;
   }
