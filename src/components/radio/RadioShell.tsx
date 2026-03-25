@@ -2941,6 +2941,7 @@ const _GENRE_TO_CAT: Record<string, string> = {
 const _GENRE_NORMALIZE_RE = /[\s-]/g;
 const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
 const _NEWLINE_RE = /\r?\n/;
+const _EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>();
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
@@ -3085,7 +3086,7 @@ function BrowseView({
   const isMobile = useMediaQuery('(max-width: 768px)', { initializeWithValue: false });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
-  const [failedCategories, setFailedCategories] = useState<Set<string>>(() => new Set());
+  const [failedCategories, setFailedCategories] = useState<ReadonlySet<string>>(_EMPTY_STRING_SET);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false);
@@ -3209,7 +3210,7 @@ function BrowseView({
     } else {
       setLoading(false);
       setCategorySections({});
-      setFailedCategories(new Set());
+      setFailedCategories(_EMPTY_STRING_SET);
       const CONCURRENCY = 3;
       const queue = [...effectiveBrowseOrder];
       const runBatch = async () => {
