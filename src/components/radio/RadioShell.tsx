@@ -2935,6 +2935,7 @@ const _GENRE_TO_CAT: Record<string, string> = {
   'lo-fi': 'lofi',
 };
 const _GENRE_NORMALIZE_RE = /[\s-]/g;
+const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
@@ -9261,19 +9262,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (isInput && e.key !== 'Escape') return;
       if (eq) {
-        const allowed = new Set([
-          ' ',
-          'Escape',
-          'e',
-          'E',
-          'r',
-          'R',
-          'ArrowUp',
-          'ArrowDown',
-          'm',
-          'M',
-        ]);
-        if (!allowed.has(e.key)) return;
+        if (!_EQ_ALLOWED_KEYS.has(e.key)) return;
       }
       if (ss) return;
       switch (e.key) {
