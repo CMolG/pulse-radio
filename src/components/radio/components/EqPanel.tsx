@@ -97,5 +97,4 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
           />
           <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(compressorAmount * 100)}%</span>
         </div>
-      </div></div>);
-});
+      </div></div>); });

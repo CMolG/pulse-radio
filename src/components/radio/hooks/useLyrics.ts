@@ -33,8 +33,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
           retryCountRef.current++; const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
           retryTimerRef.current = setTimeout(() => doFetch(key, cached, controller), delay);
         } else { setLyrics(null); setError(true); retryCountRef.current = 0; }
-      }).finally(() => { if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false); });
-  };
+      }).finally(() => { if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false); }); };
   useEffect(() => {
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;

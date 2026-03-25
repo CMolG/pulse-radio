@@ -287,8 +287,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     : null;
   const songDetailModal = ( <SongDetailModal song={selectedSong} onClose={() => setSelectedSong(null)}
       onRemoveFromFavorites={selectedFavSong ? () => { favSongs.remove(selectedFavSong.id); setSelectedSong(null);
-      } : undefined} />
-  );
+      } : undefined} /> );
   const shortcutsOverlay = showShortcuts ? ( <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />
   ) : null;
   const offlineBanner = !isOnline ? (
@@ -359,23 +358,19 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSelectGenre={handleSelectGenre}
       onSelectCountry={handleSelectCountry}
       onGoHome={handleGoHome}
-      userGenreOrder={usageStats.genreOrder} />
-  );
+      userGenreOrder={usageStats.genreOrder} /> );
   const historyViewElement = ( <HistoryGridView history={songHistory.history} onRemove={songHistory.remove}
       onClear={songHistory.clear}
       onToggleFavSong={handleFavSongFromHistory}
       isSongFavorite={favSongs.has}
-      onSelect={setSelectedSong} />
-  );
+      onSelect={setSelectedSong} /> );
   const favsViewElement = ( <FavoriteSongsView songs={favSongs.songs} onRemove={favSongs.remove}
       onClear={favSongs.clear}
-      onSelect={setSelectedSong} />
-  );
+      onSelect={setSelectedSong} /> );
   const parallaxElement = ( <ParallaxBackground faviconUrl={radio.station?.favicon}
       genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
       audioAmplitude={bgAudio.amplitude}
-      landingMode={isLandingNavigation} />
-  );
+      landingMode={isLandingNavigation} /> );
   const nowPlayingHeroElement = radio.station ? ( <NowPlayingHero station={radio.station} track={enrichedTrack}
       isPlaying={radio.status === "playing"}
       frequencyDataRef={analyser.frequencyDataRef}
@@ -383,14 +378,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       icyBitrate={icyBitrate}
       onTheater={() => setTheaterMode(true)} />
   ) : null;
-  const sharedModals = ( <> {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal /></>
-  );
+  const sharedModals = ( <> {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal /></> );
   const pulseLogoButton = (
     <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
       <div className="relative w-5 h-5 flex-shrink-0">
         <UiImage src="/favicon-32x32.png" alt="Pulse" className="object-contain" sizes="20px" priority />
-      </div><span className="text-[15px] font-semibold text-white">Pulse</span></button>
-  );
+      </div><span className="text-[15px] font-semibold text-white">Pulse</span></button> );
   const emptyStation = useMemo((): Station => ({ name: t("discover"), url_resolved: "", stationuuid: "", favicon: "", tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0 }), [t]);
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
   if (layout === "pip") { return ( <div ref={containerRef}
@@ -499,8 +492,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       : ["favorites-tab", favsViewElement, " overflow-y-auto"];
                     return (
                       <motion.div key={key} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className={`flex-1 min-h-0${extra}`}>
-                        {content}</motion.div>
-                    );
+                        {content}</motion.div> );
                   })()}</AnimatePresence></React.Fragment>
             ) : ( radio.station && ( <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
                   {albumArt.artworkUrl ? ( <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">

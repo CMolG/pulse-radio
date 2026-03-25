@@ -10,5 +10,4 @@ export default React.memo(function AnimatedBars({ size = 'default' }: { size?: '
         @media (prefers-reduced-motion: reduce) { .animate-eq-bar { animation: none; height: ${h * 0.5}px; }
         }
       `}</style>
-    </span>);
-});
+    </span>); });

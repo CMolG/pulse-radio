@@ -152,8 +152,7 @@ export default function BrowseView({
           isFavorite={isFavorite(s.stationuuid)}
           onPlay={() => onPlay(s)}
           onToggleFav={() => onToggleFav(s)}
-          onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div>
-    ));
+          onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div> ));
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => { return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   }, [stations, page, PAGE_SIZE]);
@@ -207,8 +206,7 @@ export default function BrowseView({
             {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && ( <button
                 onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-              >{t("seeMore")}</button>)}</div>
-        );
+              >{t("seeMore")}</button>)}</div> );
       })()}
       {/* Country chips — wrapping, limited on mobile */}
       {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
@@ -224,8 +222,7 @@ export default function BrowseView({
             ))}
             {collapsed && countryChips.length > MOBILE_LIMIT && ( <button onClick={() => setCountryChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-              >{t("seeMore")}</button>)}</div>
-        );
+              >{t("seeMore")}</button>)}</div> );
       })()}
       {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>{loading && (
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
@@ -256,8 +253,7 @@ export default function BrowseView({
                   const catStations = categorySections[catId]; if (catStations?.length === 0) return null;
                   const icon = CATEGORY_ICONS[catId] ?? ( catStations
                       ? <span className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`} />
-                      : <Music size={14} className="text-dim" />
-                  );
+                      : <Music size={14} className="text-dim" /> );
                   return ( <ScrollRow key={catId} title={cat.label} icon={icon} isMobile={isMobile}>
                       {!catStations && failedCategories.has(catId) ? (
                         <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
@@ -269,8 +265,7 @@ export default function BrowseView({
                       ) : !catStations ? (Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`} />
                         ))
-                      ) : (renderScrollStations(catStations))}</ScrollRow>
-                  );
+                      ) : (renderScrollStations(catStations))}</ScrollRow> );
                 })}</>
             )}
             {/* Grid column for search / genre / country views — paginated */}
@@ -314,8 +309,7 @@ export default function BrowseView({
                           onPrefetch={() => onPrefetch?.(s.url_resolved)}
                           liveStatus={live?.status}
                           liveTrack={live?.track}
-                          onPeek={!scanEnabled ? () => peekStation(s) : undefined} />
-                      );
+                          onPeek={!scanEnabled ? () => peekStation(s) : undefined} /> );
                     })}</div>
                   {/* Pagination */}
                   {totalPages > 1 && ( <div className="flex items-center justify-center gap-3 pt-2 pb-6"><button
@@ -328,8 +322,7 @@ export default function BrowseView({
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page === totalPages - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
-                      >{t("next")} <ChevronRight size={14} /></button></div>)}</>
-              );
+                      >{t("next")} <ChevronRight size={14} /></button></div>)}</> );
             })()}</>
         )}</div></div>
   ); }

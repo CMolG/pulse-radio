@@ -43,7 +43,6 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         ><ExternalLink size={10} />Listen on Apple Music</a><div className="flex items-center gap-1.5">
           <Radio size={9} className="text-dim flex-shrink-0" />
           <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
-          <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div>
-  );
+          <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div> );
 }, (prev, next) =>prev.item === next.item && prev.delay === next.delay && prev.hideRemove === next.hideRemove &&
   prev.heart?.filled === next.heart?.filled);

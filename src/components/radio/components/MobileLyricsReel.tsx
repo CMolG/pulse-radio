@@ -73,7 +73,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
                 return ( <LyricReelLine key={line.id} lineId={line.id} index={index} text={line.text} emphasisIdx={ei}
                     isDesktop={isDesktop}
                     lineRefs={lineRefs}
-                    scrollToIndex={scrollToIndex} />
-                );
+                    scrollToIndex={scrollToIndex} /> );
               })}</div></div></div></div>
   ); }

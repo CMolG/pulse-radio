@@ -25,10 +25,8 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
   const [customPresets, setCustomPresets] = useState<EqPreset[]>(() =>
     loadFromStorage<EqPreset[]>(STORAGE_KEYS.CUSTOM_EQ_PRESETS, [])
   ); const [normalizerEnabled, setNormalizerEnabled] = useState(getDefaultNormalizerEnabled);
-  const [stereoWidth, setStereoWidthState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.STEREO_WIDTH, 1.0)
-  );
-  const [bassEnhance, setBassEnhanceState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.BASS_ENHANCE, 0)
-  );
+  const [stereoWidth, setStereoWidthState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.STEREO_WIDTH, 1.0) );
+  const [bassEnhance, setBassEnhanceState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.BASS_ENHANCE, 0) );
   const [compressorEnabled, setCompressorEnabled] = useState(() =>
     loadFromStorage<boolean>(STORAGE_KEYS.COMPRESSOR_ENABLED, false));
   const [compressorAmount, setCompressorAmountState] = useState(() =>

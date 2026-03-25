@@ -12,8 +12,7 @@ export function useFavoriteSongs() { const MAX_SONGS = 500; const [songs, setSon
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
     const seen = new Set<string>(); // Dedup on load in case of corrupted storage
     return loaded.filter(s => {
-      const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;});
-  });
+      const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;}); });
   // O(1) lookup Set — rebuilt only when songs array changes
   const keySetRef = useRef(buildKeySet(songs)); useMemo(() => { keySetRef.current = buildKeySet(songs); }, [songs]);
   useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs); }, [songs]);

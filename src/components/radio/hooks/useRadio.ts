@@ -193,8 +193,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     // Network status: pause retries when offline, auto-reconnect when back online
     const onOffline = () => { clearReconnectTimer(); };
     const onOnline = () => { if (station && !userPausedRef.current && (audio.paused || audio.readyState < 2)) {
-        retryRef.current = 0; reconnect(500); }
-    };
+        retryRef.current = 0; reconnect(500); } };
     // Proactive buffer health monitor: check every 2s whether the buffered-ahead
     // audio is dangerously low. If less than 2s of audio remains in the buffer
     // while playing, trigger a preemptive reconnect before the user hears a gap.

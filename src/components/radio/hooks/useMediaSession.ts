@@ -29,6 +29,5 @@ export function useMediaSession(config: MediaSessionConfig): void {
     for (const [action, handler] of handlers) { try { navigator.mediaSession.setActionHandler(action, handler); }
       catch { /* not supported */ } }
     return () => { for (const [action] of handlers) { try { navigator.mediaSession.setActionHandler(action, null); }
-        catch { /* ok */ } }
-    };
+        catch { /* ok */ } } };
   }, []); useEffect(setupHandlers, [setupHandlers]); }

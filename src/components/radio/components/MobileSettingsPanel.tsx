@@ -17,8 +17,7 @@ type Props = { onClose: () => void;
     removeCustomPreset: (name: string) => void;
   }; onPresetChange: (name: string | null) => void;
   statsData?: { topStations: StationListenTime[]; topSongs: SongPlayCount[];
-    topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number; };
-};
+    topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number; }; };
 export default function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: Props) {
   const { locale, setLocale, locales } = useLocale(); const [showEq, setShowEq] = useState(false);
   const [showGuide, setShowGuide] = useState(false); const [showStats, setShowStats] = useState(false);

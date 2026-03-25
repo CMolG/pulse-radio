@@ -56,8 +56,7 @@ function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = 
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden">
                       <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">{section.content}</p>
-                    </motion.div>)}</AnimatePresence></div>
-            );
+                    </motion.div>)}</AnimatePresence></div> );
           })}</div><div className="h-6" /></motion.div></motion.div>
   ); }
 export default React.memo(UsageGuide);

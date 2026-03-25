@@ -29,14 +29,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n').trim() || '';
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => ( <div className="space-y-2 animate-pulse">
-      {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}</div>
-  );
+      {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}</div> );
   const lyricsEmpty = (
     <div><p className="text-[12px] text-dim">{lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}</p>
       {lyricsError && (
         <button onClick={retryLyrics} className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors">
-          Retry</button>)}</div>
-  );
+          Retry</button>)}</div> );
   // Close on Escape
   useEffect(() => { if (!song) return; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
