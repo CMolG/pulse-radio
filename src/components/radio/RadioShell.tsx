@@ -3045,19 +3045,18 @@ function BrowseView({
   );
   const effectiveBrowseOrder = useMemo(() => {
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
-    const defaultOrder = [...BROWSE_ORDER];
+    const browseSet = new Set<string>(BROWSE_ORDER);
     const boostedIds = new Set<string>();
-    const ordered: string[] = [];
-    ordered.push('trending');
+    const ordered: string[] = ['trending'];
     boostedIds.add('trending');
     for (const genre of userGenreOrder) {
       const catId = _GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
-      if (defaultOrder.includes(catId as (typeof defaultOrder)[number]) && !boostedIds.has(catId)) {
+      if (browseSet.has(catId) && !boostedIds.has(catId)) {
         ordered.push(catId);
         boostedIds.add(catId);
       }
     }
-    for (const id of defaultOrder) {
+    for (const id of BROWSE_ORDER) {
       if (!boostedIds.has(id)) ordered.push(id);
     }
     return ordered;
