@@ -8683,7 +8683,9 @@ function useMediaSession(config: MediaSessionConfig): void {
     const trackTitle = track?.title || station.name;
     const trackArtist = track?.artist || 'Internet Radio';
     const artSrc = track?.artworkUrl || station.favicon;
-    const album = station.tags?.split(',')[0] || 'Live';
+    const rawTags = station.tags;
+    const ci = rawTags ? rawTags.indexOf(',') : -1;
+    const album = (ci < 0 ? rawTags : rawTags!.slice(0, ci)) || 'Live';
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return;
     lastMetaRef.current = metaKey;
@@ -9685,10 +9687,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSelect={setSelectedSong}
     />
   );
-  const primaryGenre = useMemo(
-    () => radio.station?.tags?.split(',')[0]?.trim()?.toLowerCase(),
-    [radio.station?.tags],
-  );
+  const primaryGenre = useMemo(() => {
+    const t = radio.station?.tags;
+    if (!t) return undefined;
+    const ci = t.indexOf(',');
+    return (ci < 0 ? t : t.slice(0, ci)).trim().toLowerCase() || undefined;
+  }, [radio.station?.tags]);
   const parallaxElement = (
     <ParallaxBackground
       faviconUrl={radio.station?.favicon}
