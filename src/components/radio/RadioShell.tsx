@@ -819,8 +819,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   <button
                     onClick={radio.station ? handleToggleFav : undefined}
                     aria-label={
-                      radio.station && favs.has(radio.station.stationuuid)
-                        ? t("removeFromFavorites")
+                      radio.station && favs.has(radio.station.stationuuid) ? t("removeFromFavorites")
                         : t("addToFavorites")
                     }
                     className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? "text-sys-orange" : "text-white/30"}`}

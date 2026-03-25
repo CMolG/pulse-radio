@@ -608,8 +608,7 @@ export default function BrowseView({
                         title={t("scanNowPlaying")}
                       >
                         <ScanSearch size={12} />
-                        {isScanning
-                          ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
+                        {isScanning ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
                           : scannedCount > 0
                             ? t("nowPlayingProgress", { current: scannedCount, total: pageStations.length })
                             : t("scanNowPlaying")}

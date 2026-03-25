@@ -66,8 +66,7 @@ export async function GET(req: NextRequest) {
     }
 
     const tags =
-      mb?.tags
-        ?.filter((t: { count: number }) => t.count > 0)
+      mb?.tags ?.filter((t: { count: number }) => t.count > 0)
         ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
         ?.slice(0, 8)
         ?.map((t: { name: string }) => t.name) ?? [];

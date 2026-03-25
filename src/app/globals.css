@@ -273,10 +273,7 @@ input[type="color"]:hover { border-color: rgba(255, 255, 255, 0.25); }
 
 /* ── Vertical EQ sliders – center thumb on the track ── */
 /* In writing-mode:vertical-lr, margin-top controls horizontal offset of the thumb */
-.eq-slider::-webkit-slider-thumb {
-  margin-top: -4px; /* (12px thumb - 3px track) / 2 ≈ 4px */
-  margin-left: 0;
-}
+.eq-slider::-webkit-slider-thumb { margin-top: -4px; /* (12px thumb - 3px track) / 2 ≈ 4px */ margin-left: 0; }
 
 /* ── Mobile responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {

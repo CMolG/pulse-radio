@@ -67,16 +67,14 @@ export const GENRE_GRADIENTS: Record<string, string> = {
   default: 'linear-gradient(135deg, #34c759, #0a84ff)',
 };
 
-export const EQ_BANDS: EqBand[] = [
-  { id: 'low',     frequency: 60,    type: 'lowshelf',  gain: 0, label: '60' },
+export const EQ_BANDS: EqBand[] = [ { id: 'low',     frequency: 60,    type: 'lowshelf',  gain: 0, label: '60' },
   { id: 'lo-mid',  frequency: 230,   type: 'peaking',   gain: 0, label: '230' },
   { id: 'mid',     frequency: 910,   type: 'peaking',   gain: 0, label: '910' },
   { id: 'hi-mid',  frequency: 3600,  type: 'peaking',   gain: 0, label: '3.6k' },
   { id: 'high',    frequency: 14000, type: 'highshelf', gain: 0, label: '14k' },
 ];
 
-export const EQ_PRESETS: EqPreset[] = [
-  { name: 'Flat',       gains: [0, 0, 0, 0, 0] },
+export const EQ_PRESETS: EqPreset[] = [ { name: 'Flat',       gains: [0, 0, 0, 0, 0] },
   { name: 'Bass Boost', gains: [6, 4, 0, 0, 0] },
   { name: 'Treble',     gains: [0, 0, 0, 3, 6] },
   { name: 'V-Shape',    gains: [5, 2, -2, 2, 5] },

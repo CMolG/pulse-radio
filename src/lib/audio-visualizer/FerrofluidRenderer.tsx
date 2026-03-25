@@ -252,8 +252,7 @@ export function FerrofluidRenderer({
       blob.y += blob.vy;
 
       // pulse radius with energy (reuses cached bandVal and minWH)
-      blob.baseRadius =
-        minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity;
+      blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity;
     }
 
     // clear

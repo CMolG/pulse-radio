@@ -152,8 +152,7 @@ export function useLyrics(
     loading,
     error,
     retry,
-    effectiveCurrentTime: enableRealtime
-      ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
+    effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
       : options?.currentTime,
     realtime: enableRealtime
       ? {
