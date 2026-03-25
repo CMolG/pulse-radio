@@ -874,10 +874,13 @@ async function localStations(limit = 20): Promise<Station[]> {
   );
 }
 async function similarStations(station: Station, limit = 5): Promise<Station[]> {
-  const firstTag = station.tags
-    ?.split(',')
-    .map((t) => t.trim())
-    .filter(Boolean)[0];
+  let firstTag: string | undefined;
+  if (station.tags) {
+    for (const raw of station.tags.split(',')) {
+      const trimmed = raw.trim();
+      if (trimmed) { firstTag = trimmed; break; }
+    }
+  }
   if (!firstTag) return topStations(limit);
   const results = await stationsByTag(firstTag, limit + 5);
   return results
