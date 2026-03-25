@@ -40,5 +40,4 @@ export function useMediaSession(config: MediaSessionConfig): void {
         catch { /* ok */ }
       }
     };
-  }, []); useEffect(setupHandlers, [setupHandlers]);
-}
+  }, []); useEffect(setupHandlers, [setupHandlers]); }

@@ -11,8 +11,7 @@ interface PlaybackState { source: PlaybackSource; isPlaying: boolean; currentTim
   setSource: (s: PlaybackSource) => void; setPlaying: (p: boolean) => void;
   setCurrentTime: (t: number) => void; setVolume: (v: number) => void;
   setMuted: (m: boolean) => void; setTrackInfo: (title: string, artist: string, artwork?: string | null) => void;
-  reset: () => void;
-}
+  reset: () => void; }
 export const usePlaybackStore = create<PlaybackState>((set) => ({
   source: null, isPlaying: false, currentTime: 0, volume: 0.8,
   muted: false, trackTitle: '', trackArtist: '', artworkUrl: null,

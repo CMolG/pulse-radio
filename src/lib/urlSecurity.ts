@@ -30,5 +30,4 @@ export function isPrivateHost(hostname: string): boolean { const host = hostname
   if (ipv6 === '::1' || ipv6 === '::') return true;
   // IPv6-mapped IPv4 (::ffff:A.B.C.D) — extract the embedded IPv4 and check it
   const mappedMatch = ipv6.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i);
-  if (mappedMatch) return isPrivateHost(mappedMatch[1]); return false;
-}
+  if (mappedMatch) return isPrivateHost(mappedMatch[1]); return false; }

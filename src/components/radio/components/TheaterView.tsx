@@ -42,8 +42,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
           if (max - min < 25) continue; const s = (max - min) / max; if (s < 0.2) continue; let h = 0;
           if (max === r) h = 60 * (((g - b) / (max - min)) % 6);
           else if (max === g) h = 60 * ((b - r) / (max - min) + 2); else h = 60 * ((r - g) / (max - min) + 4);
-          if (h < 0) h += 360; const bucket = Math.round(h / 30) * 30; buckets[bucket] = (buckets[bucket] || 0) + 1;
-        }
+          if (h < 0) h += 360; const bucket = Math.round(h / 30) * 30; buckets[bucket] = (buckets[bucket] || 0) + 1; }
         const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
         if (sorted.length < 1) return resolve(FALLBACK_COLORS);
         const h1 = parseInt(sorted[0][0]); const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
@@ -53,10 +52,8 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
       } catch { resolve(FALLBACK_COLORS); }
     }; img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;});
   if (_colorCache.size >= MAX_COLOR_CACHE) {
-    const first = _colorCache.keys().next().value; if (first !== undefined) _colorCache.delete(first);
-  }
-  _colorCache.set(imgUrl, p); return p;
-}
+    const first = _colorCache.keys().next().value; if (first !== undefined) _colorCache.delete(first); }
+  _colorCache.set(imgUrl, p); return p; }
 export default function TheaterView({
   station, track, isPlaying, frequencyDataRef, artworkUrl, icyBitrate, onBack, onToggleFav,
   isFavorite, onFavSong, isSongLiked, lyrics, currentTime, activeLineOverride, lyricsVariant = "mobile", compact,
@@ -204,5 +201,4 @@ export default function TheaterView({
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
                 variant={lyricsVariant} /></div>)}</div></div></motion.div>
-  );
-}
+  ); }

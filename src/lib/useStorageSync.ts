@@ -9,5 +9,4 @@ export function useStorageSync<T>( key: string, setter: (val: T) => void,
       try { const parsed = JSON.parse(e.newValue); if (validateRef.current(parsed)) setterRef.current(parsed as T);
       } catch { /* ignore malformed */ }
     }; window.addEventListener('storage', onStorage); return () => window.removeEventListener('storage', onStorage);
-  }, [key]);
-}
+  }, [key]); }

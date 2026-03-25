@@ -24,29 +24,22 @@ async function fetchCached(path: string, key: string): Promise<Station[]> { cons
       const data: Station[] = await res.json(); const filtered = data.filter(s => s.url_resolved);
       cache.set(key, { data: filtered, ts: Date.now() });
       while (cache.size > MAX_CACHE) {
-        const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break;
-      }
+        const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
       return filtered;
     } catch { rotateServer(); }
   }
-  throw new Error('All Radio-Browser API servers unavailable');
-}
+  throw new Error('All Radio-Browser API servers unavailable'); }
 export async function topStations(limit = 20): Promise<Station[]> {
-  return fetchCached(`/stations/topvote?limit=${limit}`, `top-${limit}`);
-}
+  return fetchCached(`/stations/topvote?limit=${limit}`, `top-${limit}`); }
 function searchBy(filter: Record<string, string>, cacheKey: string, limit: number): Promise<Station[]> {
   const params = new URLSearchParams({ ...filter, limit: String(limit), order: 'votes', reverse: 'true' });
-  return fetchCached(`/stations/search?${params}`, cacheKey);
-}
+  return fetchCached(`/stations/search?${params}`, cacheKey); }
 export function searchStations(query: string, limit = 30): Promise<Station[]> {
-  return searchBy({ name: query }, `search:${query}`, limit);
-}
+  return searchBy({ name: query }, `search:${query}`, limit); }
 export function stationsByTag(tag: string, limit = 30): Promise<Station[]> {
-  return searchBy({ tag: tag.toLowerCase() }, `tag:${tag}`, limit);
-}
+  return searchBy({ tag: tag.toLowerCase() }, `tag:${tag}`, limit); }
 export function stationsByCountry(country: string, limit = 30): Promise<Station[]> {
-  return searchBy({ country }, `country:${country}`, limit);
-}
+  return searchBy({ country }, `country:${country}`, limit); }
 export function trendingStations(limit = 20): Promise<Station[]> { return topStations(limit); }
 export async function localStations(limit = 20): Promise<Station[]> {
   const countryCode = typeof navigator !== 'undefined' ? navigator.language?.split('-')[1]?.toUpperCase() || '' : '';
@@ -63,5 +56,4 @@ export async function similarStations(station: Station, limit = 5): Promise<Stat
   const firstTag = station.tags?.split(',').map(t => t.trim()).filter(Boolean)[0];
   if (!firstTag) return topStations(limit); const results = await stationsByTag(firstTag, limit + 5);
   // Exclude the current station and filter to only online streams
-  return results .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit);
-}
+  return results .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit); }

@@ -18,14 +18,11 @@ const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: num
 const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
 function ensureQualityMigration(): void { if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
   saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low'); saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-  saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
-}
+  saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true); }
 function getDefaultNoiseReductionMode(): NoiseReductionMode {
-  ensureQualityMigration(); return loadFromStorage<NoiseReductionMode>(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
-}
+  ensureQualityMigration(); return loadFromStorage<NoiseReductionMode>(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low'); }
 function getDefaultNormalizerEnabled(): boolean {
-  ensureQualityMigration(); return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-}
+  ensureQualityMigration(); return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true); }
 export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(() => {
     const defaults = EQ_BANDS.map(b => ({ ...b }));
     const saved = loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, defaults);
@@ -87,8 +84,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     const preset = NR_PRESETS[mode]; const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
     if (nrHighpassRef.current) nrHighpassRef.current.frequency.setTargetAtTime(preset.hpfHz, t, RAMP_TIME);
     if (nrGateRef.current) { nrGateRef.current.threshold.setTargetAtTime(preset.gateThreshold, t, RAMP_TIME);
-      nrGateRef.current.ratio.setTargetAtTime(preset.gateRatio, t, RAMP_TIME);
-    }
+      nrGateRef.current.ratio.setTargetAtTime(preset.gateRatio, t, RAMP_TIME); }
     if (nrDeEsserRef.current) { nrDeEsserRef.current.frequency.setTargetAtTime(preset.deEsserCenterHz, t, RAMP_TIME);
       nrDeEsserRef.current.gain.setTargetAtTime(preset.deEsserGain, t, RAMP_TIME);
     }}, []);
@@ -150,8 +146,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       // Soft-clip curve that generates even and odd harmonics
       const curveLen = 4096; const curve = new Float32Array(curveLen);
       for (let i = 0; i < curveLen; i++) {
-        const x = (i * 2) / curveLen - 1; curve[i] = (Math.PI + 2) * x / (Math.PI + 2 * Math.abs(x));
-      }
+        const x = (i * 2) / curveLen - 1; curve[i] = (Math.PI + 2) * x / (Math.PI + 2 * Math.abs(x)); }
       bassShaper.curve = curve; bassShaper.oversample = '2x';
       const bassHp = ctx.createBiquadFilter(); bassHp.type = 'highpass';
       bassHp.frequency.value = 80; bassHp.Q.value = 0.7;
@@ -234,8 +229,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       crossGainLRef.current = crossL; crossGainRRef.current = crossR; filtersRef.current = filters;} catch {
       // Keep playback alive when WebAudio graph creation fails (observed on
       // some iOS background/resume paths for cross-origin streams).
-      sourceRef.current = null; filtersRef.current = []; connectedAudioRef.current = audio;
-    }
+      sourceRef.current = null; filtersRef.current = []; connectedAudioRef.current = audio; }
   }, [bands, bassEnhance, compressorAmount, compressorEnabled, enabled, noiseReductionMode, normalizerEnabled, stereoWidth]);
   const disconnect = useCallback(() => { teardownGraph(true); }, []); const MAX_GAIN_DB = 12;
   const setBandGain = useCallback((id: string, gain: number) => {
@@ -290,8 +284,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           mbDryGainRef.current.gain.setTargetAtTime(1 - amount * 0.5, t, RAMP_TIME);
           mbWetGainRef.current.gain.setTargetAtTime(amount, t, RAMP_TIME);
         } else { mbDryGainRef.current.gain.setTargetAtTime(1, t, RAMP_TIME);
-          mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME);
-        }
+          mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME); }
       }
       return next;});
   }, [compressorAmount]);
@@ -313,5 +306,4 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     toggleNormalizer, setStereoWidth, setBassEnhance, toggleCompressor,
     setCompressorAmount, setNoiseReductionMode, setOutputVolume, connectSource,
     disconnect, saveCustomPreset, removeCustomPreset,
-  };
-}
+  }; }

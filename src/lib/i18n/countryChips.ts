@@ -17,8 +17,7 @@ const REGION_PRIORITY: Record<string, number> = {
   Europe: 1, Asia: 2, Americas: 3, Africa: 4, Oceania: 5, Antarctic: 6, Other: 9,
 };
 function localeCandidates(locale: SupportedLocale): SupportedLocale[] {
-  return LOCALE_SELF_CANDIDATES[locale] ?? [locale];
-}
+  return LOCALE_SELF_CANDIDATES[locale] ?? [locale]; }
 function localeFromLang3(code3: string): SupportedLocale | null { return LANG3_TO_LOCALE[code3] ?? null; }
 export function getCountryDisplayName(locale: SupportedLocale, code: string): string {
   const country = COUNTRY_BY_CODE[code]; if (!country) return code;
@@ -40,8 +39,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     if (subregions.has(country.subregion)) score += 60; if (regions.has(country.region)) score += 30;
     score += 30; score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };
-  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.code);
-}
+  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.code); }
 function uniquePush(target: string[], values: string[]) {
   for (const value of values) { if (!target.includes(value)) target.push(value); }
 }

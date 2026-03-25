@@ -20,16 +20,14 @@ export function useWakeLock(shouldLock: boolean) {
       if (wantReleaseRef.current) {
         // release() was called while we were awaiting — honour it immediately
         try { await lock.release(); } catch { /* already released */ }
-        setIsActive(false); return;
-      }
+        setIsActive(false); return; }
       lockRef.current = lock; setIsActive(true);
       lock.addEventListener('release', () => { lockRef.current = null; setIsActive(false); });} catch {
       // Wake lock request failed (e.g., low battery, or permission denied)
     } finally { requestingRef.current = false; }}, []);
   const release = useCallback(async () => { if (requestingRef.current) {
       // request() is in-flight — flag so it releases on completion
-      wantReleaseRef.current = true; return;
-    }
+      wantReleaseRef.current = true; return; }
     if (!lockRef.current) return;
     try { await lockRef.current.release(); } catch {
       // Already released
@@ -44,5 +42,4 @@ export function useWakeLock(shouldLock: boolean) {
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [shouldLock, request]);
   // Cleanup on unmount
-  useEffect(() => () => { release(); }, [release]); return { isActive, request, release };
-}
+  useEffect(() => () => { release(); }, [release]); return { isActive, request, release }; }

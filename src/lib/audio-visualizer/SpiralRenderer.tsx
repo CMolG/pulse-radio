@@ -7,8 +7,7 @@
 import React, { useRef, useEffect } from "react";
 interface SpiralRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string;
-  color3?: string; sensitivity?: number; demo?: boolean;
-}
+  color3?: string; sensitivity?: number; demo?: boolean; }
 import { useCanvasLoop } from './useCanvasLoop';
 const NUM_BARS = 250;
 const CYCLES = 4;
@@ -31,13 +30,11 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       // Map real frequency data to our bars
       for (let i = 0; i < NUM_BARS; i++) {
         const srcIdx = Math.min(Math.floor((i / NUM_BARS) * frequencyData.length), frequencyData.length - 1,);
-        target[i] = (frequencyData[srcIdx] / 255) * sensitivity; data[i] += (target[i] - data[i]) * 0.15;
-      }
+        target[i] = (frequencyData[srcIdx] / 255) * sensitivity; data[i] += (target[i] - data[i]) * 0.15; }
     } else if (demo) {
       // Demo mode: organic simulated audio
       for (let i = 0; i < NUM_BARS; i++) { if (Math.random() < 0.08) {
-          const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6; target[i] = Math.random() * maxVal * sensitivity;
-        }
+          const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6; target[i] = Math.random() * maxVal * sensitivity; }
         data[i] += (target[i] - data[i]) * 0.1;
       }} else {
       // No data: decay
@@ -48,11 +45,9 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
     for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) {
         const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
-        dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25;
-      }
+        dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25; }
       // Swap: previous dst becomes next src
-      const swap = src === data ? temp : src; src = dst; dst = swap;
-    }
+      const swap = src === data ? temp : src; src = dst; dst = swap; }
     // After SMOOTH_PASSES iterations, result is in `src`
     const result = src;
     // Spiral configuration
@@ -76,8 +71,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       const radius = minRadius * Math.exp(b * baseAngle);
       const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle);
       innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
-      outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2);
-    }
+      outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2); }
     // Draw slime shapes per cycle
     ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
@@ -88,17 +82,14 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       ctx.moveTo(outerX[startIdx], outerY[startIdx]);
       for (let i = startIdx + 1; i < endIdx - 1; i++) {
         const xc = (outerX[i] + outerX[i + 1]) / 2; const yc = (outerY[i] + outerY[i + 1]) / 2;
-        ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc);
-      }
+        ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc); }
       if (endIdx - 1 > startIdx) ctx.lineTo(outerX[endIdx - 1], outerY[endIdx - 1]);
       // Inner edge reversed
       ctx.lineTo(innerX[endIdx - 1], innerY[endIdx - 1]);
       for (let i = endIdx - 2; i > startIdx; i--) {
         const xc = (innerX[i] + innerX[i - 1]) / 2; const yc = (innerY[i] + innerY[i - 1]) / 2;
-        ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc);
-      }
-      ctx.lineTo(innerX[startIdx], innerY[startIdx]); ctx.closePath(); ctx.fill();
-    }
+        ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc); }
+      ctx.lineTo(innerX[startIdx], innerY[startIdx]); ctx.closePath(); ctx.fill(); }
     ctx.globalAlpha = 1.0;});
   return ( <div
       className={`relative overflow-hidden ${className}`}
@@ -106,6 +97,5 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
         ref={canvasRef}
         className="absolute inset-0 size-full"
         style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div>
-  );
-}
+  ); }
 export default SpiralRenderer;

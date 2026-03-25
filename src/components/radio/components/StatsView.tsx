@@ -12,8 +12,7 @@ function formatListenTime(ms: number): string {
   const mins = Math.floor(totalSec / 60); if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60); const remMins = mins % 60;
   if (hours < 24) return `${hours}h ${remMins}m`; const days = Math.floor(hours / 24);
-  const remHours = hours % 24; return `${days}d ${remHours}h`;
-}
+  const remHours = hours % 24; return `${days}d ${remHours}h`; }
 type Props = { topStations: StationListenTime[]; topSongs: SongPlayCount[];
   topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number;
 };
@@ -40,8 +39,7 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
         <IoTimeOutline size={40} className="text-white/20 mb-3" />
         <p className="text-[14px] text-white/40">No listening data yet</p>
         <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p></div>
-    );
-  }
+    ); }
   const maxStationTime = topStations[0]?.totalMs ?? 1; const maxSongCount = topSongs[0]?.count ?? 1;
   const maxArtistCount = topArtists[0]?.count ?? 1; const maxGenreCount = topGenres[0]?.count ?? 1;
   return ( <div className="p-4 space-y-6">

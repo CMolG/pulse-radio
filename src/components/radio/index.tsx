@@ -14,5 +14,4 @@ const RadioShell = dynamic(() => import('./RadioShell'), { ssr: false });
 export default function RadioApp({ isPip, initialCountryCode }: { isPip?: boolean; initialCountryCode?: string }) {
   return ( <ErrorBoundary><LocaleProvider countryCode={initialCountryCode}>
         <RadioShell isPip={isPip} initialCountryCode={initialCountryCode} /></LocaleProvider></ErrorBoundary>
-  );
-}
+  ); }

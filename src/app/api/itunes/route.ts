@@ -12,8 +12,7 @@ export const runtime = 'nodejs';
  */
 export async function GET(req: NextRequest) { const term = req.nextUrl.searchParams.get('term');
   if (!term || term.length > 200) {
-    return NextResponse.json({ error: 'Missing or invalid term parameter', results: [] }, { status: 400 });
-  }
+    return NextResponse.json({ error: 'Missing or invalid term parameter', results: [] }, { status: 400 }); }
   // Support podcast search via ?media=podcast (defaults to music for backward compat)
   const media = req.nextUrl.searchParams.get('media') === 'podcast' ? 'podcast' : 'music';
   const entity = media === 'podcast' ? 'podcast' : 'song'; const limit = media === 'podcast' ? '20' : '3';

@@ -74,6 +74,5 @@ function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = 
                     </motion.div>)}</AnimatePresence></div>
             );
           })}</div><div className="h-6" /></motion.div></motion.div>
-  );
-}
+  ); }
 export default React.memo(UsageGuide);

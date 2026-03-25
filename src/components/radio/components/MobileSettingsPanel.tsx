@@ -203,5 +203,4 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   topGenres={statsData.topGenres}
                   totalListenMs={statsData.totalListenMs} />
               )} <div className="h-6" /></motion.div></motion.div>)}</AnimatePresence></motion.div>
-  );
-}
+  ); }

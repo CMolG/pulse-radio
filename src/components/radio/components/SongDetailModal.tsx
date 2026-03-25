@@ -224,6 +224,5 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 )}
                 {!lyricsLoading && !plainLyrics && lyricsEmpty}</div></div></motion.div>
         </motion.div>)}</AnimatePresence>
-  );
-}
+  ); }
 export default React.memo(SongDetailModal);

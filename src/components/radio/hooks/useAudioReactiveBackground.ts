@@ -27,10 +27,8 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
       const alpha = target > valueRef.current ? attack : release;
       valueRef.current += (target - valueRef.current) * alpha;
       if (Math.abs(valueRef.current - lastPublishedRef.current) >= 0.002) {
-        lastPublishedRef.current = valueRef.current; setAmplitude(valueRef.current);
-      }
+        lastPublishedRef.current = valueRef.current; setAmplitude(valueRef.current); }
       rafRef.current = requestAnimationFrame(loop);
     }; rafRef.current = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(rafRef.current); lastTsRef.current = 0; };
-  }, [enabled, meterRef]); return { amplitude };
-}
+  }, [enabled, meterRef]); return { amplitude }; }

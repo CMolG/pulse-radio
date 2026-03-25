@@ -8,8 +8,7 @@ import { normalizeText } from '@/lib/stringUtils';
 const FETCH_TIMEOUT = 8_000;
 interface AlbumInfo {
   artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null;
-  durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null;
-}
+  durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null; }
 const CACHE = new Map<string, AlbumInfo>();
 const MAX_CACHE = 200;
 const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
@@ -32,38 +31,32 @@ function jaroDistance(a: string, b: string): number { if (a === b) return 1; if 
   for (let i = 0; i < a.length; i++) {
     const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
-      if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break;
-    }
+      if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break; }
   }
   if (!matches) return 0; let t = 0; let k = 0;
   for (let i = 0; i < a.length; i++) {
-    if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++;
-  }
+    if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++; }
   const transpositions = t / 2;
   return ( matches / a.length +
     matches / b.length +
     (matches - transpositions) / matches
-  ) / 3;
-}
+  ) / 3; }
 function jaroWinkler(a: string, b: string): number {
   const jaro = jaroDistance(a, b); if (jaro < 0.7) return jaro; let prefix = 0; const maxPrefix = 4;
   for (let i = 0; i < Math.min(maxPrefix, a.length, b.length); i++) { if (a[i] === b[i]) prefix++; else break; }
-  return jaro + prefix * 0.1 * (1 - jaro);
-}
+  return jaro + prefix * 0.1 * (1 - jaro); }
 function selectBestItunesResult(results: ItunesResult[], requestedTitle: string, requestedArtist: string | null): ItunesResult | null {
   if (!results.length) return null; const normalizedRequestedTitle = normalizeText(requestedTitle);
   const normalizedRequestedArtist = normalizeText(requestedArtist); if (!normalizedRequestedTitle) return null;
   // Pre-normalize all candidates once to avoid redundant normalizeText calls in loop
   const normTitles = new Array<string>(results.length); const normArtists = new Array<string>(results.length);
   for (let i = 0; i < results.length; i++) {
-    normTitles[i] = normalizeText(results[i].trackName); normArtists[i] = normalizeText(results[i].artistName);
-  }
+    normTitles[i] = normalizeText(results[i].trackName); normArtists[i] = normalizeText(results[i].artistName); }
   const exactIdx = normTitles.indexOf(normalizedRequestedTitle);
   if (exactIdx !== -1) {
     if (!normalizedRequestedArtist) return results[exactIdx]; const exactArtist = normArtists[exactIdx];
     if (!exactArtist || exactArtist === normalizedRequestedArtist || exactArtist.includes(normalizedRequestedArtist) || normalizedRequestedArtist.includes(exactArtist)) {
-      return results[exactIdx];
-    }
+      return results[exactIdx]; }
   }
   let best: ItunesResult | null = null; let bestScore = 0;
   for (let i = 0; i < results.length; i++) { const candidateTitle = normTitles[i]; if (!candidateTitle) continue;
@@ -74,34 +67,27 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     let score = titleScore; if (normalizedRequestedArtist) { const candidateArtist = normArtists[i];
       if (candidateArtist) {
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist); if (artistScore < 0.85) continue;
-        score = (titleScore * 0.85) + (artistScore * 0.15);
-      }
+        score = (titleScore * 0.85) + (artistScore * 0.15); }
     }
     if (score > bestScore) { bestScore = score; best = results[i]; }
   }
-  return best ?? null;
-}
+  return best ?? null; }
 function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key);
   if (val !== undefined) {
     // Move to end for LRU ordering
-    CACHE.delete(key); CACHE.set(key, val);
-  }
-  return val;
-}
+    CACHE.delete(key); CACHE.set(key, val); }
+  return val; }
 function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(key, value);
   while (CACHE.size > MAX_CACHE) {
-    const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest); else break;
-  }
+    const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest); else break; }
 }
 const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
 function appendReferrer(url: string): string {
-  if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`;
-}
+  if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`; }
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) { const img = new Image(); img.crossOrigin = 'anonymous';
   img.onerror = () => { img.src = ''; }; // release failed load
-  img.src = url;
-}
+  img.src = url; }
 export function useAlbumArt(title: string | null, artist: string | null) { const hasTitle = Boolean(title);
   const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
   const cachedInfo = useMemo(() => { if (!cacheKey) return null; return cacheGet(cacheKey) ?? null; }, [cacheKey]);
@@ -127,8 +113,7 @@ export function useAlbumArt(title: string | null, artist: string | null) { const
         }; cacheSet(cacheKey, albumInfo); if (artworkUrl) preloadImage(artworkUrl);
         setFetched({ key: cacheKey, info: albumInfo });
       }).catch(() => { if (!controller.signal.aborted) {
-          cacheSet(cacheKey, EMPTY_ALBUM_INFO); setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO });
-        }
+          cacheSet(cacheKey, EMPTY_ALBUM_INFO); setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO }); }
       }).finally(() => { clearTimeout(timeout); });
     return () => { clearTimeout(timeout); controller.abort(); };
   }, [title, artist, cacheKey, cachedInfo]);

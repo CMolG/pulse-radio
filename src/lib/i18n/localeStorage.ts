@@ -10,16 +10,12 @@ export const LOCALE_STORAGE_KEY = "radio-locale";
 export function getBrowserLocale(): SupportedLocale {
   if (typeof navigator === "undefined") return "en"; const nav = navigator as Navigator & { languages?: string[] };
   if (Array.isArray(nav.languages) && nav.languages.length > 0) return normalizeLocale(nav.languages[0]);
-  return normalizeLocale(nav.language);
-}
+  return normalizeLocale(nav.language); }
 export function getStoredLocale(): SupportedLocale | null {
   if (typeof window === "undefined") return null; const raw = loadStringFromStorage(LOCALE_STORAGE_KEY, "");
-  return raw ? normalizeLocale(raw) : null;
-}
+  return raw ? normalizeLocale(raw) : null; }
 export function getInitialLocale(): SupportedLocale { return getStoredLocale() ?? getBrowserLocale(); }
 export function getInitialLocaleForCountry(countryCode: string): SupportedLocale {
-  return getStoredLocale() ?? getDefaultLocaleForCountry(countryCode) ?? getBrowserLocale();
-}
+  return getStoredLocale() ?? getDefaultLocaleForCountry(countryCode) ?? getBrowserLocale(); }
 export function saveLocale(locale: SupportedLocale): void {
-  if (typeof window === "undefined") return; saveStringToStorage(LOCALE_STORAGE_KEY, locale);
-}
+  if (typeof window === "undefined") return; saveStringToStorage(LOCALE_STORAGE_KEY, locale); }

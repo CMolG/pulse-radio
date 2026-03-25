@@ -34,5 +34,4 @@ export function useFavorites() { const [favorites, setFavorites] = useState<Stat
   const playPrev = useCallback((currentUuid: string): Station | null => {
     const idx = favorites.findIndex(s => s.stationuuid === currentUuid);
     if (idx < 0 || favorites.length < 2) return null; return favorites[(idx - 1 + favorites.length) % favorites.length];
-  }, [favorites]); return { favorites, add, remove, toggle, has, playNext, playPrev };
-}
+  }, [favorites]); return { favorites, add, remove, toggle, has, playNext, playPrev }; }

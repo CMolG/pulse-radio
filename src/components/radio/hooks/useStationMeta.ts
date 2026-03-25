@@ -21,8 +21,7 @@ const MAX_AD_CACHE = 256;
 function isAdContent(text: string): boolean { let result = _adCache.get(text); if (result !== undefined) return result;
   result = AD_PATTERNS.some(re => re.test(text));
   if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result);
-  return result;
-}
+  return result; }
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
 export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
@@ -31,8 +30,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
       clearTimeout(timeout); controller.abort();} else {
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
       controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort);
-      }, { once: true });
-    }
+      }, { once: true }); }
   }
   try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json();
@@ -49,10 +47,8 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   if (raw.toLowerCase() === _lastStationLower) return null;
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | ']; for (const sep of separators) { const idx = raw.indexOf(sep);
-    if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() };
-  }
-  return { title: raw.trim(), artist: '' };
-}
+    if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() }; }
+  return { title: raw.trim(), artist: '' }; }
 export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
@@ -86,8 +82,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
       if (streamTitle && streamTitle !== lastTitleRef.current) { lastTitleRef.current = streamTitle;
         // Reject ad content in raw title or parsed title (artist names may look like domains)
         const parsed = !isAdContent(streamTitle) ? parseTrack(streamTitle, station.name) : null;
-        setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return;
-      }
+        setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return; }
       if (streamTitle) return; if (!lastTitleRef.current) setTrack(null);
     };
     // Fetch immediately on station change or when resuming playback,
@@ -108,5 +103,4 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     // We do NOT null these out while loading — the ICY swap keeps the
     // previous station's data visible until new data arrives.
     track: station ? track : null, icyBitrate: station ? icyBitrate : null, streamCodec: station ? streamCodec : null,
-  };
-}
+  }; }

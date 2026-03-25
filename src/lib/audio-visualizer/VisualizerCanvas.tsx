@@ -7,8 +7,7 @@
 import React, { useRef, useEffect } from 'react';
 interface VisualizerCanvasProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
-  opacity?: number; className?: string;
-}
+  opacity?: number; className?: string; }
 export function VisualizerCanvas({
   frequencyDataRef, mode = 'bars', barCount = 64, color = 'var(--accent-color)', opacity = 0.4, className = '',
 }: VisualizerCanvasProps) { const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
@@ -31,14 +30,12 @@ export function VisualizerCanvas({
           const varName = color.slice(4, -1).trim();
           const computed = getComputedStyle(canvas).getPropertyValue(varName).trim();
           resolvedColorRef.current = computed || '#34d399';
-        } else resolvedColorRef.current = color;
-      }
+        } else resolvedColorRef.current = color; }
       const resolvedColor = resolvedColorRef.current; const { width, height } = sizeRef.current;
       if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
       const dpr = devicePixelRatio; const targetW = Math.round(width * dpr); const targetH = Math.round(height * dpr);
       if (canvas.width !== targetW || canvas.height !== targetH) {
-        canvas.width = targetW; canvas.height = targetH; gradientCacheRef.current = null;
-      }
+        canvas.width = targetW; canvas.height = targetH; gradientCacheRef.current = null; }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height);
       if (mode === 'bars') { const step = Math.max(1, Math.floor(frequencyData.length / barCount));
         const barWidth = width / barCount; const gap = barWidth * 0.2;
@@ -65,12 +62,9 @@ export function VisualizerCanvas({
         const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2; ctx.beginPath();
         for (let i = 0; i < frequencyData.length; i++) {
           const y = height - (frequencyData[i] / 255) * height * 0.6; if (i === 0) ctx.moveTo(0, y);
-          else ctx.lineTo(i * step, y);
-        }
-        ctx.stroke();
-      }
+          else ctx.lineTo(i * step, y); }
+        ctx.stroke(); }
       frameRef.current = requestAnimationFrame(draw);
     }; frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
   }, [frequencyDataRef, mode, barCount, color]);
-  return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />;
-}
+  return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />; }

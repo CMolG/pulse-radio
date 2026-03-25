@@ -34,8 +34,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
   // Propagate client disconnect to upstream so we don't leak connections
   if (req.signal) { if (req.signal.aborted) controller.abort();
-    else req.signal.addEventListener('abort', () => controller.abort(), { once: true });
-  }
+    else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); }
   try { const upstream = await fetch(parsed.toString(), {
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     // Validate the final URL after redirects to prevent SSRF via redirect
@@ -61,8 +60,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr; if (icyName) responseHeaders['X-Stream-Name'] = icyName;
     // HEAD requests: return headers only (for prefetch / codec sniffing)
     if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
-      return new Response(null, { status: 200, headers: responseHeaders });
-    }
+      return new Response(null, { status: 200, headers: responseHeaders }); }
     return new Response(upstream.body, { status: 200, headers: responseHeaders, });
   } catch (err) {
     if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';

@@ -73,8 +73,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
           style={{ height: "env(safe-area-inset-bottom, 0px)" }} /></div>
-    );
-  }
+    ); }
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{statusAnnouncement}</div>
@@ -188,6 +187,5 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           aria-label="Volume"
           className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         /></div></div>
-  );
-}
+  ); }
 export default React.memo(NowPlayingBar);

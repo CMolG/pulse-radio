@@ -92,5 +92,4 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
                     scrollToIndex={scrollToIndex} />
                 );
               })}</div></div></div></div>
-  );
-}
+  ); }

@@ -21,5 +21,4 @@ export function useRecent() { const [recent, setRecent] = useState<Station[]>(()
       const filtered = prev.filter(s => s.stationuuid !== station.stationuuid);
       return [station, ...filtered].slice(0, MAX_RECENT);});}, []);
   const remove = useCallback((uuid: string) => { setRecent(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
-  const clear = useCallback(() => setRecent([]), []); return { recent, add, remove, clear };
-}
+  const clear = useCallback(() => setRecent([]), []); return { recent, add, remove, clear }; }

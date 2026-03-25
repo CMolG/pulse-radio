@@ -8,15 +8,13 @@ import React from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 interface Props { children: React.ReactNode;
   /** Optional fallback to render instead of the default error UI */
-  fallback?: React.ReactNode;
-}
+  fallback?: React.ReactNode; }
 type State = { hasError: boolean; error: Error | null; };
 export class ErrorBoundary extends React.Component<Props, State> { state: State = { hasError: false, error: null };
   static getDerivedStateFromError(error: Error): State { return { hasError: true, error };
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("[Pulse Radio] Component error caught by boundary:", error, info.componentStack);
-  }
+    console.error("[Pulse Radio] Component error caught by boundary:", error, info.componentStack); }
   private handleReset = () => { this.setState({ hasError: false, error: null }); };
   render() { if (this.state.hasError) {
       if (this.props.fallback !== undefined) return this.props.fallback;
@@ -34,8 +32,6 @@ export class ErrorBoundary extends React.Component<Props, State> { state: State 
             className="flex-row-2 px-4 py-2 rounded-lg bg-surface-3 text-[13px] font-medium text-white hover:bg-surface-4 transition-colors"
           ><RotateCcw size={14} />
             Try Again</button></div>
-      );
-    }
-    return this.props.children;
-  }
+      ); }
+    return this.props.children; }
 }

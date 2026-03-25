@@ -74,5 +74,4 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
         ? 'Realtime lyrics sync is not supported in this browser.'
         : runtimeState.diagnostics.errorMessage,
     }, toggle,
-  };
-}
+  }; }

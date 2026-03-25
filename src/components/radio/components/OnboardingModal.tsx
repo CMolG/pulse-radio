@@ -37,8 +37,7 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
     return () => window.removeEventListener('beforeinstallprompt', handler);}, []);
   const handleInstall = async () => { if (deferredPrompt) {
       try { await deferredPrompt.prompt(); } catch { /* user dismissed install prompt */ }
-      setDeferredPrompt(null);
-    }
+      setDeferredPrompt(null); }
   };
   if (isStandalone) { return (
       <div className="flex flex-col items-center gap-4 text-center">
@@ -46,8 +45,7 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
         <h2 className="text-xl font-bold text-white">Already Installed!</h2>
         <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
           You&apos;re using Pulse as an app. Enjoy the full experience!</p></div>
-    );
-  }
+    ); }
   return ( <div className="flex flex-col items-center gap-4 text-center">
       <IoPhonePortraitOutline size={48} className="text-[#3478f6]" />
       <h2 className="text-xl font-bold text-white">Install as App</h2>
@@ -64,8 +62,7 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
           </div></div>
       ) : ( <p className="text-[12px] text-white/40 mt-1">
           Use Chrome or Edge for the install option, or add this page to your home screen.</p>)}</div>
-  );
-}
+  ); }
 function OnboardingModal() { const [show, setShow] = useState(false); const [step, setStep] = useState(0);
   const totalSteps = STEPS.length + 1; // +1 for PWA step
   useEffect(() => { const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
@@ -115,6 +112,5 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
                   onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
                 >{isLast ? "Let's Go!" : 'Next'}</button></div></div></motion.div></motion.div>)}</AnimatePresence>
-  );
-}
+  ); }
 export default React.memo(OnboardingModal);

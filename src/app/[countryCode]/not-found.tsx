@@ -12,5 +12,4 @@ export default function CountryNotFound() { return (
           href="/"
           className="inline-flex items-center justify-center rounded-full px-5 py-2 bg-white/10 hover:bg-white/15 transition-colors"
         >Go back home</Link></div></main>
-  );
-}
+  ); }

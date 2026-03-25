@@ -9,8 +9,7 @@ interface FerrofluidRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; blobCount?: number; colorPrimary?: string;
   colorSecondary?: string; colorAccent?: string; sensitivity?: number;
   /** standalone demo mode — generates its own animation without audio */
-  demo?: boolean;
-}
+  demo?: boolean; }
 /* ─── helpers ─── */
 import { hexToRgb } from './colorUtils';
 import { useCanvasLoop } from './useCanvasLoop';
@@ -29,8 +28,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
       vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7,
       freqBand: Math.floor((i / count) * 128),});
   }
-  return blobs;
-}
+  return blobs; }
 /* ─── drawing ─── */
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
 let _offscreen: OffscreenCanvas | null = null;
@@ -43,8 +41,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   const scale = 3; const sw = Math.ceil(w / scale); const sh = Math.ceil(h / scale);
   // Use an offscreen canvas for smooth bilinear upscaling
   if (!_offscreen || _offscreen.width !== sw || _offscreen.height !== sh) {
-    _offscreen = new OffscreenCanvas(sw, sh); _imgData = undefined;
-  }
+    _offscreen = new OffscreenCanvas(sw, sh); _imgData = undefined; }
   const offCtx = _offscreen.getContext('2d', { willReadFrequently: true }); if (!offCtx) return;
   // Reuse ImageData across frames — every pixel is written below, so no zeroing needed
   if (!_imgData || _imgData.width !== sw || _imgData.height !== sh) {
@@ -84,8 +81,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
         const glowIntensity = (sum - thresholdLow) / glowRange; sd[idx] = (colors.accent[0] * glowIntensity * 0.4) | 0;
         sd[idx + 1] = (colors.accent[1] * glowIntensity * 0.4) | 0;
         sd[idx + 2] = (colors.accent[2] * glowIntensity * 0.4) | 0; sd[idx + 3] = (glowIntensity * 60) | 0;
-      } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0;
-    }
+      } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0; }
   }
   // Put image data into offscreen canvas, then draw upscaled with
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
@@ -104,8 +100,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
-      blobsRef.current = createBlobs(blobCount, w, h); sizeRef.current = { w, h };
-    }
+      blobsRef.current = createBlobs(blobCount, w, h); sizeRef.current = { w, h }; }
     timeRef.current += 0.016; const t = timeRef.current;
     const blobs = blobsRef.current; const cx = w / 2; const cy = h / 2;
     // compute overall energy
@@ -132,8 +127,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08;
       blob.vx *= 0.85; blob.vy *= 0.85; blob.x += blob.vx; blob.y += blob.vy;
       // pulse radius with energy (reuses cached bandVal and minWH)
-      blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity;
-    }
+      blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity; }
     // clear
     ctx.clearRect(0, 0, w, h);
     // draw metaballs
@@ -145,6 +139,5 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
           <filter id="ferrofluid-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
             <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
             <feComposite in="SourceGraphic" in2="goo" operator="atop" /></filter></defs></svg></div>
-  );
-}
+  ); }
 export default FerrofluidRenderer;

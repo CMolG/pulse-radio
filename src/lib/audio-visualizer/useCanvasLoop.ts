@@ -23,5 +23,4 @@ export function useCanvasLoop(
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       paintRef.current(ctx, w, h, freqRef.current?.current ?? null); frameRef.current = requestAnimationFrame(loop);
     }; frameRef.current = requestAnimationFrame(loop); return () => cancelAnimationFrame(frameRef.current);
-  }, [dprScale]); return canvasRef;
-}
+  }, [dprScale]); return canvasRef; }

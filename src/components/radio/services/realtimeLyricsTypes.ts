@@ -28,13 +28,10 @@ export const DEFAULT_REALTIME_ALIGN_POLICY: RealtimeAlignPolicy = {
 export function defaultRealtimeDiagnostics(): RealtimeSyncDiagnostics { return {
     qualityMode: 'balanced', lastHypothesisMs: null, hypothesesSeen: 0, confirmedTransitions: 0,
     rejectedJumps: 0, relockCount: 0, errorMessage: null,
-  };
-}
+  }; }
 export function defaultRealtimeState(enabled: boolean): RealtimeSyncState { return {
     enabled, supported: false, status: 'idle', activeLineIndex: -1,
     candidateLineIndex: -1, confidence: 0, effectiveCurrentTime: undefined, diagnostics: defaultRealtimeDiagnostics(),
-  };
-}
+  }; }
 export function isRealtimeEligible(lyrics: LyricsData | null): boolean {
-  return Boolean(lyrics?.synced && lyrics.lines.length > 0);
-}
+  return Boolean(lyrics?.synced && lyrics.lines.length > 0); }

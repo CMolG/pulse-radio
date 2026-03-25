@@ -18,8 +18,7 @@ function loadCache(): CacheEntry[] {
   const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
   // Backfill ts=0 for old entries so they expire on next TTL check — mutate in place to avoid allocation
   for (let i = 0; i < raw.length; i++) { if (raw[i].ts === undefined) (raw[i] as CacheEntry).ts = 0; }
-  return raw as CacheEntry[];
-}
+  return raw as CacheEntry[]; }
 function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 export function useLyrics( track: NowPlayingTrack | null, stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
@@ -78,5 +77,4 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
           diagnostics: realtimeSync.diagnostics, toggle: realtimeSync.toggle,
         }
       : undefined,
-  };
-}
+  }; }

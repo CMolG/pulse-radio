@@ -17,8 +17,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
       <div className="flex-center-col py-20 px-4"><Clock size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No listening history yet</p>
         <p className="text-[12px] text-dim mt-1">Songs you listen to will appear here</p></div>
-    );
-  }
+    ); }
   return ( <div className="p-4"><div className="flex items-center justify-between mb-4">
         <p className="text-[12px] text-dim">{history.length} songs</p><button
           onClick={onClear}

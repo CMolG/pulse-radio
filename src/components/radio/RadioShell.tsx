@@ -45,8 +45,7 @@ import { COUNTRY_BY_CODE, isSovereignCountryCode } from "@/lib/i18n/countries";
 import { getCountryDisplayName } from "@/lib/i18n/countryChips";
 type LayoutMode = "desktop" | "mobile" | "pip";
 function buildFavInput(t: NowPlayingTrack, s: Station): Omit<FavoriteSong, 'id' | 'timestamp'> {
-  return { ...t, artist: t.artist ?? '', stationName: s.name, stationUuid: s.stationuuid };
-}
+  return { ...t, artist: t.artist ?? '', stationName: s.name, stationUuid: s.stationuuid }; }
 function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>(() => ({
     w: typeof window !== 'undefined' ? window.innerWidth : 800,
@@ -60,8 +59,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
       const { width, height } = entry.contentRect; if (width <= 0 || height <= 0) return;
       setSize({ w: Math.round(width), h: Math.round(height) });
     }); ro.observe(el); return () => ro.disconnect();
-  }, [ref]); return size;
-}
+  }, [ref]); return size; }
 type RadioShellProps = { isPip?: boolean; initialCountryCode?: string };
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
   const containerRef = useRef<HTMLDivElement>(null); const containerSize = useContainerSize(containerRef);
@@ -100,8 +98,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (key !== lastRecordedTrackRef.current) { lastRecordedTrackRef.current = key;
       recordSongPlay(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);} else {
       // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
-      updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);
-    }
+      updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,); }
   }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, recordSongPlay, updateSongMeta]);
   const [showEq, setShowEq] = useState(false); const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [miniMode, setMiniMode] = useState(false); const [theaterMode, setTheaterMode] = useState(false);
@@ -122,8 +119,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       duckTimerRef.current = setTimeout(() => {
         if (audio && duckOrigVolRef.current !== null) audio.volume = duckOrigVolRef.current;
         duckOrigVolRef.current = null; duckTimerRef.current = null;
-      }, 400);
-    }
+      }, 400); }
     toastTimerRef.current = setTimeout(() => setToast(null), 2500);
   }, [radio.audioRef]);
   // Keep duck-restore target in sync if user changes volume while ducked.
@@ -135,8 +131,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(null);
   function mkView(mode: ViewState["mode"], label: string, overrides?: Partial<ViewState>): ViewState {
-    return { mode, query: "", tag: "", countryCode: "", countryQueryName: "", label, ...overrides };
-  }
+    return { mode, query: "", tag: "", countryCode: "", countryQueryName: "", label, ...overrides }; }
   function countryView(code: string): ViewState { const country = COUNTRY_BY_CODE[code];
     return mkView("country", getCountryDisplayName(locale, code), { countryCode: code, countryQueryName: country?.name ?? "" });
   }
@@ -175,13 +170,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     state.setPlaying(radio.status === "playing"); state.setVolume(radio.volume);
     state.setMuted(radio.muted); state.setCurrentTime(radio.currentTime);
     if (enrichedTrack) {
-      state.setTrackInfo(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.artworkUrl ?? albumArt.artworkUrl,);
-    }
+      state.setTrackInfo(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.artworkUrl ?? albumArt.artworkUrl,); }
   }, [radio.status, radio.volume, radio.muted, radio.currentTime, enrichedTrack, albumArt.artworkUrl, pbStore]);
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
   useEffect(() => { if (radio.station && radio.audioRef.current) {
-      eqConnectSource(radio.audioRef.current); analyser.connectAudio(radio.audioRef.current);
-    }
+      eqConnectSource(radio.audioRef.current); analyser.connectAudio(radio.audioRef.current); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
   // Keep EQ outputGain at unity — audio.volume already handles user volume.
@@ -259,8 +252,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       // trigger unintended actions (theater, favorites, search, etc.).
       // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
       if (eq) { const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
-        if (!allowed.has(e.key)) return;
-      }
+        if (!allowed.has(e.key)) return; }
       // When song detail modal is open, let it handle its own Escape;
       // block all keys here to prevent shortcuts from firing behind the modal
       if (ss) return;
@@ -276,13 +268,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           const searchInput =
             document.querySelector<HTMLInputElement>("[data-radio-search]") ??
             document.querySelector<HTMLInputElement>(".radio-search-input");
-          if (searchInput) searchInput.focus(); break;
-        }
+          if (searchInput) searchInput.focus(); break; }
         case "s":
         case "S": if (r.station) {
             const wasFav = f.has(r.station.stationuuid); f.toggle(r.station);
-            toast(wasFav ? "Removed from favorites" : r.station.name, "star");
-          }
+            toast(wasFav ? "Removed from favorites" : r.station.name, "star"); }
           break;
         case "Escape":
           // Priority: close topmost overlay first, then exit theater
@@ -291,13 +281,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "l":
         case "L": if (et?.title && r.station) {
             const wasLiked = fs.has(et.title, et.artist ?? ''); fs.toggle(buildFavInput(et, r.station));
-            toast(wasLiked ? "Song removed" : et.title, "heart");
-          }
+            toast(wasLiked ? "Song removed" : et.title, "heart"); }
           break;
         case "r": case "R": if (rl) rl.toggle(); break;
         case "z": case "Z":           // Z: cycle sleep timer st.cycle(); break;
-        case "?": setShowShortcuts(prev => !prev); break;
-      }
+        case "?": setShowShortcuts(prev => !prev); break; }
     }; window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
   const isSongLiked = enrichedTrack?.title ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "") : false;
@@ -481,8 +469,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           <TheaterView {...theaterBaseProps} station={radio.station ?? emptyStation} onBack={() => {}} compact /></div>
         <NowPlayingBar {...nowPlayingBaseProps} onToggleEq={() => {}} showEq={false} theaterMode={true} compact />
         {sharedModals}</div>
-    );
-  }
+    ); }
   /* ─── Mobile layout: drawer sidebar, overlay lyrics ─── */
   if (layout === "mobile") { return (
       <div ref={containerRef} className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none">
@@ -548,8 +535,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}
         <div data-testid="mobile-bottom-bar" className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10" style={glassStyle}>
           <NowPlayingBar {...nowPlayingFullProps} compact /></div>{sharedModals}</div>
-    );
-  }
+    ); }
   /* ─── Desktop layout (default) ─── */
   return ( <div
       ref={containerRef}
@@ -631,5 +617,4 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             title={miniMode ? t("expand") : t("minimize")}>
             {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}</button>
         </div><NowPlayingBar {...nowPlayingFullProps} /></div>{sharedModals}</div>
-  );
-}
+  ); }

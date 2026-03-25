@@ -21,8 +21,7 @@ const MAX_RESTARTS = 4;
 function getRecognitionCtor(): RecognitionCtor | null {
   if (typeof window === 'undefined' || !window.isSecureContext) return null;
   const w = window as Window & { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
-}
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null; }
 export function isRealtimeSpeechSupported(): boolean { return getRecognitionCtor() !== null; }
 export type RealtimeSpeechEngine = { start: (lang: 'en' | 'es') => void; stop: () => void; destroy: () => void; };
 export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): RealtimeSpeechEngine {
@@ -52,8 +51,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       }
     }; recognition.onend = () => { if (destroyed || !running) return;
       if (restartCount >= MAX_RESTARTS) {
-        running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return;
-      }
+        running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return; }
       restartCount++;
       // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,
       // this is a stale onend firing and we should not restart.
@@ -67,5 +65,4 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       try { recognition.start(); running = true; restartCount = 0;
       } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
     }, stop: () => { running = false; teardown(); }, destroy: () => { destroyed = true; running = false; teardown(); },
-  };
-}
+  }; }

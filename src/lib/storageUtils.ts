@@ -7,13 +7,11 @@ function tryLoad(key: string): string | null { if (typeof window === 'undefined'
   try { return localStorage.getItem(key); } catch { return null; }
 }
 function isQuotaExceeded(e: unknown): boolean {
-  return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22);
-}
+  return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22); }
 function trySave(key: string, raw: string): boolean { try {
     localStorage.setItem(key, raw); return true;
   } catch (e) {
-    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`); return false;
-  }
+    if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`); return false; }
 }
 /** Load a JSON value from localStorage with a fallback default */
 export function loadFromStorage<T>(key: string, defaultValue: T): T {

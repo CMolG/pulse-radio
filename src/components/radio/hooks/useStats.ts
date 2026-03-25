@@ -21,20 +21,17 @@ export type GenrePlayCount = { genre: string; count: number; };
 export interface UsageStats {
   stationListenTimes: Record<string, StationListenTime>; songPlayCounts: Record<string, SongPlayCount>;
   artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>;
-  totalListenMs: number;
-}
+  totalListenMs: number; }
 const EMPTY_STATS: UsageStats = {
   stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0,
 };
 /** Keep only the top N entries by a numeric field, dropping the lowest */
 function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
   const entries = Object.entries(map); if (entries.length <= max) return map;
-  return Object.fromEntries(entries.sort((a, b) => (b[1][key] as number) - (a[1][key] as number)).slice(0, max));
-}
+  return Object.fromEntries(entries.sort((a, b) => (b[1][key] as number) - (a[1][key] as number)).slice(0, max)); }
 /** Return top N values from a record, sorted descending by a numeric field */
 function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
-  return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n);
-}
+  return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n); }
 export function useStats() { const [stats, setStats] = useState<UsageStats>(() =>
     loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
   ); const statsRef = useRef(stats); useEffect(() => { statsRef.current = stats; }, [stats]);
@@ -56,8 +53,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       if (didPrune) {
         const pruned: UsageStats = { ...current, stationListenTimes: pStations, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };
         setStats(pruned); saveToStorage(STORAGE_KEY, pruned);
-      } else saveToStorage(STORAGE_KEY, current); dirtyRef.current = false;
-    }
+      } else saveToStorage(STORAGE_KEY, current); dirtyRef.current = false; }
   }, []); useEffect(() => { saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
     return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); persist(); };
   }, [persist]);
@@ -85,8 +81,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
           ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
-        };
-      }
+        }; }
       return next;
     }); dirtyRef.current = true;
   }, []); const topStations = useMemo(() => topN(stats.stationListenTimes, 'totalMs', 10), [stats.stationListenTimes]);
@@ -114,12 +109,10 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
           ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
-        };
-      }
+        }; }
       return next;
     }); dirtyRef.current = true;
   }, []); const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
   return { stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres,
     genreOrder, clearStats,
-  };
-}
+  }; }

@@ -13,8 +13,7 @@ function songKey(title: string, artist: string) { return `${title}|||${artist}`;
 /** Build a Set of songKeys from a song array for O(1) lookups. */
 function buildKeySet(songs: FavoriteSong[]): Set<string> { const s = new Set<string>();
   for (let i = 0; i < songs.length; i++) { s.add(songKey(songs[i].title, songs[i].artist)); }
-  return s;
-}
+  return s; }
 export function useFavoriteSongs() { const MAX_SONGS = 500;
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
@@ -38,5 +37,4 @@ export function useFavoriteSongs() { const MAX_SONGS = 500;
       const key = songKey(song.title, song.artist); const exists = prev.find(s => songKey(s.title, s.artist) === key);
       return exists ? prev.filter(s => s.id !== exists.id) : prepend(song, prev);});
   }, []); const has = useCallback((title: string, artist: string) => keySetRef.current.has(songKey(title, artist)), []);
-  const clear = useCallback(() => setSongs([]), []); return { songs, add, remove, toggle, has, clear };
-}
+  const clear = useCallback(() => setSongs([]), []); return { songs, add, remove, toggle, has, clear }; }

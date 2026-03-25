@@ -21,5 +21,4 @@ export default function UiImage({ src, alt, className, sizes = "100vw", priority
       loading={loading}
       onError={onError}
       style={style} />
-  );
-}
+  ); }

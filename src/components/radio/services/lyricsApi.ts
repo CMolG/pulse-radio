@@ -10,8 +10,7 @@ const FETCH_TIMEOUT_MS = 8_000;
 function isTransientError(err: unknown): boolean {
   if (err instanceof DOMException && err.name === 'TimeoutError') return true;
   if (err instanceof TypeError) return true; // fetch network failure
-  return false;
-}
+  return false; }
 // Fetch with combined cancellation: parent signal (caller abort) + per-request timeout.
 // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta.
 function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> {
@@ -34,17 +33,14 @@ export async function fetchLyrics( artist: string, title: string, album?: string
       if (match) return match;
     } catch (err) {
       // Re-throw transient errors so useLyrics can retry
-      if (isTransientError(err)) throw err;
-    }
+      if (isTransientError(err)) throw err; }
   }
-  return null;
-}
+  return null; }
 async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: (d: T) => LyricsData | null): Promise<LyricsData | null> {
   try { const res = await fetchWithCancel(url, signal); if (res.ok) return parse(await res.json());
     await res.text().catch(() => {}); // drain body
   } catch (err) { if (isTransientError(err)) throw err; }
-  return null;
-}
+  return null; }
 async function fetchLyricsForArtist( artist: string, title: string, album?: string, duration?: number,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> { const params = new URLSearchParams({ artist_name: artist, track_name: title, });
@@ -56,10 +52,7 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
     signal, r => r.length > 0 ? transform(r[0], artist, title) : null,);
 }
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null { if (data.syncedLyrics) {
-    return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) };
-  }
+    return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) }; }
   if (data.plainLyrics) {
-    return { trackName: title, artistName: artist, synced: false, lines: [], plainText: data.plainLyrics };
-  }
-  return null;
-}
+    return { trackName: title, artistName: artist, synced: false, lines: [], plainText: data.plainLyrics }; }
+  return null; }

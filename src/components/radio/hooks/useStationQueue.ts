@@ -61,5 +61,4 @@ export function useStationQueue() { const [queue, setQueue] = useState<Station[]
   }, []); const hasNext = currentIndex >= 0 && currentIndex < queue.length - 1; const hasPrev = currentIndex > 0;
   return { queue, currentIndex, add, addNext, remove, clear,
     moveUp, moveDown, skipToNext, skipToPrev, hasNext, hasPrev, setPlaying,
-  };
-}
+  }; }

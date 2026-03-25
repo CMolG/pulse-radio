@@ -8,8 +8,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 interface ParallaxAlbumBackgroundProps {
   imageUrl: string | null; fallbackUrl?: string; blurClass?: string; overlayClass?: string;
-  enableDrift?: boolean; showTopGlow?: boolean; children?: React.ReactNode;
-}
+  enableDrift?: boolean; showTopGlow?: boolean; children?: React.ReactNode; }
 export function ParallaxAlbumBackground({ imageUrl, fallbackUrl, blurClass = 'blur-2xl', overlayClass = 'bg-black/50',
   enableDrift = true, showTopGlow = true, children,
 }: ParallaxAlbumBackgroundProps) { const [imgError, setImgError] = useState(false);
@@ -32,5 +31,4 @@ export function ParallaxAlbumBackground({ imageUrl, fallbackUrl, blurClass = 'bl
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
       )}
       {children}</div>
-  );
-}
+  ); }

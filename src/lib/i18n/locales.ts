@@ -42,8 +42,7 @@ export type LocaleInfo = { code: SupportedLocale; nativeName: string; englishNam
 export const SUPPORTED_LOCALES: readonly LocaleInfo[] = _LOCALES;
 const SUPPORTED_SET = new Set<SupportedLocale>(SUPPORTED_LOCALES.map((locale) => locale.code),);
 export function isSupportedLocale(value: string): value is SupportedLocale {
-  return SUPPORTED_SET.has(value as SupportedLocale);
-}
+  return SUPPORTED_SET.has(value as SupportedLocale); }
 const BASE_LOCALE_MAP: Record<string, SupportedLocale> = {
   en: "en", es: "es", fr: "fr", de: "de", pt: "pt", it: "it", nl: "nl", ja: "ja",
   ko: "ko", zh: "zh", ar: "ar", hi: "hi", bn: "bn", ru: "ru", uk: "uk", pl: "pl",
@@ -55,8 +54,6 @@ export function normalizeLocale(input: string | null | undefined): SupportedLoca
   if (isSupportedLocale(normalized)) return normalized; const lower = normalized.toLowerCase();
   if (lower === "pt-br") return "pt-BR";
   if (lower === "zh-tw" || lower === "zh-hk" || lower === "zh-mo") return "zh-TW"; const base = lower.split("-")[0];
-  return BASE_LOCALE_MAP[base] ?? "en";
-}
+  return BASE_LOCALE_MAP[base] ?? "en"; }
 export function isRtlLocale(locale: SupportedLocale): boolean {
-  const info = SUPPORTED_LOCALES.find((item) => item.code === locale); return Boolean(info?.rtl);
-}
+  const info = SUPPORTED_LOCALES.find((item) => item.code === locale); return Boolean(info?.rtl); }

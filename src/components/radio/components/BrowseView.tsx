@@ -56,8 +56,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
                 disabled={!canRight}
                 aria-label="Scroll right"><ChevronRight size={14} /></button></div>)}</div>
       )} <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div></div>
-  );
-}
+  ); }
 export default function BrowseView({
   view, currentStation, isPlaying, isFavorite, onPlay, onToggleFav, onPrefetch, favorites,
   recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder,
@@ -79,8 +78,7 @@ export default function BrowseView({
     for (const genre of userGenreOrder) {
       const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
       if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
-        ordered.push(catId); boostedIds.add(catId);
-      }
+        ordered.push(catId); boostedIds.add(catId); }
     }
     // Append remaining in default order
     for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); }
@@ -139,8 +137,7 @@ export default function BrowseView({
       const load = async () => { try {
           let result: Station[]; switch (view.mode) { case "search": result = await searchStations(view.query); break;
             case "genre": result = await stationsByTag(view.tag); break;
-            case "country": result = await stationsByCountry(view.countryQueryName); break; default: result = [];
-          }
+            case "country": result = await stationsByCountry(view.countryQueryName); break; default: result = []; }
           if (!cancelled) setStations(result);
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
       }; load();} else {
@@ -149,10 +146,8 @@ export default function BrowseView({
       const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
       const runBatch = async () => { while (queue.length > 0 && !flags.cancelled) {
           const batch = queue.splice(0, CONCURRENCY);
-          await Promise.allSettled(batch.map(catId => loadCategory(catId, flags)));
-        }
-      }; runBatch();
-    }
+          await Promise.allSettled(batch.map(catId => loadCategory(catId, flags))); }
+      }; runBatch(); }
     return () => { cancelled = true; flags.cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
@@ -168,12 +163,10 @@ export default function BrowseView({
       // so the user doesn't wait 30s staring at a button they just pressed.
       if (!discoveryFiredRef.current) {
         discoveryFiredRef.current = true; const random = pool[Math.floor(Math.random() * pool.length)];
-        if (random) onPlay(random);
-      }
+        if (random) onPlay(random); }
       discoveryRef.current = setInterval(() => {
         const random = pool[Math.floor(Math.random() * pool.length)]; if (random) onPlay(random);
-      }, 30_000);
-    }
+      }, 30_000); }
     return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
@@ -382,5 +375,4 @@ export default function BrowseView({
               );
             })()}</>
         )}</div></div>
-  );
-}
+  ); }

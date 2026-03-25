@@ -58,8 +58,7 @@ export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐'; const cached = _flagCache.get(code);
   if (cached) return cached; const upper = code.toUpperCase(); if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
   const flag = String.fromCodePoint(0x1F1E6 + upper.charCodeAt(0) - 65, 0x1F1E6 + upper.charCodeAt(1) - 65,);
-  _flagCache.set(code, flag); return flag;
-}
+  _flagCache.set(code, flag); return flag; }
 export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
   trending: "genreTrending", pop: "genrePop", rock: "genreRock", jazz: "genreJazz",
   classical: "genreClassical", electronic: "genreElectronic", hiphop: "genreHiphop", country: "genreCountry",

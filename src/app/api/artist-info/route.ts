@@ -22,17 +22,14 @@ async function searchMusicBrainz(artist: string) {
   const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = await fetchJson<{ artists?: any[] }>(url, { 'User-Agent': USER_AGENT, Accept: 'application/json' });
-  return data?.artists?.[0] ?? null;
-}
+  return data?.artists?.[0] ?? null; }
 async function fetchWikiSummary(title: string) { const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT });
-  if (data?.type === 'disambiguation') return null; return data;
-}
+  if (data?.type === 'disambiguation') return null; return data; }
 export async function GET(req: NextRequest) { const artist = req.nextUrl.searchParams.get('artist');
   if (!artist || artist.length > 200) {
-    return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
-  }
+    return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 }); }
   try { const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist), fetchWikiSummary(artist),
     ]); const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
     let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
@@ -61,6 +58,5 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
         imageUrl: wiki?.thumbnail?.source ?? null, wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
       }, { headers: { 'Cache-Control': cacheHeader, }, },);
   } catch (err) { console.error('[Pulse Radio] Artist info fetch error:', err);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
-  }
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 }); }
 }

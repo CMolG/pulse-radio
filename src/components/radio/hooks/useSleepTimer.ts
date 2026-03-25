@@ -17,8 +17,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
     // Restore original volume if we saved it
     if (savedVolumeRef.current !== null && audioRef?.current) {
-      audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null;
-    }
+      audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null; }
     setIsFading(false);}, []);
   const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     stopFade(); endTimeRef.current = 0; setRemainingMin(null);
@@ -47,18 +46,15 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         savedVolumeRef.current = null; clear(); onExpireRef.current();
       } else { setRemainingMin(mins);
         // Start fading volume when less than FADE_DURATION_MS remains
-        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade();
-      }
+        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade(); }
     }, 1000); // check every second for smooth fade timing
   }, [clear, stopFade, startFade]);
   const cycle = useCallback(() => { if (remainingMin === null) {
       start(PRESETS_MIN[0]);
     } else { const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin); const nextIdx = currentIdx + 1;
-      if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear();
-    }
+      if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear(); }
   }, [remainingMin, start, clear]);
   // Cleanup on unmount
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current);
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
-  }, []); return { remainingMin, isFading, cycle, cancel: clear };
-}
+  }, []); return { remainingMin, isFading, cycle, cancel: clear }; }

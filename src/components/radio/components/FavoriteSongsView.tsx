@@ -104,8 +104,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
           <ChevronDown size={12} className="rotate-180" />
           Collapse</button>)}</div>
-  );
-}
+  ); }
 // ── Main View ─────────────────────────────────────────────────────────────────
 export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>("none");
@@ -117,24 +116,21 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const artistGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
       const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? []; existing.push(song);
-      groups.set(artist, existing);
-    }
+      groups.set(artist, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
   // Group by album
   const albumGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>();
     for (const song of songs) {
       const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? []; existing.push(song);
-      groups.set(album, existing);
-    }
+      groups.set(album, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
   if (songs.length === 0) { return (
       <div className="flex-center-col py-20 px-4"><Heart size={40} className="text-dim mb-3" />
         <p className="text-[14px] text-secondary">No favorite songs yet</p>
         <p className="text-[12px] text-dim mt-1">Tap the heart icon to save songs you love</p></div>
-    );
-  }
+    ); }
   const toggleFilter = (mode: FilterMode) => setFilterMode(prev => (prev === mode ? "none" : mode));
   return ( <div className="p-4"><SongContextMenu menu={contextMenu} onRemove={onRemove} onClose={closeContextMenu} />
       <div className="flex items-center justify-between mb-4">
@@ -183,5 +179,4 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
                 delay={i}
                 heart={null}
                 hideRemove /></div>))}</div>)}</div>
-  );
-}
+  ); }

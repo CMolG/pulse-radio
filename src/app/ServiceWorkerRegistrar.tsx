@@ -11,5 +11,4 @@ export function ServiceWorkerRegistrar() { useEffect(() => {
           // SW registration failure is non-critical; silently ignored
         });
     }
-  }, []); return null;
-}
+  }, []); return null; }

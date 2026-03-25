@@ -39,5 +39,4 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     };
   }, [handleMouseMove]);
   const gradient = genre ? GENRE_GRADIENTS[genre.toLowerCase()] || GENRE_GRADIENTS.default : GENRE_GRADIENTS.default;
-  return { offset, containerRef, gradient };
-}
+  return { offset, containerRef, gradient }; }
