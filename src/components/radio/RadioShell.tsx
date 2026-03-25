@@ -1158,13 +1158,13 @@ async function fetchIcyMeta(
       controller.abort();
     } else {
       const onParentAbort = () => controller.abort();
-      signal.addEventListener('abort', onParentAbort, { once: true });
+      signal.addEventListener('abort', onParentAbort, _EVT_ONCE);
       controller.signal.addEventListener(
         'abort',
         () => {
           signal.removeEventListener('abort', onParentAbort);
         },
-        { once: true },
+        _EVT_ONCE,
       );
     }
   }
@@ -2371,7 +2371,7 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
     controller.abort();
     return fetch(url, { signal: controller.signal });
   }
-  parentSignal.addEventListener('abort', onParentAbort, { once: true });
+  parentSignal.addEventListener('abort', onParentAbort, _EVT_ONCE);
   return fetch(url, { signal: controller.signal }).finally(() => {
     clearTimeout(timeout);
     parentSignal.removeEventListener('abort', onParentAbort);
@@ -2969,6 +2969,9 @@ const _GENRE_NORMALIZE_RE = /[\s-]/g;
 const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
 const _NEWLINE_RE = /\r?\n/;
 const _EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>();
+const _EVT_PASSIVE: AddEventListenerOptions = { passive: true };
+const _EVT_ONCE: AddEventListenerOptions = { once: true };
+const _EVT_CAPTURE_PASSIVE: AddEventListenerOptions = { capture: true, passive: true };
 const _SKELETON_INDICES = [0, 1, 2, 3, 4];
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
@@ -3021,7 +3024,7 @@ function ScrollRow({
     const el = ref.current;
     if (!el) return;
     check();
-    el.addEventListener('scroll', check, { passive: true });
+    el.addEventListener('scroll', check, _EVT_PASSIVE);
     const ro = new ResizeObserver(check);
     ro.observe(el);
     return () => {
@@ -3818,7 +3821,7 @@ function LyricsReel({
       frame = requestAnimationFrame(updateFocusedIdx);
     };
     frame = requestAnimationFrame(updateFocusedIdx);
-    scroller.addEventListener('scroll', handleScroll, { passive: true });
+    scroller.addEventListener('scroll', handleScroll, _EVT_PASSIVE);
     return () => {
       cancelAnimationFrame(frame);
       scroller.removeEventListener('scroll', handleScroll);
@@ -6515,7 +6518,7 @@ function SongContextMenu({
     };
     const onScroll = () => onClose();
     window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    window.addEventListener('scroll', onScroll, _EVT_CAPTURE_PASSIVE);
     return () => {
       window.removeEventListener('pointerdown', onPointerDown, true);
       window.removeEventListener('scroll', onScroll, { capture: true } as EventListenerOptions);
@@ -7155,7 +7158,7 @@ function useParallaxBg(genre?: string, audioAmplitude = 0) {
       tickRafRef.current = requestAnimationFrame(tick);
     };
     tickRafRef.current = requestAnimationFrame(tick);
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove, _EVT_PASSIVE);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(rafRef.current);
