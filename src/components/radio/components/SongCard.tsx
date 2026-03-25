@@ -7,8 +7,7 @@ type HeartAction = { filled: boolean; onClick: () => void; label: string };
 type Props = { item: SongCardItem; delay: number; onRemove: () => void; onSelect?: (song: SongDetailData) => void;
   heart?: HeartAction | null; hideRemove?: boolean; };
 export default React.memo(function SongCard({ item, delay, onRemove, onSelect, heart, hideRemove }: Props) { return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(delay * 0.03, 0.5) }}
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(delay * 0.03, 0.5) }}
       className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
       role="button" tabIndex={0} aria-label={`${item.title} by ${item.artist}`}
       onClick={() => onSelect?.({ title: item.title, artist: item.artist, album: item.album,
@@ -28,15 +27,13 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         <p className="text-[12px] text-secondary line-clamp-1">{item.artist}</p>
         {item.album && <p className="text-[11px] text-dim line-clamp-1">{item.album}</p>}
         {(item.genre || item.durationMs) && ( <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
-            {item.genre && <span>{item.genre}</span>}
-            {item.durationMs && ( <span className="inline-flex items-center gap-0.5">
+            {item.genre && <span>{item.genre}</span>} {item.durationMs && ( <span className="inline-flex items-center gap-0.5">
                 <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}</span>)}</p>)}</div>
       <div className="px-3 pb-2.5 space-y-1.5"><a href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
           target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
           className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
         ><ExternalLink size={10} />Listen on Apple Music</a><div className="flex items-center gap-1.5">
-          <Radio size={9} className="text-dim flex-shrink-0" />
-          <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
+          <Radio size={9} className="text-dim flex-shrink-0" /> <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
           <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div> );
 }, (prev, next) =>prev.item === next.item && prev.delay === next.delay && prev.hideRemove === next.hideRemove &&
   prev.heart?.filled === next.heart?.filled);

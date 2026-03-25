@@ -21,8 +21,7 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
             WebkitTransform: `translate3d(${offset.x * 1.5}px, ${offset.y * 1.5}px, 0)`, willChange: 'transform',
           }}> {/* Separate blur layer for iOS GPU compositing */}
           <div className="absolute inset-0" style={BF_STYLE}><UiImage src={faviconUrl} alt=""
-              className={`object-cover ${landingMode ? 'opacity-10' : 'opacity-20'}`} sizes="100vw"
-              style={BLUR_STYLE} /></div></div>
+              className={`object-cover ${landingMode ? 'opacity-10' : 'opacity-20'}`} sizes="100vw" style={BLUR_STYLE} /></div></div>
       )}
     </div>);
 } export default React.memo(ParallaxBackground);

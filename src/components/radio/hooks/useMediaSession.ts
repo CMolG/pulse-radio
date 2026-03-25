@@ -25,6 +25,5 @@ export function useMediaSession(config: MediaSessionConfig): void {
       ['seekforward', () => { if (configRef.current.onSeekForward) configRef.current.onSeekForward(); }],];
     for (const [action, handler] of handlers) { try { navigator.mediaSession.setActionHandler(action, handler); }
       catch { /* not supported */ } }
-    return () => { for (const [action] of handlers) { try { navigator.mediaSession.setActionHandler(action, null); }
-        catch { /* ok */ } } };
+    return () => { for (const [action] of handlers) { try { navigator.mediaSession.setActionHandler(action, null); } catch { /* ok */ } } };
   }, []); useEffect(setupHandlers, [setupHandlers]); }

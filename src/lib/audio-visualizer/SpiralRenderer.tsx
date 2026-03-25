@@ -39,14 +39,11 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     rotationRef.current += 0.0015; const rotation = rotationRef.current; ctx.clearRect(0, 0, w, h); // Clear
     // Gradient
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current; let fillStyle: string | CanvasGradient = c1;
-    try { const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,
-        centerY + maxRadius,
-      ); gradient.addColorStop(0, c1); gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3);
-      fillStyle = gradient;
+    try { const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius, centerY + maxRadius,
+      ); gradient.addColorStop(0, c1); gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3); fillStyle = gradient;
     } catch { /* fallback to solid color */ }
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
-    const outerX = outerXRef.current; const outerY = outerYRef.current;
-    const innerX = innerXRef.current; const innerY = innerYRef.current;
+    const outerX = outerXRef.current; const outerY = outerYRef.current; const innerX = innerXRef.current; const innerY = innerYRef.current;
     for (let i = 0; i < NUM_BARS; i++) { const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
       const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle;
       const radius = minRadius * Math.exp(b * baseAngle);
@@ -57,8 +54,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) {
       const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
-      if (startIdx >= NUM_BARS) break; ctx.beginPath();
-      ctx.moveTo(outerX[startIdx], outerY[startIdx]); // Outer edge with quadratic curves
+      if (startIdx >= NUM_BARS) break; ctx.beginPath(); ctx.moveTo(outerX[startIdx], outerY[startIdx]); // Outer edge with quadratic curves
       for (let i = startIdx + 1; i < endIdx - 1; i++) {
         const xc = (outerX[i] + outerX[i + 1]) / 2; const yc = (outerY[i] + outerY[i + 1]) / 2;
         ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc); }

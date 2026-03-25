@@ -7,5 +7,4 @@ export function formatTimeAgo(ts: number): string {
   if (diff < 3600) return `${Math.floor(diff / 60)}m`; if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
   return `${Math.floor(diff / 86400)}d`; }
 export function itunesSearchUrl(title: string, artist: string): string {
-  const q = encodeURIComponent(`${artist} ${title}`.trim());
-  return `https://music.apple.com/search?term=${q}&${ITUNES_REFERRER}`; }
+  const q = encodeURIComponent(`${artist} ${title}`.trim()); return `https://music.apple.com/search?term=${q}&${ITUNES_REFERRER}`; }

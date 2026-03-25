@@ -4,16 +4,13 @@ export type RealtimeSyncStatus = 'idle' | 'unsupported' | 'ready' | 'listening' 
 export type RealtimeSyncQualityMode = 'high' | 'balanced' | 'conservative';
 export type RealtimeSpeechHypothesis = { text: string; confidence: number; isFinal: boolean; tsMs: number; };
 export type RealtimeSyncDiagnostics = { qualityMode: RealtimeSyncQualityMode; lastHypothesisMs: number | null;
-  hypothesesSeen: number; confirmedTransitions: number; rejectedJumps: number; relockCount: number;
-  errorMessage: string | null; };
+  hypothesesSeen: number; confirmedTransitions: number; rejectedJumps: number; relockCount: number; errorMessage: string | null; };
 export type RealtimeSyncState = {
-  enabled: boolean; supported: boolean; status: RealtimeSyncStatus; activeLineIndex: number;
-  candidateLineIndex: number; confidence: number;
+  enabled: boolean; supported: boolean; status: RealtimeSyncStatus; activeLineIndex: number; candidateLineIndex: number; confidence: number;
   effectiveCurrentTime: number | undefined; diagnostics: RealtimeSyncDiagnostics; };
 export type RealtimeSyncControls = { toggle: () => void; };
 export type RealtimeSyncResult = RealtimeSyncState & RealtimeSyncControls; export type RealtimeAlignPolicy = {
-  candidateMinScore: number; confirmMinScore: number; minStableSamples: number; maxJumpDistance: number;
-  relockWindow: number; };
+  candidateMinScore: number; confirmMinScore: number; minStableSamples: number; maxJumpDistance: number; relockWindow: number; };
 export const DEFAULT_REALTIME_ALIGN_POLICY: RealtimeAlignPolicy = {
   candidateMinScore: 0.74, confirmMinScore: 0.84, minStableSamples: 2, maxJumpDistance: 4, relockWindow: 8, };
 export function defaultRealtimeDiagnostics(): RealtimeSyncDiagnostics { return {

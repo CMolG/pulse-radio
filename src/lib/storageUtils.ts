@@ -8,8 +8,7 @@ function trySave(key: string, raw: string): boolean { try { localStorage.setItem
 }
 /** Load a JSON value from localStorage with a fallback default */
 export function loadFromStorage<T>(key: string, defaultValue: T): T {
-  const raw = tryLoad(key); if (!raw) return defaultValue;
-  try { return JSON.parse(raw); } catch { return defaultValue; } }
+  const raw = tryLoad(key); if (!raw) return defaultValue; try { return JSON.parse(raw); } catch { return defaultValue; } }
 /** Save a JSON value to localStorage. Returns false if quota is exceeded. */
 export const saveToStorage = <T,>(key: string, value: T) => trySave(key, JSON.stringify(value));
 /** Load a plain string value from localStorage with fallback */
@@ -20,8 +19,7 @@ export const saveStringToStorage = (key: string, value: string) => trySave(key, 
  * ale keys are cleared so the app can re-initialize cleanly instead of crashing on malformed data. */
 const STORAGE_SCHEMA_VERSION = 1; const VERSION_KEY = 'radio-schema-version';
 export function ensureStorageVersion(managedKeys: readonly string[]): void { if (typeof window === 'undefined') return;
-  try { const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION);
-    if (stored === current) return;
+  try { const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION); if (stored === current) return;
     // Version mismatch — clear managed keys to prevent stale data crashes
     for (const key of managedKeys) { localStorage.removeItem(key); } localStorage.setItem(VERSION_KEY, current);
   } catch { /* ignore in SSR / restricted environments */ } }

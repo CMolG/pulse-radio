@@ -4,16 +4,14 @@ import { getInitialLocale, getInitialLocaleForCountry, saveLocale } from "@/lib/
 import { isRtlLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/i18n/locales";
 import { type MessageKey, translate } from "@/lib/i18n/messages";
 type TranslateFn = (key: MessageKey, vars?: Record<string, string | number>) => string; type LocaleContextValue = {
-  locale: SupportedLocale; setLocale: (locale: SupportedLocale) => void; t: TranslateFn; rtl: boolean;
-  locales: typeof SUPPORTED_LOCALES; };
+  locale: SupportedLocale; setLocale: (locale: SupportedLocale) => void; t: TranslateFn; rtl: boolean; locales: typeof SUPPORTED_LOCALES; };
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 export function LocaleProvider({ children, countryCode, }: { children: React.ReactNode; countryCode?: string; }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>
     countryCode ? getInitialLocaleForCountry(countryCode) : getInitialLocale(), ); useEffect(() => { saveLocale(locale);
     if (typeof document !== "undefined") {
       document.documentElement.lang = locale; document.documentElement.dir = isRtlLocale(locale) ? "rtl" : "ltr"; }
-  }, [locale]);
-  const value = useMemo<LocaleContextValue>(() => { const t: TranslateFn = (key, vars) => translate(locale, key, vars);
+  }, [locale]); const value = useMemo<LocaleContextValue>(() => { const t: TranslateFn = (key, vars) => translate(locale, key, vars);
     return { locale, setLocale: setLocaleState, t, rtl: isRtlLocale(locale), locales: SUPPORTED_LOCALES };
   }, [locale]); return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>; }
 export function useLocale() { const context = useContext(LocaleContext);

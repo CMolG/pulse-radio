@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client"; import Image from "next/image";
-type UiImageProps = { src: string; alt: string; className?: string; sizes?: string;
+"use client"; import Image from "next/image"; type UiImageProps = { src: string; alt: string; className?: string; sizes?: string;
   priority?: boolean; loading?: "lazy" | "eager"; onError?: () => void; style?: React.CSSProperties; };
 export default function UiImage({ src, alt, className, sizes = "100vw", priority, loading, onError, style,
 }: UiImageProps) { return ( <Image src={src} alt={alt} fill unoptimized sizes={sizes} className={className}

@@ -6,8 +6,7 @@ export function isPrivateHost(hostname: string): boolean { const host = hostname
     host === '0.0.0.0' || host.endsWith('.localhost')
   ) { return true; }
   // IPv4 private ranges (RFC 1918 + link-local + shared address space)
-  const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (ipv4Match) { const [, a, b] = ipv4Match.map(Number);
+  const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/); if (ipv4Match) { const [, a, b] = ipv4Match.map(Number);
     if (a === 10) return true;                          // 10.0.0.0/8
     if (a === 172 && b >= 16 && b <= 31) return true;   // 172.16.0.0/12
     if (a === 192 && b === 168) return true;             // 192.168.0.0/16
@@ -17,8 +16,7 @@ export function isPrivateHost(hostname: string): boolean { const host = hostname
     if (a === 0) return true;                            // 0.0.0.0/8
   }
   // IPv6 private ranges (simplified check for bracketed or plain)
-  const ipv6 = host.replace(/^\[/, '').replace(/\]$/, '');
-  if (ipv6.startsWith('fe80:')) return true;             // link-local
+  const ipv6 = host.replace(/^\[/, '').replace(/\]$/, ''); if (ipv6.startsWith('fe80:')) return true;             // link-local
   if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true; // unique local
   if (ipv6 === '::1' || ipv6 === '::') return true;
   // IPv6-mapped IPv4 (::ffff:A.B.C.D) — extract the embedded IPv4 and check it

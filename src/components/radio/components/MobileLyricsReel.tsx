@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client"; import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LyricsData } from "../types";
+"use client"; import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"; import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
-type Props = { lyrics: LyricsData | null; currentTime?: number; activeLineOverride?: number;
-  variant?: "mobile" | "desktop"; };
+type Props = { lyrics: LyricsData | null; currentTime?: number; activeLineOverride?: number; variant?: "mobile" | "desktop"; };
 const EMPHASIS: [string, string, string][] = [ // [base classes, mobile size, desktop size]
   ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],
   ["text-white/82 font-semibold opacity-100 scale-[0.985]", "text-[18px]", "text-[23px]"],
@@ -15,11 +13,9 @@ const LyricReelLine = React.memo(function LyricReelLine({
 }: { lineId: string; index: number; text: string; emphasisIdx: number;
   isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>; scrollToIndex: (i: number) => void;
 }) { const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`; return ( <button
-      key={lineId} ref={(node) => { lineRefs.current[index] = node; }}
-      type="button" onClick={() => scrollToIndex(index)}
+      key={lineId} ref={(node) => { lineRefs.current[index] = node; }} type="button" onClick={() => scrollToIndex(index)}
       className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
-    ><span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>{text}</span>
-    </button>);
+    ><span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>{text}</span> </button>);
 }, (prev, next) =>prev.lineId === next.lineId && prev.text === next.text && prev.emphasisIdx === next.emphasisIdx &&
   prev.isDesktop === next.isDesktop);
 export default function LyricsReel({ lyrics, currentTime, activeLineOverride, variant = "mobile", }: Props) {
@@ -37,23 +33,20 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     const scrollerRect = scroller.getBoundingClientRect(); const centerY = scrollerRect.top + scrollerRect.height / 2;
     let closestIdx = 0; let closestDistance = Number.POSITIVE_INFINITY; lineRefs.current.forEach((line, index) => {
       if (!line) return; const rect = line.getBoundingClientRect(); const lineCenter = rect.top + rect.height / 2;
-      const distance = Math.abs(centerY - lineCenter);
-      if (distance < closestDistance) { closestDistance = distance; closestIdx = index; }
+      const distance = Math.abs(centerY - lineCenter); if (distance < closestDistance) { closestDistance = distance; closestIdx = index; }
     }); setFocusedIdx((prev) => (prev === closestIdx ? prev : closestIdx));
   }, [renderableLines.length]);
   useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
   // Reset scroll position when lyrics change (no autoscroll on active line —
   // user controls focus manually by scrolling or clicking a line)
   useEffect(() => { if (!renderableLines.length) return;
-    const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); });
-    return () => cancelAnimationFrame(frame);
+    const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); }); return () => cancelAnimationFrame(frame);
   // Only react to lyrics changing, not to activeIdx
   }, [renderableLines.length]); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return; let frame = 0;
     const handleScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(updateFocusedIdx); };
-    frame = requestAnimationFrame(updateFocusedIdx);
-    scroller.addEventListener("scroll", handleScroll, { passive: true });
+    frame = requestAnimationFrame(updateFocusedIdx); scroller.addEventListener("scroll", handleScroll, { passive: true });
     return () => { cancelAnimationFrame(frame); scroller.removeEventListener("scroll", handleScroll); };
   }, [renderableLines.length, updateFocusedIdx]); if (renderableLines.length === 0) return null;
   return ( <div className={`relative flex-shrink-0 ${isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"}`}>

@@ -10,8 +10,7 @@ export default React.memo(function NowPlayingHero({ station, track, isPlaying, a
 }: Props) { const [imgError, setImgError] = useState(false); const coverUrl = artworkUrl ?? station.favicon;
   // Reset error state when cover URL changes so new artwork gets a chance to load
   const [prevCoverUrl, setPrevCoverUrl] = useState(coverUrl);
-  if (coverUrl !== prevCoverUrl) { setPrevCoverUrl(coverUrl); setImgError(false); }
-  const showFallback = !coverUrl || imgError;
+  if (coverUrl !== prevCoverUrl) { setPrevCoverUrl(coverUrl); setImgError(false); } const showFallback = !coverUrl || imgError;
   const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]);
   return ( <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden"><ParallaxAlbumBackground
         imageUrl={artworkUrl ?? null} fallbackUrl={station.favicon || undefined} overlayClass="bg-black/60" />
@@ -23,12 +22,10 @@ export default React.memo(function NowPlayingHero({ station, track, isPlaying, a
           {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {stationInitials(station.name) || ( <Radio size={24} className="text-white/60" /> )}</span></div>
-          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="64px" loading="lazy"
-              onError={() => setImgError(true)} />
+          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="64px" loading="lazy" onError={() => setImgError(true)} />
           )}</div><div className="flex-fill pr-20">
           <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3> {track?.title ? (
-            <p className="text-[13px] text-secondary truncate mt-0.5">
-              {track.artist ? `${track.artist} — ${track.title}` : track.title}</p>
+            <p className="text-[13px] text-secondary truncate mt-0.5"> {track.artist ? `${track.artist} — ${track.title}` : track.title}</p>
           ) : ( <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )} {track?.album && ( <p className="text-[11px] text-dim truncate">{track.album}</p>
           )} {isPlaying && ( <div className="flex-row-1.5 mt-1"><span className="dot-1.5 bg-sys-orange" />

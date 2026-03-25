@@ -30,8 +30,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
           if (max === r) h = 60 * (((g - b) / (max - min)) % 6);
           else if (max === g) h = 60 * ((b - r) / (max - min) + 2); else h = 60 * ((r - g) / (max - min) + 4);
           if (h < 0) h += 360; const bucket = Math.round(h / 30) * 30; buckets[bucket] = (buckets[bucket] || 0) + 1; }
-        const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
-        if (sorted.length < 1) return resolve(FALLBACK_COLORS);
+        const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]); if (sorted.length < 1) return resolve(FALLBACK_COLORS);
         const h1 = parseInt(sorted[0][0]); const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
         const h3 = sorted.length > 2 ? parseInt(sorted[2][0]) : (h1 + 240) % 360;
         resolve([ `hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`, ]);
@@ -48,26 +47,21 @@ export default function TheaterView({
   const lastUrlRef = useRef<string | null>(null); const coverUrl = artworkUrl ?? station.favicon;
   const showFallback = !coverUrl || failedCoverUrl === coverUrl;
   useEffect(() => { if (!artworkUrl || artworkUrl === lastUrlRef.current) return; lastUrlRef.current = artworkUrl;
-    let cancelled = false; extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); });
-    return () => { cancelled = true; };
+    let cancelled = false; extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); }); return () => { cancelled = true; };
   }, [artworkUrl]); const [color1, color2, color3] = colors;
-  const theaterTags = useMemo( () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
-    [station.tags],);
-  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+  const theaterTags = useMemo( () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags],);
+  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
       className="flex flex-col h-full w-full relative overflow-hidden"> {/* ── Layer 1: solid dark background ── */}
       <div className="absolute inset-0 bg-[#0f172a]" /> {/* ── Layer 1.5: album art background with ambient drift ── */}
       {coverUrl && failedCoverUrl !== coverUrl && (
         <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden"><UiImage src={coverUrl} alt=""
-            className="object-cover animate-ambient-drift blur-lg opacity-25" sizes="100vw"
-            onError={() => setFailedCoverUrl(coverUrl)} />
+            className="object-cover animate-ambient-drift blur-lg opacity-25" sizes="100vw" onError={() => setFailedCoverUrl(coverUrl)} />
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" /></div>
       )} {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none"><ErrorBoundary fallback={null}><SpiralRenderer
           frequencyDataRef={frequencyDataRef} className="size-full" color1={color1} color2={color2}
           color3={color3} sensitivity={compact ? 0.8 : 1.2} demo /></ErrorBoundary></div>
-      {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div className="absolute inset-0 z-6 pointer-events-none"
-        style={{
+      {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div className="absolute inset-0 z-6 pointer-events-none" style={{
           background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
           backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay', opacity: 0.6, }} />
       <div className="absolute inset-0 z-6 pointer-events-none"
@@ -96,11 +90,9 @@ export default function TheaterView({
             WebkitBackdropFilter: "blur(24px) saturate(1.4)", border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
           }}> {/* Corner metadata badges (panel corners, never over album art) */}
-          {!compact && ( <div className="w-full grid grid-cols-2 items-start"><div className="justify-self-start">
-                {track?.durationMs && (
+          {!compact && ( <div className="w-full grid grid-cols-2 items-start"><div className="justify-self-start"> {track?.durationMs && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
-                    <Clock size={10} />
-                    {formatDuration(track.durationMs)}</span>)}</div><div className="justify-self-end">
+                    <Clock size={10} /> {formatDuration(track.durationMs)}</span>)}</div><div className="justify-self-end">
                 {track?.trackNumber != null && track?.trackCount != null && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
                     #{track.trackNumber}/{track.trackCount}</span>)}</div></div>
@@ -109,8 +101,7 @@ export default function TheaterView({
             style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`, }}> {showFallback ? (
               <div className="size-full dawn-gradient flex-center-row"><span
                   className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-                >{stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" />
-                  )}</span></div>
+                >{stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" /> )}</span></div>
             ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes={compact ? "56px" : "176px"}
                 loading="lazy" onError={() => setFailedCoverUrl(coverUrl)} />
             )}</div>
@@ -119,10 +110,8 @@ export default function TheaterView({
           >{station.name}</h2> {/* Track info */} {track?.title ? ( <p
               className={`${compact ? "text-[9px]" : "text-[13px] sm:text-[14px]"} text-white/70 text-center line-clamp-2 leading-snug`}
             >{track.artist ? `${track.artist} — ${track.title}` : track.title}</p>
-          ) : ( <p className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}>{theaterTags}</p>
-          )} {track?.album && (
-            <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}>
-              {track.album}</p>
+          ) : ( <p className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}>{theaterTags}</p> )} {track?.album && (
+            <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}> {track.album}</p>
           )} {!compact && track?.releaseDate && ( <p className="text-[10px] text-white/40 text-center -mt-1">
               Released on: {formatReleaseDate(track.releaseDate)}</p>
           )} {/* LIVE badge */} {isPlaying && ( <div className={`flex-row-2 ${compact ? "mt-0" : "mt-1"}`}>

@@ -5,8 +5,7 @@
   /** standalone demo mode — generates its own animation without audio */
   demo?: boolean; }
 import { hexToRgb } from './colorUtils'; import { useCanvasLoop } from './useCanvasLoop';
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
-interface Blob { x: number; y: number; baseRadius: number;
+function lerp(a: number, b: number, t: number) { return a + (b - a) * t; } interface Blob { x: number; y: number; baseRadius: number;
   /** Per-blob random size factor (0–1), assigned once at creation */
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number;
   freqBand: number; // which frequency band drives this blob
@@ -15,8 +14,7 @@ interface Blob { x: number; y: number; baseRadius: number;
   for (let i = 0; i < count; i++) { const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
     blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist,
       baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy,
-      vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7,
-      freqBand: Math.floor((i / count) * 128),});
+      vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7, freqBand: Math.floor((i / count) * 128),});
   }
   return blobs; }
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
@@ -58,8 +56,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
         // add accent glow at edges
         const accentMix = edgeGlow * energy * 0.6; sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0);
         sd[idx + 1] = Math.min(255, g + (colors.accent[1] * accentMix) | 0);
-        sd[idx + 2] = Math.min(255, b + (colors.accent[2] * accentMix) | 0);
-        sd[idx + 3] = Math.min(255, (180 + coreIntensity * 75) | 0);
+        sd[idx + 2] = Math.min(255, b + (colors.accent[2] * accentMix) | 0); sd[idx + 3] = Math.min(255, (180 + coreIntensity * 75) | 0);
       } else if (sum > thresholdLow) {
         // outer glow
         const glowIntensity = (sum - thresholdLow) / glowRange; sd[idx] = (colors.accent[0] * glowIntensity * 0.4) | 0;
@@ -76,14 +73,12 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
   colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false, }: FerrofluidRendererProps) {
   const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 });
   const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
-  const colors = useRef(mkColors());
-  useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]);
+  const colors = useRef(mkColors()); useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]);
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
       blobsRef.current = createBlobs(blobCount, w, h); sizeRef.current = { w, h }; }
-    timeRef.current += 0.016; const t = timeRef.current;
-    const blobs = blobsRef.current; const cx = w / 2; const cy = h / 2;
+    timeRef.current += 0.016; const t = timeRef.current; const blobs = blobsRef.current; const cx = w / 2; const cy = h / 2;
     let energy = 0; const frequencyData = freqData; // compute overall energy
     if (frequencyData) { let sum = 0; for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
       energy = (sum / frequencyData.length / 255) * sensitivity;
@@ -98,8 +93,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       } else if (demo) {
         bandVal = 0.4 + Math.sin(t * 3 + i * 0.8) * 0.3; const demoDisp = Math.sin(t * 2 + i) * minWH * 0.08;
         blob.targetX += Math.cos(angle * 1.3) * demoDisp; blob.targetY += Math.sin(angle * 1.7) * demoDisp;
-      } else bandVal = 0.3;
-      blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08; // smooth follow
+      } else bandVal = 0.3; blob.vx += (blob.targetX - blob.x) * 0.08; blob.vy += (blob.targetY - blob.y) * 0.08; // smooth follow
       blob.vx *= 0.85; blob.vy *= 0.85; blob.x += blob.vx; blob.y += blob.vy;
       // pulse radius with energy (reuses cached bandVal and minWH)
       blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity; }

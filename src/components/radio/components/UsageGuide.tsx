@@ -26,19 +26,16 @@ type GuideSection = { icon: React.ReactNode; title: string; content: string; }; 
   },];
 type Props = { onClose: () => void };
 function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+  return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
       className="absolute inset-0 z-50 flex flex-col"><div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}> {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
-        {/* Header */} <div className="flex items-center gap-3 px-5 pb-3"><button onClick={onClose}
-            aria-label="Close guide"
+        {/* Header */} <div className="flex items-center gap-3 px-5 pb-3"><button onClick={onClose} aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
-          ><IoChevronBack size={16} /></button>
-          <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2></div>
+          ><IoChevronBack size={16} /></button> <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2></div>
         <div className="border-t border-white/8" /> {/* Guide sections */} <div className="px-5 py-4 space-y-2">
           {GUIDE_SECTIONS.map((section, idx) => { const isExpanded = expandedIdx === idx;
             return ( <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]"><button

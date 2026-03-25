@@ -12,8 +12,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
     ); }
   return ( <div className="p-4"><div className="flex items-center justify-between mb-4">
         <p className="text-[12px] text-dim">{history.length} songs</p><button onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
-          <Trash2 size={11} />
+          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"> <Trash2 size={11} />
           Clear all</button></div><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
         {history.map((entry, i) => ( <SongCard key={entry.id} item={entry} delay={i} onRemove={() => onRemove(entry.id)}
             onSelect={onSelect} heart={onToggleFavSong ? {

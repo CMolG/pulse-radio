@@ -20,8 +20,7 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
   return Math.max(0, overlapScore * 0.7 + orderScore * 0.3 - shortPenalty); }
 function windowBounds(total: number, center: number, relockWindow: number): [number, number] {
   if (total <= 0) return [0, 0]; if (center < 0) return [0, Math.min(total - 1, relockWindow)];
-  const start = Math.max(0, center - relockWindow); const end = Math.min(total - 1, center + relockWindow);
-  return [start, end]; }
+  const start = Math.max(0, center - relockWindow); const end = Math.min(total - 1, center + relockWindow); return [start, end]; }
 export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const { lyrics, hypothesisText, previousConfirmedIndex, previousCandidateIndex, stableSamples, policy, } = input;
   const hypoTokens = tokenize(hypothesisText); if (!hypoTokens.length) { return {

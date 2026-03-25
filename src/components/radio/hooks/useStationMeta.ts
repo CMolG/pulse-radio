@@ -10,22 +10,19 @@ const FETCH_TIMEOUT_MS = 10_000; const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500; const _adCache = new Map<string, boolean>(); const MAX_AD_CACHE = 256;
 function isAdContent(text: string): boolean { let result = _adCache.get(text); if (result !== undefined) return result;
   result = AD_PATTERNS.some(re => re.test(text));
-  if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result);
-  return result; }
+  if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result); return result; }
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
 export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   if (signal) { if (signal.aborted) { clearTimeout(timeout); controller.abort();} else {
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
-      controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort);
-      }, { once: true }); }
+      controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort); }, { once: true }); }
   } try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch { return { streamTitle: null, icyBr: null }; } finally { clearTimeout(timeout); } }
-let _lastStation = ''; let _lastStationLower = '';
-export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
+let _lastStation = ''; let _lastStationLower = ''; export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null; if (raw === stationName) return null;
   // Cache lowercase station name to avoid recomputing on every poll
   if (stationName !== _lastStation) { _lastStation = stationName; _lastStationLower = stationName.toLowerCase(); }
@@ -35,16 +32,14 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
     if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() }; }
   return { title: raw.trim(), artist: '' }; }
 export function useStationMeta(station: Station | null, isPlaying: boolean) {
-  const [track, setTrack] = useState<NowPlayingTrack | null>(null);
-  const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
+  const [track, setTrack] = useState<NowPlayingTrack | null>(null); const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const [streamCodec, setStreamCodec] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); const lastTitleRef = useRef<string>('');
   // Tracks the URL of the station whose ICY data is currently being polled.
   // Used to distinguish a station change from an isPlaying toggle.
   const prevStationUrlRef = useRef<string | null>(null);
   // Clear track state during render when station goes null (avoid setState in effect)
-  const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null);
-  const currentStationId = station?.url_resolved ?? null;
+  const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null); const currentStationId = station?.url_resolved ?? null;
   if (currentStationId !== prevStationId) { setPrevStationId(currentStationId);
     if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null); } }
   useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
@@ -54,8 +49,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
       // Intentionally NOT clearing track/icyBitrate/streamCodec here.
       // The previous station's data stays visible until the new station's
     } // first ICY response arrives — this is the "ICY swap" for smooth transitions.
-    const abortController = new AbortController();
-    const poll = async () => { if (abortController.signal.aborted || document.hidden) return;
+    const abortController = new AbortController(); const poll = async () => { if (abortController.signal.aborted || document.hidden) return;
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
       if (abortController.signal.aborted) return; if (icyBr) setIcyBitrate(icyBr);
       // Derive codec from station data for display
@@ -72,8 +66,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     // When the tab returns from background, poll immediately so the user
     // doesn't see stale metadata for up to POLL_INTERVAL_MS.
     const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current);
+    document.addEventListener('visibilitychange', onVisible); return () => { if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', onVisible); abortController.abort(); };
   }, [station, isPlaying]); return {
     // Keep showing track/bitrate as long as a station is selected.

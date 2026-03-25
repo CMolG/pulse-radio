@@ -20,8 +20,7 @@ export function VisualizerCanvas({
       const ctx = canvas.getContext('2d'); if (!ctx) return;
       // Resolve CSS variable once and cache
       if (!resolvedColorRef.current) { if (color.startsWith('var(')) { const varName = color.slice(4, -1).trim();
-          const computed = getComputedStyle(canvas).getPropertyValue(varName).trim();
-          resolvedColorRef.current = computed || '#34d399';
+          const computed = getComputedStyle(canvas).getPropertyValue(varName).trim(); resolvedColorRef.current = computed || '#34d399';
         } else resolvedColorRef.current = color; }
       const resolvedColor = resolvedColorRef.current; const { width, height } = sizeRef.current;
       if (width < 1 || height < 1) { frameRef.current = requestAnimationFrame(draw); return; }
@@ -35,8 +34,7 @@ export function VisualizerCanvas({
         const gradKey = `${height}_${resolvedColor}`; let fillStyle: string | CanvasGradient = resolvedColor;
         if (gradientCacheRef.current?.key === gradKey) { fillStyle = gradientCacheRef.current.gradient; } else { try {
             const gradient = ctx.createLinearGradient(0, height, 0, 0); gradient.addColorStop(0, resolvedColor);
-            gradient.addColorStop(1, 'transparent'); fillStyle = gradient;
-            gradientCacheRef.current = { key: gradKey, gradient };
+            gradient.addColorStop(1, 'transparent'); fillStyle = gradient; gradientCacheRef.current = { key: gradKey, gradient };
           } catch { /* fallback to solid color */ } }
         ctx.fillStyle = fillStyle;
         // Feature-detect roundRect once instead of try-catch per bar
@@ -46,13 +44,10 @@ export function VisualizerCanvas({
         for (let i = 0; i < barCount; i++) { const idx = Math.min(i * step, frequencyData.length - 1);
           const value = frequencyData[idx] / 255; const barHeight = value * height * 0.8;
           const x = i * barWidth + gap / 2; const y = height - barHeight; const w = barWidth - gap; ctx.beginPath();
-          if (useRoundRect) { ctx.roundRect(x, y, w, barHeight, radii); ctx.fill();
-          } else ctx.fillRect(x, y, w, barHeight);
-        }} else {
-        const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2; ctx.beginPath();
+          if (useRoundRect) { ctx.roundRect(x, y, w, barHeight, radii); ctx.fill(); } else ctx.fillRect(x, y, w, barHeight);
+        }} else { const step = width / frequencyData.length; ctx.strokeStyle = resolvedColor; ctx.lineWidth = 2; ctx.beginPath();
         for (let i = 0; i < frequencyData.length; i++) {
-          const y = height - (frequencyData[i] / 255) * height * 0.6; if (i === 0) ctx.moveTo(0, y);
-          else ctx.lineTo(i * step, y); }
+          const y = height - (frequencyData[i] / 255) * height * 0.6; if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(i * step, y); }
         ctx.stroke(); }
       frameRef.current = requestAnimationFrame(draw);
     }; frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);

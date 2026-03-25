@@ -1,16 +1,12 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import type { SupportedLocale } from "./locales"; const BASE_MESSAGES = {
   topStations: "Top Stations", loadingStations: "Loading…", stationCount: "{count} stations", discovery: "Discovery",
-  discoveryOn: "ON", discoveryModeAria: "Discovery mode",
-  discoveryModeTitle: "Auto-play a random station every 30 seconds", all: "All",
+  discoveryOn: "ON", discoveryModeAria: "Discovery mode", discoveryModeTitle: "Auto-play a random station every 30 seconds", all: "All",
   allCountries: "All", favorites: "Favorites", recent: "Recent", discover: "Discover",
-  history: "History", searchStations: "Search stations…",
-  searchStationsAria: "Search stations", searchResultLabel: "Search: \"{query}\"",
-  retry: "Retry", failedToLoad: "Failed to load",
-  noStationsFound: "No stations found", failedToLoadStations: "Failed to load stations",
+  history: "History", searchStations: "Search stations…", searchStationsAria: "Search stations", searchResultLabel: "Search: \"{query}\"",
+  retry: "Retry", failedToLoad: "Failed to load", noStationsFound: "No stations found", failedToLoadStations: "Failed to load stations",
   scanNowPlaying: "Scan now playing", scanningProgress: "Scanning {current}/{total}…",
-  nowPlayingProgress: "Now playing ({current}/{total})", filterBySong: "Filter by song or artist…",
-  previous: "Prev", next: "Next",
+  nowPlayingProgress: "Now playing ({current}/{total})", filterBySong: "Filter by song or artist…", previous: "Prev", next: "Next",
   pageFraction: "{current} / {total}", autoAudioEnhancements: "Audio enhancements applied:",
   minimize: "Minimize", expand: "Expand", noiseReduction: "Noise Reduction", audioNormalizer: "Audio Normalizer",
   equalizer: "Equalizer", presetLabel: "Preset: {name}",
@@ -23,8 +19,7 @@ import type { SupportedLocale } from "./locales"; const BASE_MESSAGES = {
 export type MessageKey = keyof typeof BASE_MESSAGES; export type MessageBundle = Record<MessageKey, string>;
 const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = { es: {
     topStations: "Top Stations", loadingStations: "Cargando…", stationCount: "{count} emisoras", discovery: "Descubrir",
-    all: "Todo", allCountries: "Todos", favorites: "Favoritos", recent: "Recientes",
-    discover: "Descubrir", history: "Historial",
+    all: "Todo", allCountries: "Todos", favorites: "Favoritos", recent: "Recientes", discover: "Descubrir", history: "Historial",
     searchStations: "Buscar emisoras…", searchStationsAria: "Buscar emisoras",
     searchResultLabel: "Búsqueda: \"{query}\"", retry: "Reintentar",
     failedToLoad: "Error de carga", noStationsFound: "No se encontraron emisoras",
@@ -39,8 +34,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     recent: "Récents", discover: "Découvrir", history: "Historique", searchStations: "Rechercher des stations…",
     searchStationsAria: "Rechercher des stations", retry: "Réessayer",
     failedToLoad: "Échec du chargement", noStationsFound: "Aucune station trouvée", previous: "Préc.", next: "Suiv.",
-    addToFavorites: "Ajouter aux favoris", removeFromFavorites: "Retirer des favoris",
-    minimize: "Réduire", expand: "Agrandir",
+    addToFavorites: "Ajouter aux favoris", removeFromFavorites: "Retirer des favoris", minimize: "Réduire", expand: "Agrandir",
   }, de: { loadingStations: "Laden…", stationCount: "{count} Sender", allCountries: "Alle", favorites: "Favoriten",
     recent: "Zuletzt", discover: "Entdecken", history: "Verlauf", searchStations: "Sender suchen…",
     searchStationsAria: "Sender suchen", retry: "Erneut versuchen",
@@ -70,8 +64,7 @@ function mergeBundle(locale: SupportedLocale): MessageBundle {
   const patch = DEEP_MESSAGES[locale] ?? {}; return { ...BASE_MESSAGES, ...patch }; }
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};
 export function getMessages(locale: SupportedLocale): MessageBundle {
-  if (!MESSAGE_CACHE[locale]) MESSAGE_CACHE[locale] = mergeBundle(locale);
-  return MESSAGE_CACHE[locale] as MessageBundle; }
+  if (!MESSAGE_CACHE[locale]) MESSAGE_CACHE[locale] = mergeBundle(locale); return MESSAGE_CACHE[locale] as MessageBundle; }
 export function translate(locale: SupportedLocale, key: MessageKey, vars?: Record<string, string | number>): string {
   const message = getMessages(locale)[key] ?? BASE_MESSAGES[key]; if (!vars) return message;
   return message.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, token: string) => {

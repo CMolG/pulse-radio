@@ -12,8 +12,7 @@ interface UseAudioAnalyserReturn { connectAudio: (audio: HTMLAudioElement) => vo
 export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
   const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts; const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0); const connectedRef = useRef<HTMLAudioElement | null>(null);
-  const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
-  const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null); const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 });
   const [isActive, setIsActive] = useState(false); const connectAudio = useCallback((audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
@@ -31,8 +30,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
             if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
               // to avoid 256 float divisions per frame — normalize once at the end
-              const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0;
-              for (let i = 0; i < buf.length; i++) {
+              const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0; for (let i = 0; i < buf.length; i++) {
                 const s = buf[i] - 128; sumSqInt += s * s; const a = s < 0 ? -s : s; if (a > maxAbsInt) maxAbsInt = a; }
               meterRef.current.peak = maxAbsInt / 128; meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128; }
           } rafRef.current = requestAnimationFrame(tick);

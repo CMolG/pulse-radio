@@ -2,8 +2,7 @@
 import type { Metadata, Viewport } from "next"; import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css"; import { ServiceWorkerRegistrar } from "./ServiceWorkerRegistrar";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], });
-const SITE_URL = "https://www.pulse-radio.online";
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], }); const SITE_URL = "https://www.pulse-radio.online";
 const SITE_TITLE = "Pulse Radio — Free Internet Radio with Visualizer"; const SITE_DESCRIPTION =
   "Stream thousands of free internet radio stations worldwide. Enjoy real-time audio visualizer, album art, song history, favorites, and theater mode. No sign-up required.";
 export const metadata: Metadata = {
@@ -14,8 +13,7 @@ export const metadata: Metadata = {
     icon: [{ url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" }, { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }],
     shortcut: "/favicon.ico", apple: "/apple-touch-icon.png",
   }, appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pulse Radio", },
-  openGraph: { type: "website", locale: "en_US", url: SITE_URL, siteName: "Pulse Radio",
-    title: SITE_TITLE, description: SITE_DESCRIPTION,
+  openGraph: { type: "website", locale: "en_US", url: SITE_URL, siteName: "Pulse Radio", title: SITE_TITLE, description: SITE_DESCRIPTION,
     images: [{ url: "/android-chrome-512x512.png", width: 512, height: 512, alt: "Pulse Radio" }], },
   twitter: { card: "summary", title: SITE_TITLE, description: SITE_DESCRIPTION, images: ["/android-chrome-512x512.png"] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },

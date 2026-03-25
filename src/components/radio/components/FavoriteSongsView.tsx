@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client"; import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+"use client"; import React, { useState, useMemo, useCallback, useEffect, useRef } from "react"; import { createPortal } from "react-dom";
 import { Music, Heart, Trash2, Users, X, ChevronDown, Disc3 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react"; import type { FavoriteSong, SongDetailData } from "../types";
 import UiImage from "@/components/common/UiImage"; import { primaryArtist } from "../utils/formatUtils";
@@ -19,8 +18,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
     window.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => { window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions); };
-  }, [menu, onClose]); if (!menu) return null;
-  const menuW = 200; const menuH = 48; // Clamp so menu doesn't overflow viewport
+  }, [menu, onClose]); if (!menu) return null; const menuW = 200; const menuH = 48; // Clamp so menu doesn't overflow viewport
   const x = Math.min(menu.x, window.innerWidth - menuW - 8); const y = Math.min(menu.y, window.innerHeight - menuH - 8);
   return createPortal( <div ref={ref} style={{ top: y, left: x, width: menuW }}
       className="fixed z-[200] py-1 rounded-xl bg-surface-3 border border-border-default shadow-2xl backdrop-blur-sm">
@@ -31,13 +29,11 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
 } function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
   label: string; icon: React.ElementType; songs: FavoriteSong[]; onRemove: (id: string) => void;
   onSelect?: (song: SongDetailData) => void; onContextMenu: (e: React.MouseEvent, songId: string) => void;
-}) { const [expanded, setExpanded] = useState(false); const VISIBLE_COUNT = 3;
-  const hasMore = songs.length > VISIBLE_COUNT;
+}) { const [expanded, setExpanded] = useState(false); const VISIBLE_COUNT = 3; const hasMore = songs.length > VISIBLE_COUNT;
   const visibleSongs = useMemo(() => expanded ? songs : songs.slice(0, VISIBLE_COUNT), [expanded, songs]);
   return ( <div className="mb-6"> {/* Group header */} <button onClick={() => hasMore && setExpanded(e => !e)}
         className={`flex items-center gap-2 mb-3 group ${hasMore ? "cursor-pointer" : "cursor-default"}`}>
-        <Icon size={14} className="text-white/40" />
-        <span className="text-[14px] font-semibold text-white/80">{label}</span>
+        <Icon size={14} className="text-white/40" /> <span className="text-[14px] font-semibold text-white/80">{label}</span>
         <span className="text-[11px] text-white/30 bg-white/[0.06] px-2 py-0.5 rounded-full">{songs.length}</span>
         {hasMore && ( <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown size={14} className="text-white/30" /></motion.span>)}</button>
@@ -46,8 +42,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
           tabIndex={0} aria-label={`Expand ${label} songs`}
           style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}>
           {songs.slice(0, VISIBLE_COUNT).map((song, i) => ( <div key={song.id}
-              className="absolute left-0 right-0 transition-all duration-300"
-              style={{ top: `${i * 16}px`, zIndex: VISIBLE_COUNT - i,
+              className="absolute left-0 right-0 transition-all duration-300" style={{ top: `${i * 16}px`, zIndex: VISIBLE_COUNT - i,
                 transform: `scale(${1 - i * 0.03})`, opacity: 1 - i * 0.15, maxWidth: "200px",
               }}><div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
                 <div className="w-full aspect-square bg-surface-3 relative">{song.artworkUrl ? (
@@ -57,12 +52,10 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
                   )}</div>
                 <div className="p-2.5"><p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>
                   <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p></div></div></div>
-          ))} <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-            style={{ maxWidth: "200px" }}>
+          ))} <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center" style={{ maxWidth: "200px" }}>
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
               +{songs.length - VISIBLE_COUNT} more</span></div></div>
-      ) : ( <AnimatePresence><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
-            {visibleSongs.map((song, i) => (
+      ) : ( <AnimatePresence><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"> {visibleSongs.map((song, i) => (
               <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}><SongCard
                   item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null}
                   hideRemove /></div>))}</div></AnimatePresence>
@@ -71,8 +64,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
           <ChevronDown size={12} className="rotate-180" /> Collapse</button>)}</div>
   ); }
 export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
-  const [filterMode, setFilterMode] = useState<FilterMode>("none");
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
+  const [filterMode, setFilterMode] = useState<FilterMode>("none"); const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
   const handleContextMenu = useCallback((e: React.MouseEvent, songId: string) => {
     e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, songId });
   }, []); const closeContextMenu = useCallback(() => setContextMenu(null), []);
@@ -94,13 +86,10 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const toggleFilter = (mode: FilterMode) => setFilterMode(prev => (prev === mode ? "none" : mode));
   return ( <div className="p-4"><SongContextMenu menu={contextMenu} onRemove={onRemove} onClose={closeContextMenu} />
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2"><p className="text-[12px] text-dim">{songs.length} songs</p>
-          {/* By Artist */}
-          <button onClick={() => toggleFilter("artist")} className={filterBtnClass(filterMode === "artist")}>
-            <Users size={10} /> By Artist
+        <div className="flex items-center gap-2"><p className="text-[12px] text-dim">{songs.length} songs</p> {/* By Artist */}
+          <button onClick={() => toggleFilter("artist")} className={filterBtnClass(filterMode === "artist")}> <Users size={10} /> By Artist
             {filterMode === "artist" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
-          </button> {/* By Album */}
-          <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
+          </button> {/* By Album */} <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
             <Disc3 size={10} /> By Album
             {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
           </button></div><button onClick={onClear}
@@ -111,8 +100,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               onSelect={onSelect} onContextMenu={handleContextMenu} />
           ))}</div>
       ) : filterMode === "album" ? ( <div> {albumGroups.map(([albumName, albumSongs]) => ( <GroupStack key={albumName}
-              label={albumName} icon={Disc3} songs={albumSongs} onRemove={onRemove}
-              onSelect={onSelect} onContextMenu={handleContextMenu} />
+              label={albumName} icon={Disc3} songs={albumSongs} onRemove={onRemove} onSelect={onSelect} onContextMenu={handleContextMenu} />
           ))}</div>
       ) : ( <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"> {songs.map((song, i) => (
             <div key={song.id} onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}><SongCard

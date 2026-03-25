@@ -11,8 +11,7 @@ type Props = { station: Station | null; track: NowPlayingTrack | null; status: P
   icyBitrate?: string | null; onTogglePlay: () => void; onSetVolume: (v: number) => void; onToggleMute: () => void;
   onToggleEq: () => void; onToggleTheater?: () => void; onToggleFav?: () => void; onFavSong?: () => void;
   isFavorite?: boolean; songLiked?: boolean; eqPresetActive?: boolean; showEq: boolean;
-  theaterMode?: boolean; compact?: boolean; sleepTimerMin?: number | null; onCycleSleepTimer?: () => void;
-  streamQuality?: StreamQuality; };
+  theaterMode?: boolean; compact?: boolean; sleepTimerMin?: number | null; onCycleSleepTimer?: () => void; streamQuality?: StreamQuality; };
 const SAFE_AREA_STYLE: React.CSSProperties = { paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' };
 function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef, icyBitrate, onTogglePlay,
   onSetVolume, onToggleMute, onToggleEq, onToggleTheater, onToggleFav, onFavSong, isFavorite, songLiked,
@@ -34,8 +33,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
     }, [muted, onSetVolume, onToggleMute],);
   if (compact) { return (
       <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
-        {/* Play/Pause — 48px touch target */} <button onClick={onTogglePlay} disabled={!station}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+        {/* Play/Pause — 48px touch target */} <button onClick={onTogglePlay} disabled={!station} aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >{isLoading ? ( <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? ( <Pause size={18} /> ) : ( <Play size={18} className="ml-0.5" /> )}</button>
@@ -43,10 +41,8 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           {station ? ( <><p className="text-[13px] font-medium text-white truncate leading-tight">
                 {track?.title || station.name}</p><div className="flex items-center gap-1.5 mt-0.5"> {isPlaying && (
                   <><span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
-                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
-                      LIVE</span></>
-                )}
-                <span className="text-[11px] text-secondary truncate">{track?.artist || compactTags || ""}</span></div>
+                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0"> LIVE</span></>
+                )} <span className="text-[11px] text-secondary truncate">{track?.artist || compactTags || ""}</span></div>
             </>
           ) : ( <p className="text-[13px] text-dim">No station selected</p>)}</div>
         {/* Action buttons — 44px touch targets */} <div className="flex items-center gap-0.5 shrink-0">
@@ -66,8 +62,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {station ? ( stationInitials(station.name) || ( <Radio size={14} className="text-white/60" />)
                 ) : ( <Radio size={14} className="text-white/60" /> )}</span></div>
-          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="36px" loading="lazy"
-              onError={() => setImgError(true)} />
+          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="36px" loading="lazy" onError={() => setImgError(true)} />
           )}</div>
         {/* TODO replace upper img with next image */} <div className="min-w-0">
           <p className="text-[12px] font-medium text-white truncate">{station?.name || "Not Playing"}</p>
@@ -87,12 +82,10 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >{isLoading ? ( <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? ( <Pause size={16} /> ) : ( <Play size={16} className="ml-0.5" /> )}</button></div>
-      {/* LIVE indicator + mini ferrofluid */} <div className="flex-1 flex-row-2 min-w-0 relative">
-        {station && isPlaying && (
+      {/* LIVE indicator + mini ferrofluid */} <div className="flex-1 flex-row-2 min-w-0 relative"> {station && isPlaying && (
           <><div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
               <ErrorBoundary fallback={null}><FerrofluidRenderer frequencyDataRef={frequencyDataRef}
-                className="size-full" blobCount={6} colorPrimary="#1a1a2e" colorSecondary="#16213e"
-                colorAccent="#0f3460" sensitivity={1.0}
+                className="size-full" blobCount={6} colorPrimary="#1a1a2e" colorSecondary="#16213e" colorAccent="#0f3460" sensitivity={1.0}
                 demo /></ErrorBoundary></div><div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />
               <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
@@ -105,8 +98,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
-        )} {onFavSong && ( <button onClick={onFavSong} aria-label={songLiked ? 'Unlike song' : 'Like song'}
-            aria-pressed={!!songLiked}
+        )} {onFavSong && ( <button onClick={onFavSong} aria-label={songLiked ? 'Unlike song' : 'Like song'} aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
             title="Me gusta canción"><Heart size={14} className={songLiked ? "fill-pink-400" : ""} /></button>
         )} {onCycleSleepTimer && ( <button onClick={onCycleSleepTimer}
@@ -120,8 +112,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         ><SlidersHorizontal size={14} /></button></div>
       {/* Volume */} <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2"><button
-          onClick={onToggleMute} aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
-          aria-pressed={muted || volume === 0}
+          onClick={onToggleMute} aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'} aria-pressed={muted || volume === 0}
           className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"> {muted || volume === 0 ? (
             <VolumeX size={14} />
           ) : ( <Volume2 size={14} /> )}</button><input

@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+'use client'; import React, { useState, useEffect, useCallback } from 'react'; import { motion, AnimatePresence } from 'motion/react';
 import { IoRadioOutline, IoMusicalNotesOutline, IoHeartOutline, IoStatsChartOutline,
   IoColorPaletteOutline, IoPhonePortraitOutline, IoShareOutline, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; const ONBOARDING_KEY = 'radio-onboarding-done';
@@ -35,10 +34,8 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
         <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
           You&apos;re using Pulse as an app. Enjoy the full experience!</p></div>
     ); }
-  return ( <div className="flex flex-col items-center gap-4 text-center">
-      <IoPhonePortraitOutline size={48} className="text-[#3478f6]" />
-      <h2 className="text-xl font-bold text-white">Install as App</h2>
-      <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
+  return ( <div className="flex flex-col items-center gap-4 text-center"> <IoPhonePortraitOutline size={48} className="text-[#3478f6]" />
+      <h2 className="text-xl font-bold text-white">Install as App</h2> <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
         Install Pulse on your device for the best experience — instant access, offline support, and no browser bars.</p>
       {deferredPrompt ? ( <button onClick={handleInstall}
           className="mt-2 px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
@@ -82,8 +79,7 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
               {/* Buttons */} <div className="flex items-center justify-between gap-3"><button
                   onClick={step > 0 ? () => setStep(s => s - 1) : handleClose}
                   className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
-                >{step > 0 ? 'Back' : 'Skip'}</button><button
-                  onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
+                >{step > 0 ? 'Back' : 'Skip'}</button><button onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
                 >{isLast ? "Let's Go!" : 'Next'}</button></div></div></motion.div></motion.div>)}</AnimatePresence>
   ); }

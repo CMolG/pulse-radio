@@ -9,8 +9,7 @@ export type SongPlayCount = { title: string; artist: string; count: number; artw
 export type ArtistPlayCount = { name: string; count: number; };
 export type GenrePlayCount = { genre: string; count: number; }; export interface UsageStats {
   stationListenTimes: Record<string, StationListenTime>; songPlayCounts: Record<string, SongPlayCount>;
-  artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>;
-  totalListenMs: number; }
+  artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>; totalListenMs: number; }
 const EMPTY_STATS: UsageStats = {
   stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0, };
 /** Keep only the top N entries by a numeric field, dropping the lowest */
@@ -20,13 +19,11 @@ function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<
 /** Return top N values from a record, sorted descending by a numeric field */
 function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
   return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n); }
-export function useStats() { const [stats, setStats] = useState<UsageStats>(() =>
-    loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
+export function useStats() { const [stats, setStats] = useState<UsageStats>(() => loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
   ); const statsRef = useRef(stats); useEffect(() => { statsRef.current = stats; }, [stats]);
   // Sync stats from other tabs — safe because BroadcastChannel ensures
   // only one tab plays at a time, so the writing tab always has the latest.
-  useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats =>
-    !!v && typeof (v as UsageStats).totalListenMs === 'number',);
+  useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats => !!v && typeof (v as UsageStats).totalListenMs === 'number',);
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const dirtyRef = useRef(false);
   const persist = useCallback(() => { if (dirtyRef.current) {
@@ -61,8 +58,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
           [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         }, artistPlayCounts: { ...prev.artistPlayCounts, [primary]: { ...artistEntry, count: artistEntry.count + 1 }, },
       }; if (normalizedGenre) {
-        const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
-        next.genrePlayCounts = {
+        const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 }; next.genrePlayCounts = {
           ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 }, }; }
       return next;
     }); dirtyRef.current = true;
@@ -80,17 +76,14 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       const needsArtwork = artworkUrl && songEntry.artworkUrl !== artworkUrl;
       const normalizedGenre = genre ? genre.toLowerCase().trim() : '';
       // Count genre if this song didn't already have its genre recorded
-      const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre;
-      if (!needsArtwork && !needsGenre) return prev;
+      const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre; if (!needsArtwork && !needsGenre) return prev;
       const next: UsageStats = { ...prev, songPlayCounts: { ...prev.songPlayCounts,
           [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
         }, };
       if (needsGenre) {
-        const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
-        next.genrePlayCounts = {
+        const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 }; next.genrePlayCounts = {
           ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 }, }; }
       return next;
     }); dirtyRef.current = true;
   }, []); const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
-  return { stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres,
-    genreOrder, clearStats, }; }
+  return { stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres, genreOrder, clearStats, }; }

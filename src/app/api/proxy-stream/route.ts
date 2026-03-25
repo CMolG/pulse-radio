@@ -26,15 +26,13 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   try { const upstream = await fetch(parsed.toString(), {
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     // Validate the final URL after redirects to prevent SSRF via redirect
-    if (upstream.url) { try { const finalUrl = new URL(upstream.url);
-        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+    if (upstream.url) { try { const finalUrl = new URL(upstream.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
           if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {});
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403, headers: { 'Content-Type': 'application/json' },});
         }} catch {
       } } // URL parse failed — continue with original validation
-    if (!upstream.ok || !upstream.body) { if (timeout) clearTimeout(timeout);
-      upstream.body?.cancel().catch(() => {}); // release connection
+    if (!upstream.ok || !upstream.body) { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '3' },});
     } const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
@@ -50,7 +48,6 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) { return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504, headers: { 'Content-Type': 'application/json' },});
-    } const message = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
+    } const message = err instanceof Error ? err.message : 'Unknown error'; return new Response(JSON.stringify({ error: message }), {
       status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },});
   } }

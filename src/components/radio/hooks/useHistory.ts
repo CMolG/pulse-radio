@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useState, useCallback, useEffect, useRef } from 'react';
 import type { NowPlayingTrack, HistoryEntry } from '../types'; import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { useStorageSync } from '@/lib/useStorageSync';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; import { useStorageSync } from '@/lib/useStorageSync';
 export function useHistory( stationName: string | undefined, stationUuid: string | undefined,
   track: NowPlayingTrack | null, ) { const [history, setHistory] = useState<HistoryEntry[]>(() => {
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
@@ -45,5 +44,4 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       } return prev;});
   }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
   const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
-  const clear = useCallback(() => { setHistory([]); lastTrackRef.current = '';
-  }, []); return { history, remove, clear }; }
+  const clear = useCallback(() => { setHistory([]); lastTrackRef.current = ''; }, []); return { history, remove, clear }; }

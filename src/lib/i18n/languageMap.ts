@@ -6,10 +6,8 @@ import type { SupportedLocale } from "./locales"; export const LANG3_TO_LOCALE: 
   ron: "ro", tha: "th", vie: "vi", ind: "id", msa: "ms", fas: "fa", heb: "he", swa: "sw", tgl: "tl", };
 export const LOCALE_SELF_CANDIDATES: Record<SupportedLocale, SupportedLocale[]> = {
   en: ["en"], es: ["es"], fr: ["fr"], de: ["de"], "pt-BR": ["pt-BR", "pt"], pt: ["pt", "pt-BR"], it: ["it"], nl: ["nl"],
-  ja: ["ja"], ko: ["ko"], zh: ["zh", "zh-TW"], "zh-TW": ["zh-TW", "zh"],
-  ar: ["ar"], hi: ["hi"], bn: ["bn"], ru: ["ru", "uk"],
+  ja: ["ja"], ko: ["ko"], zh: ["zh", "zh-TW"], "zh-TW": ["zh-TW", "zh"], ar: ["ar"], hi: ["hi"], bn: ["bn"], ru: ["ru", "uk"],
   uk: ["uk", "ru"], pl: ["pl"], tr: ["tr"], sv: ["sv", "da", "nb"],
   da: ["da", "sv", "nb"], nb: ["nb", "da", "sv"], fi: ["fi", "sv"], el: ["el"],
-  cs: ["cs", "pl"], hu: ["hu", "ro"], ro: ["ro", "hu"], th: ["th"],
-  vi: ["vi"], id: ["id", "ms"], ms: ["ms", "id"], fa: ["fa", "ar"],
+  cs: ["cs", "pl"], hu: ["hu", "ro"], ro: ["ro", "hu"], th: ["th"], vi: ["vi"], id: ["id", "ms"], ms: ["ms", "id"], fa: ["fa", "ar"],
   he: ["he", "ar"], sw: ["sw", "en"], tl: ["tl", "en"], };

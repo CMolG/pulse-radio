@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { FavoriteSong } from '../types'; import { STORAGE_KEYS } from '../constants';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { useStorageSync } from '@/lib/useStorageSync';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; import { useStorageSync } from '@/lib/useStorageSync';
 function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
 /** Build a Set of songKeys from a song array for O(1) lookups. */
 function buildKeySet(songs: FavoriteSong[]): Set<string> { const s = new Set<string>();

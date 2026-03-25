@@ -12,8 +12,7 @@ type Props = { bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; st
   onRemoveCustomPreset?: (name: string) => void; onPresetChange?: (name: string | null) => void; };
 export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
   const [showSaveInput, setShowSaveInput] = useState(false); const [presetName, setPresetName] = useState('');
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
-  const handleSelectPreset = (name: string, gains: number[]) => {
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null); const handleSelectPreset = (name: string, gains: number[]) => {
     setSelectedPreset(name); onApplyPreset(gains); onPresetChange?.(name); };
   const handleSetGain = (id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange?.(null); onSetGain(id, gain);
@@ -33,12 +32,10 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             <button onClick={() => handleSelectPreset(preset.name, preset.gains)}
               className={`px-2 py-1 text-[10px] rounded-l-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 hover:bg-sys-orange/20 text-sys-orange hover:text-white'}`}>
               {preset.name}</button>
-            {onRemoveCustomPreset && ( <button onClick={() => onRemoveCustomPreset(preset.name)}
-                aria-label={`Delete ${preset.name} preset`}
+            {onRemoveCustomPreset && ( <button onClick={() => onRemoveCustomPreset(preset.name)} aria-label={`Delete ${preset.name} preset`}
                 className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors">
                 <X size={8} /></button>)}</div>))}</div>
-      {/* Save custom preset */}
-      {onSaveCustomPreset && ( <div className="mb-4"> {showSaveInput ? ( <div className="flex-row-1.5">
+      {/* Save custom preset */} {onSaveCustomPreset && ( <div className="mb-4"> {showSaveInput ? ( <div className="flex-row-1.5">
  <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }}
                 placeholder="Preset name…" aria-label="Preset name"
@@ -70,8 +67,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             onChange={e => onSetStereoWidth(parseInt(e.target.value, 10) / 100)} aria-label="Stereo width"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           /> <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(stereoWidth * 100)}%</span>
-        </div><div className="flex items-center gap-2 mt-2">
-          <span className="text-[10px] text-secondary shrink-0 w-12">Bass+</span>
+        </div><div className="flex items-center gap-2 mt-2"> <span className="text-[10px] text-secondary shrink-0 w-12">Bass+</span>
           <input type="range" min={0} max={100} step={5} value={Math.round(bassEnhance * 100)}
             onChange={e => onSetBassEnhance(parseInt(e.target.value, 10) / 100)} aria-label="Bass enhance"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
@@ -82,7 +78,6 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             onChange={e => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)} disabled={!compressorEnabled}
             aria-label="Compressor amount"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
-          />
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(compressorAmount * 100)}%</span>
+          /> <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(compressorAmount * 100)}%</span>
         </div>
       </div></div>); });

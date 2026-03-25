@@ -6,8 +6,7 @@ type BrowserSpeechRecognitionEvent = { resultIndex: number; results: ArrayLike<B
 type BrowserSpeechRecognitionErrorEvent = { error: string };
 type BrowserSpeechRecognition = { continuous: boolean; interimResults: boolean; maxAlternatives: number; lang: string;
   onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
-  onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null;
-  start: () => void; stop: () => void; };
+  onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null; start: () => void; stop: () => void; };
 type RecognitionCtor = new () => BrowserSpeechRecognition; type EngineCallbacks = {
   onHypothesis: (hypothesis: RealtimeSpeechHypothesis) => void; onFatalError: (errorMessage: string) => void; };
 const MAX_RESTARTS = 4; function getRecognitionCtor(): RecognitionCtor | null {
@@ -19,8 +18,7 @@ export type RealtimeSpeechEngine = { start: (lang: 'en' | 'es') => void; stop: (
 export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): RealtimeSpeechEngine {
   let recognition: BrowserSpeechRecognition | null = null; let running = false;
   let destroyed = false; let restartCount = 0; const teardown = () => { if (!recognition) return;
-    recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.stop();
-    recognition = null;
+    recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.stop(); recognition = null;
   }; const wireRecognition = (lang: 'en' | 'es') => { const Ctor = getRecognitionCtor();
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
     recognition = new Ctor(); recognition.continuous = true; recognition.interimResults = true;
@@ -28,22 +26,19 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
     recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
       restartCount = 0; // Reset restart counter on any successful recognition — proves engine is alive.
       const index = event.resultIndex; const result = event.results[index]; if (!result || !result[0]) return;
-      const transcript = result[0].transcript.trim().toLowerCase(); if (!transcript) return;
-      callbacks.onHypothesis({ text: transcript,
+      const transcript = result[0].transcript.trim().toLowerCase(); if (!transcript) return; callbacks.onHypothesis({ text: transcript,
         confidence: typeof result[0].confidence === 'number' && Number.isFinite(result[0].confidence)
           ? Math.max(0, Math.min(1, result[0].confidence))
           : result.isFinal ? 0.7 : 0.55, isFinal: result.isFinal, tsMs: performance.now(),});
     }; recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return;
-      const fatal = event.error === 'not-allowed'|| event.error === 'service-not-allowed'
-        || event.error === 'language-not-supported';
+      const fatal = event.error === 'not-allowed'|| event.error === 'service-not-allowed' || event.error === 'language-not-supported';
       if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return; }
     }; recognition.onend = () => { if (destroyed || !running) return; if (restartCount >= MAX_RESTARTS) {
         running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return; }
       restartCount++;
       // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,
       const current = recognition; if (!current) return; // this is a stale onend firing and we should not restart.
-      try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.');
-      }
+      try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.'); }
     }; };
   return { start: (lang) => { if (destroyed || running) return; wireRecognition(lang); if (!recognition) return;
       try { recognition.start(); running = true; restartCount = 0;

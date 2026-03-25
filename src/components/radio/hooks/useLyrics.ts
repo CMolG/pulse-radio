@@ -1,16 +1,13 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import { useState, useRef, useEffect } from 'react';
-import type { NowPlayingTrack, LyricsData } from '../types';
+'use client'; import { useState, useRef, useEffect } from 'react'; import type { NowPlayingTrack, LyricsData } from '../types';
 import { fetchLyrics as fetchLyricsApi } from '../services/lyricsApi'; import { STORAGE_KEYS } from '../constants';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { useRealtimeLyricsSync } from './useRealtimeLyricsSync';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; import { useRealtimeLyricsSync } from './useRealtimeLyricsSync';
 import type { RealtimeSyncDiagnostics, RealtimeSyncStatus } from '../services/realtimeLyricsTypes';
 const MAX_CACHE = 50; const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 type CacheEntry = { key: string; data: LyricsData; ts: number }; function loadCache(): CacheEntry[] {
   const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
   // Backfill ts=0 for old entries so they expire on next TTL check — mutate in place to avoid allocation
-  for (let i = 0; i < raw.length; i++) { if (raw[i].ts === undefined) (raw[i] as CacheEntry).ts = 0; }
-  return raw as CacheEntry[]; }
+  for (let i = 0; i < raw.length; i++) { if (raw[i].ts === undefined) (raw[i] as CacheEntry).ts = 0; } return raw as CacheEntry[]; }
 function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 export function useLyrics( track: NowPlayingTrack | null, stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
@@ -24,8 +21,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined,
       controller.signal, ).then(result => {
         if (controller.signal.aborted) return; retryCountRef.current = 0; if (result) { setLyrics(result);
-          const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
-          saveCache(updated);
+          const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)]; saveCache(updated);
         } else setLyrics(null);
       }).catch(() => { if (controller.signal.aborted) return; if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++; const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
@@ -36,8 +32,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
     if (!track || !track.title) { setLoading(false); setLyrics(null); setError(false); lastKeyRef.current = ''; return;
-    } const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}\n${track.title}`.toLowerCase();
+    } const artistSeed = (track.artist || stationName || 'unknown').trim(); const key = `${artistSeed}\n${track.title}`.toLowerCase();
     if (key === lastKeyRef.current) return; lastKeyRef.current = key;
     const cached = loadCache(); const hit = cached.find(e => e.key === key);
     if (hit && Date.now() - hit.ts < CACHE_TTL_MS) { setLoading(false); setLyrics(hit.data); setError(false); return;
@@ -47,14 +42,11 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   const retry = () => { if (!track?.title) return; const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase(); const cached = loadCache();
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-    retryCountRef.current = 0; const controller = new AbortController();
-    abortRef.current = controller; doFetch(key, cached, controller); };
+    retryCountRef.current = 0; const controller = new AbortController(); abortRef.current = controller; doFetch(key, cached, controller); };
   const realtimeSync = useRealtimeLyricsSync({
     lyrics, enabled: enableRealtime, languageHint: options?.languageHint ?? 'en',});
-  return { lyrics, loading, error, retry,
-    effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
-      : options?.currentTime, realtime: enableRealtime
-      ? { enabled: realtimeSync.enabled, supported: realtimeSync.supported,
+  return { lyrics, loading, error, retry, effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
+      : options?.currentTime, realtime: enableRealtime ? { enabled: realtimeSync.enabled, supported: realtimeSync.supported,
           status: realtimeSync.status, activeLineIndex: realtimeSync.activeLineIndex,
           candidateLineIndex: realtimeSync.candidateLineIndex, confidence: realtimeSync.confidence,
           diagnostics: realtimeSync.diagnostics, toggle: realtimeSync.toggle, }

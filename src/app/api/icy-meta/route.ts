@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { NextRequest, NextResponse } from 'next/server'; import { isPrivateHost } from '@/lib/urlSecurity';
-export const runtime = 'nodejs';
+import { NextRequest, NextResponse } from 'next/server'; import { isPrivateHost } from '@/lib/urlSecurity'; export const runtime = 'nodejs';
 /* Server-side ICY metadata proxy. Fetches the first metadata block from an internet radio stream using the ICY p
  * rotocol, which browsers can't do directly due to CORS. */
 export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url');
@@ -29,10 +28,8 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     } const metaint = parseInt(icyMetaint, 10);
     const MAX_METAINT = 131072; // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
-      clearTimeout(timeout); res.body.cancel().catch(() => {});
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
-    const reader = res.body.getReader(); const chunks: Uint8Array[] = []; let totalRead = 0;
-    const bytesNeeded = metaint + 4096;
+      clearTimeout(timeout); res.body.cancel().catch(() => {}); return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
+    const reader = res.body.getReader(); const chunks: Uint8Array[] = []; let totalRead = 0; const bytesNeeded = metaint + 4096;
     try { while (totalRead < bytesNeeded) { const { done, value } = await reader.read(); if (done || !value) break;
         chunks.push(value); totalRead += value.length; }
     } finally { clearTimeout(timeout); reader.cancel().catch(() => {}); }
@@ -49,6 +46,5 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 }); }
+    const message = err instanceof Error ? err.message : 'Unknown error'; return NextResponse.json({ error: message }, { status: 500 }); }
 }
