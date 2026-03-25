@@ -25,5 +25,4 @@ export function trendingStations(limit = 20): Promise<Station[]> { return topSta
  * urrent station goes down. */
 export async function similarStations(station: Station, limit = 5): Promise<Station[]> {
   const firstTag = station.tags?.split(',').map(t => t.trim()).filter(Boolean)[0]; if (!firstTag) return topStations(limit); const results = await stationsByTag(firstTag, limit + 5);
-  // Exclude the current station and filter to only online streams
-  return results .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit); }
+  return results .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit); } // Exclude the current station and filter to only online streams

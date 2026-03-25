@@ -8,19 +8,15 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } stopFade(); endTimeRef.current = 0; setRemainingMin(null); }, [stopFade]); const startFade = useCallback(() => {
     if (!audioRef?.current || fadeTimerRef.current) return; const audio = audioRef.current; savedVolumeRef.current = audio.volume; setIsFading(true); const fadeStart = Date.now(); let baseVol = audio.volume; let lastSetVol = audio.volume; fadeTimerRef.current = setInterval(() => {
       // Detect external volume changes (user adjusted volume during fade).
-      // Check both directions — user may have raised or lowered the volume.
-      if (Math.abs(audio.volume - lastSetVol) > 0.01) { baseVol = audio.volume; savedVolumeRef.current = baseVol; } const elapsed = Date.now() - fadeStart; const progress = Math.min(1, elapsed / FADE_DURATION_MS);
-      // Ease-out quadratic for gentle fade
-      const factor = 1 - progress * progress; const target = Math.max(0, baseVol * factor); audio.volume = target; lastSetVol = target; if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; }
+      if (Math.abs(audio.volume - lastSetVol) > 0.01) { baseVol = audio.volume; savedVolumeRef.current = baseVol; } const elapsed = Date.now() - fadeStart; const progress = Math.min(1, elapsed / FADE_DURATION_MS); // Check both directions — user may have raised or lowered the volume.
+      const factor = 1 - progress * progress; const target = Math.max(0, baseVol * factor); audio.volume = target; lastSetVol = target; if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; } // Ease-out quadratic for gentle fade
     }, 200);
   }, []); const start = useCallback((minutes: number) => { if (timerRef.current) clearInterval(timerRef.current); stopFade(); endTimeRef.current = Date.now() + minutes * 60_000; setRemainingMin(minutes); timerRef.current = setInterval(() => {
       const left = Math.max(0, endTimeRef.current - Date.now()); const mins = Math.ceil(left / 60_000); if (left <= 0) {
         // Discard saved volume so stopFade won't restore it — the
-        // fade brought volume to 0 intentionally before pausing.
-        savedVolumeRef.current = null; clear(); onExpireRef.current();
+        savedVolumeRef.current = null; clear(); onExpireRef.current(); // fade brought volume to 0 intentionally before pausing.
       } else { setRemainingMin(mins);
-        // Start fading volume when less than FADE_DURATION_MS remains
-        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade(); }
+        if (left <= FADE_DURATION_MS && audioRef?.current && !fadeTimerRef.current) startFade(); } // Start fading volume when less than FADE_DURATION_MS remains
     }, 1000); // check every second for smooth fade timing
   }, [clear, stopFade, startFade]); const cycle = useCallback(() => { if (remainingMin === null) { start(PRESETS_MIN[0]); } else { const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin); const nextIdx = currentIdx + 1; if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear(); } }, [remainingMin, start, clear]); useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); // Cleanup on unmount
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);

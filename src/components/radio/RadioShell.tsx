@@ -5,8 +5,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>(() => ({
     w: typeof window !== 'undefined' ? window.innerWidth : 800, h: typeof window !== 'undefined' ? window.innerHeight : 600,
   })); useEffect(() => { const el = ref.current; if (!el) return;
-    // Synchronous measurement replaces the window-based initial guess
-    const rect = el.getBoundingClientRect(); // one frame earlier than waiting for the ResizeObserver callback.
+    const rect = el.getBoundingClientRect(); // one frame earlier than waiting for the ResizeObserver callback. // Synchronous measurement replaces the window-based initial guess
     if (rect.width > 0 && rect.height > 0) setSize({ w: Math.round(rect.width), h: Math.round(rect.height) }); const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect; if (width <= 0 || height <= 0) return; setSize({ w: Math.round(width), h: Math.round(height) });
     }); ro.observe(el); return () => ro.disconnect();
@@ -15,20 +14,17 @@ type RadioShellProps = { isPip?: boolean; initialCountryCode?: string }; export 
   const containerRef = useRef<HTMLDivElement>(null); const containerSize = useContainerSize(containerRef); const pathname = usePathname(); const { t, locale } = useLocale(); const layout: LayoutMode = isPipProp ? "pip" : containerSize.w <= 640 ? "mobile" : "desktop"; const radio = useRadio(); const eq = useEqualizer(); const { track, icyBitrate } = useStationMeta(radio.station, radio.status === "playing"); const { lyrics, effectiveCurrentTime, realtime: realtimeLyrics, } = useLyrics(track, radio.station?.name, {
     currentTime: radio.currentTime, enableRealtime: Boolean(track?.title), languageHint: locale === 'es' ? 'es' : 'en',
   }); const favs = useFavorites(); const favSongs = useFavoriteSongs(); const recent = useRecent(); const sleepTimer = useSleepTimer(radio.pause, radio.audioRef); const stationQueue = useStationQueue(); useWakeLock(radio.status === "playing"); const analyser = useAudioAnalyser({ fftSize: 2048, smoothingTimeConstant: 0.8, }); const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === "playing"); const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null); const usageStats = useStats(); const enrichedTrack = useMemo(() => { if (!track) return null; return { ...track, album: track.album || albumArt.albumName || undefined, artworkUrl: track.artworkUrl || albumArt.artworkUrl || undefined, itunesUrl: albumArt.itunesUrl ?? undefined, durationMs: albumArt.durationMs ?? undefined, genre: albumArt.genre || undefined, releaseDate: albumArt.releaseDate || undefined, trackNumber: albumArt.trackNumber ?? undefined, trackCount: albumArt.trackCount ?? undefined, }; }, [track, albumArt]); const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
-  // Track listen time for stats (every 5 seconds while playing)
-  const lastTickRef = useRef(Date.now()); const { tickListenTime } = usageStats; useEffect(() => { if (radio.status !== 'playing' || !radio.station) { lastTickRef.current = Date.now(); return; } const interval = setInterval(() => {
+  const lastTickRef = useRef(Date.now()); const { tickListenTime } = usageStats; useEffect(() => { if (radio.status !== 'playing' || !radio.station) { lastTickRef.current = Date.now(); return; } const interval = setInterval(() => { // Track listen time for stats (every 5 seconds while playing)
       const now = Date.now(); const delta = now - lastTickRef.current; lastTickRef.current = now; if (radio.station) tickListenTime(radio.station.stationuuid, radio.station.name, delta);
     }, 5000); lastTickRef.current = Date.now(); return () => clearInterval(interval);
   }, [radio.status, radio.station, tickListenTime]);
   // Record song play when a new track starts
   const lastRecordedTrackRef = useRef<string | null>(null); const { recordSongPlay, updateSongMeta } = usageStats; useEffect(() => { if (!enrichedTrack?.title || !enrichedTrack?.artist) return; const key = `${enrichedTrack.title}|||${enrichedTrack.artist}`; if (key !== lastRecordedTrackRef.current) { lastRecordedTrackRef.current = key; recordSongPlay(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);} else {
-      // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
-      updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,); }
+      updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,); } // Late-arriving metadata (artwork/genre from albumArt) — update without incrementing count
   }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, recordSongPlay, updateSongMeta]); const [showEq, setShowEq] = useState(false); const [showMobileSettings, setShowMobileSettings] = useState(false); const [miniMode, setMiniMode] = useState(false); const [theaterMode, setTheaterMode] = useState(false); const [showShortcuts, setShowShortcuts] = useState(false); const [isOnline, setIsOnline] = useState(() => typeof navigator !== 'undefined' ? navigator.onLine : true); const [toast, setToast] = useState<{ msg: string; icon: "star" | "heart"; key: number } | null>(null); const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const duckOrigVolRef = useRef<number | null>(null); const duckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const showToast = useCallback((msg: string, icon: "star" | "heart") => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current); setToast({ msg, icon, key: Date.now() }); const audio = radio.audioRef.current; // Brief audio duck: lower volume for 400ms then restore
     if (audio && !audio.paused) { if (duckTimerRef.current) clearTimeout(duckTimerRef.current);
-      // Only capture pre-duck volume if not already ducking
-      if (duckOrigVolRef.current === null) duckOrigVolRef.current = audio.volume; audio.volume = duckOrigVolRef.current * 0.4; duckTimerRef.current = setTimeout(() => {
+      if (duckOrigVolRef.current === null) duckOrigVolRef.current = audio.volume; audio.volume = duckOrigVolRef.current * 0.4; duckTimerRef.current = setTimeout(() => { // Only capture pre-duck volume if not already ducking
         if (audio && duckOrigVolRef.current !== null) audio.volume = duckOrigVolRef.current; duckOrigVolRef.current = null; duckTimerRef.current = null;
       }, 400); }
     toastTimerRef.current = setTimeout(() => setToast(null), 2500);
@@ -44,8 +40,7 @@ type RadioShellProps = { isPip?: boolean; initialCountryCode?: string }; export 
     const code = (initialCountryCode ?? "").toUpperCase(); if (isSovereignCountryCode(code)) return countryView(code); return mkView("top", t("topStations"));});
   useEffect(() => { const newLabel = view.mode === "top" ? t("topStations") : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode) : null; if (newLabel && newLabel !== view.label) setView(prev => ({ ...prev, label: newLabel })); }, [locale, t, view.countryCode, view.label, view.mode]); useEffect(() => { const code = (initialCountryCode ?? "").toUpperCase(); if (!isSovereignCountryCode(code) || !COUNTRY_BY_CODE[code]) return; if (view.mode === "country" && view.countryCode === code) return; resetNav(countryView(code)); }, [initialCountryCode, locale, view.countryCode, view.mode, resetNav]);
   // Sync view state when the user navigates with browser back/forward.
-  // pushState is used for country and home navigation but the browser's
-  useEffect(() => { const onPopState = () => { // popstate event is the only way to detect back/forward.
+  useEffect(() => { const onPopState = () => { // popstate event is the only way to detect back/forward. // pushState is used for country and home navigation but the browser's
       const segment = window.location.pathname.replace(/^\//, "").toUpperCase();
       if (!segment) { resetNav(mkView("top", t("topStations"))); return; } if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     }; window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
@@ -59,8 +54,7 @@ type RadioShellProps = { isPip?: boolean; initialCountryCode?: string }; export 
       eqConnectSource(radio.audioRef.current); analyser.connectAudio(radio.audioRef.current); }
   }, [radio.station]); // eslint-disable-next-line react-hooks/exhaustive-deps
   // Keep EQ outputGain at unity — audio.volume already handles user volume.
-  // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
-  useEffect(() => { setOutputVolume(1, false); }, [setOutputVolume]);
+  useEffect(() => { setOutputVolume(1, false); }, [setOutputVolume]); // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
   // Ref holds fresh deps so handlePlay can use [] and remain referentially
   // stable.  Prevents child components receiving onPlay={handlePlay} from re-rendering on every frame during playback.
   const handlePlayRef = useRef({ radio, recent, stationQueue, eqConnectSource, analyser }); useEffect(() => { handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser }; }, [radio, recent, stationQueue, eqConnectSource, analyser]); const handlePlay = useCallback((station: Station) => {
@@ -70,14 +64,10 @@ type RadioShellProps = { isPip?: boolean; initialCountryCode?: string }; export 
       // assigned and audio.play() is invoked — calling it after play() can result in
       // the audio being CORS-tainted and silenced in the Web Audio pipeline.
       // ensureAudio() is also needed so resumeAudioContext() inside play() finds the
-      // AudioContext in the cache and can resume it within the same user-gesture context.
-      const audio = r.ensureAudio(); eqSrc(audio); an.connectAudio(audio); r.play(station); rec.add(station); sq.setPlaying(station.stationuuid); setTheaterMode(true);
-      // Prefetch next station in queue for seamless transition
-      const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1; if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);}, [],);
-  // Auto-advance to next queued station on error, or failover to similar station
-  useEffect(() => { let cancelled = false; if (radio.status === 'error') { if (stationQueue.hasNext) { const next = stationQueue.skipToNext(); if (next) { radio.play(next); recent.add(next); } } else if (radio.station) {
-        // No queue entries — find a similar station by genre tag
-        import('./services/radioApi').then(({ similarStations }) => { similarStations(radio.station!, 3).then(alts => {
+      const audio = r.ensureAudio(); eqSrc(audio); an.connectAudio(audio); r.play(station); rec.add(station); sq.setPlaying(station.stationuuid); setTheaterMode(true); // AudioContext in the cache and can resume it within the same user-gesture context.
+      const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1; if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);}, [],); // Prefetch next station in queue for seamless transition
+  useEffect(() => { let cancelled = false; if (radio.status === 'error') { if (stationQueue.hasNext) { const next = stationQueue.skipToNext(); if (next) { radio.play(next); recent.add(next); } } else if (radio.station) { // Auto-advance to next queued station on error, or failover to similar station
+        import('./services/radioApi').then(({ similarStations }) => { similarStations(radio.station!, 3).then(alts => { // No queue entries — find a similar station by genre tag
             if (alts.length > 0 && !cancelled) handlePlay(alts[0]);
           }).catch(() => {});});
       } }
@@ -90,21 +80,17 @@ type RadioShellProps = { isPip?: boolean; initialCountryCode?: string }; export 
     station: radio.station, track: enrichedTrack, isPlaying: radio.status === "playing", onPlay: radio.resume, onPause: radio.pause, onNext: handleSkipNext, onPrev: handleSkipPrev, onStop: radio.stop, onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)), onSeekForward: () => radio.seek(radio.currentTime + 10),});
   // Ref holds fresh state for keyboard handler so the event listener is
   // registered once — avoids ~60fps add/removeEventListener churn from
-  // unstable deps (radio, favs, etc.) that change every render.
-  const keydownRef = useRef({ radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics }); useEffect(() => {
+  const keydownRef = useRef({ radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics }); useEffect(() => { // unstable deps (radio, favs, etc.) that change every render.
     keydownRef.current = { radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics };
   }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics]); useEffect(() => { const onKeyDown = (e: KeyboardEvent) => {
       const { radio: r, handleSkipNext: skipNext, handleSkipPrev: skipPrev, favs: f, favSongs: fs, enrichedTrack: et, theaterMode: tm, showEq: eq, showShortcuts: sc, selectedSong: ss, sleepTimer: st, showToast: toast, realtimeLyrics: rl } = keydownRef.current; const target = e.target as HTMLElement; const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable; if (isInput && e.key !== "Escape") return; // Allow Escape even from inputs (to close panels/modals)
       // When EQ panel is open, suppress single-letter shortcuts that could
       // trigger unintended actions (theater, favorites, search, etc.).
-      // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
-      if (eq) { const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']); if (!allowed.has(e.key)) return; }
-      // When song detail modal is open, let it handle its own Escape;
-      if (ss) return; // block all keys here to prevent shortcuts from firing behind the modal
+      if (eq) { const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']); if (!allowed.has(e.key)) return; } // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
+      if (ss) return; // block all keys here to prevent shortcuts from firing behind the modal // When song detail modal is open, let it handle its own Escape;
       switch (e.key) {
         case " ": e.preventDefault(); r.togglePlay(); break; case "ArrowLeft": e.preventDefault(); skipPrev(); break; case "ArrowRight": e.preventDefault(); skipNext(); break; case "ArrowUp": e.preventDefault(); r.setVolume(Math.min(1, r.volume + 0.05)); break; case "ArrowDown": e.preventDefault(); r.setVolume(Math.max(0, r.volume - 0.05)); break; case "m": case "M": r.toggleMute(); break; case "n": case "N": skipNext(); break; case "p": case "P": skipPrev(); break; case "f": case "F": { e.preventDefault(); const searchInput = document.querySelector<HTMLInputElement>("[data-radio-search]") ?? document.querySelector<HTMLInputElement>(".radio-search-input"); if (searchInput) searchInput.focus(); break; } case "s": case "S": if (r.station) { const wasFav = f.has(r.station.stationuuid); f.toggle(r.station); toast(wasFav ? "Removed from favorites" : r.station.name, "star"); } break; case "Escape":
-          // Priority: close topmost overlay first, then exit theater
-          if (sc) setShowShortcuts(false); else if (eq) setShowEq(false); else if (tm) setTheaterMode(false); break;
+          if (sc) setShowShortcuts(false); else if (eq) setShowEq(false); else if (tm) setTheaterMode(false); break; // Priority: close topmost overlay first, then exit theater
         case "t": case "T": setTheaterMode(prev => !prev); break; case "e": case "E": setShowEq(prev => !prev); break; case "l": case "L": if (et?.title && r.station) {
             const wasLiked = fs.has(et.title, et.artist ?? ''); fs.toggle(buildFavInput(et, r.station)); toast(wasLiked ? "Song removed" : et.title, "heart"); }
           break;

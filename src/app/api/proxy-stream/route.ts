@@ -15,11 +15,9 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
   } catch { return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },});
   } const controller = new AbortController(); const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
-  // Propagate client disconnect to upstream so we don't leak connections
-  if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); } try { const upstream = await fetch(parsed.toString(), {
+  if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); } try { const upstream = await fetch(parsed.toString(), { // Propagate client disconnect to upstream so we don't leak connections
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
-    // Validate the final URL after redirects to prevent SSRF via redirect
-    if (upstream.url) { try { const finalUrl = new URL(upstream.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+    if (upstream.url) { try { const finalUrl = new URL(upstream.url); if (isPrivateHost(finalUrl.hostname.toLowerCase())) { // Validate the final URL after redirects to prevent SSRF via redirect
           if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403, headers: { 'Content-Type': 'application/json' },});
         }} catch {

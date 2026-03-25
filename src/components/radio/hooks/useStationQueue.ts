@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useState, useCallback, useRef, useEffect } from 'react'; import type { Station } from '../types'; import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; const STORAGE_KEY = 'radio-station-queue'; const MAX_QUEUE_SIZE = 20; export function useStationQueue() { const [queue, setQueue] = useState<Station[]>(() => loadFromStorage<Station[]>(STORAGE_KEY, []) ); const [currentIndex, setCurrentIndex] = useState(-1); const persistRef = useRef(false);
-  // Ref tracks latest queue so callbacks avoid stale closures
-  const queueRef = useRef(queue); useEffect(() => { queueRef.current = queue; }, [queue]);
-  // Persist queue to storage on changes (skip initial mount)
-  useEffect(() => { if (persistRef.current) saveToStorage(STORAGE_KEY, queue); persistRef.current = true; }, [queue]); const add = useCallback((station: Station) => { setQueue(prev => {
+  const queueRef = useRef(queue); useEffect(() => { queueRef.current = queue; }, [queue]); // Ref tracks latest queue so callbacks avoid stale closures
+  useEffect(() => { if (persistRef.current) saveToStorage(STORAGE_KEY, queue); persistRef.current = true; }, [queue]); const add = useCallback((station: Station) => { setQueue(prev => { // Persist queue to storage on changes (skip initial mount)
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev; if (prev.length >= MAX_QUEUE_SIZE) return prev; return [...prev, station];});
   }, []); const addNext = useCallback((station: Station) => { let removedIdx = -1; setCurrentIndex(prevIdx => {
       const q = queueRef.current; removedIdx = q.findIndex(s => s.stationuuid === station.stationuuid); const filtered = q.filter(s => s.stationuuid !== station.stationuuid); if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;

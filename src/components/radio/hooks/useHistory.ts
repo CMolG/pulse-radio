@@ -4,10 +4,8 @@
     return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
   }); const lastTrackRef = useRef<string>(''); const lastStationRef = useRef<string | undefined>(stationUuid); useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]); useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
   // Add entry when track changes; handles station transitions in a single effect
-  // to prevent the race between station-reset and track-add
-  useEffect(() => { if (!track?.title || !stationUuid || !stationName) return;
-    // Station just changed — skip this render's potentially stale metadata
-    if (stationUuid !== lastStationRef.current) {
+  useEffect(() => { if (!track?.title || !stationUuid || !stationName) return; // to prevent the race between station-reset and track-add
+    if (stationUuid !== lastStationRef.current) { // Station just changed — skip this render's potentially stale metadata
       lastStationRef.current = stationUuid; lastTrackRef.current = ''; return; }
     const key = `${stationUuid}::${track.artist}::${track.title}`; if (key === lastTrackRef.current) return; lastTrackRef.current = key; const entry: HistoryEntry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName, stationUuid, artist: track.artist, title: track.title, album: track.album, artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl, durationMs: track.durationMs, genre: track.genre, releaseDate: track.releaseDate, trackNumber: track.trackNumber, trackCount: track.trackCount, timestamp: Date.now(), };
@@ -15,8 +13,7 @@
       const deduped = prev.filter( // Active dedup: remove older entries with same title+artist+station
         e => !(e.title === entry.title && e.artist === entry.artist && e.stationUuid === entry.stationUuid)
       ); return [entry, ...deduped].slice(0, MAX_HISTORY);});
-  // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
-  }, [track?.title, track?.artist, stationUuid, stationName]); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [track?.title, track?.artist, stationUuid, stationName]); // eslint-disable-next-line react-hooks/exhaustive-deps // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
   useEffect(() => { // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
     if (!track?.title || !stationUuid) return; const artworkUrl = track.artworkUrl; const album = track.album; const itunesUrl = track.itunesUrl; const durationMs = track.durationMs; const genre = track.genre; const releaseDate = track.releaseDate; const trackNumber = track.trackNumber; const trackCount = track.trackCount; if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return; setHistory(prev => { const head = prev[0]; if (!head) return prev; if ( head.stationUuid === stationUuid && head.title === track.title && head.artist === track.artist && (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl || head.durationMs !== durationMs || head.genre !== genre || head.releaseDate !== releaseDate || head.trackNumber !== trackNumber || head.trackCount !== trackCount) ) {
         return [{ ...head, artworkUrl, album, itunesUrl, durationMs, genre, releaseDate, trackNumber, trackCount }, ...prev.slice(1)];

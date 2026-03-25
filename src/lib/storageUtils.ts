@@ -16,6 +16,5 @@ export const saveStringToStorage = (key: string, value: string) => trySave(key, 
 /* Storage schema version. Bump this when data structures change in a backwards-incompatible way. On mismatch, st
  * ale keys are cleared so the app can re-initialize cleanly instead of crashing on malformed data. */
 const STORAGE_SCHEMA_VERSION = 1; const VERSION_KEY = 'radio-schema-version'; export function ensureStorageVersion(managedKeys: readonly string[]): void { if (typeof window === 'undefined') return; try { const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION); if (stored === current) return;
-    // Version mismatch — clear managed keys to prevent stale data crashes
-    for (const key of managedKeys) { localStorage.removeItem(key); } localStorage.setItem(VERSION_KEY, current);
+    for (const key of managedKeys) { localStorage.removeItem(key); } localStorage.setItem(VERSION_KEY, current); // Version mismatch — clear managed keys to prevent stale data crashes
   } catch { /* ignore in SSR / restricted environments */ } }

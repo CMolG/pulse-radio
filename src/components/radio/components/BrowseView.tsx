@@ -19,8 +19,7 @@ const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-we
     } for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); } // Append remaining in default order
     return ordered;
   }, [userGenreOrder]); const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, }); const [stations, setStations] = useState<Station[]>([]); const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({}); const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set()); const [loading, setLoading] = useState(false); const [error, setError] = useState<string | null>(null); const [discoveryMode, setDiscoveryMode] = useState(false); const [retryKey, setRetryKey] = useState(0); const [page, setPage] = useState(0); const PAGE_SIZE = 20; const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // Tracks whether the initial immediate play has fired for the current
-  const discoveryFiredRef = useRef(false); // discovery-mode session.  Reset when discovery mode is turned off.
+  const discoveryFiredRef = useRef(false); // discovery-mode session.  Reset when discovery mode is turned off. // Tracks whether the initial immediate play has fired for the current
   // Live track scanning
   type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null }; const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({}); const [scanEnabled, setScanEnabled] = useState(false); const [songFilter, setSongFilter] = useState(""); const scanGenRef = useRef(0); const [genreChipsExpanded, setGenreChipsExpanded] = useState(false); const [countryChipsExpanded, setCountryChipsExpanded] = useState(false); const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return; try { let result: Station[]; if (cat.id === "trending") { result = await trendingStations(15); } else if (cat.id === "local") { result = await localStations(15); } else if (cat.tag) {
@@ -32,8 +31,7 @@ const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-we
           if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;});
       } }
   }, [translatedGenreCategories]); useEffect(() => { setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter(""); scanGenRef.current++; }, [view]);
-  // Fetch ICY metadata for a single station, optionally guarded by a staleness check
-  const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => {
+  const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => { // Fetch ICY metadata for a single station, optionally guarded by a staleness check
     setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } })); try { const result = await fetchIcyMeta(s.url_resolved); if (stale?.()) return; const raw = result.streamTitle; const track = raw ? (parseTrack(raw, s.name) ?? null) : null; setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loaded', track } }));} catch { if (stale?.()) return; setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } })); }}, []);
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
     const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen; const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); }; await Promise.all(Array.from({ length: 3 }, worker));
@@ -43,31 +41,25 @@ const SCROLL_CLASS = "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-we
           let result: Station[]; switch (view.mode) { case "search": result = await searchStations(view.query); break; case "genre": result = await stationsByTag(view.tag); break; case "country": result = await stationsByCountry(view.countryQueryName); break; default: result = []; } if (!cancelled) setStations(result);
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
       }; load();} else {
-      // Top view — progressively load categories (3 concurrent max)
-      setLoading(false); setCategorySections({}); setFailedCategories(new Set()); const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder]; const runBatch = async () => { while (queue.length > 0 && !flags.cancelled) {
+      setLoading(false); setCategorySections({}); setFailedCategories(new Set()); const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder]; const runBatch = async () => { while (queue.length > 0 && !flags.cancelled) { // Top view — progressively load categories (3 concurrent max)
           const batch = queue.splice(0, CONCURRENCY); await Promise.allSettled(batch.map(catId => loadCategory(catId, flags))); }
       }; runBatch(); }
     return () => { cancelled = true; flags.cancelled = true; };
   }, [view, retryKey]); // eslint-disable-next-line react-hooks/exhaustive-deps
-  // All loaded category stations for discovery mode & station count in top view
-  const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]); const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
-  // Discovery mode: auto-play random station every 30s
-  useEffect(() => { const pool = view.mode === "top" ? allCategoryStations : stations; if (!discoveryMode) { discoveryFiredRef.current = false; return; } if (pool.length > 0) {
+  const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]); const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length; // All loaded category stations for discovery mode & station count in top view
+  useEffect(() => { const pool = view.mode === "top" ? allCategoryStations : stations; if (!discoveryMode) { discoveryFiredRef.current = false; return; } if (pool.length > 0) { // Discovery mode: auto-play random station every 30s
       // Play a random station immediately the first time discovery mode
-      // activates (or when stations finish loading after activation),
-      if (!discoveryFiredRef.current) { // so the user doesn't wait 30s staring at a button they just pressed.
+      if (!discoveryFiredRef.current) { // so the user doesn't wait 30s staring at a button they just pressed. // activates (or when stations finish loading after activation),
         discoveryFiredRef.current = true; const random = pool[Math.floor(Math.random() * pool.length)]; if (random) onPlay(random); }
       discoveryRef.current = setInterval(() => {
         const random = pool[Math.floor(Math.random() * pool.length)]; if (random) onPlay(random);
       }, 30_000); }
     return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]); const itemWidth = isMobile ? "w-[140px]" : "w-[160px]"; const renderScrollStations = (list: Station[]) => list.map((s) => ( <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard station={s} isCurrent={s.stationuuid === currentStation?.stationuuid} isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid} isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)} onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div> ));
-  // Compute page stations here so they can be used in the scan effect
-  const pageStations = useMemo(() => { return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE); }, [stations, page, PAGE_SIZE]);
+  const pageStations = useMemo(() => { return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE); }, [stations, page, PAGE_SIZE]); // Compute page stations here so they can be used in the scan effect
   // Trigger scan when enabled or page changes (non-top modes only)
   useEffect(() => { if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return; const gen = scanGenRef.current + 1; scanGenRef.current = gen; startScan(pageStations, gen); return () => { if (scanGenRef.current === gen) scanGenRef.current++; }; }, [scanEnabled, pageStations, view.mode, startScan]);
-  // Derived scan stats
-  const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length; const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
+  const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length; const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading'); // Derived scan stats
   // Reset page synchronously during render when songFilter changes.
   // Using the "adjusting state during render" pattern avoids a one-frame
   // flash of empty results that the useEffect approach would cause.

@@ -5,8 +5,7 @@ import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYC
   // Pre-allocated coordinate arrays — avoids 500+ object allocations per frame
   const outerXRef = useRef(new Float64Array(NUM_BARS)); const outerYRef = useRef(new Float64Array(NUM_BARS)); const innerXRef = useRef(new Float64Array(NUM_BARS)); const innerYRef = useRef(new Float64Array(NUM_BARS)); const colorsRef = useRef({ color1, color2, color3 }); useEffect(() => { colorsRef.current = { color1, color2, color3 }; }, [color1, color2, color3]); const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2; const centerY = h / 2;
-    // Update mock/frequency data
-    const data = dataArrayRef.current; const target = targetArrayRef.current; const frequencyData = freqData; if (frequencyData && frequencyData.length > 0) {
+    const data = dataArrayRef.current; const target = targetArrayRef.current; const frequencyData = freqData; if (frequencyData && frequencyData.length > 0) { // Update mock/frequency data
       for (let i = 0; i < NUM_BARS; i++) { // Map real frequency data to our bars
         const srcIdx = Math.min(Math.floor((i / NUM_BARS) * frequencyData.length), frequencyData.length - 1,); target[i] = (frequencyData[srcIdx] / 255) * sensitivity; data[i] += (target[i] - data[i]) * 0.15; }
     } else if (demo) {
@@ -15,8 +14,7 @@ import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYC
         data[i] += (target[i] - data[i]) * 0.1;
       }} else { for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; } } // No data: decay
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
-    // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
-    const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed; for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) {
+    const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed; for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) { // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
         const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1]; dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25; }
       const swap = src === data ? temp : src; src = dst; dst = swap; } // Swap: previous dst becomes next src
     const result = src; // After SMOOTH_PASSES iterations, result is in `src`
@@ -26,8 +24,7 @@ import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYC
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current; let fillStyle: string | CanvasGradient = c1; try { const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius, centerY + maxRadius, ); gradient.addColorStop(0, c1); gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3); fillStyle = gradient; } catch { /* fallback to solid color */ }
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
     const outerX = outerXRef.current; const outerY = outerYRef.current; const innerX = innerXRef.current; const innerY = innerYRef.current; for (let i = 0; i < NUM_BARS; i++) { const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS); const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle; const radius = minRadius * Math.exp(b * baseAngle); const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle); innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius; outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2); }
-    // Draw slime shapes per cycle
-    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85; const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) {
+    ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85; const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) { // Draw slime shapes per cycle
       const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS); if (startIdx >= NUM_BARS) break; ctx.beginPath(); ctx.moveTo(outerX[startIdx], outerY[startIdx]); // Outer edge with quadratic curves
       for (let i = startIdx + 1; i < endIdx - 1; i++) {
         const xc = (outerX[i] + outerX[i + 1]) / 2; const yc = (outerY[i] + outerY[i + 1]) / 2; ctx.quadraticCurveTo(outerX[i], outerY[i], xc, yc); }

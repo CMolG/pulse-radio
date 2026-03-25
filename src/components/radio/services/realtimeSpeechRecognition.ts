@@ -10,8 +10,7 @@ export function isRealtimeSpeechSupported(): boolean { return getRecognitionCtor
     }; recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return; const fatal = event.error === 'not-allowed'|| event.error === 'service-not-allowed' || event.error === 'language-not-supported'; if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return; } }; recognition.onend = () => { if (destroyed || !running) return; if (restartCount >= MAX_RESTARTS) {
         running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return; }
       restartCount++;
-      // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,
-      const current = recognition; if (!current) return; // this is a stale onend firing and we should not restart.
+      const current = recognition; if (!current) return; // this is a stale onend firing and we should not restart. // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,
       try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.'); }
     }; };
   return { start: (lang) => { if (destroyed || running) return; wireRecognition(lang); if (!recognition) return; try { recognition.start(); running = true; restartCount = 0; } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); } }, stop: () => { running = false; teardown(); }, destroy: () => { destroyed = true; running = false; teardown(); }, }; }
