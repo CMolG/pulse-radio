@@ -7,8 +7,7 @@
   /** Audio metering: peak level 0-1, RMS level 0-1 (updated every frame) */
   meterRef: React.RefObject<{ peak: number; rms: number }>; isActive: boolean; disconnect: () => void; }
 export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
-  const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts; const analyserRef = useRef<AnalyserNode | null>(null); const rafRef = useRef<number>(0); const connectedRef = useRef<HTMLAudioElement | null>(null); const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null); const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
-  const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 }); const [isActive, setIsActive] = useState(false); const connectAudio = useCallback((audio: HTMLAudioElement) => {
+  const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts; const analyserRef = useRef<AnalyserNode | null>(null); const rafRef = useRef<number>(0); const connectedRef = useRef<HTMLAudioElement | null>(null); const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null); const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null); const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 }); const [isActive, setIsActive] = useState(false); const connectAudio = useCallback((audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return; cancelAnimationFrame(rafRef.current); // Cancel any existing animation loop before starting a new one
       try { const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio; if (!analyserRef.current) { const analyser = ctx.createAnalyser(); analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser); analyserRef.current = analyser; } else source.connect(analyserRef.current);
         // Allocate buffers once — reused across all frames (zero per-frame allocation)

@@ -7,10 +7,7 @@ import { hexToRgb } from './colorUtils'; import { useCanvasLoop } from './useCan
   /** Per-blob random size factor (0–1), assigned once at creation */
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number; freqBand: number; // which frequency band drives this blob
 } function createBlobs(count: number, w: number, h: number): Blob[] {
-  const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2; for (let i = 0; i < count; i++) { const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
-    blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy, vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7, freqBand: Math.floor((i / count) * 128),});
-  }
-  return blobs; }
+  const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2; for (let i = 0; i < count; i++) { const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15; blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy, vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7, freqBand: Math.floor((i / count) * 128),}); } return blobs; }
 // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
 let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefined; function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number, h: number, colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] }, energy: number, ) { const threshold = 1.0;
   // downscale for performance — render at 1/3 resolution
@@ -45,8 +42,7 @@ let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefin
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
   try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h); } catch { /* skip frame on canvas error */ } }
 export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e', colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false, }: FerrofluidRendererProps) {
-  const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 }); const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
-  const colors = useRef(mkColors()); useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]); const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
+  const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 }); const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) }); const colors = useRef(mkColors()); useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]); const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
       blobsRef.current = createBlobs(blobCount, w, h); sizeRef.current = { w, h }; }
@@ -63,7 +59,5 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity; }
     ctx.clearRect(0, 0, w, h); // clear
     drawMetaballs(ctx, blobs, w, h, colors.current, energy); // draw metaballs
-  }, 0.5); return ( <div className={`relative ${className}`}> <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} /> {/* SVG filter for smoothing the metaballs */} <svg className="absolute w-0 h-0" aria-hidden="true"><defs> <filter id="ferrofluid-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" /> <feComposite in="SourceGraphic" in2="goo" operator="atop" /></filter></defs></svg></div>
-  ); }
+  }, 0.5); return ( <div className={`relative ${className}`}> <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} /> {/* SVG filter for smoothing the metaballs */} <svg className="absolute w-0 h-0" aria-hidden="true"><defs> <filter id="ferrofluid-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" /> <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" /> <feComposite in="SourceGraphic" in2="goo" operator="atop" /></filter></defs></svg></div> ); }
 export default FerrofluidRenderer;
