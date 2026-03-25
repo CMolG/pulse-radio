@@ -1207,7 +1207,17 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (stationChanged || isPlaying) poll();
     if (isPlaying) intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     const onVisible = () => {
-      if (document.visibilityState === 'visible' && isPlaying) poll();
+      if (document.visibilityState === 'visible' && isPlaying) {
+        poll();
+        if (!intervalRef.current) {
+          intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
+        }
+      } else if (document.visibilityState === 'hidden') {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      }
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => {
