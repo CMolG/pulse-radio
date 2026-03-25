@@ -94,9 +94,11 @@ export function normalizeLocale(input: string | null | undefined): SupportedLoca
   const base = lower.split('-')[0];
   return BASE_LOCALE_MAP[base] ?? 'en';
 }
+const _RTL_LOCALES: ReadonlySet<string> = new Set(
+  SUPPORTED_LOCALES.filter((l) => l.rtl).map((l) => l.code),
+);
 export function isRtlLocale(locale: SupportedLocale): boolean {
-  const info = SUPPORTED_LOCALES.find((item) => item.code === locale);
-  return Boolean(info?.rtl);
+  return _RTL_LOCALES.has(locale);
 }
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ export const LANG3_TO_LOCALE: Record<
   string,
