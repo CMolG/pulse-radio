@@ -45,7 +45,9 @@ const _ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const _ERR_INVALID_PARAM = { error: 'Missing or invalid url parameter' } as const;
 const _ERR_INVALID_PROTO = { error: 'Invalid protocol' } as const;
 const _ERR_PRIVATE_IP = { error: 'Private/internal URLs not allowed' } as const;
+const _ERR_REDIRECT_PRIVATE = { error: 'Redirect to private IP not allowed' } as const;
 const _ERR_INVALID_URL = { error: 'Invalid URL' } as const;
+const _UTF8_DECODER = new TextDecoder('utf-8');
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
@@ -75,10 +77,7 @@ export async function GET(req: NextRequest) {
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
           clearTimeout(timeout);
           res.body?.cancel().catch(() => {});
-          return NextResponse.json(
-            { error: 'Redirect to private IP not allowed' },
-            { status: 403 },
-          );
+          return NextResponse.json(_ERR_REDIRECT_PRIVATE, { status: 403 });
         }
       } catch {
         /* URL parse failed — continue */
@@ -138,7 +137,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });
     }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength);
-    const metaString = new TextDecoder('utf-8').decode(metaBytes).replace(_TRAILING_NULLS_RE, '');
+    const metaString = _UTF8_DECODER.decode(metaBytes).replace(_TRAILING_NULLS_RE, '');
     const match = metaString.match(_STREAM_TITLE_RE);    const streamTitle = match?.[1]?.trim() || null;
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
   } catch (err) {
