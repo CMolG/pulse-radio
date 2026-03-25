@@ -297,7 +297,8 @@ function stationInitials(name: string) {
   return result;
 }
 function primaryArtist(artist: string): string {
-  return artist.split(ARTIST_SPLIT_RE)[0].trim();
+  const i = artist.search(ARTIST_SPLIT_RE);
+  return (i < 0 ? artist : artist.slice(0, i)).trim();
 }
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
