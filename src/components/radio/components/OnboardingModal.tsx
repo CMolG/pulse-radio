@@ -72,15 +72,13 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
                   {currentStep ? ( <><div className="p-4 rounded-2xl bg-white/[0.06]">{currentStep.icon}</div>
                       <h2 className="text-xl font-bold text-white">{currentStep.title}</h2>
                       <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">{currentStep.description}</p></>
-                  ) : isPWAStep ? ( <PWAStep />
-                  ) : null}</motion.div></AnimatePresence></div>
+                  ) : isPWAStep ? ( <PWAStep /> ) : null}</motion.div></AnimatePresence></div>
             {/* Progress dots + navigation */} <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */} <div className="flex justify-center gap-2">
                 {Array.from({ length: totalSteps }, (_, i) => ( <button key={i} onClick={() => setStep(i)}
                     className={`rounded-full transition-all ${
                       i === step ? 'w-6 h-2 bg-[#3478f6]' : 'w-2 h-2 bg-white/20 hover:bg-white/30'
-                    }`}
-                    aria-label={`Step ${i + 1}`} />
+                    }`} aria-label={`Step ${i + 1}`} />
                 ))}</div>
               {/* Buttons */} <div className="flex items-center justify-between gap-3"><button
                   onClick={step > 0 ? () => setStep(s => s - 1) : handleClose}

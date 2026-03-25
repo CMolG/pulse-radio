@@ -8,8 +8,7 @@ function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure f
   cache.set(key, val);
   while (cache.size > MAX_CACHE) { // Evict oldest entries beyond capacity
     const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
-}
-export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
+} export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => { if (!key) return null; return cacheGet(key) ?? null; }, [key]);
   const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null); useEffect(() => {

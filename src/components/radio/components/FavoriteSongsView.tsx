@@ -29,8 +29,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
         className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors rounded-lg"
       ><Trash2 size={13} /> Borrar de favoritos</button>
     </div>, document.body,);
-}
-function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
+} function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
   label: string; icon: React.ElementType; songs: FavoriteSong[]; onRemove: (id: string) => void;
   onSelect?: (song: SongDetailData) => void; onContextMenu: (e: React.MouseEvent, songId: string) => void;
 }) { const [expanded, setExpanded] = useState(false); const VISIBLE_COUNT = 3;
@@ -71,8 +70,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
       )}
       {expanded && hasMore && ( <button onClick={() => setExpanded(false)}
           className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
-          <ChevronDown size={12} className="rotate-180" />
-          Collapse</button>)}</div>
+          <ChevronDown size={12} className="rotate-180" /> Collapse</button>)}</div>
   ); }
 export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>("none");
@@ -114,8 +112,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
           </button></div><button
           onClick={onClear}
           className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
-          <Trash2 size={11} />
-          Clear all</button></div>
+          <Trash2 size={11} /> Clear all</button></div>
       {filterMode === "artist" ? ( <div> {artistGroups.map(([artistName, artistSongs]) => ( <GroupStack key={artistName}
               label={artistName} icon={Users} songs={artistSongs} onRemove={onRemove}
               onSelect={onSelect} onContextMenu={handleContextMenu} />

@@ -75,8 +75,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                     <button key={preset.name} onClick={() => handleSelectPreset(preset.name, preset.gains)}
                       className={`px-2.5 py-1.5 text-[11px] rounded-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 border border-white/8 text-white/50 hover:text-white/80"}`}>
                       {preset.name}</button>
-                  ))}
-                  {eq.customPresets.map(preset => ( <div key={`custom-${preset.name}`} className="flex">
+                  ))} {eq.customPresets.map(preset => ( <div key={`custom-${preset.name}`} className="flex">
                       <button onClick={() => handleSelectPreset(preset.name, preset.gains)}
                         className={`px-2.5 py-1.5 text-[11px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40" : "bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8"}`}>
                         {preset.name}</button><button onClick={() => eq.removeCustomPreset(preset.name)}
@@ -104,8 +103,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))} disabled={!eq.enabled}
                         aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
-                      />
-                      <span className="text-[8px] text-white/40">{band.label}</span></div>))}</div></div>
+                      /> <span className="text-[8px] text-white/40">{band.label}</span></div>))}</div></div>
               {/* Noise Reduction */} <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Noise Reduction</span>
                 <div className="flex gap-1.5">{(["off", "low", "medium", "high"] as const).map(mode => (

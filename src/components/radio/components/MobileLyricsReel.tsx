@@ -60,8 +60,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
       <div className={`relative z-20 flex h-full flex-col ${isDesktop ? "px-8 pb-5 pt-3" : "px-5 pb-4 pt-2"}`}><div
           ref={scrollerRef} className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${
             isDesktop ? "px-4" : "px-2"
-          }`}
-          style={{
+          }`} style={{
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
             maskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}><div className="flex min-h-full flex-col justify-center py-14"> {renderableLines.map((line, index) => {

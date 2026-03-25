@@ -130,8 +130,7 @@ export default function BrowseView({
   const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
   // Discovery mode: auto-play random station every 30s
   useEffect(() => { const pool = view.mode === "top" ? allCategoryStations : stations;
-    if (!discoveryMode) { discoveryFiredRef.current = false; return; }
-    if (pool.length > 0) {
+    if (!discoveryMode) { discoveryFiredRef.current = false; return; } if (pool.length > 0) {
       // Play a random station immediately the first time discovery mode
       // activates (or when stations finish loading after activation),
       if (!discoveryFiredRef.current) { // so the user doesn't wait 30s staring at a button they just pressed.
@@ -221,8 +220,7 @@ export default function BrowseView({
       })()}
       {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>{loading && (
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
-        )}
-        {error && ( <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" />
+        )} {error && ( <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" />
             <p className="text-[13px] text-secondary">{t("failedToLoad")}</p><button
               onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
@@ -242,8 +240,7 @@ export default function BrowseView({
                 {recent && recent.length > 0 && ( <ScrollRow title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />}
                       isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
-                )}
-                {effectiveBrowseOrder.map((catId) => {
+                )} {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return null;
                   const catStations = categorySections[catId]; if (catStations?.length === 0) return null;
                   const icon = CATEGORY_ICONS[catId] ?? ( catStations
@@ -287,8 +284,7 @@ export default function BrowseView({
                         {songFilter && (
                           <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
                             <X size={11} /></button>)}</div>
-                    )}
-                    {scanEnabled && songFilter && ( <span className="text-[11px] text-dim shrink-0">
+                    )} {scanEnabled && songFilter && ( <span className="text-[11px] text-dim shrink-0">
                         {t("stationCount", { count: allSongFilteredStations.length })}</span>)}</div>
                   {/* Station grid */}
                   <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>

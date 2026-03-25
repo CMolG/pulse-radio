@@ -111,8 +111,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return { mode, query: "", tag: "", countryCode: "", countryQueryName: "", label, ...overrides }; }
   function countryView(code: string): ViewState { const country = COUNTRY_BY_CODE[code];
     return mkView("country", getCountryDisplayName(locale, code), { countryCode: code, countryQueryName: country?.name ?? "" });
-  }
-  const resetNav = useCallback((v: ViewState) => {
+  } const resetNav = useCallback((v: ViewState) => {
     setView(v); setActiveTab("discover"); setTheaterMode(false); setSearchQuery("");}, []);
   const [view, setView] = useState<ViewState>(() => {
     const code = (initialCountryCode ?? "").toUpperCase(); if (isSovereignCountryCode(code)) return countryView(code);
@@ -380,8 +379,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   >
                     <Star size={18} className={radio.station && favs.has(radio.station.stationuuid) ? "fill-sys-orange" : ""} />
                   </button>)}</div></div>
-          )}
-          {theaterMode && radio.station ? ( <div className="h-full flex flex-col">
+          )} {theaterMode && radio.station ? ( <div className="h-full flex flex-col">
               <div className="flex-1 min-h-0"><TheaterView {...theaterFullProps} lyricsVariant="mobile" /></div>
               {/* Spacer for absolute bottom bar */} <div className="h-20 shrink-0" /></div>
           ) : ( <div className="flex flex-col min-h-full pb-24"> {nowPlayingHeroElement}
@@ -421,8 +419,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 className="flex-1 min-h-0"><TheaterView {...theaterFullProps} lyricsVariant="desktop" /></motion.div>
             ) : !miniMode ? ( <React.Fragment key="browse"> {/* ── Pulse branding header ── */}
                 <div className="shrink-0 px-5 py-3"><div className="flex items-center gap-3">
-                    {pulseLogoButton} <div className="flex-1" />
-                    <LanguageSelector /></div></div>
+                    {pulseLogoButton} <div className="flex-1" /> <LanguageSelector /></div></div>
                 {nowPlayingHeroElement}
                 {/* ── Top nav: tabs + search ── */}
                 <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">{navTabs13.map((tab) => ( <button
@@ -462,8 +459,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               )
             )}</AnimatePresence></div></div>
       {/* EQ panel overlay */}
-      {eqPanelElement}
-      {/* Toast notification */} <AnimatePresence>{toastElement}</AnimatePresence>
+      {eqPanelElement} {/* Toast notification */} <AnimatePresence>{toastElement}</AnimatePresence>
       {/* Bottom bar */} <div className="relative z-10">
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           <div className="min-w-0 flex flex-col items-start gap-1.5 text-[10px] overflow-hidden">

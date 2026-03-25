@@ -111,8 +111,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       const jitter = adaptedDelay * (0.7 + Math.random() * 0.6);
       reconnectTimerRef.current = setTimeout(() => { reconnectTimerRef.current = null;
         if (userPausedRef.current || playSessionRef.current !== sessionId) { isReconnectingRef.current = false; return;
-        }
-        startPlayback(audio, station.url_resolved, (err) => {
+        } startPlayback(audio, station.url_resolved, (err) => {
           isReconnectingRef.current = false; handlePlayRejected(err);});
       }, jitter); };
     const onPause = () => {

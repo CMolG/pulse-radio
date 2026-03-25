@@ -33,8 +33,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
           if ( prev.status === 'listening' && prev.activeLineIndex === step.confirmedIndex &&
             prev.candidateLineIndex === step.candidateIndex && prev.confidence === step.score &&
             !step.jumpRejected && !step.relockTriggered
-          ) { return prev; }
-          return {
+          ) { return prev; } return {
             ...prev, status: 'listening', activeLineIndex: step.confirmedIndex, candidateLineIndex: step.candidateIndex,
             confidence: step.score, effectiveCurrentTime,
             diagnostics: { ...prev.diagnostics, lastHypothesisMs: hypothesis.tsMs,

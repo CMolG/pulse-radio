@@ -109,9 +109,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       <div className="h-2.5 bg-surface-3 rounded w-full" />
                       <div className="h-2.5 bg-surface-3 rounded w-5/6" />
                       <div className="h-2.5 bg-surface-3 rounded w-4/6" /></div></div>
-                )}
-                {/* Loaded artist data */}
-                {!loading && info && ( <div className="space-y-3">
+                )} {/* Loaded artist data */} {!loading && info && ( <div className="space-y-3">
                     {/* Artist header with image */} <div className="flex gap-3">{info.imageUrl ? (
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"><UiImage
                             src={info.imageUrl} alt={info.name} className="object-cover bg-surface-3" sizes="64px"
@@ -119,14 +117,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">
                           {info.type === 'Group' ? ( <Users size={24} className="text-dim" />
-                          ) : ( <User size={24} className="text-dim" />
-                          )}</div>
+                          ) : ( <User size={24} className="text-dim" /> )}</div>
                       )} <div className="flex-1 min-w-0 pt-0.5">
                         <p className="text-[14px] font-semibold text-white truncate">{info.name}</p>
                         {info.disambiguation && (
                           <p className="text-[11px] text-dim mt-0.5 line-clamp-1">{info.disambiguation}</p>
-                        )}
-                        {/* Metadata badges */} <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        )} {/* Metadata badges */} <div className="flex flex-wrap gap-1.5 mt-1.5">
                           {info.type && <MetaBadge icon={info.type === 'Group' ? Users : User} cls="bg-surface-3 text-secondary">{info.type}</MetaBadge>}
                           {info.country && <MetaBadge icon={Globe} cls="bg-surface-3 text-secondary">{info.country}</MetaBadge>}
                           {info.lifeSpan?.begin && ( <MetaBadge icon={Calendar} cls="bg-surface-3 text-secondary">
@@ -156,16 +152,14 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   <div className="max-h-52 overflow-y-auto rounded-xl bg-surface-3/50 border border-border-subtle p-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
                     <pre className="whitespace-pre-wrap break-words font-sans text-[12px] leading-relaxed text-secondary/90">
                       {plainLyrics}</pre></div>
-                )}
-                {!lyricsLoading && !plainLyrics && lyricsEmpty}</div>
+                )} {!lyricsLoading && !plainLyrics && lyricsEmpty}</div>
               {/* Divider (mobile) */} <div className="mx-5 my-5 border-t border-border-default md:hidden" />
               {/* ── Remove from favorites ── */}
               {onRemoveFromFavorites && ( <><div className="mx-5 my-5 border-t border-border-default" />
                   <div className="px-5 pb-2"><button onClick={onRemoveFromFavorites}
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"
                     ><Trash2 size={14} /> Borrar de favoritos</button></div></>
-              )}
-              {/* ── Station ── */} <div className="px-5 pb-6 pt-4"><div className="flex items-center gap-2">
+              )} {/* ── Station ── */} <div className="px-5 pb-6 pt-4"><div className="flex items-center gap-2">
                   <Radio size={12} className="text-dim flex-shrink-0" /> <p className="text-[11px] text-dim">
                     Played on{' '} <span className="text-secondary">{song.stationName}</span></p></div></div></div>
             {/* ── Lyrics side panel (desktop) ── */}
@@ -178,8 +172,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {!lyricsLoading && plainLyrics && (
                   <pre className="whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed text-secondary/90">
                     {plainLyrics}</pre>
-                )}
-                {!lyricsLoading && !plainLyrics && lyricsEmpty}</div></div></motion.div>
+                )} {!lyricsLoading && !plainLyrics && lyricsEmpty}</div></div></motion.div>
         </motion.div>)}</AnimatePresence>
   ); }
 export default React.memo(SongDetailModal);

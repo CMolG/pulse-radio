@@ -66,8 +66,7 @@ export default function TheaterView({
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none"><ErrorBoundary fallback={null}><SpiralRenderer
           frequencyDataRef={frequencyDataRef} className="size-full" color1={color1} color2={color2}
-          color3={color3} sensitivity={compact ? 0.8 : 1.2}
-          demo /></ErrorBoundary></div>
+          color3={color3} sensitivity={compact ? 0.8 : 1.2} demo /></ErrorBoundary></div>
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div className="absolute inset-0 z-6 pointer-events-none"
         style={{
           background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
@@ -130,22 +129,16 @@ export default function TheaterView({
           {track?.album && (
             <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}>
               {track.album}</p>
-          )}
-          {!compact && track?.releaseDate && ( <p className="text-[10px] text-white/40 text-center -mt-1">
+          )} {!compact && track?.releaseDate && ( <p className="text-[10px] text-white/40 text-center -mt-1">
               Released on: {formatReleaseDate(track.releaseDate)}</p>
-          )}
-          {/* LIVE badge */}
-          {isPlaying && ( <div className={`flex-row-2 ${compact ? "mt-0" : "mt-1"}`}>
+          )} {/* LIVE badge */} {isPlaying && ( <div className={`flex-row-2 ${compact ? "mt-0" : "mt-1"}`}>
               <span className={`${compact ? "dot-1.5" : "dot-2"} bg-red-500 animate-pulse`} /> <span
                 className={`${compact ? "text-[8px]" : "text-[11px]"} font-semibold tracking-wider uppercase text-red-400`}
               >LIVE</span>{!compact && <AnimatedBars size="small" />}</div>
-          )}
-          {/* Station details badges */}
-          {!compact && ( <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+          )} {/* Station details badges */} {!compact && ( <div className="flex flex-wrap justify-center gap-1.5 mt-1">
               {station.codec && <Badge mono upper>{station.codec}</Badge>}
               {(icyBitrate || station.bitrate > 0) && <Badge mono>{icyBitrate ?? station.bitrate}kbps</Badge>}
-              {station.country && <Badge>{station.country}</Badge>}
-              {track?.genre && <Badge>{track.genre}</Badge>}</div>
+              {station.country && <Badge>{station.country}</Badge>} {track?.genre && <Badge>{track.genre}</Badge>}</div>
           )}
           {/* Listen on Apple Music */}
           {!compact && track && ( <a

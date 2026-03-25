@@ -14,10 +14,8 @@ export function ParallaxAlbumBackground({ imageUrl, fallbackUrl, blurClass = 'bl
           style={{ objectFit: 'cover' }}
           className={`${blurClass} ${enableDrift ? 'animate-ambient-drift scale-105' : 'scale-110'} transition-[filter] duration-1000`}
           onError={() => setImgError(true)} unoptimized={src.startsWith('http')} />
-      )}
-      {!src && ( <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
+      )} {!src && ( <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
       )} <div className={`absolute inset-0 ${overlayClass} backdrop-blur-sm`} /> {showTopGlow && (
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-      )}
-      {children}</div>
+      )} {children}</div>
   ); }

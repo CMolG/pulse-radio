@@ -44,12 +44,10 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
         ))}
         {station.countrycode && (
           <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>)}</div>
-      {/* Live track preview */}
-      {liveStatus === 'loading' && ( <div className="flex items-center gap-1 mt-1.5">
+      {/* Live track preview */} {liveStatus === 'loading' && ( <div className="flex items-center gap-1 mt-1.5">
           <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />
           <span className="text-[9px] text-dim">Checking…</span></div>
-      )}
-      {liveStatus === 'loaded' && ( <div className="flex items-center gap-1 mt-1.5 min-w-0">
+      )} {liveStatus === 'loaded' && ( <div className="flex items-center gap-1 mt-1.5 min-w-0">
           {liveTrack ? ( <><Music2 size={9} className="text-sys-orange flex-shrink-0" />
               <span className="text-[9px] text-white/60 truncate leading-tight">
                 {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}</span></>
@@ -57,8 +55,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       )}
       {onPeek && !liveStatus && ( <button onClick={e => { e.stopPropagation(); onPeek(); }}
           className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors">
-          <Music2 size={9} />
-          Check track</button>
+          <Music2 size={9} /> Check track</button>
       )}
     </div>);
 }, (prev, next) =>prev.station === next.station && prev.isPlaying === next.isPlaying &&

@@ -38,9 +38,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >{isLoading ? ( <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : isPlaying ? ( <Pause size={18} />
-          ) : ( <Play size={18} className="ml-0.5" />
-          )}</button>
+          ) : isPlaying ? ( <Pause size={18} /> ) : ( <Play size={18} className="ml-0.5" /> )}</button>
         {/* Track info + LIVE indicator */} <div className="flex-1 min-w-0">
           {station ? ( <><p className="text-[13px] font-medium text-white truncate leading-tight">
                 {track?.title || station.name}</p><div className="flex items-center gap-1.5 mt-0.5"> {isPlaying && (
@@ -67,8 +65,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {station ? ( stationInitials(station.name) || ( <Radio size={14} className="text-white/60" />)
-                ) : ( <Radio size={14} className="text-white/60" />
-                )}</span></div>
+                ) : ( <Radio size={14} className="text-white/60" /> )}</span></div>
           ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="36px" loading="lazy"
               onError={() => setImgError(true)} />
           )}</div>
@@ -84,16 +81,13 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
         {streamQuality && isPlaying && ( <span
             className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
               streamQuality === 'fair' ? 'bg-yellow-500' : streamQuality === 'poor' ? 'bg-red-500' : 'bg-gray-500'
-            }`}
-            title={`Stream: ${streamQuality}`} aria-label={`Stream quality: ${streamQuality}`} />
+            }`} title={`Stream: ${streamQuality}`} aria-label={`Stream quality: ${streamQuality}`} />
         )}</div>
       {/* Controls */} <div className="flex-row-0.5"><button onClick={onTogglePlay} disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'} aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >{isLoading ? ( <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : isPlaying ? ( <Pause size={16} />
-          ) : ( <Play size={16} className="ml-0.5" />
-          )}</button></div>
+          ) : isPlaying ? ( <Pause size={16} /> ) : ( <Play size={16} className="ml-0.5" /> )}</button></div>
       {/* LIVE indicator + mini ferrofluid */} <div className="flex-1 flex-row-2 min-w-0 relative">
         {station && isPlaying && (
           <><div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">

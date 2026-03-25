@@ -6,8 +6,7 @@ import { AlertTriangle, RotateCcw } from "lucide-react"; interface Props { child
 type State = { hasError: boolean; error: Error | null; };
 export class ErrorBoundary extends React.Component<Props, State> { state: State = { hasError: false, error: null };
   static getDerivedStateFromError(error: Error): State { return { hasError: true, error };
-  }
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  } componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("[Pulse Radio] Component error caught by boundary:", error, info.componentStack); }
   private handleReset = () => { this.setState({ hasError: false, error: null }); };
   render() { if (this.state.hasError) { if (this.props.fallback !== undefined) return this.props.fallback;

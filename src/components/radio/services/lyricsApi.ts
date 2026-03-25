@@ -41,8 +41,7 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
   return tryFetch<LrcLibResponse[]>(
     `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
     signal, r => r.length > 0 ? transform(r[0], artist, title) : null,);
-}
-function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null { if (data.syncedLyrics) {
+} function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null { if (data.syncedLyrics) {
     return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) }; }
   if (data.plainLyrics) {
     return { trackName: title, artistName: artist, synced: false, lines: [], plainText: data.plainLyrics }; }

@@ -20,8 +20,7 @@ function jaroDistance(a: string, b: string): number { if (a === b) return 1; if 
     const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
       if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break; }
-  }
-  if (!matches) return 0; let t = 0; let k = 0; for (let i = 0; i < a.length; i++) {
+  } if (!matches) return 0; let t = 0; let k = 0; for (let i = 0; i < a.length; i++) {
     if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++; }
   const transpositions = t / 2;
   return ( matches / a.length + matches / b.length + (matches - transpositions) / matches
@@ -60,8 +59,7 @@ function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(ke
 function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(key, value);
   while (CACHE.size > MAX_CACHE) {
     const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest); else break; }
-}
-const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online'; function appendReferrer(url: string): string {
+} const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online'; function appendReferrer(url: string): string {
   if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`; }
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) { const img = new Image(); img.crossOrigin = 'anonymous';

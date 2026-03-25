@@ -10,8 +10,7 @@ interface Blob { x: number; y: number; baseRadius: number;
   /** Per-blob random size factor (0–1), assigned once at creation */
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number;
   freqBand: number; // which frequency band drives this blob
-}
-function createBlobs(count: number, w: number, h: number): Blob[] {
+} function createBlobs(count: number, w: number, h: number): Blob[] {
   const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2;
   for (let i = 0; i < count; i++) { const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
     blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist,

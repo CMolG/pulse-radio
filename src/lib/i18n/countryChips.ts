@@ -21,8 +21,7 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
   return SOVEREIGN_COUNTRIES.filter((country) =>country.lang3.some((lang3) => {
       const mapped = localeFromLang3(lang3); return mapped ? candidates.has(mapped) : false;
     }), ).map((country) => country.code);
-}
-function getProximityCountries(seedCodes: string[]): string[] {
+} function getProximityCountries(seedCodes: string[]): string[] {
   if (seedCodes.length === 0) return []; const seed = seedCodes .map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
   const regions = new Set(seed.map((country) => country.region));
   const subregions = new Set(seed.map((country) => country.subregion));
