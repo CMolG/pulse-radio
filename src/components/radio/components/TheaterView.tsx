@@ -10,8 +10,7 @@ import { stationInitials } from "../utils/formatUtils"; import UiImage from "@/c
 const FALLBACK_COLORS: [string, string, string] = ["#ff4b1f", "#ff9068", "#f9d423"];
 const Badge = ({ mono, upper, children }: { mono?: boolean; upper?: boolean; children: React.ReactNode }) => (
   <span className={`px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50${mono ? " font-mono" : ""}${upper ? " uppercase" : ""}`}>{children}</span>
-); type Props = { station: Station; track: NowPlayingTrack | null;
-  isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
+); type Props = { station: Station; track: NowPlayingTrack | null; isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null; icyBitrate?: string | null; onBack: () => void; onToggleFav?: () => void;
   isFavorite?: boolean; onFavSong?: () => void; isSongLiked?: boolean; lyrics?: LyricsData | null;
   currentTime?: number; activeLineOverride?: number; lyricsVariant?: "mobile" | "desktop"; compact?: boolean; };
@@ -19,15 +18,13 @@ const _colorCache = new Map<string, Promise<[string, string, string]>>(); const 
 /** Extract the top-2 saturated hues from an artwork image for use as spiral colors. */
 function extractColors(imgUrl: string): Promise<[string, string, string]> {
   const cached = _colorCache.get(imgUrl); if (cached) return cached;
-  const p = new Promise<[string, string, string]>((resolve) => { const img = new Image(); img.crossOrigin = "anonymous";
-    img.onload = () => { try {
+  const p = new Promise<[string, string, string]>((resolve) => { const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { try {
         const canvas = document.createElement("canvas"); const size = 48; canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext("2d"); if (!ctx) return resolve(FALLBACK_COLORS);
         ctx.drawImage(img, 0, 0, size, size); const data = ctx.getImageData(0, 0, size, size).data;
         const buckets: Record<number, number> = {}; for (let i = 0; i < data.length; i += 12) {
           const r = data[i], g = data[i + 1], b = data[i + 2]; const max = Math.max(r, g, b), min = Math.min(r, g, b);
-          if (max - min < 25) continue; const s = (max - min) / max; if (s < 0.2) continue; let h = 0;
-          if (max === r) h = 60 * (((g - b) / (max - min)) % 6);
+          if (max - min < 25) continue; const s = (max - min) / max; if (s < 0.2) continue; let h = 0; if (max === r) h = 60 * (((g - b) / (max - min)) % 6);
           else if (max === g) h = 60 * ((b - r) / (max - min) + 2); else h = 60 * ((r - g) / (max - min) + 4);
           if (h < 0) h += 360; const bucket = Math.round(h / 30) * 30; buckets[bucket] = (buckets[bucket] || 0) + 1; }
         const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]); if (sorted.length < 1) return resolve(FALLBACK_COLORS);
@@ -44,8 +41,7 @@ export default function TheaterView({
   isFavorite, onFavSong, isSongLiked, lyrics, currentTime, activeLineOverride, lyricsVariant = "mobile", compact,
 }: Props) { const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
   const [colors, setColors] = useState<[string, string, string]>(FALLBACK_COLORS);
-  const lastUrlRef = useRef<string | null>(null); const coverUrl = artworkUrl ?? station.favicon;
-  const showFallback = !coverUrl || failedCoverUrl === coverUrl;
+  const lastUrlRef = useRef<string | null>(null); const coverUrl = artworkUrl ?? station.favicon; const showFallback = !coverUrl || failedCoverUrl === coverUrl;
   useEffect(() => { if (!artworkUrl || artworkUrl === lastUrlRef.current) return; lastUrlRef.current = artworkUrl;
     let cancelled = false; extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); }); return () => { cancelled = true; };
   }, [artworkUrl]); const [color1, color2, color3] = colors;
@@ -64,8 +60,7 @@ export default function TheaterView({
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div className="absolute inset-0 z-6 pointer-events-none" style={{
           background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
           backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay', opacity: 0.6, }} />
-      <div className="absolute inset-0 z-6 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
+      <div className="absolute inset-0 z-6 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
           boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)', }} />
       <div className="absolute inset-0 z-6 pointer-events-none"
         style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }} />
@@ -76,12 +71,10 @@ export default function TheaterView({
             aria-label="Exit theater mode"><ArrowLeft size={16} /></button>
           <div className="flex flex-row gap-2 sm:flex-col">{onToggleFav && ( <button onClick={onToggleFav}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
-                aria-label="Favorite station"
-                aria-pressed={!!isFavorite}><Star size={16} className={isFavorite ? "fill-sys-orange" : ""} /></button>
+                aria-label="Favorite station" aria-pressed={!!isFavorite}><Star size={16} className={isFavorite ? "fill-sys-orange" : ""} /></button>
             )} {onFavSong && track && ( <button onClick={onFavSong}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
-                aria-label="Favorite song"
-                aria-pressed={!!isSongLiked}><Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} /></button>
+                aria-label="Favorite song" aria-pressed={!!isSongLiked}><Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} /></button>
             )}</div></div>
       )} {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}
       <div className="flex-1 flex items-center justify-center relative z-10 px-4"><div
@@ -128,7 +121,6 @@ export default function TheaterView({
               className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
             ><ExternalLink size={11} /> Listen on Apple Music</a>
           )} {/* ── Lyrics reel inside glass panel ── */} {!compact && (
-            <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}><LyricsReel
-                lyrics={lyrics ?? null} currentTime={currentTime}
+            <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}><LyricsReel lyrics={lyrics ?? null} currentTime={currentTime}
                 activeLineOverride={activeLineOverride} variant={lyricsVariant} /></div>)}</div></div></motion.div>
   ); }

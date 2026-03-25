@@ -1,8 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import type { LyricsData, LrcLibResponse } from '../types'; import { parseLrc } from '../lrcParser';
 const LRCLIB_BASE = 'https://lrclib.net/api'; const FETCH_TIMEOUT_MS = 8_000; function isTransientError(err: unknown): boolean {
-  if (err instanceof DOMException && err.name === 'TimeoutError') return true;
-  if (err instanceof TypeError) return true; // fetch network failure
+  if (err instanceof DOMException && err.name === 'TimeoutError') return true; if (err instanceof TypeError) return true; // fetch network failure
   return false; }
 // Fetch with combined cancellation: parent signal (caller abort) + per-request timeout.
 // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta.
@@ -17,16 +16,13 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
 export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
   fallbackArtist?: string, signal?: AbortSignal, ): Promise<LyricsData | null> {
   const artistCandidates = [...new Set([artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),)];
-  if (!artistCandidates.length || !title?.trim()) return null;
-  for (const artistCandidate of artistCandidates) { if (signal?.aborted) return null;
-    try { const match = await fetchLyricsForArtist(artistCandidate, title, album, duration, signal); if (match) return match;
-    } catch (err) {
+  if (!artistCandidates.length || !title?.trim()) return null; for (const artistCandidate of artistCandidates) { if (signal?.aborted) return null;
+    try { const match = await fetchLyricsForArtist(artistCandidate, title, album, duration, signal); if (match) return match; } catch (err) {
       if (isTransientError(err)) throw err; } // Re-throw transient errors so useLyrics can retry
   }
   return null; }
 async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: (d: T) => LyricsData | null): Promise<LyricsData | null> {
-  try { const res = await fetchWithCancel(url, signal); if (res.ok) return parse(await res.json());
-    await res.text().catch(() => {}); // drain body
+  try { const res = await fetchWithCancel(url, signal); if (res.ok) return parse(await res.json()); await res.text().catch(() => {}); // drain body
   } catch (err) { if (isTransientError(err)) throw err; } return null; }
 async function fetchLyricsForArtist( artist: string, title: string, album?: string, duration?: number, signal?: AbortSignal,
 ): Promise<LyricsData | null> { const params = new URLSearchParams({ artist_name: artist, track_name: title, });

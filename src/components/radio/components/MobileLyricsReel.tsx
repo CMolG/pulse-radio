@@ -16,18 +16,15 @@ const LyricReelLine = React.memo(function LyricReelLine({
       key={lineId} ref={(node) => { lineRefs.current[index] = node; }} type="button" onClick={() => scrollToIndex(index)}
       className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
     ><span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>{text}</span> </button>);
-}, (prev, next) =>prev.lineId === next.lineId && prev.text === next.text && prev.emphasisIdx === next.emphasisIdx &&
-  prev.isDesktop === next.isDesktop);
+}, (prev, next) =>prev.lineId === next.lineId && prev.text === next.text && prev.emphasisIdx === next.emphasisIdx && prev.isDesktop === next.isDesktop);
 export default function LyricsReel({ lyrics, currentTime, activeLineOverride, variant = "mobile", }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null); const lineRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [focusedIdx, setFocusedIdx] = useState(0); const isDesktop = variant === "desktop";
   const renderableLines = useMemo(() => getRenderableLyricLines(lyrics), [lyrics]);
-  const activeIdx = useMemo( () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride),
-    [activeLineOverride, currentTime, lyrics],);
+  const activeIdx = useMemo( () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride), [activeLineOverride, currentTime, lyrics],);
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
       const scroller = scrollerRef.current; const line = lineRefs.current[index]; if (!scroller || !line) return;
-      const top = line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2;
-      scroller.scrollTo({ top: Math.max(0, top), behavior, });}, [],);
+      const top = line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2; scroller.scrollTo({ top: Math.max(0, top), behavior, });}, [],);
   const updateFocusedIdx = useCallback(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
     const scrollerRect = scroller.getBoundingClientRect(); const centerY = scrollerRect.top + scrollerRect.height / 2;
@@ -35,8 +32,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
       if (!line) return; const rect = line.getBoundingClientRect(); const lineCenter = rect.top + rect.height / 2;
       const distance = Math.abs(centerY - lineCenter); if (distance < closestDistance) { closestDistance = distance; closestIdx = index; }
     }); setFocusedIdx((prev) => (prev === closestIdx ? prev : closestIdx));
-  }, [renderableLines.length]);
-  useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
+  }, [renderableLines.length]); useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
   // Reset scroll position when lyrics change (no autoscroll on active line —
   // user controls focus manually by scrolling or clicking a line)
   useEffect(() => { if (!renderableLines.length) return;

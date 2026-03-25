@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client"; import React from "react";
-import { Clock, Trash2 } from "lucide-react"; import type { HistoryEntry, SongDetailData } from "../types";
+"use client"; import React from "react"; import { Clock, Trash2 } from "lucide-react"; import type { HistoryEntry, SongDetailData } from "../types";
 import SongCard from "./SongCard"; type Props = { history: HistoryEntry[]; onRemove: (id: string) => void;
   onClear: () => void; onToggleFavSong?: (entry: HistoryEntry) => void;
   isSongFavorite?: (title: string, artist: string) => boolean; onSelect?: (song: SongDetailData) => void; };

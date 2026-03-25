@@ -4,8 +4,7 @@ import { STORAGE_KEYS } from '../constants'; import type { LyricsData } from '..
 import { defaultRealtimeState, DEFAULT_REALTIME_ALIGN_POLICY, isRealtimeEligible, type RealtimeSyncResult } from '../services/realtimeLyricsTypes';
 import { alignHypothesis, mapLineToEffectiveTime } from '../services/lyricsAligner';
 import { createRealtimeSpeechEngine, isRealtimeSpeechSupported, type RealtimeSpeechEngine } from '../services/realtimeSpeechRecognition';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-type Params = { lyrics: LyricsData | null; enabled: boolean; languageHint: 'en' | 'es' };
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; type Params = { lyrics: LyricsData | null; enabled: boolean; languageHint: 'en' | 'es' };
 export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params): RealtimeSyncResult {
   const initialEnabled = useMemo(() => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false), []);
   const [manuallyEnabled, setManuallyEnabled] = useState<boolean>(initialEnabled);
@@ -15,19 +14,16 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   const realtimeAllowed = enabled && manuallyEnabled; const realtimeActive = supported && eligible && realtimeAllowed;
   // Reset sync state during render when dependencies change, so stale
   // activeLineIndex from a previous song doesn't bleed into new lyrics.
-  const [prevResetKey, setPrevResetKey] = useState('');
-  const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
+  const [prevResetKey, setPrevResetKey] = useState(''); const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
   if (resetKey !== prevResetKey) { setPrevResetKey(resetKey); setRuntimeState(defaultRealtimeState(manuallyEnabled)); }
   const toggle = useCallback(() => { setManuallyEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next); return next;});}, []);
   useEffect(() => { if (!realtimeActive) { engineRef.current?.stop(); return; } engineRef.current?.destroy(); stableSamplesRef.current = 0;
     const engine = createRealtimeSpeechEngine({ onHypothesis: (hypothesis) => {
-        if (!lyrics || !isRealtimeEligible(lyrics)) return;
-        setRuntimeState(prev => { const step = alignHypothesis({ lyrics, hypothesisText: hypothesis.text,
+        if (!lyrics || !isRealtimeEligible(lyrics)) return; setRuntimeState(prev => { const step = alignHypothesis({ lyrics, hypothesisText: hypothesis.text,
             previousConfirmedIndex: prev.activeLineIndex, previousCandidateIndex: prev.candidateLineIndex,
             stableSamples: stableSamplesRef.current, policy: DEFAULT_REALTIME_ALIGN_POLICY,
-          }); stableSamplesRef.current = step.stableSamples;
-          const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
+          }); stableSamplesRef.current = step.stableSamples; const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
           // Early bail — skip spread+setState when nothing observable changed
           if ( prev.status === 'listening' && prev.activeLineIndex === step.confirmedIndex &&
             prev.candidateLineIndex === step.candidateIndex && prev.confidence === step.score && !step.jumpRejected && !step.relockTriggered

@@ -23,8 +23,7 @@ function JsonLd() { const schema = {
     "@context": "https://schema.org", "@type": "WebApplication", name: "Pulse Radio", url: SITE_URL,
     description: SITE_DESCRIPTION, applicationCategory: "MultimediaApplication",
     operatingSystem: "Any", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", },
-    browserRequirements: "Requires JavaScript. Requires HTML5.", softwareVersion: "1.0",
-    screenshot: `${SITE_URL}/android-chrome-512x512.png`,
+    browserRequirements: "Requires JavaScript. Requires HTML5.", softwareVersion: "1.0", screenshot: `${SITE_URL}/android-chrome-512x512.png`,
   }; return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />; }
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) { return (
     <html lang="en" dir="ltr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}>

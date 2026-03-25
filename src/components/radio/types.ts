@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 export type Station = { stationuuid: string; name: string; url_resolved: string; favicon: string;
-  country: string; countrycode: string; tags: string; votes: number;
-  codec: string; bitrate: number; language?: string; homepage?: string; };
+  country: string; countrycode: string; tags: string; votes: number; codec: string; bitrate: number; language?: string; homepage?: string; };
 type TrackFields = { title: string; artist: string; album?: string; artworkUrl?: string;
   itunesUrl?: string; durationMs?: number; genre?: string; releaseDate?: string; trackNumber?: number; trackCount?: number; };
 export type NowPlayingTrack = TrackFields; export type LyricLine = { time: number; text: string };

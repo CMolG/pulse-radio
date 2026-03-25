@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { RealtimeSpeechHypothesis } from './realtimeLyricsTypes';
-type BrowserSpeechAlternative = { transcript: string; confidence?: number };
+import type { RealtimeSpeechHypothesis } from './realtimeLyricsTypes'; type BrowserSpeechAlternative = { transcript: string; confidence?: number };
 type BrowserSpeechResult = { 0?: BrowserSpeechAlternative; isFinal: boolean };
 type BrowserSpeechRecognitionEvent = { resultIndex: number; results: ArrayLike<BrowserSpeechResult> };
 type BrowserSpeechRecognitionErrorEvent = { error: string };
@@ -22,13 +21,11 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
   }; const wireRecognition = (lang: 'en' | 'es') => { const Ctor = getRecognitionCtor();
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
     recognition = new Ctor(); recognition.continuous = true; recognition.interimResults = true;
-    recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
-    recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
+    recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US'; recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
       restartCount = 0; // Reset restart counter on any successful recognition — proves engine is alive.
       const index = event.resultIndex; const result = event.results[index]; if (!result || !result[0]) return;
       const transcript = result[0].transcript.trim().toLowerCase(); if (!transcript) return; callbacks.onHypothesis({ text: transcript,
-        confidence: typeof result[0].confidence === 'number' && Number.isFinite(result[0].confidence)
-          ? Math.max(0, Math.min(1, result[0].confidence))
+        confidence: typeof result[0].confidence === 'number' && Number.isFinite(result[0].confidence) ? Math.max(0, Math.min(1, result[0].confidence))
           : result.isFinal ? 0.7 : 0.55, isFinal: result.isFinal, tsMs: performance.now(),});
     }; recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return;
       const fatal = event.error === 'not-allowed'|| event.error === 'service-not-allowed' || event.error === 'language-not-supported';
@@ -41,7 +38,6 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.'); }
     }; };
   return { start: (lang) => { if (destroyed || running) return; wireRecognition(lang); if (!recognition) return;
-      try { recognition.start(); running = true; restartCount = 0;
-      } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
+      try { recognition.start(); running = true; restartCount = 0; } catch { running = false; callbacks.onFatalError('Speech recognition failed to start.'); }
     }, stop: () => { running = false; teardown(); }, destroy: () => { destroyed = true; running = false; teardown(); },
   }; }

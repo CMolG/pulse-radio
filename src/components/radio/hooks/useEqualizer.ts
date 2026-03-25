@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import { useState, useRef, useCallback, useEffect } from 'react';
-import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
+'use client'; import { useState, useRef, useCallback, useEffect } from 'react'; import type { EqBand, EqPreset, NoiseReductionMode } from '../types';
 import { EQ_BANDS, STORAGE_KEYS } from '../constants'; import { getOrCreateAudioSource } from '@/lib/audio-visualizer';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: number; gateRatio: number; deEsserCenterHz: number; deEsserGain: number }> = {
@@ -54,8 +53,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     mbHighHpRef, mbHighCompRef, mbDryGainRef, mbWetGainRef, mbMergeRef,
     nrHighpassRef, nrGateRef, nrDeEsserRef, nrDeEssGainRef, bassLpRef, bassShaperRef, bassHpRef, bassMixRef,];
   function teardownGraph(includeSource: boolean) { try {
-      sourceRef.current?.disconnect(); filtersRef.current.forEach(f => f.disconnect());
-      for (const ref of graphNodeRefs) ref.current?.disconnect();
+      sourceRef.current?.disconnect(); filtersRef.current.forEach(f => f.disconnect()); for (const ref of graphNodeRefs) ref.current?.disconnect();
     } catch { /* ok */ } filtersRef.current = []; for (const ref of graphNodeRefs) ref.current = null;
     if (includeSource) { sourceRef.current = null; connectedAudioRef.current = null; } }
   // Smooth ramp time for parameter changes to prevent clicks/pops
@@ -73,10 +71,8 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     const next = muted ? 0 : clamped; const ctx = ctxRef.current;
     if (outputGainRef.current && ctx) { outputGainRef.current.gain.setTargetAtTime(next, ctx.currentTime, RAMP_TIME);
     } else if (outputGainRef.current) outputGainRef.current.gain.value = next;
-  }, []); useEffect(() => { saveToStorage(STORAGE_KEYS.EQ_BANDS, bands); const ctx = ctxRef.current;
-    filtersRef.current.forEach((f, i) => { if (bands[i]) {
-        const target = enabled ? bands[i].gain : 0; if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
-        else f.gain.value = target;
+  }, []); useEffect(() => { saveToStorage(STORAGE_KEYS.EQ_BANDS, bands); const ctx = ctxRef.current; filtersRef.current.forEach((f, i) => { if (bands[i]) {
+        const target = enabled ? bands[i].gain : 0; if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME); else f.gain.value = target;
       }});
   }, [bands, enabled]); const connectSource = useCallback((audio: HTMLAudioElement) => {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
@@ -89,29 +85,23 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       });
       // Chain: source → normalizer → makeup gain → filter[0] → ... → limiter → destination
       // Normalizer: gentle compressor that levels loudness across stations
-      const normalizer = ctx.createDynamicsCompressor();
-      normalizer.threshold.value = -24;  // engage earlier than limiter — catch loud passages
+      const normalizer = ctx.createDynamicsCompressor(); normalizer.threshold.value = -24;  // engage earlier than limiter — catch loud passages
       normalizer.knee.value = 12;        // wide soft knee for transparent compression
       normalizer.ratio.value = 3;        // gentle 3:1 — level without squashing dynamics
       normalizer.attack.value = 0.01;    // 10ms attack — fast enough to catch transients
       normalizer.release.value = 0.25;   // 250ms release — smooth volume recovery
-      normalizerRef.current = normalizer;
-      const normGain = ctx.createGain(); // Makeup gain compensates for normalizer's volume reduction (~4dB)
+      normalizerRef.current = normalizer; const normGain = ctx.createGain(); // Makeup gain compensates for normalizer's volume reduction (~4dB)
       normGain.gain.value = normalizerEnabled ? 1.6 : 1.0; // ~4dB makeup when active
       normGainRef.current = normGain;
       // Noise-reduction block: high-pass + soft gate + de-esser attenuation branch.
-      const nrHighpass = ctx.createBiquadFilter(); nrHighpass.type = 'highpass';
-      nrHighpass.frequency.value = nrPreset.hpfHz; nrHighpass.Q.value = 0.7;
+      const nrHighpass = ctx.createBiquadFilter(); nrHighpass.type = 'highpass'; nrHighpass.frequency.value = nrPreset.hpfHz; nrHighpass.Q.value = 0.7;
       const nrGate = ctx.createDynamicsCompressor(); nrGate.threshold.value = nrPreset.gateThreshold;
       nrGate.knee.value = 4; nrGate.ratio.value = nrPreset.gateRatio; nrGate.attack.value = 0.01; nrGate.release.value = 0.18;
-      const nrDeEsser = ctx.createBiquadFilter(); nrDeEsser.type = 'peaking';
-      nrDeEsser.frequency.value = nrPreset.deEsserCenterHz; nrDeEsser.Q.value = 3.2;
+      const nrDeEsser = ctx.createBiquadFilter(); nrDeEsser.type = 'peaking'; nrDeEsser.frequency.value = nrPreset.deEsserCenterHz; nrDeEsser.Q.value = 3.2;
       nrDeEsser.gain.value = nrPreset.deEsserGain; const nrDeEssGain = ctx.createGain(); nrDeEssGain.gain.value = 1;
-      nrHighpassRef.current = nrHighpass; nrGateRef.current = nrGate;
-      nrDeEsserRef.current = nrDeEsser; nrDeEssGainRef.current = nrDeEssGain;
+      nrHighpassRef.current = nrHighpass; nrGateRef.current = nrGate; nrDeEsserRef.current = nrDeEsser; nrDeEssGainRef.current = nrDeEssGain;
       if (normalizerEnabled) { source.connect(normalizer); normalizer.connect(normGain); normGain.connect(nrHighpass);
-      } else source.connect(nrHighpass); nrHighpass.connect(nrGate); nrGate.connect(nrDeEsser);
-      nrDeEsser.connect(nrDeEssGain); nrDeEssGain.connect(filters[0]);
+      } else source.connect(nrHighpass); nrHighpass.connect(nrGate); nrGate.connect(nrDeEsser); nrDeEsser.connect(nrDeEssGain); nrDeEssGain.connect(filters[0]);
       for (let i = 0; i < filters.length - 1; i++) { filters[i].connect(filters[i + 1]); }
       // Psychoacoustic bass enhancer: parallel path that extracts bass,
       // generates harmonics via waveshaping, then mixes back in.
@@ -168,14 +158,12 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       // Width 1.0 = original, 0.0 = mono, 2.0 = max width
       // L_out = L * direct + R * cross, R_out = R * direct + L * cross
       const w = stereoWidth; const direct = (1 + w) / 2; // where direct = (1+w)/2, cross = (1-w)/2
-      const cross = (1 - w) / 2; const splitter = ctx.createChannelSplitter(2);
-      const merger = ctx.createChannelMerger(2); const outputGain = ctx.createGain();
+      const cross = (1 - w) / 2; const splitter = ctx.createChannelSplitter(2); const merger = ctx.createChannelMerger(2); const outputGain = ctx.createGain();
       const directL = ctx.createGain(); const directR = ctx.createGain();
       const crossL = ctx.createGain(); const crossR = ctx.createGain(); directL.gain.value = direct;
       directR.gain.value = direct; crossL.gain.value = cross; crossR.gain.value = cross; limiter.connect(splitter);
       splitter.connect(directL, 0); splitter.connect(crossR, 1); // L channel: direct L + cross R
-      directL.connect(merger, 0, 0); crossR.connect(merger, 0, 0);
-      splitter.connect(directR, 1); splitter.connect(crossL, 0); // R channel: direct R + cross L
+      directL.connect(merger, 0, 0); crossR.connect(merger, 0, 0); splitter.connect(directR, 1); splitter.connect(crossL, 0); // R channel: direct R + cross L
       directR.connect(merger, 0, 1); crossL.connect(merger, 0, 1); merger.connect(outputGain); outputGain.connect(ctx.destination);
       outputGainRef.current = outputGain; const initialOutput = outputMutedRef.current ? 0 : outputVolumeRef.current;
       outputGain.gain.value = initialOutput; splitterRef.current = splitter; mergerRef.current = merger;
@@ -185,14 +173,11 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       // some iOS background/resume paths for cross-origin streams).
       sourceRef.current = null; filtersRef.current = []; connectedAudioRef.current = audio; }
   }, [bands, bassEnhance, compressorAmount, compressorEnabled, enabled, noiseReductionMode, normalizerEnabled, stereoWidth]);
-  const disconnect = useCallback(() => { teardownGraph(true); }, []); const MAX_GAIN_DB = 12;
-  const setBandGain = useCallback((id: string, gain: number) => {
-    const clamped = Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gain));
-    setBands(prev => prev.map(b => b.id === id ? { ...b, gain: clamped } : b));}, []);
+  const disconnect = useCallback(() => { teardownGraph(true); }, []); const MAX_GAIN_DB = 12; const setBandGain = useCallback((id: string, gain: number) => {
+    const clamped = Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gain)); setBands(prev => prev.map(b => b.id === id ? { ...b, gain: clamped } : b));}, []);
   const applyPreset = useCallback((gains: number[]) => { setBands(prev => prev.map((b, i) => ({
       ...b, gain: Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gains[i] ?? 0)), })));
-  }, []); const toggleEnabled = useCallback(() => setEnabled(e => !e), []);
-  const toggleNormalizer = useCallback(() => { setNormalizerEnabled(prev => {
+  }, []); const toggleEnabled = useCallback(() => setEnabled(e => !e), []); const toggleNormalizer = useCallback(() => { setNormalizerEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, next);
       // Live-toggle: rewire audio graph without full reconnect
       const source = sourceRef.current; const normalizer = normalizerRef.current;
@@ -200,8 +185,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           try { source.disconnect(normalizer); } catch { /* source may not be connected to normalizer */ }
           try { source.disconnect(nrHead); } catch { /* source may not be connected to NR head */ }
           normalizer.disconnect(); normGain.disconnect(); const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
-          if (next) { normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME); source.connect(normalizer);
-            normalizer.connect(normGain); normGain.connect(nrHead);
+          if (next) { normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME); source.connect(normalizer); normalizer.connect(normGain); normGain.connect(nrHead);
           } else { normGain.gain.setTargetAtTime(1.0, t, RAMP_TIME); source.connect(nrHead); }
         } catch { /* ok */ } }
       return next;});}, []);
@@ -219,28 +203,24 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     if (crossGainLRef.current) crossGainLRef.current.gain.setTargetAtTime(cross, t, RAMP_TIME);
     if (crossGainRRef.current) crossGainRRef.current.gain.setTargetAtTime(cross, t, RAMP_TIME);}, []);
   const setBassEnhance = useCallback((v: number) => {
-    const clamped = Math.max(0, Math.min(1, v)); setBassEnhanceState(clamped);
-    saveToStorage(STORAGE_KEYS.BASS_ENHANCE, clamped); const ctx = ctxRef.current;
+    const clamped = Math.max(0, Math.min(1, v)); setBassEnhanceState(clamped); saveToStorage(STORAGE_KEYS.BASS_ENHANCE, clamped); const ctx = ctxRef.current;
     if (bassMixRef.current && ctx) { bassMixRef.current.gain.setTargetAtTime(clamped, ctx.currentTime, RAMP_TIME);
     } else if (bassMixRef.current) bassMixRef.current.gain.value = clamped;}, []);
   const toggleCompressor = useCallback(() => { setCompressorEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.COMPRESSOR_ENABLED, next);
       const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0; const amount = compressorAmount;
       if (mbDryGainRef.current && mbWetGainRef.current) { if (next) {
-          mbDryGainRef.current.gain.setTargetAtTime(1 - amount * 0.5, t, RAMP_TIME);
-          mbWetGainRef.current.gain.setTargetAtTime(amount, t, RAMP_TIME);
+          mbDryGainRef.current.gain.setTargetAtTime(1 - amount * 0.5, t, RAMP_TIME); mbWetGainRef.current.gain.setTargetAtTime(amount, t, RAMP_TIME);
         } else { mbDryGainRef.current.gain.setTargetAtTime(1, t, RAMP_TIME); mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME); }
       } return next;});
   }, [compressorAmount]); const setCompressorAmount = useCallback((v: number) => {
     const clamped = Math.max(0, Math.min(1, v)); setCompressorAmountState(clamped);
-    saveToStorage(STORAGE_KEYS.COMPRESSOR_AMOUNT, clamped); if (!compressorEnabled) return;
-    const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
+    saveToStorage(STORAGE_KEYS.COMPRESSOR_AMOUNT, clamped); if (!compressorEnabled) return; const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
     if (mbDryGainRef.current) mbDryGainRef.current.gain.setTargetAtTime(1 - clamped * 0.5, t, RAMP_TIME);
     if (mbWetGainRef.current) mbWetGainRef.current.gain.setTargetAtTime(clamped, t, RAMP_TIME);
   }, [compressorEnabled]); const setNoiseReductionMode = useCallback((mode: NoiseReductionMode) => {
     setNoiseReductionModeState(mode); saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, mode); applyNoiseReductionPreset(mode);
-  }, [applyNoiseReductionPreset]);
-  useEffect(() => { applyNoiseReductionPreset(noiseReductionMode); }, [applyNoiseReductionPreset, noiseReductionMode]);
+  }, [applyNoiseReductionPreset]); useEffect(() => { applyNoiseReductionPreset(noiseReductionMode); }, [applyNoiseReductionPreset, noiseReductionMode]);
   return { bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode,
     customPresets, setBandGain, applyPreset, toggleEnabled, toggleNormalizer, setStereoWidth, setBassEnhance, toggleCompressor,
     setCompressorAmount, setNoiseReductionMode, setOutputVolume, connectSource, disconnect, saveCustomPreset, removeCustomPreset, }; }

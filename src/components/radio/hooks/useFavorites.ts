@@ -1,11 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import { useState, useCallback, useEffect } from 'react';
-import type { Station } from '../types'; import { STORAGE_KEYS } from '../constants';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import { useStorageSync } from '@/lib/useStorageSync'; const MAX_FAVORITES = 500;
+'use client'; import { useState, useCallback, useEffect } from 'react'; import type { Station } from '../types'; import { STORAGE_KEYS } from '../constants';
+import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; import { useStorageSync } from '@/lib/useStorageSync'; const MAX_FAVORITES = 500;
 export function useFavorites() { const [favorites, setFavorites] = useState<Station[]>(() => {
-    const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []);
-    const seen = new Set<string>(); // Dedup on load in case of corrupted storage
+    const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.FAVORITES, []); const seen = new Set<string>(); // Dedup on load in case of corrupted storage
     return loaded.filter(s => {
       if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid); return true;});
   }); useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITES, favorites); }, [favorites]);

@@ -15,11 +15,9 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   const [error, setError] = useState(false); const lastKeyRef = useRef('');
   const abortRef = useRef<AbortController | null>(null); const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const MAX_RETRIES = 2;
-  const enableRealtime = Boolean(options?.enableRealtime && track?.title);
-  const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
+  const enableRealtime = Boolean(options?.enableRealtime && track?.title); const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
     if (controller.signal.aborted || !track?.title) return; setLoading(true); setError(false);
-    fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined,
-      controller.signal, ).then(result => {
+    fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined, controller.signal, ).then(result => {
         if (controller.signal.aborted) return; retryCountRef.current = 0; if (result) { setLyrics(result);
           const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)]; saveCache(updated);
         } else setLyrics(null);
@@ -29,12 +27,10 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
         } else { setLyrics(null); setError(true); retryCountRef.current = 0; }
       }).finally(() => { if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false); }); };
   useEffect(() => {
-    if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-    retryCountRef.current = 0;
+    if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); retryCountRef.current = 0;
     if (!track || !track.title) { setLoading(false); setLyrics(null); setError(false); lastKeyRef.current = ''; return;
     } const artistSeed = (track.artist || stationName || 'unknown').trim(); const key = `${artistSeed}\n${track.title}`.toLowerCase();
-    if (key === lastKeyRef.current) return; lastKeyRef.current = key;
-    const cached = loadCache(); const hit = cached.find(e => e.key === key);
+    if (key === lastKeyRef.current) return; lastKeyRef.current = key; const cached = loadCache(); const hit = cached.find(e => e.key === key);
     if (hit && Date.now() - hit.ts < CACHE_TTL_MS) { setLoading(false); setLyrics(hit.data); setError(false); return;
     } const controller = new AbortController(); abortRef.current = controller; doFetch(key, cached, controller);
     return () => { controller.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };

@@ -6,8 +6,7 @@ export function ParallaxAlbumBackground({ imageUrl, fallbackUrl, blurClass = 'bl
   enableDrift = true, showTopGlow = true, children,
 }: ParallaxAlbumBackgroundProps) { const [imgError, setImgError] = useState(false);
   // Reset error state when image URL changes so new artwork gets a chance to load
-  const [prevImageUrl, setPrevImageUrl] = useState(imageUrl);
-  if (imageUrl !== prevImageUrl) { setPrevImageUrl(imageUrl); setImgError(false); }
+  const [prevImageUrl, setPrevImageUrl] = useState(imageUrl); if (imageUrl !== prevImageUrl) { setPrevImageUrl(imageUrl); setImgError(false); }
   const src = (!imgError && imageUrl) || fallbackUrl || null;
   return ( <div className="absolute inset-0 overflow-hidden"> {src && ( <Image src={src} alt="" fill style={{ objectFit: 'cover' }}
           className={`${blurClass} ${enableDrift ? 'animate-ambient-drift scale-105' : 'scale-110'} transition-[filter] duration-1000`}

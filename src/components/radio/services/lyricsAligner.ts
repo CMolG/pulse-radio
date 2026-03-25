@@ -24,8 +24,7 @@ function windowBounds(total: number, center: number, relockWindow: number): [num
 export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const { lyrics, hypothesisText, previousConfirmedIndex, previousCandidateIndex, stableSamples, policy, } = input;
   const hypoTokens = tokenize(hypothesisText); if (!hypoTokens.length) { return {
-      candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: 0, stableSamples,
-      jumpRejected: false, relockTriggered: false, }; }
+      candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: 0, stableSamples, jumpRejected: false, relockTriggered: false, }; }
   const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex;
   const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow); let bestIndex = -1;
   let bestScore = 0; for (let i = start; i <= end; i++) {
@@ -42,8 +41,6 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     confirmed = bestIndex;
   } else if (jumpRejected && bestScore >= Math.min(0.98, policy.confirmMinScore + 0.08)) {
     confirmed = bestIndex; relockTriggered = true; } // Strict relock path for distant jumps with very high confidence
-  return { candidateIndex: bestIndex, confirmedIndex: confirmed, score: bestScore, stableSamples: nextStable,
-    jumpRejected, relockTriggered, }; }
+  return { candidateIndex: bestIndex, confirmedIndex: confirmed, score: bestScore, stableSamples: nextStable, jumpRejected, relockTriggered, }; }
 export function mapLineToEffectiveTime(lyrics: LyricsData, lineIndex: number): number | undefined {
-  if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) return undefined;
-  return lyrics.lines[lineIndex].time; }
+  if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) return undefined; return lyrics.lines[lineIndex].time; }

@@ -1,13 +1,11 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import React, { useRef, useEffect } from 'react'; interface VisualizerCanvasProps {
-  frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
-  opacity?: number; className?: string; }
+  frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string; opacity?: number; className?: string; }
 export function VisualizerCanvas({
   frequencyDataRef, mode = 'bars', barCount = 64, color = 'var(--accent-color)', opacity = 0.4, className = '',
 }: VisualizerCanvasProps) { const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
   const resolvedColorRef = useRef<string | null>(null); const sizeRef = useRef({ width: 0, height: 0 });
-  const gradientCacheRef = useRef<{ key: string; gradient: CanvasGradient } | null>(null);
-  const supportsRoundRectRef = useRef<boolean | null>(null);
+  const gradientCacheRef = useRef<{ key: string; gradient: CanvasGradient } | null>(null); const supportsRoundRectRef = useRef<boolean | null>(null);
   // Invalidate cached color when prop changes
   useEffect(() => { resolvedColorRef.current = null; gradientCacheRef.current = null; }, [color]);
   // Track size via ResizeObserver instead of getBoundingClientRect per frame
@@ -16,8 +14,7 @@ export function VisualizerCanvas({
     }; updateSize(); const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();}, []);
   useEffect(() => { const draw = () => {
       const canvas = canvasRef.current; const frequencyData = frequencyDataRef?.current;
-      if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; }
-      const ctx = canvas.getContext('2d'); if (!ctx) return;
+      if (!canvas || !frequencyData) { frameRef.current = requestAnimationFrame(draw); return; } const ctx = canvas.getContext('2d'); if (!ctx) return;
       // Resolve CSS variable once and cache
       if (!resolvedColorRef.current) { if (color.startsWith('var(')) { const varName = color.slice(4, -1).trim();
           const computed = getComputedStyle(canvas).getPropertyValue(varName).trim(); resolvedColorRef.current = computed || '#34d399';
@@ -51,5 +48,4 @@ export function VisualizerCanvas({
         ctx.stroke(); }
       frameRef.current = requestAnimationFrame(draw);
     }; frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
-  }, [frequencyDataRef, mode, barCount, color]);
-  return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />; }
+  }, [frequencyDataRef, mode, barCount, color]); return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />; }

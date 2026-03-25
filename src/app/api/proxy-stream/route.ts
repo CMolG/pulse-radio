@@ -4,8 +4,7 @@ export const runtime = 'nodejs'; const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 const MAX_DURATION_MS = 0; // 0 = no forced timeout; stream should run indefinitely
 /* Proxies an internet radio stream, adding CORS headers so the browser can use it with <audio crossOrigin="anony
  * mous"> + Web Audio API. */
-export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url');
-  if (!streamUrl || streamUrl.length > 2048) {
+export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url'); if (!streamUrl || streamUrl.length > 2048) {
     return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },});
   } let parsed: URL; try { parsed = new URL(streamUrl); if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
@@ -18,11 +17,9 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     }
   } catch { return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400, headers: { 'Content-Type': 'application/json' },});
-  } const controller = new AbortController();
-  const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
+  } const controller = new AbortController(); const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
   // Propagate client disconnect to upstream so we don't leak connections
-  if (req.signal) { if (req.signal.aborted) controller.abort();
-    else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); }
+  if (req.signal) { if (req.signal.aborted) controller.abort(); else req.signal.addEventListener('abort', () => controller.abort(), { once: true }); }
   try { const upstream = await fetch(parsed.toString(), {
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', }, signal: controller.signal,});
     // Validate the final URL after redirects to prevent SSRF via redirect

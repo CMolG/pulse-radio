@@ -36,19 +36,15 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   // field = r² / (distSq + 1). For field >= 0.01 → distSq < r²/0.01 = 100*r²
   const blobCount = blobs.length; const blobMaxDistSq = new Float64Array(blobCount);
   for (let b = 0; b < blobCount; b++) { const r = blobs[b].baseRadius; blobMaxDistSq[b] = r * r * 100; }
-  const thresholdLow = threshold * 0.7; const glowRange = threshold * 0.3;
-  for (let py = 0; py < sh; py++) { for (let px = 0; px < sw; px++) {
-      const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0; let totalWeight = 0;
-      for (let b = 0; b < blobCount; b++) {
+  const thresholdLow = threshold * 0.7; const glowRange = threshold * 0.3; for (let py = 0; py < sh; py++) { for (let px = 0; px < sw; px++) {
+      const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0; let totalWeight = 0; for (let b = 0; b < blobCount; b++) {
         const blob = blobs[b]; const dx = x - blob.x; const dy = y - blob.y; const distSq = dx * dx + dy * dy;
         if (distSq > blobMaxDistSq[b]) continue; // Early-exit: skip blobs too far to contribute meaningfully
         const r = blob.baseRadius; const field = (r * r) / (distSq + 1); sum += field;
         if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; } }
-      const idx = (py * sw + px) * 4;
-      if (sum > threshold) { const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
+      const idx = (py * sw + px) * 4; if (sum > threshold) { const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
         // color based on proximity to center vs edge, and energy
-        const coreIntensity = Math.min(1, (sum - threshold) * 2);
-        const edgeGlow = 1 - coreIntensity; const brightnessMul = 0.3 + coreIntensity * 0.7;
+        const coreIntensity = Math.min(1, (sum - threshold) * 2); const edgeGlow = 1 - coreIntensity; const brightnessMul = 0.3 + coreIntensity * 0.7;
         // blend primary → secondary based on frequency band
         const r = (lerp(colors.primary[0], colors.secondary[0], bandNorm) * brightnessMul) | 0;
         const g = (lerp(colors.primary[1], colors.secondary[1], bandNorm) * brightnessMul) | 0;
@@ -84,8 +80,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       energy = (sum / frequencyData.length / 255) * sensitivity;
     } else if (demo) energy = 0.3 + Math.sin(t * 0.5) * 0.2; const minWH = Math.min(w, h); // update blobs
     for (let i = 0; i < blobs.length; i++) { const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5;
-      const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127);
-      const orbitRadius = minWH * (0.1 + energy * 0.25); // base orbit
+      const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127); const orbitRadius = minWH * (0.1 + energy * 0.25); // base orbit
       blob.targetX = cx + Math.cos(angle) * orbitRadius; blob.targetY = cy + Math.sin(angle * 0.7) * orbitRadius * 0.8;
       let bandVal: number; if (frequencyData) { bandVal = frequencyData[bandIdx] / 255; // frequency-driven displacement
         const displacement = bandVal * minWH * 0.15 * sensitivity; const dispAngle = angle + Math.PI * 0.5;
@@ -99,8 +94,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       blob.baseRadius = minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity; }
     ctx.clearRect(0, 0, w, h); // clear
     drawMetaballs(ctx, blobs, w, h, colors.current, energy); // draw metaballs
-  }, 0.5); return ( <div className={`relative ${className}`}>
-      <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />
+  }, 0.5); return ( <div className={`relative ${className}`}> <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />
       {/* SVG filter for smoothing the metaballs */} <svg className="absolute w-0 h-0" aria-hidden="true"><defs>
           <filter id="ferrofluid-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
             <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />

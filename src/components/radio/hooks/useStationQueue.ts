@@ -9,23 +9,18 @@ export function useStationQueue() { const [queue, setQueue] = useState<Station[]
   // Persist queue to storage on changes (skip initial mount)
   useEffect(() => { if (persistRef.current) saveToStorage(STORAGE_KEY, queue); persistRef.current = true; }, [queue]);
   const add = useCallback((station: Station) => { setQueue(prev => {
-      if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
-      if (prev.length >= MAX_QUEUE_SIZE) return prev; return [...prev, station];});
+      if (prev.some(s => s.stationuuid === station.stationuuid)) return prev; if (prev.length >= MAX_QUEUE_SIZE) return prev; return [...prev, station];});
   }, []); const addNext = useCallback((station: Station) => { let removedIdx = -1; setCurrentIndex(prevIdx => {
       const q = queueRef.current; removedIdx = q.findIndex(s => s.stationuuid === station.stationuuid);
-      const filtered = q.filter(s => s.stationuuid !== station.stationuuid);
-      if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;
+      const filtered = q.filter(s => s.stationuuid !== station.stationuuid); if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;
       // Adjust for removal of the station from before the current position
       let adjusted = prevIdx; if (removedIdx >= 0 && removedIdx < prevIdx) adjusted--;
       const insertAt = adjusted >= 0 ? Math.min(adjusted + 1, filtered.length) : 0;
       setQueue([...filtered.slice(0, insertAt), station, ...filtered.slice(insertAt)]); return adjusted;});
   }, []); const remove = useCallback((stationuuid: string) => { let removedIdx = -1;
-    setQueue(prev => { removedIdx = prev.findIndex(s => s.stationuuid === stationuuid);
-      return prev.filter(s => s.stationuuid !== stationuuid);
-    }); setCurrentIndex(prev => { if (removedIdx < 0) return prev; if (removedIdx < prev) return prev - 1;
-      if (removedIdx === prev) return -1; return prev;});
-  }, []); const clear = useCallback(() => { setQueue([]); setCurrentIndex(-1);
-  }, []); const moveUp = useCallback((stationuuid: string) => { let movedIdx = -1;
+    setQueue(prev => { removedIdx = prev.findIndex(s => s.stationuuid === stationuuid); return prev.filter(s => s.stationuuid !== stationuuid);
+    }); setCurrentIndex(prev => { if (removedIdx < 0) return prev; if (removedIdx < prev) return prev - 1; if (removedIdx === prev) return -1; return prev;});
+  }, []); const clear = useCallback(() => { setQueue([]); setCurrentIndex(-1); }, []); const moveUp = useCallback((stationuuid: string) => { let movedIdx = -1;
     setQueue(prev => { const idx = prev.findIndex(s => s.stationuuid === stationuuid); if (idx <= 0) return prev;
       movedIdx = idx; const next = [...prev]; [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]; return next;
     }); setCurrentIndex(prev => { if (movedIdx < 0) return prev; if (prev === movedIdx) return movedIdx - 1;

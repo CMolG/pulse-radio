@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { getOrCreateAudioSource } from './audioSourceCache';
+'use client'; import React, { useRef, useCallback, useEffect, useState } from 'react'; import { getOrCreateAudioSource } from './audioSourceCache';
 type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: number; };
 interface UseAudioAnalyserReturn { connectAudio: (audio: HTMLAudioElement) => void;
   /** Stable ref whose .current is updated in-place every frame — zero allocations */
@@ -19,8 +18,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
       cancelAnimationFrame(rafRef.current); // Cancel any existing animation loop before starting a new one
       try { const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
         if (!analyserRef.current) { const analyser = ctx.createAnalyser();
-          analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser);
-          analyserRef.current = analyser;
+          analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser); analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
         // Allocate buffers once — reused across all frames (zero per-frame allocation)
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
@@ -41,7 +39,6 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         frequencyDataRef.current = null; waveDataRef.current = null; }
     }, [fftSize, smoothingTimeConstant],);
   const disconnect = useCallback(() => {
-    cancelAnimationFrame(rafRef.current); connectedRef.current = null; setIsActive(false);
-    frequencyDataRef.current = null; waveDataRef.current = null;
+    cancelAnimationFrame(rafRef.current); connectedRef.current = null; setIsActive(false); frequencyDataRef.current = null; waveDataRef.current = null;
   }, []); useEffect(() => () => { cancelAnimationFrame(rafRef.current); }, [],);
   return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect }; }

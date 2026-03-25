@@ -14,8 +14,7 @@ export type RealtimeSyncResult = RealtimeSyncState & RealtimeSyncControls; expor
 export const DEFAULT_REALTIME_ALIGN_POLICY: RealtimeAlignPolicy = {
   candidateMinScore: 0.74, confirmMinScore: 0.84, minStableSamples: 2, maxJumpDistance: 4, relockWindow: 8, };
 export function defaultRealtimeDiagnostics(): RealtimeSyncDiagnostics { return {
-    qualityMode: 'balanced', lastHypothesisMs: null, hypothesesSeen: 0, confirmedTransitions: 0,
-    rejectedJumps: 0, relockCount: 0, errorMessage: null, }; }
+    qualityMode: 'balanced', lastHypothesisMs: null, hypothesesSeen: 0, confirmedTransitions: 0, rejectedJumps: 0, relockCount: 0, errorMessage: null, }; }
 export function defaultRealtimeState(enabled: boolean): RealtimeSyncState { return {
     enabled, supported: false, status: 'idle', activeLineIndex: -1,
     candidateLineIndex: -1, confidence: 0, effectiveCurrentTime: undefined, diagnostics: defaultRealtimeDiagnostics(),

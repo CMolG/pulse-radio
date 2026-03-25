@@ -12,8 +12,7 @@ function isAdContent(text: string): boolean { let result = _adCache.get(text); i
   result = AD_PATTERNS.some(re => re.test(text));
   if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result); return result; }
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
-export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
-): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal, ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   if (signal) { if (signal.aborted) { clearTimeout(timeout); controller.abort();} else {
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
@@ -40,8 +39,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const prevStationUrlRef = useRef<string | null>(null);
   // Clear track state during render when station goes null (avoid setState in effect)
   const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null); const currentStationId = station?.url_resolved ?? null;
-  if (currentStationId !== prevStationId) { setPrevStationId(currentStationId);
-    if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null); } }
+  if (currentStationId !== prevStationId) { setPrevStationId(currentStationId); if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null); } }
   useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
     } const stationChanged = station.url_resolved !== prevStationUrlRef.current;

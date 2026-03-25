@@ -13,8 +13,7 @@ export function useFavoriteSongs() { const MAX_SONGS = 500; const [songs, setSon
       const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;}); });
   // O(1) lookup Set — rebuilt only when songs array changes
   const keySetRef = useRef(buildKeySet(songs)); useMemo(() => { keySetRef.current = buildKeySet(songs); }, [songs]);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs); }, [songs]);
-  useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
+  useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs); }, [songs]); useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const prepend = (song: Omit<FavoriteSong, 'id' | 'timestamp'>, prev: FavoriteSong[]) => {
     const entry: FavoriteSong = { ...song, id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, timestamp: Date.now() };
     const next = [entry, ...prev]; return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next; };

@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { countryFlag } from "@/components/radio/constants"; import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRIES } from "./countries";
-import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from "./languageMap";
-import type { SupportedLocale } from "./locales"; export type CountryChip = {
+import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from "./languageMap"; import type { SupportedLocale } from "./locales"; export type CountryChip = {
   code: string; queryName: string; displayName: string; flag: string; reason: "language" | "proximity" | "global"; };
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
 const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI", "TV", "NR", "PW", "MH", "FM", "TO", "WS", "VU",]);
@@ -12,8 +11,7 @@ function localeCandidates(locale: SupportedLocale): SupportedLocale[] {
 function localeFromLang3(code3: string): SupportedLocale | null { return LANG3_TO_LOCALE[code3] ?? null; }
 export function getCountryDisplayName(locale: SupportedLocale, code: string): string {
   const country = COUNTRY_BY_CODE[code]; if (!country) return code;
-  try { const dn = new Intl.DisplayNames([locale], { type: "region" }); return dn.of(code) ?? country.name;
-  } catch { return country.name; } }
+  try { const dn = new Intl.DisplayNames([locale], { type: "region" }); return dn.of(code) ?? country.name; } catch { return country.name; } }
 function getSameLanguageCountries(locale: SupportedLocale): string[] {
   const candidates = new Set(localeCandidates(locale)); return SOVEREIGN_COUNTRIES.filter((country) =>country.lang3.some((lang3) => {
       const mapped = localeFromLang3(lang3); return mapped ? candidates.has(mapped) : false;

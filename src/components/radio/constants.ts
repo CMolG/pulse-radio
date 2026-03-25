@@ -1,9 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { BrowseCategory, EqBand, EqPreset } from './types'; import type { MessageKey } from '@/lib/i18n/messages';
-export const STORAGE_KEYS = {
+import type { BrowseCategory, EqBand, EqPreset } from './types'; import type { MessageKey } from '@/lib/i18n/messages'; export const STORAGE_KEYS = {
   FAVORITES: 'radio-favorites', RECENT: 'radio-recent', VOLUME: 'radio-volume', EQ_BANDS: 'radio-eq-bands',
-  LYRICS_CACHE: 'radio-lyrics-cache', CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
-  HISTORY: 'radio-history', FAVORITE_SONGS: 'radio-favorite-songs',
+  LYRICS_CACHE: 'radio-lyrics-cache', CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets', HISTORY: 'radio-history', FAVORITE_SONGS: 'radio-favorite-songs',
   NORMALIZER_ENABLED: 'radio-normalizer-enabled', STEREO_WIDTH: 'radio-stereo-width',
   BASS_ENHANCE: 'radio-bass-enhance', COMPRESSOR_ENABLED: 'radio-compressor-enabled',
   COMPRESSOR_AMOUNT: 'radio-compressor-amount', NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
@@ -35,22 +33,18 @@ export const GENRE_GRADIENTS: Record<string, string> = {
   trending: 'linear-gradient(135deg, #facc15, #f97316)', local: 'linear-gradient(135deg, #4ade80, #10b981)',
   world: 'linear-gradient(135deg, #60a5fa, #6366f1)', default: 'linear-gradient(135deg, #34c759, #0a84ff)', };
 export const EQ_BANDS: EqBand[] = [ { id: 'low',     frequency: 60,    type: 'lowshelf',  gain: 0, label: '60' },
-  { id: 'lo-mid',  frequency: 230,   type: 'peaking',   gain: 0, label: '230' },
-  { id: 'mid',     frequency: 910,   type: 'peaking',   gain: 0, label: '910' },
+  { id: 'lo-mid',  frequency: 230,   type: 'peaking',   gain: 0, label: '230' }, { id: 'mid',     frequency: 910,   type: 'peaking',   gain: 0, label: '910' },
   { id: 'hi-mid',  frequency: 3600,  type: 'peaking',   gain: 0, label: '3.6k' },
   { id: 'high',    frequency: 14000, type: 'highshelf', gain: 0, label: '14k' },];
 export const EQ_PRESETS: EqPreset[] = [ { name: 'Flat',       gains: [0, 0, 0, 0, 0] },
   { name: 'Bass Boost', gains: [6, 4, 0, 0, 0] }, { name: 'Treble',     gains: [0, 0, 0, 3, 6] },
   { name: 'V-Shape',    gains: [5, 2, -2, 2, 5] }, { name: 'Vocal',      gains: [-2, 0, 4, 3, 0] },
-  { name: 'Rock',       gains: [4, 2, -1, 3, 4] }, { name: 'Electronic', gains: [5, 3, -1, 2, 6] },
-  { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },];
+  { name: 'Rock',       gains: [4, 2, -1, 3, 4] }, { name: 'Electronic', gains: [5, 3, -1, 2, 6] }, { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },];
 const _flagCache = new Map<string, string>(); export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐'; const cached = _flagCache.get(code);
   if (cached) return cached; const upper = code.toUpperCase(); if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
-  const flag = String.fromCodePoint(0x1F1E6 + upper.charCodeAt(0) - 65, 0x1F1E6 + upper.charCodeAt(1) - 65,);
-  _flagCache.set(code, flag); return flag; }
+  const flag = String.fromCodePoint(0x1F1E6 + upper.charCodeAt(0) - 65, 0x1F1E6 + upper.charCodeAt(1) - 65,); _flagCache.set(code, flag); return flag; }
 export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
   trending: "genreTrending", pop: "genrePop", rock: "genreRock", jazz: "genreJazz",
   classical: "genreClassical", electronic: "genreElectronic", hiphop: "genreHiphop", country: "genreCountry",
-  ambient: "genreAmbient", lofi: "genreLofi", news: "genreNews", latin: "genreLatin",
-  metal: "genreMetal", local: "genreLocal", world: "genreWorld", };
+  ambient: "genreAmbient", lofi: "genreLofi", news: "genreNews", latin: "genreLatin", metal: "genreMetal", local: "genreLocal", world: "genreWorld", };

@@ -9,7 +9,6 @@ export function useRecent() { const [recent, setRecent] = useState<Station[]>(()
       if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid); return true;});
   }); useEffect(() => { saveToStorage(STORAGE_KEYS.RECENT, recent); }, [recent]); useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
   const add = useCallback((station: Station) => { setRecent(prev => {
-      const filtered = prev.filter(s => s.stationuuid !== station.stationuuid);
-      return [station, ...filtered].slice(0, MAX_RECENT);});}, []);
+      const filtered = prev.filter(s => s.stationuuid !== station.stationuuid); return [station, ...filtered].slice(0, MAX_RECENT);});}, []);
   const remove = useCallback((uuid: string) => { setRecent(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
   const clear = useCallback(() => setRecent([]), []); return { recent, add, remove, clear }; }

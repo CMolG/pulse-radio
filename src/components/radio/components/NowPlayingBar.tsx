@@ -4,8 +4,7 @@ import { Play, Pause, Volume2, VolumeX, Radio, SlidersHorizontal, Maximize2, Sta
 import type { Station, NowPlayingTrack, PlaybackStatus } from "../types";
 import type { StreamQuality } from "../hooks/useRadio"; import AnimatedBars from "./AnimatedBars";
 import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
-import { ErrorBoundary } from "./ErrorBoundary"; import UiImage from "@/components/common/UiImage";
-import { stationInitials } from "../utils/formatUtils";
+import { ErrorBoundary } from "./ErrorBoundary"; import UiImage from "@/components/common/UiImage"; import { stationInitials } from "../utils/formatUtils";
 type Props = { station: Station | null; track: NowPlayingTrack | null; status: PlaybackStatus; volume: number;
   muted: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
   icyBitrate?: string | null; onTogglePlay: () => void; onSetVolume: (v: number) => void; onToggleMute: () => void;
@@ -50,8 +49,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater" aria-label="Theater mode"><Maximize2 size={18} /></button>)}</div>
         {/* Fill iPhone safe-area inset below the bar without adding layout height */} <div aria-hidden
-          className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
-          style={{ height: "env(safe-area-inset-bottom, 0px)" }} /></div>
+          className="pointer-events-none absolute left-0 right-0 top-full glass-blur" style={{ height: "env(safe-area-inset-bottom, 0px)" }} /></div>
     ); }
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
@@ -62,18 +60,14 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {station ? ( stationInitials(station.name) || ( <Radio size={14} className="text-white/60" />)
                 ) : ( <Radio size={14} className="text-white/60" /> )}</span></div>
-          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="36px" loading="lazy" onError={() => setImgError(true)} />
-          )}</div>
+          ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes="36px" loading="lazy" onError={() => setImgError(true)} /> )}</div>
         {/* TODO replace upper img with next image */} <div className="min-w-0">
-          <p className="text-[12px] font-medium text-white truncate">{station?.name || "Not Playing"}</p>
-          <p className="text-[10px] text-secondary truncate">
+          <p className="text-[12px] font-medium text-white truncate">{station?.name || "Not Playing"}</p> <p className="text-[10px] text-secondary truncate">
             {track?.title ? (track.artist ? `${track.artist} — ${track.title}` : track.title) : firstTag}</p>
           {track?.album && ( <p className="text-[9px] text-dim truncate">{track.album}</p>)}</div>
         {icyBitrate && (
-          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
-            {icyBitrate}kbps</span>
-        )} {streamQuality && isPlaying && ( <span
-            className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
+          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center"> {icyBitrate}kbps</span>
+        )} {streamQuality && isPlaying && ( <span className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
               streamQuality === 'fair' ? 'bg-yellow-500' : streamQuality === 'poor' ? 'bg-red-500' : 'bg-gray-500'
             }`} title={`Stream: ${streamQuality}`} aria-label={`Stream quality: ${streamQuality}`} />
         )}</div>
@@ -87,15 +81,13 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
               <ErrorBoundary fallback={null}><FerrofluidRenderer frequencyDataRef={frequencyDataRef}
                 className="size-full" blobCount={6} colorPrimary="#1a1a2e" colorSecondary="#16213e" colorAccent="#0f3460" sensitivity={1.0}
                 demo /></ErrorBoundary></div><div className="flex-row-1.5 relative z-10">
-              <span className="dot-2 bg-red-500 animate-pulse" />
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
+              <span className="dot-2 bg-red-500 animate-pulse" /> <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
               <AnimatedBars size="small" /></div></>
         )}</div>
       {/* Toggles */} <div className="flex-row-0.5">{station && !theaterMode && ( <button onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50" title="Theater Mode"
             aria-label="Theater mode"><Maximize2 size={14} /></button>
-        )} {onToggleFav && ( <button onClick={onToggleFav}
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={!!isFavorite}
+        )} {onToggleFav && ( <button onClick={onToggleFav} aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
         )} {onFavSong && ( <button onClick={onFavSong} aria-label={songLiked ? 'Unlike song' : 'Like song'} aria-pressed={!!songLiked}
@@ -106,8 +98,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
             aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}>
             <Clock size={14} /> {sleepTimerMin != null && (
-              <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
-                {sleepTimerMin}</span>)}</button>
+              <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none"> {sleepTimerMin}</span>)}</button>
         )} <button onClick={onToggleEq} aria-label="Toggle equalizer"
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         ><SlidersHorizontal size={14} /></button></div>

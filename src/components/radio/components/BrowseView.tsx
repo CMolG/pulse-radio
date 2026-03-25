@@ -15,22 +15,19 @@ type Props = {
   view: ViewState; currentStation: Station | null; isPlaying: boolean; isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void; onToggleFav: (station: Station) => void;
   onPrefetch?: (streamUrl: string) => void; favorites?: Station[]; recent?: Station[]; onSelectGenre?: (cat: BrowseCategory) => void;
-  onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
-  onGoHome?: () => void; userGenreOrder?: string[]; };
+  onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void; onGoHome?: () => void; userGenreOrder?: string[]; };
 const SCROLL_CLASS =
   "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
 function ScrollRow({ title, icon, children, isMobile, className, }: {
   title?: string; icon?: React.ReactNode; children: React.ReactNode; isMobile: boolean; className?: string;
-}) { const ref = useRef<HTMLDivElement>(null); const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(false);
+}) { const ref = useRef<HTMLDivElement>(null); const [canLeft, setCanLeft] = useState(false); const [canRight, setCanRight] = useState(false);
   const check = useCallback(() => { const el = ref.current; if (!el) return; setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   }, []); useEffect(() => { const el = ref.current; if (!el) return; check();
     el.addEventListener("scroll", check, { passive: true }); const ro = new ResizeObserver(check);
     ro.observe(el); return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [check, children]); const scroll = (dir: -1 | 1) => { ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" }); };
-  return ( <div className={`mb-4 ${className ?? ""}`}>
-      {title && ( <div className={`flex items-center justify-between mb-2 ${isMobile ? "px-4" : ""}`}>
+  return ( <div className={`mb-4 ${className ?? ""}`}> {title && ( <div className={`flex items-center justify-between mb-2 ${isMobile ? "px-4" : ""}`}>
           <div className="flex-row-1.5">{icon} <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
           {!isMobile && ( <div className="flex gap-1"><button onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
@@ -50,8 +47,7 @@ export default function BrowseView({
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER; const defaultOrder = [...BROWSE_ORDER];
     // Map genre stats to category IDs (handle partial matches: "hip hop" → "hiphop")
     const GENRE_TO_CAT: Record<string, string> = { 'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi' };
-    const boostedIds = new Set<string>(); const ordered: string[] = [];
-    ordered.push('trending'); boostedIds.add('trending'); // Always keep trending first
+    const boostedIds = new Set<string>(); const ordered: string[] = []; ordered.push('trending'); boostedIds.add('trending'); // Always keep trending first
     for (const genre of userGenreOrder) {
       const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
       if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
@@ -60,8 +56,7 @@ export default function BrowseView({
     for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); } // Append remaining in default order
     return ordered;
   }, [userGenreOrder]); const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
-  const [stations, setStations] = useState<Station[]>([]);
-  const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
+  const [stations, setStations] = useState<Station[]>([]); const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
   const [failedCategories, setFailedCategories] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false); const [error, setError] = useState<string | null>(null);
   const [discoveryMode, setDiscoveryMode] = useState(false); const [retryKey, setRetryKey] = useState(0);
@@ -76,18 +71,15 @@ export default function BrowseView({
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
     const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return; try { let result: Station[];
-      if (cat.id === "trending") { result = await trendingStations(15);
-      } else if (cat.id === "local") { result = await localStations(15); } else if (cat.tag) {
+      if (cat.id === "trending") { result = await trendingStations(15); } else if (cat.id === "local") { result = await localStations(15); } else if (cat.tag) {
         result = await stationsByTag(cat.tag, 15);
-      } else return; if (!flags?.cancelled) { setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
-        setFailedCategories((prev) => {
+      } else return; if (!flags?.cancelled) { setCategorySections((prev) => ({ ...prev, [cat.id]: result })); setFailedCategories((prev) => {
           if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;});
       }
     } catch { if (!flags?.cancelled) { setFailedCategories((prev) => {
           if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;});
       } }
-  }, [translatedGenreCategories]);
-  useEffect(() => { setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter(""); scanGenRef.current++; }, [view]);
+  }, [translatedGenreCategories]); useEffect(() => { setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter(""); scanGenRef.current++; }, [view]);
   // Fetch ICY metadata for a single station, optionally guarded by a staleness check
   const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => {
     setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
@@ -111,8 +103,7 @@ export default function BrowseView({
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }
       }; load();} else {
       // Top view — progressively load categories (3 concurrent max)
-      setLoading(false); setCategorySections({}); setFailedCategories(new Set());
-      const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
+      setLoading(false); setCategorySections({}); setFailedCategories(new Set()); const CONCURRENCY = 3; const queue = [...effectiveBrowseOrder];
       const runBatch = async () => { while (queue.length > 0 && !flags.cancelled) {
           const batch = queue.splice(0, CONCURRENCY); await Promise.allSettled(batch.map(catId => loadCategory(catId, flags))); }
       }; runBatch(); }
@@ -151,8 +142,7 @@ export default function BrowseView({
   // Reset page synchronously during render when songFilter changes.
   // Using the "adjusting state during render" pattern avoids a one-frame
   // flash of empty results that the useEffect approach would cause.
-  const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
-  if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
+  const [prevSongFilter, setPrevSongFilter] = useState(songFilter); if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
   const allSongFilteredStations = useMemo(() => { // Filter grid by song/artist when songFilter is active — paginated
     const trimmed = songFilter.trim(); if (!trimmed) return []; const q = trimmed.toLowerCase(); return stations.filter(s => {
       const live = liveData[s.stationuuid]; if (!live?.track) return false; const { title, artist } = live.track;
@@ -163,10 +153,8 @@ export default function BrowseView({
   // Chip active states based on current view (chips trigger view changes, not local filters)
   const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
   const countryChipActive = (countryCode: string) => view.mode === "country" && view.countryCode === countryCode;
-  return ( <div className="col-fill min-w-0 h-full">
-      {/* Header */} <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
-        <div><h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2>
-          <p className="text-[12px] text-muted mt-0.5">
+  return ( <div className="col-fill min-w-0 h-full"> {/* Header */} <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
+        <div><h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2> <p className="text-[12px] text-muted mt-0.5">
             {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div><button
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
@@ -183,8 +171,7 @@ export default function BrowseView({
             ))} {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && ( <button onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >{t("seeMore")}</button>)}</div> );
-      })()} {/* Country chips — wrapping, limited on mobile */}
-      {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
+      })()} {/* Country chips — wrapping, limited on mobile */} {(() => { const MOBILE_LIMIT = 7; const collapsed = isMobile && !countryChipsExpanded;
         const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
         return ( <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? "px-3" : "px-4"} pb-3`}><button onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
@@ -205,19 +192,16 @@ export default function BrowseView({
           <div className="flex-center-col py-16"><Radio size={32} className="text-muted mb-2" />
             <p className="text-[13px] text-secondary">{t("noStationsFound")}</p></div>
         )} {!loading && !error && ( <> {/* Category rows for top view */} {view.mode === "top" && ( <> {/* Favorites row */}
-                {favorites && favorites.length > 0 && ( <ScrollRow title={t("favorites")}
-                      icon={<Star size={14} className="text-sys-orange/70" />}
+                {favorites && favorites.length > 0 && ( <ScrollRow title={t("favorites")} icon={<Star size={14} className="text-sys-orange/70" />}
                       isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
                 )} {/* Recent stations row */} {recent && recent.length > 0 && ( <ScrollRow title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />} isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
                 )} {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return null;
-                  const catStations = categorySections[catId]; if (catStations?.length === 0) return null;
-                  const icon = CATEGORY_ICONS[catId] ?? ( catStations
+                  const catStations = categorySections[catId]; if (catStations?.length === 0) return null; const icon = CATEGORY_ICONS[catId] ?? ( catStations
                       ? <span className={`inline-block w-2.5 h-2.5 rounded-full bg-linear-to-r ${cat.gradient}`} />
                       : <Music size={14} className="text-dim" /> );
-                  return ( <ScrollRow key={catId} title={cat.label} icon={icon} isMobile={isMobile}>
-                      {!catStations && failedCategories.has(catId) ? (
+                  return ( <ScrollRow key={catId} title={cat.label} icon={icon} isMobile={isMobile}> {!catStations && failedCategories.has(catId) ? (
                         <div className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}>
                           <Radio size={18} className="text-muted" />
                           <p className="text-[11px] text-muted">{t("failedToLoadStations")}</p><button onClick={() => loadCategory(catId)}
@@ -232,8 +216,7 @@ export default function BrowseView({
             {view.mode !== "top" && stations.length > 0 && (() => { const filterActive = !!songFilter.trim();
               const paginationSource = filterActive ? allSongFilteredStations : stations;
               const totalPages = Math.ceil(paginationSource.length / PAGE_SIZE); return ( <> {/* Scan now-playing bar */}
-                  <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}><button
-                      onClick={() => setScanEnabled(v => !v)}
+                  <div className={`flex items-center gap-2 mb-3 ${isMobile ? "px-3" : "px-0"}`}><button onClick={() => setScanEnabled(v => !v)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${
                         scanEnabled ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
                           : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
@@ -246,15 +229,13 @@ export default function BrowseView({
                           placeholder={t("filterBySong")} value={songFilter} onChange={e => setSongFilter(e.target.value)}
                           className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0" />
                         {songFilter && (
-                          <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
-                            <X size={11} /></button>)}</div>
+                          <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0"> <X size={11} /></button>)}</div>
                     )} {scanEnabled && songFilter && ( <span className="text-[11px] text-dim shrink-0">
                         {t("stationCount", { count: allSongFilteredStations.length })}</span>)}</div>
                   {/* Station grid */} <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
                     {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
                       const live = liveData[s.stationuuid]; return ( <StationCard key={s.stationuuid} station={s}
-                          isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
-                          isCurrent={currentStation?.stationuuid === s.stationuuid}
+                          isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid} isCurrent={currentStation?.stationuuid === s.stationuuid}
                           isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)}
                           onToggleFav={() => onToggleFav(s)} onPrefetch={() => onPrefetch?.(s.url_resolved)}
                           liveStatus={live?.status} liveTrack={live?.track} onPeek={!scanEnabled ? () => peekStation(s) : undefined} /> );

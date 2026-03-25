@@ -1,8 +1,7 @@
 import React from "react"; import { Music, Radio, Clock, Trash2, Heart, ExternalLink } from "lucide-react";
 import { motion } from "motion/react"; import type { SongDetailData } from "../types";
 import { formatDuration } from "../utils/formatDuration"; import UiImage from "@/components/common/UiImage";
-import { formatTimeAgo, itunesSearchUrl } from "../utils/formatUtils";
-export type SongCardItem = SongDetailData & { id: string; timestamp: number };
+import { formatTimeAgo, itunesSearchUrl } from "../utils/formatUtils"; export type SongCardItem = SongDetailData & { id: string; timestamp: number };
 type HeartAction = { filled: boolean; onClick: () => void; label: string };
 type Props = { item: SongCardItem; delay: number; onRemove: () => void; onSelect?: (song: SongDetailData) => void;
   heart?: HeartAction | null; hideRemove?: boolean; };
@@ -12,8 +11,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
       role="button" tabIndex={0} aria-label={`${item.title} by ${item.artist}`}
       onClick={() => onSelect?.({ title: item.title, artist: item.artist, album: item.album,
         artworkUrl: item.artworkUrl, itunesUrl: item.itunesUrl, durationMs: item.durationMs,
-        genre: item.genre, releaseDate: item.releaseDate, trackNumber: item.trackNumber,
-        trackCount: item.trackCount, stationName: item.stationName,
+        genre: item.genre, releaseDate: item.releaseDate, trackNumber: item.trackNumber, trackCount: item.trackCount, stationName: item.stationName,
       })}><div className="w-full aspect-square bg-surface-3 relative">{item.artworkUrl ? (
           <UiImage src={item.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />
         ) : ( <div className="size-full flex items-center justify-center"><Music size={32} className="text-dim" /></div>
@@ -35,5 +33,4 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         ><ExternalLink size={10} />Listen on Apple Music</a><div className="flex items-center gap-1.5">
           <Radio size={9} className="text-dim flex-shrink-0" /> <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
           <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div> );
-}, (prev, next) =>prev.item === next.item && prev.delay === next.delay && prev.hideRemove === next.hideRemove &&
-  prev.heart?.filled === next.heart?.filled);
+}, (prev, next) =>prev.item === next.item && prev.delay === next.delay && prev.hideRemove === next.hideRemove && prev.heart?.filled === next.heart?.filled);

@@ -2,8 +2,7 @@
 "use client"; import React, { useState, useMemo, useCallback, useEffect, useRef } from "react"; import { createPortal } from "react-dom";
 import { Music, Heart, Trash2, Users, X, ChevronDown, Disc3 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react"; import type { FavoriteSong, SongDetailData } from "../types";
-import UiImage from "@/components/common/UiImage"; import { primaryArtist } from "../utils/formatUtils";
-import SongCard from "./SongCard"; type Props = {
+import UiImage from "@/components/common/UiImage"; import { primaryArtist } from "../utils/formatUtils"; import SongCard from "./SongCard"; type Props = {
   songs: FavoriteSong[]; onRemove: (id: string) => void; onClear: () => void; onSelect?: (song: SongDetailData) => void;
 }; type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = "none" | "artist" | "album"; const filterBtnClass = (active: boolean) =>
@@ -37,10 +36,8 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
         <span className="text-[11px] text-white/30 bg-white/[0.06] px-2 py-0.5 rounded-full">{songs.length}</span>
         {hasMore && ( <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown size={14} className="text-white/30" /></motion.span>)}</button>
-      {/* Stacked/expanded cards */}
-      {!expanded && hasMore ? ( <div className="relative cursor-pointer" onClick={() => setExpanded(true)} role="button"
-          tabIndex={0} aria-label={`Expand ${label} songs`}
-          style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}>
+      {/* Stacked/expanded cards */} {!expanded && hasMore ? ( <div className="relative cursor-pointer" onClick={() => setExpanded(true)} role="button"
+          tabIndex={0} aria-label={`Expand ${label} songs`} style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}>
           {songs.slice(0, VISIBLE_COUNT).map((song, i) => ( <div key={song.id}
               className="absolute left-0 right-0 transition-all duration-300" style={{ top: `${i * 16}px`, zIndex: VISIBLE_COUNT - i,
                 transform: `scale(${1 - i * 0.03})`, opacity: 1 - i * 0.15, maxWidth: "200px",
@@ -57,8 +54,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
               +{songs.length - VISIBLE_COUNT} more</span></div></div>
       ) : ( <AnimatePresence><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"> {visibleSongs.map((song, i) => (
               <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}><SongCard
-                  item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null}
-                  hideRemove /></div>))}</div></AnimatePresence>
+                  item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null} hideRemove /></div>))}</div></AnimatePresence>
       )} {expanded && hasMore && ( <button onClick={() => setExpanded(false)}
           className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
           <ChevronDown size={12} className="rotate-180" /> Collapse</button>)}</div>
@@ -70,13 +66,11 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   }, []); const closeContextMenu = useCallback(() => setContextMenu(null), []);
   const artistGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>(); // Group by primary artist
     for (const song of songs) {
-      const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? []; existing.push(song);
-      groups.set(artist, existing); }
+      const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? []; existing.push(song); groups.set(artist, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]); const albumGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>(); // Group by album
     for (const song of songs) {
-      const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? []; existing.push(song);
-      groups.set(album, existing); }
+      const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? []; existing.push(song); groups.set(album, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]); if (songs.length === 0) { return (
       <div className="flex-center-col py-20 px-4"><Heart size={40} className="text-dim mb-3" />
@@ -92,18 +86,15 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
           </button> {/* By Album */} <button onClick={() => toggleFilter("album")} className={filterBtnClass(filterMode === "album")}>
             <Disc3 size={10} /> By Album
             {filterMode === "album" && <X size={8} className="ml-0.5" onClick={(e) => { e.stopPropagation(); setFilterMode("none"); }} />}
-          </button></div><button onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
+          </button></div><button onClick={onClear} className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} /> Clear all</button></div>
       {filterMode === "artist" ? ( <div> {artistGroups.map(([artistName, artistSongs]) => ( <GroupStack key={artistName}
-              label={artistName} icon={Users} songs={artistSongs} onRemove={onRemove}
-              onSelect={onSelect} onContextMenu={handleContextMenu} />
+              label={artistName} icon={Users} songs={artistSongs} onRemove={onRemove} onSelect={onSelect} onContextMenu={handleContextMenu} />
           ))}</div>
       ) : filterMode === "album" ? ( <div> {albumGroups.map(([albumName, albumSongs]) => ( <GroupStack key={albumName}
               label={albumName} icon={Disc3} songs={albumSongs} onRemove={onRemove} onSelect={onSelect} onContextMenu={handleContextMenu} />
           ))}</div>
       ) : ( <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"> {songs.map((song, i) => (
             <div key={song.id} onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}><SongCard
-                item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null}
-                hideRemove /></div>))}</div>)}</div>
+                item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null} hideRemove /></div>))}</div>)}</div>
   ); }

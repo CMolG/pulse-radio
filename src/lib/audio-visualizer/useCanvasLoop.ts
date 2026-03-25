@@ -4,8 +4,7 @@ export type PaintFn = (ctx: CanvasRenderingContext2D, w: number, h: number, freq
 export function useCanvasLoop(
   frequencyDataRef: React.RefObject<Uint8Array | null> | undefined, paint: PaintFn, dprScale = 1,
 ): React.RefObject<HTMLCanvasElement | null> {
-  const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0);
-  const paintRef = useRef(paint); const freqRef = useRef(frequencyDataRef);
+  const canvasRef = useRef<HTMLCanvasElement>(null); const frameRef = useRef(0); const paintRef = useRef(paint); const freqRef = useRef(frequencyDataRef);
   const sizeRef = useRef({ w: 0, h: 0 }); useEffect(() => { paintRef.current = paint; });
   useEffect(() => { freqRef.current = frequencyDataRef; }, [frequencyDataRef]);
   // Track canvas size via ResizeObserver instead of getBoundingClientRect() per frame
