@@ -119,12 +119,6 @@ export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36)
       ? "proximity"
       : "global";
 
-    return {
-      code,
-      queryName: country.name,
-      displayName,
-      flag: countryFlag(code),
-      reason,
-    };
+    return { code, queryName: country.name, displayName, flag: countryFlag(code), reason };
   });
 }

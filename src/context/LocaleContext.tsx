@@ -43,13 +43,7 @@ export function LocaleProvider({
 
   const value = useMemo<LocaleContextValue>(() => {
     const t: TranslateFn = (key, vars) => translate(locale, key, vars);
-    return {
-      locale,
-      setLocale: setLocaleState,
-      t,
-      rtl: isRtlLocale(locale),
-      locales: SUPPORTED_LOCALES,
-    };
+    return { locale, setLocale: setLocaleState, t, rtl: isRtlLocale(locale), locales: SUPPORTED_LOCALES };
   }, [locale]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

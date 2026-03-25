@@ -99,21 +99,10 @@ async function fetchLyricsForArtist(
 
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
   if (data.syncedLyrics) {
-    return {
-      trackName: title,
-      artistName: artist,
-      synced: true,
-      lines: parseLrc(data.syncedLyrics),
-    };
+    return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) };
   }
   if (data.plainLyrics) {
-    return {
-      trackName: title,
-      artistName: artist,
-      synced: false,
-      lines: [],
-      plainText: data.plainLyrics,
-    };
+    return { trackName: title, artistName: artist, synced: false, lines: [], plainText: data.plainLyrics };
   }
   return null;
 }
