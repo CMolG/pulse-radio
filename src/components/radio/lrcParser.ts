@@ -4,7 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 
-export type LyricLine = { time: number; text: string; };
+import type { LyricLine } from './types';
 const TS_REGEX = /\[(\d{1,3}):(\d{2})(?:\.(\d{1,3}))?]/g;
 
 export function parseLrc(lrcText: string): LyricLine[] {

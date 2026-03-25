@@ -5,12 +5,7 @@
  */
 
 @import "tailwindcss";
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --accent-color: #3478f6;
-  --accent-rgb: 52, 120, 246;
-}
+:root { --background: #ffffff; --foreground: #171717; --accent-color: #3478f6; --accent-rgb: 52, 120, 246; }
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -71,12 +66,7 @@ textarea,
 .lyrics-reel::-webkit-scrollbar { display: none; }
 
 /* Range slider - macOS style */
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-}
+input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
 input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
@@ -94,11 +84,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 input[type="range"]::-webkit-slider-thumb:active { transform: scale(0.95); }
-input[type="range"]::-moz-range-track {
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.12);
-}
+input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); }
 input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;

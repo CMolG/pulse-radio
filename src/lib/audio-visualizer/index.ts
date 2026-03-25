@@ -10,4 +10,3 @@ export { ParallaxAlbumBackground } from './ParallaxAlbumBackground';
 export { useAlbumArt } from './useAlbumArt';
 export { getOrCreateAudioSource, resumeAudioContext, hasAudioSource } from './audioSourceCache';
 export { FerrofluidRenderer } from './FerrofluidRenderer';
-export { CircularRenderer } from './CircularRenderer';
