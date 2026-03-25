@@ -51,19 +51,16 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
     setSelectedPreset(name); eq.applyPreset(gains);
     onPresetChange(name);
   }, [eq, onPresetChange]);
-
   const handleSetGain = useCallback((id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange(null);
     eq.setBandGain(id, gain);
   }, [eq, onPresetChange]);
-
   const handleSave = () => {
     const name = presetName.trim();
     if (name) {
       eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false);
     }
   };
-
   return (
     <motion.div
       initial={{ opacity: 0 }}

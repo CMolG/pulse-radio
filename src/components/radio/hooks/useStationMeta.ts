@@ -52,7 +52,6 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
       }, { once: true });
     }
   }
-
   try {
     const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null };
@@ -72,14 +71,12 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   // Cache lowercase station name to avoid recomputing on every poll
   if (stationName !== _lastStation) { _lastStation = stationName; _lastStationLower = stationName.toLowerCase(); }
   if (raw.toLowerCase() === _lastStationLower) return null;
-
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
   for (const sep of separators) {
     const idx = raw.indexOf(sep);
     if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() };
   }
-
   return { title: raw.trim(), artist: '' };
 }
 
@@ -92,7 +89,6 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   // Tracks the URL of the station whose ICY data is currently being polled.
   // Used to distinguish a station change from an isPlaying toggle.
   const prevStationUrlRef = useRef<string | null>(null);
-
   // Clear track state during render when station goes null (avoid setState in effect)
   const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null);
   const currentStationId = station?.url_resolved ?? null;
@@ -102,7 +98,6 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
       setTrack(null); setIcyBitrate(null); setStreamCodec(null);
     }
   }
-
   useEffect(() => {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     if (!station) {
@@ -146,7 +141,6 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
       document.removeEventListener('visibilitychange', onVisible); abortController.abort();
     };
   }, [station, isPlaying]);
-
   return {
     // Keep showing track/bitrate as long as a station is selected.
     // We do NOT null these out while loading — the ICY swap keeps the

@@ -30,10 +30,8 @@ export function VisualizerCanvas({
   const sizeRef = useRef({ width: 0, height: 0 });
   const gradientCacheRef = useRef<{ key: string; gradient: CanvasGradient } | null>(null);
   const supportsRoundRectRef = useRef<boolean | null>(null);
-
   // Invalidate cached color when prop changes
   useEffect(() => { resolvedColorRef.current = null; gradientCacheRef.current = null; }, [color]);
-
   // Track size via ResizeObserver instead of getBoundingClientRect per frame
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -42,7 +40,6 @@ export function VisualizerCanvas({
     }; updateSize();
     const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, []);
-
   useEffect(() => {
     const draw = () => {
       const canvas = canvasRef.current; const frequencyData = frequencyDataRef?.current;
@@ -104,6 +101,5 @@ export function VisualizerCanvas({
     };
     frameRef.current = requestAnimationFrame(draw); return () => cancelAnimationFrame(frameRef.current);
   }, [frequencyDataRef, mode, barCount, color]);
-
   return <canvas ref={canvasRef} className={`pointer-events-none ${className}`} style={{ opacity }} />;
 }

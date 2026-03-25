@@ -46,12 +46,10 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null,
     song?.stationName ?? null,
   );
-
   const plainLyrics =
     lyrics?.plainText?.trim() ||
     lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n')
       .trim() || '';
-
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => (
     <div className="space-y-2 animate-pulse">
@@ -68,14 +66,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       )}
     </div>
   );
-
   // Close on Escape
   useEffect(() => {
     if (!song) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
   }, [song, onClose]);
-
   // Focus trap: keep Tab cycling within the modal
   const modalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -98,7 +94,6 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     }; window.addEventListener('keydown', onTab);
     return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
   }, [song]);
-
   return (
     <AnimatePresence>
       {song && (

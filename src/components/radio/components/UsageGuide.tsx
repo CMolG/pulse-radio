@@ -67,7 +67,6 @@ type Props = { onClose: () => void };
 
 function UsageGuide({ onClose }: Props) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-
   return (
     <motion.div
       initial={{ opacity: 0 }}

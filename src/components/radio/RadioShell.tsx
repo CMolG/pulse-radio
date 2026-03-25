@@ -112,9 +112,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       trackCount: albumArt.trackCount ?? undefined,
     };
   }, [track, albumArt]);
-
   const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
-
   // Track listen time for stats (every 5 seconds while playing)
   const lastTickRef = useRef(Date.now());
   const { tickListenTime } = usageStats;
@@ -126,7 +124,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }, 5000); lastTickRef.current = Date.now();
     return () => clearInterval(interval);
   }, [radio.status, radio.station, tickListenTime]);
-
   // Record song play when a new track starts
   const lastRecordedTrackRef = useRef<string | null>(null);
   const { recordSongPlay, updateSongMeta } = usageStats;
@@ -141,7 +138,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       updateSongMeta(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.genre, enrichedTrack.artworkUrl,);
     }
   }, [enrichedTrack?.title, enrichedTrack?.artist, enrichedTrack?.genre, enrichedTrack?.artworkUrl, recordSongPlay, updateSongMeta]);
-
   const [showEq, setShowEq] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
@@ -175,25 +171,20 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (duckOrigVolRef.current !== null) duckOrigVolRef.current = radio.muted ? 0 : radio.volume;
   }, [radio.volume, radio.muted]);
-
   const [eqPreset, setEqPreset] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"discover" | "history" | "favorites">("discover");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(null);
-
   function mkView(mode: ViewState["mode"], label: string, overrides?: Partial<ViewState>): ViewState {
     return { mode, query: "", tag: "", countryCode: "", countryQueryName: "", label, ...overrides };
   }
-
   function countryView(code: string): ViewState {
     const country = COUNTRY_BY_CODE[code];
     return mkView("country", getCountryDisplayName(locale, code), { countryCode: code, countryQueryName: country?.name ?? "" });
   }
-
   const resetNav = useCallback((v: ViewState) => {
     setView(v); setActiveTab("discover"); setTheaterMode(false); setSearchQuery("");
   }, []);
-
   const [view, setView] = useState<ViewState>(() => {
     const code = (initialCountryCode ?? "").toUpperCase();
     if (isSovereignCountryCode(code)) return countryView(code);
@@ -205,14 +196,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       : null;
     if (newLabel && newLabel !== view.label) setView(prev => ({ ...prev, label: newLabel }));
   }, [locale, t, view.countryCode, view.label, view.mode]);
-
   useEffect(() => {
     const code = (initialCountryCode ?? "").toUpperCase();
     if (!isSovereignCountryCode(code) || !COUNTRY_BY_CODE[code]) return;
     if (view.mode === "country" && view.countryCode === code) return;
     resetNav(countryView(code));
   }, [initialCountryCode, locale, view.countryCode, view.mode, resetNav]);
-
   // Sync view state when the user navigates with browser back/forward.
   // pushState is used for country and home navigation but the browser's
   // popstate event is the only way to detect back/forward.
@@ -223,17 +212,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     }; window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
   }, [locale, t, resetNav]);
-
   // Reset compact state on layout change
   useEffect(() => { if (layout === "pip") setMiniMode(false); }, [layout]);
-
   // Track network connectivity for offline indicator
   useEffect(() => {
     const goOnline = () => setIsOnline(true); const goOffline = () => setIsOnline(false);
     window.addEventListener('online', goOnline); window.addEventListener('offline', goOffline);
     return () => { window.removeEventListener('online', goOnline); window.removeEventListener('offline', goOffline); };
   }, []);
-
   // Sync to shared playback store
   const pbStore = usePlaybackStore;
   useEffect(() => {
@@ -244,20 +230,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       state.setTrackInfo(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.artworkUrl ?? albumArt.artworkUrl,);
     }
   }, [radio.status, radio.volume, radio.muted, radio.currentTime, enrichedTrack, albumArt.artworkUrl, pbStore]);
-
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
-
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
       eqConnectSource(radio.audioRef.current); analyser.connectAudio(radio.audioRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station]);
-
   // Keep EQ outputGain at unity — audio.volume already handles user volume.
   // Previously this forwarded radio.volume/muted, causing volume² (quadratic).
   useEffect(() => { setOutputVolume(1, false); }, [setOutputVolume]);
-
   // Ref holds fresh deps so handlePlay can use [] and remain referentially
   // stable.  Prevents child components receiving onPlay={handlePlay} from
   // re-rendering on every frame during playback.
@@ -265,7 +247,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser };
   }, [radio, recent, stationQueue, eqConnectSource, analyser]);
-
   const handlePlay = useCallback((station: Station) => {
       const { radio: r, recent: rec, stationQueue: sq, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
       // Pre-create audio element and set up the Web Audio graph BEFORE calling play().
@@ -284,7 +265,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     },
     [],
   );
-
   // Auto-advance to next queued station on error, or failover to similar station
   useEffect(() => {
     let cancelled = false;
@@ -304,10 +284,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.status]);
-
   const skipDepsRef = useRef({ radio, favs, stationQueue });
   useEffect(() => { skipDepsRef.current = { radio, favs, stationQueue }; }, [radio, favs, stationQueue]);
-
   const handleSkipNext = useCallback(() => {
     const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     // Prefer queue if it has entries
@@ -317,7 +295,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }
     if (r.station) { const next = f.playNext(r.station.stationuuid); if (next) handlePlay(next); }
   }, [handlePlay]);
-
   const handleSkipPrev = useCallback(() => {
     const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     if (sq.hasPrev) {
@@ -326,7 +303,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }
     if (r.station) { const prev = f.playPrev(r.station.stationuuid); if (prev) handlePlay(prev); }
   }, [handlePlay]);
-
   useMediaSession({
     station: radio.station,
     track: enrichedTrack,
@@ -339,7 +315,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)),
     onSeekForward: () => radio.seek(radio.currentTime + 10),
   });
-
   // Ref holds fresh state for keyboard handler so the event listener is
   // registered once — avoids ~60fps add/removeEventListener churn from
   // unstable deps (radio, favs, etc.) that change every render.
@@ -347,7 +322,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     keydownRef.current = { radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics };
   }, [radio, handleSkipNext, handleSkipPrev, favs, favSongs, enrichedTrack, theaterMode, showEq, showShortcuts, selectedSong, sleepTimer, showToast, realtimeLyrics]);
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const { radio: r, handleSkipNext: skipNext, handleSkipPrev: skipPrev, favs: f, favSongs: fs, enrichedTrack: et, theaterMode: tm, showEq: eq, showShortcuts: sc, selectedSong: ss, sleepTimer: st, showToast: toast, realtimeLyrics: rl } = keydownRef.current;
@@ -413,37 +387,31 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       }
     }; window.addEventListener("keydown", onKeyDown); return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
-
   const isSongLiked = enrichedTrack?.title ? favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "") : false;
   const handleToggleFav = useCallback(() => {
     if (!radio.station) return;
     const wasFav = favs.has(radio.station.stationuuid); favs.toggle(radio.station);
     showToast(wasFav ? "Removed from favorites" : radio.station.name, "star");
   }, [radio.station, favs, showToast]);
-
   const handleFavSong = useCallback(() => {
     if (!enrichedTrack?.title || !radio.station) return;
     const wasLiked = favSongs.has(enrichedTrack.title, enrichedTrack.artist ?? "");
     favSongs.toggle(buildFavInput(enrichedTrack, radio.station));
     showToast(wasLiked ? "Song removed" : enrichedTrack.title, "heart");
   }, [enrichedTrack, radio.station, favSongs, showToast]);
-
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
     const wasLiked = favSongs.has(entry.title, entry.artist); const { id: _, timestamp: _t, ...input } = entry;
     favSongs.toggle(input); showToast(wasLiked ? "Song removed" : entry.title, "heart");
   }, [favSongs, showToast]);
-
   const handleSearch = useCallback((query: string) => {
     const sanitized = query.trim();
     setView(mkView("search", t("searchResultLabel", { query: sanitized }), { query: sanitized }));
     setActiveTab("discover"); setTheaterMode(false);
   }, [t]);
-
   const handleGoHome = useCallback(() => {
     resetNav(mkView("top", t("topStations")));
     if (pathname !== "/") window.history.pushState(null, "", "/");
   }, [pathname, t, resetNav]);
-
   const handleSearchSubmit = useCallback((e: React.FormEvent) => {
       e.preventDefault();
       if (searchQuery.trim()) handleSearch(searchQuery.trim());
@@ -451,19 +419,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     },
     [searchQuery, handleSearch, handleGoHome],
   );
-
   const handleSelectGenre = useCallback((cat: BrowseCategory) => {
     const key = GENRE_LABEL_KEYS[cat.id];
     setView(mkView("genre", key ? t(key) : cat.label, { tag: cat.tag || cat.id }));
     setTheaterMode(false); setSearchQuery("");
   }, [t]);
-
   const handleSelectCountry = useCallback((countryCode: string, countryQueryName: string, countryDisplayName: string) => {
     setView(mkView("country", countryDisplayName, { countryCode, countryQueryName }));
     setTheaterMode(false); setSearchQuery(""); const newPath = `/${countryCode}`;
     if (pathname !== newPath) window.history.pushState(null, "", newPath);
   }, [pathname]);
-
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
   const isLandingNavigation = !theaterMode;
   const theaterAudioBadges = useMemo(() => {
@@ -475,7 +440,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (eq.enabled && eqPreset) badges.push(t("presetLabel", { name: eqPreset }));
       return badges;
   }, [eq.enabled, eq.noiseReductionMode, eq.normalizerEnabled, eqPreset, radio.station, theaterMode, t]);
-
   const selectedFavSong = selectedSong
     ? favSongs.songs.find(s => s.title === selectedSong.title && s.artist === selectedSong.artist) ?? null
     : null;
@@ -487,17 +451,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         favSongs.remove(selectedFavSong.id); setSelectedSong(null);
       } : undefined} />
   );
-
   const shortcutsOverlay = showShortcuts ? (
     <KeyboardShortcutsHelp onClose={() => setShowShortcuts(false)} />
   ) : null;
-
   const offlineBanner = !isOnline ? (
     <div className="fixed top-0 inset-x-0 z-[250] bg-yellow-600 text-white text-center text-[12px] font-medium py-1 select-none" role="alert">
       {t("offlineBanner")}
     </div>
   ) : null;
-
   const eqPanelElement = showEq ? (
     <EqPanel
       bands={eq.bands}
@@ -523,7 +484,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onPresetChange={setEqPreset}
       onClose={() => setShowEq(false)} />
   ) : null;
-
   const toastElement = toast ? (
     <motion.div
       key={toast.key}
@@ -541,7 +501,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       </div>
     </motion.div>
   ) : null;
-
   const mkNavTabs = (sz: number) => [ { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={sz} /> },
     { id: "history" as const, label: t("history"), icon: <Clock size={sz} /> },
     { id: "favorites" as const, label: t("favorites"), icon: <Heart size={sz} /> },
@@ -560,7 +519,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     currentTime: effectiveCurrentTime,
     activeLineOverride: realtimeLyrics?.activeLineIndex,
   };
-
   const theaterFullProps = {
     ...theaterBaseProps,
     station: radio.station!,
@@ -568,7 +526,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     onToggleFav: radio.station ? handleToggleFav : undefined,
     isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false,
   };
-
   const nowPlayingBaseProps = {
     station: radio.station,
     track: enrichedTrack,
@@ -584,7 +541,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     sleepTimerMin: sleepTimer.remainingMin,
     onCycleSleepTimer: sleepTimer.cycle,
   };
-
   const nowPlayingFullProps = {
     ...nowPlayingBaseProps,
     onToggleEq: () => setShowEq((s) => !s),
@@ -597,7 +553,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     showEq,
     theaterMode,
   };
-
   /* ─── Shared tab content elements (used by mobile + desktop) ─── */
   const browseViewElement = (
     <BrowseView
@@ -631,7 +586,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onClear={favSongs.clear}
       onSelect={setSelectedSong} />
   );
-
   const parallaxElement = (
     <ParallaxBackground
       faviconUrl={radio.station?.favicon}
@@ -639,7 +593,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       audioAmplitude={bgAudio.amplitude}
       landingMode={isLandingNavigation} />
   );
-
   const nowPlayingHeroElement = radio.station ? (
     <NowPlayingHero
       station={radio.station}
@@ -650,7 +603,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       icyBitrate={icyBitrate}
       onTheater={() => setTheaterMode(true)} />
   ) : null;
-
   const sharedModals = (
     <>
       {songDetailModal}
@@ -659,7 +611,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       <OnboardingModal />
     </>
   );
-
   const pulseLogoButton = (
     <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
       <div className="relative w-5 h-5 flex-shrink-0">
@@ -668,10 +619,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       <span className="text-[15px] font-semibold text-white">Pulse</span>
     </button>
   );
-
   const emptyStation = useMemo((): Station => ({ name: t("discover"), url_resolved: "", stationuuid: "", favicon: "", tags: "", codec: "", bitrate: 0, country: "", countrycode: "", votes: 0 }), [t]);
   const glassStyle = { background: 'rgba(30, 32, 45, 0.62)', backdropFilter: 'blur(20px) saturate(1.8)', WebkitBackdropFilter: 'blur(20px) saturate(1.8)' } as const;
-
   /* ─── PiP layout: always theater, no sidebar/lyrics ─── */
   if (layout === "pip") {
     return (
@@ -687,7 +636,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       </div>
     );
   }
-
   /* ─── Mobile layout: drawer sidebar, overlay lyrics ─── */
   if (layout === "mobile") {
     return (
@@ -798,7 +746,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       </div>
     );
   }
-
   /* ─── Desktop layout (default) ─── */
   return (
     <div

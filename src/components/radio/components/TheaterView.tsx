@@ -111,18 +111,15 @@ export default function TheaterView({
   const lastUrlRef = useRef<string | null>(null);
   const coverUrl = artworkUrl ?? station.favicon;
   const showFallback = !coverUrl || failedCoverUrl === coverUrl;
-
   useEffect(() => {
     if (!artworkUrl || artworkUrl === lastUrlRef.current) return; lastUrlRef.current = artworkUrl;
     let cancelled = false; extractColors(artworkUrl).then(c => { if (!cancelled) setColors(c); });
     return () => { cancelled = true; };
   }, [artworkUrl]);
-
   const [color1, color2, color3] = colors;
   const theaterTags = useMemo( () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
     [station.tags],
   );
-
   return (
     <motion.div
       initial={{ opacity: 0 }}

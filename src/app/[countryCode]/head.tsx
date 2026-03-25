@@ -12,12 +12,9 @@ export default async function Head({ params }: CountryHeadProps) {
   const resolved = await params;
   const countryCode = resolved.countryCode.toUpperCase();
   const country = COUNTRY_BY_CODE[countryCode];
-
   if (!country) return null;
-
   const title = `Top radio stations in ${country.name} (${countryCode})`;
   const description = `Listen to top internet radio stations in ${country.name}. Popular live stations and genres tailored for ${country.name}.`;
-
   return (
     <>
       <title>{title}</title>

@@ -24,7 +24,6 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
     cache.delete(key); cache.set(key, hit);
     return hit.data;
   }
-
   // Try current server, failover to next on error
   for (let attempt = 0; attempt < SERVERS.length; attempt++) {
     try {

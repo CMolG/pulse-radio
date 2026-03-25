@@ -25,7 +25,6 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
   const lastPublishedRef = useRef(0);
   const rafRef = useRef(0);
   const lastTsRef = useRef(0);
-
   useEffect(() => {
     const loop = (ts: number) => {
       const lastTs = lastTsRef.current || ts; lastTsRef.current = ts;
@@ -44,7 +43,6 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
     rafRef.current = requestAnimationFrame(loop);
     return () => { cancelAnimationFrame(rafRef.current); lastTsRef.current = 0; };
   }, [enabled, meterRef]);
-
   return { amplitude };
 }
 

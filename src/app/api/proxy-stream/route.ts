@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-
   let parsed: URL;
   try {
     parsed = new URL(streamUrl);
@@ -47,16 +46,13 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-
   const controller = new AbortController();
   const timeout = MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
-
   // Propagate client disconnect to upstream so we don't leak connections
   if (req.signal) {
     if (req.signal.aborted) controller.abort();
     else req.signal.addEventListener('abort', () => controller.abort(), { once: true });
   }
-
   try {
     const upstream = await fetch(parsed.toString(), {
       headers: { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0', },

@@ -10,7 +10,6 @@
  */
 export function isPrivateHost(hostname: string): boolean {
   const host = hostname.toLowerCase();
-
   // Loopback
   if (
     host === 'localhost' ||
@@ -18,7 +17,6 @@ export function isPrivateHost(hostname: string): boolean {
     host === '::1' ||
     host === '0.0.0.0' || host.endsWith('.localhost')
   ) { return true; }
-
   // IPv4 private ranges (RFC 1918 + link-local + shared address space)
   const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
   if (ipv4Match) {
@@ -31,16 +29,13 @@ export function isPrivateHost(hostname: string): boolean {
     if (a === 127) return true;                          // 127.0.0.0/8
     if (a === 0) return true;                            // 0.0.0.0/8
   }
-
   // IPv6 private ranges (simplified check for bracketed or plain)
   const ipv6 = host.replace(/^\[/, '').replace(/\]$/, '');
   if (ipv6.startsWith('fe80:')) return true;             // link-local
   if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true; // unique local
   if (ipv6 === '::1' || ipv6 === '::') return true;
-
   // IPv6-mapped IPv4 (::ffff:A.B.C.D) — extract the embedded IPv4 and check it
   const mappedMatch = ipv6.match(/^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i);
   if (mappedMatch) return isPrivateHost(mappedMatch[1]);
-
   return false;
 }

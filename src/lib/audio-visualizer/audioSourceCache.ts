@@ -32,7 +32,6 @@ export function getOrCreateAudioSource(audio: HTMLAudioElement): {
     if (existing.ctx.state === 'suspended') existing.ctx.resume().catch(() => {});
     return existing;
   }
-
   const ctx = getSharedContext();
   const source = ctx.createMediaElementSource(audio);
   const entry = { ctx, source };

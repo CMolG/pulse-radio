@@ -280,11 +280,9 @@ input[type="color"]:hover { border-color: rgba(255, 255, 255, 0.25); }
   /* Prevent pull-to-refresh / bounce on mobile */
   html,
   body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
-
   /* Prevent text selection on UI chrome */
   [role="menubar"],
   [role="toolbar"] { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-
   /* Safe area padding for devices with notches/home indicators */
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .safe-top { padding-top: env(safe-area-inset-top, 0px); }

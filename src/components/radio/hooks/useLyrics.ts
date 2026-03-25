@@ -62,7 +62,6 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
       })
       .finally(() => { if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false); });
   };
-
   useEffect(() => {
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
@@ -83,7 +82,6 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     return () => { controller.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.artist, track?.title, track?.album, stationName]);
-
   const retry = () => {
     if (!track?.title) return;
     const artistSeed = (track.artist || stationName || 'unknown').trim();
@@ -92,13 +90,11 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     retryCountRef.current = 0; const controller = new AbortController();
     abortRef.current = controller; doFetch(key, cached, controller);
   };
-
   const realtimeSync = useRealtimeLyricsSync({
     lyrics,
     enabled: enableRealtime,
     languageHint: options?.languageHint ?? 'en',
   });
-
   return {
     lyrics,
     loading,

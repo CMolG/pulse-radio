@@ -59,13 +59,10 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
 
 function getProximityCountries(seedCodes: string[]): string[] {
   if (seedCodes.length === 0) return [];
-
   const seed = seedCodes .map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
-
   const regions = new Set(seed.map((country) => country.region));
   const subregions = new Set(seed.map((country) => country.subregion));
   const borders = new Set(seed.flatMap((country) => country.borders));
-
   return SOVEREIGN_COUNTRIES.map((country) => {
     let score = 0;
     if (borders.has(country.code)) score += 100;
@@ -84,16 +81,13 @@ export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36)
   const languageCodes = getSameLanguageCountries(locale);
   const proximityCodes = getProximityCountries(languageCodes);
   const ordered: string[] = [];
-
   uniquePush(ordered, languageCodes);
   uniquePush(ordered, proximityCodes);
   uniquePush(ordered, GLOBAL_INTEREST_CODES);
-
   const capped = ordered
     .filter((code) => COUNTRY_BY_CODE[code] && !EXCLUDED_LOW_RELEVANCE_CODES.has(code)).slice(0, maxChips);
   const languageSet = new Set(languageCodes);
   const proximitySet = new Set(proximityCodes);
-
   return capped.map((code) => {
     const country = COUNTRY_BY_CODE[code]!; const displayName = getCountryDisplayName(locale, code);
     const reason: CountryChip["reason"] = languageSet.has(code)? "language"

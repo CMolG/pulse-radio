@@ -12,7 +12,6 @@ import { useLocale } from "@/context/LocaleContext";
 
 function LanguageSelector() {
   const { locale, setLocale, locales } = useLocale();
-
   return (
     <label className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.06] text-[12px] text-dim">
       <Languages size={12} className="text-white/70" />

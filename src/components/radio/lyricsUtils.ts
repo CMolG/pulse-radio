@@ -16,19 +16,16 @@ export type RenderableLyricLine = { id: string; text: string; };
  */
 function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1;
-
   const lines = lyrics.lines;
   let lo = 0;
   let hi = lines.length - 1;
   let result = -1;
-
   while (lo <= hi) {
     const mid = (lo + hi) >>> 1;
     if (lines[mid].time <= currentTime) {
       result = mid; lo = mid + 1;
     } else hi = mid - 1;
   }
-
   return result;
 }
 
@@ -43,13 +40,10 @@ export function getEffectiveActiveLyricIndex( lyrics: LyricsData | null, current
 
 export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLyricLine[] {
   if (!lyrics) return [];
-
   if (lyrics.synced && lyrics.lines.length > 0) {
     return lyrics.lines.map((line, index) => ({ id: `synced-${index}-${line.time}`, text: line.text || "♪", }));
   }
-
   if (!lyrics.plainText) return [];
-
   return lyrics.plainText .split(/\r?\n/) .map((line) => line.trim()).filter(Boolean).map((text, index) => ({
       id: `plain-${index}`,
       text,

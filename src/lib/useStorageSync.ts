@@ -8,7 +8,6 @@ export function useStorageSync<T>( key: string, setter: (val: T) => void,
   const validateRef = useRef(validate);
   setterRef.current = setter;
   validateRef.current = validate;
-
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key !== key || e.newValue == null) return;

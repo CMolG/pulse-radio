@@ -15,10 +15,8 @@ export function useCanvasLoop(
   const paintRef = useRef(paint);
   const freqRef = useRef(frequencyDataRef);
   const sizeRef = useRef({ w: 0, h: 0 });
-
   useEffect(() => { paintRef.current = paint; });
   useEffect(() => { freqRef.current = frequencyDataRef; }, [frequencyDataRef]);
-
   // Track canvas size via ResizeObserver instead of getBoundingClientRect() per frame
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -28,7 +26,6 @@ export function useCanvasLoop(
     }; updateSize();
     const ro = new ResizeObserver(updateSize); ro.observe(canvas); return () => ro.disconnect();
   }, [dprScale]);
-
   useEffect(() => {
     const loop = () => {
       const canvas = canvasRef.current; if (!canvas) return; const ctx = canvas.getContext("2d"); if (!ctx) return;
@@ -39,6 +36,5 @@ export function useCanvasLoop(
     };
     frameRef.current = requestAnimationFrame(loop); return () => cancelAnimationFrame(frameRef.current);
   }, [dprScale]);
-
   return canvasRef;
 }

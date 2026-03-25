@@ -54,16 +54,13 @@ export function useStats() {
   const [stats, setStats] = useState<UsageStats>(() =>
     loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
   );
-
   const statsRef = useRef(stats);
   useEffect(() => { statsRef.current = stats; }, [stats]);
-
   // Sync stats from other tabs — safe because BroadcastChannel ensures
   // only one tab plays at a time, so the writing tab always has the latest.
   useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats =>
     !!v && typeof (v as UsageStats).totalListenMs === 'number',
   );
-
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
@@ -83,12 +80,10 @@ export function useStats() {
       } else saveToStorage(STORAGE_KEY, current); dirtyRef.current = false;
     }
   }, []);
-
   useEffect(() => {
     saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
     return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); persist(); };
   }, [persist]);
-
   // Track listen time for a station (call periodically while playing)
   const tickListenTime = useCallback((stationUuid: string, stationName: string, deltaMs: number) => {
     if (deltaMs <= 0 || !stationUuid) return;
@@ -104,7 +99,6 @@ export function useStats() {
       };
     }); dirtyRef.current = true;
   }, []);
-
   // Record a song play
   const recordSongPlay = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return;
@@ -131,7 +125,6 @@ export function useStats() {
       return next;
     }); dirtyRef.current = true;
   }, []);
-
   const topStations = useMemo(() => topN(stats.stationListenTimes, 'totalMs', 10), [stats.stationListenTimes]);
   const topSongs = useMemo(() => topN(stats.songPlayCounts, 'count', 10), [stats.songPlayCounts]);
   const topArtists = useMemo(() => topN(stats.artistPlayCounts, 'count', 10), [stats.artistPlayCounts]);
@@ -140,7 +133,6 @@ export function useStats() {
   );
   const topGenres = useMemo(() => sortedGenres.slice(0, 10), [sortedGenres]);
   const genreOrder = useMemo(() => sortedGenres.map(g => g.genre), [sortedGenres]);
-
   // Update artwork/genre on an existing song entry without incrementing counts.
   // Used when album metadata arrives after the initial recordSongPlay call.
   const updateSongMeta = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
@@ -171,9 +163,7 @@ export function useStats() {
       return next;
     }); dirtyRef.current = true;
   }, []);
-
   const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
-
   return {
     stats,
     tickListenTime,

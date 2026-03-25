@@ -34,13 +34,10 @@ export function useFavoriteSongs() {
       return true;
     });
   });
-
   // O(1) lookup Set — rebuilt only when songs array changes
   const keySetRef = useRef(buildKeySet(songs));
   useMemo(() => { keySetRef.current = buildKeySet(songs); }, [songs]);
-
   useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITE_SONGS, songs); }, [songs]);
-
   useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const prepend = (song: Omit<FavoriteSong, 'id' | 'timestamp'>, prev: FavoriteSong[]) => {
     const entry: FavoriteSong = { ...song, id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, timestamp: Date.now() };
@@ -57,9 +54,7 @@ export function useFavoriteSongs() {
       return exists ? prev.filter(s => s.id !== exists.id) : prepend(song, prev);
     });
   }, []);
-
   const has = useCallback((title: string, artist: string) => keySetRef.current.has(songKey(title, artist)), []);
   const clear = useCallback(() => setSongs([]), []);
-
   return { songs, add, remove, toggle, has, clear };
 }

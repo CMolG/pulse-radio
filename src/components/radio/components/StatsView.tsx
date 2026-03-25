@@ -64,7 +64,6 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
 
 export default React.memo(function StatsView({ topStations, topSongs, topArtists, topGenres, totalListenMs }: Props) {
   const hasData = totalListenMs > 0 || topSongs.length > 0;
-
   if (!hasData) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -74,12 +73,10 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
       </div>
     );
   }
-
   const maxStationTime = topStations[0]?.totalMs ?? 1;
   const maxSongCount = topSongs[0]?.count ?? 1;
   const maxArtistCount = topArtists[0]?.count ?? 1;
   const maxGenreCount = topGenres[0]?.count ?? 1;
-
   return (
     <div className="p-4 space-y-6">
       {/* Total listen time */}

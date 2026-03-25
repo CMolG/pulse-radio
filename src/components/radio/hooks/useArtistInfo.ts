@@ -35,7 +35,6 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => { if (!key) return null; return cacheGet(key) ?? null; }, [key]);
   const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
-
   useEffect(() => {
     if (!key || !artist || cachedInfo) return;
     let cancelled = false; const controller = new AbortController();
@@ -52,8 +51,6 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
       .finally(() => { clearTimeout(timeout); });
     return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
   }, [artist, key, cachedInfo]);
-
   const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
-
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }

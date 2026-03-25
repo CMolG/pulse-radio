@@ -26,20 +26,17 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   const supported = isRealtimeSpeechSupported();
   const realtimeAllowed = enabled && manuallyEnabled;
   const realtimeActive = supported && eligible && realtimeAllowed;
-
   // Reset sync state during render when dependencies change, so stale
   // activeLineIndex from a previous song doesn't bleed into new lyrics.
   const [prevResetKey, setPrevResetKey] = useState('');
   const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
   if (resetKey !== prevResetKey) { setPrevResetKey(resetKey); setRuntimeState(defaultRealtimeState(manuallyEnabled)); }
-
   const toggle = useCallback(() => {
     setManuallyEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next);
       return next;
     });
   }, []);
-
   useEffect(() => {
     if (!realtimeActive) { engineRef.current?.stop(); return; }
     engineRef.current?.destroy(); stableSamplesRef.current = 0;
@@ -99,11 +96,8 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
     engineRef.current = engine; engine.start(languageHint);
     return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
-
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
-
   const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
-
   return {
     ...runtimeState,
     enabled: manuallyEnabled,

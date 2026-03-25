@@ -20,7 +20,6 @@ function isTransientError(err: unknown): boolean {
 // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta.
 function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> {
   if (!parentSignal) return fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   const onParentAbort = () => controller.abort();
@@ -29,7 +28,6 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
     return fetch(url, { signal: controller.signal }); // will reject immediately
   }
   parentSignal.addEventListener('abort', onParentAbort, { once: true });
-
   return fetch(url, { signal: controller.signal }).finally(() => {
     clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);
   });
@@ -40,9 +38,7 @@ export async function fetchLyrics( artist: string, title: string, album?: string
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
   const artistCandidates = [...new Set([artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),)];
-
   if (!artistCandidates.length || !title?.trim()) return null;
-
   for (const artistCandidate of artistCandidates) {
     if (signal?.aborted) return null;
     try {
@@ -53,7 +49,6 @@ export async function fetchLyrics( artist: string, title: string, album?: string
       if (isTransientError(err)) throw err;
     }
   }
-
   return null;
 }
 
@@ -72,7 +67,6 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
   const params = new URLSearchParams({ artist_name: artist, track_name: title, });
   if (album) params.set('album_name', album);
   if (duration) params.set('duration', String(Math.round(duration)));
-
   const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, d => transform(d, artist, title));
   if (exact) return exact;
   if (signal?.aborted) return null;

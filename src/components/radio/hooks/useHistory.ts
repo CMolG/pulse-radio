@@ -21,14 +21,10 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     const seen = new Set<string>();
     return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
   });
-
   const lastTrackRef = useRef<string>('');
   const lastStationRef = useRef<string | undefined>(stationUuid);
-
   useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]);
-
   useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
-
   // Add entry when track changes; handles station transitions in a single effect
   // to prevent the race between station-reset and track-add
   useEffect(() => {
@@ -65,7 +61,6 @@ export function useHistory( stationName: string | undefined, stationUuid: string
   // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.title, track?.artist, stationUuid, stationName]);
-
   // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
   useEffect(() => {
     if (!track?.title || !stationUuid) return;
@@ -90,12 +85,9 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       return prev;
     });
   }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
-
   const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
-
   const clear = useCallback(() => {
     setHistory([]); lastTrackRef.current = '';
   }, []);
-
   return { history, remove, clear };
 }

@@ -73,11 +73,9 @@ function NowPlayingBar({
   const isLoading = status === "loading";
   const [imgError, setImgError] = useState(false);
   const coverUrlForReset = track?.artworkUrl ?? station?.favicon;
-
   // Reset error state when cover URL changes so new artwork gets a chance to load
   const [prevBarCoverUrl, setPrevBarCoverUrl] = useState(coverUrlForReset);
   if (coverUrlForReset !== prevBarCoverUrl) { setPrevBarCoverUrl(coverUrlForReset); setImgError(false); }
-
   const coverUrl = track?.artworkUrl ?? station?.favicon;
   const showFallback = !coverUrl || imgError;
   const statusAnnouncement = useMemo(() => {
@@ -88,12 +86,10 @@ function NowPlayingBar({
     if (status === "error") return `Playback error: ${station.name}`;
     return `Paused: ${trackInfo}`;
   }, [station, track, isPlaying, isLoading, status]);
-
   const [firstTag, compactTags] = useMemo(() => {
     const tags = station?.tags?.split(",") ?? [];
     return [tags[0] ?? "", tags.slice(0, 2).join(" · ")];
   }, [station?.tags]);
-
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = parseFloat(e.target.value); onSetVolume(v);
@@ -101,7 +97,6 @@ function NowPlayingBar({
     },
     [muted, onSetVolume, onToggleMute],
   );
-
   if (compact) {
     return (
       <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
@@ -165,7 +160,6 @@ function NowPlayingBar({
       </div>
     );
   }
-
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">

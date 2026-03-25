@@ -54,7 +54,6 @@ function PWAStep() {
   const [deferredPrompt, setDeferredPrompt] = useState<{ prompt: () => Promise<void> } | null>(null);
   const [isIos] = useState(() => typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent));
   const [isStandalone] = useState(() => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches);
-
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
@@ -62,14 +61,12 @@ function PWAStep() {
     }; window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
-
   const handleInstall = async () => {
     if (deferredPrompt) {
       try { await deferredPrompt.prompt(); } catch { /* user dismissed install prompt */ }
       setDeferredPrompt(null);
     }
   };
-
   if (isStandalone) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
@@ -81,7 +78,6 @@ function PWAStep() {
       </div>
     );
   }
-
   return (
     <div className="flex flex-col items-center gap-4 text-center">
       <IoPhonePortraitOutline size={48} className="text-[#3478f6]" />
@@ -116,20 +112,15 @@ function OnboardingModal() {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
   const totalSteps = STEPS.length + 1; // +1 for PWA step
-
   useEffect(() => {
     const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
     if (!done) { const timer = setTimeout(() => setShow(true), 800); return () => clearTimeout(timer); }
   }, []);
-
   const handleClose = useCallback(() => { setShow(false); saveToStorage(ONBOARDING_KEY, true); }, []);
-
   if (!show) return null;
-
   const currentStep = step < STEPS.length ? STEPS[step] : null;
   const isPWAStep = step >= STEPS.length;
   const isLast = step === totalSteps - 1;
-
   return (
     <AnimatePresence>
       {show && (

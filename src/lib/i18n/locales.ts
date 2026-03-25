@@ -92,11 +92,9 @@ export function normalizeLocale(input: string | null | undefined): SupportedLoca
   if (!input) return "en";
   const normalized = input.replace(/_/g, "-").trim();
   if (isSupportedLocale(normalized)) return normalized;
-
   const lower = normalized.toLowerCase();
   if (lower === "pt-br") return "pt-BR";
   if (lower === "zh-tw" || lower === "zh-hk" || lower === "zh-mo") return "zh-TW";
-
   const base = lower.split("-")[0];
   return BASE_LOCALE_MAP[base] ?? "en";
 }

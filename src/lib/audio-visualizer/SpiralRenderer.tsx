@@ -44,9 +44,7 @@ export function SpiralRenderer({
   const innerXRef = useRef(new Float64Array(NUM_BARS));
   const innerYRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 });
-
   useEffect(() => { colorsRef.current = { color1, color2, color3 }; }, [color1, color2, color3]);
-
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2; const centerY = h / 2;
     // Update mock/frequency data
@@ -136,7 +134,6 @@ export function SpiralRenderer({
     }
     ctx.globalAlpha = 1.0;
   });
-
   return (
     <div
       className={`relative overflow-hidden ${className}`}

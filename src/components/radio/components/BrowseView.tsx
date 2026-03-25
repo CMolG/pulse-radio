@@ -62,15 +62,12 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
     const el = ref.current; if (!el) return; setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   }, []);
-
   useEffect(() => {
     const el = ref.current; if (!el) return; check();
     el.addEventListener("scroll", check, { passive: true }); const ro = new ResizeObserver(check);
     ro.observe(el); return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [check, children]);
-
   const scroll = (dir: -1 | 1) => { ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" }); };
-
   return (
     <div className={`mb-4 ${className ?? ""}`}>
       {title && (
@@ -130,7 +127,6 @@ export default function BrowseView({
       }),
     [t],
   );
-
   // Reorder browse sections based on user listening stats
   const effectiveBrowseOrder = useMemo(() => {
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
@@ -151,7 +147,6 @@ export default function BrowseView({
     for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); }
     return ordered;
   }, [userGenreOrder]);
-
   const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
   const [stations, setStations] = useState<Station[]>([]);
   const [categorySections, setCategorySections] = useState<Record<string, Station[]>>({});
@@ -166,7 +161,6 @@ export default function BrowseView({
   // Tracks whether the initial immediate play has fired for the current
   // discovery-mode session.  Reset when discovery mode is turned off.
   const discoveryFiredRef = useRef(false);
-
   // Live track scanning
   type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
   const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({});
@@ -202,12 +196,10 @@ export default function BrowseView({
       }
     }
   }, [translatedGenreCategories]);
-
   useEffect(() => {
     setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter("");
     scanGenRef.current++;
   }, [view]);
-
   // Fetch ICY metadata for a single station, optionally guarded by a staleness check
   const fetchMeta = useCallback(async (s: Station, stale?: () => boolean) => {
     setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'loading', track: null } }));
@@ -220,15 +212,12 @@ export default function BrowseView({
       setLiveData(prev => ({ ...prev, [s.stationuuid]: { status: 'error', track: null } }));
     }
   }, []);
-
   const startScan = useCallback(async (stationsToScan: Station[], gen: number) => {
     const queue = [...stationsToScan]; const stale = () => scanGenRef.current !== gen;
     const worker = async () => { while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale); };
     await Promise.all(Array.from({ length: 3 }, worker));
   }, [fetchMeta]);
-
   const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
-
   useEffect(() => {
     let cancelled = false; const flags = { cancelled: false };
     setError(null);
@@ -261,12 +250,9 @@ export default function BrowseView({
     return () => { cancelled = true; flags.cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
-
   // All loaded category stations for discovery mode & station count in top view
   const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]);
-
   const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
-
   // Discovery mode: auto-play random station every 30s
   useEffect(() => {
     const pool = view.mode === "top" ? allCategoryStations : stations;
@@ -286,7 +272,6 @@ export default function BrowseView({
     }
     return () => { if (discoveryRef.current) clearInterval(discoveryRef.current); };
   }, [discoveryMode, stations, allCategoryStations, view.mode, onPlay]);
-
   const itemWidth = isMobile ? "w-[140px]" : "w-[160px]";
   const renderScrollStations = (list: Station[]) =>
     list.map((s) => (
@@ -301,29 +286,24 @@ export default function BrowseView({
           onPrefetch={() => onPrefetch?.(s.url_resolved)} />
       </div>
     ));
-
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => {
     return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   }, [stations, page, PAGE_SIZE]);
-
   // Trigger scan when enabled or page changes (non-top modes only)
   useEffect(() => {
     if (!scanEnabled || view.mode === "top" || pageStations.length === 0) return;
     const gen = scanGenRef.current + 1; scanGenRef.current = gen; startScan(pageStations, gen);
     return () => { if (scanGenRef.current === gen) scanGenRef.current++; };
   }, [scanEnabled, pageStations, view.mode, startScan]);
-
   // Derived scan stats
   const scannedCount = pageStations.filter(s => liveData[s.stationuuid]?.status === 'loaded').length;
   const isScanning = scanEnabled && pageStations.some(s => liveData[s.stationuuid]?.status === 'loading');
-
   // Reset page synchronously during render when songFilter changes.
   // Using the "adjusting state during render" pattern avoids a one-frame
   // flash of empty results that the useEffect approach would cause.
   const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
   if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
-
   // Filter grid by song/artist when songFilter is active — paginated
   const allSongFilteredStations = useMemo(() => {
     const trimmed = songFilter.trim();
@@ -336,16 +316,13 @@ export default function BrowseView({
       return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));
     });
   }, [stations, songFilter, liveData]);
-
   const songFilteredStations = useMemo(() => {
     if (!songFilter.trim()) return pageStations;
     return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   }, [allSongFilteredStations, pageStations, songFilter, page, PAGE_SIZE]);
-
   // Chip active states based on current view (chips trigger view changes, not local filters)
   const genreChipActive = (tag: string) => view.mode === "genre" && view.tag === tag;
   const countryChipActive = (countryCode: string) => view.mode === "country" && view.countryCode === countryCode;
-
   return (
     <div className="col-fill min-w-0 h-full">
       {/* Header */}

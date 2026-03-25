@@ -19,11 +19,8 @@ export function getDefaultLocaleForCountry(countryCode: string): SupportedLocale
   const normalized = countryCode.toUpperCase();
   const override = COUNTRY_LOCALE_OVERRIDES[normalized];
   if (override) return override;
-
   const country = COUNTRY_BY_CODE[normalized];
   if (!country) return null;
-
   for (const lang3 of country.lang3) { const locale = LANG3_TO_LOCALE[lang3]; if (locale) return locale; }
-
   return null;
 }

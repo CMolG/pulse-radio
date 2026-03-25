@@ -33,7 +33,6 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
   const tags = useMemo( () => station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean) ?? [],
     [station.tags],
   );
-
   return (<div
       role="button"
       tabIndex={0}

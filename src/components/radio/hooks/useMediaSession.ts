@@ -25,10 +25,8 @@ type MediaSessionConfig = {
 export function useMediaSession(config: MediaSessionConfig): void {
   const configRef = useRef(config);
   useEffect(() => { configRef.current = config; }, [config]);
-
   const { station, track, isPlaying } = config;
   const lastMetaRef = useRef('');
-
   useEffect(() => {
     if (!('mediaSession' in navigator) || !station) return;
     const trackTitle = track?.title || station.name; const trackArtist = track?.artist || 'Internet Radio';
@@ -40,12 +38,10 @@ export function useMediaSession(config: MediaSessionConfig): void {
       navigator.mediaSession.metadata = new MediaMetadata({ title: trackTitle, artist: trackArtist, album, artwork, });
     } catch { /* MediaMetadata constructor can throw on malformed artwork data */ }
   }, [station, track]);
-
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [isPlaying]);
-
   const setupHandlers = useCallback(() => {
     if (!('mediaSession' in navigator)) return;
     const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [ ['play', () => configRef.current.onPlay()],
@@ -67,6 +63,5 @@ export function useMediaSession(config: MediaSessionConfig): void {
       }
     };
   }, []);
-
   useEffect(setupHandlers, [setupHandlers]);
 }

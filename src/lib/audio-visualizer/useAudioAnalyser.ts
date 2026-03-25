@@ -74,13 +74,10 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
     },
     [fftSize, smoothingTimeConstant],
   );
-
   const disconnect = useCallback(() => {
     cancelAnimationFrame(rafRef.current); connectedRef.current = null; setIsActive(false);
     frequencyDataRef.current = null; waveDataRef.current = null;
   }, []);
-
   useEffect(() => () => { cancelAnimationFrame(rafRef.current); }, [],);
-
   return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect };
 }

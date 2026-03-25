@@ -26,18 +26,14 @@ export function useFavorites() {
     });
   });
   useEffect(() => { saveToStorage(STORAGE_KEYS.FAVORITES, favorites); }, [favorites]);
-
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
-
   const add = useCallback((station: Station) => {
     setFavorites(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
       return [station, ...prev].slice(0, MAX_FAVORITES);
     });
   }, []);
-
   const remove = useCallback((uuid: string) => { setFavorites(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
-
   const toggle = useCallback((station: Station) => {
     setFavorites(prev => {
       const exists = prev.some(s => s.stationuuid === station.stationuuid);
@@ -45,19 +41,16 @@ export function useFavorites() {
       return [station, ...prev].slice(0, MAX_FAVORITES);
     });
   }, []);
-
   const has = useCallback((uuid: string) => favorites.some(s => s.stationuuid === uuid), [favorites]);
   const playNext = useCallback((currentUuid: string): Station | null => {
     const idx = favorites.findIndex(s => s.stationuuid === currentUuid);
     if (idx < 0 || favorites.length < 2) return null;
     return favorites[(idx + 1) % favorites.length];
   }, [favorites]);
-
   const playPrev = useCallback((currentUuid: string): Station | null => {
     const idx = favorites.findIndex(s => s.stationuuid === currentUuid);
     if (idx < 0 || favorites.length < 2) return null;
     return favorites[(idx - 1 + favorites.length) % favorites.length];
   }, [favorites]);
-
   return { favorites, add, remove, toggle, has, playNext, playPrev };
 }

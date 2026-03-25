@@ -36,7 +36,6 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (!menu) return;
     const onPointerDown = (e: PointerEvent) => {
@@ -49,15 +48,12 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
       window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
     };
   }, [menu, onClose]);
-
   if (!menu) return null;
-
   // Clamp so menu doesn't overflow viewport
   const menuW = 200;
   const menuH = 48;
   const x = Math.min(menu.x, window.innerWidth - menuW - 8);
   const y = Math.min(menu.y, window.innerHeight - menuH - 8);
-
   return createPortal(
     <div
       ref={ref}
@@ -88,7 +84,6 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
   const VISIBLE_COUNT = 3;
   const hasMore = songs.length > VISIBLE_COUNT;
   const visibleSongs = useMemo(() => expanded ? songs : songs.slice(0, VISIBLE_COUNT), [expanded, songs]);
-
   return (
     <div className="mb-6">
       {/* Group header */}
@@ -184,9 +179,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const handleContextMenu = useCallback((e: React.MouseEvent, songId: string) => {
     e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, songId });
   }, []);
-
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
-
   // Group by primary artist
   const artistGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
@@ -196,7 +189,6 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
     }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
-
   // Group by album
   const albumGroups = useMemo(() => {
     const groups = new Map<string, FavoriteSong[]>();
@@ -206,7 +198,6 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
     }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
-
   if (songs.length === 0) {
     return (
       <div className="flex-center-col py-20 px-4">
@@ -216,9 +207,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
       </div>
     );
   }
-
   const toggleFilter = (mode: FilterMode) => setFilterMode(prev => (prev === mode ? "none" : mode));
-
   return (
     <div className="p-4">
       <SongContextMenu menu={contextMenu} onRemove={onRemove} onClose={closeContextMenu} />

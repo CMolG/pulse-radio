@@ -62,25 +62,20 @@ export function useRadio() {
   const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good');
   const lastBufferEndRef = useRef<number>(0);
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clearTimer = (ref: React.MutableRefObject<any>) => {
     if (ref.current != null) { clearTimeout(ref.current); ref.current = null; }
   };
-
   // Latest volume/muted refs so crossfade intervals read current values
   const volumeRef = useRef(volume);
   const mutedRef = useRef(muted);
   volumeRef.current = volume;
   mutedRef.current = muted;
-
   // Tracks whether the user explicitly requested a pause (vs stall/src-change pauses)
   const userPausedRef = useRef(false);
-
   // Cross-tab coordination: pause this tab when another tab starts playing
   const bcRef = useRef<BroadcastChannel | null>(null);
   const tabIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`);
-
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
     const bc = new BroadcastChannel('pulse-radio-playback'); bcRef.current = bc;
@@ -96,7 +91,6 @@ export function useRadio() {
     };
     return () => { bc.close(); bcRef.current = null; };
   }, []);
-
   // Clean up timers on unmount to prevent orphaned intervals
   useEffect(() => {
     return () => {
@@ -104,7 +98,6 @@ export function useRadio() {
       clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
     };
   }, []);
-
   const getAudio = useCallback(() => {
     if (!audioRef.current) {
       const audio = new Audio(); audio.crossOrigin = 'anonymous';
@@ -113,7 +106,6 @@ export function useRadio() {
     }
     return audioRef.current;
   }, []);
-
   const handlePlayRejected = useCallback((err: unknown) => {
     // AbortError means the play was superseded — stop(), pause(), or a new
     // play() cleared audio.src while this promise was pending.  The caller
@@ -121,7 +113,6 @@ export function useRadio() {
     if (err instanceof DOMException && err.name === 'AbortError') return;
     setStatus(isAutoplayBlocked(err) ? 'paused' : 'error');
   }, []);
-
   const startPlayback = useCallback(
     (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void,) => {
       // Force proxy when the Web Audio graph is connected to this element.
@@ -152,7 +143,6 @@ export function useRadio() {
     },
     [preferDirectStream],
   );
-
   useEffect(() => {
     const audio = getAudio();
     const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); };
@@ -373,13 +363,11 @@ export function useRadio() {
       pairs.forEach(([t, e, h]) => t.removeEventListener(e, h));
     };
   }, [station, getAudio, startPlayback, handlePlayRejected]);
-
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume); const audio = audioRef.current;
     // Skip direct volume set while crossfade is in progress — the interval controls audio.volume
     if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
-
   const play = useCallback((s: Station) => {
     if (!isValidStreamUrl(s.url_resolved)) { setStatus('error'); return; }
     const audio = getAudio();
@@ -412,14 +400,12 @@ export function useRadio() {
       audio.volume = mutedRef.current ? 0 : volumeRef.current; startPlayback(audio, s.url_resolved, handlePlayRejected);
     }
   }, [getAudio, startPlayback, handlePlayRejected]);
-
   const pause = useCallback(() => {
     userPausedRef.current = true;
     // Cancel any in-progress crossfade so its completion doesn't call
     // startPlayback() and resume audio after this explicit pause.
     clearTimer(fadeTimerRef); audioRef.current?.pause();
   }, []);
-
   const resume = useCallback(() => {
     userPausedRef.current = false; const audio = audioRef.current;
     if (audio) {
@@ -430,7 +416,6 @@ export function useRadio() {
     }
     audio?.play().catch(() => {});
   }, []);
-
   const togglePlay = useCallback(() => {
     const audio = audioRef.current; if (!audio || !audio.src) return;
     if (audio.paused) {
@@ -444,7 +429,6 @@ export function useRadio() {
       clearTimer(fadeTimerRef); audio.pause();
     }
   }, []);
-
   const stop = useCallback(() => {
     clearTimer(fadeTimerRef); clearTimer(pauseTimerRef);
     clearTimer(reconnectTimerRef); clearTimer(bufferCheckRef);
@@ -453,9 +437,7 @@ export function useRadio() {
     setStation(null); setStatus('idle'); setStreamQuality('good');
     lastBufferEndRef.current = 0;
   }, []);
-
   const setVolume = useCallback((v: number) => { setVolumeState(Math.max(0, Math.min(1, v))); }, []);
-
   const prefetchedUrlsRef = useRef<Set<string>>(new Set());
   const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
@@ -467,15 +449,12 @@ export function useRadio() {
       .catch(() => { clearTimeout(timer); });
     const timer = setTimeout(() => controller.abort(), 2000);
   }, []);
-
   const toggleMute = useCallback(() => setMuted(m => !m), []);
   const seek = useCallback((t: number) => {
     const audio = audioRef.current; if (!audio || !isFinite(t)) return; const duration = audio.duration || 0;
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
-
   const ensureAudio = useCallback(() => getAudio(), [getAudio]);
-
   return {
     station,
     status,

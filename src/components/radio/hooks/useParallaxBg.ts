@@ -19,7 +19,6 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   // Ref avoids re-running the effect (and tearing down RAF + listener) on every amplitude change
   const audioAmplitudeRef = useRef(audioAmplitude);
   useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]);
-
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const el = containerRef.current; if (!el) return;
     // Coalesce rapid mouse events into a single rAF update
@@ -30,9 +29,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
       const y = ((e.clientY - cy) / rect.height) * 20; pointerOffsetRef.current = { x, y };
     });
   }, []);
-
   const lastPublishedRef = useRef({ x: 0, y: 0 });
-
   useEffect(() => {
     const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.
@@ -55,8 +52,6 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
       cancelAnimationFrame(rafRef.current); cancelAnimationFrame(tickRafRef.current);
     };
   }, [handleMouseMove]);
-
   const gradient = genre ? GENRE_GRADIENTS[genre.toLowerCase()] || GENRE_GRADIENTS.default : GENRE_GRADIENTS.default;
-
   return { offset, containerRef, gradient };
 }

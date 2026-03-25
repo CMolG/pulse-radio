@@ -75,34 +75,28 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] },
   energy: number, ) {
   const threshold = 1.0;
-
   // downscale for performance — render at 1/3 resolution
   const scale = 3;
   const sw = Math.ceil(w / scale);
   const sh = Math.ceil(h / scale);
-
   // Use an offscreen canvas for smooth bilinear upscaling
   if (!_offscreen || _offscreen.width !== sw || _offscreen.height !== sh) {
     _offscreen = new OffscreenCanvas(sw, sh); _imgData = undefined;
   }
   const offCtx = _offscreen.getContext('2d', { willReadFrequently: true });
   if (!offCtx) return;
-
   // Reuse ImageData across frames — every pixel is written below, so no zeroing needed
   if (!_imgData || _imgData.width !== sw || _imgData.height !== sh) {
     try { _imgData = offCtx.createImageData(sw, sh); } catch { return; }
   }
   const sd = _imgData.data;
-
   // Pre-compute per-blob max influence radius squared for distance culling.
   // field = r² / (distSq + 1). For field >= 0.01 → distSq < r²/0.01 = 100*r²
   const blobCount = blobs.length;
   const blobMaxDistSq = new Float64Array(blobCount);
   for (let b = 0; b < blobCount; b++) { const r = blobs[b].baseRadius; blobMaxDistSq[b] = r * r * 100; }
-
   const thresholdLow = threshold * 0.7;
   const glowRange = threshold * 0.3;
-
   for (let py = 0; py < sh; py++) {
     for (let px = 0; px < sw; px++) {
       const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0;
@@ -137,7 +131,6 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
       } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0;
     }
   }
-
   // Put image data into offscreen canvas, then draw upscaled with
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
   try {
@@ -164,7 +157,6 @@ export function FerrofluidRenderer({
   const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
   const colors = useRef(mkColors());
   useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]);
-
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     // init blobs if needed
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) {
@@ -208,7 +200,6 @@ export function FerrofluidRenderer({
     // draw metaballs
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
   }, 0.5);
-
   return (
     <div className={`relative ${className}`}>
       <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />

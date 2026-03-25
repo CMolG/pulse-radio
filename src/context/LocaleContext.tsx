@@ -26,19 +26,16 @@ export function LocaleProvider({ children, countryCode, }: { children: React.Rea
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>
     countryCode ? getInitialLocaleForCountry(countryCode) : getInitialLocale(),
   );
-
   useEffect(() => {
     saveLocale(locale);
     if (typeof document !== "undefined") {
       document.documentElement.lang = locale; document.documentElement.dir = isRtlLocale(locale) ? "rtl" : "ltr";
     }
   }, [locale]);
-
   const value = useMemo<LocaleContextValue>(() => {
     const t: TranslateFn = (key, vars) => translate(locale, key, vars);
     return { locale, setLocale: setLocaleState, t, rtl: isRtlLocale(locale), locales: SUPPORTED_LOCALES };
   }, [locale]);
-
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 

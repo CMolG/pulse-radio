@@ -41,13 +41,11 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
   let running = false;
   let destroyed = false;
   let restartCount = 0;
-
   const teardown = () => {
     if (!recognition) return;
     recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.stop();
     recognition = null;
   };
-
   const wireRecognition = (lang: 'en' | 'es') => {
     const Ctor = getRecognitionCtor();
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
@@ -92,7 +90,6 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       }
     };
   };
-
   return {
     start: (lang) => {
       if (destroyed || running) return;

@@ -63,7 +63,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   const activeIdx = useMemo( () => getEffectiveActiveLyricIndex(lyrics, currentTime, activeLineOverride),
     [activeLineOverride, currentTime, lyrics],
   );
-
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = "smooth") => {
       const scroller = scrollerRef.current; const line = lineRefs.current[index]; if (!scroller || !line) return;
       const top = line.offsetTop - scroller.clientHeight / 2 + line.clientHeight / 2;
@@ -71,7 +70,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     },
     [],
   );
-
   const updateFocusedIdx = useCallback(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
     const scrollerRect = scroller.getBoundingClientRect(); const centerY = scrollerRect.top + scrollerRect.height / 2;
@@ -84,9 +82,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     });
     setFocusedIdx((prev) => (prev === closestIdx ? prev : closestIdx));
   }, [renderableLines.length]);
-
   useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
-
   // Reset scroll position when lyrics change (no autoscroll on active line —
   // user controls focus manually by scrolling or clicking a line)
   useEffect(() => {
@@ -96,7 +92,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   // Only react to lyrics changing, not to activeIdx
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderableLines.length]);
-
   useEffect(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
     let frame = 0;
@@ -105,9 +100,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     scroller.addEventListener("scroll", handleScroll, { passive: true });
     return () => { cancelAnimationFrame(frame); scroller.removeEventListener("scroll", handleScroll); };
   }, [renderableLines.length, updateFocusedIdx]);
-
   if (renderableLines.length === 0) return null;
-
   return (
     <div className={`relative flex-shrink-0 ${isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"}`}>
       <div className={`relative z-20 flex h-full flex-col ${isDesktop ? "px-8 pb-5 pt-3" : "px-5 pb-4 pt-2"}`}>

@@ -43,7 +43,6 @@ export async function GET(req: NextRequest) {
   if (!artist || artist.length > 200) {
     return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
   }
-
   try {
     const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist), fetchWikiSummary(artist),
     ]);

@@ -21,10 +21,8 @@ export function useStationQueue() {
   // Ref tracks latest queue so callbacks avoid stale closures
   const queueRef = useRef(queue);
   useEffect(() => { queueRef.current = queue; }, [queue]);
-
   // Persist queue to storage on changes (skip initial mount)
   useEffect(() => { if (persistRef.current) saveToStorage(STORAGE_KEY, queue); persistRef.current = true; }, [queue]);
-
   const add = useCallback((station: Station) => {
     setQueue(prev => {
       if (prev.some(s => s.stationuuid === station.stationuuid)) return prev;
@@ -32,7 +30,6 @@ export function useStationQueue() {
       return [...prev, station];
     });
   }, []);
-
   const addNext = useCallback((station: Station) => {
     let removedIdx = -1;
     setCurrentIndex(prevIdx => {
@@ -47,7 +44,6 @@ export function useStationQueue() {
       return adjusted;
     });
   }, []);
-
   const remove = useCallback((stationuuid: string) => {
     let removedIdx = -1;
     setQueue(prev => {
@@ -61,11 +57,9 @@ export function useStationQueue() {
       return prev;
     });
   }, []);
-
   const clear = useCallback(() => {
     setQueue([]); setCurrentIndex(-1);
   }, []);
-
   const moveUp = useCallback((stationuuid: string) => {
     let movedIdx = -1;
     setQueue(prev => {
@@ -82,7 +76,6 @@ export function useStationQueue() {
       return prev;
     });
   }, []);
-
   const moveDown = useCallback((stationuuid: string) => {
     let movedIdx = -1;
     setQueue(prev => {
@@ -99,7 +92,6 @@ export function useStationQueue() {
       return prev;
     });
   }, []);
-
   const skipToNext = useCallback((): Station | null => {
     const q = queueRef.current;
     if (q.length === 0) return null;
@@ -111,7 +103,6 @@ export function useStationQueue() {
     });
     return result;
   }, []);
-
   const skipToPrev = useCallback((): Station | null => {
     const q = queueRef.current;
     if (q.length === 0) return null;
@@ -123,14 +114,11 @@ export function useStationQueue() {
     });
     return result;
   }, []);
-
   const setPlaying = useCallback((stationuuid: string) => {
     const idx = queueRef.current.findIndex(s => s.stationuuid === stationuuid); setCurrentIndex(idx);
   }, []);
-
   const hasNext = currentIndex >= 0 && currentIndex < queue.length - 1;
   const hasPrev = currentIndex > 0;
-
   return {
     queue, currentIndex, add, addNext, remove, clear,
     moveUp, moveDown, skipToNext, skipToPrev, hasNext, hasPrev, setPlaying,
