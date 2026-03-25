@@ -8,6 +8,8 @@ const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
 const USER_AGENT = 'PulseRadio/1.0 (https://pulse-radio.online)';
 const MUSIC_KEYWORDS =
   /band|singer|musician|artist|rapper|group|duo|dj|producer|composer|vocalist|songwriter|hip.hop|rock|pop|jazz|classical|electronic|country|metal|r&b|soul|blues|funk|reggae|punk|folk/i;
+const _PERSON_SUFFIXES = ['(singer)', '(musician)', '(rapper)'] as const;
+const _BAND_SUFFIXES = ['(band)', '(musical group)', '(singer)', '(musician)'] as const;
 async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T | null> {
   try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(8_000) });
@@ -52,10 +54,7 @@ export async function GET(req: NextRequest) {
     const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
     let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
     if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) {
-      const suffixes =
-        mb?.type === 'Person'
-          ? ['(singer)', '(musician)', '(rapper)']
-          : ['(band)', '(musical group)', '(singer)', '(musician)'];
+      const suffixes = mb?.type === 'Person' ? _PERSON_SUFFIXES : _BAND_SUFFIXES;
       for (const suffix of suffixes) {
         const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
         if (attempt?.extract) {
