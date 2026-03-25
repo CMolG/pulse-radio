@@ -65,8 +65,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
   function teardownGraph(includeSource: boolean) { try {
       sourceRef.current?.disconnect(); filtersRef.current.forEach(f => f.disconnect());
       for (const ref of graphNodeRefs) ref.current?.disconnect();
-    } catch { /* ok */ }
-    filtersRef.current = []; for (const ref of graphNodeRefs) ref.current = null;
+    } catch { /* ok */ } filtersRef.current = []; for (const ref of graphNodeRefs) ref.current = null;
     if (includeSource) { sourceRef.current = null; connectedAudioRef.current = null; } }
   // Smooth ramp time for parameter changes to prevent clicks/pops
   const RAMP_TIME = 0.02; // 20ms — fast enough to feel instant, slow enough to avoid clicks
@@ -264,8 +263,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           mbWetGainRef.current.gain.setTargetAtTime(amount, t, RAMP_TIME);
         } else { mbDryGainRef.current.gain.setTargetAtTime(1, t, RAMP_TIME);
           mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME); }
-      }
-      return next;});
+      } return next;});
   }, [compressorAmount]); const setCompressorAmount = useCallback((v: number) => {
     const clamped = Math.max(0, Math.min(1, v)); setCompressorAmountState(clamped);
     saveToStorage(STORAGE_KEYS.COMPRESSOR_AMOUNT, clamped); if (!compressorEnabled) return;

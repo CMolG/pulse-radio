@@ -2,8 +2,7 @@
 // Shared cache for MediaElementAudioSourceNode instances.
 // createMediaElementSource can only be called ONCE per HTMLAudioElement,
 // so all consumers (EQ, visualizer, etc.) must share the same source node.
-const cache = new WeakMap< HTMLAudioElement, { ctx: AudioContext; source: MediaElementAudioSourceNode }
->();
+const cache = new WeakMap< HTMLAudioElement, { ctx: AudioContext; source: MediaElementAudioSourceNode } >();
 // Singleton AudioContext — browsers limit the number of contexts (~6-20).
 let sharedCtx: AudioContext | null = null; // Reusing one context avoids exhaustion after many station switches.
 function getSharedContext(): AudioContext {

@@ -23,6 +23,5 @@ export function ensureStorageVersion(managedKeys: readonly string[]): void { if 
   try { const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION);
     if (stored === current) return;
     // Version mismatch — clear managed keys to prevent stale data crashes
-    for (const key of managedKeys) { localStorage.removeItem(key); }
-    localStorage.setItem(VERSION_KEY, current);
+    for (const key of managedKeys) { localStorage.removeItem(key); } localStorage.setItem(VERSION_KEY, current);
   } catch { /* ignore in SSR / restricted environments */ } }

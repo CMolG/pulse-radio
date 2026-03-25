@@ -20,8 +20,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
       controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort);
       }, { once: true }); }
-  }
-  try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
+  } try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch { return { streamTitle: null, icyBr: null };
@@ -52,8 +51,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     } }
   useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
-    }
-    const stationChanged = station.url_resolved !== prevStationUrlRef.current;
+    } const stationChanged = station.url_resolved !== prevStationUrlRef.current;
     if (stationChanged) { prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
       // Intentionally NOT clearing track/icyBitrate/streamCodec here.
       // The previous station's data stays visible until the new station's

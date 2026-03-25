@@ -35,8 +35,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
               for (let i = 0; i < buf.length; i++) {
                 const s = buf[i] - 128; sumSqInt += s * s; const a = s < 0 ? -s : s; if (a > maxAbsInt) maxAbsInt = a; }
               meterRef.current.peak = maxAbsInt / 128; meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128; }
-          }
-          rafRef.current = requestAnimationFrame(tick);
+          } rafRef.current = requestAnimationFrame(tick);
         }; rafRef.current = requestAnimationFrame(tick);} catch {
         // Some mobile browsers (notably iOS in background paths) can reject
         // WebAudio graph connections for cross-origin streams. Keep playback

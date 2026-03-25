@@ -29,8 +29,7 @@ function PWAStep() { const [deferredPrompt, setDeferredPrompt] = useState<{ prom
     }; window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);}, []);
   const handleInstall = async () => { if (deferredPrompt) {
-      try { await deferredPrompt.prompt(); } catch { /* user dismissed install prompt */ }
-      setDeferredPrompt(null); } };
+      try { await deferredPrompt.prompt(); } catch { /* user dismissed install prompt */ } setDeferredPrompt(null); } };
   if (isStandalone) { return ( <div className="flex flex-col items-center gap-4 text-center">
         <IoCheckmarkCircleOutline size={48} className="text-emerald-400" />
         <h2 className="text-xl font-bold text-white">Already Installed!</h2>

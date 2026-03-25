@@ -41,8 +41,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     if (!normalizedRequestedArtist) return results[exactIdx]; const exactArtist = normArtists[exactIdx];
     if (!exactArtist || exactArtist === normalizedRequestedArtist || exactArtist.includes(normalizedRequestedArtist) || normalizedRequestedArtist.includes(exactArtist)) {
       return results[exactIdx]; }
-  }
-  let best: ItunesResult | null = null; let bestScore = 0;
+  } let best: ItunesResult | null = null; let bestScore = 0;
   for (let i = 0; i < results.length; i++) { const candidateTitle = normTitles[i]; if (!candidateTitle) continue;
     const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length);
     const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length);

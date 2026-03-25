@@ -26,5 +26,4 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
               style={BLUR_STYLE} /></div></div>
       )}
     </div>);
-}
-export default React.memo(ParallaxBackground);
+} export default React.memo(ParallaxBackground);

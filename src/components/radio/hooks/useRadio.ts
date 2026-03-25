@@ -95,8 +95,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       if (typeof navigator !== 'undefined' && !navigator.onLine) return;
       if (isReconnectingRef.current) return; // Prevent concurrent reconnects — only one attempt at a time
       if (retryRef.current >= 10) { setStatus('error'); isReconnectingRef.current = false; return;
-      }
-      isReconnectingRef.current = true; retryRef.current++; setStatus('loading'); clearReconnectTimer();
+      } isReconnectingRef.current = true; retryRef.current++; setStatus('loading'); clearReconnectTimer();
       let adaptedDelay = delay; // Adapt reconnect delay based on network quality (Network Information API)
       const conn = typeof navigator !== 'undefined'
         ? (navigator as Navigator & { connection?: { effectiveType?: string; downlink?: number; saveData?: boolean } }).connection

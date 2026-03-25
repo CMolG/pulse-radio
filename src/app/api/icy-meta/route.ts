@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       // No ICY support — return whatever headers are available
       clearTimeout(timeout); res.body?.cancel().catch(() => {}); return NextResponse.json({
         streamTitle: null, icyName: icyName || null, icyGenre: icyGenre || null, icyBr: icyBr || null,});
-    }
-    const metaint = parseInt(icyMetaint, 10);
+    } const metaint = parseInt(icyMetaint, 10);
     const MAX_METAINT = 131072; // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout); res.body.cancel().catch(() => {});

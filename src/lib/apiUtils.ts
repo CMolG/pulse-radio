@@ -6,6 +6,5 @@ export async function apiFetch( url: string,
       await res.text().catch(() => {}); throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`); }
     if (opts.maxBytes) { const cl = res.headers.get('content-length'); if (cl && parseInt(cl, 10) > opts.maxBytes) {
         await res.body?.cancel().catch(() => {}); throw new Error('Response too large'); }
-    }
-    return res;
+    } return res;
   } finally { clearTimeout(timer); } }
