@@ -2498,6 +2498,10 @@ function useLyrics(
         if (!controller.signal.aborted && retryCountRef.current === 0) setLoading(false);
       });
   };
+  const lyricsKey = (t: NowPlayingTrack): string => {
+    const a = (t.artist || stationName || 'unknown').trim();
+    return `${a}\n${t.title}`.toLowerCase();
+  };
   useEffect(() => {
     if (abortRef.current) abortRef.current.abort();
     if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
@@ -2509,8 +2513,7 @@ function useLyrics(
       lastKeyRef.current = '';
       return;
     }
-    const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}\n${track.title}`.toLowerCase();
+    const key = lyricsKey(track);
     if (key === lastKeyRef.current) return;
     lastKeyRef.current = key;
     const cached = loadCache();
@@ -2531,8 +2534,7 @@ function useLyrics(
   }, [track?.artist, track?.title, track?.album, stationName]);
   const retry = () => {
     if (!track?.title) return;
-    const artistSeed = (track.artist || stationName || 'unknown').trim();
-    const key = `${artistSeed}\n${track.title}`.toLowerCase();
+    const key = lyricsKey(track);
     const cached = loadCache();
     if (abortRef.current) abortRef.current.abort();
     if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
