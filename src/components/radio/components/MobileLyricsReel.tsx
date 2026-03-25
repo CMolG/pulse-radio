@@ -7,8 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
-type Props = {
-  lyrics: LyricsData | null; currentTime?: number;
+type Props = { lyrics: LyricsData | null; currentTime?: number;
    activeLineOverride?: number;
   variant?: "mobile" | "desktop";
 };
@@ -22,13 +21,10 @@ const EMPHASIS: [string, string, string][] = [
 ];
 const LyricReelLine = React.memo(function LyricReelLine({
   lineId, index, text, emphasisIdx, isDesktop, lineRefs, scrollToIndex,
-}: {
-  lineId: string; index: number; text: string; emphasisIdx: number;
+}: { lineId: string; index: number; text: string; emphasisIdx: number;
   isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>; scrollToIndex: (i: number) => void;
-}) {
-  const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`;
-  return (
-    <button
+}) { const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`;
+  return ( <button
       key={lineId}
       ref={(node) => { lineRefs.current[index] = node; }}
       type="button"
@@ -69,8 +65,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   useEffect(() => { lineRefs.current = lineRefs.current.slice(0, renderableLines.length); }, [renderableLines.length]);
   // Reset scroll position when lyrics change (no autoscroll on active line —
   // user controls focus manually by scrolling or clicking a line)
-  useEffect(() => {
-    if (!renderableLines.length) return;
+  useEffect(() => { if (!renderableLines.length) return;
     const frame = requestAnimationFrame(() => { scrollToIndex(0, "auto"); setFocusedIdx(0); });
     return () => cancelAnimationFrame(frame);
   // Only react to lyrics changing, not to activeIdx
@@ -83,8 +78,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
     scroller.addEventListener("scroll", handleScroll, { passive: true });
     return () => { cancelAnimationFrame(frame); scroller.removeEventListener("scroll", handleScroll); };
   }, [renderableLines.length, updateFocusedIdx]); if (renderableLines.length === 0) return null;
-  return (
-    <div className={`relative flex-shrink-0 ${isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"}`}>
+  return ( <div className={`relative flex-shrink-0 ${isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"}`}>
       <div className={`relative z-20 flex h-full flex-col ${isDesktop ? "px-8 pb-5 pt-3" : "px-5 pb-4 pt-2"}`}><div
           ref={scrollerRef}
           className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${
@@ -96,8 +90,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
           }}><div className="flex min-h-full flex-col justify-center py-14">
               {renderableLines.map((line, index) => {
                 const ei = (activeIdx >= 0 && index === activeIdx) ? 0 : Math.min(Math.abs(index - focusedIdx), 3) + 1;
-                return (
-                  <LyricReelLine
+                return ( <LyricReelLine
                     key={line.id}
                     lineId={line.id}
                     index={index}

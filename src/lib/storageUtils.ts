@@ -3,15 +3,13 @@
  * Open source project: Pulse Radio.
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
-function tryLoad(key: string): string | null {
-  if (typeof window === 'undefined') return null;
+function tryLoad(key: string): string | null { if (typeof window === 'undefined') return null;
   try { return localStorage.getItem(key); } catch { return null; }
 }
 function isQuotaExceeded(e: unknown): boolean {
   return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22);
 }
-function trySave(key: string, raw: string): boolean {
-  try {
+function trySave(key: string, raw: string): boolean { try {
     localStorage.setItem(key, raw); return true;
   } catch (e) {
     if (isQuotaExceeded(e)) console.warn(`[Pulse Radio] localStorage quota exceeded for key "${key}"`); return false;
@@ -35,10 +33,8 @@ export const saveStringToStorage = (key: string, value: string) => trySave(key, 
  */
 const STORAGE_SCHEMA_VERSION = 1;
 const VERSION_KEY = 'radio-schema-version';
-export function ensureStorageVersion(managedKeys: readonly string[]): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION);
+export function ensureStorageVersion(managedKeys: readonly string[]): void { if (typeof window === 'undefined') return;
+  try { const stored = localStorage.getItem(VERSION_KEY); const current = String(STORAGE_SCHEMA_VERSION);
     if (stored === current) return;
     // Version mismatch — clear managed keys to prevent stale data crashes
     for (const key of managedKeys) { localStorage.removeItem(key); }

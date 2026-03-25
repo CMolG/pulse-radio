@@ -28,8 +28,7 @@ const BASE_MESSAGES = {
 } as const;
 export type MessageKey = keyof typeof BASE_MESSAGES;
 export type MessageBundle = Record<MessageKey, string>;
-const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = {
-  es: {
+const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = { es: {
     topStations: "Top Stations", loadingStations: "Cargando…", stationCount: "{count} emisoras", discovery: "Descubrir",
     all: "Todo", allCountries: "Todos", favorites: "Favoritos", recent: "Recientes",
     discover: "Descubrir", history: "Historial",
@@ -44,16 +43,14 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     genreClassical: "Clásica", genreElectronic: "Electrónica", genreNews: "Noticias", genreLatin: "Latina",
     genreLocal: "Local", minimize: "Minimizar", expand: "Expandir", seeMore: "Ver más",
   },
-  fr: {
-    loadingStations: "Chargement…", stationCount: "{count} stations", allCountries: "Tous", favorites: "Favoris",
+  fr: { loadingStations: "Chargement…", stationCount: "{count} stations", allCountries: "Tous", favorites: "Favoris",
     recent: "Récents", discover: "Découvrir", history: "Historique", searchStations: "Rechercher des stations…",
     searchStationsAria: "Rechercher des stations", retry: "Réessayer",
     failedToLoad: "Échec du chargement", noStationsFound: "Aucune station trouvée", previous: "Préc.", next: "Suiv.",
     addToFavorites: "Ajouter aux favoris", removeFromFavorites: "Retirer des favoris",
     minimize: "Réduire", expand: "Agrandir",
   },
-  de: {
-    loadingStations: "Laden…", stationCount: "{count} Sender", allCountries: "Alle", favorites: "Favoriten",
+  de: { loadingStations: "Laden…", stationCount: "{count} Sender", allCountries: "Alle", favorites: "Favoriten",
     recent: "Zuletzt", discover: "Entdecken", history: "Verlauf", searchStations: "Sender suchen…",
     searchStationsAria: "Sender suchen", retry: "Erneut versuchen",
     failedToLoad: "Laden fehlgeschlagen", noStationsFound: "Keine Sender gefunden", previous: "Zurück", next: "Weiter",
@@ -67,21 +64,18 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     failedToLoad: "Falha ao carregar", noStationsFound: "Nenhuma estação encontrada",
     previous: "Anterior", next: "Próximo", minimize: "Minimizar", expand: "Expandir",
   },
-  pt: {
-    loadingStations: "A carregar…", stationCount: "{count} estações", allCountries: "Todos", favorites: "Favoritos",
+  pt: { loadingStations: "A carregar…", stationCount: "{count} estações", allCountries: "Todos", favorites: "Favoritos",
     recent: "Recentes", discover: "Descobrir", history: "Histórico", searchStations: "Pesquisar estações…",
     searchStationsAria: "Pesquisar estações", retry: "Tentar novamente",
     failedToLoad: "Falha ao carregar", noStationsFound: "Nenhuma estação encontrada",
     previous: "Anterior", next: "Seguinte", minimize: "Minimizar", expand: "Expandir",
   },
-  ja: {
-    loadingStations: "読み込み中…", stationCount: "{count} 局", allCountries: "すべて", favorites: "お気に入り",
+  ja: { loadingStations: "読み込み中…", stationCount: "{count} 局", allCountries: "すべて", favorites: "お気に入り",
     recent: "最近", discover: "発見", history: "履歴", searchStations: "ラジオ局を検索…",
     searchStationsAria: "ラジオ局を検索", retry: "再試行", failedToLoad: "読み込みに失敗しました", noStationsFound: "局が見つかりません",
     previous: "前へ", next: "次へ", minimize: "最小化", expand: "展開",
   },
-  ar: {
-    loadingStations: "جارٍ التحميل…", stationCount: "{count} محطة", allCountries: "الكل", favorites: "المفضلة",
+  ar: { loadingStations: "جارٍ التحميل…", stationCount: "{count} محطة", allCountries: "الكل", favorites: "المفضلة",
     recent: "الأخيرة", discover: "اكتشاف", history: "السجل", searchStations: "ابحث عن المحطات…",
     searchStationsAria: "ابحث عن المحطات", retry: "إعادة المحاولة",
     failedToLoad: "فشل التحميل", noStationsFound: "لم يتم العثور على محطات", previous: "السابق", next: "التالي",

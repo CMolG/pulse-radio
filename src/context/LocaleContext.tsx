@@ -18,18 +18,15 @@ export function LocaleProvider({ children, countryCode, }: { children: React.Rea
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>
     countryCode ? getInitialLocaleForCountry(countryCode) : getInitialLocale(),
   );
-  useEffect(() => {
-    saveLocale(locale);
+  useEffect(() => { saveLocale(locale);
     if (typeof document !== "undefined") {
       document.documentElement.lang = locale; document.documentElement.dir = isRtlLocale(locale) ? "rtl" : "ltr";
     }
   }, [locale]);
-  const value = useMemo<LocaleContextValue>(() => {
-    const t: TranslateFn = (key, vars) => translate(locale, key, vars);
+  const value = useMemo<LocaleContextValue>(() => { const t: TranslateFn = (key, vars) => translate(locale, key, vars);
     return { locale, setLocale: setLocaleState, t, rtl: isRtlLocale(locale), locales: SUPPORTED_LOCALES };
   }, [locale]); return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
-export function useLocale() {
-  const context = useContext(LocaleContext);
+export function useLocale() { const context = useContext(LocaleContext);
   if (!context) throw new Error("useLocale must be used within a LocaleProvider"); return context;
 }

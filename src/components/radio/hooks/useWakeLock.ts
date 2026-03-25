@@ -16,8 +16,7 @@ export function useWakeLock(shouldLock: boolean) {
   const request = useCallback(async () => {
     if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
     requestingRef.current = true; wantReleaseRef.current = false;
-    try {
-      const lock = await navigator.wakeLock.request('screen');
+    try { const lock = await navigator.wakeLock.request('screen');
       if (wantReleaseRef.current) {
         // release() was called while we were awaiting — honour it immediately
         try { await lock.release(); } catch { /* already released */ }
@@ -29,8 +28,7 @@ export function useWakeLock(shouldLock: boolean) {
       // Wake lock request failed (e.g., low battery, or permission denied)
     } finally { requestingRef.current = false; }
   }, []);
-  const release = useCallback(async () => {
-    if (requestingRef.current) {
+  const release = useCallback(async () => { if (requestingRef.current) {
       // request() is in-flight — flag so it releases on completion
       wantReleaseRef.current = true; return;
     }

@@ -9,8 +9,7 @@ import type { Station } from '../types';
 import { STORAGE_KEYS, MAX_RECENT } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
-export function useRecent() {
-  const [recent, setRecent] = useState<Station[]>(() => {
+export function useRecent() { const [recent, setRecent] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, []);
     // Dedup by stationuuid on load in case of corrupted storage
     const seen = new Set<string>();
@@ -19,8 +18,7 @@ export function useRecent() {
     });
   }); useEffect(() => { saveToStorage(STORAGE_KEYS.RECENT, recent); }, [recent]);
   useStorageSync<Station[]>(STORAGE_KEYS.RECENT, setRecent);
-  const add = useCallback((station: Station) => {
-    setRecent(prev => {
+  const add = useCallback((station: Station) => { setRecent(prev => {
       const filtered = prev.filter(s => s.stationuuid !== station.stationuuid);
       return [station, ...filtered].slice(0, MAX_RECENT);
     });

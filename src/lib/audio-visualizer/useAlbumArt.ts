@@ -12,20 +12,17 @@ interface AlbumInfo {
 }
 const CACHE = new Map<string, AlbumInfo>();
 const MAX_CACHE = 200;
-const EMPTY_ALBUM_INFO: AlbumInfo = {
-  artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
+const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
   durationMs: null, genre: null, trackNumber: null, trackCount: null,
 };
-type ItunesResult = {
-  trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
+type ItunesResult = { trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
   collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number;
   primaryGenreName?: string; trackNumber?: number; trackCount?: number;
 };
 // Reusable match arrays for Jaro distance — avoids allocation per call
 let _aMatches: boolean[] = [];
 let _bMatches: boolean[] = [];
-function jaroDistance(a: string, b: string): number {
-  if (a === b) return 1; if (!a.length || !b.length) return 0;
+function jaroDistance(a: string, b: string): number { if (a === b) return 1; if (!a.length || !b.length) return 0;
   const matchDistance = Math.floor(Math.max(a.length, b.length) / 2) - 1;
   // Grow and reset reusable arrays
   if (_aMatches.length < a.length) _aMatches = new Array(a.length);
@@ -43,8 +40,7 @@ function jaroDistance(a: string, b: string): number {
     if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++;
   }
   const transpositions = t / 2;
-  return (
-    matches / a.length +
+  return ( matches / a.length +
     matches / b.length +
     (matches - transpositions) / matches
   ) / 3;
@@ -70,15 +66,13 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     }
   }
   let best: ItunesResult | null = null; let bestScore = 0;
-  for (let i = 0; i < results.length; i++) {
-    const candidateTitle = normTitles[i]; if (!candidateTitle) continue;
+  for (let i = 0; i < results.length; i++) { const candidateTitle = normTitles[i]; if (!candidateTitle) continue;
     const lenDiff = Math.abs(candidateTitle.length - normalizedRequestedTitle.length);
     const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length);
     if (maxLen > 0 && lenDiff / maxLen > 0.35) continue;
     const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle); if (titleScore < 0.94) continue;
     let score = titleScore;
-    if (normalizedRequestedArtist) {
-      const candidateArtist = normArtists[i];
+    if (normalizedRequestedArtist) { const candidateArtist = normArtists[i];
       if (candidateArtist) {
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist); if (artistScore < 0.85) continue;
         score = (titleScore * 0.85) + (artistScore * 0.15);
@@ -88,16 +82,14 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   }
   return best ?? null;
 }
-function cacheGet(key: string): AlbumInfo | undefined {
-  const val = CACHE.get(key);
+function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key);
   if (val !== undefined) {
     // Move to end for LRU ordering
     CACHE.delete(key); CACHE.set(key, val);
   }
   return val;
 }
-function cacheSet(key: string, value: AlbumInfo) {
-  CACHE.delete(key); CACHE.set(key, value);
+function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(key, value);
   while (CACHE.size > MAX_CACHE) {
     const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest); else break;
   }
@@ -107,13 +99,11 @@ function appendReferrer(url: string): string {
   if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`;
 }
 /** Preload an image so it's already in the browser cache when rendered. */
-function preloadImage(url: string) {
-  const img = new Image(); img.crossOrigin = 'anonymous';
+function preloadImage(url: string) { const img = new Image(); img.crossOrigin = 'anonymous';
   img.onerror = () => { img.src = ''; }; // release failed load
   img.src = url;
 }
-export function useAlbumArt(title: string | null, artist: string | null) {
-  const hasTitle = Boolean(title);
+export function useAlbumArt(title: string | null, artist: string | null) { const hasTitle = Boolean(title);
   const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
   const cachedInfo = useMemo(() => { if (!cacheKey) return null; return cacheGet(cacheKey) ?? null; }, [cacheKey]);
   const [fetched, setFetched] = useState<{ key: string; info: AlbumInfo } | null>(null);
@@ -125,13 +115,11 @@ export function useAlbumArt(title: string | null, artist: string | null) {
     const term = artist ? `${artist} ${title}` : title;
     fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal },).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();
-      }).then((data) => {
-        if (controller.signal.aborted) return;
+      }).then((data) => { if (controller.signal.aborted) return;
         const result = selectBestItunesResult((data.results ?? []) as ItunesResult[], title, artist);
         const artworkUrl = result?.artworkUrl100?.replace('100x100', '600x600') ?? null;
         const rawItunesUrl: string | null = result?.trackViewUrl ?? result?.collectionViewUrl ?? null;
-        const albumInfo: AlbumInfo = {
-          artworkUrl, albumName: result?.collectionName ?? null,
+        const albumInfo: AlbumInfo = { artworkUrl, albumName: result?.collectionName ?? null,
           releaseDate: result?.releaseDate ?? null, itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
           durationMs: typeof result?.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
           genre: result?.primaryGenreName ?? null,
@@ -139,8 +127,7 @@ export function useAlbumArt(title: string | null, artist: string | null) {
           trackCount: typeof result?.trackCount === 'number' ? result.trackCount : null,
         }; cacheSet(cacheKey, albumInfo); if (artworkUrl) preloadImage(artworkUrl);
         setFetched({ key: cacheKey, info: albumInfo });
-      }).catch(() => {
-        if (!controller.signal.aborted) {
+      }).catch(() => { if (!controller.signal.aborted) {
           cacheSet(cacheKey, EMPTY_ALBUM_INFO); setFetched({ key: cacheKey, info: EMPTY_ALBUM_INFO });
         }
       }).finally(() => { clearTimeout(timeout); });

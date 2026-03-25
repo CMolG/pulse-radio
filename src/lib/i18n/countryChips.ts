@@ -23,8 +23,7 @@ function localeCandidates(locale: SupportedLocale): SupportedLocale[] {
 function localeFromLang3(code3: string): SupportedLocale | null { return LANG3_TO_LOCALE[code3] ?? null; }
 export function getCountryDisplayName(locale: SupportedLocale, code: string): string {
   const country = COUNTRY_BY_CODE[code]; if (!country) return code;
-  try {
-    const dn = new Intl.DisplayNames([locale], { type: "region" }); return dn.of(code) ?? country.name;
+  try { const dn = new Intl.DisplayNames([locale], { type: "region" }); return dn.of(code) ?? country.name;
   } catch { return country.name; }
 }
 function getSameLanguageCountries(locale: SupportedLocale): string[] {
@@ -39,8 +38,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
   const regions = new Set(seed.map((country) => country.region));
   const subregions = new Set(seed.map((country) => country.subregion));
   const borders = new Set(seed.flatMap((country) => country.borders));
-  return SOVEREIGN_COUNTRIES.map((country) => {
-    let score = 0; if (borders.has(country.code)) score += 100;
+  return SOVEREIGN_COUNTRIES.map((country) => { let score = 0; if (borders.has(country.code)) score += 100;
     if (subregions.has(country.subregion)) score += 60; if (regions.has(country.region)) score += 30;
     score += 30; score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };

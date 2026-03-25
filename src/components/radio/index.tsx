@@ -12,8 +12,7 @@ import { LocaleProvider } from '@/context/LocaleContext';
 ensureStorageVersion(Object.values(STORAGE_KEYS));
 const RadioShell = dynamic(() => import('./RadioShell'), { ssr: false });
 export default function RadioApp({ isPip, initialCountryCode }: { isPip?: boolean; initialCountryCode?: string }) {
-  return (
-    <ErrorBoundary><LocaleProvider countryCode={initialCountryCode}>
+  return ( <ErrorBoundary><LocaleProvider countryCode={initialCountryCode}>
         <RadioShell isPip={isPip} initialCountryCode={initialCountryCode} /></LocaleProvider></ErrorBoundary>
   );
 }

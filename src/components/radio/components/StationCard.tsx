@@ -11,8 +11,7 @@ import type { Station } from '../types';
 import { countryFlag } from '../constants';
 import UiImage from '@/components/common/UiImage';
 import { stationInitials } from '../utils/formatUtils';
-type Props = {
-  station: Station; isPlaying: boolean; isCurrent: boolean; isFavorite: boolean;
+type Props = { station: Station; isPlaying: boolean; isCurrent: boolean; isFavorite: boolean;
   onPlay: () => void; onToggleFav: () => void;
   liveStatus?: 'loading' | 'loaded' | 'error'; liveTrack?: { title: string; artist: string } | null;
   onPeek?: () => void; onPrefetch?: () => void;
@@ -31,11 +30,9 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       onMouseEnter={onPrefetch}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPlay(); } }}> {/* Artwork */}
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
-        {showFallback ? (
-          <div className="size-full dawn-gradient flex-center-row">
+        {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
             <span className="text-white text-lg font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{stationInitials(station.name) || <Radio size={20} className="text-white/60" />}</span></div>
-        ) : (
-          <UiImage
+        ) : ( <UiImage
             src={station.favicon}
             alt=""
             className="object-cover"
@@ -71,22 +68,17 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
         {station.countrycode && (
           <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>)}</div>
       {/* Live track preview */}
-      {liveStatus === 'loading' && (
-        <div className="flex items-center gap-1 mt-1.5">
+      {liveStatus === 'loading' && ( <div className="flex items-center gap-1 mt-1.5">
           <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />
           <span className="text-[9px] text-dim">Checking…</span></div>
       )}
-      {liveStatus === 'loaded' && (
-        <div className="flex items-center gap-1 mt-1.5 min-w-0">
-          {liveTrack ? (
-            <><Music2 size={9} className="text-sys-orange flex-shrink-0" />
+      {liveStatus === 'loaded' && ( <div className="flex items-center gap-1 mt-1.5 min-w-0">
+          {liveTrack ? ( <><Music2 size={9} className="text-sys-orange flex-shrink-0" />
               <span className="text-[9px] text-white/60 truncate leading-tight">
                 {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}</span></>
-          ) : (
-            <span className="text-[9px] text-white/20">No track info</span>)}</div>
+          ) : ( <span className="text-[9px] text-white/20">No track info</span>)}</div>
       )}
-      {onPeek && !liveStatus && (
-        <button
+      {onPeek && !liveStatus && ( <button
           onClick={e => { e.stopPropagation(); onPeek(); }}
           className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors">
           <Music2 size={9} />

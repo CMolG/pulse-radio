@@ -13,8 +13,7 @@ import { FerrofluidRenderer } from "@/lib/audio-visualizer/FerrofluidRenderer";
 import { ErrorBoundary } from "./ErrorBoundary";
 import UiImage from "@/components/common/UiImage";
 import { stationInitials } from "../utils/formatUtils";
-type Props = {
-  station: Station | null; track: NowPlayingTrack | null; status: PlaybackStatus; volume: number;
+type Props = { station: Station | null; track: NowPlayingTrack | null; status: PlaybackStatus; volume: number;
   muted: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
   icyBitrate?: string | null; onTogglePlay: () => void; onSetVolume: (v: number) => void; onToggleMute: () => void;
   onToggleEq: () => void; onToggleTheater?: () => void; onToggleFav?: () => void; onFavSong?: () => void;
@@ -23,19 +22,16 @@ type Props = {
   streamQuality?: StreamQuality;
 };
 const SAFE_AREA_STYLE: React.CSSProperties = { paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' };
-function NowPlayingBar({
-  station, track, status, volume, muted, frequencyDataRef, icyBitrate, onTogglePlay,
+function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef, icyBitrate, onTogglePlay,
   onSetVolume, onToggleMute, onToggleEq, onToggleTheater, onToggleFav, onFavSong, isFavorite, songLiked,
   eqPresetActive, showEq, theaterMode, compact, sleepTimerMin, onCycleSleepTimer, streamQuality,
-}: Props) {
-  const isPlaying = status === "playing"; const isLoading = status === "loading";
+}: Props) { const isPlaying = status === "playing"; const isLoading = status === "loading";
   const [imgError, setImgError] = useState(false); const coverUrlForReset = track?.artworkUrl ?? station?.favicon;
   // Reset error state when cover URL changes so new artwork gets a chance to load
   const [prevBarCoverUrl, setPrevBarCoverUrl] = useState(coverUrlForReset);
   if (coverUrlForReset !== prevBarCoverUrl) { setPrevBarCoverUrl(coverUrlForReset); setImgError(false); }
   const coverUrl = track?.artworkUrl ?? station?.favicon; const showFallback = !coverUrl || imgError;
-  const statusAnnouncement = useMemo(() => {
-    if (!station) return "No station selected";
+  const statusAnnouncement = useMemo(() => { if (!station) return "No station selected";
     const trackInfo = track?.title ? (track.artist ? `${track.artist}, ${track.title}` : track.title) : station.name;
     if (isLoading) return `Loading ${trackInfo}`; if (isPlaying) return `Now playing: ${trackInfo}`;
     if (status === "error") return `Playback error: ${station.name}`; return `Paused: ${trackInfo}`;
@@ -43,13 +39,11 @@ function NowPlayingBar({
   const [firstTag, compactTags] = useMemo(() => {
     const tags = station?.tags?.split(",") ?? []; return [tags[0] ?? "", tags.slice(0, 2).join(" · ")];
   }, [station?.tags]);
-  const handleVolumeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVolumeChange = useCallback( (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = parseFloat(e.target.value); onSetVolume(v); if (muted && v > 0) onToggleMute();
     }, [muted, onSetVolume, onToggleMute],
   );
-  if (compact) {
-    return (
+  if (compact) { return (
       <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
         {/* Play/Pause — 48px touch target */} <button
           onClick={onTogglePlay}
@@ -57,16 +51,12 @@ function NowPlayingBar({
           aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
         >
-          {isLoading ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : isPlaying ? (
-            <Pause size={18} />
-          ) : (
-            <Play size={18} className="ml-0.5" />
+          {isLoading ? ( <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : isPlaying ? ( <Pause size={18} />
+          ) : ( <Play size={18} className="ml-0.5" />
           )}</button>
         {/* Track info + LIVE indicator */} <div className="flex-1 min-w-0">
-          {station ? (
-            <><p className="text-[13px] font-medium text-white truncate leading-tight">
+          {station ? ( <><p className="text-[13px] font-medium text-white truncate leading-tight">
                 {track?.title || station.name}</p><div className="flex items-center gap-1.5 mt-0.5"> {isPlaying && (
                   <><span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />
                     <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
@@ -74,11 +64,9 @@ function NowPlayingBar({
                 )}
                 <span className="text-[11px] text-secondary truncate">{track?.artist || compactTags || ""}</span></div>
             </>
-          ) : (
-            <p className="text-[13px] text-dim">No station selected</p>)}</div>
+          ) : ( <p className="text-[13px] text-dim">No station selected</p>)}</div>
         {/* Action buttons — 44px touch targets */} <div className="flex items-center gap-0.5 shrink-0">
-          {station && !theaterMode && (
-            <button
+          {station && !theaterMode && ( <button
               onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
@@ -94,18 +82,14 @@ function NowPlayingBar({
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{statusAnnouncement}</div>
       {/* Station info */} <div className="flex-row-2.5 min-w-40">
         <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
-          {showFallback ? (
-            <div className="size-full dawn-gradient flex-center-row">
+          {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
-                {station ? (
-                  stationInitials(station.name) || (
+                {station ? ( stationInitials(station.name) || (
                     <Radio size={14} className="text-white/60" />
                   )
-                ) : (
-                  <Radio size={14} className="text-white/60" />
+                ) : ( <Radio size={14} className="text-white/60" />
                 )}</span></div>
-          ) : (
-            <UiImage
+          ) : ( <UiImage
               src={coverUrl}
               alt=""
               className="object-cover"
@@ -117,16 +101,13 @@ function NowPlayingBar({
           <p className="text-[12px] font-medium text-white truncate">{station?.name || "Not Playing"}</p>
           <p className="text-[10px] text-secondary truncate">
             {track?.title ? (track.artist ? `${track.artist} — ${track.title}` : track.title) : firstTag}</p>
-          {track?.album && (
-            <p className="text-[9px] text-dim truncate">{track.album}</p>)}</div>
+          {track?.album && ( <p className="text-[9px] text-dim truncate">{track.album}</p>)}</div>
         {icyBitrate && (
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
             {icyBitrate}kbps</span>
         )}
-        {streamQuality && isPlaying && (
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 self-center ${
-              streamQuality === 'good' ? 'bg-green-500' :
+        {streamQuality && isPlaying && ( <span
+            className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
               streamQuality === 'fair' ? 'bg-yellow-500' :
               streamQuality === 'poor' ? 'bg-red-500' :
               'bg-gray-500'
@@ -141,12 +122,9 @@ function NowPlayingBar({
           aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >
-          {isLoading ? (
-            <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : isPlaying ? (
-            <Pause size={16} />
-          ) : (
-            <Play size={16} className="ml-0.5" />
+          {isLoading ? ( <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : isPlaying ? ( <Pause size={16} />
+          ) : ( <Play size={16} className="ml-0.5" />
           )}</button></div>
       {/* LIVE indicator + mini ferrofluid */} <div className="flex-1 flex-row-2 min-w-0 relative">
         {station && isPlaying && (
@@ -165,31 +143,27 @@ function NowPlayingBar({
               <AnimatedBars size="small" /></div></>
         )}</div>
       {/* Toggles */} <div className="flex-row-0.5">
-        {station && !theaterMode && (
-          <button
+        {station && !theaterMode && ( <button
             onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
             aria-label="Theater mode"><Maximize2 size={14} /></button>
         )}
-        {onToggleFav && (
-          <button
+        {onToggleFav && ( <button
             onClick={onToggleFav}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
         )}
-        {onFavSong && (
-          <button
+        {onFavSong && ( <button
             onClick={onFavSong}
             aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
             title="Me gusta canción"><Heart size={14} className={songLiked ? "fill-pink-400" : ""} /></button>
         )}
-        {onCycleSleepTimer && (
-          <button
+        {onCycleSleepTimer && ( <button
             onClick={onCycleSleepTimer}
             className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
@@ -208,8 +182,7 @@ function NowPlayingBar({
           aria-pressed={muted || volume === 0}
           className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"> {muted || volume === 0 ? (
             <VolumeX size={14} />
-          ) : (
-            <Volume2 size={14} />
+          ) : ( <Volume2 size={14} />
           )}</button><input
           type="range"
           min={0}

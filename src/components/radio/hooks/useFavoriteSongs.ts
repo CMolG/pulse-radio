@@ -11,13 +11,11 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 function songKey(title: string, artist: string) { return `${title}|||${artist}`; }
 /** Build a Set of songKeys from a song array for O(1) lookups. */
-function buildKeySet(songs: FavoriteSong[]): Set<string> {
-  const s = new Set<string>();
+function buildKeySet(songs: FavoriteSong[]): Set<string> { const s = new Set<string>();
   for (let i = 0; i < songs.length; i++) { s.add(songKey(songs[i].title, songs[i].artist)); }
   return s;
 }
-export function useFavoriteSongs() {
-  const MAX_SONGS = 500;
+export function useFavoriteSongs() { const MAX_SONGS = 500;
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
     // Dedup on load in case of corrupted storage
@@ -37,8 +35,7 @@ export function useFavoriteSongs() {
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => keySetRef.current.has(songKey(song.title, song.artist)) ? prev : prepend(song, prev));
   }, []); const remove = useCallback((id: string) => { setSongs(prev => prev.filter(s => s.id !== id)); }, []);
-  const toggle = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
-    setSongs(prev => {
+  const toggle = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => { setSongs(prev => {
       const key = songKey(song.title, song.artist); const exists = prev.find(s => songKey(s.title, s.artist) === key);
       return exists ? prev.filter(s => s.id !== exists.id) : prepend(song, prev);
     });

@@ -13,11 +13,9 @@ import { useCanvasLoop } from './useCanvasLoop';
 const NUM_BARS = 250;
 const CYCLES = 4;
 const SMOOTH_PASSES = 3;
-export function SpiralRenderer({
-  frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068",
+export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068",
   color3 = "#f9d423", sensitivity = 1.0, demo = false,
-}: SpiralRendererProps) {
-  const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS));
+}: SpiralRendererProps) { const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS));
   const targetArrayRef = useRef(new Float64Array(NUM_BARS)); const smoothedRef = useRef(new Float64Array(NUM_BARS));
   const tempRef = useRef(new Float64Array(NUM_BARS));
   // Pre-allocated coordinate arrays — avoids 500+ object allocations per frame
@@ -37,8 +35,7 @@ export function SpiralRenderer({
       }
     } else if (demo) {
       // Demo mode: organic simulated audio
-      for (let i = 0; i < NUM_BARS; i++) {
-        if (Math.random() < 0.08) {
+      for (let i = 0; i < NUM_BARS; i++) { if (Math.random() < 0.08) {
           const maxVal = i < NUM_BARS / 3 ? 1.0 : 0.6; target[i] = Math.random() * maxVal * sensitivity;
         }
         data[i] += (target[i] - data[i]) * 0.1;
@@ -50,8 +47,7 @@ export function SpiralRenderer({
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;
-    for (let pass = 0; pass < SMOOTH_PASSES; pass++) {
-      for (let i = 0; i < NUM_BARS; i++) {
+    for (let pass = 0; pass < SMOOTH_PASSES; pass++) { for (let i = 0; i < NUM_BARS; i++) {
         const prev = src[i > 0 ? i - 1 : 0]; const next = src[i < NUM_BARS - 1 ? i + 1 : NUM_BARS - 1];
         dst[i] = prev * 0.25 + src[i] * 0.5 + next * 0.25;
       }
@@ -68,8 +64,7 @@ export function SpiralRenderer({
     ctx.clearRect(0, 0, w, h);
     // Gradient
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current; let fillStyle: string | CanvasGradient = c1;
-    try {
-      const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,
+    try { const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,
         centerY + maxRadius,
       ); gradient.addColorStop(0, c1); gradient.addColorStop(0.5, c2); gradient.addColorStop(1, c3);
       fillStyle = gradient;
@@ -77,8 +72,7 @@ export function SpiralRenderer({
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
     const outerX = outerXRef.current; const outerY = outerYRef.current;
     const innerX = innerXRef.current; const innerY = innerYRef.current;
-    for (let i = 0; i < NUM_BARS; i++) {
-      const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
+    for (let i = 0; i < NUM_BARS; i++) { const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
       const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle;
       const radius = minRadius * Math.exp(b * baseAngle);
       const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle);
@@ -108,8 +102,7 @@ export function SpiralRenderer({
     }
     ctx.globalAlpha = 1.0;
   });
-  return (
-    <div
+  return ( <div
       className={`relative overflow-hidden ${className}`}
       style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}><canvas
         ref={canvasRef}

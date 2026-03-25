@@ -7,19 +7,16 @@
  * Checks whether a hostname resolves to a private/internal address.
  * Blocks loopback, link-local, and RFC 1918 private ranges to prevent SSRF.
  */
-export function isPrivateHost(hostname: string): boolean {
-  const host = hostname.toLowerCase();
+export function isPrivateHost(hostname: string): boolean { const host = hostname.toLowerCase();
   // Loopback
-  if (
-    host === 'localhost' ||
+  if ( host === 'localhost' ||
     host === '127.0.0.1' ||
     host === '::1' ||
     host === '0.0.0.0' || host.endsWith('.localhost')
   ) { return true; }
   // IPv4 private ranges (RFC 1918 + link-local + shared address space)
   const ipv4Match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (ipv4Match) {
-    const [, a, b] = ipv4Match.map(Number);
+  if (ipv4Match) { const [, a, b] = ipv4Match.map(Number);
     if (a === 10) return true;                          // 10.0.0.0/8
     if (a === 172 && b >= 16 && b <= 31) return true;   // 172.16.0.0/12
     if (a === 192 && b === 168) return true;             // 192.168.0.0/16

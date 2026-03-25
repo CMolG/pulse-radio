@@ -16,8 +16,7 @@ const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: num
   high: { hpfHz: 35, gateThreshold: -42, gateRatio: 3.0, deEsserCenterHz: 6500, deEsserGain: -4.5 },
 };
 const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
-function ensureQualityMigration(): void {
-  if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
+function ensureQualityMigration(): void { if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
   saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low'); saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
   saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
 }
@@ -27,8 +26,7 @@ function getDefaultNoiseReductionMode(): NoiseReductionMode {
 function getDefaultNormalizerEnabled(): boolean {
   ensureQualityMigration(); return loadFromStorage<boolean>(STORAGE_KEYS.NORMALIZER_ENABLED, true);
 }
-export function useEqualizer() {
-  const [bands, setBands] = useState<EqBand[]>(() => {
+export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(() => {
     const defaults = EQ_BANDS.map(b => ({ ...b }));
     const saved = loadFromStorage<EqBand[]>(STORAGE_KEYS.EQ_BANDS, defaults);
     // If stored band count doesn't match current config, reset to defaults
@@ -81,8 +79,7 @@ export function useEqualizer() {
     mbHighHpRef, mbHighCompRef, mbDryGainRef, mbWetGainRef, mbMergeRef,
     nrHighpassRef, nrGateRef, nrDeEsserRef, nrDeEssGainRef, bassLpRef, bassShaperRef, bassHpRef, bassMixRef,
   ];
-  function teardownGraph(includeSource: boolean) {
-    try {
+  function teardownGraph(includeSource: boolean) { try {
       sourceRef.current?.disconnect(); filtersRef.current.forEach(f => f.disconnect());
       for (const ref of graphNodeRefs) ref.current?.disconnect();
     } catch { /* ok */ }
@@ -94,26 +91,21 @@ export function useEqualizer() {
   const applyNoiseReductionPreset = useCallback((mode: NoiseReductionMode) => {
     const preset = NR_PRESETS[mode]; const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
     if (nrHighpassRef.current) nrHighpassRef.current.frequency.setTargetAtTime(preset.hpfHz, t, RAMP_TIME);
-    if (nrGateRef.current) {
-      nrGateRef.current.threshold.setTargetAtTime(preset.gateThreshold, t, RAMP_TIME);
+    if (nrGateRef.current) { nrGateRef.current.threshold.setTargetAtTime(preset.gateThreshold, t, RAMP_TIME);
       nrGateRef.current.ratio.setTargetAtTime(preset.gateRatio, t, RAMP_TIME);
     }
-    if (nrDeEsserRef.current) {
-      nrDeEsserRef.current.frequency.setTargetAtTime(preset.deEsserCenterHz, t, RAMP_TIME);
+    if (nrDeEsserRef.current) { nrDeEsserRef.current.frequency.setTargetAtTime(preset.deEsserCenterHz, t, RAMP_TIME);
       nrDeEsserRef.current.gain.setTargetAtTime(preset.deEsserGain, t, RAMP_TIME);
     }
   }, []);
   const setOutputVolume = useCallback((volume: number, muted: boolean) => {
     const clamped = Math.max(0, Math.min(1, volume)); outputVolumeRef.current = clamped; outputMutedRef.current = muted;
     const next = muted ? 0 : clamped; const ctx = ctxRef.current;
-    if (outputGainRef.current && ctx) {
-      outputGainRef.current.gain.setTargetAtTime(next, ctx.currentTime, RAMP_TIME);
+    if (outputGainRef.current && ctx) { outputGainRef.current.gain.setTargetAtTime(next, ctx.currentTime, RAMP_TIME);
     } else if (outputGainRef.current) outputGainRef.current.gain.value = next;
   }, []);
-  useEffect(() => {
-    saveToStorage(STORAGE_KEYS.EQ_BANDS, bands); const ctx = ctxRef.current;
-    filtersRef.current.forEach((f, i) => {
-      if (bands[i]) {
+  useEffect(() => { saveToStorage(STORAGE_KEYS.EQ_BANDS, bands); const ctx = ctxRef.current;
+    filtersRef.current.forEach((f, i) => { if (bands[i]) {
         const target = enabled ? bands[i].gain : 0; if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
         else f.gain.value = target;
       }
@@ -123,12 +115,10 @@ export function useEqualizer() {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
     // Disconnect any existing chain before building a new one
     if (connectedAudioRef.current) teardownGraph(false);
-    try {
-      const { ctx, source } = getOrCreateAudioSource(audio); ctxRef.current = ctx; sourceRef.current = source;
+    try { const { ctx, source } = getOrCreateAudioSource(audio); ctxRef.current = ctx; sourceRef.current = source;
       connectedAudioRef.current = audio;
       const nrPreset = NR_PRESETS[noiseReductionMode]; const nyquist = ctx.sampleRate / 2;
-      const filters = bands.map(band => {
-        const filter = ctx.createBiquadFilter(); filter.type = band.type;
+      const filters = bands.map(band => { const filter = ctx.createBiquadFilter(); filter.type = band.type;
         filter.frequency.value = Math.max(20, Math.min(nyquist - 1, band.frequency));
         filter.gain.value = enabled ? band.gain : 0; if (band.type === 'peaking') filter.Q.value = 1.0; return filter;
       });
@@ -156,8 +146,7 @@ export function useEqualizer() {
       nrDeEsser.gain.value = nrPreset.deEsserGain; const nrDeEssGain = ctx.createGain(); nrDeEssGain.gain.value = 1;
       nrHighpassRef.current = nrHighpass; nrGateRef.current = nrGate;
       nrDeEsserRef.current = nrDeEsser; nrDeEssGainRef.current = nrDeEssGain;
-      if (normalizerEnabled) {
-        source.connect(normalizer); normalizer.connect(normGain); normGain.connect(nrHighpass);
+      if (normalizerEnabled) { source.connect(normalizer); normalizer.connect(normGain); normGain.connect(nrHighpass);
       } else source.connect(nrHighpass); nrHighpass.connect(nrGate); nrGate.connect(nrDeEsser);
       nrDeEsser.connect(nrDeEssGain); nrDeEssGain.connect(filters[0]);
       for (let i = 0; i < filters.length - 1; i++) { filters[i].connect(filters[i + 1]); }
@@ -262,24 +251,20 @@ export function useEqualizer() {
     const clamped = Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gain));
     setBands(prev => prev.map(b => b.id === id ? { ...b, gain: clamped } : b));
   }, []);
-  const applyPreset = useCallback((gains: number[]) => {
-    setBands(prev => prev.map((b, i) => ({
+  const applyPreset = useCallback((gains: number[]) => { setBands(prev => prev.map((b, i) => ({
       ...b, gain: Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gains[i] ?? 0)),
     })));
   }, []); const toggleEnabled = useCallback(() => setEnabled(e => !e), []);
-  const toggleNormalizer = useCallback(() => {
-    setNormalizerEnabled(prev => {
+  const toggleNormalizer = useCallback(() => { setNormalizerEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, next);
       // Live-toggle: rewire audio graph without full reconnect
       const source = sourceRef.current; const normalizer = normalizerRef.current;
       const normGain = normGainRef.current; const nrHead = nrHighpassRef.current;
-      if (source && normalizer && normGain && nrHead) {
-        try {
+      if (source && normalizer && normGain && nrHead) { try {
           try { source.disconnect(normalizer); } catch { /* source may not be connected to normalizer */ }
           try { source.disconnect(nrHead); } catch { /* source may not be connected to NR head */ }
           normalizer.disconnect(); normGain.disconnect(); const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
-          if (next) {
-            normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME); source.connect(normalizer);
+          if (next) { normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME); source.connect(normalizer);
             normalizer.connect(normGain); normGain.connect(nrHead);
           } else { normGain.gain.setTargetAtTime(1.0, t, RAMP_TIME); source.connect(nrHead); }
         } catch { /* ok */ }
@@ -294,8 +279,7 @@ export function useEqualizer() {
       return next;
     });
   }, [bands]);
-  const removeCustomPreset = useCallback((name: string) => {
-    setCustomPresets(prev => {
+  const removeCustomPreset = useCallback((name: string) => { setCustomPresets(prev => {
       const next = prev.filter(p => p.name !== name); saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next); return next;
     });
   }, []);
@@ -312,20 +296,16 @@ export function useEqualizer() {
   const setBassEnhance = useCallback((v: number) => {
     const clamped = Math.max(0, Math.min(1, v)); setBassEnhanceState(clamped);
     saveToStorage(STORAGE_KEYS.BASS_ENHANCE, clamped); const ctx = ctxRef.current;
-    if (bassMixRef.current && ctx) {
-      bassMixRef.current.gain.setTargetAtTime(clamped, ctx.currentTime, RAMP_TIME);
+    if (bassMixRef.current && ctx) { bassMixRef.current.gain.setTargetAtTime(clamped, ctx.currentTime, RAMP_TIME);
     } else if (bassMixRef.current) bassMixRef.current.gain.value = clamped;
   }, []);
-  const toggleCompressor = useCallback(() => {
-    setCompressorEnabled(prev => {
+  const toggleCompressor = useCallback(() => { setCompressorEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.COMPRESSOR_ENABLED, next);
       const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0; const amount = compressorAmount;
-      if (mbDryGainRef.current && mbWetGainRef.current) {
-        if (next) {
+      if (mbDryGainRef.current && mbWetGainRef.current) { if (next) {
           mbDryGainRef.current.gain.setTargetAtTime(1 - amount * 0.5, t, RAMP_TIME);
           mbWetGainRef.current.gain.setTargetAtTime(amount, t, RAMP_TIME);
-        } else {
-          mbDryGainRef.current.gain.setTargetAtTime(1, t, RAMP_TIME);
+        } else { mbDryGainRef.current.gain.setTargetAtTime(1, t, RAMP_TIME);
           mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME);
         }
       }
@@ -344,8 +324,7 @@ export function useEqualizer() {
     applyNoiseReductionPreset(mode);
   }, [applyNoiseReductionPreset]);
   useEffect(() => { applyNoiseReductionPreset(noiseReductionMode); }, [applyNoiseReductionPreset, noiseReductionMode]);
-  return {
-    bands, enabled, normalizerEnabled, stereoWidth,
+  return { bands, enabled, normalizerEnabled, stereoWidth,
     bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode,
     customPresets, setBandGain, applyPreset, toggleEnabled,
     toggleNormalizer, setStereoWidth, setBassEnhance, toggleCompressor,

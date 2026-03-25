@@ -23,8 +23,7 @@ function loadCache(): CacheEntry[] {
 function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 export function useLyrics( track: NowPlayingTrack | null, stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
-) {
-  const [lyrics, setLyrics] = useState<LyricsData | null>(null); const [loading, setLoading] = useState(false);
+) { const [lyrics, setLyrics] = useState<LyricsData | null>(null); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false); const lastKeyRef = useRef('');
   const abortRef = useRef<AbortController | null>(null); const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const MAX_RETRIES = 2;
@@ -35,13 +34,11 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
       controller.signal,
     ).then(result => {
         if (controller.signal.aborted) return; retryCountRef.current = 0;
-        if (result) {
-          setLyrics(result);
+        if (result) { setLyrics(result);
           const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
         } else setLyrics(null);
-      }).catch(() => {
-        if (controller.signal.aborted) return;
+      }).catch(() => { if (controller.signal.aborted) return;
         if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++; const delay = 1000 * Math.pow(2, retryCountRef.current - 1);
           retryTimerRef.current = setTimeout(() => doFetch(key, cached, controller), delay);
@@ -51,22 +48,19 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   useEffect(() => {
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0;
-    if (!track || !track.title) {
-      setLoading(false); setLyrics(null); setError(false); lastKeyRef.current = ''; return;
+    if (!track || !track.title) { setLoading(false); setLyrics(null); setError(false); lastKeyRef.current = ''; return;
     }
     const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase();
     if (key === lastKeyRef.current) return; lastKeyRef.current = key;
     const cached = loadCache(); const hit = cached.find(e => e.key === key);
-    if (hit && Date.now() - hit.ts < CACHE_TTL_MS) {
-      setLoading(false); setLyrics(hit.data); setError(false); return;
+    if (hit && Date.now() - hit.ts < CACHE_TTL_MS) { setLoading(false); setLyrics(hit.data); setError(false); return;
     }
     const controller = new AbortController(); abortRef.current = controller; doFetch(key, cached, controller);
     return () => { controller.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.artist, track?.title, track?.album, stationName]);
-  const retry = () => {
-    if (!track?.title) return; const artistSeed = (track.artist || stationName || 'unknown').trim();
+  const retry = () => { if (!track?.title) return; const artistSeed = (track.artist || stationName || 'unknown').trim();
     const key = `${artistSeed}\n${track.title}`.toLowerCase(); const cached = loadCache();
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0; const controller = new AbortController();
@@ -75,8 +69,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   const realtimeSync = useRealtimeLyricsSync({
     lyrics, enabled: enableRealtime, languageHint: options?.languageHint ?? 'en',
   });
-  return {
-    lyrics, loading, error, retry,
+  return { lyrics, loading, error, retry,
     effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
       : options?.currentTime,
     realtime: enableRealtime

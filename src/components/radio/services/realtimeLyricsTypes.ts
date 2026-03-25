@@ -7,8 +7,7 @@ import type { LyricsData } from '../types';
 export type RealtimeSyncStatus = 'idle' | 'unsupported' | 'ready' | 'listening' | 'recovering' | 'disabled' | 'error';
 export type RealtimeSyncQualityMode = 'high' | 'balanced' | 'conservative';
 export type RealtimeSpeechHypothesis = { text: string; confidence: number; isFinal: boolean; tsMs: number; };
-export type RealtimeSyncDiagnostics = {
-  qualityMode: RealtimeSyncQualityMode; lastHypothesisMs: number | null;
+export type RealtimeSyncDiagnostics = { qualityMode: RealtimeSyncQualityMode; lastHypothesisMs: number | null;
   hypothesesSeen: number; confirmedTransitions: number; rejectedJumps: number; relockCount: number;
   errorMessage: string | null;
 };
@@ -26,14 +25,12 @@ export type RealtimeAlignPolicy = {
 export const DEFAULT_REALTIME_ALIGN_POLICY: RealtimeAlignPolicy = {
   candidateMinScore: 0.74, confirmMinScore: 0.84, minStableSamples: 2, maxJumpDistance: 4, relockWindow: 8,
 };
-export function defaultRealtimeDiagnostics(): RealtimeSyncDiagnostics {
-  return {
+export function defaultRealtimeDiagnostics(): RealtimeSyncDiagnostics { return {
     qualityMode: 'balanced', lastHypothesisMs: null, hypothesesSeen: 0, confirmedTransitions: 0,
     rejectedJumps: 0, relockCount: 0, errorMessage: null,
   };
 }
-export function defaultRealtimeState(enabled: boolean): RealtimeSyncState {
-  return {
+export function defaultRealtimeState(enabled: boolean): RealtimeSyncState { return {
     enabled, supported: false, status: 'idle', activeLineIndex: -1,
     candidateLineIndex: -1, confidence: 0, effectiveCurrentTime: undefined, diagnostics: defaultRealtimeDiagnostics(),
   };

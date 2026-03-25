@@ -30,10 +30,8 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const resolvedReleaseDate = song?.releaseDate ?? albumMeta.releaseDate ?? null;
   const resolvedTrackNumber = song?.trackNumber ?? albumMeta.trackNumber ?? null;
   const resolvedTrackCount = song?.trackCount ?? albumMeta.trackCount ?? null;
-  const showMetaHydration = Boolean(
-    song &&
-    (song.durationMs == null ||
-      song.genre == null ||
+  const showMetaHydration = Boolean( song &&
+    (song.durationMs == null || song.genre == null ||
       song.releaseDate == null ||
       song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
@@ -45,8 +43,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n')
       .trim() || '';
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
-  const lyricsSkeleton = (n: number) => (
-    <div className="space-y-2 animate-pulse">
+  const lyricsSkeleton = (n: number) => ( <div className="space-y-2 animate-pulse">
       {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}</div>
   );
   const lyricsEmpty = (
@@ -56,34 +53,28 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
           Retry</button>)}</div>
   );
   // Close on Escape
-  useEffect(() => {
-    if (!song) return; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+  useEffect(() => { if (!song) return; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
   }, [song, onClose]);
   // Focus trap: keep Tab cycling within the modal
   const modalRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!song || !modalRef.current) return; const modal = modalRef.current;
+  useEffect(() => { if (!song || !modalRef.current) return; const modal = modalRef.current;
     const prev = document.activeElement as HTMLElement | null;
     // Focus first focusable element
     const focusable = modal.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     ); focusable[0]?.focus();
-    const onTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+    const onTab = (e: KeyboardEvent) => { if (e.key !== 'Tab') return;
       const nodes = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       ); if (nodes.length === 0) return; const first = nodes[0]; const last = nodes[nodes.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault(); last.focus();
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus();
       } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }; window.addEventListener('keydown', onTab);
     return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
   }, [song]);
-  return (
-    <AnimatePresence>
-      {song && (
-        <motion.div
+  return ( <AnimatePresence>
+      {song && ( <motion.div
           key="song-detail-backdrop"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -110,15 +101,13 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
               {/* ── Song Info ── */} <div className="px-5 -mt-2">
                 {/* Artwork */}
                 <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
-                  {resolvedArtworkUrl ? (
-                    <UiImage
+                  {resolvedArtworkUrl ? ( <UiImage
                       src={resolvedArtworkUrl}
                       alt={`Album art for ${song.title} by ${song.artist}`}
                       className="object-cover"
                       sizes="240px"
                       loading="lazy" />
-                  ) : (
-                    <div className="size-full flex items-center justify-center">
+                  ) : ( <div className="size-full flex items-center justify-center">
                       <Music size={56} className="text-dim" /></div>)}</div>
                 {/* Title & artist */} <div className="mt-5 text-center">
                   <h2 className="text-[17px] font-bold text-white leading-snug line-clamp-2">{song.title}</h2>
@@ -135,8 +124,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                           {resolvedTrackNumber != null && resolvedTrackCount != null && (
                             <MetaBadge icon={Disc3} cls="bg-white/[0.08] border border-white/10 text-white/70">#{resolvedTrackNumber}/{resolvedTrackCount}</MetaBadge>
                           )}</div></div>
-                      {resolvedReleaseDate && (
-                        <p className="text-[10px] text-white/50">
+                      {resolvedReleaseDate && ( <p className="text-[10px] text-white/50">
                           Released on: {formatReleaseDate(resolvedReleaseDate)}</p>
                       )} <div className="flex flex-wrap justify-center gap-1.5">
                         {resolvedGenre && <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">{resolvedGenre}</MetaBadge>}
@@ -153,8 +141,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
               <div className="px-5"><h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
                   About {song.artist}</h3>
                 {/* Loading skeleton */}
-                {loading && (
-                  <div className="space-y-3 animate-pulse"><div className="flex gap-3">
+                {loading && ( <div className="space-y-3 animate-pulse"><div className="flex gap-3">
                       <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0" />
                       <div className="flex-1 space-y-2 pt-1"><div className="h-3 bg-surface-3 rounded w-2/3" />
                         <div className="h-2.5 bg-surface-3 rounded w-1/2" /></div></div><div className="space-y-2">
@@ -163,8 +150,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       <div className="h-2.5 bg-surface-3 rounded w-4/6" /></div></div>
                 )}
                 {/* Loaded artist data */}
-                {!loading && info && (
-                  <div className="space-y-3">
+                {!loading && info && ( <div className="space-y-3">
                     {/* Artist header with image */} <div className="flex gap-3">
                       {info.imageUrl ? (
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"><UiImage
@@ -175,10 +161,8 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                             loading="lazy" /></div>
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">
-                          {info.type === 'Group' ? (
-                            <Users size={24} className="text-dim" />
-                          ) : (
-                            <User size={24} className="text-dim" />
+                          {info.type === 'Group' ? ( <Users size={24} className="text-dim" />
+                          ) : ( <User size={24} className="text-dim" />
                           )}</div>
                       )} <div className="flex-1 min-w-0 pt-0.5">
                         <p className="text-[14px] font-semibold text-white truncate">{info.name}</p>
@@ -188,26 +172,21 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         {/* Metadata badges */} <div className="flex flex-wrap gap-1.5 mt-1.5">
                           {info.type && <MetaBadge icon={info.type === 'Group' ? Users : User} cls="bg-surface-3 text-secondary">{info.type}</MetaBadge>}
                           {info.country && <MetaBadge icon={Globe} cls="bg-surface-3 text-secondary">{info.country}</MetaBadge>}
-                          {info.lifeSpan?.begin && (
-                            <MetaBadge icon={Calendar} cls="bg-surface-3 text-secondary">
+                          {info.lifeSpan?.begin && ( <MetaBadge icon={Calendar} cls="bg-surface-3 text-secondary">
                               {info.lifeSpan.begin}{info.lifeSpan.ended && info.lifeSpan.end ? ` – ${info.lifeSpan.end}` : ' – present'}
                             </MetaBadge>)}</div></div></div>
                     {/* Bio */}
-                    {info.bio && (
-                      <p className="text-[12px] text-secondary/90 leading-relaxed">{info.bio}</p>
+                    {info.bio && ( <p className="text-[12px] text-secondary/90 leading-relaxed">{info.bio}</p>
                     )}
                     {/* Genre tags */}
-                    {info.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {info.tags.map((tag) => (
-                          <span
+                    {info.tags.length > 0 && ( <div className="flex flex-wrap gap-1.5">
+                        {info.tags.map((tag) => ( <span
                             key={tag}
                             className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50">
                             {tag}</span>))}</div>
                     )}
                     {/* Wikipedia link */}
-                    {info.wikipediaUrl && (
-                      <a
+                    {info.wikipediaUrl && ( <a
                         href={info.wikipediaUrl}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -216,8 +195,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         Read more on Wikipedia</a>)}</div>
                 )}
                 {/* No data */}
-                {!loading && !info && (
-                  <p className="text-[12px] text-dim">No artist information available</p>)}</div>
+                {!loading && !info && ( <p className="text-[12px] text-dim">No artist information available</p>)}</div>
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />
               {/* ── Lyrics (mobile) ── */} <div className="px-5 md:hidden">
                 <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">Lyrics (plain)</h3>
@@ -230,8 +208,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {!lyricsLoading && !plainLyrics && lyricsEmpty}</div>
               {/* Divider (mobile) */} <div className="mx-5 my-5 border-t border-border-default md:hidden" />
               {/* ── Remove from favorites ── */}
-              {onRemoveFromFavorites && (
-                <><div className="mx-5 my-5 border-t border-border-default" />
+              {onRemoveFromFavorites && ( <><div className="mx-5 my-5 border-t border-border-default" />
                   <div className="px-5 pb-2"><button
                       onClick={onRemoveFromFavorites}
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"

@@ -14,17 +14,13 @@ function rotateServer(): void { serverIndex = (serverIndex + 1) % SERVERS.length
 const cache = new Map<string, { data: Station[]; ts: number }>();
 const TTL = 60_000;
 const MAX_CACHE = 100;
-async function fetchCached(path: string, key: string): Promise<Station[]> {
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.ts < TTL) {
-    cache.delete(key); cache.set(key, hit); return hit.data;
+async function fetchCached(path: string, key: string): Promise<Station[]> { const hit = cache.get(key);
+  if (hit && Date.now() - hit.ts < TTL) { cache.delete(key); cache.set(key, hit); return hit.data;
   }
   // Try current server, failover to next on error
-  for (let attempt = 0; attempt < SERVERS.length; attempt++) {
-    try {
+  for (let attempt = 0; attempt < SERVERS.length; attempt++) { try {
       const url = `${getBase()}${path}`; const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) {
-        await res.text().catch(() => {}); rotateServer(); continue;
+      if (!res.ok) { await res.text().catch(() => {}); rotateServer(); continue;
       }
       const data: Station[] = await res.json(); const filtered = data.filter(s => s.url_resolved);
       cache.set(key, { data: filtered, ts: Date.now() });

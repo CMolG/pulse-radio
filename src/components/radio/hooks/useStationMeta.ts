@@ -19,8 +19,7 @@ const POLL_INTERVAL_MS = 5_000;
 const MAX_TITLE_LENGTH = 500;
 const _adCache = new Map<string, boolean>();
 const MAX_AD_CACHE = 256;
-function isAdContent(text: string): boolean {
-  let result = _adCache.get(text); if (result !== undefined) return result;
+function isAdContent(text: string): boolean { let result = _adCache.get(text); if (result !== undefined) return result;
   result = AD_PATTERNS.some(re => re.test(text));
   if (_adCache.size >= MAX_AD_CACHE) _adCache.delete(_adCache.keys().next().value!); _adCache.set(text, result);
   return result;
@@ -29,22 +28,18 @@ function isAdContent(text: string): boolean {
 export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  if (signal) {
-    if (signal.aborted) {
+  if (signal) { if (signal.aborted) {
       clearTimeout(timeout); controller.abort();
     } else {
       const onParentAbort = () => controller.abort(); signal.addEventListener('abort', onParentAbort, { once: true });
-      controller.signal.addEventListener('abort', () => {
-        signal.removeEventListener('abort', onParentAbort);
+      controller.signal.addEventListener('abort', () => { signal.removeEventListener('abort', onParentAbort);
       }, { once: true });
     }
   }
-  try {
-    const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
+  try { const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, { signal: controller.signal },);
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
-  } catch {
-    return { streamTitle: null, icyBr: null };
+  } catch { return { streamTitle: null, icyBr: null };
   } finally { clearTimeout(timeout); }
 }
 let _lastStation = '';
@@ -56,8 +51,7 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   if (raw.toLowerCase() === _lastStationLower) return null;
   // Common separators: " - ", " — ", " – "
   const separators = [' - ', ' — ', ' – ', ' | '];
-  for (const sep of separators) {
-    const idx = raw.indexOf(sep);
+  for (const sep of separators) { const idx = raw.indexOf(sep);
     if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() };
   }
   return { title: raw.trim(), artist: '' };
@@ -73,33 +67,26 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   // Clear track state during render when station goes null (avoid setState in effect)
   const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null);
   const currentStationId = station?.url_resolved ?? null;
-  if (currentStationId !== prevStationId) {
-    setPrevStationId(currentStationId);
-    if (!station) {
-      setTrack(null); setIcyBitrate(null); setStreamCodec(null);
+  if (currentStationId !== prevStationId) { setPrevStationId(currentStationId);
+    if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null);
     }
   }
-  useEffect(() => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-    if (!station) {
-      lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
+  useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
     }
     const stationChanged = station.url_resolved !== prevStationUrlRef.current;
-    if (stationChanged) {
-      prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
+    if (stationChanged) { prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
       // Intentionally NOT clearing track/icyBitrate/streamCodec here.
       // The previous station's data stays visible until the new station's
       // first ICY response arrives — this is the "ICY swap" for smooth transitions.
     }
     const abortController = new AbortController();
-    const poll = async () => {
-      if (abortController.signal.aborted || document.hidden) return;
+    const poll = async () => { if (abortController.signal.aborted || document.hidden) return;
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
       if (abortController.signal.aborted) return; if (icyBr) setIcyBitrate(icyBr);
       // Derive codec from station data for display
       if (station.codec) { const c = station.codec.toUpperCase(); setStreamCodec(CODEC_MAP[c] ?? c); }
-      if (streamTitle && streamTitle !== lastTitleRef.current) {
-        lastTitleRef.current = streamTitle;
+      if (streamTitle && streamTitle !== lastTitleRef.current) { lastTitleRef.current = streamTitle;
         // Reject ad content in raw title or parsed title (artist names may look like domains)
         const parsed = !isAdContent(streamTitle) ? parseTrack(streamTitle, station.name) : null;
         setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return;
@@ -115,8 +102,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     // doesn't see stale metadata for up to POLL_INTERVAL_MS.
     const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); };
     document.addEventListener('visibilitychange', onVisible);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', onVisible); abortController.abort();
     };
   }, [station, isPlaying]);

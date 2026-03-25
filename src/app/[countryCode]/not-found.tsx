@@ -4,8 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 import Link from "next/link";
-export default function CountryNotFound() {
-  return (
+export default function CountryNotFound() { return (
     <main className="h-full min-h-screen bg-[#0a0f1a] text-white flex items-center justify-center px-6">
       <div className="max-w-lg w-full rounded-2xl bg-white/5 border border-white/10 p-8 text-center">
         <h1 className="text-2xl font-semibold mb-3">Country page not found</h1>

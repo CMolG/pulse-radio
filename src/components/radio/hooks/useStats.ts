@@ -35,8 +35,7 @@ function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<
 function topN<T>(map: Record<string, T>, key: keyof T, n: number): T[] {
   return Object.values(map).sort((a, b) => (b[key] as number) - (a[key] as number)).slice(0, n);
 }
-export function useStats() {
-  const [stats, setStats] = useState<UsageStats>(() =>
+export function useStats() { const [stats, setStats] = useState<UsageStats>(() =>
     loadFromStorage<UsageStats>(STORAGE_KEY, EMPTY_STATS),
   ); const statsRef = useRef(stats); useEffect(() => { statsRef.current = stats; }, [stats]);
   // Sync stats from other tabs — safe because BroadcastChannel ensures
@@ -46,8 +45,7 @@ export function useStats() {
   );
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const dirtyRef = useRef(false);
-  const persist = useCallback(() => {
-    if (dirtyRef.current) {
+  const persist = useCallback(() => { if (dirtyRef.current) {
       const current = statsRef.current; const pStations = pruneTop(current.stationListenTimes, MAX_STATIONS, 'totalMs');
       const pSongs = pruneTop(current.songPlayCounts, MAX_SONGS, 'count');
       const pArtists = pruneTop(current.artistPlayCounts, MAX_ARTISTS, 'count');
@@ -62,8 +60,7 @@ export function useStats() {
       } else saveToStorage(STORAGE_KEY, current); dirtyRef.current = false;
     }
   }, []);
-  useEffect(() => {
-    saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
+  useEffect(() => { saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
     return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); persist(); };
   }, [persist]);
   // Track listen time for a station (call periodically while playing)
@@ -71,8 +68,7 @@ export function useStats() {
     if (deltaMs <= 0 || !stationUuid) return;
     setStats(prev => {
       const entry = prev.stationListenTimes[stationUuid] ?? { name: stationName, uuid: stationUuid, totalMs: 0 };
-      return {
-        ...prev,
+      return { ...prev,
         stationListenTimes: {
           ...prev.stationListenTimes, [stationUuid]: { ...entry, name: stationName, totalMs: entry.totalMs + deltaMs },
         }, totalListenMs: prev.totalListenMs + deltaMs,
@@ -82,14 +78,11 @@ export function useStats() {
   // Record a song play
   const recordSongPlay = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return; const songKey = `${title}|||${artist}`; const primary = primaryArtist(artist);
-    setStats(prev => {
-      const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
+    setStats(prev => { const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
       const artistEntry = prev.artistPlayCounts[primary] ?? { name: primary, count: 0 };
       const normalizedGenre = genre ? genre.toLowerCase().trim() : undefined;
-      const next: UsageStats = {
-        ...prev,
-        songPlayCounts: {
-          ...prev.songPlayCounts,
+      const next: UsageStats = { ...prev,
+        songPlayCounts: { ...prev.songPlayCounts,
           [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         }, artistPlayCounts: { ...prev.artistPlayCounts, [primary]: { ...artistEntry, count: artistEntry.count + 1 }, },
       };
@@ -112,17 +105,14 @@ export function useStats() {
   // Used when album metadata arrives after the initial recordSongPlay call.
   const updateSongMeta = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
     if (!title) return; const key = `${title}|||${artist}`;
-    setStats(prev => {
-      const songEntry = prev.songPlayCounts[key]; if (!songEntry) return prev;
+    setStats(prev => { const songEntry = prev.songPlayCounts[key]; if (!songEntry) return prev;
       const needsArtwork = artworkUrl && songEntry.artworkUrl !== artworkUrl;
       const normalizedGenre = genre ? genre.toLowerCase().trim() : '';
       // Count genre if this song didn't already have its genre recorded
       const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre;
       if (!needsArtwork && !needsGenre) return prev;
-      const next: UsageStats = {
-        ...prev,
-        songPlayCounts: {
-          ...prev.songPlayCounts,
+      const next: UsageStats = { ...prev,
+        songPlayCounts: { ...prev.songPlayCounts,
           [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
         },
       };
@@ -135,8 +125,7 @@ export function useStats() {
       return next;
     }); dirtyRef.current = true;
   }, []); const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
-  return {
-    stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres,
+  return { stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres,
     genreOrder, clearStats,
   };
 }

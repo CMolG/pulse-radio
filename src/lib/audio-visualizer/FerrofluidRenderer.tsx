@@ -16,18 +16,15 @@ import { hexToRgb } from './colorUtils';
 import { useCanvasLoop } from './useCanvasLoop';
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 /* ─── blob state ─── */
-interface Blob {
-  x: number; y: number; baseRadius: number;
+interface Blob { x: number; y: number; baseRadius: number;
   /** Per-blob random size factor (0–1), assigned once at creation */
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number;
   freqBand: number; // which frequency band drives this blob
 }
 function createBlobs(count: number, w: number, h: number): Blob[] {
   const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2;
-  for (let i = 0; i < count; i++) {
-    const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
-    blobs.push({
-      x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist,
+  for (let i = 0; i < count; i++) { const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15;
+    blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist,
       baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy,
       vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7,
       freqBand: Math.floor((i / count) * 128),
@@ -60,8 +57,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   const blobCount = blobs.length; const blobMaxDistSq = new Float64Array(blobCount);
   for (let b = 0; b < blobCount; b++) { const r = blobs[b].baseRadius; blobMaxDistSq[b] = r * r * 100; }
   const thresholdLow = threshold * 0.7; const glowRange = threshold * 0.3;
-  for (let py = 0; py < sh; py++) {
-    for (let px = 0; px < sw; px++) {
+  for (let py = 0; py < sh; py++) { for (let px = 0; px < sw; px++) {
       const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0; let totalWeight = 0;
       for (let b = 0; b < blobCount; b++) {
         const blob = blobs[b]; const dx = x - blob.x; const dy = y - blob.y; const distSq = dx * dx + dy * dy;
@@ -71,8 +67,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
         if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; }
       }
       const idx = (py * sw + px) * 4;
-      if (sum > threshold) {
-        const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
+      if (sum > threshold) { const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
         // color based on proximity to center vs edge, and energy
         const coreIntensity = Math.min(1, (sum - threshold) * 2);
         const edgeGlow = 1 - coreIntensity; const brightnessMul = 0.3 + coreIntensity * 0.7;
@@ -95,14 +90,12 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   }
   // Put image data into offscreen canvas, then draw upscaled with
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
-  try {
-    offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h);
   } catch { /* skip frame on canvas error */ }
 }
 /* ─── component ─── */
-export function FerrofluidRenderer({
-  frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
+export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
   colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false,
 }: FerrofluidRendererProps) {
   const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 });
@@ -118,22 +111,19 @@ export function FerrofluidRenderer({
     const blobs = blobsRef.current; const cx = w / 2; const cy = h / 2;
     // compute overall energy
     let energy = 0; const frequencyData = freqData;
-    if (frequencyData) {
-      let sum = 0; for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
+    if (frequencyData) { let sum = 0; for (let i = 0; i < frequencyData.length; i++) sum += frequencyData[i];
       energy = (sum / frequencyData.length / 255) * sensitivity;
     } else if (demo) energy = 0.3 + Math.sin(t * 0.5) * 0.2;
     // update blobs
     const minWH = Math.min(w, h);
-    for (let i = 0; i < blobs.length; i++) {
-      const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5;
+    for (let i = 0; i < blobs.length; i++) { const blob = blobs[i]; const angle = blob.phase + t * blob.speed * 0.5;
       const bandIdx = Math.min(blob.freqBand, frequencyData ? frequencyData.length - 1 : 127);
       // base orbit
       const orbitRadius = minWH * (0.1 + energy * 0.25);
       blob.targetX = cx + Math.cos(angle) * orbitRadius; blob.targetY = cy + Math.sin(angle * 0.7) * orbitRadius * 0.8;
       // frequency-driven displacement
       let bandVal: number;
-      if (frequencyData) {
-        bandVal = frequencyData[bandIdx] / 255;
+      if (frequencyData) { bandVal = frequencyData[bandIdx] / 255;
         const displacement = bandVal * minWH * 0.15 * sensitivity; const dispAngle = angle + Math.PI * 0.5;
         blob.targetX += Math.cos(dispAngle) * displacement; blob.targetY += Math.sin(dispAngle) * displacement;
       } else if (demo) {
@@ -151,8 +141,7 @@ export function FerrofluidRenderer({
     // draw metaballs
     drawMetaballs(ctx, blobs, w, h, colors.current, energy);
   }, 0.5);
-  return (
-    <div className={`relative ${className}`}>
+  return ( <div className={`relative ${className}`}>
       <canvas ref={canvasRef} className="size-full" style={{ imageRendering: 'auto' }} />
       {/* SVG filter for smoothing the metaballs */} <svg className="absolute w-0 h-0" aria-hidden="true"><defs>
           <filter id="ferrofluid-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />

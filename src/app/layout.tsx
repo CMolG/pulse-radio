@@ -22,8 +22,7 @@ export const metadata: Metadata = {
     icon: [{ url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" }, { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }],
     shortcut: "/favicon.ico", apple: "/apple-touch-icon.png",
   }, appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pulse Radio", },
-  openGraph: {
-    type: "website", locale: "en_US", url: SITE_URL, siteName: "Pulse Radio",
+  openGraph: { type: "website", locale: "en_US", url: SITE_URL, siteName: "Pulse Radio",
     title: SITE_TITLE, description: SITE_DESCRIPTION,
     images: [{ url: "/android-chrome-512x512.png", width: 512, height: 512, alt: "Pulse Radio" }],
   },
@@ -32,8 +31,7 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL, }, category: "music", other: { "mobile-web-app-capable": "yes", },
 };
 export const viewport: Viewport = { themeColor: "#0a0f1a", width: "device-width", initialScale: 1, maximumScale: 5, viewportFit: "cover" };
-function JsonLd() {
-  const schema = {
+function JsonLd() { const schema = {
     "@context": "https://schema.org", "@type": "WebApplication", name: "Pulse Radio", url: SITE_URL,
     description: SITE_DESCRIPTION, applicationCategory: "MultimediaApplication",
     operatingSystem: "Any", offers: { "@type": "Offer", price: "0", priceCurrency: "USD", },
@@ -41,8 +39,7 @@ function JsonLd() {
     screenshot: `${SITE_URL}/android-chrome-512x512.png`,
   }; return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
-export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
-  return (
+export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) { return (
     <html lang="en" dir="ltr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}>
       <body className="h-full bg-[#0a0f1a] text-white"><JsonLd />
         {children} <ServiceWorkerRegistrar /></body></html>

@@ -15,44 +15,34 @@ const GLASS_STYLE: React.CSSProperties = {
 };
 type GuideSection = { icon: React.ReactNode; title: string; content: string; };
 const GUIDE_SECTIONS: GuideSection[] = [
-  {
-    icon: <IoRadioOutline size={22} className="text-[#3478f6]" />, title: 'Listening to Radio',
+  { icon: <IoRadioOutline size={22} className="text-[#3478f6]" />, title: 'Listening to Radio',
     content: 'Browse stations by genre, country or search. Tap any station card to start playing. The visualizer activates automatically with live audio-reactive effects.',
   },
-  {
-    icon: <IoSearchOutline size={22} className="text-cyan-400" />, title: 'Search & Discover',
+  { icon: <IoSearchOutline size={22} className="text-cyan-400" />, title: 'Search & Discover',
     content: 'Use the search bar to find stations by name, genre or location. Enable Discovery Mode (lightning icon) to auto-play random stations every 30 seconds.',
   },
-  {
-    icon: <IoHeartOutline size={22} className="text-pink-400" />, title: 'Favorites',
+  { icon: <IoHeartOutline size={22} className="text-pink-400" />, title: 'Favorites',
     content: 'Tap the star to save stations. Tap the heart to save songs. Filter your favorite songs by artist — songs are grouped in stacks you can expand.',
   },
-  {
-    icon: <IoMusicalNotesOutline size={22} className="text-purple-400" />, title: 'Lyrics & Track Info',
+  { icon: <IoMusicalNotesOutline size={22} className="text-purple-400" />, title: 'Lyrics & Track Info',
     content: 'Pulse detects the current song and fetches lyrics automatically. Tap on any song in history for detailed info including artist bio and album art.',
   },
-  {
-    icon: <IoColorPaletteOutline size={22} className="text-amber-400" />, title: 'Theater Mode',
+  { icon: <IoColorPaletteOutline size={22} className="text-amber-400" />, title: 'Theater Mode',
     content: 'Press T or tap the theater button to enter immersive mode. The Fibonacci spiral visualizer reacts to the music with a CRT retro effect overlay.',
   },
-  {
-    icon: <IoStatsChartOutline size={22} className="text-emerald-400" />, title: 'Your Statistics',
+  { icon: <IoStatsChartOutline size={22} className="text-emerald-400" />, title: 'Your Statistics',
     content: 'Pulse tracks your listening: time per station, most played songs, top artists and genres. Your home screen reorders sections based on what you listen to most.',
   },
-  {
-    icon: <IoTimerOutline size={22} className="text-orange-400" />, title: 'Sleep Timer',
+  { icon: <IoTimerOutline size={22} className="text-orange-400" />, title: 'Sleep Timer',
     content: 'Press Z or use the timer icon to cycle through sleep durations (15, 30, 60, 90 min). Pulse will automatically stop playback when the timer ends.',
   },
-  {
-    icon: <IoGlobeOutline size={22} className="text-sky-400" />, title: 'Keyboard Shortcuts',
+  { icon: <IoGlobeOutline size={22} className="text-sky-400" />, title: 'Keyboard Shortcuts',
     content: 'Space: play/pause • ← →: skip station • ↑ ↓: volume • T: theater • E: equalizer • L: like song • S: star station • F: focus search • ?: show all shortcuts.',
   },
 ];
 type Props = { onClose: () => void };
-function UsageGuide({ onClose }: Props) {
-  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
-  return (
-    <motion.div
+function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  return ( <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -73,10 +63,8 @@ function UsageGuide({ onClose }: Props) {
           ><IoChevronBack size={16} /></button>
           <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2></div>
         <div className="border-t border-white/8" /> {/* Guide sections */} <div className="px-5 py-4 space-y-2">
-          {GUIDE_SECTIONS.map((section, idx) => {
-            const isExpanded = expandedIdx === idx;
-            return (
-              <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]"><button
+          {GUIDE_SECTIONS.map((section, idx) => { const isExpanded = expandedIdx === idx;
+            return ( <div key={idx} className="rounded-xl overflow-hidden border border-white/8 bg-white/[0.03]"><button
                   onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
                 ><div className="flex-shrink-0">{section.icon}</div>
@@ -84,8 +72,7 @@ function UsageGuide({ onClose }: Props) {
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.2 }}
                     className="text-white/30 text-[12px]">▶</motion.span></button><AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
+                  {isExpanded && ( <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}

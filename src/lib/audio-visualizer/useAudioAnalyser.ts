@@ -7,8 +7,7 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { getOrCreateAudioSource } from './audioSourceCache';
 type UseAudioAnalyserOptions = { fftSize?: number; smoothingTimeConstant?: number; };
-interface UseAudioAnalyserReturn {
-  connectAudio: (audio: HTMLAudioElement) => void;
+interface UseAudioAnalyserReturn { connectAudio: (audio: HTMLAudioElement) => void;
   /** Stable ref whose .current is updated in-place every frame — zero allocations */
   frequencyDataRef: React.RefObject<Uint8Array<ArrayBuffer> | null>;
   /** Stable ref whose .current is updated in-place every frame — zero allocations */
@@ -27,10 +26,8 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
       if (connectedRef.current === audio && analyserRef.current) return;
       // Cancel any existing animation loop before starting a new one
       cancelAnimationFrame(rafRef.current);
-      try {
-        const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
-        if (!analyserRef.current) {
-          const analyser = ctx.createAnalyser();
+      try { const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
+        if (!analyserRef.current) { const analyser = ctx.createAnalyser();
           analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
@@ -41,8 +38,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
           // Skip expensive analyser reads when tab is hidden to save CPU
           if (!document.hidden) {
             if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
-            if (waveDataRef.current) {
-              analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
+            if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
               // to avoid 256 float divisions per frame — normalize once at the end
               const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0;

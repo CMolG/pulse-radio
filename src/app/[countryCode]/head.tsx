@@ -10,8 +10,7 @@ export default async function Head({ params }: CountryHeadProps) {
   const country = COUNTRY_BY_CODE[countryCode]; if (!country) return null;
   const title = `Top radio stations in ${country.name} (${countryCode})`;
   const description = `Listen to top internet radio stations in ${country.name}. Popular live stations and genres tailored for ${country.name}.`;
-  return (
-    <><title>{title}</title><meta name="description" content={description} />
+  return ( <><title>{title}</title><meta name="description" content={description} />
       <meta name="geo.region" content={countryCode} /> <meta name="geo.placename" content={country.name} />
       <meta property="og:locale" content="en_US" /> <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />

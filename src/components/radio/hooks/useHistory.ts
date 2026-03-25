@@ -11,8 +11,7 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 export function useHistory( stationName: string | undefined, stationUuid: string | undefined,
   track: NowPlayingTrack | null,
-) {
-  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+) { const [history, setHistory] = useState<HistoryEntry[]>(() => {
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
     // Dedup by id on load in case of corrupted storage
     const seen = new Set<string>();
@@ -22,8 +21,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
   useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
   // Add entry when track changes; handles station transitions in a single effect
   // to prevent the race between station-reset and track-add
-  useEffect(() => {
-    if (!track?.title || !stationUuid || !stationName) return;
+  useEffect(() => { if (!track?.title || !stationUuid || !stationName) return;
     // Station just changed — skip this render's potentially stale metadata
     if (stationUuid !== lastStationRef.current) {
       lastStationRef.current = stationUuid; lastTrackRef.current = ''; return;
@@ -52,10 +50,8 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     const genre = track.genre; const releaseDate = track.releaseDate;
     const trackNumber = track.trackNumber; const trackCount = track.trackCount;
     if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
-    setHistory(prev => {
-      const head = prev[0]; if (!head) return prev;
-      if (
-        head.stationUuid === stationUuid &&
+    setHistory(prev => { const head = prev[0]; if (!head) return prev;
+      if ( head.stationUuid === stationUuid &&
         head.title === track.title &&
         head.artist === track.artist &&
         (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl ||
@@ -68,7 +64,6 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     });
   }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
   const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
-  const clear = useCallback(() => {
-    setHistory([]); lastTrackRef.current = '';
+  const clear = useCallback(() => { setHistory([]); lastTrackRef.current = '';
   }, []); return { history, remove, clear };
 }

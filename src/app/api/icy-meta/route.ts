@@ -11,13 +11,11 @@ export const runtime = 'nodejs';
  * Fetches the first metadata block from an internet radio stream
  * using the ICY protocol, which browsers can't do directly due to CORS.
  */
-export async function GET(req: NextRequest) {
-  const streamUrl = req.nextUrl.searchParams.get('url');
+export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
     return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 });
   }
-  try {
-    const url = new URL(streamUrl);
+  try { const url = new URL(streamUrl);
     if (!['http:', 'https:'].includes(url.protocol)) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
     }
@@ -25,20 +23,16 @@ export async function GET(req: NextRequest) {
     if (isPrivateHost(host)) return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
   } catch { return NextResponse.json({ error: 'Invalid URL' }, { status: 400 }); }
   const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 8000);
-  try {
-    const res = await fetch(streamUrl, { headers: { 'Icy-MetaData': '1' }, signal: controller.signal, });
+  try { const res = await fetch(streamUrl, { headers: { 'Icy-MetaData': '1' }, signal: controller.signal, });
     // Validate the final URL after redirects to prevent SSRF via redirect
-    if (res.url) {
-      try {
+    if (res.url) { try {
         const finalUrl = new URL(res.url);
-        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
-          clearTimeout(timeout); res.body?.cancel().catch(() => {});
+        if (isPrivateHost(finalUrl.hostname.toLowerCase())) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 });
         }
       } catch { /* URL parse failed — continue */ }
     }
-    if (!res.ok) {
-      clearTimeout(timeout); res.body?.cancel().catch(() => {});
+    if (!res.ok) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 });
     }
     const icyMetaint = res.headers.get('icy-metaint');
@@ -60,13 +54,11 @@ export async function GET(req: NextRequest) {
     }
     const reader = res.body.getReader(); const chunks: Uint8Array[] = []; let totalRead = 0;
     const bytesNeeded = metaint + 4096;
-    try {
-      while (totalRead < bytesNeeded) {
+    try { while (totalRead < bytesNeeded) {
         const { done, value } = await reader.read(); if (done || !value) break;
         chunks.push(value); totalRead += value.length;
       }
-    } finally {
-      clearTimeout(timeout); reader.cancel().catch(() => {});
+    } finally { clearTimeout(timeout); reader.cancel().catch(() => {});
     }
     // Concatenate chunks
     const buffer = new Uint8Array(totalRead); let offset = 0;
@@ -82,8 +74,7 @@ export async function GET(req: NextRequest) {
     // Parse StreamTitle='Artist - Title';
     const match = metaString.match(/StreamTitle='([^']*)'/); const streamTitle = match?.[1]?.trim() || null;
     return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr });
-  } catch (err) {
-    clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+  } catch (err) { clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) return NextResponse.json({ error: 'Request timed out' }, { status: 504 });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
