@@ -2945,7 +2945,7 @@ const StationCard = React.memo(
         {/* Tags / Country / Format */}{' '}
         <div className="flex-row-1 mt-1 flex-wrap">
           {station.codec && (
-            <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">
+            <span className="pad-xs bg-surface-3 text-[11px] font-mono text-secondary uppercase flex-shrink-0">
               {' '}
               {station.codec}
               {station.bitrate > 0 ? ` ${station.bitrate}k` : ''}
@@ -2954,7 +2954,7 @@ const StationCard = React.memo(
           {tags.map((tag) => (
             <span
               key={tag}
-              className="pad-xs-full bg-surface-2 text-[9px] text-secondary truncate max-w-[80px]"
+              className="pad-xs-full bg-surface-2 text-[11px] text-secondary truncate max-w-[80px]"
             >
               {tag}
             </span>
@@ -2970,7 +2970,7 @@ const StationCard = React.memo(
           <div className="flex items-center gap-1 mt-1.5">
             {' '}
             <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />{' '}
-            <span className="text-[9px] text-dim">Checking…</span>
+            <span className="text-[11px] text-dim">Checking…</span>
           </div>
         )}{' '}
         {liveStatus === 'loaded' && (
@@ -2979,13 +2979,13 @@ const StationCard = React.memo(
             {liveTrack ? (
               <>
                 <Music2 size={9} className="text-sys-orange flex-shrink-0" />{' '}
-                <span className="text-[9px] text-white/60 truncate leading-tight">
+                <span className="text-[11px] text-white/60 truncate leading-tight">
                   {' '}
                   {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}
                 </span>
               </>
             ) : (
-              <span className="text-[9px] text-white/50">No track info</span>
+              <span className="text-[11px] text-white/50">No track info</span>
             )}
           </div>
         )}{' '}
@@ -2995,7 +2995,7 @@ const StationCard = React.memo(
               e.stopPropagation();
               onPeek();
             }}
-            className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors"
+            className="flex items-center gap-1 mt-1.5 text-[11px] text-dim hover:text-white/50 transition-colors"
           >
             {' '}
             <Music2 size={9} /> Check track
@@ -4480,18 +4480,18 @@ function TheaterView({
           {/* Track info */}{' '}
           {track?.title ? (
             <p
-              className={`${compact ? 'text-[9px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
+              className={`${compact ? 'text-[10px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
             >
               {track.artist ? `${track.artist} — ${track.title}` : track.title}
             </p>
           ) : (
-            <p className={`${compact ? 'text-[8px]' : 'text-[12px]'} text-white/40 text-center`}>
+            <p className={`${compact ? 'text-[10px]' : 'text-[12px]'} text-white/40 text-center`}>
               {theaterTags}
             </p>
           )}{' '}
           {track?.album && (
             <p
-              className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-white/40 text-center line-clamp-1`}
+              className={`${compact ? 'text-[10px]' : 'text-[11px]'} text-white/40 text-center line-clamp-1`}
             >
               {' '}
               {track.album}
@@ -4509,7 +4509,7 @@ function TheaterView({
               {' '}
               <span className={`${compact ? 'dot-1.5' : 'dot-2'} bg-red-500 animate-pulse`} />{' '}
               <span
-                className={`${compact ? 'text-[8px]' : 'text-[11px]'} font-semibold tracking-wider uppercase text-red-400`}
+                className={`${compact ? 'text-[10px]' : 'text-[11px]'} font-semibold tracking-wider uppercase text-red-400`}
               >
                 LIVE
               </span>
@@ -4549,7 +4549,7 @@ function TheaterView({
           {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
           {!compact && concerts.length > 0 && (
             <div className="w-full mt-2">
-              <p className="text-[9px] font-semibold tracking-widest uppercase text-white/40 text-center mb-1.5">
+              <p className="text-[11px] font-semibold tracking-widest uppercase text-white/40 text-center mb-1.5">
                 Upcoming Shows
               </p>
               <div className="flex flex-col gap-1 w-full">
@@ -5474,7 +5474,7 @@ function _NowPlayingBar({
                 {isPlaying && (
                   <>
                     <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />{' '}
-                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
+                    <span className="text-[11px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
                       {' '}
                       LIVE
                     </span>
@@ -5560,10 +5560,10 @@ function _NowPlayingBar({
                 : track.title
               : firstTag}
           </p>{' '}
-          {track?.album && <p className="text-[9px] text-dim truncate">{track.album}</p>}
+          {track?.album && <p className="text-[11px] text-dim truncate">{track.album}</p>}
         </div>{' '}
         {icyBitrate && (
-          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
+          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] font-mono text-white/50 shrink-0 self-center">
             {' '}
             {icyBitrate}kbps
           </span>
@@ -5673,7 +5673,7 @@ function _NowPlayingBar({
             {' '}
             <Clock size={14} />{' '}
             {sleepTimerMin != null && (
-              <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
+              <span className="absolute -top-1 -right-1 text-[9px] font-bold text-sys-orange leading-none">
                 {' '}
                 {sleepTimerMin}
               </span>
@@ -5849,7 +5849,7 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
               </span>{' '}
               <AnimatedBars size="small" />{' '}
               {icyBitrate && (
-                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1">
+                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] font-mono text-white/50 ml-1">
                   {' '}
                   {icyBitrate}kbps
                 </span>
@@ -6446,7 +6446,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {eq.bands.map((band) => (
                     <div key={band.id} className="flex flex-col items-center gap-1">
                       {' '}
-                      <span className="text-[9px] text-white/40 tabular-nums">
+                      <span className="text-[10px] text-white/40 tabular-nums">
                         {band.gain > 0 ? `+${band.gain}` : band.gain}
                       </span>{' '}
                       <input
@@ -6460,7 +6460,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                         aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />{' '}
-                      <span className="text-[8px] text-white/40">{band.label}</span>
+                      <span className="text-[10px] text-white/40">{band.label}</span>
                     </div>
                   ))}
                 </div>
@@ -7485,7 +7485,7 @@ const EqPanel = React.memo(function EqPanel({
               normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'
             }
             title="Loudness Normalizer"
-            className={`px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
+            className={`px-1.5 py-0.5 text-[10px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
           >
             NORM
           </button>
@@ -7581,7 +7581,7 @@ const EqPanel = React.memo(function EqPanel({
         {bands.map((band) => (
           <div key={band.id} className="col-center gap-1">
             {' '}
-            <span className="text-[9px] text-dim tabular-nums">
+            <span className="text-[10px] text-dim tabular-nums">
               {band.gain > 0 ? `+${band.gain}` : band.gain}
             </span>{' '}
             <input
@@ -7595,7 +7595,7 @@ const EqPanel = React.memo(function EqPanel({
               aria-label={`${band.label} gain`}
               className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />{' '}
-            <span className="text-[9px] text-secondary">{band.label}</span>
+            <span className="text-[10px] text-secondary">{band.label}</span>
           </div>
         ))}
       </div>{' '}
@@ -7629,7 +7629,7 @@ const EqPanel = React.memo(function EqPanel({
             aria-label="Stereo width"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[10px] text-dim tabular-nums w-8 text-right">
             {Math.round(stereoWidth * 100)}%
           </span>{' '}
         </div>
@@ -7646,7 +7646,7 @@ const EqPanel = React.memo(function EqPanel({
             aria-label="Bass enhance"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[10px] text-dim tabular-nums w-8 text-right">
             {Math.round(bassEnhance * 100)}%
           </span>{' '}
         </div>
@@ -7671,7 +7671,7 @@ const EqPanel = React.memo(function EqPanel({
             aria-label="Compressor amount"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[10px] text-dim tabular-nums w-8 text-right">
             {Math.round(compressorAmount * 100)}%
           </span>{' '}
         </div>{' '}
@@ -10112,12 +10112,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     >
                       {tab.icon} {tab.label}{' '}
                       {tab.id === 'history' && songHistory.history.length > 0 && (
-                        <span className="text-[9px] text-dim ml-0.5">
+                        <span className="text-[10px] text-dim ml-0.5">
                           {songHistory.history.length}
                         </span>
                       )}{' '}
                       {tab.id === 'favorites' && favSongs.songs.length > 0 && (
-                        <span className="text-[9px] text-dim ml-0.5">{favSongs.songs.length}</span>
+                        <span className="text-[10px] text-dim ml-0.5">{favSongs.songs.length}</span>
                       )}
                     </button>
                   ))}{' '}
