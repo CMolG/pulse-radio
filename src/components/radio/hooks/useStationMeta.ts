@@ -11,16 +11,12 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal, ): 
 let _lastStation = ''; let _lastStationLower = ''; export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
   if (!raw || raw.length > MAX_TITLE_LENGTH) return null; if (raw === stationName) return null;
   if (stationName !== _lastStation) { _lastStation = stationName; _lastStationLower = stationName.toLowerCase(); } if (raw.toLowerCase() === _lastStationLower) return null; // Cache lowercase station name to avoid recomputing on every poll
-  // Common separators: " - ", " — ", " – "
-  const separators = [' - ', ' — ', ' – ', ' | ']; for (const sep of separators) { const idx = raw.indexOf(sep); if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() }; } return { title: raw.trim(), artist: '' }; }
+  const separators = [' - ', ' — ', ' – ', ' | ']; for (const sep of separators) { const idx = raw.indexOf(sep); if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() }; } return { title: raw.trim(), artist: '' }; } // Common separators: " - ", " — ", " – "
 export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null); const [icyBitrate, setIcyBitrate] = useState<string | null>(null); const [streamCodec, setStreamCodec] = useState<string | null>(null); const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); const lastTitleRef = useRef<string>('');
-  // Tracks the URL of the station whose ICY data is currently being polled.
-  const prevStationUrlRef = useRef<string | null>(null); // Used to distinguish a station change from an isPlaying toggle.
-  // Clear track state during render when station goes null (avoid setState in effect)
-  const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null); const currentStationId = station?.url_resolved ?? null; if (currentStationId !== prevStationId) { setPrevStationId(currentStationId); if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null); } } useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return; } const stationChanged = station.url_resolved !== prevStationUrlRef.current; if (stationChanged) { prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
-      // Intentionally NOT clearing track/icyBitrate/streamCodec here.
-      // The previous station's data stays visible until the new station's
+  const prevStationUrlRef = useRef<string | null>(null); // Used to distinguish a station change from an isPlaying toggle. // Tracks the URL of the station whose ICY data is currently being polled.
+  const [prevStationId, setPrevStationId] = useState(station?.url_resolved ?? null); const currentStationId = station?.url_resolved ?? null; if (currentStationId !== prevStationId) { setPrevStationId(currentStationId); if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null); } } useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; } if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return; } const stationChanged = station.url_resolved !== prevStationUrlRef.current; if (stationChanged) { prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = ''; // Clear track state during render when station goes null (avoid setState in effect)
+      // Intentionally NOT clearing track/icyBitrate/streamCodec here. The previous station's data stays visible until the new station's
     } // first ICY response arrives — this is the "ICY swap" for smooth transitions.
     const abortController = new AbortController(); const poll = async () => { if (abortController.signal.aborted || document.hidden) return; const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal); if (abortController.signal.aborted) return; if (icyBr) setIcyBitrate(icyBr);
       if (station.codec) { const c = station.codec.toUpperCase(); setStreamCodec(CODEC_MAP[c] ?? c); } if (streamTitle && streamTitle !== lastTitleRef.current) { lastTitleRef.current = streamTitle; // Derive codec from station data for display
@@ -28,11 +24,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
       if (streamTitle) return; if (!lastTitleRef.current) setTrack(null); };
     if (stationChanged || isPlaying) poll(); // so we don't wait a full poll interval for fresh metadata. // Fetch immediately on station change or when resuming playback,
     if (isPlaying) intervalRef.current = setInterval(poll, POLL_INTERVAL_MS); // Continuous polling only while actively playing
-    // When the tab returns from background, poll immediately so the user
-    // doesn't see stale metadata for up to POLL_INTERVAL_MS.
-    const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); }; document.addEventListener('visibilitychange', onVisible); return () => { if (intervalRef.current) clearInterval(intervalRef.current); document.removeEventListener('visibilitychange', onVisible); abortController.abort(); };
+    const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); }; document.addEventListener('visibilitychange', onVisible); return () => { if (intervalRef.current) clearInterval(intervalRef.current); document.removeEventListener('visibilitychange', onVisible); abortController.abort(); }; // When the tab returns from background, poll immediately so the user doesn't see stale metadata for up to POLL_INTERVAL_MS.
   }, [station, isPlaying]); return {
-    // Keep showing track/bitrate as long as a station is selected.
-    // We do NOT null these out while loading — the ICY swap keeps the
-    track: station ? track : null, icyBitrate: station ? icyBitrate : null, streamCodec: station ? streamCodec : null, // previous station's data visible until new data arrives.
+    track: station ? track : null, icyBitrate: station ? icyBitrate : null, streamCodec: station ? streamCodec : null, // previous station's data visible until new data arrives. // Keep showing track/bitrate as long as a station is selected. We do NOT null these out while loading — the ICY swap keeps the
   }; }

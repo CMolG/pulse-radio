@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '3' },});
     } const contentType = upstream.headers.get('content-type') || 'audio/mpeg'; const icyBr = upstream.headers.get('icy-br'); const icyName = upstream.headers.get('icy-name'); const responseHeaders: Record<string, string> = { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-cache, no-store', 'Transfer-Encoding': 'chunked', }; if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr; if (icyName) responseHeaders['X-Stream-Name'] = icyName;
-    // HEAD requests: return headers only (for prefetch / codec sniffing)
-    if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(null, { status: 200, headers: responseHeaders }); } return new Response(upstream.body, { status: 200, headers: responseHeaders, });
+    if (req.method === 'HEAD') { if (timeout) clearTimeout(timeout); upstream.body?.cancel().catch(() => {}); return new Response(null, { status: 200, headers: responseHeaders }); } return new Response(upstream.body, { status: 200, headers: responseHeaders, }); // HEAD requests: return headers only (for prefetch / codec sniffing)
   } catch (err) {
     if (timeout) clearTimeout(timeout); const isTimeout = err instanceof DOMException && err.name === 'AbortError'; if (isTimeout) { return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504, headers: { 'Content-Type': 'application/json' },});

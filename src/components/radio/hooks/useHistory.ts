@@ -3,8 +3,7 @@
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []); const seen = new Set<string>(); // Dedup by id on load in case of corrupted storage
     return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
   }); const lastTrackRef = useRef<string>(''); const lastStationRef = useRef<string | undefined>(stationUuid); useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]); useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
-  // Add entry when track changes; handles station transitions in a single effect
-  useEffect(() => { if (!track?.title || !stationUuid || !stationName) return; // to prevent the race between station-reset and track-add
+  useEffect(() => { if (!track?.title || !stationUuid || !stationName) return; // to prevent the race between station-reset and track-add // Add entry when track changes; handles station transitions in a single effect
     if (stationUuid !== lastStationRef.current) { // Station just changed — skip this render's potentially stale metadata
       lastStationRef.current = stationUuid; lastTrackRef.current = ''; return; }
     const key = `${stationUuid}::${track.artist}::${track.title}`; if (key === lastTrackRef.current) return; lastTrackRef.current = key; const entry: HistoryEntry = {

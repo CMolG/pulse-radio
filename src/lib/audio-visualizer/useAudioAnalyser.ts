@@ -13,14 +13,12 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount); waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true); const tick = () => { // Allocate buffers once — reused across all frames (zero per-frame allocation)
           if (!document.hidden) { // Skip expensive analyser reads when tab is hidden to save CPU
             if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current); if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
-              // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
-              const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0; for (let i = 0; i < buf.length; i++) { // to avoid 256 float divisions per frame — normalize once at the end
+              const buf = waveDataRef.current; let sumSqInt = 0; let maxAbsInt = 0; for (let i = 0; i < buf.length; i++) { // to avoid 256 float divisions per frame — normalize once at the end // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
                 const s = buf[i] - 128; sumSqInt += s * s; const a = s < 0 ? -s : s; if (a > maxAbsInt) maxAbsInt = a; }
               meterRef.current.peak = maxAbsInt / 128; meterRef.current.rms = Math.sqrt(sumSqInt / buf.length) / 128; }
           } rafRef.current = requestAnimationFrame(tick);
         }; rafRef.current = requestAnimationFrame(tick);} catch {
-        // Some mobile browsers (notably iOS in background paths) can reject
-        cancelAnimationFrame(rafRef.current); setIsActive(false); // alive and just disable analyser updates. // WebAudio graph connections for cross-origin streams. Keep playback
+        cancelAnimationFrame(rafRef.current); setIsActive(false); // alive and just disable analyser updates. // WebAudio graph connections for cross-origin streams. Keep playback // Some mobile browsers (notably iOS in background paths) can reject
         frequencyDataRef.current = null; waveDataRef.current = null; }
     }, [fftSize, smoothingTimeConstant],);
   const disconnect = useCallback(() => {

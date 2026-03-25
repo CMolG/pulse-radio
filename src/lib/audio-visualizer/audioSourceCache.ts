@@ -1,7 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-// Shared cache for MediaElementAudioSourceNode instances.
-// createMediaElementSource can only be called ONCE per HTMLAudioElement,
-const cache = new WeakMap< HTMLAudioElement, { ctx: AudioContext; source: MediaElementAudioSourceNode } >(); // so all consumers (EQ, visualizer, etc.) must share the same source node.
+const cache = new WeakMap< HTMLAudioElement, { ctx: AudioContext; source: MediaElementAudioSourceNode } >(); // so all consumers (EQ, visualizer, etc.) must share the same source node. // Shared cache for MediaElementAudioSourceNode instances. createMediaElementSource can only be called ONCE per HTMLAudioElement,
 let sharedCtx: AudioContext | null = null; // Reusing one context avoids exhaustion after many station switches. // Singleton AudioContext — browsers limit the number of contexts (~6-20).
 function getSharedContext(): AudioContext {
   if (!sharedCtx || sharedCtx.state === 'closed') sharedCtx = new AudioContext(); if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {}); return sharedCtx; }

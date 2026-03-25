@@ -2,8 +2,7 @@
 import type { LyricsData, LrcLibResponse } from '../types'; import { parseLrc } from '../lrcParser'; const LRCLIB_BASE = 'https://lrclib.net/api'; const FETCH_TIMEOUT_MS = 8_000; function isTransientError(err: unknown): boolean {
   if (err instanceof DOMException && err.name === 'TimeoutError') return true; if (err instanceof TypeError) return true; // fetch network failure
   return false; }
-// Fetch with combined cancellation: parent signal (caller abort) + per-request timeout.
-function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> { // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta.
+function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Response> { // Follows the child-controller pattern used by fetchIcyMeta in useStationMeta. // Fetch with combined cancellation: parent signal (caller abort) + per-request timeout.
   if (!parentSignal) return fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) }); const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS); const onParentAbort = () => controller.abort(); if (parentSignal.aborted) { clearTimeout(timeout); controller.abort(); return fetch(url, { signal: controller.signal }); // will reject immediately
   } parentSignal.addEventListener('abort', onParentAbort, { once: true }); return fetch(url, { signal: controller.signal }).finally(() => {
     clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);});

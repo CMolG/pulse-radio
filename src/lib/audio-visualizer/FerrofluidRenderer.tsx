@@ -8,8 +8,7 @@ import { hexToRgb } from './colorUtils'; import { useCanvasLoop } from './useCan
   sizeFactor: number; targetX: number; targetY: number; vx: number; vy: number; phase: number; speed: number; freqBand: number; // which frequency band drives this blob
 } function createBlobs(count: number, w: number, h: number): Blob[] {
   const blobs: Blob[] = []; const cx = w / 2; const cy = h / 2; for (let i = 0; i < count; i++) { const angle = (i / count) * Math.PI * 2; const dist = Math.min(w, h) * 0.15; blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy, vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7, freqBand: Math.floor((i / count) * 128),}); } return blobs; }
-// Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
-let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefined; function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number, h: number, colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] }, energy: number, ) { const threshold = 1.0;
+let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefined; function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number, h: number, colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] }, energy: number, ) { const threshold = 1.0; // Module-level cache for offscreen canvas and ImageData (avoids function property hacks)
   const scale = 3; const sw = Math.ceil(w / scale); const sh = Math.ceil(h / scale); // downscale for performance — render at 1/3 resolution
   if (!_offscreen || _offscreen.width !== sw || _offscreen.height !== sh) { // Use an offscreen canvas for smooth bilinear upscaling
     _offscreen = new OffscreenCanvas(sw, sh); _imgData = undefined; }
@@ -17,24 +16,19 @@ let _offscreen: OffscreenCanvas | null = null; let _imgData: ImageData | undefin
   if (!_imgData || _imgData.width !== sw || _imgData.height !== sh) { // Reuse ImageData across frames — every pixel is written below, so no zeroing needed
     try { _imgData = offCtx.createImageData(sw, sh); } catch { return; } }
   const sd = _imgData.data;
-  // Pre-compute per-blob max influence radius squared for distance culling.
-  // field = r² / (distSq + 1). For field >= 0.01 → distSq < r²/0.01 = 100*r²
-  const blobCount = blobs.length; const blobMaxDistSq = new Float64Array(blobCount); for (let b = 0; b < blobCount; b++) { const r = blobs[b].baseRadius; blobMaxDistSq[b] = r * r * 100; } const thresholdLow = threshold * 0.7; const glowRange = threshold * 0.3; for (let py = 0; py < sh; py++) { for (let px = 0; px < sw; px++) {
+  const blobCount = blobs.length; const blobMaxDistSq = new Float64Array(blobCount); for (let b = 0; b < blobCount; b++) { const r = blobs[b].baseRadius; blobMaxDistSq[b] = r * r * 100; } const thresholdLow = threshold * 0.7; const glowRange = threshold * 0.3; for (let py = 0; py < sh; py++) { for (let px = 0; px < sw; px++) { // Pre-compute per-blob max influence radius squared for distance culling. field = r² / (distSq + 1). For field >= 0.01 → distSq < r²/0.01 = 100*r²
       const x = px * scale; const y = py * scale; let sum = 0; let weightedBand = 0; let totalWeight = 0; for (let b = 0; b < blobCount; b++) {
         const blob = blobs[b]; const dx = x - blob.x; const dy = y - blob.y; const distSq = dx * dx + dy * dy; if (distSq > blobMaxDistSq[b]) continue; // Early-exit: skip blobs too far to contribute meaningfully
         const r = blob.baseRadius; const field = (r * r) / (distSq + 1); sum += field; if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; } }
       const idx = (py * sw + px) * 4; if (sum > threshold) { const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
         const coreIntensity = Math.min(1, (sum - threshold) * 2); const edgeGlow = 1 - coreIntensity; const brightnessMul = 0.3 + coreIntensity * 0.7; // color based on proximity to center vs edge, and energy
-        // blend primary → secondary based on frequency band
-        const r = (lerp(colors.primary[0], colors.secondary[0], bandNorm) * brightnessMul) | 0; const g = (lerp(colors.primary[1], colors.secondary[1], bandNorm) * brightnessMul) | 0; const b = (lerp(colors.primary[2], colors.secondary[2], bandNorm) * brightnessMul) | 0;
-        // add accent glow at edges
-        const accentMix = edgeGlow * energy * 0.6; sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0); sd[idx + 1] = Math.min(255, g + (colors.accent[1] * accentMix) | 0); sd[idx + 2] = Math.min(255, b + (colors.accent[2] * accentMix) | 0); sd[idx + 3] = Math.min(255, (180 + coreIntensity * 75) | 0);
+        const r = (lerp(colors.primary[0], colors.secondary[0], bandNorm) * brightnessMul) | 0; const g = (lerp(colors.primary[1], colors.secondary[1], bandNorm) * brightnessMul) | 0; const b = (lerp(colors.primary[2], colors.secondary[2], bandNorm) * brightnessMul) | 0; // blend primary → secondary based on frequency band
+        const accentMix = edgeGlow * energy * 0.6; sd[idx] = Math.min(255, r + (colors.accent[0] * accentMix) | 0); sd[idx + 1] = Math.min(255, g + (colors.accent[1] * accentMix) | 0); sd[idx + 2] = Math.min(255, b + (colors.accent[2] * accentMix) | 0); sd[idx + 3] = Math.min(255, (180 + coreIntensity * 75) | 0); // add accent glow at edges
       } else if (sum > thresholdLow) {
         const glowIntensity = (sum - thresholdLow) / glowRange; sd[idx] = (colors.accent[0] * glowIntensity * 0.4) | 0; sd[idx + 1] = (colors.accent[1] * glowIntensity * 0.4) | 0; sd[idx + 2] = (colors.accent[2] * glowIntensity * 0.4) | 0; sd[idx + 3] = (glowIntensity * 60) | 0; // outer glow
       } else sd[idx] = sd[idx + 1] = sd[idx + 2] = sd[idx + 3] = 0; }
   }
-  // Put image data into offscreen canvas, then draw upscaled with
-  try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h); } catch { /* skip frame on canvas error */ } } // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
+  try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h); } catch { /* skip frame on canvas error */ } } // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing // Put image data into offscreen canvas, then draw upscaled with
 export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e', colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false, }: FerrofluidRendererProps) {
   const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 }); const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) }); const colors = useRef(mkColors()); useEffect(() => { colors.current = mkColors(); }, [colorPrimary, colorSecondary, colorAccent]); const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     if (blobsRef.current.length !== blobCount || sizeRef.current.w !== w || sizeRef.current.h !== h) { // init blobs if needed
