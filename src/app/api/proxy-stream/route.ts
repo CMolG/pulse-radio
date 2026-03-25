@@ -39,12 +39,15 @@ const _IPV6_BRACKET_END_RE = /\]$/;
 export const runtime = 'nodejs';
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const MAX_DURATION_MS = 0;
+const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
+const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
+const _JSON_R5_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '5' } as const;
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
     return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: _JSON_HDRS,
     });
   }
   let parsed: URL;
@@ -53,14 +56,14 @@ export async function GET(req: NextRequest) {
     if (!ALLOWED_PROTOCOLS.has(parsed.protocol)) {
       return new Response(JSON.stringify({ error: 'Invalid protocol' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: _JSON_HDRS,
       });
     }
     const host = parsed.hostname.toLowerCase();
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid URL' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: _JSON_HDRS,
     });
   }
   const controller = new AbortController();
@@ -83,7 +86,7 @@ export async function GET(req: NextRequest) {
           upstream.body?.cancel().catch(() => {});
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403,
-            headers: { 'Content-Type': 'application/json' },
+            headers: _JSON_HDRS,
           });
         }
       } catch {}
@@ -93,7 +96,7 @@ export async function GET(req: NextRequest) {
       upstream.body?.cancel().catch(() => {});
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json', 'Retry-After': '3' },
+        headers: _JSON_R3_HDRS,
       });
     }
     const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
@@ -119,13 +122,13 @@ export async function GET(req: NextRequest) {
     if (isTimeout) {
       return new Response(JSON.stringify({ error: 'Stream timed out' }), {
         status: 504,
-        headers: { 'Content-Type': 'application/json' },
+        headers: _JSON_HDRS,
       });
     }
     const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 502,
-      headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },
+      headers: _JSON_R5_HDRS,
     });
   }
 }
