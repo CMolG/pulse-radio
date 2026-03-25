@@ -83,8 +83,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         const h1 = parseInt(sorted[0][0]);
         const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
         const h3 = sorted.length > 2 ? parseInt(sorted[2][0]) : (h1 + 240) % 360;
-        resolve([
-          `hsl(${h1}, 75%, 55%)`,
+        resolve([ `hsl(${h1}, 75%, 55%)`,
           `hsl(${h2}, 65%, 50%)`,
           `hsl(${h3}, 60%, 45%)`,
         ]);
@@ -134,8 +133,7 @@ export default function TheaterView({
   }, [artworkUrl]);
 
   const [color1, color2, color3] = colors;
-  const theaterTags = useMemo(
-    () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
+  const theaterTags = useMemo( () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
     [station.tags],
   );
 

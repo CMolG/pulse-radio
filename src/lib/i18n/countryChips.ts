@@ -18,8 +18,7 @@ export type CountryChip = {
 };
 
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
-const EXCLUDED_LOW_RELEVANCE_CODES = new Set([
-  "AD",
+const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD",
   "SM",
   "LI",
   "MC",
@@ -73,8 +72,7 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
 function getProximityCountries(seedCodes: string[]): string[] {
   if (seedCodes.length === 0) return [];
 
-  const seed = seedCodes
-    .map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
+  const seed = seedCodes .map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
 
   const regions = new Set(seed.map((country) => country.region));
   const subregions = new Set(seed.map((country) => country.subregion));

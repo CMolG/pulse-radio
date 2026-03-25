@@ -72,8 +72,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
 let _offscreen: OffscreenCanvas | null = null;
 let _imgData: ImageData | undefined;
 
-function drawMetaballs(
-  ctx: CanvasRenderingContext2D,
+function drawMetaballs( ctx: CanvasRenderingContext2D,
   blobs: Blob[],
   w: number,
   h: number,

@@ -8,8 +8,7 @@
 // createMediaElementSource can only be called ONCE per HTMLAudioElement,
 // so all consumers (EQ, visualizer, etc.) must share the same source node.
 
-const cache = new WeakMap<
-  HTMLAudioElement,
+const cache = new WeakMap< HTMLAudioElement,
   { ctx: AudioContext; source: MediaElementAudioSourceNode }
 >();
 

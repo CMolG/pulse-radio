@@ -495,8 +495,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           if (rl) rl.toggle();
           break;
         case "z":
-        case "Z":           // Z: cycle sleep timer
-          st.cycle();
+        case "Z":           // Z: cycle sleep timer st.cycle();
           break;
         case "?":
           setShowShortcuts(prev => !prev);
@@ -648,8 +647,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </motion.div>
   ) : null;
 
-  const mkNavTabs = (sz: number) => [
-    { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={sz} /> },
+  const mkNavTabs = (sz: number) => [ { id: "discover" as const, label: t("discover"), icon: <RadioIcon size={sz} /> },
     { id: "history" as const, label: t("history"), icon: <Clock size={sz} /> },
     { id: "favorites" as const, label: t("favorites"), icon: <Heart size={sz} /> },
   ];

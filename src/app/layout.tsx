@@ -33,8 +33,7 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   manifest: "/site.webmanifest",
   applicationName: "Pulse Radio",
-  keywords: [
-    "internet radio",
+  keywords: [ "internet radio",
     "online radio",
     "free radio",
     "radio player",
@@ -49,8 +48,7 @@ export const metadata: Metadata = {
   creator: "Pulse Radio",
   publisher: "Pulse Radio",
   icons: {
-    icon: [
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    icon: [ { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
     shortcut: "/favicon.ico",

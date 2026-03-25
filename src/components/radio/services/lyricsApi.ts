@@ -72,8 +72,7 @@ async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: 
   return null;
 }
 
-async function fetchLyricsForArtist(
-  artist: string,
+async function fetchLyricsForArtist( artist: string,
   title: string,
   album?: string,
   duration?: number,

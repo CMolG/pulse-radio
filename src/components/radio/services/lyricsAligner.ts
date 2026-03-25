@@ -26,8 +26,7 @@ export type AlignerStepResult = {
   relockTriggered: boolean;
 };
 
-const STOPWORDS = new Set([
-  'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'for', 'with',
+const STOPWORDS = new Set([ 'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'for', 'with',
   'el', 'la', 'los', 'las', 'de', 'del', 'y', 'en', 'por', 'con', 'un', 'una',
 ]);
 

@@ -45,8 +45,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [mbResult, wikiResult] = await Promise.allSettled([
-      searchMusicBrainz(artist),
+    const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist),
       fetchWikiSummary(artist),
     ]);
 

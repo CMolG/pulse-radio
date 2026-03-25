@@ -67,8 +67,7 @@ export function useLyrics(
     if (controller.signal.aborted || !track?.title) return;
     setLoading(true);
     setError(false);
-    fetchLyricsApi(
-      track.artist || stationName || '',
+    fetchLyricsApi( track.artist || stationName || '',
       track.title,
       track.album,
       undefined,

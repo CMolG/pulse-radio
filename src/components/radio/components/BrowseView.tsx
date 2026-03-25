@@ -24,8 +24,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 
 /** Order in which category sections appear on the home screen */
-const BROWSE_ORDER = [
-  'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
+const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
   'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin',
   'metal', 'local', 'world',
 ] as const;

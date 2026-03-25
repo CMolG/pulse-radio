@@ -60,8 +60,7 @@ export function useMediaSession(config: MediaSessionConfig): void {
   const setupHandlers = useCallback(() => {
     if (!('mediaSession' in navigator)) return;
 
-    const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [
-      ['play', () => configRef.current.onPlay()],
+    const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [ ['play', () => configRef.current.onPlay()],
       ['pause', () => configRef.current.onPause()],
       ['nexttrack', () => configRef.current.onNext()],
       ['previoustrack', () => configRef.current.onPrev()],

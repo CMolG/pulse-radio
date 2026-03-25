@@ -430,8 +430,7 @@ export function useRadio(): UseRadioReturn {
       } else lowBufferStreak = 0;
     }, BUFFER_CHECK_MS);
 
-    const pairs: [EventTarget, string, EventListener][] = [
-      [audio, 'playing', onPlaying], [audio, 'pause', onPause],
+    const pairs: [EventTarget, string, EventListener][] = [ [audio, 'playing', onPlaying], [audio, 'pause', onPause],
       [audio, 'waiting', onWaiting], [audio, 'error', onError],
       [audio, 'stalled', onStalled], [audio, 'ended', onEnded],
       [audio, 'timeupdate', onTimeUpdate], [audio, 'canplay', onCanPlay],

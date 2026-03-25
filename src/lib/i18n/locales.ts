@@ -4,8 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 
-const _LOCALES = [
-  { code: "en", nativeName: "English", englishName: "English" },
+const _LOCALES = [ { code: "en", nativeName: "English", englishName: "English" },
   { code: "es", nativeName: "Español", englishName: "Spanish" },
   { code: "fr", nativeName: "Français", englishName: "French" },
   { code: "de", nativeName: "Deutsch", englishName: "German" },

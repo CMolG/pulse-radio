@@ -7,8 +7,7 @@
 import type { Station } from '../types';
 
 // Radio-Browser API mirrors for redundancy
-const SERVERS = [
-  'https://de1.api.radio-browser.info/json',
+const SERVERS = [ 'https://de1.api.radio-browser.info/json',
   'https://de2.api.radio-browser.info/json',
   'https://nl1.api.radio-browser.info/json',
 ];
@@ -93,6 +92,5 @@ export async function similarStations(station: Station, limit = 5): Promise<Stat
   if (!firstTag) return topStations(limit);
   const results = await stationsByTag(firstTag, limit + 5);
   // Exclude the current station and filter to only online streams
-  return results
-    .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit);
+  return results .filter(s => s.stationuuid !== station.stationuuid && s.url_resolved).slice(0, limit);
 }

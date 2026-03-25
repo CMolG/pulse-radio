@@ -148,8 +148,7 @@ export function useStats() {
   const topStations = useMemo(() => topN(stats.stationListenTimes, 'totalMs', 10), [stats.stationListenTimes]);
   const topSongs = useMemo(() => topN(stats.songPlayCounts, 'count', 10), [stats.songPlayCounts]);
   const topArtists = useMemo(() => topN(stats.artistPlayCounts, 'count', 10), [stats.artistPlayCounts]);
-  const sortedGenres = useMemo(
-    () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count),
+  const sortedGenres = useMemo( () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count),
     [stats.genrePlayCounts],
   );
   const topGenres = useMemo(() => sortedGenres.slice(0, 10), [sortedGenres]);
