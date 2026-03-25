@@ -1,2 +1,0 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-export { useAudioAnalyser } from './useAudioAnalyser'; export { VisualizerCanvas } from './VisualizerCanvas'; export { ParallaxAlbumBackground } from './ParallaxAlbumBackground'; export { useAlbumArt } from './useAlbumArt'; export { getOrCreateAudioSource, resumeAudioContext, hasAudioSource } from './audioSourceCache'; export { FerrofluidRenderer } from './FerrofluidRenderer';
