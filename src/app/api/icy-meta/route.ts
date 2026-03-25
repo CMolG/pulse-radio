@@ -43,21 +43,25 @@ const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 }
 export const runtime = 'nodejs';
 const _ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
+const _ERR_INVALID_PARAM = { error: 'Missing or invalid url parameter' } as const;
+const _ERR_INVALID_PROTO = { error: 'Invalid protocol' } as const;
+const _ERR_PRIVATE_IP = { error: 'Private/internal URLs not allowed' } as const;
+const _ERR_INVALID_URL = { error: 'Invalid URL' } as const;
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
-    return NextResponse.json({ error: 'Missing or invalid url parameter' }, { status: 400 });
+    return NextResponse.json(_ERR_INVALID_PARAM, { status: 400 });
   }
   try {
     const url = new URL(streamUrl);
     if (!_ALLOWED_PROTOCOLS.has(url.protocol)) {
-      return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
+      return NextResponse.json(_ERR_INVALID_PROTO, { status: 400 });
     }
     const host = url.hostname.toLowerCase();
     if (isPrivateHost(host))
-      return NextResponse.json({ error: 'Private/internal URLs not allowed' }, { status: 400 });
+      return NextResponse.json(_ERR_PRIVATE_IP, { status: 400 });
   } catch {
-    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    return NextResponse.json(_ERR_INVALID_URL, { status: 400 });
   }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
