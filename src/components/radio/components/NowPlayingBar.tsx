@@ -131,15 +131,11 @@ function NowPlayingBar({
                     </span>
                   </>
                 )}
-                <span className="text-[11px] text-secondary truncate">
-                  {track?.artist || compactTags || ""}
-                </span>
+                <span className="text-[11px] text-secondary truncate">{track?.artist || compactTags || ""}</span>
               </div>
             </>
           ) : (
-            <p className="text-[13px] text-dim">No station selected</p>
-          )}
-        </div>
+            <p className="text-[13px] text-dim">No station selected</p>)}</div>
         {/* Action buttons — 44px touch targets */}
         <div className="flex items-center gap-0.5 shrink-0">
           {station && !theaterMode && (
@@ -147,9 +143,7 @@ function NowPlayingBar({
               onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
-              aria-label="Theater mode">
-              <Maximize2 size={18} />
-            </button>
+              aria-label="Theater mode"><Maximize2 size={18} /></button>
           )}
         </div>
         {/* Fill iPhone safe-area inset below the bar without adding layout height */}
@@ -162,9 +156,7 @@ function NowPlayingBar({
   }
   return (
     <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
-      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {statusAnnouncement}
-      </div>
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{statusAnnouncement}</div>
       {/* Station info */}
       <div className="flex-row-2.5 min-w-40">
         <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-surface-2 flex-center-row">
@@ -192,16 +184,12 @@ function NowPlayingBar({
         </div>
         {/* TODO replace upper img with next image */}
         <div className="min-w-0">
-          <p className="text-[12px] font-medium text-white truncate">
-            {station?.name || "Not Playing"}
-          </p>
+          <p className="text-[12px] font-medium text-white truncate">{station?.name || "Not Playing"}</p>
           <p className="text-[10px] text-secondary truncate">
             {track?.title ? (track.artist ? `${track.artist} — ${track.title}` : track.title) : firstTag}
           </p>
           {track?.album && (
-            <p className="text-[9px] text-dim truncate">{track.album}</p>
-          )}
-        </div>
+            <p className="text-[9px] text-dim truncate">{track.album}</p>)}</div>
         {icyBitrate && (
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
             {icyBitrate}kbps
@@ -256,9 +244,7 @@ function NowPlayingBar({
             </div>
             <div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">
-                LIVE
-              </span>
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
               <AnimatedBars size="small" />
             </div>
           </>
@@ -271,9 +257,7 @@ function NowPlayingBar({
             onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
-            aria-label="Theater mode">
-            <Maximize2 size={14} />
-          </button>
+            aria-label="Theater mode"><Maximize2 size={14} /></button>
         )}
         {onToggleFav && (
           <button
@@ -281,9 +265,7 @@ function NowPlayingBar({
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
-            title="Favorita">
-            <Star size={14} className={isFavorite ? "fill-sys-orange" : ""} />
-          </button>
+            title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
         )}
         {onFavSong && (
           <button
@@ -291,9 +273,7 @@ function NowPlayingBar({
             aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
-            title="Me gusta canción">
-            <Heart size={14} className={songLiked ? "fill-pink-400" : ""} />
-          </button>
+            title="Me gusta canción"><Heart size={14} className={songLiked ? "fill-pink-400" : ""} /></button>
         )}
         {onCycleSleepTimer && (
           <button
@@ -305,17 +285,13 @@ function NowPlayingBar({
             {sleepTimerMin != null && (
               <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
                 {sleepTimerMin}
-              </span>
-            )}
-          </button>
+              </span>)}</button>
         )}
         <button
           onClick={onToggleEq}
           aria-label="Toggle equalizer"
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
-        >
-          <SlidersHorizontal size={14} />
-        </button>
+        ><SlidersHorizontal size={14} /></button>
       </div>
       {/* Volume */}
       <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">

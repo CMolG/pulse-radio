@@ -83,18 +83,14 @@ function UsageGuide({ onClose }: Props) {
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}>
         {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
-        </div>
+        <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
         {/* Header */}
         <div className="flex items-center gap-3 px-5 pb-3">
           <button
             onClick={onClose}
             aria-label="Close guide"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
-          >
-            <IoChevronBack size={16} />
-          </button>
+          ><IoChevronBack size={16} /></button>
           <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2>
         </div>
         <div className="border-t border-white/8" />
@@ -113,9 +109,7 @@ function UsageGuide({ onClose }: Props) {
                   <motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-white/30 text-[12px]">
-                    ▶
-                  </motion.span>
+                    className="text-white/30 text-[12px]">▶</motion.span>
                 </button>
                 <AnimatePresence>
                   {isExpanded && (
@@ -125,18 +119,12 @@ function UsageGuide({ onClose }: Props) {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                       className="overflow-hidden">
-                      <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">
-                        {section.content}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">{section.content}</p>
+                    </motion.div>)}</AnimatePresence>
               </div>
             );
           })}
-        </div>
-        <div className="h-6" />
-      </motion.div>
+        </div><div className="h-6" /></motion.div>
     </motion.div>
   );
 }

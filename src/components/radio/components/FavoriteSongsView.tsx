@@ -96,9 +96,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
         {hasMore && (
           <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown size={14} className="text-white/30" />
-          </motion.span>
-        )}
-      </button>
+          </motion.span>)}</button>
       {/* Stacked/expanded cards */}
       {!expanded && hasMore ? (
         <div
@@ -129,9 +127,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                 </div>
                 <div className="p-2.5">
                   <p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>
-                  <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p>
-                </div>
-              </div>
+                  <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p></div></div>
             </div>
           ))}
           <div
@@ -139,9 +135,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
             style={{ maxWidth: "200px" }}>
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
               +{songs.length - VISIBLE_COUNT} more
-            </span>
-          </div>
-        </div>
+            </span></div></div>
       ) : (
         <AnimatePresence>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
@@ -154,9 +148,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                   delay={i}
                   heart={null}
                   hideRemove />
-              </div>
-            ))}
-          </div>
+              </div>))}</div>
         </AnimatePresence>
       )}
       {expanded && hasMore && (
@@ -165,9 +157,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
           <ChevronDown size={12} className="rotate-180" />
           Collapse
-        </button>
-      )}
-    </div>
+        </button>)}</div>
   );
 }
 
@@ -271,9 +261,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
                 delay={i}
                 heart={null}
                 hideRemove />
-            </div>
-          ))}
-        </div>
+            </div>))}</div>
       )}
     </div>
   );

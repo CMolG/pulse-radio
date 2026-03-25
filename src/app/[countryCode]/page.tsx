@@ -38,8 +38,6 @@ export default async function CountryPage({ params }: CountryPageProps) {
   const countryCode = normalizeCountryCode(resolved.countryCode);
   if (!COUNTRY_BY_CODE[countryCode]) notFound();
   return (
-    <div className="h-full w-full">
-      <Radio initialCountryCode={countryCode} />
-    </div>
+    <div className="h-full w-full"><Radio initialCountryCode={countryCode} /></div>
   );
 }

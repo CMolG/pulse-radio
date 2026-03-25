@@ -71,9 +71,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-pressed={isFavorite}
           className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50' }`}
-        >
- <Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} />
-        </button>
+        ><Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} /></button>
         {/* Now-playing indicator */}
         {isCurrent && isPlaying && <span className="absolute bottom-1.5 left-1.5 dot-2 bg-sys-orange animate-pulse" />}
       </div>
@@ -90,9 +88,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           <span key={tag} className="pad-xs-full bg-surface-2 text-[9px] text-secondary truncate max-w-[80px]">{tag}</span>
         ))}
         {station.countrycode && (
-          <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>
-        )}
-      </div>
+          <span className="text-[10px] text-dim leading-none">{countryFlag(station.countrycode)}</span>)}</div>
       {/* Live track preview */}
       {liveStatus === 'loading' && (
         <div className="flex items-center gap-1 mt-1.5">
@@ -110,9 +106,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
               </span>
             </>
           ) : (
-            <span className="text-[9px] text-white/20">No track info</span>
-          )}
-        </div>
+            <span className="text-[9px] text-white/20">No track info</span>)}</div>
       )}
       {onPeek && !liveStatus && (
         <button

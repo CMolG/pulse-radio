@@ -82,23 +82,15 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
                 onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canLeft}
-                aria-label="Scroll left">
-                <ChevronLeft size={14} />
-              </button>
+                aria-label="Scroll left"><ChevronLeft size={14} /></button>
               <button
                 onClick={() => scroll(1)}
                 className={`p-1 rounded-md transition-colors ${canRight ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canRight}
-                aria-label="Scroll right">
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          )}
-        </div>
+                aria-label="Scroll right"><ChevronRight size={14} /></button>
+            </div>)}</div>
       )}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>
-        {children}
-      </div>
+      <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div>
     </div>
   );
 }
@@ -328,9 +320,7 @@ export default function BrowseView({
       {/* Header */}
       <div className={`${isMobile ? "px-4" : "px-5"} pt-4 pb-3 shrink-0 flex-between`}>
         <div>
-          <h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>
-            {view.label}
-          </h2>
+          <h2 className={`${isMobile ? "text-base" : "text-lg"} font-semibold text-white`}>{view.label}</h2>
           <p className="text-[12px] text-muted mt-0.5">
             {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}
           </p>
@@ -354,26 +344,20 @@ export default function BrowseView({
             <button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "genre" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >
-              {t("all")}
-            </button>
+            >{t("all")}</button>
             {visibleGenres.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => onSelectGenre?.(cat)}
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
                 className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-              >
-                {cat.label}
-              </button>
+              >{cat.label}</button>
             ))}
             {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setGenreChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-              >
-                {t("seeMore")}
-              </button>
+              >{t("seeMore")}</button>
             )}
           </div>
         );
@@ -387,9 +371,7 @@ export default function BrowseView({
             <button
               onClick={() => onGoHome?.()}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== "country" ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
-            >
-              {`🌐 ${t("allCountries")}`}
-            </button>
+            >{`🌐 ${t("allCountries")}`}</button>
             {visibleCountries.map((c) => (
               <button
                 key={c.code}
@@ -397,17 +379,13 @@ export default function BrowseView({
                 aria-current={countryChipActive(c.code) || undefined}
                 className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? "bg-surface-6 text-white" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70"}`}
               >
-                <span>{c.flag}</span>
-                <span>{c.displayName}</span>
-              </button>
+                <span>{c.flag}</span><span>{c.displayName}</span></button>
             ))}
             {collapsed && countryChips.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setCountryChipsExpanded(true)}
                 className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
-              >
-                {t("seeMore")}
-              </button>
+              >{t("seeMore")}</button>
             )}
           </div>
         );
@@ -415,9 +393,7 @@ export default function BrowseView({
       {/* Content */}
       <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
         {loading && (
-          <div className="flex-center-row py-16">
-            <Loader2 size={24} className="text-dim animate-spin" />
-          </div>
+          <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
         )}
         {error && (
           <div className="flex-center-col gap-3 py-16">
@@ -426,9 +402,7 @@ export default function BrowseView({
             <button
               onClick={() => setRetryKey((k) => k + 1)}
               className="px-4 py-1.5 rounded-lg bg-surface-3 text-[12px] font-medium text-secondary hover:text-white hover:bg-surface-4 transition-colors"
-            >
-              {t("retry")}
-            </button>
+            >{t("retry")}</button>
           </div>
         )}
         {!loading && !error && view.mode !== "top" && stations.length === 0 && (
@@ -447,18 +421,14 @@ export default function BrowseView({
                     <ScrollRow
                       title={t("favorites")}
                       icon={<Star size={14} className="text-sys-orange/70" />}
-                      isMobile={isMobile}>
-                    {renderScrollStations(favorites)}
-                  </ScrollRow>
+                      isMobile={isMobile}>{renderScrollStations(favorites)}</ScrollRow>
                 )}
                 {/* Recent stations row */}
                 {recent && recent.length > 0 && (
                     <ScrollRow
                       title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />}
-                      isMobile={isMobile}>
-                    {renderScrollStations(recent)}
-                  </ScrollRow>
+                      isMobile={isMobile}>{renderScrollStations(recent)}</ScrollRow>
                 )}
                 {effectiveBrowseOrder.map((catId) => {
                   const cat = translatedGenreCategories.find((c) => c.id === catId);
@@ -479,9 +449,7 @@ export default function BrowseView({
                           <button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
-                          >
-                            {t("retry")}
-                          </button>
+                          >{t("retry")}</button>
                         </div>
                       ) : !catStations ? (Array.from({ length: 5 }).map((_, i) => (
                           <div key={i} className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`} />
@@ -527,16 +495,12 @@ export default function BrowseView({
                         {songFilter && (
                           <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
                             <X size={11} />
-                          </button>
-                        )}
-                      </div>
+                          </button>)}</div>
                     )}
                     {scanEnabled && songFilter && (
                       <span className="text-[11px] text-dim shrink-0">
                         {t("stationCount", { count: allSongFilteredStations.length })}
-                      </span>
-                    )}
-                  </div>
+                      </span>)}</div>
                   {/* Station grid */}
                   <div className={`grid gap-3 ${isMobile ? "grid-cols-2 px-3" : "grid-cols-4 px-0"} pb-4`}>
                     {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
@@ -579,9 +543,7 @@ export default function BrowseView({
                         {t("next")}
                         <ChevronRight size={14} />
                       </button>
-                    </div>
-                  )}
-                </>
+                    </div>)}</>
               );
             })()}
           </>

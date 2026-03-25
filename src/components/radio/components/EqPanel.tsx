@@ -81,9 +81,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                 aria-label={`Delete ${preset.name} preset`}
                 className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors">
                 <X size={8} />
-              </button>
-            )}
-          </div>
+              </button>)}</div>
         ))}
       </div>
       {/* Save custom preset */}
@@ -100,17 +98,13 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
  <button onClick={handleSave} aria-label="Save preset" className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors" ><Save size={10} /></button>
               <button onClick={() => setShowSaveInput(false)}
                 aria-label="Cancel"
-                className="p-1 rounded-md bg-surface-2 text-subtle-hover">
-                <X size={10} />
-              </button></div>
+                className="p-1 rounded-md bg-surface-2 text-subtle-hover"><X size={10} /></button></div>
           ) : (
             <button onClick={() => setShowSaveInput(true)}
               className="flex-row-1 px-2 py-1 text-[10px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors">
               <Plus size={10} />
               Save Custom
-            </button>
-          )}
-        </div>
+            </button>)}</div>
       )}
       {/* Band sliders */}
       <div className="flex items-end justify-between gap-2">
@@ -123,9 +117,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
               className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />
             <span className="text-[9px] text-secondary">{band.label}</span>
-          </div>
-        ))}
-      </div>
+          </div>))}</div>
       {/* Stereo width */}
       <div className="mt-3 pt-3 border-t border-white/10">
         <div className="mb-2">
@@ -140,9 +132,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                     ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40'
                     : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'
                 }`}
-                aria-label={`Noise reduction ${mode}`}>
-                {mode.toUpperCase()}
-              </button>
+                aria-label={`Noise reduction ${mode}`}>{mode.toUpperCase()}</button>
             ))}
           </div>
         </div>

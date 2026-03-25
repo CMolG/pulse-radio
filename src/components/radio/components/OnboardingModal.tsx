@@ -89,9 +89,7 @@ function PWAStep() {
         <button
           onClick={handleInstall}
           className="mt-2 px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
-        >
-          Install Now
-        </button>
+        >Install Now</button>
       ) : isIos ? (
         <div className="mt-2 p-3 rounded-xl bg-white/5 border border-white/10">
           <div className="flex items-center gap-2 text-[13px] text-white/70">
@@ -102,9 +100,7 @@ function PWAStep() {
       ) : (
         <p className="text-[12px] text-white/40 mt-1">
           Use Chrome or Edge for the install option, or add this page to your home screen.
-        </p>
-      )}
-    </div>
+        </p>)}</div>
   );
 }
 
@@ -158,9 +154,7 @@ function OnboardingModal() {
                   ) : isPWAStep ? (
                     <PWAStep />
                   ) : null}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                </motion.div></AnimatePresence></div>
             {/* Progress dots + navigation */}
             <div className="px-8 pb-6 flex flex-col gap-4">
               {/* Dots */}
@@ -180,21 +174,13 @@ function OnboardingModal() {
                 <button
                   onClick={step > 0 ? () => setStep(s => s - 1) : handleClose}
                   className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
-                >
-                  {step > 0 ? 'Back' : 'Skip'}
-                </button>
+                >{step > 0 ? 'Back' : 'Skip'}</button>
                 <button
                   onClick={() => step < totalSteps - 1 ? setStep(s => s + 1) : handleClose()}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
-                >
-                  {isLast ? "Let's Go!" : 'Next'}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+                >{isLast ? "Let's Go!" : 'Next'}</button>
+              </div></div></motion.div>
+        </motion.div>)}</AnimatePresence>
   );
 }
 

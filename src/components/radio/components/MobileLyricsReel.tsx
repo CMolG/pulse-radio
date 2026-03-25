@@ -42,9 +42,7 @@ const LyricReelLine = React.memo(function LyricReelLine({
       onClick={() => scrollToIndex(index)}
       className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
     >
-      <span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>
-        {text}
-      </span>
+      <span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>{text}</span>
     </button>
   );
 }, (prev, next) =>
@@ -128,9 +126,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
                     scrollToIndex={scrollToIndex} />
                 );
               })}
-            </div>
-        </div>
-      </div>
+            </div></div></div>
     </div>
   );
 }

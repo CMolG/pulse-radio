@@ -31,13 +31,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
       if (this.props.fallback !== undefined) return this.props.fallback;
       return (
         <div className="flex-center-col gap-4 p-8 h-full bg-surface-1 text-center select-none">
-          <div className="p-3 rounded-full bg-sys-red/10">
-            <AlertTriangle size={28} className="text-sys-red" />
-          </div>
+          <div className="p-3 rounded-full bg-sys-red/10"><AlertTriangle size={28} className="text-sys-red" /></div>
           <div>
-            <h2 className="text-[15px] font-semibold text-white mb-1">
-              Something went wrong
-            </h2>
+            <h2 className="text-[15px] font-semibold text-white mb-1">Something went wrong</h2>
             <p className="text-[13px] text-secondary max-w-xs">
               An unexpected error occurred. Your playback may still be running
               in the background.

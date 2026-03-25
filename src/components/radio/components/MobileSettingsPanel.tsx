@@ -84,9 +84,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         }}
         data-testid="mobile-settings-panel">
         {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
-        </div>
+        <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
         {/* Header */}
         <div className="flex items-center justify-between px-5 pb-3">
           <h2 className="text-[17px] font-semibold text-white">Settings</h2>
@@ -94,9 +92,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             onClick={onClose}
             aria-label="Close settings"
             className="w-8 h-8 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
-          >
-            <X size={16} />
-          </button>
+          ><X size={16} /></button>
         </div>
         <div className="border-t border-white/8" />
         {/* Language section */}
@@ -114,9 +110,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   locale === item.code
                     ? "bg-sys-orange/20 border border-sys-orange/50 text-sys-orange"
                     : "bg-white/5 border border-white/8 text-white/60 hover:text-white/80"
-                }`}>
-                {item.nativeName}
-              </button>
+                }`}>{item.nativeName}</button>
             ))}
           </div>
         </div>
@@ -131,9 +125,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             <div className="flex items-center gap-2">
               <span className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${
                 eq.enabled ? "bg-sys-orange/20 text-sys-orange" : "bg-white/5 text-white/40"
-              }`}>
-                {eq.enabled ? "ON" : "OFF"}
-              </span>
+              }`}>{eq.enabled ? "ON" : "OFF"}</span>
               {showEq ? <ChevronUp size={14} className="text-white/40" /> : <ChevronDown size={14} className="text-white/40" />}
             </div>
           </button>
@@ -170,9 +162,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors">
                         <X size={10} />
                       </button>
-                    </div>
-                  ))}
-                </div>
+                    </div>))}</div>
                 {/* Save custom */}
                 <div className="mt-2">
                   {showSaveInput ? (
@@ -189,9 +179,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                     <button onClick={() => setShowSaveInput(true)}
                       className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/40 hover:text-white/60 transition-colors">
                       <Plus size={10} /> Save Custom
-                    </button>
-                  )}
-                </div>
+                    </button>)}</div>
               </div>
               {/* Band sliders — horizontal scroll */}
               <div>
@@ -207,9 +195,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />
                       <span className="text-[8px] text-white/40">{band.label}</span>
-                    </div>
-                  ))}
-                </div>
+                    </div>))}</div>
               </div>
               {/* Noise Reduction */}
               <div>
@@ -221,9 +207,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         eq.noiseReductionMode === mode
                           ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40"
                           : "bg-white/5 border border-white/8 text-white/50"
-                      }`}>
-                      {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                    </button>
+                      }`}>{mode.charAt(0).toUpperCase() + mode.slice(1)}</button>
                   ))}
                 </div>
               </div>
@@ -253,9 +237,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                     aria-label="Compressor amount"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.compressorAmount * 100)}%</span>
-                </div>
-              </div>
-            </div>
+                </div></div></div>
           )}
         </div>
         {/* Usage guide & Stats */}
@@ -273,16 +255,12 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:bg-white/[0.06] transition-colors text-left"
           >
             <IoStatsChartOutline size={18} className="text-emerald-400 flex-shrink-0" />
-            <span className="text-[14px] font-medium text-white/70">Your Statistics</span>
-          </button>
-        </div>
+            <span className="text-[14px] font-medium text-white/70">Your Statistics</span></button></div>
         {/* Bottom safe area padding */}
         <div className="h-6" />
       </motion.div>
       {/* Usage Guide overlay */}
-      <AnimatePresence>
-        {showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}
-      </AnimatePresence>
+      <AnimatePresence>{showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}</AnimatePresence>
       {/* Stats overlay */}
       <AnimatePresence>
         {showStats && (
@@ -305,17 +283,13 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                 WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
                 border: '1px solid rgba(255,255,255,0.12)',
               }}>
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-white/20" />
-              </div>
+              <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
               <div className="flex items-center gap-3 px-5 pb-3">
                 <button
                   onClick={() => setShowStats(false)}
                   aria-label="Close statistics"
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
-                >
-                  <X size={16} />
-                </button>
+                ><X size={16} /></button>
                 <h2 className="text-[17px] font-semibold text-white">Your Statistics</h2>
               </div>
               <div className="border-t border-white/8" />
@@ -329,9 +303,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
               )}
               <div className="h-6" />
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </motion.div>)}</AnimatePresence>
     </motion.div>
   );
 }

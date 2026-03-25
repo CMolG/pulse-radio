@@ -44,18 +44,14 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             onClick={(e) => { e.stopPropagation(); heart.onClick(); }}
             aria-label={heart.label}
             className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? "bg-pink-500/20 text-pink-400" : "bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400"}`}
-          >
-            <Heart size={12} className={heart.filled ? "fill-pink-400" : ""} />
-          </button>
+          ><Heart size={12} className={heart.filled ? "fill-pink-400" : ""} /></button>
         )}
         {!hideRemove && (
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
             aria-label="Remove"
             className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-          >
-            <Trash2 size={12} />
-          </button>
+          ><Trash2 size={12} /></button>
         )}
       </div>
       <div className="p-3 space-y-0.5">
@@ -68,9 +64,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
             {item.durationMs && (
               <span className="inline-flex items-center gap-0.5">
                 <Clock size={8} className="opacity-60" />{formatDuration(item.durationMs)}
-              </span>
-            )}
-          </p>
+              </span>)}</p>
         )}
       </div>
       <div className="px-3 pb-2.5 space-y-1.5">
@@ -80,15 +74,11 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
-        >
-          <ExternalLink size={10} />Listen on Apple Music
-        </a>
+        ><ExternalLink size={10} />Listen on Apple Music</a>
         <div className="flex items-center gap-1.5">
           <Radio size={9} className="text-dim flex-shrink-0" />
           <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
-          <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span>
-        </div>
-      </div>
+          <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div>
     </motion.div>
   );
 }, (prev, next) =>

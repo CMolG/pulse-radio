@@ -75,17 +75,13 @@ export default React.memo(function NowPlayingHero({
           )}
         </div>
         <div className="flex-fill pr-20">
-          <h3 className="text-[15px] font-semibold text-white truncate">
-            {station.name}
-          </h3>
+          <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3>
           {track?.title ? (
             <p className="text-[13px] text-secondary truncate mt-0.5">
               {track.artist ? `${track.artist} — ${track.title}` : track.title}
             </p>
           ) : (
-            <p className="text-[12px] text-secondary truncate mt-0.5">
-              {heroTags}
-            </p>
+            <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )}
           {track?.album && (
             <p className="text-[11px] text-dim truncate">{track.album}</p>
@@ -93,19 +89,13 @@ export default React.memo(function NowPlayingHero({
           {isPlaying && (
             <div className="flex-row-1.5 mt-1">
               <span className="dot-1.5 bg-sys-orange" />
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-sys-orange">
-                LIVE
-              </span>
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-sys-orange">LIVE</span>
               <AnimatedBars size="small" />
               {icyBitrate && (
                 <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1">
                   {icyBitrate}kbps
-                </span>
-              )}
-            </div>
+                </span>)}</div>
           )}
-        </div>
-      </div>
-    </div>
+        </div></div></div>
   );
 });

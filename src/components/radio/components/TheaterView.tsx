@@ -180,27 +180,21 @@ export default function TheaterView({
           <button
             onClick={onBack}
             className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
-            aria-label="Exit theater mode">
-            <ArrowLeft size={16} />
-          </button>
+            aria-label="Exit theater mode"><ArrowLeft size={16} /></button>
           <div className="flex flex-row gap-2 sm:flex-col">
             {onToggleFav && (
               <button
                 onClick={onToggleFav}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
                 aria-label="Favorite station"
-                aria-pressed={!!isFavorite}>
-                <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
-              </button>
+                aria-pressed={!!isFavorite}><Star size={16} className={isFavorite ? "fill-sys-orange" : ""} /></button>
             )}
             {onFavSong && track && (
               <button
                 onClick={onFavSong}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
                 aria-label="Favorite song"
-                aria-pressed={!!isSongLiked}>
-                <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
-              </button>
+                aria-pressed={!!isSongLiked}><Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} /></button>
             )}
           </div>
         </div>
@@ -224,16 +218,12 @@ export default function TheaterView({
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
                     <Clock size={10} />
                     {formatDuration(track.durationMs)}
-                  </span>
-                )}
-              </div>
+                  </span>)}</div>
               <div className="justify-self-end">
                 {track?.trackNumber != null && track?.trackCount != null && (
                   <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
                     #{track.trackNumber}/{track.trackCount}
-                  </span>
-                )}
-              </div>
+                  </span>)}</div>
             </div>
           )}
           {/* Cover art */}
@@ -263,20 +253,14 @@ export default function TheaterView({
           {/* Station name */}
           <h2
             className={`${compact ? "text-[11px] mb-0" : "text-lg sm:text-xl mb-0"} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
-          >
-            {station.name}
-          </h2>
+          >{station.name}</h2>
           {/* Track info */}
           {track?.title ? (
             <p
               className={`${compact ? "text-[9px]" : "text-[13px] sm:text-[14px]"} text-white/70 text-center line-clamp-2 leading-snug`}
-            >
-              {track.artist ? `${track.artist} — ${track.title}` : track.title}
-            </p>
+            >{track.artist ? `${track.artist} — ${track.title}` : track.title}</p>
           ) : (
-            <p className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}>
-              {theaterTags}
-            </p>
+            <p className={`${compact ? "text-[8px]" : "text-[12px]"} text-white/40 text-center`}>{theaterTags}</p>
           )}
           {track?.album && (
             <p className={`${compact ? "text-[8px]" : "text-[11px]"} text-white/40 text-center line-clamp-1`}>
@@ -294,9 +278,7 @@ export default function TheaterView({
               <span className={`${compact ? "dot-1.5" : "dot-2"} bg-red-500 animate-pulse`} />
               <span
                 className={`${compact ? "text-[8px]" : "text-[11px]"} font-semibold tracking-wider uppercase text-red-400`}
-              >
-                LIVE
-              </span>
+              >LIVE</span>
               {!compact && <AnimatedBars size="small" />}
             </div>
           )}
@@ -329,9 +311,7 @@ export default function TheaterView({
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
                 variant={lyricsVariant} />
-            </div>
-          )}
-        </div>
+            </div>)}</div>
       </div>
     </motion.div>
   );

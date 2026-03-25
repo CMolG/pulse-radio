@@ -41,9 +41,7 @@ const StatSection = React.memo(function StatSection({ title, icon, children, }: 
       <div className="flex items-center gap-2 mb-2">
         {icon}
         <span className="text-[13px] font-semibold text-white/80">{title}</span>
-      </div>
-      <div className="space-y-1">{children}</div>
-    </div>
+      </div><div className="space-y-1">{children}</div></div>
   );
 });
 
@@ -56,9 +54,7 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
         <div
           className="h-full rounded-full bg-gradient-to-r from-[#3478f6]/60 to-[#3478f6]/30 transition-all duration-500"
           style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span>
-    </div>
+      </div><span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span></div>
   );
 });
 
@@ -84,9 +80,7 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
         <IoTimeOutline size={20} className="text-[#3478f6]" />
         <div>
           <p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>
-          <p className="text-[18px] font-bold text-white tabular-nums">{formatListenTime(totalListenMs)}</p>
-        </div>
-      </div>
+          <p className="text-[18px] font-bold text-white tabular-nums">{formatListenTime(totalListenMs)}</p></div></div>
       {/* Top Stations */}
       {topStations.length > 0 && (
         <StatSection title="Top Stations" icon={<IoRadioOutline size={16} className="text-amber-400/70" />}>
@@ -117,8 +111,6 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
           {topGenres.slice(0, 5).map(g => (
             <BarRow key={g.genre} label={g.genre} value={g.count} maxValue={maxGenreCount} suffix={`${g.count}×`} />
           ))}
-        </StatSection>
-      )}
-    </div>
+        </StatSection>)}</div>
   );
 });
