@@ -60,8 +60,7 @@ export async function GET(req: NextRequest) {
     if (!_ALLOWED_PROTOCOLS.has(url.protocol)) {
       return NextResponse.json(_ERR_INVALID_PROTO, { status: 400 });
     }
-    const host = url.hostname.toLowerCase();
-    if (isPrivateHost(host))
+    if (isPrivateHost(url.hostname))
       return NextResponse.json(_ERR_PRIVATE_IP, { status: 400 });
   } catch {
     return NextResponse.json(_ERR_INVALID_URL, { status: 400 });
