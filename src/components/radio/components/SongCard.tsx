@@ -23,8 +23,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         artworkUrl: item.artworkUrl, itunesUrl: item.itunesUrl, durationMs: item.durationMs,
         genre: item.genre, releaseDate: item.releaseDate, trackNumber: item.trackNumber,
         trackCount: item.trackCount, stationName: item.stationName,
-      })}><div className="w-full aspect-square bg-surface-3 relative">
-        {item.artworkUrl ? (
+      })}><div className="w-full aspect-square bg-surface-3 relative">{item.artworkUrl ? (
           <UiImage src={item.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />
         ) : ( <div className="size-full flex items-center justify-center"><Music size={32} className="text-dim" /></div>
         )}
@@ -57,9 +56,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
           <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>
           <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span></div></div></motion.div>
   );
-}, (prev, next) =>
-  prev.item === next.item &&
+}, (prev, next) =>prev.item === next.item &&
   prev.delay === next.delay &&
   prev.hideRemove === next.hideRemove &&
-  prev.heart?.filled === next.heart?.filled
-);
+  prev.heart?.filled === next.heart?.filled);

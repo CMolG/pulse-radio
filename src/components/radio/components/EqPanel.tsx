@@ -36,8 +36,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
  <button onClick={onToggleEnabled} aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'} className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`} ><Power size={13} /></button>
  <button onClick={onToggleNormalizer} aria-label={normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'} title="Loudness Normalizer" className={`px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}>NORM</button></div>
         <button onClick={onClose} aria-label="Close equalizer" className="p-1 text-subtle-hover"><X size={14} /></button></div>
-      {/* Presets */} <div className="flex-wrap-1.5 mb-2">
-        {EQ_PRESETS.map(preset => (
+      {/* Presets */} <div className="flex-wrap-1.5 mb-2">{EQ_PRESETS.map(preset => (
  <button key={preset.name} onClick={() => handleSelectPreset(preset.name, preset.gains)}
             className={`px-2 py-1 text-[10px] rounded-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}>
             {preset.name}</button>
@@ -79,8 +78,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
             <span className="text-[9px] text-secondary">{band.label}</span></div>))}</div>
       {/* Stereo width */} <div className="mt-3 pt-3 border-t border-white/10">
         <div className="mb-2"><div className="text-[10px] text-secondary mb-1">Noise Reduction</div>
-          <div className="flex-wrap-1.5">
-            {(['off', 'low', 'medium', 'high'] as const).map(mode => ( <button
+          <div className="flex-wrap-1.5">{(['off', 'low', 'medium', 'high'] as const).map(mode => ( <button
                 key={mode}
                 onClick={() => onSetNoiseReductionMode(mode)}
                 className={`px-2 py-1 text-[10px] rounded-md transition-colors ${ noiseReductionMode === mode

@@ -51,8 +51,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         resolve([ `hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`,
         ]);
       } catch { resolve(FALLBACK_COLORS); }
-    }; img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;
-  });
+    }; img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;});
   if (_colorCache.size >= MAX_COLOR_CACHE) {
     const first = _colorCache.keys().next().value; if (first !== undefined) _colorCache.delete(first);
   }
@@ -70,8 +69,7 @@ export default function TheaterView({
     return () => { cancelled = true; };
   }, [artworkUrl]); const [color1, color2, color3] = colors;
   const theaterTags = useMemo( () => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio",
-    [station.tags],
-  );
+    [station.tags],);
   return ( <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -89,8 +87,7 @@ export default function TheaterView({
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" /></div>
       )}
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
-      <div className="absolute inset-0 z-5 pointer-events-none"><ErrorBoundary fallback={null}>
-        <SpiralRenderer
+      <div className="absolute inset-0 z-5 pointer-events-none"><ErrorBoundary fallback={null}><SpiralRenderer
           frequencyDataRef={frequencyDataRef}
           className="size-full"
           color1={color1}
@@ -119,8 +116,7 @@ export default function TheaterView({
             onClick={onBack}
             className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
             aria-label="Exit theater mode"><ArrowLeft size={16} /></button>
-          <div className="flex flex-row gap-2 sm:flex-col">
-            {onToggleFav && ( <button
+          <div className="flex flex-row gap-2 sm:flex-col">{onToggleFav && ( <button
                 onClick={onToggleFav}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
                 aria-label="Favorite station"
@@ -154,8 +150,7 @@ export default function TheaterView({
             style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`, }}> {showFallback ? (
               <div className="size-full dawn-gradient flex-center-row"><span
                   className={`${compact ? "text-base" : "text-4xl"} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-                >
-                  {stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" />
+                >{stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" />
                   )}</span></div>
             ) : ( <UiImage
                 src={coverUrl}

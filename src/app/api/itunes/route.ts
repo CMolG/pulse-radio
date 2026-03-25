@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) { const term = req.nextUrl.searchPar
   } catch (e) { const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : (e instanceof Error ? e.message : 'Internal error'), results: [] },
-      { status: isTimeout ? 504 : 500 },
-    );
+      { status: isTimeout ? 504 : 500 },);
   }
 }

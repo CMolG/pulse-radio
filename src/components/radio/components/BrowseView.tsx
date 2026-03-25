@@ -45,8 +45,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   const scroll = (dir: -1 | 1) => { ref.current?.scrollBy({ left: dir * 300, behavior: "smooth" }); };
   return ( <div className={`mb-4 ${className ?? ""}`}>
       {title && ( <div className={`flex items-center justify-between mb-2 ${isMobile ? "px-4" : ""}`}>
-          <div className="flex-row-1.5">
-            {icon} <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
+          <div className="flex-row-1.5">{icon} <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
           {!isMobile && ( <div className="flex gap-1"><button
                 onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
@@ -68,8 +67,7 @@ export default function BrowseView({
       GENRE_CATEGORIES.map((category) => {
         const key = GENRE_LABEL_KEYS[category.id]; return key ? { ...category, label: t(key) } : category;
       }),
-    [t],
-  );
+    [t],);
   // Reorder browse sections based on user listening stats
   const effectiveBrowseOrder = useMemo(() => {
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER; const defaultOrder = [...BROWSE_ORDER];
@@ -111,13 +109,11 @@ export default function BrowseView({
         result = await stationsByTag(cat.tag, 15);
       } else return; if (!flags?.cancelled) { setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {
-          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;
-        });
+          if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;});
       }
     } catch { if (!flags?.cancelled) {
         setFailedCategories((prev) => {
-          if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;
-        });
+          if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;});
       }
     }
   }, [translatedGenreCategories]);
@@ -215,8 +211,7 @@ export default function BrowseView({
     const trimmed = songFilter.trim(); if (!trimmed) return []; const q = trimmed.toLowerCase();
     return stations.filter(s => {
       const live = liveData[s.stationuuid]; if (!live?.track) return false; const { title, artist } = live.track;
-      return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));
-    });
+      return (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q));});
   }, [stations, songFilter, liveData]);
   const songFilteredStations = useMemo(() => { if (!songFilter.trim()) return pageStations;
     return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -273,8 +268,7 @@ export default function BrowseView({
               >{t("seeMore")}</button>)}</div>
         );
       })()}
-      {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>
-        {loading && (
+      {/* Content */} <div className={`app-body ${isMobile ? "px-0" : "px-4"} pb-4 overflow-y-auto`}>{loading && (
           <div className="flex-center-row py-16"><Loader2 size={24} className="text-dim animate-spin" /></div>
         )}
         {error && ( <div className="flex-center-col gap-3 py-16"><Radio size={32} className="text-muted" />
@@ -387,8 +381,7 @@ export default function BrowseView({
                         onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                         disabled={page === totalPages - 1}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
-                      >
-                        {t("next")} <ChevronRight size={14} /></button></div>)}</>
+                      >{t("next")} <ChevronRight size={14} /></button></div>)}</>
               );
             })()}</>
         )}</div></div>

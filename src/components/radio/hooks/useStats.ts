@@ -41,8 +41,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
   // Sync stats from other tabs — safe because BroadcastChannel ensures
   // only one tab plays at a time, so the writing tab always has the latest.
   useStorageSync<UsageStats>(STORAGE_KEY, setStats, (v): v is UsageStats =>
-    !!v && typeof (v as UsageStats).totalListenMs === 'number',
-  );
+    !!v && typeof (v as UsageStats).totalListenMs === 'number',);
   // Persist periodically and on unmount
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null); const dirtyRef = useRef(false);
   const persist = useCallback(() => { if (dirtyRef.current) {

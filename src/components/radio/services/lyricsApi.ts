@@ -22,8 +22,7 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
   }
   parentSignal.addEventListener('abort', onParentAbort, { once: true });
   return fetch(url, { signal: controller.signal }).finally(() => {
-    clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);
-  });
+    clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);});
 }
 export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
   fallbackArtist?: string, signal?: AbortSignal,
@@ -54,8 +53,7 @@ async function fetchLyricsForArtist( artist: string, title: string, album?: stri
   if (exact) return exact; if (signal?.aborted) return null;
   return tryFetch<LrcLibResponse[]>(
     `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
-    signal, r => r.length > 0 ? transform(r[0], artist, title) : null,
-  );
+    signal, r => r.length > 0 ? transform(r[0], artist, title) : null,);
 }
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null { if (data.syncedLyrics) {
     return { trackName: title, artistName: artist, synced: true, lines: parseLrc(data.syncedLyrics) };

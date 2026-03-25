@@ -54,8 +54,7 @@ export async function localStations(limit = 20): Promise<Station[]> {
   if (!countryCode || !/^[A-Z]{2}$/.test(countryCode)) return topStations(limit);
   return fetchCached(
     `/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?limit=${limit}&order=votes&reverse=true`,
-    `local-${countryCode}-${limit}`,
-  );
+    `local-${countryCode}-${limit}`,);
 }
 /**
  * Find similar stations by matching the first tag of the current station.

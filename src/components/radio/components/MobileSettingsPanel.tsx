@@ -68,8 +68,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         {/* Language section */} <div className="px-5 py-4"><div className="flex items-center gap-2 mb-3">
             <Languages size={16} className="text-white/60" />
             <span className="text-[14px] font-medium text-white/80">Language</span></div>
-          <div className="grid grid-cols-3 gap-2">
-            {locales.map((item) => ( <button
+          <div className="grid grid-cols-3 gap-2">{locales.map((item) => ( <button
                 key={item.code}
                 onClick={() => setLocale(item.code as typeof locale)}
                 className={`px-3 py-2 rounded-xl text-[13px] font-medium transition-colors ${ locale === item.code
@@ -94,8 +93,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   NORM</button></div>
               {/* Presets */}
               <div><span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Presets</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {EQ_PRESETS.map(preset => (
+                <div className="flex flex-wrap gap-1.5">{EQ_PRESETS.map(preset => (
                     <button key={preset.name} onClick={() => handleSelectPreset(preset.name, preset.gains)}
                       className={`px-2.5 py-1.5 text-[11px] rounded-lg transition-colors ${selectedPreset === preset.name ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/40" : "bg-white/5 border border-white/8 text-white/50 hover:text-white/80"}`}>
                       {preset.name}</button>
@@ -107,8 +105,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                         aria-label={`Delete ${preset.name} preset`}
                         className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors">
                         <X size={10} /></button></div>))}</div>
-                {/* Save custom */} <div className="mt-2">
-                  {showSaveInput ? ( <div className="flex items-center gap-1.5">
+                {/* Save custom */} <div className="mt-2">{showSaveInput ? ( <div className="flex items-center gap-1.5">
                       <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)}
                         onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setShowSaveInput(false); }}
                         placeholder="Preset name…"
@@ -134,8 +131,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                       <span className="text-[8px] text-white/40">{band.label}</span></div>))}</div></div>
               {/* Noise Reduction */} <div>
                 <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">Noise Reduction</span>
-                <div className="flex gap-1.5">
-                  {(["off", "low", "medium", "high"] as const).map(mode => (
+                <div className="flex gap-1.5">{(["off", "low", "medium", "high"] as const).map(mode => (
                     <button key={mode} onClick={() => eq.setNoiseReductionMode(mode)}
                       className={`flex-1 py-1.5 text-[11px] rounded-lg font-medium transition-colors ${
                         eq.noiseReductionMode === mode
@@ -179,8 +175,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         {/* Bottom safe area padding */} <div className="h-6" /></motion.div>
       {/* Usage Guide overlay */}
       <AnimatePresence>{showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}</AnimatePresence>
-      {/* Stats overlay */} <AnimatePresence>
-        {showStats && ( <motion.div
+      {/* Stats overlay */} <AnimatePresence>{showStats && ( <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -38,8 +38,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       // Active dedup: remove older entries with same title+artist+station
       const deduped = prev.filter(
         e => !(e.title === entry.title && e.artist === entry.artist && e.stationUuid === entry.stationUuid)
-      ); return [entry, ...deduped].slice(0, MAX_HISTORY);
-    });
+      ); return [entry, ...deduped].slice(0, MAX_HISTORY);});
   // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.title, track?.artist, stationUuid, stationName]);
@@ -58,8 +57,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       ) {
         return [{ ...head, artworkUrl, album, itunesUrl, durationMs, genre, releaseDate, trackNumber, trackCount }, ...prev.slice(1)];
       }
-      return prev;
-    });
+      return prev;});
   }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
   const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
   const clear = useCallback(() => { setHistory([]); lastTrackRef.current = '';

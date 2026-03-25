@@ -66,8 +66,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     abortRef.current = controller; doFetch(key, cached, controller);
   };
   const realtimeSync = useRealtimeLyricsSync({
-    lyrics, enabled: enableRealtime, languageHint: options?.languageHint ?? 'en',
-  });
+    lyrics, enabled: enableRealtime, languageHint: options?.languageHint ?? 'en',});
   return { lyrics, loading, error, retry,
     effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
       : options?.currentTime,

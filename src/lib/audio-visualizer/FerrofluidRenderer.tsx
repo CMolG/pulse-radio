@@ -27,8 +27,7 @@ function createBlobs(count: number, w: number, h: number): Blob[] {
     blobs.push({ x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist,
       baseRadius: Math.min(w, h) * (0.04 + Math.random() * 0.06), sizeFactor: Math.random(), targetX: cx, targetY: cy,
       vx: 0, vy: 0, phase: (i / count) * Math.PI * 2, speed: 0.3 + Math.random() * 0.7,
-      freqBand: Math.floor((i / count) * 128),
-    });
+      freqBand: Math.floor((i / count) * 128),});
   }
   return blobs;
 }

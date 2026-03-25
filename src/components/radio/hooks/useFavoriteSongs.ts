@@ -21,8 +21,7 @@ export function useFavoriteSongs() { const MAX_SONGS = 500;
     // Dedup on load in case of corrupted storage
     const seen = new Set<string>();
     return loaded.filter(s => {
-      const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;
-    });
+      const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;});
   });
   // O(1) lookup Set — rebuilt only when songs array changes
   const keySetRef = useRef(buildKeySet(songs)); useMemo(() => { keySetRef.current = buildKeySet(songs); }, [songs]);
@@ -37,8 +36,7 @@ export function useFavoriteSongs() { const MAX_SONGS = 500;
   }, []); const remove = useCallback((id: string) => { setSongs(prev => prev.filter(s => s.id !== id)); }, []);
   const toggle = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => { setSongs(prev => {
       const key = songKey(song.title, song.artist); const exists = prev.find(s => songKey(s.title, s.artist) === key);
-      return exists ? prev.filter(s => s.id !== exists.id) : prepend(song, prev);
-    });
+      return exists ? prev.filter(s => s.id !== exists.id) : prepend(song, prev);});
   }, []); const has = useCallback((title: string, artist: string) => keySetRef.current.has(songKey(title, artist)), []);
   const clear = useCallback(() => setSongs([]), []); return { songs, add, remove, toggle, has, clear };
 }

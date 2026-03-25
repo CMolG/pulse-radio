@@ -25,8 +25,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   const resetKey = `${realtimeActive}::${lyrics?.trackName ?? ''}::${languageHint}::${manuallyEnabled}`;
   if (resetKey !== prevResetKey) { setPrevResetKey(resetKey); setRuntimeState(defaultRealtimeState(manuallyEnabled)); }
   const toggle = useCallback(() => { setManuallyEnabled(prev => {
-      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next); return next;
-    });
+      const next = !prev; saveToStorage(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, next); return next;});
   }, []);
   useEffect(() => { if (!realtimeActive) { engineRef.current?.stop(); return; }
     engineRef.current?.destroy(); stableSamplesRef.current = 0;
@@ -54,8 +53,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
               rejectedJumps: prev.diagnostics.rejectedJumps + (step.jumpRejected ? 1 : 0),
               relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0), errorMessage: null,
             },
-          };
-        });
+          };});
       },
       onFatalError: (errorMessage) => { setRuntimeState(prev => ({
           ...prev, status: 'error', activeLineIndex: -1, candidateLineIndex: -1,

@@ -16,8 +16,7 @@ import UiImage from '@/components/common/UiImage';
 import { itunesSearchUrl } from '../utils/formatUtils';
 const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]';
 const MetaBadge = ({ icon: Icon, cls, children }: { icon: typeof Clock; cls: string; children: React.ReactNode }) => (
-  <span className={`${BADGE_CLS} ${cls}`}><Icon size={9} />{children}</span>
-);
+  <span className={`${BADGE_CLS} ${cls}`}><Icon size={9} />{children}</span>);
 type Props = { song: SongDetailData | null; onClose: () => void; onRemoveFromFavorites?: () => void };
 function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
@@ -35,8 +34,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
       song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
-    song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null, song?.stationName ?? null,
-  );
+    song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null, song?.stationName ?? null,);
   const plainLyrics =
     lyrics?.plainText?.trim() ||
     lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n')
@@ -96,8 +94,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   aria-label="Close song details"
                   className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
                 ><X size={16} /></button></div>
-              {/* ── Song Info ── */} <div className="px-5 -mt-2">
-                {/* Artwork */}
+              {/* ── Song Info ── */} <div className="px-5 -mt-2">{/* Artwork */}
                 <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
                   {resolvedArtworkUrl ? ( <UiImage
                       src={resolvedArtworkUrl}
@@ -115,8 +112,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                   {/* Extended metadata: corner-style row + release line + context badges */}
                   {(resolvedDurationMs || resolvedTrackNumber != null || resolvedReleaseDate || resolvedGenre) && (
                     <div className="mt-2 space-y-1.5"><div className="grid grid-cols-2 items-start">
-                        <div className="justify-self-start">
-                          {resolvedDurationMs && (
+                        <div className="justify-self-start">{resolvedDurationMs && (
                             <MetaBadge icon={Clock} cls="bg-white/[0.08] border border-white/10 font-mono text-white/70">{formatDuration(resolvedDurationMs)}</MetaBadge>
                           )}</div><div className="justify-self-end">
                           {resolvedTrackNumber != null && resolvedTrackCount != null && (
@@ -149,8 +145,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 )}
                 {/* Loaded artist data */}
                 {!loading && info && ( <div className="space-y-3">
-                    {/* Artist header with image */} <div className="flex gap-3">
-                      {info.imageUrl ? (
+                    {/* Artist header with image */} <div className="flex gap-3">{info.imageUrl ? (
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"><UiImage
                             src={info.imageUrl}
                             alt={info.name}

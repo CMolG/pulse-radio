@@ -100,8 +100,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       }
       ctx.lineTo(innerX[startIdx], innerY[startIdx]); ctx.closePath(); ctx.fill();
     }
-    ctx.globalAlpha = 1.0;
-  });
+    ctx.globalAlpha = 1.0;});
   return ( <div
       className={`relative overflow-hidden ${className}`}
       style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}><canvas

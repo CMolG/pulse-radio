@@ -19,8 +19,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     rafRef.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;
-      const y = ((e.clientY - cy) / rect.height) * 20; pointerOffsetRef.current = { x, y };
-    });
+      const y = ((e.clientY - cy) / rect.height) * 20; pointerOffsetRef.current = { x, y };});
   }, []); const lastPublishedRef = useRef({ x: 0, y: 0 });
   useEffect(() => { const tick = () => {
       // Audio pulse is intentionally vertical-dominant with subtle horizontal drift.

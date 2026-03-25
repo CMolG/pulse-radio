@@ -35,18 +35,14 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
   const [customPresets, setCustomPresets] = useState<EqPreset[]>(() =>
     loadFromStorage<EqPreset[]>(STORAGE_KEYS.CUSTOM_EQ_PRESETS, [])
   ); const [normalizerEnabled, setNormalizerEnabled] = useState(getDefaultNormalizerEnabled);
-  const [stereoWidth, setStereoWidthState] = useState(() =>
-    loadFromStorage<number>(STORAGE_KEYS.STEREO_WIDTH, 1.0)
+  const [stereoWidth, setStereoWidthState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.STEREO_WIDTH, 1.0)
   );
-  const [bassEnhance, setBassEnhanceState] = useState(() =>
-    loadFromStorage<number>(STORAGE_KEYS.BASS_ENHANCE, 0)
+  const [bassEnhance, setBassEnhanceState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.BASS_ENHANCE, 0)
   );
   const [compressorEnabled, setCompressorEnabled] = useState(() =>
-    loadFromStorage<boolean>(STORAGE_KEYS.COMPRESSOR_ENABLED, false)
-  );
+    loadFromStorage<boolean>(STORAGE_KEYS.COMPRESSOR_ENABLED, false));
   const [compressorAmount, setCompressorAmountState] = useState(() =>
-    loadFromStorage<number>(STORAGE_KEYS.COMPRESSOR_AMOUNT, 0.5)
-  );
+    loadFromStorage<number>(STORAGE_KEYS.COMPRESSOR_AMOUNT, 0.5));
   const [noiseReductionMode, setNoiseReductionModeState] = useState<NoiseReductionMode>(getDefaultNoiseReductionMode);
   const ctxRef = useRef<AudioContext | null>(null); const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]); const limiterRef = useRef<DynamicsCompressorNode | null>(null);
@@ -107,8 +103,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     filtersRef.current.forEach((f, i) => { if (bands[i]) {
         const target = enabled ? bands[i].gain : 0; if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
         else f.gain.value = target;
-      }
-    });
+      }});
   }, [bands, enabled]);
   const connectSource = useCallback((audio: HTMLAudioElement) => {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
@@ -268,15 +263,13 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           } else { normGain.gain.setTargetAtTime(1.0, t, RAMP_TIME); source.connect(nrHead); }
         } catch { /* ok */ }
       }
-      return next;
-    });
+      return next;});
   }, []);
   const saveCustomPreset = useCallback((name: string) => {
     const preset: EqPreset = { name, gains: bands.map(b => b.gain) };
     setCustomPresets(prev => {
       const next = [...prev.filter(p => p.name !== name), preset]; saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next);
-      return next;
-    });
+      return next;});
   }, [bands]);
   const removeCustomPreset = useCallback((name: string) => { setCustomPresets(prev => {
       const next = prev.filter(p => p.name !== name); saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next); return next;
@@ -308,8 +301,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME);
         }
       }
-      return next;
-    });
+      return next;});
   }, [compressorAmount]);
   const setCompressorAmount = useCallback((v: number) => {
     const clamped = Math.max(0, Math.min(1, v)); setCompressorAmountState(clamped);

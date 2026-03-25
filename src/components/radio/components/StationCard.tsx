@@ -19,8 +19,7 @@ type Props = { station: Station; isPlaying: boolean; isCurrent: boolean; isFavor
 export default React.memo(function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek, onPrefetch }: Props) {
   const [imgError, setImgError] = useState(false); const showFallback = !station.favicon || imgError;
   const tags = useMemo( () => station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean) ?? [],
-    [station.tags],
-  );
+    [station.tags],);
   return (<div
       role="button"
       tabIndex={0}
@@ -57,8 +56,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
         {/* Now-playing indicator */}
         {isCurrent && isPlaying && <span className="absolute bottom-1.5 left-1.5 dot-2 bg-sys-orange animate-pulse" />}
       </div> {/* Name */} <p className="text-[12px] font-medium text-white truncate leading-tight">{station.name}</p>
-      {/* Tags / Country / Format */} <div className="flex-row-1 mt-1 flex-wrap">
-        {station.codec && (
+      {/* Tags / Country / Format */} <div className="flex-row-1 mt-1 flex-wrap">{station.codec && (
           <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">
             {station.codec}{station.bitrate > 0 ? ` ${station.bitrate}k` : ''}</span>
         )}
@@ -85,11 +83,9 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
           Check track</button>
       )}
     </div>);
-}, (prev, next) =>
-  prev.station === next.station &&
+}, (prev, next) =>prev.station === next.station &&
   prev.isPlaying === next.isPlaying &&
   prev.isCurrent === next.isCurrent &&
   prev.isFavorite === next.isFavorite &&
   prev.liveStatus === next.liveStatus &&
-  prev.liveTrack === next.liveTrack
-);
+  prev.liveTrack === next.liveTrack);

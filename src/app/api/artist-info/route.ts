@@ -59,8 +59,7 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
         beginArea: mb?.['begin-area']?.name ?? null, lifeSpan: mb?.['life-span'] ?? null,
         tags, bio: wiki?.extract ?? null,
         imageUrl: wiki?.thumbnail?.source ?? null, wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
-      }, { headers: { 'Cache-Control': cacheHeader, }, },
-    );
+      }, { headers: { 'Cache-Control': cacheHeader, }, },);
   } catch (err) { console.error('[Pulse Radio] Artist info fetch error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }

@@ -23,8 +23,7 @@ const StatSection = React.memo(function StatSection({ title, icon, children, }: 
     <div><div className="flex items-center gap-2 mb-2">
         {icon} <span className="text-[13px] font-semibold text-white/80">{title}</span>
       </div><div className="space-y-1">{children}</div></div>
-  );
-});
+  );});
 const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { label: string; value: number; maxValue: number; suffix: string }) {
   const pct = maxValue > 0 ? Math.max(8, (value / maxValue) * 100) : 0;
   return ( <div className="flex items-center gap-2 group">
@@ -33,8 +32,7 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
           className="h-full rounded-full bg-gradient-to-r from-[#3478f6]/60 to-[#3478f6]/30 transition-all duration-500"
           style={{ width: `${pct}%` }} />
       </div><span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span></div>
-  );
-});
+  );});
 export default React.memo(function StatsView({ topStations, topSongs, topArtists, topGenres, totalListenMs }: Props) {
   const hasData = totalListenMs > 0 || topSongs.length > 0;
   if (!hasData) { return (
@@ -79,5 +77,4 @@ export default React.memo(function StatsView({ topStations, topSongs, topArtists
           {topGenres.slice(0, 5).map(g => (
             <BarRow key={g.genre} label={g.genre} value={g.count} maxValue={maxGenreCount} suffix={`${g.count}×`} />
           ))}</StatSection>)}</div>
-  );
-});
+  );});

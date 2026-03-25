@@ -36,5 +36,4 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
               label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song',
             } : null} />
         ))}</div></div>
-  );
-});
+  );});

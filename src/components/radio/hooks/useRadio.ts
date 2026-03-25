@@ -41,8 +41,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
   const [preferDirectStream] = useState(() => isIOSDevice());
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
-  const [volume, setVolumeState] = useState(() =>
-    loadFromStorage<number>(STORAGE_KEYS.VOLUME, 0.8)
+  const [volume, setVolumeState] = useState(() =>loadFromStorage<number>(STORAGE_KEYS.VOLUME, 0.8)
   ); const [muted, setMuted] = useState(false); const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good'); const lastBufferEndRef = useRef<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -110,8 +109,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
           if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
           proxyFallbackUrlsRef.current.add(streamUrl); setSourceAndPlay(true).catch(onRejected); return;
         }
-        onRejected(err);
-      });
+        onRejected(err);});
     }, [preferDirectStream],
   ); useEffect(() => { const audio = getAudio();
     const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); };
@@ -145,8 +143,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
         if (userPausedRef.current || playSessionRef.current !== sessionId) { isReconnectingRef.current = false; return;
         }
         startPlayback(audio, station.url_resolved, (err) => {
-          isReconnectingRef.current = false; handlePlayRejected(err);
-        });
+          isReconnectingRef.current = false; handlePlayRejected(err);});
       }, jitter);
     };
     const onPause = () => {
@@ -170,8 +167,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
           } else {
             // Genuine network/decode error — reconnect with a fresh source
             reconnect(500);
-          }
-        });
+          }});
       }, 300);
     }; const onWaiting = () => setStatus('loading'); const onError = () => { const err = audio.error;
       if (err && (err.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || err.code === MediaError.MEDIA_ERR_DECODE)) {
@@ -231,8 +227,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
         audio.play().catch((err) => { if (isAutoplayBlocked(err)) {
             // Mobile: no gesture — show play button
             setStatus('paused');
-          } else reconnect(500);
-        });
+          } else reconnect(500);});
       }
     };
     // Network status: pause retries when offline, auto-reconnect when back online

@@ -41,8 +41,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
   }, [station?.tags]);
   const handleVolumeChange = useCallback( (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = parseFloat(e.target.value); onSetVolume(v); if (muted && v > 0) onToggleMute();
-    }, [muted, onSetVolume, onToggleMute],
-  );
+    }, [muted, onSetVolume, onToggleMute],);
   if (compact) { return (
       <div className="relative flex items-center justify-between gap-3 pr-4 pt-2 pb-2 min-h-20 shrink-0 safe-bottom safe-x" style={SAFE_AREA_STYLE}>
         {/* Play/Pause — 48px touch target */} <button
@@ -50,8 +49,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
-        >
-          {isLoading ? ( <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        >{isLoading ? ( <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? ( <Pause size={18} />
           ) : ( <Play size={18} className="ml-0.5" />
           )}</button>
@@ -85,8 +83,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
               <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {station ? ( stationInitials(station.name) || (
-                    <Radio size={14} className="text-white/60" />
-                  )
+                    <Radio size={14} className="text-white/60" />)
                 ) : ( <Radio size={14} className="text-white/60" />
                 )}</span></div>
           ) : ( <UiImage
@@ -121,8 +118,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           aria-label={isPlaying ? 'Pause' : 'Play'}
           aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
-        >
-          {isLoading ? ( <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        >{isLoading ? ( <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? ( <Pause size={16} />
           ) : ( <Play size={16} className="ml-0.5" />
           )}</button></div>
@@ -142,8 +138,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
               <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
               <AnimatedBars size="small" /></div></>
         )}</div>
-      {/* Toggles */} <div className="flex-row-0.5">
-        {station && !theaterMode && ( <button
+      {/* Toggles */} <div className="flex-row-0.5">{station && !theaterMode && ( <button
             onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"

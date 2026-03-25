@@ -14,8 +14,7 @@ export type AlignerStepResult = { candidateIndex: number; confirmedIndex: number
   jumpRejected: boolean; relockTriggered: boolean;
 };
 const STOPWORDS = new Set([ 'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'for', 'with',
-  'el', 'la', 'los', 'las', 'de', 'del', 'y', 'en', 'por', 'con', 'un', 'una',
-]);
+  'el', 'la', 'los', 'las', 'de', 'del', 'y', 'en', 'por', 'con', 'un', 'una',]);
 const WORD_RE = /[a-z0-9']+/g;
 function tokenize(value: string): string[] {
   const normalized = normalizeText(value); if (!normalized) return []; const matches = normalized.match(WORD_RE) ?? [];

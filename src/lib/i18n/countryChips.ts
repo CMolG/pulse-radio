@@ -12,8 +12,7 @@ export type CountryChip = {
 };
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
 const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI", "TV", "NR", "PW", "MH", "FM", "TO",
-  "WS", "VU",
-]);
+  "WS", "VU",]);
 const REGION_PRIORITY: Record<string, number> = {
   Europe: 1, Asia: 2, Americas: 3, Africa: 4, Oceania: 5, Antarctic: 6, Other: 9,
 };
@@ -28,8 +27,7 @@ export function getCountryDisplayName(locale: SupportedLocale, code: string): st
 }
 function getSameLanguageCountries(locale: SupportedLocale): string[] {
   const candidates = new Set(localeCandidates(locale));
-  return SOVEREIGN_COUNTRIES.filter((country) =>
-    country.lang3.some((lang3) => {
+  return SOVEREIGN_COUNTRIES.filter((country) =>country.lang3.some((lang3) => {
       const mapped = localeFromLang3(lang3); return mapped ? candidates.has(mapped) : false;
     }), ).map((country) => country.code);
 }
@@ -58,6 +56,5 @@ export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36)
     const country = COUNTRY_BY_CODE[code]!; const displayName = getCountryDisplayName(locale, code);
     const reason: CountryChip["reason"] = languageSet.has(code)? "language"
       : proximitySet.has(code) ? "proximity" : "global";
-    return { code, queryName: country.name, displayName, flag: countryFlag(code), reason };
-  });
+    return { code, queryName: country.name, displayName, flag: countryFlag(code), reason };});
 }

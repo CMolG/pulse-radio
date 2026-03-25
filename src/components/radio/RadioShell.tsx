@@ -146,8 +146,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, []);
   const [view, setView] = useState<ViewState>(() => {
     const code = (initialCountryCode ?? "").toUpperCase(); if (isSovereignCountryCode(code)) return countryView(code);
-    return mkView("top", t("topStations"));
-  });
+    return mkView("top", t("topStations"));});
   useEffect(() => { const newLabel = view.mode === "top" ? t("topStations")
       : view.mode === "country" && view.countryCode ? getCountryDisplayName(locale, view.countryCode)
       : null;
@@ -209,8 +208,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       // Prefetch next station in queue for seamless transition
       const nextIdx = sq.queue.findIndex(s => s.stationuuid === station.stationuuid) + 1;
       if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
-    }, [],
-  );
+    }, [],);
   // Auto-advance to next queued station on error, or failover to similar station
   useEffect(() => { let cancelled = false;
     if (radio.status === 'error') { if (stationQueue.hasNext) {
@@ -220,8 +218,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         // No queue entries — find a similar station by genre tag
         import('./services/radioApi').then(({ similarStations }) => { similarStations(radio.station!, 3).then(alts => {
             if (alts.length > 0 && !cancelled) handlePlay(alts[0]);
-          }).catch(() => {});
-        });
+          }).catch(() => {});});
       }
     }
     return () => { cancelled = true; };
@@ -245,8 +242,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     station: radio.station, track: enrichedTrack, isPlaying: radio.status === "playing", onPlay: radio.resume,
     onPause: radio.pause, onNext: handleSkipNext, onPrev: handleSkipPrev, onStop: radio.stop,
     onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)),
-    onSeekForward: () => radio.seek(radio.currentTime + 10),
-  });
+    onSeekForward: () => radio.seek(radio.currentTime + 10),});
   // Ref holds fresh state for keyboard handler so the event listener is
   // registered once — avoids ~60fps add/removeEventListener churn from
   // unstable deps (radio, favs, etc.) that change every render.
@@ -524,13 +520,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           ) : ( <div className="flex flex-col min-h-full pb-24">
               {nowPlayingHeroElement}
               {/* ── Mobile top nav tabs + search ── */}
-              <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
-                {navTabs14.map((tab) => ( <button
+              <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">{navTabs14.map((tab) => ( <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60 hover:bg-white/[0.04]"}`}
-                  >
-                    {tab.icon}
+                  >{tab.icon}
                     {tab.label}</button>))}</div><div className="flex-shrink-0 px-4 pb-2">
                 <form onSubmit={handleSearchSubmit}>
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
@@ -546,8 +540,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               </div></div>)}</div>
         {/* EQ panel overlay */}
         {eqPanelElement}
-        {/* Mobile settings panel */} <AnimatePresence>
-          {showMobileSettings && ( <MobileSettingsPanel
+        {/* Mobile settings panel */} <AnimatePresence>{showMobileSettings && ( <MobileSettingsPanel
               onClose={() => setShowMobileSettings(false)}
               eq={eq}
               onPresetChange={setEqPreset}
@@ -582,13 +575,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     <LanguageSelector /></div></div>
                 {nowPlayingHeroElement}
                 {/* ── Top nav: tabs + search ── */}
-                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
-                  {navTabs13.map((tab) => ( <button
+                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">{navTabs13.map((tab) => ( <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors flex-shrink-0 ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
-                    >
-                      {tab.icon}
+                    >{tab.icon}
                       {tab.label}
                       {tab.id === "history" && songHistory.history.length > 0 && (
                         <span className="text-[9px] text-dim ml-0.5">{songHistory.history.length}</span>

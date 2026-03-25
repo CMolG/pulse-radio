@@ -57,5 +57,4 @@ export default React.memo(function NowPlayingHero({ station, track, isPlaying, a
               <AnimatedBars size="small" /> {icyBitrate && (
                 <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1">
                   {icyBitrate}kbps</span>)}</div>)}</div></div></div>
-  );
-});
+  );});

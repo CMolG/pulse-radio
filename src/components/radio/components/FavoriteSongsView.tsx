@@ -45,8 +45,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
         className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors rounded-lg"
       ><Trash2 size={13} />
         Borrar de favoritos</button>
-    </div>, document.body,
-  );
+    </div>, document.body,);
 }
 // ── Group Stack ───────────────────────────────────────────────────────────────
 function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
@@ -78,8 +77,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
               style={{ top: `${i * 16}px`, zIndex: VISIBLE_COUNT - i,
                 transform: `scale(${1 - i * 0.03})`, opacity: 1 - i * 0.15, maxWidth: "200px",
               }}><div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
-                <div className="w-full aspect-square bg-surface-3 relative">
-                  {song.artworkUrl ? (
+                <div className="w-full aspect-square bg-surface-3 relative">{song.artworkUrl ? (
                     <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="200px" loading="lazy" />
                   ) : (
                     <div className="size-full flex items-center justify-center"><Music size={28} className="text-dim" /></div>
