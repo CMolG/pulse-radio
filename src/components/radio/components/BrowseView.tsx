@@ -54,13 +54,7 @@ const SCROLL_CLASS =
   "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
 
 /* ── Scroll row with left/right arrow buttons (desktop only) ── */
-function ScrollRow({
-  title,
-  icon,
-  children,
-  isMobile,
-  className,
-}: {
+function ScrollRow({ title, icon, children, isMobile, className, }: {
   title?: string;
   icon?: React.ReactNode;
   children: React.ReactNode;

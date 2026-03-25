@@ -22,13 +22,7 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 
-export function LocaleProvider({
-  children,
-  countryCode,
-}: {
-  children: React.ReactNode;
-  countryCode?: string;
-}) {
+export function LocaleProvider({ children, countryCode, }: { children: React.ReactNode; countryCode?: string; }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>
     countryCode ? getInitialLocaleForCountry(countryCode) : getInitialLocale(),
   );

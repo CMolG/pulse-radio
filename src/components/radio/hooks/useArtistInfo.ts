@@ -33,10 +33,7 @@ function cacheSet(key: string, val: ArtistInfo) {
   }
 }
 
-export function useArtistInfo(artist: string | null): {
-  info: ArtistInfo | null;
-  loading: boolean;
-} {
+export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => {
     if (!key) return null;

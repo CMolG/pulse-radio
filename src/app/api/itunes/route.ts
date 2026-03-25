@@ -25,12 +25,7 @@ export async function GET(req: NextRequest) {
   const limit = media === 'podcast' ? '20' : '3';
 
   try {
-    const url = `https://itunes.apple.com/search?${new URLSearchParams({
-      term,
-      media,
-      entity,
-      limit,
-    })}`;
+    const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit, })}`;
 
     const res = await apiFetch(url, { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024, label: 'iTunes API' });
     const data = await res.json();

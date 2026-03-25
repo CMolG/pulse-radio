@@ -31,11 +31,7 @@ type Props = {
   totalListenMs: number;
 };
 
-const StatSection = React.memo(function StatSection({
-  title,
-  icon,
-  children,
-}: {
+const StatSection = React.memo(function StatSection({ title, icon, children, }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;

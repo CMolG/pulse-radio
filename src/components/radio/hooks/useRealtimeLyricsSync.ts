@@ -16,11 +16,7 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 
 type Params = { lyrics: LyricsData | null; enabled: boolean; languageHint: 'en' | 'es' };
 
-export function useRealtimeLyricsSync({
-  lyrics,
-  enabled,
-  languageHint,
-}: Params): RealtimeSyncResult {
+export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params): RealtimeSyncResult {
   const initialEnabled = useMemo(() => loadFromStorage<boolean>(STORAGE_KEYS.REALTIME_LYRICS_ENABLED, false), []);
   const [manuallyEnabled, setManuallyEnabled] = useState<boolean>(initialEnabled);
   const [runtimeState, setRuntimeState] = useState(() => defaultRealtimeState(initialEnabled));

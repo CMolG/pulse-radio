@@ -54,12 +54,7 @@ const LyricReelLine = React.memo(function LyricReelLine({
   prev.isDesktop === next.isDesktop
 );
 
-export default function LyricsReel({
-  lyrics,
-  currentTime,
-  activeLineOverride,
-  variant = "mobile",
-}: Props) {
+export default function LyricsReel({ lyrics, currentTime, activeLineOverride, variant = "mobile", }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [focusedIdx, setFocusedIdx] = useState(0);

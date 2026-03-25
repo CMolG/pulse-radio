@@ -30,11 +30,7 @@ const filterBtnClass = (active: boolean) =>
   }`;
 
 // ── Context Menu ─────────────────────────────────────────────────────────────
-function SongContextMenu({
-  menu,
-  onRemove,
-  onClose,
-}: {
+function SongContextMenu({ menu, onRemove, onClose, }: {
   menu: ContextMenuState;
   onRemove: (id: string) => void;
   onClose: () => void;
@@ -82,14 +78,7 @@ function SongContextMenu({
 }
 
 // ── Group Stack ───────────────────────────────────────────────────────────────
-function GroupStack({
-  label,
-  icon: Icon,
-  songs,
-  onRemove,
-  onSelect,
-  onContextMenu,
-}: {
+function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMenu, }: {
   label: string;
   icon: React.ElementType;
   songs: FavoriteSong[];
