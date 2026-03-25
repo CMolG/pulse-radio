@@ -4,8 +4,7 @@
 } from 'next/server';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
-const _IPV6_BRACKET_START_RE = /^\[/;
-const _IPV6_BRACKET_END_RE = /\]$/;
+const _IPV6_BRACKETS_RE = /^\[|\]$/g;
 const _TRAILING_NULLS_RE = /\0+$/;
 const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ function isPrivateHost(
@@ -33,7 +32,7 @@ const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
     if (a === 127) return true;
     if (a === 0) return true;
   }
-  const ipv6 = host.replace(_IPV6_BRACKET_START_RE, '').replace(_IPV6_BRACKET_END_RE, '');
+  const ipv6 = host.replace(_IPV6_BRACKETS_RE, '');
   if (ipv6.startsWith('fe80:')) return true;
   if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true;
   if (ipv6 === '::1' || ipv6 === '::') return true;
