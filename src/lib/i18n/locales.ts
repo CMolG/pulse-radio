@@ -94,9 +94,8 @@ export function normalizeLocale(input: string | null | undefined): SupportedLoca
   const base = lower.split('-')[0];
   return BASE_LOCALE_MAP[base] ?? 'en';
 }
-const _RTL_LOCALES: ReadonlySet<string> = new Set(
-  SUPPORTED_LOCALES.filter((l) => l.rtl).map((l) => l.code),
-);
+const _RTL_LOCALES = new Set<string>();
+for (const l of SUPPORTED_LOCALES) if (l.rtl) _RTL_LOCALES.add(l.code);
 export function isRtlLocale(locale: SupportedLocale): boolean {
   return _RTL_LOCALES.has(locale);
 }
