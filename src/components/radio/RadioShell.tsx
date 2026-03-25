@@ -5090,7 +5090,8 @@ function FerrofluidRenderer({
     secondary: hexToRgb(colorSecondary),
     accent: hexToRgb(colorAccent),
   });
-  const colors = useRef(mkColors());
+  const colors = useRef<ReturnType<typeof mkColors>>(null!);
+  if (!colors.current) colors.current = mkColors();
   useEffect(() => {
     colors.current = mkColors();
   }, [colorPrimary, colorSecondary, colorAccent]);
@@ -8380,7 +8381,8 @@ function useFavoriteSongs() {
       return true;
     });
   });
-  const keySetRef = useRef(buildKeySet(songs));
+  const keySetRef = useRef<Set<string>>(null!);
+  if (!keySetRef.current) keySetRef.current = buildKeySet(songs);
   useMemo(() => {
     keySetRef.current = buildKeySet(songs);
   }, [songs]);
@@ -8952,7 +8954,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     };
   }, [track, albumArt]);
   const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
-  const lastTickRef = useRef(Date.now());
+  const lastTickRef = useRef<number>(null!);
+  if (lastTickRef.current === null) lastTickRef.current = Date.now();
   const { tickListenTime } = usageStats;
   useEffect(() => {
     if (radio.status !== 'playing' || !radio.station) {
