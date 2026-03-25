@@ -2026,6 +2026,15 @@ function windowBounds(total: number, center: number, relockWindow: number): [num
   const end = Math.min(total - 1, center + relockWindow);
   return [start, end];
 }
+const _lyricsTokenCache = new WeakMap<LyricsData, string[][]>();
+function getCachedLineTokens(lyrics: LyricsData): string[][] {
+  let cached = _lyricsTokenCache.get(lyrics);
+  if (!cached) {
+    cached = lyrics.lines.map((line) => tokenize(line.text));
+    _lyricsTokenCache.set(lyrics, cached);
+  }
+  return cached;
+}
 function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const {
     lyrics,
@@ -2046,12 +2055,13 @@ function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
       relockTriggered: false,
     };
   }
+  const allLineTokens = getCachedLineTokens(lyrics);
   const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex;
   const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow);
   let bestIndex = -1;
   let bestScore = 0;
   for (let i = start; i <= end; i++) {
-    const lineTokens = tokenize(lyrics.lines[i]?.text ?? '');
+    const lineTokens = allLineTokens[i] ?? [];
     const score = scoreLine(lineTokens, hypoTokens);
     if (score > bestScore) {
       bestScore = score;
