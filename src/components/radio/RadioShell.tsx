@@ -420,7 +420,11 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
 }
 function getProximityCountries(seedCodes: string[]): string[] {
   if (seedCodes.length === 0) return [];
-  const seed = seedCodes.map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
+  const seed: (typeof SOVEREIGN_COUNTRIES)[number][] = [];
+  for (let i = 0; i < seedCodes.length; i++) {
+    const c = COUNTRY_BY_CODE[seedCodes[i]];
+    if (c) seed.push(c);
+  }
   const regions = new Set<string>();
   const subregions = new Set<string>();
   const borders = new Set<string>();
