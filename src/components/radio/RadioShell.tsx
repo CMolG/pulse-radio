@@ -2936,6 +2936,7 @@ const _GENRE_TO_CAT: Record<string, string> = {
 };
 const _GENRE_NORMALIZE_RE = /[\s-]/g;
 const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
+const _NEWLINE_RE = /\r?\n/;
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
@@ -3648,7 +3649,7 @@ function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLyricLine
     }));
   }
   if (!lyrics.plainText) return [];
-  const raw = lyrics.plainText.split(/\r?\n/);
+  const raw = lyrics.plainText.split(_NEWLINE_RE);
   const result: RenderableLyricLine[] = [];
   for (let i = 0; i < raw.length; i++) {
     const text = raw[i].trim();
