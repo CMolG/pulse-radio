@@ -3080,6 +3080,7 @@ function BrowseView({
   const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({});
   const [scanEnabled, setScanEnabled] = useState(false);
   const [songFilter, setSongFilter] = useState('');
+  const songFilterTrimmed = useMemo(() => songFilter.trim(), [songFilter]);
   const scanGenRef = useRef(0);
   const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
@@ -3265,9 +3266,8 @@ function BrowseView({
     setPage(0);
   }
   const allSongFilteredStations = useMemo(() => {
-    const trimmed = songFilter.trim();
-    if (!trimmed) return [];
-    const q = trimmed.toLowerCase();
+    if (!songFilterTrimmed) return [];
+    const q = songFilterTrimmed.toLowerCase();
     return stations.filter((s) => {
       const live = liveData[s.stationuuid];
       if (!live?.track) return false;
@@ -3276,7 +3276,7 @@ function BrowseView({
         (title && title.toLowerCase().includes(q)) || (artist && artist.toLowerCase().includes(q))
       );
     });
-  }, [stations, songFilter, liveData]);
+  }, [stations, songFilterTrimmed, liveData]);
   const songFilteredStations = useMemo(() => {
     if (allSongFilteredStations.length === 0) return pageStations;
     return allSongFilteredStations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -3481,7 +3481,7 @@ function BrowseView({
             {view.mode !== 'top' &&
               stations.length > 0 &&
               (() => {
-                const filterActive = !!songFilter.trim();
+                const filterActive = !!songFilterTrimmed;
                 const paginationSource = filterActive ? allSongFilteredStations : stations;
                 const totalPages = Math.ceil(paginationSource.length / PAGE_SIZE);
                 return (
@@ -3541,7 +3541,7 @@ function BrowseView({
                       className={`grid gap-3 ${isMobile ? 'grid-cols-2 px-3' : 'grid-cols-4 px-0'} pb-4`}
                     >
                       {' '}
-                      {(songFilter.trim() ? songFilteredStations : pageStations).map((s) => {
+                      {(songFilterTrimmed ? songFilteredStations : pageStations).map((s) => {
                         const live = liveData[s.stationuuid];
                         return (
                           <StationCard
@@ -4428,6 +4428,7 @@ type SongDetailModalProps = {
   onClose: () => void;
   onRemoveFromFavorites?: () => void;
 };
+const _SKELETON_WIDTHS = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
 function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailModalProps) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
   const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
@@ -4468,11 +4469,10 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
       '',
     [lyrics],
   );
-  const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => (
     <div className="space-y-2 animate-pulse">
       {' '}
-      {skeletonWidths.slice(0, n).map((w, i) => (
+      {_SKELETON_WIDTHS.slice(0, n).map((w, i) => (
         <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />
       ))}
     </div>
