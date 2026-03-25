@@ -3666,6 +3666,7 @@ function BrowseView({
                             <button
                               onClick={() => setSongFilter('')}
                               className="text-dim hover:text-white shrink-0"
+                              aria-label="Clear filter"
                             >
                               {' '}
                               <X size={11} />
@@ -6315,6 +6316,8 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
           <button
             onClick={() => setShowEq((s) => !s)}
             className="flex items-center justify-between w-full"
+            aria-label="Toggle equalizer section"
+            aria-expanded={showEq}
           >
             {' '}
             <div className="flex items-center gap-2">
@@ -9860,6 +9863,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     <button
       onClick={handleGoHome}
       className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+      aria-label="Go to home"
     >
       {' '}
       <div className="relative w-5 h-5 flex-shrink-0">
