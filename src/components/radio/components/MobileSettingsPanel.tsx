@@ -70,8 +70,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="absolute inset-0 z-50 flex flex-col"
-    >
+      className="absolute inset-0 z-50 flex flex-col">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       {/* Panel slides up from bottom */}
@@ -86,8 +85,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
           backdropFilter: "blur(24px) saturate(1.6)",
           WebkitBackdropFilter: "blur(24px) saturate(1.6)",
         }}
-        data-testid="mobile-settings-panel"
-      >
+        data-testid="mobile-settings-panel">
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-white/20" />
@@ -119,8 +117,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   locale === item.code
                     ? "bg-sys-orange/20 border border-sys-orange/50 text-sys-orange"
                     : "bg-white/5 border border-white/8 text-white/60 hover:text-white/80"
-                }`}
-              >
+                }`}>
                 {item.nativeName}
               </button>
             ))}
@@ -297,8 +294,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 z-50 flex flex-col"
-          >
+            className="absolute inset-0 z-50 flex flex-col">
             <div className="absolute inset-0 bg-black/50" onClick={() => setShowStats(false)} />
             <motion.div
               initial={{ y: '100%' }}
@@ -311,8 +307,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                 backdropFilter: 'blur(32px) saturate(1.6)',
                 WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
                 border: '1px solid rgba(255,255,255,0.12)',
-              }}
-            >
+              }}>
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 rounded-full bg-white/20" />
               </div>
@@ -333,8 +328,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   topSongs={statsData.topSongs}
                   topArtists={statsData.topArtists}
                   topGenres={statsData.topGenres}
-                  totalListenMs={statsData.totalListenMs}
-                />
+                  totalListenMs={statsData.totalListenMs} />
               )}
               <div className="h-6" />
             </motion.div>

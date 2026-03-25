@@ -54,8 +54,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             className="object-cover"
             sizes="180px"
             loading="lazy"
-            onError={() => setImgError(true)}
-          />
+            onError={() => setImgError(true)} />
         )}
         {/* Play overlay */}
         <motion.button
@@ -119,8 +118,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
       {onPeek && !liveStatus && (
         <button
           onClick={e => { e.stopPropagation(); onPeek(); }}
-          className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors"
-        >
+          className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors">
           <Music2 size={9} />
           Check track
         </button>

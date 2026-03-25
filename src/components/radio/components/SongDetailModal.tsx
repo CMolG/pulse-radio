@@ -108,8 +108,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-          onClick={onClose}
-        >
+          onClick={onClose}>
           <motion.div
             key="song-detail-modal"
             ref={modalRef}
@@ -121,8 +120,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
             exit={{ y: 30, opacity: 0, scale: 0.96 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
             className="w-full max-w-[860px] mx-4 md:flex md:items-stretch md:gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
+            onClick={(e) => e.stopPropagation()}>
             <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
               {/* Close button */}
               <div className="sticky top-0 z-10 flex justify-end p-3">
@@ -144,8 +142,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       alt={`Album art for ${song.title} by ${song.artist}`}
                       className="object-cover"
                       sizes="240px"
-                      loading="lazy"
-                    />
+                      loading="lazy" />
                   ) : (
                     <div className="size-full flex items-center justify-center">
                       <Music size={56} className="text-dim" />
@@ -237,8 +234,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                             alt={info.name}
                             className="object-cover bg-surface-3"
                             sizes="64px"
-                            loading="lazy"
-                          />
+                            loading="lazy" />
                         </div>
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">
@@ -282,8 +278,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                         {info.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50"
-                          >
+                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50">
                             {tag}
                           </span>
                         ))}

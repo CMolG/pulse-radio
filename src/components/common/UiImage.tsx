@@ -40,7 +40,6 @@ export default function UiImage({
       priority={priority}
       loading={loading}
       onError={onError}
-      style={style}
-    />
+      style={style} />
   );
 }

@@ -152,8 +152,7 @@ function NowPlayingBar({
               onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
               title="Theater"
-              aria-label="Theater mode"
-            >
+              aria-label="Theater mode">
               <Maximize2 size={18} />
             </button>
           )}
@@ -162,8 +161,7 @@ function NowPlayingBar({
         <div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
-          style={{ height: "env(safe-area-inset-bottom, 0px)" }}
-        />
+          style={{ height: "env(safe-area-inset-bottom, 0px)" }} />
       </div>
     );
   }
@@ -195,8 +193,7 @@ function NowPlayingBar({
               className="object-cover"
               sizes="36px"
               loading="lazy"
-              onError={() => setImgError(true)}
-            />
+              onError={() => setImgError(true)} />
           )}
         </div>
         {/* TODO replace upper img with next image */}
@@ -225,8 +222,7 @@ function NowPlayingBar({
               'bg-gray-500'
             }`}
             title={`Stream: ${streamQuality}`}
-            aria-label={`Stream quality: ${streamQuality}`}
-          />
+            aria-label={`Stream quality: ${streamQuality}`} />
         )}
       </div>
       {/* Controls */}
@@ -261,8 +257,7 @@ function NowPlayingBar({
                 colorSecondary="#16213e"
                 colorAccent="#0f3460"
                 sensitivity={1.0}
-                demo
-              />
+                demo />
               </ErrorBoundary>
             </div>
             <div className="flex-row-1.5 relative z-10">
@@ -282,8 +277,7 @@ function NowPlayingBar({
             onClick={onToggleTheater}
             className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
-            aria-label="Theater mode"
-          >
+            aria-label="Theater mode">
             <Maximize2 size={14} />
           </button>
         )}
@@ -293,8 +287,7 @@ function NowPlayingBar({
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
-            title="Favorita"
-          >
+            title="Favorita">
             <Star size={14} className={isFavorite ? "fill-sys-orange" : ""} />
           </button>
         )}
@@ -304,8 +297,7 @@ function NowPlayingBar({
             aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
             className={`p-1.5 rounded-md transition-colors ${songLiked ? "text-pink-400" : "text-subtle hover:text-white/50"}`}
-            title="Me gusta canción"
-          >
+            title="Me gusta canción">
             <Heart size={14} className={songLiked ? "fill-pink-400" : ""} />
           </button>
         )}
@@ -314,8 +306,7 @@ function NowPlayingBar({
             onClick={onCycleSleepTimer}
             className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : "Sleep Timer"}
-            aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}
-          >
+            aria-label={sleepTimerMin != null ? `Sleep timer: ${sleepTimerMin} minutes remaining` : "Sleep Timer"}>
             <Clock size={14} />
             {sleepTimerMin != null && (
               <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
@@ -338,8 +329,7 @@ function NowPlayingBar({
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
-          className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"
-        >
+          className="p-1 text-muted hover:text-white/60 transition-colors shrink-0">
           {muted || volume === 0 ? (
             <VolumeX size={14} />
           ) : (

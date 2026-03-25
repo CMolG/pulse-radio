@@ -34,12 +34,10 @@ export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({
       role="dialog"
       aria-modal="true"
       aria-label="Keyboard shortcuts"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="bg-surface-2 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[15px] font-semibold text-white">
             Keyboard Shortcuts
@@ -47,8 +45,7 @@ export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({
           <button
             onClick={onClose}
             className="p-1 rounded-lg hover:bg-surface-3 transition-colors text-secondary"
-            aria-label="Close shortcuts help"
-          >
+            aria-label="Close shortcuts help">
             <X size={16} />
           </button>
         </div>

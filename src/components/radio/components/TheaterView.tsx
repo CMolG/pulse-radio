@@ -129,8 +129,7 @@ export default function TheaterView({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col h-full w-full relative overflow-hidden"
-    >
+      className="flex flex-col h-full w-full relative overflow-hidden">
       {/* ── Layer 1: solid dark background ── */}
       <div className="absolute inset-0 bg-[#0f172a]" />
       {/* ── Layer 1.5: album art background with ambient drift ── */}
@@ -141,8 +140,7 @@ export default function TheaterView({
             alt=""
             className="object-cover animate-ambient-drift blur-lg opacity-25"
             sizes="100vw"
-            onError={() => setFailedCoverUrl(coverUrl)}
-          />
+            onError={() => setFailedCoverUrl(coverUrl)} />
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" />
         </div>
       )}
@@ -156,8 +154,7 @@ export default function TheaterView({
           color2={color2}
           color3={color3}
           sensitivity={compact ? 0.8 : 1.2}
-          demo
-        />
+          demo />
         </ErrorBoundary>
       </div>
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */}
@@ -168,30 +165,25 @@ export default function TheaterView({
           backgroundSize: '100% 4px, 6px 100%',
           mixBlendMode: 'overlay',
           opacity: 0.6,
-        }}
-      />
+        }} />
       <div
         className="absolute inset-0 z-6 pointer-events-none"
         style={{
           background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
           boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
-        }}
-      />
+        }} />
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }}
-      />
+        style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }} />
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}
       {!compact && (
         <div
           className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
-          style={{ top: "env(safe-area-inset-top, 0px)" }}
-        >
+          style={{ top: "env(safe-area-inset-top, 0px)" }}>
           <button
             onClick={onBack}
             className="flex-row-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-soft hover:text-white hover:bg-black/50 transition-all text-[13px]"
-            aria-label="Exit theater mode"
-          >
+            aria-label="Exit theater mode">
             <ArrowLeft size={16} />
           </button>
           <div className="flex flex-row gap-2 sm:flex-col">
@@ -200,8 +192,7 @@ export default function TheaterView({
                 onClick={onToggleFav}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isFavorite ? "bg-sys-orange/20 border-sys-orange/40 text-sys-orange" : "bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50"}`}
                 aria-label="Favorite station"
-                aria-pressed={!!isFavorite}
-              >
+                aria-pressed={!!isFavorite}>
                 <Star size={16} className={isFavorite ? "fill-sys-orange" : ""} />
               </button>
             )}
@@ -210,8 +201,7 @@ export default function TheaterView({
                 onClick={onFavSong}
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${isSongLiked ? "bg-pink-500/20 border-pink-400/40 text-pink-400" : "bg-black/30 border-white/10 text-soft hover:text-pink-400 hover:bg-black/50"}`}
                 aria-label="Favorite song"
-                aria-pressed={!!isSongLiked}
-              >
+                aria-pressed={!!isSongLiked}>
                 <Heart size={16} className={isSongLiked ? "fill-pink-400" : ""} />
               </button>
             )}
@@ -228,8 +218,7 @@ export default function TheaterView({
             WebkitBackdropFilter: "blur(24px) saturate(1.4)",
             border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
-          }}
-        >
+          }}>
           {/* Corner metadata badges (panel corners, never over album art) */}
           {!compact && (
             <div className="w-full grid grid-cols-2 items-start">
@@ -253,8 +242,7 @@ export default function TheaterView({
           {/* Cover art */}
           <div
             className={`${compact ? "w-14 h-14 rounded-xl" : "w-36 h-36 sm:w-44 sm:h-44 rounded-2xl"} relative overflow-hidden flex-center-row flex-shrink-0`}
-            style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`, }}
-          >
+            style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50`, }}>
             {showFallback ? (
               <div className="size-full dawn-gradient flex-center-row">
                 <span
@@ -272,8 +260,7 @@ export default function TheaterView({
                 className="object-cover"
                 sizes={compact ? "56px" : "176px"}
                 loading="lazy"
-                onError={() => setFailedCoverUrl(coverUrl)}
-              />
+                onError={() => setFailedCoverUrl(coverUrl)} />
             )}
           </div>
           {/* Station name */}
@@ -344,8 +331,7 @@ export default function TheaterView({
                 lyrics={lyrics ?? null}
                 currentTime={currentTime}
                 activeLineOverride={activeLineOverride}
-                variant={lyricsVariant}
-              />
+                variant={lyricsVariant} />
             </div>
           )}
         </div>

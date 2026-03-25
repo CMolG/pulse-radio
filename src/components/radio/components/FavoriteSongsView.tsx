@@ -62,8 +62,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
     <div
       ref={ref}
       style={{ top: y, left: x, width: menuW }}
-      className="fixed z-[200] py-1 rounded-xl bg-surface-3 border border-border-default shadow-2xl backdrop-blur-sm"
-    >
+      className="fixed z-[200] py-1 rounded-xl bg-surface-3 border border-border-default shadow-2xl backdrop-blur-sm">
       <button
         onClick={() => { onRemove(menu.songId); onClose(); }}
         className="flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-400/10 transition-colors rounded-lg"
@@ -95,8 +94,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
       {/* Group header */}
       <button
         onClick={() => hasMore && setExpanded(e => !e)}
-        className={`flex items-center gap-2 mb-3 group ${hasMore ? "cursor-pointer" : "cursor-default"}`}
-      >
+        className={`flex items-center gap-2 mb-3 group ${hasMore ? "cursor-pointer" : "cursor-default"}`}>
         <Icon size={14} className="text-white/40" />
         <span className="text-[14px] font-semibold text-white/80">{label}</span>
         <span className="text-[11px] text-white/30 bg-white/[0.06] px-2 py-0.5 rounded-full">{songs.length}</span>
@@ -114,8 +112,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           role="button"
           tabIndex={0}
           aria-label={`Expand ${label} songs`}
-          style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}
-        >
+          style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}>
           {songs.slice(0, VISIBLE_COUNT).map((song, i) => (
             <div
               key={song.id}
@@ -126,8 +123,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                 transform: `scale(${1 - i * 0.03})`,
                 opacity: 1 - i * 0.15,
                 maxWidth: "200px",
-              }}
-            >
+              }}>
               <div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
                 <div className="w-full aspect-square bg-surface-3 relative">
                   {song.artworkUrl ? (
@@ -145,8 +141,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
           ))}
           <div
             className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-            style={{ maxWidth: "200px" }}
-          >
+            style={{ maxWidth: "200px" }}>
             <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
               +{songs.length - VISIBLE_COUNT} more
             </span>
@@ -163,8 +158,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
                   onSelect={onSelect}
                   delay={i}
                   heart={null}
-                  hideRemove
-                />
+                  hideRemove />
               </div>
             ))}
           </div>
@@ -173,8 +167,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
       {expanded && hasMore && (
         <button
           onClick={() => setExpanded(false)}
-          className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors"
-        >
+          className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors">
           <ChevronDown size={12} className="rotate-180" />
           Collapse
         </button>
@@ -247,8 +240,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
         </div>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
-        >
+          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} />
           Clear all
         </button>
@@ -263,8 +255,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               songs={artistSongs}
               onRemove={onRemove}
               onSelect={onSelect}
-              onContextMenu={handleContextMenu}
-            />
+              onContextMenu={handleContextMenu} />
           ))}
         </div>
       ) : filterMode === "album" ? (
@@ -277,8 +268,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
               songs={albumSongs}
               onRemove={onRemove}
               onSelect={onSelect}
-              onContextMenu={handleContextMenu}
-            />
+              onContextMenu={handleContextMenu} />
           ))}
         </div>
       ) : (
@@ -291,8 +281,7 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
                 onSelect={onSelect}
                 delay={i}
                 heart={null}
-                hideRemove
-              />
+                hideRemove />
             </div>
           ))}
         </div>

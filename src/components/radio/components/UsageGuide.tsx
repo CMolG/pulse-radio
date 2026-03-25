@@ -74,8 +74,7 @@ function UsageGuide({ onClose }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="absolute inset-0 z-50 flex flex-col"
-    >
+      className="absolute inset-0 z-50 flex flex-col">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <motion.div
         initial={{ y: '100%' }}
@@ -83,8 +82,7 @@ function UsageGuide({ onClose }: Props) {
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
-        style={GLASS_STYLE}
-      >
+        style={GLASS_STYLE}>
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-white/20" />
@@ -116,8 +114,7 @@ function UsageGuide({ onClose }: Props) {
                   <motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="text-white/30 text-[12px]"
-                  >
+                    className="text-white/30 text-[12px]">
                     ▶
                   </motion.span>
                 </button>
@@ -128,8 +125,7 @@ function UsageGuide({ onClose }: Props) {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
+                      className="overflow-hidden">
                       <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">
                         {section.content}
                       </p>

@@ -143,8 +143,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                     ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40'
                     : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'
                 }`}
-                aria-label={`Noise reduction ${mode}`}
-              >
+                aria-label={`Noise reduction ${mode}`}>
                 {mode.toUpperCase()}
               </button>
             ))}

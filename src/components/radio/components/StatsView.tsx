@@ -55,8 +55,7 @@ const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { 
       <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden relative">
         <div
           className="h-full rounded-full bg-gradient-to-r from-[#3478f6]/60 to-[#3478f6]/30 transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
+          style={{ width: `${pct}%` }} />
       </div>
       <span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span>
     </div>

@@ -85,16 +85,14 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
                 onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canLeft}
-                aria-label="Scroll left"
-              >
+                aria-label="Scroll left">
                 <ChevronLeft size={14} />
               </button>
               <button
                 onClick={() => scroll(1)}
                 className={`p-1 rounded-md transition-colors ${canRight ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
                 disabled={!canRight}
-                aria-label="Scroll right"
-              >
+                aria-label="Scroll right">
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -300,8 +298,7 @@ export default function BrowseView({
           isFavorite={isFavorite(s.stationuuid)}
           onPlay={() => onPlay(s)}
           onToggleFav={() => onToggleFav(s)}
-          onPrefetch={() => onPrefetch?.(s.url_resolved)}
-        />
+          onPrefetch={() => onPrefetch?.(s.url_resolved)} />
       </div>
     ));
 
@@ -366,8 +363,7 @@ export default function BrowseView({
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
           title={t("discoveryModeTitle")}
           aria-pressed={discoveryMode}
-          aria-label={t("discoveryModeAria")}
-        >
+          aria-label={t("discoveryModeAria")}>
           <Sparkles size={12} />
           {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}
         </button>
@@ -474,8 +470,7 @@ export default function BrowseView({
                     <ScrollRow
                       title={t("favorites")}
                       icon={<Star size={14} className="text-sys-orange/70" />}
-                      isMobile={isMobile}
-                    >
+                      isMobile={isMobile}>
                     {renderScrollStations(favorites)}
                   </ScrollRow>
                 )}
@@ -484,8 +479,7 @@ export default function BrowseView({
                     <ScrollRow
                       title={t("recent")}
                       icon={<Clock size={14} className="text-blue-400/70" />}
-                      isMobile={isMobile}
-                    >
+                      isMobile={isMobile}>
                     {renderScrollStations(recent)}
                   </ScrollRow>
                 )}
@@ -537,8 +531,7 @@ export default function BrowseView({
                           ? "bg-sys-orange/20 text-sys-orange border border-sys-orange/30"
                           : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"
                       }`}
-                        title={t("scanNowPlaying")}
-                      >
+                        title={t("scanNowPlaying")}>
                         <ScanSearch size={12} />
                         {isScanning ? t("scanningProgress", { current: scannedCount, total: pageStations.length })
                           : scannedCount > 0
@@ -553,8 +546,7 @@ export default function BrowseView({
                           placeholder={t("filterBySong")}
                           value={songFilter}
                           onChange={e => setSongFilter(e.target.value)}
-                          className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
-                        />
+                          className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0" />
                         {songFilter && (
                           <button onClick={() => setSongFilter("")} className="text-dim hover:text-white shrink-0">
                             <X size={11} />
@@ -584,8 +576,7 @@ export default function BrowseView({
                           onPrefetch={() => onPrefetch?.(s.url_resolved)}
                           liveStatus={live?.status}
                           liveTrack={live?.track}
-                          onPeek={!scanEnabled ? () => peekStation(s) : undefined}
-                        />
+                          onPeek={!scanEnabled ? () => peekStation(s) : undefined} />
                       );
                     })}
                   </div>

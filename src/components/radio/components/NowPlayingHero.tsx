@@ -47,14 +47,12 @@ export default React.memo(function NowPlayingHero({
       <ParallaxAlbumBackground
         imageUrl={artworkUrl ?? null}
         fallbackUrl={station.favicon || undefined}
-        overlayClass="bg-black/60"
-      />
+        overlayClass="bg-black/60" />
       {onTheater && (
         <button
           onClick={onTheater}
           className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
-          title="Theater mode"
-        >
+          title="Theater mode">
           <Maximize2 size={12} />
           Theater
         </button>
@@ -76,8 +74,7 @@ export default React.memo(function NowPlayingHero({
               className="object-cover"
               sizes="64px"
               loading="lazy"
-              onError={() => setImgError(true)}
-            />
+              onError={() => setImgError(true)} />
           )}
         </div>
         <div className="flex-fill pr-20">

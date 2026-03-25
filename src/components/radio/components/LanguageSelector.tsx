@@ -22,8 +22,7 @@ function LanguageSelector() {
         onChange={(event) => setLocale(event.target.value as typeof locale)}
         className="bg-transparent text-white outline-none cursor-pointer"
         aria-label="Language selector"
-        data-language-selector
-      >
+        data-language-selector>
         {locales.map((item) => (
           <option key={item.code} value={item.code} className="bg-[#0a0f1a] text-white">
             {item.nativeName}

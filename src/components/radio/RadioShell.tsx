@@ -485,8 +485,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onClose={() => setSelectedSong(null)}
       onRemoveFromFavorites={selectedFavSong ? () => {
         favSongs.remove(selectedFavSong.id); setSelectedSong(null);
-      } : undefined}
-    />
+      } : undefined} />
   );
 
   const shortcutsOverlay = showShortcuts ? (
@@ -522,8 +521,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSaveCustomPreset={eq.saveCustomPreset}
       onRemoveCustomPreset={eq.removeCustomPreset}
       onPresetChange={setEqPreset}
-      onClose={() => setShowEq(false)}
-    />
+      onClose={() => setShowEq(false)} />
   ) : null;
 
   const toastElement = toast ? (
@@ -533,8 +531,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 4 }}
       transition={{ duration: 0.18 }}
-      className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-    >
+      className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none">
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
         {toast.icon === "star"
           ? <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
@@ -616,8 +613,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSelectGenre={handleSelectGenre}
       onSelectCountry={handleSelectCountry}
       onGoHome={handleGoHome}
-      userGenreOrder={usageStats.genreOrder}
-    />
+      userGenreOrder={usageStats.genreOrder} />
   );
   const historyViewElement = (
     <HistoryGridView
@@ -626,16 +622,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onClear={songHistory.clear}
       onToggleFavSong={handleFavSongFromHistory}
       isSongFavorite={favSongs.has}
-      onSelect={setSelectedSong}
-    />
+      onSelect={setSelectedSong} />
   );
   const favsViewElement = (
     <FavoriteSongsView
       songs={favSongs.songs}
       onRemove={favSongs.remove}
       onClear={favSongs.clear}
-      onSelect={setSelectedSong}
-    />
+      onSelect={setSelectedSong} />
   );
 
   const parallaxElement = (
@@ -643,8 +637,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       faviconUrl={radio.station?.favicon}
       genre={radio.station?.tags?.split(",")[0]?.trim()?.toLowerCase()}
       audioAmplitude={bgAudio.amplitude}
-      landingMode={isLandingNavigation}
-    />
+      landingMode={isLandingNavigation} />
   );
 
   const nowPlayingHeroElement = radio.station ? (
@@ -655,8 +648,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       frequencyDataRef={analyser.frequencyDataRef}
       artworkUrl={albumArt.artworkUrl}
       icyBitrate={icyBitrate}
-      onTheater={() => setTheaterMode(true)}
-    />
+      onTheater={() => setTheaterMode(true)} />
   ) : null;
 
   const sharedModals = (
@@ -685,8 +677,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return (
       <div
         ref={containerRef}
-        className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
-      >
+        className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative">
         {parallaxElement}
         <div className="flex-1 min-h-0 relative z-10 flex flex-col">
           <TheaterView {...theaterBaseProps} station={radio.station ?? emptyStation} onBack={() => {}} compact />
@@ -714,8 +705,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     onClick={() => setShowMobileSettings(true)}
                     className="w-9 h-9 flex-center-row rounded-xl text-white/40 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
                     title="Settings"
-                    data-testid="mobile-settings-btn"
-                  >
+                    data-testid="mobile-settings-btn">
                     <Settings size={18} />
                   </button>
                   {radio.station && (
@@ -768,8 +758,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t("searchStationsAria")}
                       className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
-                      data-radio-search
-                    />
+                      data-radio-search />
                   </div>
                 </form>
               </div>
@@ -794,8 +783,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 topArtists: usageStats.topArtists,
                 topGenres: usageStats.topGenres,
                 totalListenMs: usageStats.stats.totalListenMs,
-              }}
-            />
+              }} />
           )}
         </AnimatePresence>
         {/* Toast notification */}
@@ -815,8 +803,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   return (
     <div
       ref={containerRef}
-      className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
-    >
+      className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative">
       {parallaxElement}
       <div className="flex flex-1 min-h-0 relative z-10">
         {/* Main content */}
@@ -829,8 +816,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="flex-1 min-h-0"
-              >
+                className="flex-1 min-h-0">
                 <TheaterView {...theaterFullProps} lyricsVariant="desktop" />
               </motion.div>
             ) : !miniMode ? (
@@ -873,8 +859,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label={t("searchStationsAria")}
                         className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
-                        data-radio-search
-                      />
+                        data-radio-search />
                     </div>
                   </form>
                 </div>
@@ -940,8 +925,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           <button
             onClick={() => setMiniMode((m) => !m)}
             className="pointer-events-auto shrink-0 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
-            title={miniMode ? t("expand") : t("minimize")}
-          >
+            title={miniMode ? t("expand") : t("minimize")}>
             {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
           </button>
         </div>

@@ -32,8 +32,7 @@ export default React.memo(function SongCard({ item, delay, onRemove, onSelect, h
         artworkUrl: item.artworkUrl, itunesUrl: item.itunesUrl, durationMs: item.durationMs,
         genre: item.genre, releaseDate: item.releaseDate, trackNumber: item.trackNumber,
         trackCount: item.trackCount, stationName: item.stationName,
-      })}
-    >
+      })}>
       <div className="w-full aspect-square bg-surface-3 relative">
         {item.artworkUrl ? (
           <UiImage src={item.artworkUrl} alt="" className="object-cover" sizes="300px" loading="lazy" />

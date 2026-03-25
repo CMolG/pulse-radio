@@ -37,8 +37,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
         <p className="text-[12px] text-dim">{history.length} songs</p>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
-        >
+          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors">
           <Trash2 size={11} />
           Clear all
         </button>
@@ -55,8 +54,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
               filled: !!isSongFavorite?.(entry.title, entry.artist),
               onClick: () => onToggleFavSong(entry),
               label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song',
-            } : null}
-          />
+            } : null} />
         ))}
       </div>
     </div>

@@ -140,13 +140,11 @@ export function SpiralRenderer({
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}
-    >
+      style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}>
       <canvas
         ref={canvasRef}
         className="absolute inset-0 size-full"
-        style={{ imageRendering: "auto", transform: "scale(1.12)" }}
-      />
+        style={{ imageRendering: "auto", transform: "scale(1.12)" }} />
     </div>
   );
 }
