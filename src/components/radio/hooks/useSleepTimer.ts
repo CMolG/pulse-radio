@@ -38,8 +38,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       lastSetVol = target;
       if (progress >= 1) { clearInterval(fadeTimerRef.current!); fadeTimerRef.current = null; }
     }, 200);
-  }, []);
-  const start = useCallback((minutes: number) => { if (timerRef.current) clearInterval(timerRef.current);
+  }, []); const start = useCallback((minutes: number) => { if (timerRef.current) clearInterval(timerRef.current);
     stopFade(); endTimeRef.current = Date.now() + minutes * 60_000; setRemainingMin(minutes);
     timerRef.current = setInterval(() => {
       const left = Math.max(0, endTimeRef.current - Date.now()); const mins = Math.ceil(left / 60_000);

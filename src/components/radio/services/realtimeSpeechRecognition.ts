@@ -27,12 +27,10 @@ export function isRealtimeSpeechSupported(): boolean { return getRecognitionCtor
 export type RealtimeSpeechEngine = { start: (lang: 'en' | 'es') => void; stop: () => void; destroy: () => void; };
 export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): RealtimeSpeechEngine {
   let recognition: BrowserSpeechRecognition | null = null; let running = false;
-  let destroyed = false; let restartCount = 0;
-  const teardown = () => { if (!recognition) return;
+  let destroyed = false; let restartCount = 0; const teardown = () => { if (!recognition) return;
     recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.stop();
     recognition = null;
-  };
-  const wireRecognition = (lang: 'en' | 'es') => { const Ctor = getRecognitionCtor();
+  }; const wireRecognition = (lang: 'en' | 'es') => { const Ctor = getRecognitionCtor();
     if (!Ctor) { callbacks.onFatalError('Speech recognition is not supported in this browser.'); return; }
     recognition = new Ctor(); recognition.continuous = true; recognition.interimResults = true;
     recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
@@ -47,15 +45,13 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
           : result.isFinal ? 0.7 : 0.55,
         isFinal: result.isFinal, tsMs: performance.now(),
       });
-    };
-    recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return;
+    }; recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return;
       const fatal = event.error === 'not-allowed'
         || event.error === 'service-not-allowed'
         || event.error === 'language-not-supported';
       if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return;
       }
-    };
-    recognition.onend = () => { if (destroyed || !running) return;
+    }; recognition.onend = () => { if (destroyed || !running) return;
       if (restartCount >= MAX_RESTARTS) {
         running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return;
       }

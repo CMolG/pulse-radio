@@ -38,8 +38,7 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   const [canRight, setCanRight] = useState(false);
   const check = useCallback(() => { const el = ref.current; if (!el) return; setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
-  useEffect(() => { const el = ref.current; if (!el) return; check();
+  }, []); useEffect(() => { const el = ref.current; if (!el) return; check();
     el.addEventListener("scroll", check, { passive: true }); const ro = new ResizeObserver(check);
     ro.observe(el); return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [check, children]);
@@ -106,13 +105,11 @@ export default function BrowseView({
   const scanGenRef = useRef(0); const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
   const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
   const loadCategory = useCallback(async (catId: string, flags?: { cancelled: boolean }) => {
-    const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return;
-    try { let result: Station[];
+    const cat = translatedGenreCategories.find((c) => c.id === catId); if (!cat) return; try { let result: Station[];
       if (cat.id === "trending") { result = await trendingStations(15);
       } else if (cat.id === "local") { result = await localStations(15); } else if (cat.tag) {
         result = await stationsByTag(cat.tag, 15);
-      } else return;
-      if (!flags?.cancelled) { setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
+      } else return; if (!flags?.cancelled) { setCategorySections((prev) => ({ ...prev, [cat.id]: result }));
         setFailedCategories((prev) => {
           if (!prev.has(catId)) return prev; const next = new Set(prev); next.delete(catId); return next;
         });
@@ -146,8 +143,7 @@ export default function BrowseView({
       // Search, genre, country modes — single list
       setLoading(true);
       const load = async () => { try {
-          let result: Station[];
-          switch (view.mode) { case "search": result = await searchStations(view.query); break;
+          let result: Station[]; switch (view.mode) { case "search": result = await searchStations(view.query); break;
             case "genre": result = await stationsByTag(view.tag); break;
             case "country": result = await stationsByCountry(view.countryQueryName); break; default: result = [];
           }

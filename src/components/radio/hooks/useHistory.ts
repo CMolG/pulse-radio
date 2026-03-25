@@ -51,9 +51,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     const trackNumber = track.trackNumber; const trackCount = track.trackCount;
     if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
     setHistory(prev => { const head = prev[0]; if (!head) return prev;
-      if ( head.stationUuid === stationUuid &&
-        head.title === track.title &&
-        head.artist === track.artist &&
+      if ( head.stationUuid === stationUuid && head.title === track.title && head.artist === track.artist &&
         (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl ||
          head.durationMs !== durationMs || head.genre !== genre || head.releaseDate !== releaseDate ||
          head.trackNumber !== trackNumber || head.trackCount !== trackCount)

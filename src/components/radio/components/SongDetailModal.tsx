@@ -30,8 +30,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const resolvedReleaseDate = song?.releaseDate ?? albumMeta.releaseDate ?? null;
   const resolvedTrackNumber = song?.trackNumber ?? albumMeta.trackNumber ?? null;
   const resolvedTrackCount = song?.trackCount ?? albumMeta.trackCount ?? null;
-  const showMetaHydration = Boolean( song &&
-    (song.durationMs == null || song.genre == null ||
+  const showMetaHydration = Boolean( song && (song.durationMs == null || song.genre == null ||
       song.releaseDate == null ||
       song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
@@ -63,8 +62,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     // Focus first focusable element
     const focusable = modal.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    ); focusable[0]?.focus();
-    const onTab = (e: KeyboardEvent) => { if (e.key !== 'Tab') return;
+    ); focusable[0]?.focus(); const onTab = (e: KeyboardEvent) => { if (e.key !== 'Tab') return;
       const nodes = modal.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       ); if (nodes.length === 0) return; const first = nodes[0]; const last = nodes[nodes.length - 1];

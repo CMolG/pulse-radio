@@ -9,9 +9,7 @@
  */
 export function isPrivateHost(hostname: string): boolean { const host = hostname.toLowerCase();
   // Loopback
-  if ( host === 'localhost' ||
-    host === '127.0.0.1' ||
-    host === '::1' ||
+  if ( host === 'localhost' || host === '127.0.0.1' || host === '::1' ||
     host === '0.0.0.0' || host.endsWith('.localhost')
   ) { return true; }
   // IPv4 private ranges (RFC 1918 + link-local + shared address space)

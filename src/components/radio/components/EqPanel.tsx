@@ -26,8 +26,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
   };
   const handleSetGain = (id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange?.(null); onSetGain(id, gain);
-  };
-  const handleSave = () => { const name = presetName.trim();
+  }; const handleSave = () => { const name = presetName.trim();
     if (name && onSaveCustomPreset) { onSaveCustomPreset(name); setPresetName(''); setShowSaveInput(false);
     }
   };

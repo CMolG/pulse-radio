@@ -50,8 +50,7 @@ export function parseTrack(raw: string, stationName: string): NowPlayingTrack | 
   if (stationName !== _lastStation) { _lastStation = stationName; _lastStationLower = stationName.toLowerCase(); }
   if (raw.toLowerCase() === _lastStationLower) return null;
   // Common separators: " - ", " — ", " – "
-  const separators = [' - ', ' — ', ' – ', ' | '];
-  for (const sep of separators) { const idx = raw.indexOf(sep);
+  const separators = [' - ', ' — ', ' – ', ' | ']; for (const sep of separators) { const idx = raw.indexOf(sep);
     if (idx > 0) return { artist: raw.slice(0, idx).trim(), title: raw.slice(idx + sep.length).trim() };
   }
   return { title: raw.trim(), artist: '' };

@@ -103,8 +103,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     const next = muted ? 0 : clamped; const ctx = ctxRef.current;
     if (outputGainRef.current && ctx) { outputGainRef.current.gain.setTargetAtTime(next, ctx.currentTime, RAMP_TIME);
     } else if (outputGainRef.current) outputGainRef.current.gain.value = next;
-  }, []);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.EQ_BANDS, bands); const ctx = ctxRef.current;
+  }, []); useEffect(() => { saveToStorage(STORAGE_KEYS.EQ_BANDS, bands); const ctx = ctxRef.current;
     filtersRef.current.forEach((f, i) => { if (bands[i]) {
         const target = enabled ? bands[i].gain : 0; if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
         else f.gain.value = target;

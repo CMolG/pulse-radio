@@ -17,8 +17,7 @@ const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 export function LocaleProvider({ children, countryCode, }: { children: React.ReactNode; countryCode?: string; }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>
     countryCode ? getInitialLocaleForCountry(countryCode) : getInitialLocale(),
-  );
-  useEffect(() => { saveLocale(locale);
+  ); useEffect(() => { saveLocale(locale);
     if (typeof document !== "undefined") {
       document.documentElement.lang = locale; document.documentElement.dir = isRtlLocale(locale) ? "rtl" : "ltr";
     }

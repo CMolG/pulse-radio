@@ -122,8 +122,7 @@ export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount
       const orbitRadius = minWH * (0.1 + energy * 0.25);
       blob.targetX = cx + Math.cos(angle) * orbitRadius; blob.targetY = cy + Math.sin(angle * 0.7) * orbitRadius * 0.8;
       // frequency-driven displacement
-      let bandVal: number;
-      if (frequencyData) { bandVal = frequencyData[bandIdx] / 255;
+      let bandVal: number; if (frequencyData) { bandVal = frequencyData[bandIdx] / 255;
         const displacement = bandVal * minWH * 0.15 * sensitivity; const dispAngle = angle + Math.PI * 0.5;
         blob.targetX += Math.cos(dispAngle) * displacement; blob.targetY += Math.sin(dispAngle) * displacement;
       } else if (demo) {

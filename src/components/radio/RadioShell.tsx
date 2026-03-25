@@ -51,8 +51,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>(() => ({
     w: typeof window !== 'undefined' ? window.innerWidth : 800,
     h: typeof window !== 'undefined' ? window.innerHeight : 600,
-  }));
-  useEffect(() => { const el = ref.current; if (!el) return;
+  })); useEffect(() => { const el = ref.current; if (!el) return;
     // Synchronous measurement replaces the window-based initial guess
     // one frame earlier than waiting for the ResizeObserver callback.
     const rect = el.getBoundingClientRect();
@@ -175,8 +174,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return () => { window.removeEventListener('online', goOnline); window.removeEventListener('offline', goOffline); };
   }, []);
   // Sync to shared playback store
-  const pbStore = usePlaybackStore;
-  useEffect(() => { const state = pbStore.getState(); state.setSource("radio");
+  const pbStore = usePlaybackStore; useEffect(() => { const state = pbStore.getState(); state.setSource("radio");
     state.setPlaying(radio.status === "playing"); state.setVolume(radio.volume);
     state.setMuted(radio.muted); state.setCurrentTime(radio.currentTime);
     if (enrichedTrack) {
@@ -322,8 +320,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleFavSongFromHistory = useCallback((entry: HistoryEntry) => {
     const wasLiked = favSongs.has(entry.title, entry.artist); const { id: _, timestamp: _t, ...input } = entry;
     favSongs.toggle(input); showToast(wasLiked ? "Song removed" : entry.title, "heart");
-  }, [favSongs, showToast]);
-  const handleSearch = useCallback((query: string) => { const sanitized = query.trim();
+  }, [favSongs, showToast]); const handleSearch = useCallback((query: string) => { const sanitized = query.trim();
     setView(mkView("search", t("searchResultLabel", { query: sanitized }), { query: sanitized }));
     setActiveTab("discover"); setTheaterMode(false);
   }, [t]);
@@ -333,8 +330,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleSearchSubmit = useCallback((e: React.FormEvent) => {
       e.preventDefault(); if (searchQuery.trim()) handleSearch(searchQuery.trim()); else handleGoHome();
     }, [searchQuery, handleSearch, handleGoHome],
-  );
-  const handleSelectGenre = useCallback((cat: BrowseCategory) => { const key = GENRE_LABEL_KEYS[cat.id];
+  ); const handleSelectGenre = useCallback((cat: BrowseCategory) => { const key = GENRE_LABEL_KEYS[cat.id];
     setView(mkView("genre", key ? t(key) : cat.label, { tag: cat.tag || cat.id }));
     setTheaterMode(false); setSearchQuery("");
   }, [t]);

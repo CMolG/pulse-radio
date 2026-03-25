@@ -71,8 +71,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
     const maxLen = Math.max(candidateTitle.length, normalizedRequestedTitle.length);
     if (maxLen > 0 && lenDiff / maxLen > 0.35) continue;
     const titleScore = jaroDistance(candidateTitle, normalizedRequestedTitle); if (titleScore < 0.94) continue;
-    let score = titleScore;
-    if (normalizedRequestedArtist) { const candidateArtist = normArtists[i];
+    let score = titleScore; if (normalizedRequestedArtist) { const candidateArtist = normArtists[i];
       if (candidateArtist) {
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist); if (artistScore < 0.85) continue;
         score = (titleScore * 0.85) + (artistScore * 0.15);

@@ -39,8 +39,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
           }); stableSamplesRef.current = step.stableSamples;
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
           // Early bail — skip spread+setState when nothing observable changed
-          if ( prev.status === 'listening' &&
-            prev.activeLineIndex === step.confirmedIndex &&
+          if ( prev.status === 'listening' && prev.activeLineIndex === step.confirmedIndex &&
             prev.candidateLineIndex === step.candidateIndex &&
             prev.confidence === step.score &&
             !step.jumpRejected &&
@@ -67,16 +66,14 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
   }, [lyrics, languageHint, realtimeActive]);
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
   const isSyncing = realtimeActive && (runtimeState.status === 'listening' || runtimeState.status === 'recovering');
-  return { ...runtimeState, enabled: manuallyEnabled, supported,
-    status: !supported ? 'unsupported' : !realtimeActive
+  return { ...runtimeState, enabled: manuallyEnabled, supported, status: !supported ? 'unsupported' : !realtimeActive
         ? 'idle'
         : runtimeState.status === 'idle' ? 'ready' : runtimeState.status,
     activeLineIndex: isSyncing ? runtimeState.activeLineIndex : -1,
     candidateLineIndex: isSyncing ? runtimeState.candidateLineIndex : -1,
     confidence: isSyncing ? runtimeState.confidence : 0,
     effectiveCurrentTime: isSyncing ? runtimeState.effectiveCurrentTime : undefined,
-    diagnostics: { ...runtimeState.diagnostics,
-      errorMessage: !supported
+    diagnostics: { ...runtimeState.diagnostics, errorMessage: !supported
         ? 'Realtime lyrics sync is not supported in this browser.'
         : runtimeState.diagnostics.errorMessage,
     }, toggle,

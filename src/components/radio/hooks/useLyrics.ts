@@ -33,8 +33,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined,
       controller.signal,
     ).then(result => {
-        if (controller.signal.aborted) return; retryCountRef.current = 0;
-        if (result) { setLyrics(result);
+        if (controller.signal.aborted) return; retryCountRef.current = 0; if (result) { setLyrics(result);
           const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
         } else setLyrics(null);

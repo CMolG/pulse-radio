@@ -59,8 +59,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
         setStats(pruned); saveToStorage(STORAGE_KEY, pruned);
       } else saveToStorage(STORAGE_KEY, current); dirtyRef.current = false;
     }
-  }, []);
-  useEffect(() => { saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
+  }, []); useEffect(() => { saveTimerRef.current = setInterval(persist, SAVE_INTERVAL_MS);
     return () => { if (saveTimerRef.current) clearInterval(saveTimerRef.current); persist(); };
   }, [persist]);
   // Track listen time for a station (call periodically while playing)
@@ -68,8 +67,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
     if (deltaMs <= 0 || !stationUuid) return;
     setStats(prev => {
       const entry = prev.stationListenTimes[stationUuid] ?? { name: stationName, uuid: stationUuid, totalMs: 0 };
-      return { ...prev,
-        stationListenTimes: {
+      return { ...prev, stationListenTimes: {
           ...prev.stationListenTimes, [stationUuid]: { ...entry, name: stationName, totalMs: entry.totalMs + deltaMs },
         }, totalListenMs: prev.totalListenMs + deltaMs,
       };
@@ -81,8 +79,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
     setStats(prev => { const songEntry = prev.songPlayCounts[songKey] ?? { title, artist, count: 0 };
       const artistEntry = prev.artistPlayCounts[primary] ?? { name: primary, count: 0 };
       const normalizedGenre = genre ? genre.toLowerCase().trim() : undefined;
-      const next: UsageStats = { ...prev,
-        songPlayCounts: { ...prev.songPlayCounts,
+      const next: UsageStats = { ...prev, songPlayCounts: { ...prev.songPlayCounts,
           [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         }, artistPlayCounts: { ...prev.artistPlayCounts, [primary]: { ...artistEntry, count: artistEntry.count + 1 }, },
       };
@@ -111,8 +108,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       // Count genre if this song didn't already have its genre recorded
       const needsGenre = normalizedGenre && songEntry.genre !== normalizedGenre;
       if (!needsArtwork && !needsGenre) return prev;
-      const next: UsageStats = { ...prev,
-        songPlayCounts: { ...prev.songPlayCounts,
+      const next: UsageStats = { ...prev, songPlayCounts: { ...prev.songPlayCounts,
           [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
         },
       };
