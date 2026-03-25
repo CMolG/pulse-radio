@@ -5305,8 +5305,13 @@ function _NowPlayingBar({
     return `Paused: ${trackInfo}`;
   }, [station, track, isPlaying, isLoading, status]);
   const [firstTag, compactTags] = useMemo(() => {
-    const tags = station?.tags?.split(',') ?? [];
-    return [tags[0] ?? '', tags.slice(0, 2).join(' · ')];
+    const t = station?.tags;
+    if (!t) return ['', ''];
+    const i1 = t.indexOf(',');
+    if (i1 < 0) return [t, t];
+    const first = t.slice(0, i1);
+    const i2 = t.indexOf(',', i1 + 1);
+    return [first, i2 < 0 ? `${first} · ${t.slice(i1 + 1)}` : `${first} · ${t.slice(i1 + 1, i2)}`];
   }, [station?.tags]);
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
