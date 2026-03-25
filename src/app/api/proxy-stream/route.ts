@@ -41,10 +41,15 @@ const MAX_DURATION_MS = 0;
 const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
 const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
 const _JSON_R5_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '5' } as const;
+const _ERR_MISSING_URL = JSON.stringify({ error: 'Missing or invalid url parameter' });
+const _ERR_INVALID_PROTOCOL = JSON.stringify({ error: 'Invalid protocol' });
+const _ERR_INVALID_URL = JSON.stringify({ error: 'Invalid URL' });
+const _ERR_PRIVATE_IP = JSON.stringify({ error: 'Redirect to private IP not allowed' });
+const _ERR_TIMEOUT = JSON.stringify({ error: 'Stream timed out' });
 export async function GET(req: NextRequest) {
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
-    return new Response(JSON.stringify({ error: 'Missing or invalid url parameter' }), {
+    return new Response(_ERR_MISSING_URL, {
       status: 400,
       headers: _JSON_HDRS,
     });
@@ -53,14 +58,14 @@ export async function GET(req: NextRequest) {
   try {
     parsed = new URL(streamUrl);
     if (!ALLOWED_PROTOCOLS.has(parsed.protocol)) {
-      return new Response(JSON.stringify({ error: 'Invalid protocol' }), {
+      return new Response(_ERR_INVALID_PROTOCOL, {
         status: 400,
         headers: _JSON_HDRS,
       });
     }
     const host = parsed.hostname.toLowerCase();
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid URL' }), {
+    return new Response(_ERR_INVALID_URL, {
       status: 400,
       headers: _JSON_HDRS,
     });
@@ -83,7 +88,7 @@ export async function GET(req: NextRequest) {
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
           if (timeout) clearTimeout(timeout);
           upstream.body?.cancel().catch(() => {});
-          return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
+          return new Response(_ERR_PRIVATE_IP, {
             status: 403,
             headers: _JSON_HDRS,
           });
@@ -119,7 +124,7 @@ export async function GET(req: NextRequest) {
     if (timeout) clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) {
-      return new Response(JSON.stringify({ error: 'Stream timed out' }), {
+      return new Response(_ERR_TIMEOUT, {
         status: 504,
         headers: _JSON_HDRS,
       });
