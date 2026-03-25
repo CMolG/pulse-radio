@@ -4458,14 +4458,17 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
     song ? { title: song.title, artist: song.artist, album: resolvedAlbum } : null,
     song?.stationName ?? null,
   );
-  const plainLyrics =
-    lyrics?.plainText?.trim() ||
-    lyrics?.lines
-      ?.map((line) => line.text.trim())
-      .filter(Boolean)
-      .join('\n')
-      .trim() ||
-    '';
+  const plainLyrics = useMemo(
+    () =>
+      lyrics?.plainText?.trim() ||
+      lyrics?.lines
+        ?.map((line) => line.text.trim())
+        .filter(Boolean)
+        .join('\n')
+        .trim() ||
+      '',
+    [lyrics],
+  );
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => (
     <div className="space-y-2 animate-pulse">
