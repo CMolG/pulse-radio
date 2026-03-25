@@ -2750,9 +2750,9 @@ const SongCard = React.memo(
         <div className="p-3 space-y-0.5">
           <p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>{' '}
           <p className="text-[12px] text-secondary line-clamp-1">{item.artist}</p>{' '}
-          {item.album && <p className="text-[11px] text-dim line-clamp-1">{item.album}</p>}{' '}
+          {item.album && <p className="text-[12px] text-dim line-clamp-1">{item.album}</p>}{' '}
           {(item.genre || item.durationMs) && (
-            <p className="text-[11px] text-dim line-clamp-1 flex items-center gap-1">
+            <p className="text-[12px] text-dim line-clamp-1 flex items-center gap-1">
               {' '}
               {item.genre && <span>{item.genre}</span>}{' '}
               {item.durationMs && (
@@ -2771,7 +2771,7 @@ const SongCard = React.memo(
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
+            className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
           >
             <ExternalLink size={10} />
             Listen on Apple Music
@@ -2779,8 +2779,8 @@ const SongCard = React.memo(
           <div className="flex items-center gap-1.5">
             {' '}
             <RadioIcon size={9} className="text-dim flex-shrink-0" />{' '}
-            <p className="text-[11px] text-dim truncate flex-1">{item.stationName}</p>{' '}
-            <span className="text-[11px] text-dim">{formatTimeAgo(item.timestamp)}</span>
+            <p className="text-[12px] text-dim truncate flex-1">{item.stationName}</p>{' '}
+            <span className="text-[12px] text-dim">{formatTimeAgo(item.timestamp)}</span>
           </div>
         </div>
       </motion.div>
@@ -2945,7 +2945,7 @@ const StationCard = React.memo(
         {/* Tags / Country / Format */}{' '}
         <div className="flex-row-1 mt-1 flex-wrap">
           {station.codec && (
-            <span className="pad-xs bg-surface-3 text-[11px] font-mono text-secondary uppercase flex-shrink-0">
+            <span className="pad-xs bg-surface-3 text-[12px] font-mono text-secondary uppercase flex-shrink-0">
               {' '}
               {station.codec}
               {station.bitrate > 0 ? ` ${station.bitrate}k` : ''}
@@ -2954,13 +2954,13 @@ const StationCard = React.memo(
           {tags.map((tag) => (
             <span
               key={tag}
-              className="pad-xs-full bg-surface-2 text-[11px] text-secondary truncate max-w-[80px]"
+              className="pad-xs-full bg-surface-2 text-[12px] text-secondary truncate max-w-[80px]"
             >
               {tag}
             </span>
           ))}{' '}
           {station.countrycode && (
-            <span className="text-[11px] text-dim leading-none">
+            <span className="text-[12px] text-dim leading-none">
               {countryFlag(station.countrycode)}
             </span>
           )}
@@ -2970,7 +2970,7 @@ const StationCard = React.memo(
           <div className="flex items-center gap-1 mt-1.5">
             {' '}
             <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />{' '}
-            <span className="text-[11px] text-dim">Checking…</span>
+            <span className="text-[12px] text-dim">Checking…</span>
           </div>
         )}{' '}
         {liveStatus === 'loaded' && (
@@ -2979,13 +2979,13 @@ const StationCard = React.memo(
             {liveTrack ? (
               <>
                 <Music2 size={9} className="text-sys-orange flex-shrink-0" />{' '}
-                <span className="text-[11px] text-white/60 truncate leading-tight">
+                <span className="text-[12px] text-white/60 truncate leading-tight">
                   {' '}
                   {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}
                 </span>
               </>
             ) : (
-              <span className="text-[11px] text-white/50">No track info</span>
+              <span className="text-[12px] text-white/50">No track info</span>
             )}
           </div>
         )}{' '}
@@ -2995,7 +2995,7 @@ const StationCard = React.memo(
               e.stopPropagation();
               onPeek();
             }}
-            className="flex items-center gap-1 mt-1.5 text-[11px] text-dim hover:text-white/50 transition-colors"
+            className="flex items-center gap-1 mt-1.5 text-[12px] text-dim hover:text-white/50 transition-colors"
           >
             {' '}
             <Music2 size={9} /> Check track
@@ -3598,7 +3598,7 @@ function BrowseView({
                         >
                           {' '}
                           <RadioIcon size={18} className="text-muted" />{' '}
-                          <p className="text-[11px] text-muted">{t('failedToLoadStations')}</p>
+                          <p className="text-[12px] text-muted">{t('failedToLoadStations')}</p>
                           <button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
@@ -5553,7 +5553,7 @@ function _NowPlayingBar({
           <p className="text-[12px] font-medium text-white truncate">
             {station?.name || 'Not Playing'}
           </p>{' '}
-          <p className="text-[11px] text-secondary truncate">
+          <p className="text-[12px] text-secondary truncate">
             {' '}
             {track?.title
               ? track.artist
@@ -5561,7 +5561,7 @@ function _NowPlayingBar({
                 : track.title
               : firstTag}
           </p>{' '}
-          {track?.album && <p className="text-[11px] text-dim truncate">{track.album}</p>}
+          {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}
         </div>{' '}
         {icyBitrate && (
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] font-mono text-white/50 shrink-0 self-center">
