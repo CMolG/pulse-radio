@@ -6327,14 +6327,14 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
             <div className="flex items-center gap-2">
               {' '}
               <span
-                className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange' : 'bg-white/5 text-white/40'}`}
+                className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange' : 'bg-white/5 text-white/45'}`}
               >
                 {eq.enabled ? 'ON' : 'OFF'}
               </span>{' '}
               {showEq ? (
-                <ChevronUp size={14} className="text-white/40" />
+                <ChevronUp size={14} className="text-white/45" />
               ) : (
-                <ChevronDown size={14} className="text-white/40" />
+                <ChevronDown size={14} className="text-white/45" />
               )}{' '}
             </div>
           </button>{' '}
@@ -6423,7 +6423,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                       <button
                         onClick={() => setShowSaveInput(false)}
                         aria-label="Cancel"
-                        className="p-1.5 rounded-lg bg-white/5 text-white/40"
+                        className="p-1.5 rounded-lg bg-white/5 text-white/45"
                       >
                         <X size={12} />
                       </button>{' '}
@@ -9950,7 +9950,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 {pulseLogoButton} <div className="flex-1" />{' '}
                 <button
                   onClick={() => setShowMobileSettings(true)}
-                  className="w-9 h-9 flex-center-row rounded-xl text-white/40 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
+                  className="w-9 h-9 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
                   title="Settings"
                   data-testid="mobile-settings-btn"
                 >
@@ -10098,7 +10098,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {pulseLogoButton} <div className="flex-1" /> <LanguageSelector />
                     <button
                       onClick={() => setShowDesktopSettings(true)}
-                      className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
+                      className="w-9 h-9 flex items-center justify-center rounded-xl text-white/45 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
                       title="Settings"
                       data-testid="desktop-settings-btn"
                     >
