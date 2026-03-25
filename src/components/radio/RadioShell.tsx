@@ -8387,6 +8387,7 @@ function useFavorites() {
     saveToStorage(STORAGE_KEYS.FAVORITES, favorites);
   }, [favorites]);
   useStorageSync<Station[]>(STORAGE_KEYS.FAVORITES, setFavorites);
+  const favUuids = useMemo(() => new Set(favorites.map((s) => s.stationuuid)), [favorites]);
   const add = useCallback((station: Station) => {
     setFavorites((prev) => {
       if (prev.some((s) => s.stationuuid === station.stationuuid)) return prev;
@@ -8404,8 +8405,8 @@ function useFavorites() {
     });
   }, []);
   const has = useCallback(
-    (uuid: string) => favorites.some((s) => s.stationuuid === uuid),
-    [favorites],
+    (uuid: string) => favUuids.has(uuid),
+    [favUuids],
   );
   const playNext = useCallback(
     (currentUuid: string): Station | null => {
