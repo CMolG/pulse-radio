@@ -14,13 +14,11 @@ function windowBounds(total: number, center: number, relockWindow: number): [num
 export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const { lyrics, hypothesisText, previousConfirmedIndex, previousCandidateIndex, stableSamples, policy, } = input; const hypoTokens = tokenize(hypothesisText); if (!hypoTokens.length) { return {
       candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: 0, stableSamples, jumpRejected: false, relockTriggered: false, }; }
-  const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex; const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow); let bestIndex = -1;
-  let bestScore = 0; for (let i = start; i <= end; i++) {
+  const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex; const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow); let bestIndex = -1; let bestScore = 0; for (let i = start; i <= end; i++) {
     const lineTokens = tokenize(lyrics.lines[i]?.text ?? ''); const score = scoreLine(lineTokens, hypoTokens); if (score > bestScore) { bestScore = score; bestIndex = i; } }
   if (bestIndex < 0 || bestScore < policy.candidateMinScore) { return {
       candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: bestScore, stableSamples, jumpRejected: false, relockTriggered: false, }; }
-  const sameCandidate = bestIndex === previousCandidateIndex; const nextStable = sameCandidate ? stableSamples + 1 : 1;
-  const jumpDistance = previousConfirmedIndex >= 0 ? Math.abs(bestIndex - previousConfirmedIndex) : 0; const jumpRejected = previousConfirmedIndex >= 0 && jumpDistance > policy.maxJumpDistance;
+  const sameCandidate = bestIndex === previousCandidateIndex; const nextStable = sameCandidate ? stableSamples + 1 : 1; const jumpDistance = previousConfirmedIndex >= 0 ? Math.abs(bestIndex - previousConfirmedIndex) : 0; const jumpRejected = previousConfirmedIndex >= 0 && jumpDistance > policy.maxJumpDistance;
   let confirmed = previousConfirmedIndex; let relockTriggered = false; if (!jumpRejected && bestScore >= policy.confirmMinScore && nextStable >= policy.minStableSamples) {
     confirmed = bestIndex;
   } else if (jumpRejected && bestScore >= Math.min(0.98, policy.confirmMinScore + 0.08)) {

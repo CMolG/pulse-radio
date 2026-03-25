@@ -1,14 +1,12 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import React from 'react'; import { IoRadioOutline, IoMusicalNotesOutline, IoPersonOutline, IoDiscOutline, IoTimeOutline } from 'react-icons/io5';
-import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from '../hooks/useStats'; function formatListenTime(ms: number): string {
+'use client'; import React from 'react'; import { IoRadioOutline, IoMusicalNotesOutline, IoPersonOutline, IoDiscOutline, IoTimeOutline } from 'react-icons/io5'; import type { StationListenTime, SongPlayCount, ArtistPlayCount, GenrePlayCount } from '../hooks/useStats'; function formatListenTime(ms: number): string {
   const totalSec = Math.floor(ms / 1000); if (totalSec < 60) return `${totalSec}s`; const mins = Math.floor(totalSec / 60); if (mins < 60) return `${mins}m`; const hours = Math.floor(mins / 60); const remMins = mins % 60;
   if (hours < 24) return `${hours}h ${remMins}m`; const days = Math.floor(hours / 24); const remHours = hours % 24; return `${days}d ${remHours}h`; }
 type Props = { topStations: StationListenTime[]; topSongs: SongPlayCount[]; topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number; }; const StatSection = React.memo(function StatSection({ title, icon, children, }: {
   title: string; icon: React.ReactNode; children: React.ReactNode;
 }) { return ( <div><div className="flex items-center gap-2 mb-2"> {icon} <span className="text-[13px] font-semibold text-white/80">{title}</span> </div><div className="space-y-1">{children}</div></div> );});
 const BarRow = React.memo(function BarRow({ label, value, maxValue, suffix }: { label: string; value: number; maxValue: number; suffix: string }) {
-  const pct = maxValue > 0 ? Math.max(8, (value / maxValue) * 100) : 0; return ( <div className="flex items-center gap-2 group">
-      <span className="text-[12px] text-white/50 w-[100px] truncate shrink-0">{label}</span> <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden relative"><div
+  const pct = maxValue > 0 ? Math.max(8, (value / maxValue) * 100) : 0; return ( <div className="flex items-center gap-2 group"> <span className="text-[12px] text-white/50 w-[100px] truncate shrink-0">{label}</span> <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden relative"><div
           className="h-full rounded-full bg-gradient-to-r from-[#3478f6]/60 to-[#3478f6]/30 transition-all duration-500" style={{ width: `${pct}%` }} />
       </div><span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">{suffix}</span></div>
   );});

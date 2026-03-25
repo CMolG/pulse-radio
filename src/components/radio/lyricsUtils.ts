@@ -3,8 +3,7 @@
 /* Binary search for the last lyric line whose time ≤ currentTime. Lines are sorted ascending by time, so binary 
  * search is O(log n) vs O(n). */
 function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
-  if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1; const lines = lyrics.lines;
-  let lo = 0; let hi = lines.length - 1; let result = -1; while (lo <= hi) { const mid = (lo + hi) >>> 1; if (lines[mid].time <= currentTime) { result = mid; lo = mid + 1; } else hi = mid - 1; } return result; }
+  if (currentTime == null || !lyrics?.synced || !lyrics.lines.length) return -1; const lines = lyrics.lines; let lo = 0; let hi = lines.length - 1; let result = -1; while (lo <= hi) { const mid = (lo + hi) >>> 1; if (lines[mid].time <= currentTime) { result = mid; lo = mid + 1; } else hi = mid - 1; } return result; }
 export function getEffectiveActiveLyricIndex( lyrics: LyricsData | null, currentTime: number | undefined, activeLineOverride?: number, ) { if (typeof activeLineOverride === 'number' && activeLineOverride >= 0) {
     if (!lyrics?.synced || !lyrics.lines.length) return -1; return Math.min(activeLineOverride, lyrics.lines.length - 1); }
   return getActiveLyricIndex(lyrics, currentTime); }

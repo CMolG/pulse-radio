@@ -1,11 +1,9 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import { useState, useCallback, useEffect, useRef } from 'react'; import type { NowPlayingTrack, HistoryEntry } from '../types'; import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; import { useStorageSync } from '@/lib/useStorageSync';
+'use client'; import { useState, useCallback, useEffect, useRef } from 'react'; import type { NowPlayingTrack, HistoryEntry } from '../types'; import { STORAGE_KEYS, MAX_HISTORY } from '../constants'; import { loadFromStorage, saveToStorage } from '@/lib/storageUtils'; import { useStorageSync } from '@/lib/useStorageSync';
 export function useHistory( stationName: string | undefined, stationUuid: string | undefined, track: NowPlayingTrack | null, ) { const [history, setHistory] = useState<HistoryEntry[]>(() => {
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []); const seen = new Set<string>(); // Dedup by id on load in case of corrupted storage
     return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
-  }); const lastTrackRef = useRef<string>(''); const lastStationRef = useRef<string | undefined>(stationUuid);
-  useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]); useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
+  }); const lastTrackRef = useRef<string>(''); const lastStationRef = useRef<string | undefined>(stationUuid); useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]); useStorageSync<HistoryEntry[]>(STORAGE_KEYS.HISTORY, setHistory);
   // Add entry when track changes; handles station transitions in a single effect
   // to prevent the race between station-reset and track-add
   useEffect(() => { if (!track?.title || !stationUuid || !stationName) return;
@@ -25,8 +23,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     if (!track?.title || !stationUuid) return; const artworkUrl = track.artworkUrl; const album = track.album; const itunesUrl = track.itunesUrl; const durationMs = track.durationMs; const genre = track.genre; const releaseDate = track.releaseDate;
     const trackNumber = track.trackNumber; const trackCount = track.trackCount; if (!artworkUrl && !album && !itunesUrl && !durationMs && !genre && !releaseDate && trackNumber == null && trackCount == null) return;
     setHistory(prev => { const head = prev[0]; if (!head) return prev; if ( head.stationUuid === stationUuid && head.title === track.title && head.artist === track.artist &&
-        (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl || head.durationMs !== durationMs || head.genre !== genre || head.releaseDate !== releaseDate ||
-         head.trackNumber !== trackNumber || head.trackCount !== trackCount)
+        (head.artworkUrl !== artworkUrl || head.album !== album || head.itunesUrl !== itunesUrl || head.durationMs !== durationMs || head.genre !== genre || head.releaseDate !== releaseDate || head.trackNumber !== trackNumber || head.trackCount !== trackCount)
       ) {
         return [{ ...head, artworkUrl, album, itunesUrl, durationMs, genre, releaseDate, trackNumber, trackCount }, ...prev.slice(1)];
       } return prev;});

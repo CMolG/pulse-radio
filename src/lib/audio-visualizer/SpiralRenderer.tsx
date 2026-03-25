@@ -1,10 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 "use client"; import React, { useRef, useEffect } from "react"; interface SpiralRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string; color3?: string; sensitivity?: number; demo?: boolean; }
-import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYCLES = 4; const SMOOTH_PASSES = 3;
-export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068", color3 = "#f9d423", sensitivity = 1.0, demo = false,
-}: SpiralRendererProps) { const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS));
-  const targetArrayRef = useRef(new Float64Array(NUM_BARS)); const smoothedRef = useRef(new Float64Array(NUM_BARS)); const tempRef = useRef(new Float64Array(NUM_BARS));
+import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYCLES = 4; const SMOOTH_PASSES = 3; export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff4b1f", color2 = "#ff9068", color3 = "#f9d423", sensitivity = 1.0, demo = false,
+}: SpiralRendererProps) { const rotationRef = useRef(0); const dataArrayRef = useRef(new Float64Array(NUM_BARS)); const targetArrayRef = useRef(new Float64Array(NUM_BARS)); const smoothedRef = useRef(new Float64Array(NUM_BARS)); const tempRef = useRef(new Float64Array(NUM_BARS));
   // Pre-allocated coordinate arrays — avoids 500+ object allocations per frame
   const outerXRef = useRef(new Float64Array(NUM_BARS)); const outerYRef = useRef(new Float64Array(NUM_BARS)); const innerXRef = useRef(new Float64Array(NUM_BARS)); const innerYRef = useRef(new Float64Array(NUM_BARS));
   const colorsRef = useRef({ color1, color2, color3 }); useEffect(() => { colorsRef.current = { color1, color2, color3 }; }, [color1, color2, color3]); const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
@@ -32,8 +30,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     } catch { /* fallback to solid color */ }
     // Build points into pre-allocated arrays (avoids 500+ object allocs/frame)
     const outerX = outerXRef.current; const outerY = outerYRef.current; const innerX = innerXRef.current; const innerY = innerYRef.current; for (let i = 0; i < NUM_BARS; i++) { const val = result[i]; const scaleFactor = 0.5 + 1.5 * (i / NUM_BARS);
-      const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle; const radius = minRadius * Math.exp(b * baseAngle);
-      const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle); innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
+      const barHeight = val * (Math.max(w, h) * 0.08) * scaleFactor; const baseAngle = (i / NUM_BARS) * maxAngle; const radius = minRadius * Math.exp(b * baseAngle); const finalAngle = baseAngle + rotation; const cos = Math.cos(finalAngle); const sin = Math.sin(finalAngle); innerX[i] = centerX + cos * radius; innerY[i] = centerY + sin * radius;
       outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2); }
     // Draw slime shapes per cycle
     ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85; const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) {
@@ -45,7 +42,5 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
         const xc = (innerX[i] + innerX[i - 1]) / 2; const yc = (innerY[i] + innerY[i - 1]) / 2; ctx.quadraticCurveTo(innerX[i], innerY[i], xc, yc); }
       ctx.lineTo(innerX[startIdx], innerY[startIdx]); ctx.closePath(); ctx.fill(); }
     ctx.globalAlpha = 1.0;});
-  return ( <div className={`relative overflow-hidden ${className}`} style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}><canvas ref={canvasRef}
-        className="absolute inset-0 size-full" style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div>
-  ); }
+  return ( <div className={`relative overflow-hidden ${className}`} style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}><canvas ref={canvasRef} className="absolute inset-0 size-full" style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div> ); }
 export default SpiralRenderer;
