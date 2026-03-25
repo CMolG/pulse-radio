@@ -7590,7 +7590,8 @@ interface UseAudioAnalyserReturn {
   isActive: boolean;
   disconnect: () => void;
 }
-function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAnalyserReturn {
+const _EMPTY_ANALYSER_OPTS: UseAudioAnalyserOptions = {};
+function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS): UseAudioAnalyserReturn {
   const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts;
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0);
