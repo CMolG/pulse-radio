@@ -16,8 +16,7 @@ const CODEC_MAP: Record<string, string> = {
 };
 
 // Patterns that indicate ads/spam rather than real song metadata
-const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i,
-  /^https?:\/\//i,
+const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i, /^https?:\/\//i,
   /\b(shopify|squarespace|wix|spotify\.com|instagram|facebook|twitter|tiktok|youtube)\b/i,
   /\b(buy now|subscribe|promo|advertisement|advert|commercial|sponsor)\b/i,
   /\b(www\.)/i,
@@ -39,8 +38,7 @@ function isAdContent(text: string): boolean {
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
-export async function fetchIcyMeta(
-  streamUrl: string,
+export async function fetchIcyMeta( streamUrl: string,
   signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController();

@@ -33,8 +33,7 @@ function getActiveLyricIndex(lyrics: LyricsData | null, currentTime?: number) {
   return result;
 }
 
-export function getEffectiveActiveLyricIndex(
-  lyrics: LyricsData | null,
+export function getEffectiveActiveLyricIndex( lyrics: LyricsData | null,
   currentTime: number | undefined,
   activeLineOverride?: number, ) {
   if (typeof activeLineOverride === 'number' && activeLineOverride >= 0) {

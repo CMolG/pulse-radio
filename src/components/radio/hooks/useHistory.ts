@@ -12,8 +12,7 @@ import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 
-export function useHistory(
-  stationName: string | undefined,
+export function useHistory( stationName: string | undefined,
   stationUuid: string | undefined,
   track: NowPlayingTrack | null,
 ) {

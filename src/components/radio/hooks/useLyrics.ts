@@ -27,8 +27,7 @@ function loadCache(): CacheEntry[] {
 
 function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 
-export function useLyrics(
-  track: NowPlayingTrack | null,
+export function useLyrics( track: NowPlayingTrack | null,
   stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
 ) {
@@ -45,8 +44,7 @@ export function useLyrics(
     if (controller.signal.aborted || !track?.title) return;
     setLoading(true);
     setError(false);
-    fetchLyricsApi( track.artist || stationName || '',
-      track.title,
+    fetchLyricsApi( track.artist || stationName || '', track.title,
       track.album,
       undefined,
       stationName ?? undefined,

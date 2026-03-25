@@ -7,8 +7,7 @@
 import type { Station } from '../types';
 
 // Radio-Browser API mirrors for redundancy
-const SERVERS = [ 'https://de1.api.radio-browser.info/json',
-  'https://de2.api.radio-browser.info/json',
+const SERVERS = [ 'https://de1.api.radio-browser.info/json', 'https://de2.api.radio-browser.info/json',
   'https://nl1.api.radio-browser.info/json',
 ];
 let serverIndex = 0;

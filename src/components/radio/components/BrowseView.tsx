@@ -267,8 +267,7 @@ export default function BrowseView({
             case "search": result = await searchStations(view.query); break;
             case "genre": result = await stationsByTag(view.tag); break;
             case "country": result = await stationsByCountry(view.countryQueryName); break;
-            default:
-              result = [];
+            default: result = [];
           }
           if (!cancelled) setStations(result);
         } catch { if (!cancelled) setError("Failed to load stations"); } finally { if (!cancelled) setLoading(false); }

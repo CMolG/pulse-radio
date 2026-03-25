@@ -45,8 +45,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist),
-      fetchWikiSummary(artist),
+    const [mbResult, wikiResult] = await Promise.allSettled([ searchMusicBrainz(artist), fetchWikiSummary(artist),
     ]);
 
     const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
@@ -65,8 +64,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const tags =
-      mb?.tags ?.filter((t: { count: number }) => t.count > 0)
+    const tags = mb?.tags ?.filter((t: { count: number }) => t.count > 0)
         ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
         ?.slice(0, 8)
         ?.map((t: { name: string }) => t.name) ?? [];

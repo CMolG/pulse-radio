@@ -135,10 +135,8 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
             isDesktop ? "px-4" : "px-2"
           }`}
           style={{
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
-            maskImage:
-              "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
           }}
         >
             <div className="flex min-h-full flex-col justify-center py-14">

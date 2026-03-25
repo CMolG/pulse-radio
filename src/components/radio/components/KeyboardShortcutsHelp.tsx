@@ -9,8 +9,7 @@
 import React from "react";
 import { X } from "lucide-react";
 
-const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" },
-  { key: "←", desc: "Previous station" },
+const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: "Previous station" },
   { key: "→", desc: "Next station" },
   { key: "↑", desc: "Volume up" },
   { key: "↓", desc: "Volume down" },
