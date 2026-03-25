@@ -31,13 +31,10 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
   }, [eq, onPresetChange]); const handleSave = () => { const name = presetName.trim();
     if (name) { eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false); } };
   return ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="absolute inset-0 z-50 flex flex-col"> {/* Backdrop */}
+      transition={{ duration: 0.2 }} className="absolute inset-0 z-50 flex flex-col"> {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} /> {/* Panel slides up from bottom */} <motion.div
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 28, stiffness: 300 }}
+        initial={{ y: "100%" }} animate={{ y: 0 }}
+        exit={{ y: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={{ background: "rgba(22, 24, 35, 0.92)", backdropFilter: "blur(24px) saturate(1.6)",
           WebkitBackdropFilter: "blur(24px) saturate(1.6)", }}
@@ -105,8 +102,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   {eq.bands.map(band => ( <div key={band.id} className="flex flex-col items-center gap-1">
                       <span className="text-[9px] text-white/40 tabular-nums">{band.gain > 0 ? `+${band.gain}` : band.gain}</span>
                       <input type="range" min={-12} max={12} step={1} value={band.gain}
-                        onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))}
-                        disabled={!eq.enabled}
+                        onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))} disabled={!eq.enabled}
                         aria-label={`${band.label} Hz gain`}
                         className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />
@@ -123,23 +119,20 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
               <div className="space-y-3"><div className="flex items-center gap-3">
                   <span className="text-[11px] text-white/50 w-10 shrink-0">Width</span>
                   <input type="range" min={0} max={200} step={5} value={Math.round(eq.stereoWidth * 100)}
-                    onChange={e => eq.setStereoWidth(parseInt(e.target.value, 10) / 100)}
-                    aria-label="Stereo width"
+                    onChange={e => eq.setStereoWidth(parseInt(e.target.value, 10) / 100)} aria-label="Stereo width"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.stereoWidth * 100)}%</span>
                 </div><div className="flex items-center gap-3">
                   <span className="text-[11px] text-white/50 w-10 shrink-0">Bass+</span>
                   <input type="range" min={0} max={100} step={5} value={Math.round(eq.bassEnhance * 100)}
-                    onChange={e => eq.setBassEnhance(parseInt(e.target.value, 10) / 100)}
-                    aria-label="Bass enhance"
+                    onChange={e => eq.setBassEnhance(parseInt(e.target.value, 10) / 100)} aria-label="Bass enhance"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.bassEnhance * 100)}%</span>
                 </div><div className="flex items-center gap-3">
                   <button onClick={eq.toggleCompressor} className={`text-[11px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? "text-sys-orange" : "text-white/50"}`}>Comp</button>
                   <input type="range" min={0} max={100} step={5} value={Math.round(eq.compressorAmount * 100)}
                     onChange={e => eq.setCompressorAmount(parseInt(e.target.value, 10) / 100)}
-                    disabled={!eq.compressorEnabled}
-                    aria-label="Compressor amount"
+                    disabled={!eq.compressorEnabled} aria-label="Compressor amount"
                     className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange" />
                   <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">{Math.round(eq.compressorAmount * 100)}%</span>
                 </div></div></div>)}</div>
@@ -156,15 +149,11 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
       {/* Usage Guide overlay */}
       <AnimatePresence>{showGuide && <UsageGuide onClose={() => setShowGuide(false)} />}</AnimatePresence>
       {/* Stats overlay */} <AnimatePresence>{showStats && ( <motion.div initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 z-50 flex flex-col">
+            animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }} className="absolute inset-0 z-50 flex flex-col">
             <div className="absolute inset-0 bg-black/50" onClick={() => setShowStats(false)} /> <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              initial={{ y: '100%' }} animate={{ y: 0 }}
+              exit={{ y: '100%' }} transition={{ type: 'spring', damping: 28, stiffness: 300 }}
               className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
               style={{ background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
                 WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)', }}>
@@ -174,9 +163,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
                 ><X size={16} /></button><h2 className="text-[17px] font-semibold text-white">Your Statistics</h2></div>
               <div className="border-t border-white/8" /> {statsData && ( <StatsView topStations={statsData.topStations}
-                  topSongs={statsData.topSongs}
-                  topArtists={statsData.topArtists}
-                  topGenres={statsData.topGenres}
-                  totalListenMs={statsData.totalListenMs} />
+                  topSongs={statsData.topSongs} topArtists={statsData.topArtists}
+                  topGenres={statsData.topGenres} totalListenMs={statsData.totalListenMs} />
               )} <div className="h-6" /></motion.div></motion.div>)}</AnimatePresence></motion.div>
   ); }

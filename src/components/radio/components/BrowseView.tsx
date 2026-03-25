@@ -36,12 +36,10 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
           <div className="flex-row-1.5">{icon} <h3 className="text-[13px] font-semibold text-soft">{title}</h3></div>
           {!isMobile && ( <div className="flex gap-1"><button onClick={() => scroll(-1)}
                 className={`p-1 rounded-md transition-colors ${canLeft ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
-                disabled={!canLeft}
-                aria-label="Scroll left"><ChevronLeft size={14} /></button><button
+                disabled={!canLeft} aria-label="Scroll left"><ChevronLeft size={14} /></button><button
                 onClick={() => scroll(1)}
                 className={`p-1 rounded-md transition-colors ${canRight ? "text-secondary hover:text-white hover:bg-surface-3" : "text-white/10 cursor-default"}`}
-                disabled={!canRight}
-                aria-label="Scroll right"><ChevronRight size={14} /></button></div>)}</div>
+                disabled={!canRight} aria-label="Scroll right"><ChevronRight size={14} /></button></div>)}</div>
       )} <div ref={ref} className={SCROLL_CLASS + (isMobile ? " px-4" : "")}>{children}</div></div>
   ); }
 export default function BrowseView({
@@ -148,10 +146,8 @@ export default function BrowseView({
   const renderScrollStations = (list: Station[]) =>
     list.map((s) => ( <div key={s.stationuuid} className={`snap-start shrink-0 ${itemWidth}`}><StationCard station={s}
           isCurrent={s.stationuuid === currentStation?.stationuuid}
-          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid}
-          isFavorite={isFavorite(s.stationuuid)}
-          onPlay={() => onPlay(s)}
-          onToggleFav={() => onToggleFav(s)}
+          isPlaying={isPlaying && s.stationuuid === currentStation?.stationuuid} isFavorite={isFavorite(s.stationuuid)}
+          onPlay={() => onPlay(s)} onToggleFav={() => onToggleFav(s)}
           onPrefetch={() => onPrefetch?.(s.url_resolved)} /></div> ));
   // Compute page stations here so they can be used in the scan effect
   const pageStations = useMemo(() => { return stations.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -188,8 +184,7 @@ export default function BrowseView({
             {loading ? t("loadingStations") : t("stationCount", { count: displayCount })}</p></div><button
           onClick={() => setDiscoveryMode((d) => !d)}
           className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? "bg-sys-purple/20 text-sys-purple border border-sys-purple/30" : "bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr"}`}
-          title={t("discoveryModeTitle")}
-          aria-pressed={discoveryMode}
+          title={t("discoveryModeTitle")} aria-pressed={discoveryMode}
           aria-label={t("discoveryModeAria")}><Sparkles size={12} />
           {t("discovery")}{discoveryMode ? ` ${t("discoveryOn")}` : ""}</button></div>
       {/* Genre chips — wrapping, limited on mobile */}
@@ -286,8 +281,7 @@ export default function BrowseView({
                     {scanEnabled && (
                       <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                         <Music2 size={11} className="text-dim shrink-0" /> <input type="text"
-                          placeholder={t("filterBySong")}
-                          value={songFilter}
+                          placeholder={t("filterBySong")} value={songFilter}
                           onChange={e => setSongFilter(e.target.value)}
                           className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0" />
                         {songFilter && (
@@ -303,18 +297,14 @@ export default function BrowseView({
                       return ( <StationCard key={s.stationuuid} station={s}
                           isPlaying={isPlaying && currentStation?.stationuuid === s.stationuuid}
                           isCurrent={currentStation?.stationuuid === s.stationuuid}
-                          isFavorite={isFavorite(s.stationuuid)}
-                          onPlay={() => onPlay(s)}
-                          onToggleFav={() => onToggleFav(s)}
-                          onPrefetch={() => onPrefetch?.(s.url_resolved)}
-                          liveStatus={live?.status}
-                          liveTrack={live?.track}
+                          isFavorite={isFavorite(s.stationuuid)} onPlay={() => onPlay(s)}
+                          onToggleFav={() => onToggleFav(s)} onPrefetch={() => onPrefetch?.(s.url_resolved)}
+                          liveStatus={live?.status} liveTrack={live?.track}
                           onPeek={!scanEnabled ? () => peekStation(s) : undefined} /> );
                     })}</div>
                   {/* Pagination */}
                   {totalPages > 1 && ( <div className="flex items-center justify-center gap-3 pt-2 pb-6"><button
-                        onClick={() => setPage((p) => Math.max(0, p - 1))}
-                        disabled={page === 0}
+                        onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? "text-white/20 cursor-default" : "bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white"}`}
                       ><ChevronLeft size={14} />
                         {t("previous")}</button><span className="text-[12px] text-dim tabular-nums">

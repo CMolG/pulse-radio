@@ -14,9 +14,7 @@ export default React.memo(function NowPlayingHero({ station, track, isPlaying, a
   const showFallback = !coverUrl || imgError;
   const heroTags = useMemo(() => station.tags?.split(",").slice(0, 3).join(" · ") ?? "Internet Radio", [station.tags]);
   return ( <div className="relative flex flex-col px-5 py-4 bg-surface-1 bdr-b overflow-hidden"><ParallaxAlbumBackground
-        imageUrl={artworkUrl ?? null}
-        fallbackUrl={station.favicon || undefined}
-        overlayClass="bg-black/60" />
+        imageUrl={artworkUrl ?? null} fallbackUrl={station.favicon || undefined} overlayClass="bg-black/60" />
       {onTheater && ( <button onClick={onTheater}
           className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
           title="Theater mode"><Maximize2 size={12} />

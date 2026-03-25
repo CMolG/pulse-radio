@@ -56,8 +56,7 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
         {/* Action buttons — 44px touch targets */} <div className="flex items-center gap-0.5 shrink-0">
           {station && !theaterMode && ( <button onClick={onToggleTheater}
               className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
-              title="Theater"
-              aria-label="Theater mode"><Maximize2 size={18} /></button>)}</div>
+              title="Theater" aria-label="Theater mode"><Maximize2 size={18} /></button>)}</div>
         {/* Fill iPhone safe-area inset below the bar without adding layout height */} <div aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
           style={{ height: "env(safe-area-inset-bottom, 0px)" }} /></div>
@@ -88,12 +87,10 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
             className={`w-2 h-2 rounded-full shrink-0 self-center ${ streamQuality === 'good' ? 'bg-green-500' :
               streamQuality === 'fair' ? 'bg-yellow-500' : streamQuality === 'poor' ? 'bg-red-500' : 'bg-gray-500'
             }`}
-            title={`Stream: ${streamQuality}`}
-            aria-label={`Stream quality: ${streamQuality}`} />
+            title={`Stream: ${streamQuality}`} aria-label={`Stream quality: ${streamQuality}`} />
         )}</div>
       {/* Controls */} <div className="flex-row-0.5"><button onClick={onTogglePlay} disabled={!station}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-          aria-pressed={isPlaying}
+          aria-label={isPlaying ? 'Pause' : 'Play'} aria-pressed={isPlaying}
           className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
         >{isLoading ? ( <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? ( <Pause size={16} />
@@ -103,25 +100,19 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
         {station && isPlaying && (
           <><div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none opacity-40">
               <ErrorBoundary fallback={null}><FerrofluidRenderer frequencyDataRef={frequencyDataRef}
-                className="size-full"
-                blobCount={6}
-                colorPrimary="#1a1a2e"
-                colorSecondary="#16213e"
-                colorAccent="#0f3460"
-                sensitivity={1.0}
+                className="size-full" blobCount={6} colorPrimary="#1a1a2e" colorSecondary="#16213e"
+                colorAccent="#0f3460" sensitivity={1.0}
                 demo /></ErrorBoundary></div><div className="flex-row-1.5 relative z-10">
               <span className="dot-2 bg-red-500 animate-pulse" />
               <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">LIVE</span>
               <AnimatedBars size="small" /></div></>
         )}</div>
       {/* Toggles */} <div className="flex-row-0.5">{station && !theaterMode && ( <button onClick={onToggleTheater}
-            className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
-            title="Theater Mode"
+            className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50" title="Theater Mode"
             aria-label="Theater mode"><Maximize2 size={14} /></button>
         )}
         {onToggleFav && ( <button onClick={onToggleFav}
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            aria-pressed={!!isFavorite}
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={!!isFavorite}
             className={`p-1.5 rounded-md transition-colors ${isFavorite ? "text-sys-orange" : "text-subtle hover:text-white/50"}`}
             title="Favorita"><Star size={14} className={isFavorite ? "fill-sys-orange" : ""} /></button>
         )}
@@ -141,20 +132,13 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
           className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? "text-sys-orange" : showEq ? "text-sys-orange bg-surface-2" : "text-subtle hover:text-white/50"}`}
         ><SlidersHorizontal size={14} /></button></div>
       {/* Volume */} <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2"><button
-          onClick={onToggleMute}
-          aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+          onClick={onToggleMute} aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
           className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"> {muted || volume === 0 ? (
             <VolumeX size={14} />
           ) : ( <Volume2 size={14} />
           )}</button><input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={volume}
-          onChange={handleVolumeChange}
-          aria-label="Volume"
+          type="range" min={0} max={1} step={0.01} value={volume} onChange={handleVolumeChange} aria-label="Volume"
           className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         /></div></div>
   ); }

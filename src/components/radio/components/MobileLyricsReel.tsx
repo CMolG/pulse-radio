@@ -15,10 +15,8 @@ const LyricReelLine = React.memo(function LyricReelLine({
 }: { lineId: string; index: number; text: string; emphasisIdx: number;
   isDesktop: boolean; lineRefs: React.MutableRefObject<(HTMLElement | null)[]>; scrollToIndex: (i: number) => void;
 }) { const emphasisClass = `${EMPHASIS[emphasisIdx][0]} ${EMPHASIS[emphasisIdx][isDesktop ? 2 : 1]}`; return ( <button
-      key={lineId}
-      ref={(node) => { lineRefs.current[index] = node; }}
-      type="button"
-      onClick={() => scrollToIndex(index)}
+      key={lineId} ref={(node) => { lineRefs.current[index] = node; }}
+      type="button" onClick={() => scrollToIndex(index)}
       className={`block w-full snap-center px-2 py-2 text-center leading-snug tracking-tight transition-all duration-300 ${emphasisClass}`}
     ><span className={`mx-auto block whitespace-pre-wrap ${isDesktop ? "max-w-3xl" : "max-w-[92%]"}`}>{text}</span>
     </button>);
@@ -61,8 +59,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   }, [renderableLines.length, updateFocusedIdx]); if (renderableLines.length === 0) return null;
   return ( <div className={`relative flex-shrink-0 ${isDesktop ? "h-[256px] lg:h-[272px]" : "h-[192px]"}`}>
       <div className={`relative z-20 flex h-full flex-col ${isDesktop ? "px-8 pb-5 pt-3" : "px-5 pb-4 pt-2"}`}><div
-          ref={scrollerRef}
-          className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${
+          ref={scrollerRef} className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${
             isDesktop ? "px-4" : "px-2"
           }`}
           style={{
@@ -71,8 +68,6 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
           }}><div className="flex min-h-full flex-col justify-center py-14"> {renderableLines.map((line, index) => {
                 const ei = (activeIdx >= 0 && index === activeIdx) ? 0 : Math.min(Math.abs(index - focusedIdx), 3) + 1;
                 return ( <LyricReelLine key={line.id} lineId={line.id} index={index} text={line.text} emphasisIdx={ei}
-                    isDesktop={isDesktop}
-                    lineRefs={lineRefs}
-                    scrollToIndex={scrollToIndex} /> );
+                    isDesktop={isDesktop} lineRefs={lineRefs} scrollToIndex={scrollToIndex} /> );
               })}</div></div></div></div>
   ); }

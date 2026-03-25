@@ -54,14 +54,11 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     return () => { window.removeEventListener('keydown', onTab); prev?.focus(); };
   }, [song]);
   return ( <AnimatePresence> {song && ( <motion.div key="song-detail-backdrop" initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
           onClick={onClose}><motion.div key="song-detail-modal" ref={modalRef} role="dialog" aria-modal="true"
-            aria-label={`Song details: ${song.title} by ${song.artist}`}
-            initial={{ y: 30, opacity: 0, scale: 0.96 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 30, opacity: 0, scale: 0.96 }}
+            aria-label={`Song details: ${song.title} by ${song.artist}`} initial={{ y: 30, opacity: 0, scale: 0.96 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 30, opacity: 0, scale: 0.96 }}
             transition={{ type: 'spring', damping: 28, stiffness: 350 }}
             className="w-full max-w-[860px] mx-4 md:flex md:items-stretch md:gap-4"
             onClick={(e) => e.stopPropagation()}>
@@ -73,10 +70,8 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
               {/* ── Song Info ── */} <div className="px-5 -mt-2">{/* Artwork */}
                 <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
                   {resolvedArtworkUrl ? ( <UiImage src={resolvedArtworkUrl}
-                      alt={`Album art for ${song.title} by ${song.artist}`}
-                      className="object-cover"
-                      sizes="240px"
-                      loading="lazy" />
+                      alt={`Album art for ${song.title} by ${song.artist}`} className="object-cover"
+                      sizes="240px" loading="lazy" />
                   ) : ( <div className="size-full flex items-center justify-center">
                       <Music size={56} className="text-dim" /></div>)}</div>
                 {/* Title & artist */} <div className="mt-5 text-center">
@@ -100,8 +95,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                       {showMetaHydration && <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">Fetching metadata…</MetaBadge>}
                       </div></div>)}</div>
                 {/* Apple Music button */} <a href={ resolvedItunesUrl || itunesSearchUrl(song.title, song.artist) }
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
                 ><ExternalLink size={14} /> Listen on Apple Music</a></div>
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" /> {/* ── Artist Info ── */}
@@ -120,10 +114,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {!loading && info && ( <div className="space-y-3">
                     {/* Artist header with image */} <div className="flex gap-3">{info.imageUrl ? (
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"><UiImage
-                            src={info.imageUrl}
-                            alt={info.name}
-                            className="object-cover bg-surface-3"
-                            sizes="64px"
+                            src={info.imageUrl} alt={info.name} className="object-cover bg-surface-3" sizes="64px"
                             loading="lazy" /></div>
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">

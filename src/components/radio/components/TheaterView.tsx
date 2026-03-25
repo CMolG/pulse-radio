@@ -60,19 +60,14 @@ export default function TheaterView({
       <div className="absolute inset-0 bg-[#0f172a]" /> {/* ── Layer 1.5: album art background with ambient drift ── */}
       {coverUrl && failedCoverUrl !== coverUrl && (
         <div className="absolute inset-0 z-2 pointer-events-none overflow-hidden"><UiImage src={coverUrl} alt=""
-            className="object-cover animate-ambient-drift blur-lg opacity-25"
-            sizes="100vw"
+            className="object-cover animate-ambient-drift blur-lg opacity-25" sizes="100vw"
             onError={() => setFailedCoverUrl(coverUrl)} />
           <div className="absolute inset-0 bg-linear-to-t from-[#0f172a] via-[#0f172a]/40 to-[#0f172a]/60" /></div>
       )}
       {/* ── Layer 2: Fibonacci/logarithmic spiral visualizer (blurred, fills screen) ── */}
       <div className="absolute inset-0 z-5 pointer-events-none"><ErrorBoundary fallback={null}><SpiralRenderer
-          frequencyDataRef={frequencyDataRef}
-          className="size-full"
-          color1={color1}
-          color2={color2}
-          color3={color3}
-          sensitivity={compact ? 0.8 : 1.2}
+          frequencyDataRef={frequencyDataRef} className="size-full" color1={color1} color2={color2}
+          color3={color3} sensitivity={compact ? 0.8 : 1.2}
           demo /></ErrorBoundary></div>
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */} <div className="absolute inset-0 z-6 pointer-events-none"
         style={{
@@ -123,8 +118,7 @@ export default function TheaterView({
                 >{stationInitials(station.name) || ( <Radio size={compact ? 24 : 52} className="text-white/60" />
                   )}</span></div>
             ) : ( <UiImage src={coverUrl} alt="" className="object-cover" sizes={compact ? "56px" : "176px"}
-                loading="lazy"
-                onError={() => setFailedCoverUrl(coverUrl)} />
+                loading="lazy" onError={() => setFailedCoverUrl(coverUrl)} />
             )}</div>
           {/* Station name */} <h2
             className={`${compact ? "text-[11px] mb-0" : "text-lg sm:text-xl mb-0"} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
@@ -157,16 +151,13 @@ export default function TheaterView({
           {/* Listen on Apple Music */}
           {!compact && track && ( <a
               href={track.itunesUrl || `https://music.apple.com/search?term=${encodeURIComponent(`${track.artist} ${track.title}`.trim())}&pt=pulse-radio&ct=www.pulse-radio.online`}
-              target="_blank"
-              rel="noopener noreferrer"
+              target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
             ><ExternalLink size={11} /> Listen on Apple Music</a>
           )}
           {/* ── Lyrics reel inside glass panel ── */}
           {!compact && (
             <div className={`w-full ${lyricsVariant === "desktop" ? "px-2 pb-2" : "px-0 pb-1"}`}><LyricsReel
-                lyrics={lyrics ?? null}
-                currentTime={currentTime}
-                activeLineOverride={activeLineOverride}
-                variant={lyricsVariant} /></div>)}</div></div></motion.div>
+                lyrics={lyrics ?? null} currentTime={currentTime}
+                activeLineOverride={activeLineOverride} variant={lyricsVariant} /></div>)}</div></div></motion.div>
   ); }

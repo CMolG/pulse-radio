@@ -61,20 +61,14 @@ function OnboardingModal() { const [show, setShow] = useState(false); const [ste
   if (!show) return null; const currentStep = step < STEPS.length ? STEPS[step] : null;
   const isPWAStep = step >= STEPS.length; const isLast = step === totalSteps - 1;
   return ( <AnimatePresence> {show && ( <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[300] flex items-center justify-center p-4"> {/* Backdrop */}
+          exit={{ opacity: 0 }} className="fixed inset-0 z-[300] flex items-center justify-center p-4"> {/* Backdrop */}
           <div className="absolute inset-0 bg-black/70" onClick={handleClose} /> {/* Modal */} <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
             style={GLASS_STYLE}> {/* Content */} <div className="p-8"><AnimatePresence mode="wait"> <motion.div
-                  key={step}
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.2 }}
+                  key={step} initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.2 }}
                   className="flex flex-col items-center gap-4 text-center min-h-[200px] justify-center">
                   {currentStep ? ( <><div className="p-4 rounded-2xl bg-white/[0.06]">{currentStep.icon}</div>
                       <h2 className="text-xl font-bold text-white">{currentStep.title}</h2>

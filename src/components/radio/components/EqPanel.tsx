@@ -42,8 +42,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
       {onSaveCustomPreset && ( <div className="mb-4"> {showSaveInput ? ( <div className="flex-row-1.5">
  <input type="text" value={presetName} onChange={e => setPresetName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowSaveInput(false); }}
-                placeholder="Preset name…"
-                aria-label="Preset name"
+                placeholder="Preset name…" aria-label="Preset name"
                 className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/30 outline-none focus:border-sys-orange/50"
                 autoFocus/>
  <button onClick={handleSave} aria-label="Save preset" className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors" ><Save size={10} /></button>
@@ -58,8 +57,7 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
         {bands.map(band => ( <div key={band.id} className="col-center gap-1">
             <span className="text-[9px] text-dim tabular-nums">{band.gain > 0 ? `+${band.gain}` : band.gain}</span>
  <input type="range" min={-12} max={12} step={1} value={band.gain} onChange={e => handleSetGain(band.id, parseInt(e.target.value, 10))}
-              disabled={!enabled}
-              aria-label={`${band.label} gain`}
+              disabled={!enabled} aria-label={`${band.label} gain`}
               className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />
             <span className="text-[9px] text-secondary">{band.label}</span></div>))}</div>
@@ -74,24 +72,21 @@ export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, 
                 aria-label={`Noise reduction ${mode}`}>{mode.toUpperCase()}</button>))}</div></div>
         <div className="flex items-center gap-2"><span className="text-[10px] text-secondary shrink-0 w-12">Width</span>
           <input type="range" min={0} max={200} step={5} value={Math.round(stereoWidth * 100)}
-            onChange={e => onSetStereoWidth(parseInt(e.target.value, 10) / 100)}
-            aria-label="Stereo width"
+            onChange={e => onSetStereoWidth(parseInt(e.target.value, 10) / 100)} aria-label="Stereo width"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />
           <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(stereoWidth * 100)}%</span>
         </div><div className="flex items-center gap-2 mt-2">
           <span className="text-[10px] text-secondary shrink-0 w-12">Bass+</span>
           <input type="range" min={0} max={100} step={5} value={Math.round(bassEnhance * 100)}
-            onChange={e => onSetBassEnhance(parseInt(e.target.value, 10) / 100)}
-            aria-label="Bass enhance"
+            onChange={e => onSetBassEnhance(parseInt(e.target.value, 10) / 100)} aria-label="Bass enhance"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />
           <span className="text-[9px] text-dim tabular-nums w-8 text-right">{Math.round(bassEnhance * 100)}%</span>
         </div><div className="flex items-center gap-2 mt-2">
           <button onClick={onToggleCompressor} aria-label={compressorEnabled ? 'Disable compressor' : 'Enable compressor'} title="Multiband Compressor" className={`text-[10px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}>Comp</button>
           <input type="range" min={0} max={100} step={5} value={Math.round(compressorAmount * 100)}
-            onChange={e => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)}
-            disabled={!compressorEnabled}
+            onChange={e => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)} disabled={!compressorEnabled}
             aria-label="Compressor amount"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />

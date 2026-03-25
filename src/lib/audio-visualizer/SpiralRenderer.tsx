@@ -75,7 +75,6 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
     ctx.globalAlpha = 1.0;});
   return ( <div className={`relative overflow-hidden ${className}`}
       style={{ WebkitFilter: "blur(6px)", filter: "blur(6px)" }}><canvas ref={canvasRef}
-        className="absolute inset-0 size-full"
-        style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div>
+        className="absolute inset-0 size-full" style={{ imageRendering: "auto", transform: "scale(1.12)" }} /></div>
   ); }
 export default SpiralRenderer;

@@ -10,10 +10,8 @@ const SHORTCUTS = [ { key: "Space", desc: "Play / Pause" }, { key: "←", desc: 
   { key: "?", desc: "Toggle this help" },];
 interface Props { onClose: () => void; }
 export const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClose }: Props) { return ( <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Keyboard shortcuts"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm" role="dialog"
+      aria-modal="true" aria-label="Keyboard shortcuts"
       onClick={onClose}><div className="bg-surface-2 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 relative"
         onClick={(e) => e.stopPropagation()}><div className="flex items-center justify-between mb-4">
           <h2 className="text-[15px] font-semibold text-white">Keyboard Shortcuts</h2><button onClick={onClose}

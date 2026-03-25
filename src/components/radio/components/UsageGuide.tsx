@@ -47,14 +47,11 @@ function UsageGuide({ onClose }: Props) { const [expandedIdx, setExpandedIdx] = 
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
                 ><div className="flex-shrink-0">{section.icon}</div>
                   <span className="text-[14px] font-medium text-white/80 flex-1">{section.title}</span><motion.span
-                    animate={{ rotate: isExpanded ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}
                     className="text-white/30 text-[12px]">▶</motion.span></button><AnimatePresence>
                   {isExpanded && ( <motion.div initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden">
+                      animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }} className="overflow-hidden">
                       <p className="px-4 pb-3 text-[13px] text-white/50 leading-relaxed pl-[52px]">{section.content}</p>
                     </motion.div>)}</AnimatePresence></div> );
           })}</div><div className="h-6" /></motion.div></motion.div>

@@ -46,8 +46,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
             <ChevronDown size={14} className="text-white/30" /></motion.span>)}</button>
       {/* Stacked/expanded cards */}
       {!expanded && hasMore ? ( <div className="relative cursor-pointer" onClick={() => setExpanded(true)} role="button"
-          tabIndex={0}
-          aria-label={`Expand ${label} songs`}
+          tabIndex={0} aria-label={`Expand ${label} songs`}
           style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}>
           {songs.slice(0, VISIBLE_COUNT).map((song, i) => ( <div key={song.id}
               className="absolute left-0 right-0 transition-all duration-300"
@@ -68,11 +67,7 @@ function GroupStack({ label, icon: Icon, songs, onRemove, onSelect, onContextMen
       ) : ( <AnimatePresence><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
             {visibleSongs.map((song, i) => (
               <div key={song.id} onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}><SongCard
-                  item={song}
-                  onRemove={() => onRemove(song.id)}
-                  onSelect={onSelect}
-                  delay={i}
-                  heart={null}
+                  item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null}
                   hideRemove /></div>))}</div></AnimatePresence>
       )}
       {expanded && hasMore && ( <button onClick={() => setExpanded(false)}
@@ -123,27 +118,15 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
           <Trash2 size={11} />
           Clear all</button></div>
       {filterMode === "artist" ? ( <div> {artistGroups.map(([artistName, artistSongs]) => ( <GroupStack key={artistName}
-              label={artistName}
-              icon={Users}
-              songs={artistSongs}
-              onRemove={onRemove}
-              onSelect={onSelect}
-              onContextMenu={handleContextMenu} />
+              label={artistName} icon={Users} songs={artistSongs} onRemove={onRemove}
+              onSelect={onSelect} onContextMenu={handleContextMenu} />
           ))}</div>
       ) : filterMode === "album" ? ( <div> {albumGroups.map(([albumName, albumSongs]) => ( <GroupStack key={albumName}
-              label={albumName}
-              icon={Disc3}
-              songs={albumSongs}
-              onRemove={onRemove}
-              onSelect={onSelect}
-              onContextMenu={handleContextMenu} />
+              label={albumName} icon={Disc3} songs={albumSongs} onRemove={onRemove}
+              onSelect={onSelect} onContextMenu={handleContextMenu} />
           ))}</div>
       ) : ( <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3"> {songs.map((song, i) => (
             <div key={song.id} onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e, song.id); }}><SongCard
-                item={song}
-                onRemove={() => onRemove(song.id)}
-                onSelect={onSelect}
-                delay={i}
-                heart={null}
+                item={song} onRemove={() => onRemove(song.id)} onSelect={onSelect} delay={i} heart={null}
                 hideRemove /></div>))}</div>)}</div>
   ); }

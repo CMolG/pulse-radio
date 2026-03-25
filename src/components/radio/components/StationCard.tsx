@@ -13,8 +13,7 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
     [station.tags],);
   return (<div role="button" tabIndex={0} aria-label={`${station.name}${isCurrent && isPlaying ? ' (playing)' : ''}`}
       className={`group cursor-pointer rounded-xl p-2 transition-all duration-150 ${isCurrent ? 'bg-surface-3 ring-1 ring-border-strong' : 'hover:bg-surface-2' }`}
-      onClick={onPlay}
-      onMouseEnter={onPrefetch}
+      onClick={onPlay} onMouseEnter={onPrefetch}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPlay(); } }}> {/* Artwork */}
       <div className="relative aspect-square rounded-lg overflow-hidden bg-surface-2 mb-2">
         {showFallback ? ( <div className="size-full dawn-gradient flex-center-row">
@@ -23,16 +22,14 @@ export default React.memo(function StationCard({ station, isPlaying, isCurrent, 
             onError={() => setImgError(true)} />
         )}
         {/* Play overlay */} <motion.button aria-label={isCurrent && isPlaying ? 'Pause' : 'Play'}
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileHover={{ scale: 1.1 }}
+          initial={{ opacity: 0, scale: 0.8 }} whileHover={{ scale: 1.1 }}
           className={`app-overlay-center bg-black/40 transition-opacity duration-200 ${isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
           onClick={e => { e.stopPropagation(); onPlay(); }}>
           <div className="dot-10 bg-sys-orange flex-center-row shadow-lg shadow-black/30">
             {isCurrent && isPlaying ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
           </div></motion.button>
         {/* Favorite badge */} <button onClick={e => { e.stopPropagation(); onToggleFav(); }}
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          aria-pressed={isFavorite}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={isFavorite}
           className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50' }`}
         ><Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} /></button>
         {/* Now-playing indicator */}

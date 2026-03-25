@@ -16,8 +16,7 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
           <Trash2 size={11} />
           Clear all</button></div><div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
         {history.map((entry, i) => ( <SongCard key={entry.id} item={entry} delay={i} onRemove={() => onRemove(entry.id)}
-            onSelect={onSelect}
-            heart={onToggleFavSong ? {
+            onSelect={onSelect} heart={onToggleFavSong ? {
               filled: !!isSongFavorite?.(entry.title, entry.artist), onClick: () => onToggleFavSong(entry),
               label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song', } : null} />
         ))}</div></div>
