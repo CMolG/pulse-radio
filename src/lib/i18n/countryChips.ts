@@ -8,8 +8,7 @@ import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRIES } from "./countries";
 import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from "./languageMap";
 import type { SupportedLocale } from "./locales";
 export type CountryChip = {
-  code: string; queryName: string; displayName: string; flag: string; reason: "language" | "proximity" | "global";
-};
+  code: string; queryName: string; displayName: string; flag: string; reason: "language" | "proximity" | "global"; };
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
 const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI", "TV", "NR", "PW", "MH", "FM", "TO",
   "WS", "VU",]);
@@ -22,8 +21,7 @@ function localeFromLang3(code3: string): SupportedLocale | null { return LANG3_T
 export function getCountryDisplayName(locale: SupportedLocale, code: string): string {
   const country = COUNTRY_BY_CODE[code]; if (!country) return code;
   try { const dn = new Intl.DisplayNames([locale], { type: "region" }); return dn.of(code) ?? country.name;
-  } catch { return country.name; }
-}
+  } catch { return country.name; } }
 function getSameLanguageCountries(locale: SupportedLocale): string[] {
   const candidates = new Set(localeCandidates(locale));
   return SOVEREIGN_COUNTRIES.filter((country) =>country.lang3.some((lang3) => {
@@ -41,8 +39,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     return { code: country.code, score };
   }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).map((item) => item.code); }
 function uniquePush(target: string[], values: string[]) {
-  for (const value of values) { if (!target.includes(value)) target.push(value); }
-}
+  for (const value of values) { if (!target.includes(value)) target.push(value); } }
 export function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36): CountryChip[] {
   const languageCodes = getSameLanguageCountries(locale); const proximityCodes = getProximityCountries(languageCodes);
   const ordered: string[] = []; uniquePush(ordered, languageCodes);

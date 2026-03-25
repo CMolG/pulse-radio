@@ -62,8 +62,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     const key = `${artistSeed}\n${track.title}`.toLowerCase(); const cached = loadCache();
     if (abortRef.current) abortRef.current.abort(); if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     retryCountRef.current = 0; const controller = new AbortController();
-    abortRef.current = controller; doFetch(key, cached, controller);
-  };
+    abortRef.current = controller; doFetch(key, cached, controller); };
   const realtimeSync = useRealtimeLyricsSync({
     lyrics, enabled: enableRealtime, languageHint: options?.languageHint ?? 'en',});
   return { lyrics, loading, error, retry,

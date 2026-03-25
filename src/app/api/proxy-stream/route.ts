@@ -46,8 +46,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
             status: 403, headers: { 'Content-Type': 'application/json' },});
         }} catch {
         // URL parse failed — continue with original validation
-      }
-    }
+      } }
     if (!upstream.ok || !upstream.body) { if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
@@ -70,5 +69,4 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
     const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 502, headers: { 'Content-Type': 'application/json', 'Retry-After': '5' },});
-  }
-}
+  } }

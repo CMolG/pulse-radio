@@ -13,6 +13,5 @@ export function parseLrc(lrcText: string): LyricLine[] { const lines: LyricLine[
       const centiseconds = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
       timestamps.push(minutes * 60 + seconds + centiseconds / 1000); lastIndex = TS_REGEX.lastIndex; }
     if (timestamps.length === 0) continue; const text = raw.slice(lastIndex).trim(); if (!text) continue;
-    for (const time of timestamps) { lines.push({ time, text }); }
-  }
+    for (const time of timestamps) { lines.push({ time, text }); } }
   return lines.sort((a, b) => a.time - b.time); }

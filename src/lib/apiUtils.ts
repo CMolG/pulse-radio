@@ -11,5 +11,4 @@ export async function apiFetch( url: string,
         await res.body?.cancel().catch(() => {}); throw new Error('Response too large'); }
     }
     return res;
-  } finally { clearTimeout(timer); }
-}
+  } finally { clearTimeout(timer); } }

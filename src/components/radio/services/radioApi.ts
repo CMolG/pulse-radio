@@ -26,8 +26,7 @@ async function fetchCached(path: string, key: string): Promise<Station[]> { cons
       while (cache.size > MAX_CACHE) {
         const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
       return filtered;
-    } catch { rotateServer(); }
-  }
+    } catch { rotateServer(); } }
   throw new Error('All Radio-Browser API servers unavailable'); }
 export async function topStations(limit = 20): Promise<Station[]> {
   return fetchCached(`/stations/topvote?limit=${limit}`, `top-${limit}`); }

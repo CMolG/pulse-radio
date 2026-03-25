@@ -9,8 +9,7 @@ import type { LyricsData } from "../types";
 import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyricsUtils";
 type Props = { lyrics: LyricsData | null; currentTime?: number;
    activeLineOverride?: number;
-  variant?: "mobile" | "desktop";
-};
+  variant?: "mobile" | "desktop"; };
 // [base classes, mobile size, desktop size]
 const EMPHASIS: [string, string, string][] = [
   ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],

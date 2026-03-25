@@ -46,8 +46,7 @@ export function VisualizerCanvas({
             const gradient = ctx.createLinearGradient(0, height, 0, 0); gradient.addColorStop(0, resolvedColor);
             gradient.addColorStop(1, 'transparent'); fillStyle = gradient;
             gradientCacheRef.current = { key: gradKey, gradient };
-          } catch { /* fallback to solid color */ }
-        }
+          } catch { /* fallback to solid color */ } }
         ctx.fillStyle = fillStyle;
         // Feature-detect roundRect once instead of try-catch per bar
         if (supportsRoundRectRef.current === null) supportsRoundRectRef.current = typeof ctx.roundRect === 'function';

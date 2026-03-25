@@ -16,20 +16,17 @@ type Props = { bands: EqBand[]; enabled: boolean; normalizerEnabled: boolean; st
   onSetBassEnhance: (v: number) => void; onToggleCompressor: () => void;
   onSetCompressorAmount: (v: number) => void; onSetNoiseReductionMode: (mode: NoiseReductionMode) => void;
   onClose: () => void; onSaveCustomPreset?: (name: string) => void;
-  onRemoveCustomPreset?: (name: string) => void; onPresetChange?: (name: string | null) => void;
-};
+  onRemoveCustomPreset?: (name: string) => void; onPresetChange?: (name: string | null) => void; };
 export default React.memo(function EqPanel({ bands, enabled, normalizerEnabled, stereoWidth, bassEnhance, compressorEnabled, compressorAmount, noiseReductionMode, customPresets = [], onSetGain, onApplyPreset, onToggleEnabled, onToggleNormalizer, onSetStereoWidth, onSetBassEnhance, onToggleCompressor, onSetCompressorAmount, onSetNoiseReductionMode, onClose, onSaveCustomPreset, onRemoveCustomPreset, onPresetChange }: Props) {
   const [showSaveInput, setShowSaveInput] = useState(false); const [presetName, setPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const handleSelectPreset = (name: string, gains: number[]) => {
-    setSelectedPreset(name); onApplyPreset(gains); onPresetChange?.(name);
-  };
+    setSelectedPreset(name); onApplyPreset(gains); onPresetChange?.(name); };
   const handleSetGain = (id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange?.(null); onSetGain(id, gain);
   }; const handleSave = () => { const name = presetName.trim();
     if (name && onSaveCustomPreset) { onSaveCustomPreset(name); setPresetName(''); setShowSaveInput(false);
-    }
-  };
+    } };
   return (<div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50">
       {/* Header */} <div className="flex-between mb-4">
         <div className="flex-row-2"><span className="text-[13px] font-semibold text-white">Equalizer</span>

@@ -16,8 +16,7 @@ async function fetchJson<T>(url: string, headers: Record<string, string>): Promi
     const cl = res.headers.get('content-length');
     if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) { await res.body?.cancel().catch(() => {}); return null; }
     return await res.json();
-  } catch { return null; }
-}
+  } catch { return null; } }
 async function searchMusicBrainz(artist: string) {
   const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,8 +38,7 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
           ? ['(singer)', '(musician)', '(rapper)']
           : ['(band)', '(musical group)', '(singer)', '(musician)'];
       for (const suffix of suffixes) { const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
-        if (attempt?.extract) { wiki = attempt; break; }
-      }
+        if (attempt?.extract) { wiki = attempt; break; } }
     }
     const tags = mb?.tags ?.filter((t: { count: number }) => t.count > 0)
         ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)

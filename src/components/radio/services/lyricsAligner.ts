@@ -8,11 +8,9 @@ import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
 import { normalizeText } from '@/lib/stringUtils';
 export type AlignerStepInput = {
   lyrics: LyricsData; hypothesisText: string; previousConfirmedIndex: number; previousCandidateIndex: number;
-  stableSamples: number; policy: RealtimeAlignPolicy;
-};
+  stableSamples: number; policy: RealtimeAlignPolicy; };
 export type AlignerStepResult = { candidateIndex: number; confirmedIndex: number; score: number; stableSamples: number;
-  jumpRejected: boolean; relockTriggered: boolean;
-};
+  jumpRejected: boolean; relockTriggered: boolean; };
 const STOPWORDS = new Set([ 'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'for', 'with',
   'el', 'la', 'los', 'las', 'de', 'del', 'y', 'en', 'por', 'con', 'un', 'una',]);
 const WORD_RE = /[a-z0-9']+/g;
@@ -25,8 +23,7 @@ function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
   const overlapScore = overlaps / Math.max(lineSet.size, 1); let ordered = 0; let lineIdx = 0;
   for (const token of hypoTokens) { for (let i = lineIdx; i < lineTokens.length; i++) {
       if (lineTokens[i] === token) { ordered++; lineIdx = i + 1; break;
-      }
-    }
+      } }
   }
   const orderScore = ordered / Math.max(hypoTokens.length, 1); const shortPenalty = lineTokens.length <= 2 ? 0.2 : 0;
   return Math.max(0, overlapScore * 0.7 + orderScore * 0.3 - shortPenalty); }
@@ -46,8 +43,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   let bestScore = 0;
   for (let i = start; i <= end; i++) {
     const lineTokens = tokenize(lyrics.lines[i]?.text ?? ''); const score = scoreLine(lineTokens, hypoTokens);
-    if (score > bestScore) { bestScore = score; bestIndex = i; }
-  }
+    if (score > bestScore) { bestScore = score; bestIndex = i; } }
   if (bestIndex < 0 || bestScore < policy.candidateMinScore) { return {
       candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: bestScore, stableSamples,
       jumpRejected: false, relockTriggered: false,

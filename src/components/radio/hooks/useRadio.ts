@@ -13,8 +13,7 @@ import { resumeAudioContext, hasAudioSource } from '@/lib/audio-visualizer';
 function proxyUrl(raw: string): string { return `/api/proxy-stream?url=${encodeURIComponent(raw)}`; }
 function isValidStreamUrl(url: string | undefined): url is string { if (!url) return false;
   try { const parsed = new URL(url); return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch { return false; }
-}
+  } catch { return false; } }
 /** Browser blocked autoplay — treat as paused, not error */
 function isAutoplayBlocked(err: unknown): boolean {
   return err instanceof DOMException && err.name === 'NotAllowedError'; }
@@ -44,8 +43,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good'); const lastBufferEndRef = useRef<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clearTimer = (ref: React.MutableRefObject<any>) => {
-    if (ref.current != null) { clearTimeout(ref.current); ref.current = null; }
-  };
+    if (ref.current != null) { clearTimeout(ref.current); ref.current = null; } };
   // Latest volume/muted refs so crossfade intervals read current values
   const volumeRef = useRef(volume); const mutedRef = useRef(muted);
   volumeRef.current = volume; mutedRef.current = muted;
@@ -92,8 +90,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
         srcChangingRef.current = true;
         audio.crossOrigin = useProxy ? 'anonymous' : null; audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
         // Clear in a microtask (after the synchronous pause event has fired)
-        Promise.resolve().then(() => { srcChangingRef.current = false; }); return audio.play();
-      };
+        Promise.resolve().then(() => { srcChangingRef.current = false; }); return audio.play(); };
       setSourceAndPlay(shouldUseProxy).catch((err) => {
         // On iOS, direct playback is more stable in background.
         // If direct fails for non-autoplay reasons, fallback to proxy for this station.
@@ -135,8 +132,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
         }
         startPlayback(audio, station.url_resolved, (err) => {
           isReconnectingRef.current = false; handlePlayRejected(err);});
-      }, jitter);
-    };
+      }, jitter); };
     const onPause = () => {
       // Case 1: user explicitly paused — just show paused state
       if (userPausedRef.current) { setStatus('paused'); return; }
@@ -177,8 +173,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
             if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return; setStatus('error');
           }); return; }
         setStatus('error'); return; }
-      reconnect(1000 * Math.min(retryRef.current + 1, 5));
-    };
+      reconnect(1000 * Math.min(retryRef.current + 1, 5)); };
     // Stalled: the browser stopped receiving data but hasn't errored
     // Timeout adapts to remaining buffer: more buffer → wait longer for recovery
     let stallCount = 0; const onStalled = () => { clearTimer(stallTimerRef); stallCount++; let bufferAhead = 0;
@@ -196,8 +191,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       stallCount = 0; // Reset stall counter on successful playback
       userPausedRef.current = false;
       isReconnectingRef.current = false; // Clear gate — reconnect path succeeded
-      bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current });
-    };
+      bcRef.current?.postMessage({ type: 'playing', tabId: tabIdRef.current }); };
     // Ended: connection dropped — seamlessly reconnect
     const onEnded = () => { if (!userPausedRef.current && station) reconnect(500); };
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
@@ -216,8 +210,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
             // Mobile: no gesture — show play button
             setStatus('paused');
           } else reconnect(500);});
-      }
-    };
+      } };
     // Network status: pause retries when offline, auto-reconnect when back online
     const onOffline = () => { clearReconnectTimer(); };
     const onOnline = () => { if (station && !userPausedRef.current && (audio.paused || audio.readyState < 2)) {
@@ -276,8 +269,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     ]; pairs.forEach(([t, e, h]) => t.addEventListener(e, h));
     return () => {
       clearTimer(stallTimerRef); clearTimer(pauseTimerRef); clearReconnectTimer(); clearTimer(bufferCheckRef);
-      pairs.forEach(([t, e, h]) => t.removeEventListener(e, h));
-    };
+      pairs.forEach(([t, e, h]) => t.removeEventListener(e, h)); };
   }, [station, getAudio, startPlayback, handlePlayRejected]);
   useEffect(() => { saveToStorage(STORAGE_KEYS.VOLUME, volume); const audio = audioRef.current;
     // Skip direct volume set while crossfade is in progress — the interval controls audio.volume

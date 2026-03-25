@@ -25,8 +25,7 @@ type Props = { onClose: () => void;
     removeCustomPreset: (name: string) => void;
   }; onPresetChange: (name: string | null) => void;
   statsData?: { topStations: StationListenTime[]; topSongs: SongPlayCount[];
-    topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number;
-  };
+    topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number; };
 };
 export default function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: Props) {
   const { locale, setLocale, locales } = useLocale(); const [showEq, setShowEq] = useState(false);
@@ -40,8 +39,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
     setSelectedPreset(null); onPresetChange(null); eq.setBandGain(id, gain);
   }, [eq, onPresetChange]); const handleSave = () => { const name = presetName.trim();
     if (name) { eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false);
-    }
-  };
+    } };
   return ( <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

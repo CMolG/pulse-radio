@@ -45,8 +45,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   const offCtx = _offscreen.getContext('2d', { willReadFrequently: true }); if (!offCtx) return;
   // Reuse ImageData across frames — every pixel is written below, so no zeroing needed
   if (!_imgData || _imgData.width !== sw || _imgData.height !== sh) {
-    try { _imgData = offCtx.createImageData(sw, sh); } catch { return; }
-  }
+    try { _imgData = offCtx.createImageData(sw, sh); } catch { return; } }
   const sd = _imgData.data;
   // Pre-compute per-blob max influence radius squared for distance culling.
   // field = r² / (distSq + 1). For field >= 0.01 → distSq < r²/0.01 = 100*r²
@@ -60,8 +59,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
         // Early-exit: skip blobs too far to contribute meaningfully
         if (distSq > blobMaxDistSq[b]) continue;
         const r = blob.baseRadius; const field = (r * r) / (distSq + 1); sum += field;
-        if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; }
-      }
+        if (field > 0.01) { weightedBand += blob.freqBand * field; totalWeight += field; } }
       const idx = (py * sw + px) * 4;
       if (sum > threshold) { const band = totalWeight > 0 ? weightedBand / totalWeight : 0; const bandNorm = band / 128;
         // color based on proximity to center vs edge, and energy
@@ -87,8 +85,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
   // bilinear interpolation (imageSmoothingEnabled) to eliminate aliasing
   try { offCtx.putImageData(_imgData, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h);
-  } catch { /* skip frame on canvas error */ }
-}
+  } catch { /* skip frame on canvas error */ } }
 /* ─── component ─── */
 export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
   colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false,

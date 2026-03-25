@@ -4,8 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 export type SovereignCountry = {
-  code: string; name: string; region: string; subregion: string; borders: string[]; lang3: string[];
-};
+  code: string; name: string; region: string; subregion: string; borders: string[]; lang3: string[]; };
 export const SOVEREIGN_COUNTRIES: SovereignCountry[] = [
   { code: "AD", name: "Andorra", region: "Europe", subregion: "Southern Europe", borders: ["FR", "ES"], lang3: ["cat"] },
   { code: "AE", name: "United Arab Emirates", region: "Asia", subregion: "Western Asia", borders: ["OM", "SA"], lang3: ["ara"] },

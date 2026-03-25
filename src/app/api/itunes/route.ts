@@ -25,5 +25,4 @@ export async function GET(req: NextRequest) { const term = req.nextUrl.searchPar
     return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : (e instanceof Error ? e.message : 'Internal error'), results: [] },
       { status: isTimeout ? 504 : 500 },);
-  }
-}
+  } }

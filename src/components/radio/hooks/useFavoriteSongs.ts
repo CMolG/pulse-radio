@@ -28,8 +28,7 @@ export function useFavoriteSongs() { const MAX_SONGS = 500;
   useStorageSync<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, setSongs);
   const prepend = (song: Omit<FavoriteSong, 'id' | 'timestamp'>, prev: FavoriteSong[]) => {
     const entry: FavoriteSong = { ...song, id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, timestamp: Date.now() };
-    const next = [entry, ...prev]; return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next;
-  };
+    const next = [entry, ...prev]; return next.length > MAX_SONGS ? next.slice(0, MAX_SONGS) : next; };
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => keySetRef.current.has(songKey(song.title, song.artist)) ? prev : prepend(song, prev));
   }, []); const remove = useCallback((id: string) => { setSongs(prev => prev.filter(s => s.id !== id)); }, []);

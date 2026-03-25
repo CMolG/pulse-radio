@@ -14,8 +14,7 @@ import { stationInitials } from '../utils/formatUtils';
 type Props = { station: Station; isPlaying: boolean; isCurrent: boolean; isFavorite: boolean;
   onPlay: () => void; onToggleFav: () => void;
   liveStatus?: 'loading' | 'loaded' | 'error'; liveTrack?: { title: string; artist: string } | null;
-  onPeek?: () => void; onPrefetch?: () => void;
-};
+  onPeek?: () => void; onPrefetch?: () => void; };
 export default React.memo(function StationCard({ station, isPlaying, isCurrent, isFavorite, onPlay, onToggleFav, liveStatus, liveTrack, onPeek, onPrefetch }: Props) {
   const [imgError, setImgError] = useState(false); const showFallback = !station.favicon || imgError;
   const tags = useMemo( () => station.tags?.split(',').slice(0, 1).map(t => t.trim()).filter(Boolean) ?? [],

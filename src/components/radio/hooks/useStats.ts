@@ -103,8 +103,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       if (!needsArtwork && !needsGenre) return prev;
       const next: UsageStats = { ...prev, songPlayCounts: { ...prev.songPlayCounts,
           [key]: { ...songEntry, ...(needsArtwork ? { artworkUrl } : {}), ...(needsGenre ? { genre: normalizedGenre } : {}) },
-        },
-      };
+        }, };
       if (needsGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {

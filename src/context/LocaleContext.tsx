@@ -11,8 +11,7 @@ import { type MessageKey, translate } from "@/lib/i18n/messages";
 type TranslateFn = (key: MessageKey, vars?: Record<string, string | number>) => string;
 type LocaleContextValue = {
   locale: SupportedLocale; setLocale: (locale: SupportedLocale) => void; t: TranslateFn; rtl: boolean;
-  locales: typeof SUPPORTED_LOCALES;
-};
+  locales: typeof SUPPORTED_LOCALES; };
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 export function LocaleProvider({ children, countryCode, }: { children: React.ReactNode; countryCode?: string; }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(() =>

@@ -28,8 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary", title: SITE_TITLE, description: SITE_DESCRIPTION, images: ["/android-chrome-512x512.png"] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
-  alternates: { canonical: SITE_URL, }, category: "music", other: { "mobile-web-app-capable": "yes", },
-};
+  alternates: { canonical: SITE_URL, }, category: "music", other: { "mobile-web-app-capable": "yes", }, };
 export const viewport: Viewport = { themeColor: "#0a0f1a", width: "device-width", initialScale: 1, maximumScale: 5, viewportFit: "cover" };
 function JsonLd() { const schema = {
     "@context": "https://schema.org", "@type": "WebApplication", name: "Pulse Radio", url: SITE_URL,

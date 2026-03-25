@@ -35,8 +35,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
     }; tickRafRef.current = requestAnimationFrame(tick);
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => { window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(rafRef.current); cancelAnimationFrame(tickRafRef.current);
-    };
+      cancelAnimationFrame(rafRef.current); cancelAnimationFrame(tickRafRef.current); };
   }, [handleMouseMove]);
   const gradient = genre ? GENRE_GRADIENTS[genre.toLowerCase()] || GENRE_GRADIENTS.default : GENRE_GRADIENTS.default;
   return { offset, containerRef, gradient }; }

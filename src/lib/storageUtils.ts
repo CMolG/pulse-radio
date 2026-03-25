@@ -4,8 +4,7 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 function tryLoad(key: string): string | null { if (typeof window === 'undefined') return null;
-  try { return localStorage.getItem(key); } catch { return null; }
-}
+  try { return localStorage.getItem(key); } catch { return null; } }
 function isQuotaExceeded(e: unknown): boolean {
   return e instanceof DOMException && (e.name === 'QuotaExceededError' || (e as DOMException).code === 22); }
 function trySave(key: string, raw: string): boolean { try {
@@ -16,8 +15,7 @@ function trySave(key: string, raw: string): boolean { try {
 /** Load a JSON value from localStorage with a fallback default */
 export function loadFromStorage<T>(key: string, defaultValue: T): T {
   const raw = tryLoad(key); if (!raw) return defaultValue;
-  try { return JSON.parse(raw); } catch { return defaultValue; }
-}
+  try { return JSON.parse(raw); } catch { return defaultValue; } }
 /** Save a JSON value to localStorage. Returns false if quota is exceeded. */
 export const saveToStorage = <T,>(key: string, value: T) => trySave(key, JSON.stringify(value));
 /** Load a plain string value from localStorage with fallback */
@@ -37,5 +35,4 @@ export function ensureStorageVersion(managedKeys: readonly string[]): void { if 
     // Version mismatch — clear managed keys to prevent stale data crashes
     for (const key of managedKeys) { localStorage.removeItem(key); }
     localStorage.setItem(VERSION_KEY, current);
-  } catch { /* ignore in SSR / restricted environments */ }
-}
+  } catch { /* ignore in SSR / restricted environments */ } }

@@ -13,8 +13,7 @@ const NR_PRESETS: Record<NoiseReductionMode, { hpfHz: number; gateThreshold: num
   off: { hpfHz: 20, gateThreshold: -90, gateRatio: 1.0, deEsserCenterHz: 6000, deEsserGain: 0 },
   low: { hpfHz: 35, gateThreshold: -55, gateRatio: 1.5, deEsserCenterHz: 5500, deEsserGain: -1.5 },
   medium: { hpfHz: 35, gateThreshold: -48, gateRatio: 2.0, deEsserCenterHz: 6000, deEsserGain: -3 },
-  high: { hpfHz: 35, gateThreshold: -42, gateRatio: 3.0, deEsserCenterHz: 6500, deEsserGain: -4.5 },
-};
+  high: { hpfHz: 35, gateThreshold: -42, gateRatio: 3.0, deEsserCenterHz: 6500, deEsserGain: -4.5 }, };
 const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
 function ensureQualityMigration(): void { if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
   saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low'); saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
@@ -76,8 +75,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       for (const ref of graphNodeRefs) ref.current?.disconnect();
     } catch { /* ok */ }
     filtersRef.current = []; for (const ref of graphNodeRefs) ref.current = null;
-    if (includeSource) { sourceRef.current = null; connectedAudioRef.current = null; }
-  }
+    if (includeSource) { sourceRef.current = null; connectedAudioRef.current = null; } }
   // Smooth ramp time for parameter changes to prevent clicks/pops
   const RAMP_TIME = 0.02; // 20ms — fast enough to feel instant, slow enough to avoid clicks
   const applyNoiseReductionPreset = useCallback((mode: NoiseReductionMode) => {
@@ -251,8 +249,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           if (next) { normGain.gain.setTargetAtTime(1.6, t, RAMP_TIME); source.connect(normalizer);
             normalizer.connect(normGain); normGain.connect(nrHead);
           } else { normGain.gain.setTargetAtTime(1.0, t, RAMP_TIME); source.connect(nrHead); }
-        } catch { /* ok */ }
-      }
+        } catch { /* ok */ } }
       return next;});}, []);
   const saveCustomPreset = useCallback((name: string) => {
     const preset: EqPreset = { name, gains: bands.map(b => b.gain) };

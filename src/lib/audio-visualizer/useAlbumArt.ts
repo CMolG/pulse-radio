@@ -16,8 +16,7 @@ const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, release
 };
 type ItunesResult = { trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
   collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number;
-  primaryGenreName?: string; trackNumber?: number; trackCount?: number;
-};
+  primaryGenreName?: string; trackNumber?: number; trackCount?: number; };
 // Reusable match arrays for Jaro distance — avoids allocation per call
 let _aMatches: boolean[] = [];
 let _bMatches: boolean[] = [];
@@ -69,8 +68,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
         const artistScore = jaroWinkler(candidateArtist, normalizedRequestedArtist); if (artistScore < 0.85) continue;
         score = (titleScore * 0.85) + (artistScore * 0.15); }
     }
-    if (score > bestScore) { bestScore = score; best = results[i]; }
-  }
+    if (score > bestScore) { bestScore = score; best = results[i]; } }
   return best ?? null; }
 function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key);
   if (val !== undefined) {

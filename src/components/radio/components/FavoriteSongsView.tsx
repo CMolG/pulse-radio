@@ -30,8 +30,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
     }; const onScroll = () => onClose(); window.addEventListener("pointerdown", onPointerDown, true);
     window.addEventListener("scroll", onScroll, { capture: true, passive: true });
     return () => { window.removeEventListener("pointerdown", onPointerDown, true);
-      window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
-    };
+      window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions); };
   }, [menu, onClose]); if (!menu) return null;
   // Clamp so menu doesn't overflow viewport
   const menuW = 200; const menuH = 48;

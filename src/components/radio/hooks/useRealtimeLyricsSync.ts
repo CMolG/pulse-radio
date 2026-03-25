@@ -57,8 +57,7 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
       onFatalError: (errorMessage) => { setRuntimeState(prev => ({
           ...prev, status: 'error', activeLineIndex: -1, candidateLineIndex: -1,
           confidence: 0, effectiveCurrentTime: undefined, diagnostics: { ...prev.diagnostics, errorMessage, },
-        }));
-      },
+        })); },
     }); engineRef.current = engine; engine.start(languageHint); return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);

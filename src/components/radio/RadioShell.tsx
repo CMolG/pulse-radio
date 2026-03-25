@@ -209,8 +209,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         import('./services/radioApi').then(({ similarStations }) => { similarStations(radio.station!, 3).then(alts => {
             if (alts.length > 0 && !cancelled) handlePlay(alts[0]);
           }).catch(() => {});});
-      }
-    }
+      } }
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.status]); const skipDepsRef = useRef({ radio, favs, stationQueue });
@@ -218,14 +217,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleSkipNext = useCallback(() => { const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     // Prefer queue if it has entries
     if (sq.hasNext) { const next = sq.skipToNext();
-      if (next) { handlePlay(next); return; }
-    }
+      if (next) { handlePlay(next); return; } }
     if (r.station) { const next = f.playNext(r.station.stationuuid); if (next) handlePlay(next); }
   }, [handlePlay]);
   const handleSkipPrev = useCallback(() => { const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     if (sq.hasPrev) { const prev = sq.skipToPrev();
-      if (prev) { handlePlay(prev); return; }
-    }
+      if (prev) { handlePlay(prev); return; } }
     if (r.station) { const prev = f.playPrev(r.station.stationuuid); if (prev) handlePlay(prev); }
   }, [handlePlay]);
   useMediaSession({

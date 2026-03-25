@@ -19,8 +19,7 @@ type Props = { station: Station | null; track: NowPlayingTrack | null; status: P
   onToggleEq: () => void; onToggleTheater?: () => void; onToggleFav?: () => void; onFavSong?: () => void;
   isFavorite?: boolean; songLiked?: boolean; eqPresetActive?: boolean; showEq: boolean;
   theaterMode?: boolean; compact?: boolean; sleepTimerMin?: number | null; onCycleSleepTimer?: () => void;
-  streamQuality?: StreamQuality;
-};
+  streamQuality?: StreamQuality; };
 const SAFE_AREA_STYLE: React.CSSProperties = { paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))' };
 function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef, icyBitrate, onTogglePlay,
   onSetVolume, onToggleMute, onToggleEq, onToggleTheater, onToggleFav, onFavSong, isFavorite, songLiked,

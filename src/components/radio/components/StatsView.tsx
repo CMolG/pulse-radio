@@ -14,8 +14,7 @@ function formatListenTime(ms: number): string {
   if (hours < 24) return `${hours}h ${remMins}m`; const days = Math.floor(hours / 24);
   const remHours = hours % 24; return `${days}d ${remHours}h`; }
 type Props = { topStations: StationListenTime[]; topSongs: SongPlayCount[];
-  topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number;
-};
+  topArtists: ArtistPlayCount[]; topGenres: GenrePlayCount[]; totalListenMs: number; };
 const StatSection = React.memo(function StatSection({ title, icon, children, }: {
   title: string; icon: React.ReactNode; children: React.ReactNode;
 }) { return (

@@ -27,8 +27,7 @@ type Props = {
   onPrefetch?: (streamUrl: string) => void; favorites?: Station[];
   recent?: Station[]; onSelectGenre?: (cat: BrowseCategory) => void;
   onSelectCountry?: (countryCode: string, countryQueryName: string, countryDisplayName: string) => void;
-  onGoHome?: () => void; userGenreOrder?: string[];
-};
+  onGoHome?: () => void; userGenreOrder?: string[]; };
 const SCROLL_CLASS =
   "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]";
 /* ── Scroll row with left/right arrow buttons (desktop only) ── */
@@ -112,8 +111,7 @@ export default function BrowseView({
     } catch { if (!flags?.cancelled) {
         setFailedCategories((prev) => {
           if (prev.has(catId)) return prev; const next = new Set(prev); next.add(catId); return next;});
-      }
-    }
+      } }
   }, [translatedGenreCategories]);
   useEffect(() => { setPage(0); setLiveData({}); setScanEnabled(false); setSongFilter(""); scanGenRef.current++;
   }, [view]);

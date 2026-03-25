@@ -9,8 +9,7 @@ import type { Station, NowPlayingTrack } from '../types';
 type MediaSessionConfig = {
   station: Station | null; track: NowPlayingTrack | null; isPlaying: boolean; onPlay: () => void;
   onPause: () => void; onNext: () => void; onPrev: () => void; onStop: () => void;
-  onSeekBackward?: () => void; onSeekForward?: () => void;
-};
+  onSeekBackward?: () => void; onSeekForward?: () => void; };
 export function useMediaSession(config: MediaSessionConfig): void {
   const configRef = useRef(config); useEffect(() => { configRef.current = config; }, [config]);
   const { station, track, isPlaying } = config; const lastMetaRef = useRef('');
@@ -33,11 +32,9 @@ export function useMediaSession(config: MediaSessionConfig): void {
       ['seekbackward', () => { if (configRef.current.onSeekBackward) configRef.current.onSeekBackward(); }],
       ['seekforward', () => { if (configRef.current.onSeekForward) configRef.current.onSeekForward(); }],];
     for (const [action, handler] of handlers) { try { navigator.mediaSession.setActionHandler(action, handler); }
-      catch { /* not supported */ }
-    }
+      catch { /* not supported */ } }
     return () => { for (const [action] of handlers) {
         try { navigator.mediaSession.setActionHandler(action, null); }
-        catch { /* ok */ }
-      }
+        catch { /* ok */ } }
     };
   }, []); useEffect(setupHandlers, [setupHandlers]); }

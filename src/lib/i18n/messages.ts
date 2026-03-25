@@ -76,8 +76,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     searchStationsAria: "ابحث عن المحطات", retry: "إعادة المحاولة",
     failedToLoad: "فشل التحميل", noStationsFound: "لم يتم العثور على محطات", previous: "السابق", next: "التالي",
     minimize: "تصغير", expand: "توسيع",
-  },
-};
+  }, };
 function mergeBundle(locale: SupportedLocale): MessageBundle {
   const patch = DEEP_MESSAGES[locale] ?? {}; return { ...BASE_MESSAGES, ...patch }; }
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};

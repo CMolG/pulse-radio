@@ -11,12 +11,10 @@ type BrowserSpeechRecognitionErrorEvent = { error: string };
 type BrowserSpeechRecognition = { continuous: boolean; interimResults: boolean; maxAlternatives: number; lang: string;
   onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
   onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null;
-  start: () => void; stop: () => void;
-};
+  start: () => void; stop: () => void; };
 type RecognitionCtor = new () => BrowserSpeechRecognition;
 type EngineCallbacks = {
-  onHypothesis: (hypothesis: RealtimeSpeechHypothesis) => void; onFatalError: (errorMessage: string) => void;
-};
+  onHypothesis: (hypothesis: RealtimeSpeechHypothesis) => void; onFatalError: (errorMessage: string) => void; };
 const MAX_RESTARTS = 4;
 function getRecognitionCtor(): RecognitionCtor | null {
   if (typeof window === 'undefined' || !window.isSecureContext) return null;
@@ -58,8 +56,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       const current = recognition; if (!current) return;
       try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.');
       }
-    };
-  };
+    }; };
   return { start: (lang) => {
       if (destroyed || running) return; wireRecognition(lang); if (!recognition) return;
       try { recognition.start(); running = true; restartCount = 0;

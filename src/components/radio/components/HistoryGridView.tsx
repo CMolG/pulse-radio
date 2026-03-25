@@ -10,8 +10,7 @@ import type { HistoryEntry, SongDetailData } from "../types";
 import SongCard from "./SongCard";
 type Props = { history: HistoryEntry[]; onRemove: (id: string) => void;
   onClear: () => void; onToggleFavSong?: (entry: HistoryEntry) => void;
-  isSongFavorite?: (title: string, artist: string) => boolean; onSelect?: (song: SongDetailData) => void;
-};
+  isSongFavorite?: (title: string, artist: string) => boolean; onSelect?: (song: SongDetailData) => void; };
 export default React.memo(function HistoryGridView({ history, onRemove, onClear, onToggleFavSong, isSongFavorite, onSelect }: Props) {
   if (history.length === 0) { return (
       <div className="flex-center-col py-20 px-4"><Clock size={40} className="text-dim mb-3" />

@@ -36,8 +36,7 @@ export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
     if (!res.ok) return { streamTitle: null, icyBr: null }; const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
   } catch { return { streamTitle: null, icyBr: null };
-  } finally { clearTimeout(timeout); }
-}
+  } finally { clearTimeout(timeout); } }
 let _lastStation = '';
 let _lastStationLower = '';
 export function parseTrack(raw: string, stationName: string): NowPlayingTrack | null {
@@ -62,8 +61,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
   const currentStationId = station?.url_resolved ?? null;
   if (currentStationId !== prevStationId) { setPrevStationId(currentStationId);
     if (!station) { setTrack(null); setIcyBitrate(null); setStreamCodec(null);
-    }
-  }
+    } }
   useEffect(() => { if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     if (!station) { lastTitleRef.current = ''; prevStationUrlRef.current = null; return;
     }
@@ -83,8 +81,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
         // Reject ad content in raw title or parsed title (artist names may look like domains)
         const parsed = !isAdContent(streamTitle) ? parseTrack(streamTitle, station.name) : null;
         setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return; }
-      if (streamTitle) return; if (!lastTitleRef.current) setTrack(null);
-    };
+      if (streamTitle) return; if (!lastTitleRef.current) setTrack(null); };
     // Fetch immediately on station change or when resuming playback,
     // so we don't wait a full poll interval for fresh metadata.
     if (stationChanged || isPlaying) poll();
@@ -95,8 +92,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     const onVisible = () => { if (document.visibilityState === 'visible' && isPlaying) poll(); };
     document.addEventListener('visibilitychange', onVisible);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener('visibilitychange', onVisible); abortController.abort();
-    };
+      document.removeEventListener('visibilitychange', onVisible); abortController.abort(); };
   }, [station, isPlaying]);
   return {
     // Keep showing track/bitrate as long as a station is selected.

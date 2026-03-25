@@ -38,8 +38,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
         data[i] += (target[i] - data[i]) * 0.1;
       }} else {
       // No data: decay
-      for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; }
-    }
+      for (let i = 0; i < NUM_BARS; i++) { data[i] *= 0.95; } }
     // Spatial smoothing (slime/goo effect — rounds peaks into smooth sigmoid curves)
     // Ping-pong buffers: alternate read/write to avoid full-array copy per pass
     const smoothed = smoothedRef.current; const temp = tempRef.current; let src = data; let dst = smoothed;

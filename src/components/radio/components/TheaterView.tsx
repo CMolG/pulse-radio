@@ -24,8 +24,7 @@ type Props = { station: Station; track: NowPlayingTrack | null;
   isPlaying: boolean; frequencyDataRef?: React.RefObject<Uint8Array | null>;
   artworkUrl?: string | null; icyBitrate?: string | null; onBack: () => void; onToggleFav?: () => void;
   isFavorite?: boolean; onFavSong?: () => void; isSongLiked?: boolean; lyrics?: LyricsData | null;
-  currentTime?: number; activeLineOverride?: number; lyricsVariant?: "mobile" | "desktop"; compact?: boolean;
-};
+  currentTime?: number; activeLineOverride?: number; lyricsVariant?: "mobile" | "desktop"; compact?: boolean; };
 const _colorCache = new Map<string, Promise<[string, string, string]>>();
 const MAX_COLOR_CACHE = 32;
 /** Extract the top-2 saturated hues from an artwork image for use as spiral colors. */

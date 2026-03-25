@@ -27,8 +27,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
         const finalUrl = new URL(res.url);
         if (isPrivateHost(finalUrl.hostname.toLowerCase())) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
           return NextResponse.json({ error: 'Redirect to private IP not allowed' }, { status: 403 }); }
-      } catch { /* URL parse failed — continue */ }
-    }
+      } catch { /* URL parse failed — continue */ } }
     if (!res.ok) { clearTimeout(timeout); res.body?.cancel().catch(() => {});
       return NextResponse.json({ error: `Upstream ${res.status}` }, { status: 502 }); }
     const icyMetaint = res.headers.get('icy-metaint');
