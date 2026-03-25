@@ -77,8 +77,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
   colors: { primary: [number, number, number]; secondary: [number, number, number]; accent: [number, number, number] },
-  energy: number,
-) {
+  energy: number, ) {
   const threshold = 1.0;
 
   // downscale for performance — render at 1/3 resolution
@@ -254,8 +253,7 @@ export function FerrofluidRenderer({
 
       // pulse radius with energy (reuses cached bandVal and minWH)
       blob.baseRadius =
-        minWH * (0.04 + blob.sizeFactor * 0.01) +
-        bandVal * minWH * 0.06 * sensitivity;
+        minWH * (0.04 + blob.sizeFactor * 0.01) + bandVal * minWH * 0.06 * sensitivity;
     }
 
     // clear

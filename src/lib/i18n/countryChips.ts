@@ -65,8 +65,7 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
     country.lang3.some((lang3) => {
       const mapped = localeFromLang3(lang3);
       return mapped ? candidates.has(mapped) : false;
-    }),
-  ).map((country) => country.code);
+    }), ).map((country) => country.code);
 }
 
 function getProximityCountries(seedCodes: string[]): string[] {

@@ -398,8 +398,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const target = e.target as HTMLElement;
       const isInput =
         target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
+        target.tagName === "TEXTAREA" || target.isContentEditable;
 
       // Allow Escape even from inputs (to close panels/modals)
       if (isInput && e.key !== "Escape") return;

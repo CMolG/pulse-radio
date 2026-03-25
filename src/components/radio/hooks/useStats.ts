@@ -77,8 +77,7 @@ export function useStats() {
       const didPrune =
         pStations !== current.stationListenTimes ||
         pSongs !== current.songPlayCounts ||
-        pArtists !== current.artistPlayCounts ||
-        pGenres !== current.genrePlayCounts;
+        pArtists !== current.artistPlayCounts || pGenres !== current.genrePlayCounts;
       if (didPrune) {
         const pruned: UsageStats = { ...current, stationListenTimes: pStations, songPlayCounts: pSongs, artistPlayCounts: pArtists, genrePlayCounts: pGenres };
         setStats(pruned);

@@ -39,7 +39,6 @@ export function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean)
       const release = 1 - Math.exp(-dtSec / (RELEASE_MS / 1000));
       const alpha = target > valueRef.current ? attack : release;
       valueRef.current += (target - valueRef.current) * alpha;
-
       if (Math.abs(valueRef.current - lastPublishedRef.current) >= 0.002) {
         lastPublishedRef.current = valueRef.current;
         setAmplitude(valueRef.current);

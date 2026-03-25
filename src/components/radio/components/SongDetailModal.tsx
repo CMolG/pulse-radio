@@ -40,8 +40,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     (song.durationMs == null ||
       song.genre == null ||
       song.releaseDate == null ||
-      song.trackNumber == null ||
-      song.trackCount == null),
+      song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
     song
@@ -59,8 +58,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
     lyrics?.lines
       ?.map((line) => line.text.trim()).filter(Boolean)
       .join('\n')
-      .trim() ||
-    '';
+      .trim() || '';
 
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => (
@@ -216,8 +214,7 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
                 {/* Apple Music button */}
                 <a
                   href={
-                    resolvedItunesUrl ||
-                    itunesSearchUrl(song.title, song.artist)
+                    resolvedItunesUrl || itunesSearchUrl(song.title, song.artist)
                   }
                   target="_blank"
                   rel="noopener noreferrer"

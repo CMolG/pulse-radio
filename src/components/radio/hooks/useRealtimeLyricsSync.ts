@@ -47,7 +47,6 @@ export function useRealtimeLyricsSync({
 
   useEffect(() => {
     if (!realtimeActive) { engineRef.current?.stop(); return; }
-
     engineRef.current?.destroy();
     stableSamplesRef.current = 0;
 
