@@ -9575,10 +9575,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSelect={setSelectedSong}
     />
   );
+  const primaryGenre = useMemo(
+    () => radio.station?.tags?.split(',')[0]?.trim()?.toLowerCase(),
+    [radio.station?.tags],
+  );
   const parallaxElement = (
     <ParallaxBackground
       faviconUrl={radio.station?.favicon}
-      genre={radio.station?.tags?.split(',')[0]?.trim()?.toLowerCase()}
+      genre={primaryGenre}
       audioAmplitude={bgAudio.amplitude}
       landingMode={isLandingNavigation}
     />
