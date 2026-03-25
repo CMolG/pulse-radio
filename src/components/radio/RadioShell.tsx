@@ -3123,7 +3123,7 @@ function ScrollRow({
             <div className="flex gap-1">
               <button
                 onClick={() => scroll(-1)}
-                className={`p-1 rounded-md transition-colors ${canLeft ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
+                className={`p-2 rounded-md transition-colors ${canLeft ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
                 disabled={!canLeft}
                 aria-label="Scroll left"
               >
@@ -3131,7 +3131,7 @@ function ScrollRow({
               </button>
               <button
                 onClick={() => scroll(1)}
-                className={`p-1 rounded-md transition-colors ${canRight ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
+                className={`p-2 rounded-md transition-colors ${canRight ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
                 disabled={!canRight}
                 aria-label="Scroll right"
               >
@@ -5626,11 +5626,11 @@ function _NowPlayingBar({
         )}
       </div>{' '}
       {/* Toggles */}{' '}
-      <div className="flex-row-0.5">
+      <div className="flex-row-1">
         {station && !theaterMode && (
           <button
             onClick={onToggleTheater}
-            className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
+            className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
             aria-label="Theater mode"
           >
@@ -5642,7 +5642,7 @@ function _NowPlayingBar({
             onClick={onToggleFav}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={!!isFavorite}
-            className={`p-1.5 rounded-md transition-colors ${isFavorite ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
+            className={`p-2.5 rounded-md transition-colors ${isFavorite ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
             title="Favorita"
           >
             <Star size={14} className={isFavorite ? 'fill-sys-orange' : ''} />
@@ -5653,7 +5653,7 @@ function _NowPlayingBar({
             onClick={onFavSong}
             aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
-            className={`p-1.5 rounded-md transition-colors ${songLiked ? 'text-pink-400' : 'text-subtle hover:text-white/50'}`}
+            className={`p-2.5 rounded-md transition-colors ${songLiked ? 'text-pink-400' : 'text-subtle hover:text-white/50'}`}
             title="Me gusta canción"
           >
             <Heart size={14} className={songLiked ? 'fill-pink-400' : ''} />
@@ -5662,7 +5662,7 @@ function _NowPlayingBar({
         {onCycleSleepTimer && (
           <button
             onClick={onCycleSleepTimer}
-            className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
+            className={`p-2.5 rounded-md transition-colors relative ${sleepTimerMin != null ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : 'Sleep Timer'}
             aria-label={
               sleepTimerMin != null
@@ -5683,7 +5683,7 @@ function _NowPlayingBar({
         <button
           onClick={onToggleEq}
           aria-label="Toggle equalizer"
-          className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
+          className={`p-2.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
         >
           <SlidersHorizontal size={14} />
         </button>
@@ -5694,7 +5694,7 @@ function _NowPlayingBar({
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
-          className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"
+          className="p-2 text-muted hover:text-white/60 transition-colors shrink-0"
         >
           {' '}
           {muted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -7475,7 +7475,7 @@ const EqPanel = React.memo(function EqPanel({
           <button
             onClick={onToggleEnabled}
             aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'}
-            className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`}
+            className={`p-2 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`}
           >
             <Power size={13} />
           </button>{' '}
@@ -7490,7 +7490,7 @@ const EqPanel = React.memo(function EqPanel({
             NORM
           </button>
         </div>{' '}
-        <button onClick={onClose} aria-label="Close equalizer" className="p-1 text-subtle-hover">
+        <button onClick={onClose} aria-label="Close equalizer" className="p-2 text-subtle-hover">
           <X size={14} />
         </button>
       </div>{' '}
@@ -7552,14 +7552,14 @@ const EqPanel = React.memo(function EqPanel({
               <button
                 onClick={handleSave}
                 aria-label="Save preset"
-                className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
+                className="p-2 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
               >
                 <Save size={10} />
               </button>{' '}
               <button
                 onClick={() => setShowSaveInput(false)}
                 aria-label="Cancel"
-                className="p-1 rounded-md bg-surface-2 text-subtle-hover"
+                className="p-2 rounded-md bg-surface-2 text-subtle-hover"
               >
                 <X size={10} />
               </button>
