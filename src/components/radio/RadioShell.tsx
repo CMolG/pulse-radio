@@ -1309,7 +1309,7 @@ function isIOSDevice(): boolean {
   if (typeof navigator === 'undefined') return false;
   const ua = navigator.userAgent || '';
   return (
-    /iPad|iPhone|iPod/.test(ua) ||
+    _IOS_UA_RE.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
   );
 }
@@ -2969,6 +2969,7 @@ const _GENRE_TO_CAT: Record<string, string> = {
   'lo-fi': 'lofi',
 };
 const _GENRE_NORMALIZE_RE = /[\s-]/g;
+const _IOS_UA_RE = /iPad|iPhone|iPod/;
 const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
 const _NEWLINE_RE = /\r?\n/;
 const _EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>();
@@ -6945,7 +6946,7 @@ function PWAStep() {
     null,
   );
   const [isIos] = useState(
-    () => typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent),
+    () => typeof navigator !== 'undefined' && _IOS_UA_RE.test(navigator.userAgent),
   );
   const [isStandalone] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches,
@@ -9137,7 +9138,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [initialCountryCode, locale, view.countryCode, view.mode, resetNav]);
   useEffect(() => {
     const onPopState = () => {
-      const segment = window.location.pathname.replace(/^\//, '').toUpperCase();
+      const p = window.location.pathname;
+      const segment = (p[0] === '/' ? p.slice(1) : p).toUpperCase();
       if (!segment) {
         resetNav(mkView('top', t('topStations')));
         return;
