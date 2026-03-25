@@ -3252,11 +3252,14 @@ function BrowseView({
       if (scanGenRef.current === gen) scanGenRef.current++;
     };
   }, [scanEnabled, pageStations, view.mode, startScan]);
-  const scannedCount = pageStations.filter(
-    (s) => liveData[s.stationuuid]?.status === 'loaded',
-  ).length;
-  const isScanning =
-    scanEnabled && pageStations.some((s) => liveData[s.stationuuid]?.status === 'loading');
+  const scannedCount = useMemo(
+    () => pageStations.filter((s) => liveData[s.stationuuid]?.status === 'loaded').length,
+    [pageStations, liveData],
+  );
+  const isScanning = useMemo(
+    () => scanEnabled && pageStations.some((s) => liveData[s.stationuuid]?.status === 'loading'),
+    [scanEnabled, pageStations, liveData],
+  );
   const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
   if (songFilter !== prevSongFilter) {
     setPrevSongFilter(songFilter);
