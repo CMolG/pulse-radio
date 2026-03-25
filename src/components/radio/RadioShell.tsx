@@ -2945,6 +2945,7 @@ const _GENRE_NORMALIZE_RE = /[\s-]/g;
 const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
 const _NEWLINE_RE = /\r?\n/;
 const _EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>();
+const _SKELETON_INDICES = [0, 1, 2, 3, 4];
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
@@ -3496,7 +3497,7 @@ function BrowseView({
                           </button>
                         </div>
                       ) : !catStations ? (
-                        Array.from({ length: 5 }).map((_, i) => (
+                        _SKELETON_INDICES.map((i) => (
                           <div
                             key={i}
                             className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 animate-pulse`}
