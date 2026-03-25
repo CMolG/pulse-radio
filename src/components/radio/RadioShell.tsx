@@ -1324,7 +1324,8 @@ function useRadio() {
   mutedRef.current = muted;
   const userPausedRef = useRef(false);
   const bcRef = useRef<BroadcastChannel | null>(null);
-  const tabIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const tabIdRef = useRef<string>(null!);
+  if (!tabIdRef.current) tabIdRef.current = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
     const bc = new BroadcastChannel('pulse-radio-playback');
