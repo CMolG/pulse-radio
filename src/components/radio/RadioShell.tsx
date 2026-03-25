@@ -3697,6 +3697,10 @@ const LyricReelLine = React.memo(
     prev.emphasisIdx === next.emphasisIdx &&
     prev.isDesktop === next.isDesktop,
 );
+const _LYRICS_MASK_STYLE: React.CSSProperties = {
+  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
+  maskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
+};
 function LyricsReel({
   lyrics,
   currentTime,
@@ -3774,12 +3778,7 @@ function LyricsReel({
         <div
           ref={scrollerRef}
           className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${isDesktop ? 'px-4' : 'px-2'}`}
-          style={{
-            WebkitMaskImage:
-              'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
-            maskImage:
-              'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
-          }}
+          style={_LYRICS_MASK_STYLE}
         >
           <div className="flex min-h-full flex-col justify-center py-14">
             {' '}
@@ -4083,6 +4082,21 @@ const MAX_COLOR_CACHE = 32;
   _colorCache.set(imgUrl, p);
   return p;
 }
+const _CRT_SCANLINE_STYLE: React.CSSProperties = {
+  background:
+    'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+  backgroundSize: '100% 4px, 6px 100%',
+  mixBlendMode: 'overlay' as const,
+  opacity: 0.6,
+};
+const _CRT_VIGNETTE_STYLE: React.CSSProperties = {
+  background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
+  boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
+};
+const _CRT_GLARE_STYLE: React.CSSProperties = {
+  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
+};
+const _SAFE_AREA_TOP_STYLE: React.CSSProperties = { top: 'env(safe-area-inset-top, 0px)' };
 function TheaterView({
   station,
   track,
@@ -4162,32 +4176,21 @@ function TheaterView({
       {/* ── Layer 3: CRT scanlines + vignette overlay ── */}{' '}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-          backgroundSize: '100% 4px, 6px 100%',
-          mixBlendMode: 'overlay',
-          opacity: 0.6,
-        }}
+        style={_CRT_SCANLINE_STYLE}
       />{' '}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
-          boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
-        }}
+        style={_CRT_VIGNETTE_STYLE}
       />{' '}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
-        }}
+        style={_CRT_GLARE_STYLE}
       />{' '}
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}{' '}
       {!compact && (
         <div
           className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
-          style={{ top: 'env(safe-area-inset-top, 0px)' }}
+          style={_SAFE_AREA_TOP_STYLE}
         >
           <button
             onClick={onBack}
