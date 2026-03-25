@@ -89,8 +89,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
         onRejected(err);});
     }, [preferDirectStream], ); useEffect(() => { const audio = getAudio();
     const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); };
-    const sessionId = playSessionRef.current;
-    const reconnect = (delay: number) => {
+    const sessionId = playSessionRef.current; const reconnect = (delay: number) => {
       if (playSessionRef.current !== sessionId || !station || userPausedRef.current) return;
       // Don't retry when browser is offline — onOnline will resume
       if (typeof navigator !== 'undefined' && !navigator.onLine) return;
@@ -149,8 +148,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
             srcChangingRef.current = true; audio.crossOrigin = useProxy ? 'anonymous' : null;
             audio.src = useProxy ? proxyUrl(station.url_resolved) : station.url_resolved;
             Promise.resolve().then(() => { srcChangingRef.current = false; }); return audio.play();
-          }; setStatus('loading');
-          setSourceAndPlay(!isCurrentlyProxied).catch((fallbackErr) => {
+          }; setStatus('loading'); setSourceAndPlay(!isCurrentlyProxied).catch((fallbackErr) => {
             if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return; setStatus('error');
           }); return; }
         setStatus('error'); return; }
@@ -179,14 +177,12 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     // Single debounced handler for both visibilitychange and pageshow.
     // On iOS, both events fire on the same resume (screen unlock / tab switch),
     // so without debouncing we get two parallel reconnect attempts.
-    let lastResumeAttempt = 0; const RESUME_DEBOUNCE_MS = 1000;
-    const onVisibilityResume = () => {
+    let lastResumeAttempt = 0; const RESUME_DEBOUNCE_MS = 1000; const onVisibilityResume = () => {
       if (document.visibilityState !== 'visible' || !station || userPausedRef.current) return; const now = Date.now();
       if (now - lastResumeAttempt < RESUME_DEBOUNCE_MS) return; lastResumeAttempt = now;
       if (audio.paused || audio.readyState < 2) { retryRef.current = 0;
         isReconnectingRef.current = false; // Reset gate for fresh visibility-triggered resume
-        setStatus('loading');
-        audio.play().catch((err) => { if (isAutoplayBlocked(err)) {
+        setStatus('loading'); audio.play().catch((err) => { if (isAutoplayBlocked(err)) {
             setStatus('paused'); // Mobile: no gesture — show play button
           } else reconnect(500);});
       } };
@@ -210,8 +206,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       if (userPausedRef.current || audio.paused || !station) { lowBufferStreak = 0; return; }
       if (document.hidden) return; // Skip check when tab is hidden — browser throttles network
       // Skip quality/reconnect logic during an active reconnect to avoid cascade
-      if (isReconnectingRef.current) return; const { buffered, currentTime: ct } = audio;
-      if (buffered.length === 0) {
+      if (isReconnectingRef.current) return; const { buffered, currentTime: ct } = audio; if (buffered.length === 0) {
         lowBufferStreak++; setStreamQuality('poor'); // No buffer ranges at all while playing — treat as underrun
         if (lowBufferStreak >= 2) { lowBufferStreak = 0; reconnect(300); }
         return; }
@@ -221,8 +216,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       }
       const prevEnd = lastBufferEndRef.current; // Stream quality: based on buffer-ahead and growth rate
       const growth = bufferEnd - prevEnd; // how much buffer grew since last check
-      lastBufferEndRef.current = bufferEnd;
-      if (ahead >= 5) {
+      lastBufferEndRef.current = bufferEnd; if (ahead >= 5) {
         // saveData means the user opted into reduced bandwidth; cap at 'fair'
         setStreamQuality(conn?.saveData ? 'fair' : 'good');
       } else if (ahead >= MIN_BUFFER_AHEAD_S) {
@@ -239,8 +233,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
       [audio, 'timeupdate', onTimeUpdate], [audio, 'canplay', onCanPlay],
       [document, 'visibilitychange', onVisibilityResume], [window, 'pageshow', onVisibilityResume],
       [window, 'online', onOnline], [window, 'offline', onOffline],
-    ]; pairs.forEach(([t, e, h]) => t.addEventListener(e, h));
-    return () => {
+    ]; pairs.forEach(([t, e, h]) => t.addEventListener(e, h)); return () => {
       clearTimer(stallTimerRef); clearTimer(pauseTimerRef); clearReconnectTimer(); clearTimer(bufferCheckRef);
       pairs.forEach(([t, e, h]) => t.removeEventListener(e, h)); };
   }, [station, getAudio, startPlayback, handlePlayRejected]);
@@ -290,8 +283,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     if (audio) { audio.pause(); audio.src = ''; }
     setStation(null); setStatus('idle'); setStreamQuality('good'); lastBufferEndRef.current = 0;
   }, []); const setVolume = useCallback((v: number) => { setVolumeState(Math.max(0, Math.min(1, v))); }, []);
-  const prefetchedUrlsRef = useRef<Set<string>>(new Set());
-  const prefetchStream = useCallback((streamUrl: string) => {
+  const prefetchedUrlsRef = useRef<Set<string>>(new Set()); const prefetchStream = useCallback((streamUrl: string) => {
     if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
     if (prefetchedUrlsRef.current.size >= 500) prefetchedUrlsRef.current.clear();
     prefetchedUrlsRef.current.add(streamUrl);
@@ -299,8 +291,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     fetch(proxyUrl(streamUrl), { method: 'HEAD', signal: controller.signal }).then(() => { clearTimeout(timer); })
       .catch(() => { clearTimeout(timer); });
     const timer = setTimeout(() => controller.abort(), 2000);
-  }, []); const toggleMute = useCallback(() => setMuted(m => !m), []);
-  const seek = useCallback((t: number) => {
+  }, []); const toggleMute = useCallback(() => setMuted(m => !m), []); const seek = useCallback((t: number) => {
     const audio = audioRef.current; if (!audio || !isFinite(t)) return; const duration = audio.duration || 0;
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []); const ensureAudio = useCallback(() => getAudio(), [getAudio]);

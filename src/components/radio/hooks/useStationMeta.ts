@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useState, useRef, useEffect } from 'react';
-import type { Station, NowPlayingTrack } from '../types';
-const CODEC_MAP: Record<string, string> = {
+import type { Station, NowPlayingTrack } from '../types'; const CODEC_MAP: Record<string, string> = {
   MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus', FLAC: 'FLAC', WMA: 'WMA', };
 // Patterns that indicate ads/spam rather than real song metadata
 const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i, /^https?:\/\//i,
@@ -80,8 +79,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     document.addEventListener('visibilitychange', onVisible);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener('visibilitychange', onVisible); abortController.abort(); };
-  }, [station, isPlaying]);
-  return {
+  }, [station, isPlaying]); return {
     // Keep showing track/bitrate as long as a station is selected.
     // We do NOT null these out while loading — the ICY swap keeps the
     // previous station's data visible until new data arrives.

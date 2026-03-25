@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import React, { useRef, useEffect } from 'react';
-interface VisualizerCanvasProps {
+'use client'; import React, { useRef, useEffect } from 'react'; interface VisualizerCanvasProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; mode?: 'bars' | 'wave'; barCount?: number; color?: string;
   opacity?: number; className?: string; }
 export function VisualizerCanvas({
@@ -34,8 +33,7 @@ export function VisualizerCanvas({
         const barWidth = width / barCount; const gap = barWidth * 0.2;
         // Cache gradient — only recreate on height or color change
         const gradKey = `${height}_${resolvedColor}`; let fillStyle: string | CanvasGradient = resolvedColor;
-        if (gradientCacheRef.current?.key === gradKey) { fillStyle = gradientCacheRef.current.gradient;
-        } else { try {
+        if (gradientCacheRef.current?.key === gradKey) { fillStyle = gradientCacheRef.current.gradient; } else { try {
             const gradient = ctx.createLinearGradient(0, height, 0, 0); gradient.addColorStop(0, resolvedColor);
             gradient.addColorStop(1, 'transparent'); fillStyle = gradient;
             gradientCacheRef.current = { key: gradKey, gradient };

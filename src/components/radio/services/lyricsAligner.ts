@@ -1,15 +1,13 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import type { LyricsData } from '../types'; import type { RealtimeAlignPolicy } from './realtimeLyricsTypes';
-import { normalizeText } from '@/lib/stringUtils';
-export type AlignerStepInput = {
+import { normalizeText } from '@/lib/stringUtils'; export type AlignerStepInput = {
   lyrics: LyricsData; hypothesisText: string; previousConfirmedIndex: number; previousCandidateIndex: number;
   stableSamples: number; policy: RealtimeAlignPolicy; };
 export type AlignerStepResult = { candidateIndex: number; confirmedIndex: number; score: number; stableSamples: number;
   jumpRejected: boolean; relockTriggered: boolean; };
 const STOPWORDS = new Set([ 'the', 'a', 'an', 'and', 'to', 'of', 'in', 'on', 'for', 'with',
   'el', 'la', 'los', 'las', 'de', 'del', 'y', 'en', 'por', 'con', 'un', 'una',]);
-const WORD_RE = /[a-z0-9']+/g;
-function tokenize(value: string): string[] {
+const WORD_RE = /[a-z0-9']+/g; function tokenize(value: string): string[] {
   const normalized = normalizeText(value); if (!normalized) return []; const matches = normalized.match(WORD_RE) ?? [];
   return matches.filter(token => token.length > 1 && !STOPWORDS.has(token)); }
 function scoreLine(lineTokens: string[], hypoTokens: string[]): number {
@@ -28,14 +26,12 @@ function windowBounds(total: number, center: number, relockWindow: number): [num
   return [start, end]; }
 export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const { lyrics, hypothesisText, previousConfirmedIndex, previousCandidateIndex, stableSamples, policy, } = input;
-  const hypoTokens = tokenize(hypothesisText);
-  if (!hypoTokens.length) { return {
+  const hypoTokens = tokenize(hypothesisText); if (!hypoTokens.length) { return {
       candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: 0, stableSamples,
       jumpRejected: false, relockTriggered: false, }; }
   const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex;
   const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow); let bestIndex = -1;
-  let bestScore = 0;
-  for (let i = start; i <= end; i++) {
+  let bestScore = 0; for (let i = start; i <= end; i++) {
     const lineTokens = tokenize(lyrics.lines[i]?.text ?? ''); const score = scoreLine(lineTokens, hypoTokens);
     if (score > bestScore) { bestScore = score; bestIndex = i; } }
   if (bestIndex < 0 || bestScore < policy.candidateMinScore) { return {

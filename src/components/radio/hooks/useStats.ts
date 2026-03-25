@@ -7,8 +7,7 @@ const MAX_STATIONS = 300; const MAX_SONGS = 500; const MAX_ARTISTS = 200; const 
 export type StationListenTime = { name: string; uuid: string; totalMs: number; };
 export type SongPlayCount = { title: string; artist: string; count: number; artworkUrl?: string; genre?: string; };
 export type ArtistPlayCount = { name: string; count: number; };
-export type GenrePlayCount = { genre: string; count: number; };
-export interface UsageStats {
+export type GenrePlayCount = { genre: string; count: number; }; export interface UsageStats {
   stationListenTimes: Record<string, StationListenTime>; songPlayCounts: Record<string, SongPlayCount>;
   artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>;
   totalListenMs: number; }
@@ -46,8 +45,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
   }, [persist]);
   // Track listen time for a station (call periodically while playing)
   const tickListenTime = useCallback((stationUuid: string, stationName: string, deltaMs: number) => {
-    if (deltaMs <= 0 || !stationUuid) return;
-    setStats(prev => {
+    if (deltaMs <= 0 || !stationUuid) return; setStats(prev => {
       const entry = prev.stationListenTimes[stationUuid] ?? { name: stationName, uuid: stationUuid, totalMs: 0 };
       return { ...prev, stationListenTimes: {
           ...prev.stationListenTimes, [stationUuid]: { ...entry, name: stationName, totalMs: entry.totalMs + deltaMs },
@@ -62,8 +60,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       const next: UsageStats = { ...prev, songPlayCounts: { ...prev.songPlayCounts,
           [songKey]: { ...songEntry, count: songEntry.count + 1, artworkUrl: artworkUrl ?? songEntry.artworkUrl, genre: normalizedGenre ?? songEntry.genre },
         }, artistPlayCounts: { ...prev.artistPlayCounts, [primary]: { ...artistEntry, count: artistEntry.count + 1 }, },
-      };
-      if (normalizedGenre) {
+      }; if (normalizedGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
           ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 }, }; }

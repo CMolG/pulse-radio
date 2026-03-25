@@ -3,8 +3,7 @@
 import { getInitialLocale, getInitialLocaleForCountry, saveLocale } from "@/lib/i18n/localeStorage";
 import { isRtlLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/i18n/locales";
 import { type MessageKey, translate } from "@/lib/i18n/messages";
-type TranslateFn = (key: MessageKey, vars?: Record<string, string | number>) => string;
-type LocaleContextValue = {
+type TranslateFn = (key: MessageKey, vars?: Record<string, string | number>) => string; type LocaleContextValue = {
   locale: SupportedLocale; setLocale: (locale: SupportedLocale) => void; t: TranslateFn; rtl: boolean;
   locales: typeof SUPPORTED_LOCALES; };
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);

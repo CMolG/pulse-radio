@@ -4,8 +4,7 @@ import { createPortal } from "react-dom";
 import { Music, Heart, Trash2, Users, X, ChevronDown, Disc3 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react"; import type { FavoriteSong, SongDetailData } from "../types";
 import UiImage from "@/components/common/UiImage"; import { primaryArtist } from "../utils/formatUtils";
-import SongCard from "./SongCard";
-type Props = {
+import SongCard from "./SongCard"; type Props = {
   songs: FavoriteSong[]; onRemove: (id: string) => void; onClear: () => void; onSelect?: (song: SongDetailData) => void;
 }; type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = "none" | "artist" | "album";

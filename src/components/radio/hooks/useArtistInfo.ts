@@ -12,8 +12,7 @@ function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure f
 export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => { if (!key) return null; return cacheGet(key) ?? null; }, [key]);
-  const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
-  useEffect(() => {
+  const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null); useEffect(() => {
     if (!key || !artist || cachedInfo) return; let cancelled = false; const controller = new AbortController();
     // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
     const timeout = setTimeout(() => controller.abort(), 15_000);

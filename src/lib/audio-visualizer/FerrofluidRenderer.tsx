@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-'use client'; import React, { useRef, useEffect } from 'react';
-interface FerrofluidRendererProps {
+'use client'; import React, { useRef, useEffect } from 'react'; interface FerrofluidRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; blobCount?: number; colorPrimary?: string;
   colorSecondary?: string; colorAccent?: string; sensitivity?: number;
   /** standalone demo mode — generates its own animation without audio */

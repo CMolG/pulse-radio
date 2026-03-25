@@ -93,8 +93,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (audio && !audio.paused) { if (duckTimerRef.current) clearTimeout(duckTimerRef.current);
       // Only capture pre-duck volume if not already ducking
       if (duckOrigVolRef.current === null) duckOrigVolRef.current = audio.volume;
-      audio.volume = duckOrigVolRef.current * 0.4;
-      duckTimerRef.current = setTimeout(() => {
+      audio.volume = duckOrigVolRef.current * 0.4; duckTimerRef.current = setTimeout(() => {
         if (audio && duckOrigVolRef.current !== null) audio.volume = duckOrigVolRef.current;
         duckOrigVolRef.current = null; duckTimerRef.current = null;
       }, 400); }
@@ -144,8 +143,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // Sync to shared playback store
   const pbStore = usePlaybackStore; useEffect(() => { const state = pbStore.getState(); state.setSource("radio");
     state.setPlaying(radio.status === "playing"); state.setVolume(radio.volume);
-    state.setMuted(radio.muted); state.setCurrentTime(radio.currentTime);
-    if (enrichedTrack) {
+    state.setMuted(radio.muted); state.setCurrentTime(radio.currentTime); if (enrichedTrack) {
       state.setTrackInfo(enrichedTrack.title, enrichedTrack.artist, enrichedTrack.artworkUrl ?? albumArt.artworkUrl,); }
   }, [radio.status, radio.volume, radio.muted, radio.currentTime, enrichedTrack, albumArt.artworkUrl, pbStore]);
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
@@ -159,8 +157,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   // stable.  Prevents child components receiving onPlay={handlePlay} from re-rendering on every frame during playback.
   const handlePlayRef = useRef({ radio, recent, stationQueue, eqConnectSource, analyser });
   useEffect(() => { handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser };
-  }, [radio, recent, stationQueue, eqConnectSource, analyser]);
-  const handlePlay = useCallback((station: Station) => {
+  }, [radio, recent, stationQueue, eqConnectSource, analyser]); const handlePlay = useCallback((station: Station) => {
       const { radio: r, recent: rec, stationQueue: sq, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
       // Pre-create audio element and set up the Web Audio graph BEFORE calling play().
       // On iOS Safari, createMediaElementSource() must be called BEFORE audio.src is
@@ -194,8 +191,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleSkipPrev = useCallback(() => { const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
     if (sq.hasPrev) { const prev = sq.skipToPrev(); if (prev) { handlePlay(prev); return; } }
     if (r.station) { const prev = f.playPrev(r.station.stationuuid); if (prev) handlePlay(prev); }
-  }, [handlePlay]);
-  useMediaSession({
+  }, [handlePlay]); useMediaSession({
     station: radio.station, track: enrichedTrack, isPlaying: radio.status === "playing", onPlay: radio.resume,
     onPause: radio.pause, onNext: handleSkipNext, onPrev: handleSkipPrev, onStop: radio.stop,
     onSeekBackward: () => radio.seek(Math.max(0, radio.currentTime - 10)),
@@ -263,8 +259,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     setActiveTab("discover"); setTheaterMode(false);}, [t]);
   const handleGoHome = useCallback(() => {
     resetNav(mkView("top", t("topStations"))); if (pathname !== "/") window.history.pushState(null, "", "/");
-  }, [pathname, t, resetNav]);
-  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
+  }, [pathname, t, resetNav]); const handleSearchSubmit = useCallback((e: React.FormEvent) => {
       e.preventDefault(); if (searchQuery.trim()) handleSearch(searchQuery.trim()); else handleGoHome();
     }, [searchQuery, handleSearch, handleGoHome],
   ); const handleSelectGenre = useCallback((cat: BrowseCategory) => { const key = GENRE_LABEL_KEYS[cat.id];
@@ -275,8 +270,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     setTheaterMode(false); setSearchQuery(""); const newPath = `/${countryCode}`;
     if (pathname !== newPath) window.history.pushState(null, "", newPath);
   }, [pathname]); const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
-  const isLandingNavigation = !theaterMode;
-  const theaterAudioBadges = useMemo(() => {
+  const isLandingNavigation = !theaterMode; const theaterAudioBadges = useMemo(() => {
     if (!theaterMode || !radio.station) return [] as string[]; const badges: string[] = [];
       if (eq.noiseReductionMode !== 'off') badges.push(t("noiseReduction"));
       if (eq.normalizerEnabled) badges.push(t("audioNormalizer")); if (eq.enabled) badges.push(t("equalizer"));
@@ -351,8 +345,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const nowPlayingHeroElement = radio.station ? ( <NowPlayingHero station={radio.station} track={enrichedTrack}
       isPlaying={radio.status === "playing"} frequencyDataRef={analyser.frequencyDataRef}
       artworkUrl={albumArt.artworkUrl} icyBitrate={icyBitrate} onTheater={() => setTheaterMode(true)} />
-  ) : null;
-  const sharedModals = ( <> {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal /></> );
+  ) : null; const sharedModals = ( <> {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal /></> );
   const pulseLogoButton = (
     <button onClick={handleGoHome} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
       <div className="relative w-5 h-5 flex-shrink-0">

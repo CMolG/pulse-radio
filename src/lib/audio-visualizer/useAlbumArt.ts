@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { useState, useEffect, useRef, useMemo } from 'react'; import { normalizeText } from '@/lib/stringUtils';
-const FETCH_TIMEOUT = 8_000;
-interface AlbumInfo {
+const FETCH_TIMEOUT = 8_000; interface AlbumInfo {
   artworkUrl: string | null; albumName: string | null; releaseDate: string | null; itunesUrl: string | null;
   durationMs: number | null; genre: string | null; trackNumber: number | null; trackCount: number | null; }
 const CACHE = new Map<string, AlbumInfo>(); const MAX_CACHE = 200;
@@ -17,14 +16,12 @@ function jaroDistance(a: string, b: string): number { if (a === b) return 1; if 
   if (_aMatches.length < a.length) _aMatches = new Array(a.length); // Grow and reset reusable arrays
   if (_bMatches.length < b.length) _bMatches = new Array(b.length);
   for (let i = 0; i < a.length; i++) _aMatches[i] = false; for (let i = 0; i < b.length; i++) _bMatches[i] = false;
-  let matches = 0;
-  for (let i = 0; i < a.length; i++) {
+  let matches = 0; for (let i = 0; i < a.length; i++) {
     const start = Math.max(0, i - matchDistance); const end = Math.min(i + matchDistance + 1, b.length);
     for (let j = start; j < end; j++) {
       if (_bMatches[j] || a[i] !== b[j]) continue; _aMatches[i] = true; _bMatches[j] = true; matches++; break; }
   }
-  if (!matches) return 0; let t = 0; let k = 0;
-  for (let i = 0; i < a.length; i++) {
+  if (!matches) return 0; let t = 0; let k = 0; for (let i = 0; i < a.length; i++) {
     if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++; }
   const transpositions = t / 2;
   return ( matches / a.length + matches / b.length + (matches - transpositions) / matches
@@ -40,8 +37,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   const normTitles = new Array<string>(results.length); const normArtists = new Array<string>(results.length);
   for (let i = 0; i < results.length; i++) {
     normTitles[i] = normalizeText(results[i].trackName); normArtists[i] = normalizeText(results[i].artistName); }
-  const exactIdx = normTitles.indexOf(normalizedRequestedTitle);
-  if (exactIdx !== -1) {
+  const exactIdx = normTitles.indexOf(normalizedRequestedTitle); if (exactIdx !== -1) {
     if (!normalizedRequestedArtist) return results[exactIdx]; const exactArtist = normArtists[exactIdx];
     if (!exactArtist || exactArtist === normalizedRequestedArtist || exactArtist.includes(normalizedRequestedArtist) || normalizedRequestedArtist.includes(exactArtist)) {
       return results[exactIdx]; }
@@ -66,8 +62,7 @@ function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(
   while (CACHE.size > MAX_CACHE) {
     const oldest = CACHE.keys().next().value; if (oldest !== undefined) CACHE.delete(oldest); else break; }
 }
-const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online';
-function appendReferrer(url: string): string {
+const ITUNES_REFERRER = 'pt=pulse-radio&ct=www.pulse-radio.online'; function appendReferrer(url: string): string {
   if (!url) return url; const sep = url.includes('?') ? '&' : '?'; return `${url}${sep}${ITUNES_REFERRER}`; }
 /** Preload an image so it's already in the browser cache when rendered. */
 function preloadImage(url: string) { const img = new Image(); img.crossOrigin = 'anonymous';
@@ -77,8 +72,7 @@ export function useAlbumArt(title: string | null, artist: string | null) { const
   const cacheKey = useMemo(() => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''), [title, artist]);
   const cachedInfo = useMemo(() => { if (!cacheKey) return null; return cacheGet(cacheKey) ?? null; }, [cacheKey]);
   const [fetched, setFetched] = useState<{ key: string; info: AlbumInfo } | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  useEffect(() => {
+  const abortRef = useRef<AbortController | null>(null); useEffect(() => {
     if (!title || !cacheKey || cachedInfo) return; abortRef.current?.abort(); const controller = new AbortController();
     abortRef.current = controller; const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
     // Use server-side proxy to avoid CORS/CSP issues from the browser

@@ -15,8 +15,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 });
-  const [isActive, setIsActive] = useState(false);
-  const connectAudio = useCallback((audio: HTMLAudioElement) => {
+  const [isActive, setIsActive] = useState(false); const connectAudio = useCallback((audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
       cancelAnimationFrame(rafRef.current); // Cancel any existing animation loop before starting a new one
       try { const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
@@ -26,8 +25,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         } else source.connect(analyserRef.current);
         // Allocate buffers once — reused across all frames (zero per-frame allocation)
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
-        waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true);
-        const tick = () => {
+        waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true); const tick = () => {
           if (!document.hidden) { // Skip expensive analyser reads when tab is hidden to save CPU
             if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
             if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);

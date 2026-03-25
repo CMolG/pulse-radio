@@ -8,11 +8,9 @@ type BrowserSpeechRecognition = { continuous: boolean; interimResults: boolean; 
   onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null;
   onerror: ((event: BrowserSpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null;
   start: () => void; stop: () => void; };
-type RecognitionCtor = new () => BrowserSpeechRecognition;
-type EngineCallbacks = {
+type RecognitionCtor = new () => BrowserSpeechRecognition; type EngineCallbacks = {
   onHypothesis: (hypothesis: RealtimeSpeechHypothesis) => void; onFatalError: (errorMessage: string) => void; };
-const MAX_RESTARTS = 4;
-function getRecognitionCtor(): RecognitionCtor | null {
+const MAX_RESTARTS = 4; function getRecognitionCtor(): RecognitionCtor | null {
   if (typeof window === 'undefined' || !window.isSecureContext) return null;
   const w = window as Window & { SpeechRecognition?: RecognitionCtor; webkitSpeechRecognition?: RecognitionCtor };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null; }

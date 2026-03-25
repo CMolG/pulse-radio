@@ -11,8 +11,7 @@ export type RealtimeSyncState = {
   candidateLineIndex: number; confidence: number;
   effectiveCurrentTime: number | undefined; diagnostics: RealtimeSyncDiagnostics; };
 export type RealtimeSyncControls = { toggle: () => void; };
-export type RealtimeSyncResult = RealtimeSyncState & RealtimeSyncControls;
-export type RealtimeAlignPolicy = {
+export type RealtimeSyncResult = RealtimeSyncState & RealtimeSyncControls; export type RealtimeAlignPolicy = {
   candidateMinScore: number; confirmMinScore: number; minStableSamples: number; maxJumpDistance: number;
   relockWindow: number; };
 export const DEFAULT_REALTIME_ALIGN_POLICY: RealtimeAlignPolicy = {

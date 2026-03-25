@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-"use client"; import React, { useRef, useEffect } from "react";
-interface SpiralRendererProps {
+"use client"; import React, { useRef, useEffect } from "react"; interface SpiralRendererProps {
   frequencyDataRef?: React.RefObject<Uint8Array | null>; className?: string; color1?: string; color2?: string;
   color3?: string; sensitivity?: number; demo?: boolean; }
 import { useCanvasLoop } from './useCanvasLoop'; const NUM_BARS = 250; const CYCLES = 4; const SMOOTH_PASSES = 3;
@@ -58,8 +57,7 @@ export function SpiralRenderer({ frequencyDataRef, className = "", color1 = "#ff
       outerX[i] = centerX + cos * (radius + barHeight + 2); outerY[i] = centerY + sin * (radius + barHeight + 2); }
     // Draw slime shapes per cycle
     ctx.fillStyle = fillStyle; ctx.shadowBlur = 20; ctx.shadowColor = `${c1}66`; ctx.globalAlpha = 0.85;
-    const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
-    for (let c = 0; c < CYCLES; c++) {
+    const barsPerCycle = Math.ceil(NUM_BARS / CYCLES); for (let c = 0; c < CYCLES; c++) {
       const startIdx = c * barsPerCycle; const endIdx = Math.min((c + 1) * barsPerCycle + 2, NUM_BARS);
       if (startIdx >= NUM_BARS) break; ctx.beginPath();
       ctx.moveTo(outerX[startIdx], outerY[startIdx]); // Outer edge with quadratic curves

@@ -27,11 +27,9 @@ function NowPlayingBar({ station, track, status, volume, muted, frequencyDataRef
     const trackInfo = track?.title ? (track.artist ? `${track.artist}, ${track.title}` : track.title) : station.name;
     if (isLoading) return `Loading ${trackInfo}`; if (isPlaying) return `Now playing: ${trackInfo}`;
     if (status === "error") return `Playback error: ${station.name}`; return `Paused: ${trackInfo}`;
-  }, [station, track, isPlaying, isLoading, status]);
-  const [firstTag, compactTags] = useMemo(() => {
+  }, [station, track, isPlaying, isLoading, status]); const [firstTag, compactTags] = useMemo(() => {
     const tags = station?.tags?.split(",") ?? []; return [tags[0] ?? "", tags.slice(0, 2).join(" · ")];
-  }, [station?.tags]);
-  const handleVolumeChange = useCallback( (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [station?.tags]); const handleVolumeChange = useCallback( (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = parseFloat(e.target.value); onSetVolume(v); if (muted && v > 0) onToggleMute();
     }, [muted, onSetVolume, onToggleMute],);
   if (compact) { return (

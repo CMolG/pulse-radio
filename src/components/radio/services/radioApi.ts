@@ -15,8 +15,7 @@ async function fetchCached(path: string, key: string): Promise<Station[]> { cons
       if (!res.ok) { await res.text().catch(() => {}); rotateServer(); continue;
       }
       const data: Station[] = await res.json(); const filtered = data.filter(s => s.url_resolved);
-      cache.set(key, { data: filtered, ts: Date.now() });
-      while (cache.size > MAX_CACHE) {
+      cache.set(key, { data: filtered, ts: Date.now() }); while (cache.size > MAX_CACHE) {
         const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
       return filtered;
     } catch { rotateServer(); } }

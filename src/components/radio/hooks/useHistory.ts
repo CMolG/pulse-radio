@@ -18,8 +18,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
     if (stationUuid !== lastStationRef.current) {
       lastStationRef.current = stationUuid; lastTrackRef.current = ''; return; }
     const key = `${stationUuid}::${track.artist}::${track.title}`;
-    if (key === lastTrackRef.current) return; lastTrackRef.current = key;
-    const entry: HistoryEntry = {
+    if (key === lastTrackRef.current) return; lastTrackRef.current = key; const entry: HistoryEntry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName, stationUuid, artist: track.artist,
       title: track.title, album: track.album, artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl,
       durationMs: track.durationMs, genre: track.genre, releaseDate: track.releaseDate, trackNumber: track.trackNumber,

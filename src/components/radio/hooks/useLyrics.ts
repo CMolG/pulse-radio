@@ -7,8 +7,7 @@ import { useRealtimeLyricsSync } from './useRealtimeLyricsSync';
 import type { RealtimeSyncDiagnostics, RealtimeSyncStatus } from '../services/realtimeLyricsTypes';
 const MAX_CACHE = 50;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-type CacheEntry = { key: string; data: LyricsData; ts: number };
-function loadCache(): CacheEntry[] {
+type CacheEntry = { key: string; data: LyricsData; ts: number }; function loadCache(): CacheEntry[] {
   const raw = loadFromStorage<{ key: string; data: LyricsData; ts?: number }[]>(STORAGE_KEYS.LYRICS_CACHE, []);
   // Backfill ts=0 for old entries so they expire on next TTL check — mutate in place to avoid allocation
   for (let i = 0; i < raw.length; i++) { if (raw[i].ts === undefined) (raw[i] as CacheEntry).ts = 0; }

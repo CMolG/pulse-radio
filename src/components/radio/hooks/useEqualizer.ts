@@ -88,8 +88,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
         const target = enabled ? bands[i].gain : 0; if (ctx) f.gain.setTargetAtTime(target, ctx.currentTime, RAMP_TIME);
         else f.gain.value = target;
       }});
-  }, [bands, enabled]);
-  const connectSource = useCallback((audio: HTMLAudioElement) => {
+  }, [bands, enabled]); const connectSource = useCallback((audio: HTMLAudioElement) => {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
     if (connectedAudioRef.current) teardownGraph(false); // Disconnect any existing chain before building a new one
     try { const { ctx, source } = getOrCreateAudioSource(audio); ctxRef.current = ctx; sourceRef.current = source;
@@ -132,8 +131,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       const bassLp = ctx.createBiquadFilter(); bassLp.type = 'lowpass';
       bassLp.frequency.value = 200; bassLp.Q.value = 0.7; const bassShaper = ctx.createWaveShaper();
       // Soft-clip curve that generates even and odd harmonics
-      const curveLen = 4096; const curve = new Float32Array(curveLen);
-      for (let i = 0; i < curveLen; i++) {
+      const curveLen = 4096; const curve = new Float32Array(curveLen); for (let i = 0; i < curveLen; i++) {
         const x = (i * 2) / curveLen - 1; curve[i] = (Math.PI + 2) * x / (Math.PI + 2 * Math.abs(x)); }
       bassShaper.curve = curve; bassShaper.oversample = '2x';
       const bassHp = ctx.createBiquadFilter(); bassHp.type = 'highpass';
@@ -238,12 +236,10 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
         } catch { /* ok */ } }
       return next;});}, []);
   const saveCustomPreset = useCallback((name: string) => {
-    const preset: EqPreset = { name, gains: bands.map(b => b.gain) };
-    setCustomPresets(prev => {
+    const preset: EqPreset = { name, gains: bands.map(b => b.gain) }; setCustomPresets(prev => {
       const next = [...prev.filter(p => p.name !== name), preset]; saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next);
       return next;});
-  }, [bands]);
-  const removeCustomPreset = useCallback((name: string) => { setCustomPresets(prev => {
+  }, [bands]); const removeCustomPreset = useCallback((name: string) => { setCustomPresets(prev => {
       const next = prev.filter(p => p.name !== name); saveToStorage(STORAGE_KEYS.CUSTOM_EQ_PRESETS, next); return next;
     });}, []);
   const setStereoWidth = useCallback((w: number) => {
@@ -270,15 +266,13 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
           mbWetGainRef.current.gain.setTargetAtTime(0, t, RAMP_TIME); }
       }
       return next;});
-  }, [compressorAmount]);
-  const setCompressorAmount = useCallback((v: number) => {
+  }, [compressorAmount]); const setCompressorAmount = useCallback((v: number) => {
     const clamped = Math.max(0, Math.min(1, v)); setCompressorAmountState(clamped);
     saveToStorage(STORAGE_KEYS.COMPRESSOR_AMOUNT, clamped); if (!compressorEnabled) return;
     const ctx = ctxRef.current; const t = ctx?.currentTime ?? 0;
     if (mbDryGainRef.current) mbDryGainRef.current.gain.setTargetAtTime(1 - clamped * 0.5, t, RAMP_TIME);
     if (mbWetGainRef.current) mbWetGainRef.current.gain.setTargetAtTime(clamped, t, RAMP_TIME);
-  }, [compressorEnabled]);
-  const setNoiseReductionMode = useCallback((mode: NoiseReductionMode) => {
+  }, [compressorEnabled]); const setNoiseReductionMode = useCallback((mode: NoiseReductionMode) => {
     setNoiseReductionModeState(mode); saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, mode);
     applyNoiseReductionPreset(mode);
   }, [applyNoiseReductionPreset]);

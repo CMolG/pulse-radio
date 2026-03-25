@@ -35,8 +35,7 @@ export default function LyricsReel({ lyrics, currentTime, activeLineOverride, va
   const updateFocusedIdx = useCallback(() => {
     const scroller = scrollerRef.current; if (!scroller || !renderableLines.length) return;
     const scrollerRect = scroller.getBoundingClientRect(); const centerY = scrollerRect.top + scrollerRect.height / 2;
-    let closestIdx = 0; let closestDistance = Number.POSITIVE_INFINITY;
-    lineRefs.current.forEach((line, index) => {
+    let closestIdx = 0; let closestDistance = Number.POSITIVE_INFINITY; lineRefs.current.forEach((line, index) => {
       if (!line) return; const rect = line.getBoundingClientRect(); const lineCenter = rect.top + rect.height / 2;
       const distance = Math.abs(centerY - lineCenter);
       if (distance < closestDistance) { closestDistance = distance; closestIdx = index; }

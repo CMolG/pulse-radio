@@ -24,8 +24,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         const canvas = document.createElement("canvas"); const size = 48; canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext("2d"); if (!ctx) return resolve(FALLBACK_COLORS);
         ctx.drawImage(img, 0, 0, size, size); const data = ctx.getImageData(0, 0, size, size).data;
-        const buckets: Record<number, number> = {};
-        for (let i = 0; i < data.length; i += 12) {
+        const buckets: Record<number, number> = {}; for (let i = 0; i < data.length; i += 12) {
           const r = data[i], g = data[i + 1], b = data[i + 2]; const max = Math.max(r, g, b), min = Math.min(r, g, b);
           if (max - min < 25) continue; const s = (max - min) / max; if (s < 0.2) continue; let h = 0;
           if (max === r) h = 60 * (((g - b) / (max - min)) % 6);

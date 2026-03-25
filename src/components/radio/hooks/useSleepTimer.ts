@@ -7,16 +7,14 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   const [isFading, setIsFading] = useState(false); const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null); const endTimeRef = useRef<number>(0);
   const savedVolumeRef = useRef<number | null>(null); const onExpireRef = useRef(onExpire);
-  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
-  const stopFade = useCallback(() => {
+  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]); const stopFade = useCallback(() => {
     if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
     if (savedVolumeRef.current !== null && audioRef?.current) { // Restore original volume if we saved it
       audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null; }
     setIsFading(false);}, []);
   const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     stopFade(); endTimeRef.current = 0; setRemainingMin(null);
-  }, [stopFade]);
-  const startFade = useCallback(() => {
+  }, [stopFade]); const startFade = useCallback(() => {
     if (!audioRef?.current || fadeTimerRef.current) return; const audio = audioRef.current;
     savedVolumeRef.current = audio.volume; setIsFading(true);
     const fadeStart = Date.now(); let baseVol = audio.volume; let lastSetVol = audio.volume;
@@ -33,8 +31,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   }, []); const start = useCallback((minutes: number) => { if (timerRef.current) clearInterval(timerRef.current);
     stopFade(); endTimeRef.current = Date.now() + minutes * 60_000; setRemainingMin(minutes);
     timerRef.current = setInterval(() => {
-      const left = Math.max(0, endTimeRef.current - Date.now()); const mins = Math.ceil(left / 60_000);
-      if (left <= 0) {
+      const left = Math.max(0, endTimeRef.current - Date.now()); const mins = Math.ceil(left / 60_000); if (left <= 0) {
         // Discard saved volume so stopFade won't restore it — the
         // fade brought volume to 0 intentionally before pausing.
         savedVolumeRef.current = null; clear(); onExpireRef.current();

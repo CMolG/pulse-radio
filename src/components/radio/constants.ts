@@ -45,8 +45,7 @@ export const EQ_PRESETS: EqPreset[] = [ { name: 'Flat',       gains: [0, 0, 0, 0
   { name: 'V-Shape',    gains: [5, 2, -2, 2, 5] }, { name: 'Vocal',      gains: [-2, 0, 4, 3, 0] },
   { name: 'Rock',       gains: [4, 2, -1, 3, 4] }, { name: 'Electronic', gains: [5, 3, -1, 2, 6] },
   { name: 'Acoustic',   gains: [0, 1, -1, 2, 0] },];
-const _flagCache = new Map<string, string>();
-export function countryFlag(code: string): string {
+const _flagCache = new Map<string, string>(); export function countryFlag(code: string): string {
   if (!code || code.length !== 2) return '🌐'; const cached = _flagCache.get(code);
   if (cached) return cached; const upper = code.toUpperCase(); if (!/^[A-Z]{2}$/.test(upper)) return '🌐';
   const flag = String.fromCodePoint(0x1F1E6 + upper.charCodeAt(0) - 65, 0x1F1E6 + upper.charCodeAt(1) - 65,);

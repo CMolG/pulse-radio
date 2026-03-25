@@ -25,8 +25,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
   const [showSaveInput, setShowSaveInput] = useState(false); const [presetName, setPresetName] = useState("");
   const handleSelectPreset = useCallback((name: string, gains: number[]) => {
     setSelectedPreset(name); eq.applyPreset(gains); onPresetChange(name);
-  }, [eq, onPresetChange]);
-  const handleSetGain = useCallback((id: string, gain: number) => {
+  }, [eq, onPresetChange]); const handleSetGain = useCallback((id: string, gain: number) => {
     setSelectedPreset(null); onPresetChange(null); eq.setBandGain(id, gain);
   }, [eq, onPresetChange]); const handleSave = () => { const name = presetName.trim();
     if (name) { eq.saveCustomPreset(name); setPresetName(""); setShowSaveInput(false); } };

@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 'use client'; import { useEffect, useRef, useCallback } from 'react';
-import type { Station, NowPlayingTrack } from '../types';
-type MediaSessionConfig = {
+import type { Station, NowPlayingTrack } from '../types'; type MediaSessionConfig = {
   station: Station | null; track: NowPlayingTrack | null; isPlaying: boolean; onPlay: () => void;
   onPause: () => void; onNext: () => void; onPrev: () => void; onStop: () => void;
   onSeekBackward?: () => void; onSeekForward?: () => void; };
@@ -13,12 +12,10 @@ export function useMediaSession(config: MediaSessionConfig): void {
     const artSrc = track?.artworkUrl || station.favicon; const album = station.tags?.split(',')[0] || 'Live';
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return; lastMetaRef.current = metaKey;
-    const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : [];
-    try {
+    const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : []; try {
       navigator.mediaSession.metadata = new MediaMetadata({ title: trackTitle, artist: trackArtist, album, artwork, });
     } catch { /* MediaMetadata constructor can throw on malformed artwork data */ }
-  }, [station, track]);
-  useEffect(() => {
+  }, [station, track]); useEffect(() => {
     if (!('mediaSession' in navigator)) return; navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [isPlaying]); const setupHandlers = useCallback(() => { if (!('mediaSession' in navigator)) return;
     const handlers: [MediaSessionAction, MediaSessionActionHandler][] = [ ['play', () => configRef.current.onPlay()],

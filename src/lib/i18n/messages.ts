@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { SupportedLocale } from "./locales";
-const BASE_MESSAGES = {
+import type { SupportedLocale } from "./locales"; const BASE_MESSAGES = {
   topStations: "Top Stations", loadingStations: "Loading…", stationCount: "{count} stations", discovery: "Discovery",
   discoveryOn: "ON", discoveryModeAria: "Discovery mode",
   discoveryModeTitle: "Auto-play a random station every 30 seconds", all: "All",

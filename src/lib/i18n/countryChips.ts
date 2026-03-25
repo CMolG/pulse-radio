@@ -2,8 +2,7 @@
 import { countryFlag } from "@/components/radio/constants";
 import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRIES } from "./countries";
 import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from "./languageMap";
-import type { SupportedLocale } from "./locales";
-export type CountryChip = {
+import type { SupportedLocale } from "./locales"; export type CountryChip = {
   code: string; queryName: string; displayName: string; flag: string; reason: "language" | "proximity" | "global"; };
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
 const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI", "TV", "NR", "PW", "MH", "FM", "TO",

@@ -1,6 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type { SupportedLocale } from "./locales";
-export const LANG3_TO_LOCALE: Record<string, SupportedLocale> = {
+import type { SupportedLocale } from "./locales"; export const LANG3_TO_LOCALE: Record<string, SupportedLocale> = {
   eng: "en", spa: "es", fra: "fr", deu: "de", por: "pt", ita: "it", nld: "nl", jpn: "ja",
   kor: "ko", zho: "zh", ara: "ar", hin: "hi", ben: "bn", rus: "ru", ukr: "uk", pol: "pl",
   tur: "tr", swe: "sv", dan: "da", nor: "nb", fin: "fi", ell: "el", ces: "cs", hun: "hu",
