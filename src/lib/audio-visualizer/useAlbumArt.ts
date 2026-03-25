@@ -224,8 +224,7 @@ export function useAlbumArt(title: string | null, artist: string | null): UseAlb
     fetch(
       `/api/itunes?term=${encodeURIComponent(term)}`,
       { signal: controller.signal },
-    )
-      .then((r) => {
+    ).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })

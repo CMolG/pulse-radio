@@ -191,7 +191,6 @@ export function useRadio(): UseRadioReturn {
   useEffect(() => {
     const audio = getAudio();
     const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); };
-
     const sessionId = playSessionRef.current;
     const reconnect = (delay: number) => {
       if (playSessionRef.current !== sessionId || !station || userPausedRef.current) return;
@@ -332,7 +331,6 @@ export function useRadio(): UseRadioReturn {
 
     // Ended: connection dropped — seamlessly reconnect
     const onEnded = () => { if (!userPausedRef.current && station) reconnect(500); };
-
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onCanPlay = () => { if (!userPausedRef.current && station && audio.paused) audio.play().catch(() => {}); };
 
@@ -362,7 +360,6 @@ export function useRadio(): UseRadioReturn {
 
     // Network status: pause retries when offline, auto-reconnect when back online
     const onOffline = () => { clearReconnectTimer(); };
-
     const onOnline = () => {
       if (station && !userPausedRef.current && (audio.paused || audio.readyState < 2)) {
         retryRef.current = 0;
@@ -573,8 +570,7 @@ export function useRadio(): UseRadioReturn {
     prefetchedUrlsRef.current.add(streamUrl);
     // Warm DNS+TCP+TLS with a HEAD request and measure latency
     const controller = new AbortController();
-    fetch(proxyUrl(streamUrl), { method: 'HEAD', signal: controller.signal })
-      .then(() => { clearTimeout(timer); })
+    fetch(proxyUrl(streamUrl), { method: 'HEAD', signal: controller.signal }).then(() => { clearTimeout(timer); })
       .catch(() => { clearTimeout(timer); });
     const timer = setTimeout(() => controller.abort(), 2000);
   }, []);

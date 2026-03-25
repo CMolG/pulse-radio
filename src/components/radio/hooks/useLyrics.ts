@@ -74,8 +74,7 @@ export function useLyrics(
       undefined,
       stationName ?? undefined,
       controller.signal,
-    )
-      .then(result => {
+    ).then(result => {
         if (controller.signal.aborted) return;
         retryCountRef.current = 0;
         if (result) {

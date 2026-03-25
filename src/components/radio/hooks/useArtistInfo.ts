@@ -52,8 +52,7 @@ export function useArtistInfo(artist: string | null): {
     // Abort after 15s if the API doesn't respond (server-side has 8s per upstream call)
     const timeout = setTimeout(() => controller.abort(), 15_000);
 
-    fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal })
-      .then((r) => {
+    fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })

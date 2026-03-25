@@ -67,8 +67,7 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
       const mapped = localeFromLang3(lang3);
       return mapped ? candidates.has(mapped) : false;
     }),
-  )
-    .map((country) => country.code);
+  ).map((country) => country.code);
 }
 
 function getProximityCountries(seedCodes: string[]): string[] {
@@ -89,8 +88,7 @@ function getProximityCountries(seedCodes: string[]): string[] {
     score += 30;
     score -= (REGION_PRIORITY[country.region] ?? REGION_PRIORITY.Other) * 0.05;
     return { code: country.code, score };
-  })
-    .filter((item) => item.score > 0).sort((a, b) => b.score - a.score)
+  }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score)
     .map((item) => item.code);
 }
 
