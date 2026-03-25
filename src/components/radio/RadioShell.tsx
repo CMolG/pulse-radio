@@ -2914,6 +2914,11 @@ const StationCard = React.memo(
   'local',
   'world',
 ] as const;
+const _GENRE_TO_CAT: Record<string, string> = {
+  'hip hop': 'hiphop',
+  'hip-hop': 'hiphop',
+  'lo-fi': 'lofi',
+};
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   trending: <Zap size={14} className="text-amber-400/70" />,
   local: <MapPin size={14} className="text-emerald-400/70" />,
@@ -3041,17 +3046,12 @@ function BrowseView({
   const effectiveBrowseOrder = useMemo(() => {
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER;
     const defaultOrder = [...BROWSE_ORDER];
-    const GENRE_TO_CAT: Record<string, string> = {
-      'hip hop': 'hiphop',
-      'hip-hop': 'hiphop',
-      'lo-fi': 'lofi',
-    };
     const boostedIds = new Set<string>();
     const ordered: string[] = [];
     ordered.push('trending');
     boostedIds.add('trending');
     for (const genre of userGenreOrder) {
-      const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
+      const catId = _GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
       if (defaultOrder.includes(catId as (typeof defaultOrder)[number]) && !boostedIds.has(catId)) {
         ordered.push(catId);
         boostedIds.add(catId);
