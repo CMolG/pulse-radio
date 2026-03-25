@@ -1,6 +1,3 @@
-const ITUNES_REFERRER = "pt=pulse-radio&ct=www.pulse-radio.online"; const WHITESPACE_RE = /\s+/; const ARTIST_SPLIT_RE = /[,;&]|feat\.|ft\.|featuring|vs\.?/i; export function stationInitials(name: string) {
-  return name .split(WHITESPACE_RE) .slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join(""); }
-export function primaryArtist(artist: string): string { return artist.split(ARTIST_SPLIT_RE)[0].trim(); } export function formatTimeAgo(ts: number): string {
-  const diff = Math.floor((Date.now() - ts) / 1000); if (diff < 60) return "now"; if (diff < 3600) return `${Math.floor(diff / 60)}m`; if (diff < 86400) return `${Math.floor(diff / 3600)}h`; return `${Math.floor(diff / 86400)}d`; }
-export function itunesSearchUrl(title: string, artist: string): string {
-  const q = encodeURIComponent(`${artist} ${title}`.trim()); return `https://music.apple.com/search?term=${q}&${ITUNES_REFERRER}`; }
+const ITUNES_REFERRER = "pt=pulse-radio&ct=www.pulse-radio.online"; const WHITESPACE_RE = /\s+/; const ARTIST_SPLIT_RE = /[,;&]|feat\.|ft\.|featuring|vs\.?/i; export function stationInitials(name: string) { return name .split(WHITESPACE_RE) .slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join(""); }
+export function primaryArtist(artist: string): string { return artist.split(ARTIST_SPLIT_RE)[0].trim(); } export function formatTimeAgo(ts: number): string { const diff = Math.floor((Date.now() - ts) / 1000); if (diff < 60) return "now"; if (diff < 3600) return `${Math.floor(diff / 60)}m`; if (diff < 86400) return `${Math.floor(diff / 3600)}h`; return `${Math.floor(diff / 86400)}d`; }
+export function itunesSearchUrl(title: string, artist: string): string { const q = encodeURIComponent(`${artist} ${title}`.trim()); return `https://music.apple.com/search?term=${q}&${ITUNES_REFERRER}`; }

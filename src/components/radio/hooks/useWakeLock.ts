@@ -2,14 +2,10 @@
 'use client'; import { useRef, useEffect, useCallback, useState } from 'react';
 /* Prevents the screen from dimming/locking while audio is playing. Uses the Screen Wake Lock API (supported in C
  * hrome, Edge, Safari 16.4+). Automatically re-acquires the lock when the tab becomes visible again. */
-export function useWakeLock(shouldLock: boolean) {
-  const lockRef = useRef<WakeLockSentinel | null>(null); const [isActive, setIsActive] = useState(false); const requestingRef = useRef(false); const wantReleaseRef = useRef(false); const request = useCallback(async () => {
-    if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return; requestingRef.current = true; wantReleaseRef.current = false; try { const lock = await navigator.wakeLock.request('screen'); if (wantReleaseRef.current) {
-        try { await lock.release(); } catch { /* already released */ } setIsActive(false); return; } // release() was called while we were awaiting — honour it immediately
+export function useWakeLock(shouldLock: boolean) { const lockRef = useRef<WakeLockSentinel | null>(null); const [isActive, setIsActive] = useState(false); const requestingRef = useRef(false); const wantReleaseRef = useRef(false); const request = useCallback(async () => { if (lockRef.current || requestingRef.current || typeof navigator === 'undefined' || !('wakeLock' in navigator)) return; requestingRef.current = true; wantReleaseRef.current = false; try { const lock = await navigator.wakeLock.request('screen'); if (wantReleaseRef.current) { try { await lock.release(); } catch { /* already released */ } setIsActive(false); return; } // release() was called while we were awaiting — honour it immediately
       lockRef.current = lock; setIsActive(true); lock.addEventListener('release', () => { lockRef.current = null; setIsActive(false); });} catch {
     } finally { requestingRef.current = false; }}, []); // Wake lock request failed (e.g., low battery, or permission denied)
-  const release = useCallback(async () => { if (requestingRef.current) {
-      wantReleaseRef.current = true; return; } // request() is in-flight — flag so it releases on completion
+  const release = useCallback(async () => { if (requestingRef.current) { wantReleaseRef.current = true; return; } // request() is in-flight — flag so it releases on completion
     if (!lockRef.current) return; try { await lockRef.current.release(); } catch { } // Already released
     lockRef.current = null; setIsActive(false);}, []);
   useEffect(() => { if (shouldLock) request(); else release(); }, [shouldLock, request, release]); useEffect(() => { // Re-acquire when tab becomes visible (browser releases lock on hide) // Auto-acquire/release based on shouldLock
