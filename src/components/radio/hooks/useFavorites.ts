@@ -46,9 +46,7 @@ export function useFavorites(): UseFavoritesReturn {
     });
   }, []);
 
-  const remove = useCallback((uuid: string) => {
-    setFavorites(prev => prev.filter(s => s.stationuuid !== uuid));
-  }, []);
+  const remove = useCallback((uuid: string) => { setFavorites(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
 
   const toggle = useCallback((station: Station) => {
     setFavorites(prev => {

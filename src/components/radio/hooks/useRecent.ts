@@ -41,9 +41,7 @@ export function useRecent(): UseRecentReturn {
     });
   }, []);
 
-  const remove = useCallback((uuid: string) => {
-    setRecent(prev => prev.filter(s => s.stationuuid !== uuid));
-  }, []);
+  const remove = useCallback((uuid: string) => { setRecent(prev => prev.filter(s => s.stationuuid !== uuid)); }, []);
 
   const clear = useCallback(() => setRecent([]), []);
 

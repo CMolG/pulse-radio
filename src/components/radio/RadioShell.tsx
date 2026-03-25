@@ -259,9 +259,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [locale, t, resetNav]);
 
   // Reset compact state on layout change
-  useEffect(() => {
-    if (layout === "pip") setMiniMode(false);
-  }, [layout]);
+  useEffect(() => { if (layout === "pip") setMiniMode(false); }, [layout]);
 
   // Track network connectivity for offline indicator
   useEffect(() => {

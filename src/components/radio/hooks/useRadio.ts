@@ -554,9 +554,7 @@ export function useRadio(): UseRadioReturn {
     lastBufferEndRef.current = 0;
   }, []);
 
-  const setVolume = useCallback((v: number) => {
-    setVolumeState(Math.max(0, Math.min(1, v)));
-  }, []);
+  const setVolume = useCallback((v: number) => { setVolumeState(Math.max(0, Math.min(1, v))); }, []);
 
   const prefetchedUrlsRef = useRef<Set<string>>(new Set());
   const prefetchStream = useCallback((streamUrl: string) => {

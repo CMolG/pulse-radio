@@ -322,9 +322,7 @@ export default function BrowseView({
   }, [view, retryKey]);
 
   // All loaded category stations for discovery mode & station count in top view
-  const allCategoryStations = useMemo(() => {
-    return Object.values(categorySections).flat();
-  }, [categorySections]);
+  const allCategoryStations = useMemo(() => { return Object.values(categorySections).flat(); }, [categorySections]);
 
   const displayCount = view.mode === "top" ? allCategoryStations.length : stations.length;
 

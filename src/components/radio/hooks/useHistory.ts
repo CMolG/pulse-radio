@@ -107,9 +107,7 @@ export function useHistory(
     });
   }, [track?.artworkUrl, track?.album, track?.itunesUrl, track?.durationMs, track?.genre, track?.releaseDate, track?.trackNumber, track?.trackCount, track?.title, track?.artist, stationUuid]);
 
-  const remove = useCallback((id: string) => {
-    setHistory(prev => prev.filter(e => e.id !== id));
-  }, []);
+  const remove = useCallback((id: string) => { setHistory(prev => prev.filter(e => e.id !== id)); }, []);
 
   const clear = useCallback(() => {
     setHistory([]);

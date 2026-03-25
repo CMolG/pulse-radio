@@ -450,9 +450,7 @@ export function useEqualizer(): UseEqualizerReturn {
     }
   }, [bands, bassEnhance, compressorAmount, compressorEnabled, enabled, noiseReductionMode, normalizerEnabled, stereoWidth]);
 
-  const disconnect = useCallback(() => {
-    teardownGraph(true);
-  }, []);
+  const disconnect = useCallback(() => { teardownGraph(true); }, []);
 
   const MAX_GAIN_DB = 12;
   const setBandGain = useCallback((id: string, gain: number) => {

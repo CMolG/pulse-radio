@@ -65,9 +65,7 @@ export function useFavoriteSongs(): UseFavoriteSongsReturn {
     });
   }, []);
 
-  const remove = useCallback((id: string) => {
-    setSongs(prev => prev.filter(s => s.id !== id));
-  }, []);
+  const remove = useCallback((id: string) => { setSongs(prev => prev.filter(s => s.id !== id)); }, []);
 
   const toggle = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs(prev => {
