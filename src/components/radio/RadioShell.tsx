@@ -3141,10 +3141,14 @@ function BrowseView({
   }, []);
   const startScan = useCallback(
     async (stationsToScan: Station[], gen: number) => {
-      const queue = [...stationsToScan];
+      let idx = 0;
       const stale = () => scanGenRef.current !== gen;
       const worker = async () => {
-        while (queue.length > 0 && !stale()) await fetchMeta(queue.shift()!, stale);
+        while (!stale()) {
+          const i = idx++;
+          if (i >= stationsToScan.length) break;
+          await fetchMeta(stationsToScan[i], stale);
+        }
       };
       await Promise.all(Array.from({ length: 3 }, worker));
     },
