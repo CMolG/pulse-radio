@@ -9725,6 +9725,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       exit={{ opacity: 0, y: 4 }}
       transition={{ duration: 0.18 }}
       className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+      role="status"
+      aria-live="polite"
     >
       {' '}
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
