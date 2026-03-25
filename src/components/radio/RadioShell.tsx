@@ -384,11 +384,16 @@ function localeCandidates(locale: SupportedLocale): SupportedLocale[] {
 function localeFromLang3(code3: string): SupportedLocale | null {
   return LANG3_TO_LOCALE[code3] ?? null;
 }
+const _displayNamesCache = new Map<string, Intl.DisplayNames>();
 function getCountryDisplayName(locale: SupportedLocale, code: string): string {
   const country = COUNTRY_BY_CODE[code];
   if (!country) return code;
   try {
-    const dn = new Intl.DisplayNames([locale], { type: 'region' });
+    let dn = _displayNamesCache.get(locale);
+    if (!dn) {
+      dn = new Intl.DisplayNames([locale], { type: 'region' });
+      _displayNamesCache.set(locale, dn);
+    }
     return dn.of(code) ?? country.name;
   } catch {
     return country.name;
