@@ -3287,10 +3287,13 @@ function BrowseView({
       if (scanGenRef.current === gen) scanGenRef.current++;
     };
   }, [scanEnabled, pageStations, view.mode, startScan]);
-  const scannedCount = useMemo(
-    () => pageStations.filter((s) => liveData[s.stationuuid]?.status === 'loaded').length,
-    [pageStations, liveData],
-  );
+  const scannedCount = useMemo(() => {
+    let count = 0;
+    for (let i = 0; i < pageStations.length; i++) {
+      if (liveData[pageStations[i].stationuuid]?.status === 'loaded') count++;
+    }
+    return count;
+  }, [pageStations, liveData]);
   const isScanning = useMemo(
     () => scanEnabled && pageStations.some((s) => liveData[s.stationuuid]?.status === 'loading'),
     [scanEnabled, pageStations, liveData],
