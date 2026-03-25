@@ -1387,6 +1387,7 @@ function useRadio() {
       const audio = new Audio();
       audio.crossOrigin = 'anonymous';
       audio.setAttribute('playsinline', '');
+      audio.setAttribute('webkit-playsinline', '');
       audio.preload = 'none';
       audioRef.current = audio;
     }
@@ -6110,8 +6111,9 @@ type MobileSettingsPanelProps = {
     topGenres: GenrePlayCount[];
     totalListenMs: number;
   };
+  desktop?: boolean;
 };
-function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileSettingsPanelProps) {
+function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }: MobileSettingsPanelProps) {
   const { locale, setLocale, locales } = useLocale();
   const [showEq, setShowEq] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -6149,27 +6151,29 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
       animate={_MOTION_FADE_VISIBLE}
       exit={_MOTION_FADE_OUT}
       transition={_MOTION_T_02}
-      className="absolute inset-0 z-50 flex flex-col"
+      className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
     >
       {' '}
-      {/* Backdrop */} <div className="absolute inset-0 bg-black/50" onClick={onClose} />{' '}
-      {/* Panel slides up from bottom */}{' '}
+      {/* Backdrop */} <div className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'} onClick={onClose} />{' '}
+      {/* Panel */}{' '}
       <motion.div
-        initial={_MOTION_SLIDE_UP_INIT}
-        animate={_MOTION_SLIDE_UP_VISIBLE}
-        exit={_MOTION_SLIDE_UP_EXIT}
-        transition={_MOTION_T_SPRING}
-        className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
+        initial={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_INIT}
+        animate={desktop ? { opacity: 1, scale: 1 } : _MOTION_SLIDE_UP_VISIBLE}
+        exit={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_EXIT}
+        transition={desktop ? { duration: 0.2 } : _MOTION_T_SPRING}
+        className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
         style={_GLASS_SETTINGS_STYLE}
-        data-testid="mobile-settings-panel"
+        data-testid={desktop ? 'desktop-settings-modal' : 'mobile-settings-panel'}
       >
         {' '}
-        {/* Handle bar */}{' '}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
-        </div>{' '}
+        {/* Handle bar — mobile only */}{' '}
+        {!desktop && (
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 rounded-full bg-white/20" />
+          </div>
+        )}{' '}
         {/* Header */}{' '}
-        <div className="flex items-center justify-between px-5 pb-3">
+        <div className={`flex items-center justify-between px-5 pb-3 ${desktop ? 'pt-4' : ''}`}>
           {' '}
           <h2 className="text-[17px] font-semibold text-white">Settings</h2>
           <button
@@ -8700,7 +8704,15 @@ function useMediaSession(config: MediaSessionConfig): void {
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return;
     lastMetaRef.current = metaKey;
-    const artwork = artSrc ? [{ src: artSrc, sizes: '512x512', type: 'image/png' }] : [];
+    const imgSrc = artSrc || '/android-chrome-512x512.png';
+    const artwork: MediaImage[] = [
+      { src: imgSrc, sizes: '96x96', type: 'image/png' },
+      { src: imgSrc, sizes: '128x128', type: 'image/png' },
+      { src: imgSrc, sizes: '192x192', type: 'image/png' },
+      { src: imgSrc, sizes: '256x256', type: 'image/png' },
+      { src: imgSrc, sizes: '384x384', type: 'image/png' },
+      { src: imgSrc, sizes: '512x512', type: 'image/png' },
+    ];
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: trackTitle,
@@ -9067,6 +9079,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   ]);
   const [showEq, setShowEq] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
+  const [showDesktopSettings, setShowDesktopSettings] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -9966,6 +9979,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   <div className="flex items-center gap-3">
                     {' '}
                     {pulseLogoButton} <div className="flex-1" /> <LanguageSelector />
+                    <button
+                      onClick={() => setShowDesktopSettings(true)}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
+                      title="Settings"
+                      data-testid="desktop-settings-btn"
+                    >
+                      <Settings size={18} />
+                    </button>
                   </div>
                 </div>{' '}
                 {nowPlayingHeroElement} {/* ── Top nav: tabs + search ── */}{' '}
@@ -10065,8 +10086,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         </div>
       </div>{' '}
       {/* EQ panel overlay */} {eqPanelElement} {/* Toast notification */}{' '}
-      <AnimatePresence>{toastElement}</AnimatePresence> {/* Bottom bar */}{' '}
-      <div className="relative z-10">
+      <AnimatePresence>{toastElement}</AnimatePresence> {/* Bottom bar — glassmorphism */}{' '}
+      <div className="relative z-10 border-t border-white/10" style={glassStyle}>
         {' '}
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           {' '}
@@ -10102,6 +10123,24 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         </div>
         <NowPlayingBar {...nowPlayingFullProps} />
       </div>
+      {/* Desktop settings modal */}
+      <AnimatePresence>
+        {showDesktopSettings && (
+          <MobileSettingsPanel
+            onClose={() => setShowDesktopSettings(false)}
+            eq={eq}
+            onPresetChange={setEqPreset}
+            statsData={{
+              topStations: usageStats.topStations,
+              topSongs: usageStats.topSongs,
+              topArtists: usageStats.topArtists,
+              topGenres: usageStats.topGenres,
+              totalListenMs: usageStats.stats.totalListenMs,
+            }}
+            desktop
+          />
+        )}
+      </AnimatePresence>
       {sharedModals}
     </div>
   );
