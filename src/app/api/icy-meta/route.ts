@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
     if (res.url) {
       try {
         const finalUrl = new URL(res.url);
-        if (isPrivateHost(finalUrl.hostname.toLowerCase())) {
+        if (isPrivateHost(finalUrl.hostname)) {
           clearTimeout(timeout);
           res.body?.cancel().catch(_NOOP);
           return NextResponse.json(_ERR_REDIRECT_PRIVATE, { status: 403 });
