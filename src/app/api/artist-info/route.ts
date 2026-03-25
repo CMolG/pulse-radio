@@ -13,6 +13,8 @@ const _BAND_SUFFIXES = ['(band)', '(musical group)', '(singer)', '(musician)'] a
 const _ERR_400 = { error: 'Missing or invalid artist parameter' };
 const _ERR_500 = { error: 'Internal error' };
 const _NOOP = () => {};
+const _MB_HDRS = { 'User-Agent': USER_AGENT, Accept: 'application/json' } as const;
+const _WIKI_HDRS = { 'User-Agent': USER_AGENT } as const;
 async function fetchJson<T>(url: string, headers: Record<string, string>): Promise<T | null> {
   try {
     const res = await fetch(url, { headers, signal: AbortSignal.timeout(8_000) });
@@ -32,15 +34,12 @@ async function fetchJson<T>(url: string, headers: Record<string, string>): Promi
 }
 async function searchMusicBrainz(artist: string) {
   const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
-  const data = await fetchJson<{ artists?: any[] }>(url, {
-    'User-Agent': USER_AGENT,
-    Accept: 'application/json',
-  });
+  const data = await fetchJson<{ artists?: any[] }>(url, _MB_HDRS);
   return data?.artists?.[0] ?? null;
 }
 async function fetchWikiSummary(title: string) {
   const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
-  const data = await fetchJson<any>(url, { 'User-Agent': USER_AGENT });
+  const data = await fetchJson<any>(url, _WIKI_HDRS);
   if (data?.type === 'disambiguation') return null;
   return data;
 }
