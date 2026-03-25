@@ -113,8 +113,7 @@ export function SpiralRenderer({
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current;
     let fillStyle: string | CanvasGradient = c1;
     try {
-      const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius,
-        centerX + maxRadius,
+      const gradient = ctx.createLinearGradient( centerX - maxRadius, centerY - maxRadius, centerX + maxRadius,
         centerY + maxRadius,
       );
       gradient.addColorStop(0, c1);

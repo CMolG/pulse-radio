@@ -37,10 +37,7 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
   });
 }
 
-export async function fetchLyrics( artist: string,
-  title: string,
-  album?: string,
-  duration?: number,
+export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
   fallbackArtist?: string,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
@@ -71,9 +68,7 @@ async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: 
   return null;
 }
 
-async function fetchLyricsForArtist( artist: string, title: string,
-  album?: string,
-  duration?: number,
+async function fetchLyricsForArtist( artist: string, title: string, album?: string, duration?: number,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
   const params = new URLSearchParams({ artist_name: artist, track_name: title, });

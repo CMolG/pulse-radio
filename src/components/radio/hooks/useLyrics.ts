@@ -27,8 +27,7 @@ function loadCache(): CacheEntry[] {
 
 function saveCache(entries: CacheEntry[]) { saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, MAX_CACHE)); }
 
-export function useLyrics( track: NowPlayingTrack | null,
-  stationName?: string | null,
+export function useLyrics( track: NowPlayingTrack | null, stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es'; },
 ) {
   const [lyrics, setLyrics] = useState<LyricsData | null>(null);
@@ -44,10 +43,7 @@ export function useLyrics( track: NowPlayingTrack | null,
     if (controller.signal.aborted || !track?.title) return;
     setLoading(true);
     setError(false);
-    fetchLyricsApi( track.artist || stationName || '', track.title,
-      track.album,
-      undefined,
-      stationName ?? undefined,
+    fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined,
       controller.signal,
     ).then(result => {
         if (controller.signal.aborted) return;

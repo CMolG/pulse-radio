@@ -18,17 +18,7 @@ export type CountryChip = {
 };
 
 const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "IN", "CA", "AU"];
-const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM",
-  "LI",
-  "MC",
-  "VA",
-  "KI",
-  "TV",
-  "NR",
-  "PW",
-  "MH",
-  "FM",
-  "TO",
+const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI", "TV", "NR", "PW", "MH", "FM", "TO",
   "WS",
   "VU",
 ]);

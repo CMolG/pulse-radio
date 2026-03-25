@@ -38,8 +38,7 @@ function isAdContent(text: string): boolean {
 }
 
 // Fetch ICY metadata via server-side proxy to avoid CORS issues.
-export async function fetchIcyMeta( streamUrl: string,
-  signal?: AbortSignal,
+export async function fetchIcyMeta( streamUrl: string, signal?: AbortSignal,
 ): Promise<{ streamTitle: string | null; icyBr: string | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
