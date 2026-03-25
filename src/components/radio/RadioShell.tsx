@@ -3837,6 +3837,7 @@ interface SpiralRendererProps {
   demo?: boolean;
 }
 const NUM_BARS = 250;
+const _EMPTY_F64 = () => new Float64Array(NUM_BARS);
 const CYCLES = 4;
 const SMOOTH_PASSES = 3;
 function SpiralRenderer({
@@ -3849,14 +3850,24 @@ function SpiralRenderer({
   demo = false,
 }: SpiralRendererProps) {
   const rotationRef = useRef(0);
-  const dataArrayRef = useRef(new Float64Array(NUM_BARS));
-  const targetArrayRef = useRef(new Float64Array(NUM_BARS));
-  const smoothedRef = useRef(new Float64Array(NUM_BARS));
-  const tempRef = useRef(new Float64Array(NUM_BARS));
-  const outerXRef = useRef(new Float64Array(NUM_BARS));
-  const outerYRef = useRef(new Float64Array(NUM_BARS));
-  const innerXRef = useRef(new Float64Array(NUM_BARS));
-  const innerYRef = useRef(new Float64Array(NUM_BARS));
+  const dataArrayRef = useRef<Float64Array>(null!);
+  const targetArrayRef = useRef<Float64Array>(null!);
+  const smoothedRef = useRef<Float64Array>(null!);
+  const tempRef = useRef<Float64Array>(null!);
+  const outerXRef = useRef<Float64Array>(null!);
+  const outerYRef = useRef<Float64Array>(null!);
+  const innerXRef = useRef<Float64Array>(null!);
+  const innerYRef = useRef<Float64Array>(null!);
+  if (!dataArrayRef.current) {
+    dataArrayRef.current = _EMPTY_F64();
+    targetArrayRef.current = _EMPTY_F64();
+    smoothedRef.current = _EMPTY_F64();
+    tempRef.current = _EMPTY_F64();
+    outerXRef.current = _EMPTY_F64();
+    outerYRef.current = _EMPTY_F64();
+    innerXRef.current = _EMPTY_F64();
+    innerYRef.current = _EMPTY_F64();
+  }
   const colorsRef = useRef({ color1, color2, color3 });
   useEffect(() => {
     colorsRef.current = { color1, color2, color3 };
