@@ -10,11 +10,9 @@ import UiImage from '@/components/common/UiImage';
 type Props = { faviconUrl?: string; genre?: string; audioAmplitude?: number; landingMode?: boolean; };
 const BF_STYLE: React.CSSProperties = { WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' };
 const BLUR_STYLE: React.CSSProperties = { filter: 'blur(64px)', WebkitFilter: 'blur(64px)',
-  transform: 'translate3d(0,0,0)', WebkitTransform: 'translate3d(0,0,0)',
-};
+  transform: 'translate3d(0,0,0)', WebkitTransform: 'translate3d(0,0,0)', };
 const RADIAL_OVERLAY: React.CSSProperties = {
-  background: 'radial-gradient(140% 120% at 50% 40%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%)',
-};
+  background: 'radial-gradient(140% 120% at 50% 40%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%)', };
 function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode = false }: Props) {
   const { offset, containerRef, gradient } = useParallaxBg(genre, audioAmplitude);
   const baseGradient = landingMode ? 'radial-gradient(120% 100% at 50% 8%, rgba(112,112,112,0.18) 0%, rgba(44,44,44,0.16) 35%, rgba(24,24,24,0.92) 100%)' : gradient;
@@ -22,8 +20,7 @@ function ParallaxBackground({ faviconUrl, genre, audioAmplitude = 0, landingMode
         className="absolute inset-[-40px] transition-transform duration-300 ease-out"
         style={{ transform: `translate3d(${offset.x}px, ${offset.y}px, 0)`,
           WebkitTransform: `translate3d(${offset.x}px, ${offset.y}px, 0)`, background: baseGradient,
-          opacity: landingMode ? 0.85 : 0.15, willChange: 'transform',
-        }}/>
+          opacity: landingMode ? 0.85 : 0.15, willChange: 'transform', }}/>
       {landingMode && ( <div className="absolute inset-0" style={RADIAL_OVERLAY} />
       )}
       {faviconUrl && ( <div

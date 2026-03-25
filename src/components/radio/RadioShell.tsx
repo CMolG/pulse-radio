@@ -80,8 +80,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       artworkUrl: track.artworkUrl || albumArt.artworkUrl || undefined, itunesUrl: albumArt.itunesUrl ?? undefined,
       durationMs: albumArt.durationMs ?? undefined, genre: albumArt.genre || undefined,
       releaseDate: albumArt.releaseDate || undefined, trackNumber: albumArt.trackNumber ?? undefined,
-      trackCount: albumArt.trackCount ?? undefined,
-    };
+      trackCount: albumArt.trackCount ?? undefined, };
   }, [track, albumArt]); const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
   // Track listen time for stats (every 5 seconds while playing)
   const lastTickRef = useRef(Date.now()); const { tickListenTime } = usageStats;
@@ -237,8 +236,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => { const onKeyDown = (e: KeyboardEvent) => {
       const { radio: r, handleSkipNext: skipNext, handleSkipPrev: skipPrev, favs: f, favSongs: fs, enrichedTrack: et, theaterMode: tm, showEq: eq, showShortcuts: sc, selectedSong: ss, sleepTimer: st, showToast: toast, realtimeLyrics: rl } = keydownRef.current;
       const target = e.target as HTMLElement;
-      const isInput =
-        target.tagName === "INPUT" ||
+      const isInput = target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" || target.isContentEditable;
       // Allow Escape even from inputs (to close panels/modals)
       if (isInput && e.key !== "Escape") return;
@@ -257,22 +255,18 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case "ArrowDown": e.preventDefault(); r.setVolume(Math.max(0, r.volume - 0.05)); break;
         case "m": case "M": r.toggleMute(); break; case "n": case "N": skipNext(); break;
         case "p": case "P": skipPrev(); break;
-        case "f":
-        case "F": { e.preventDefault();
-          const searchInput =
-            document.querySelector<HTMLInputElement>("[data-radio-search]") ??
+        case "f": case "F": { e.preventDefault();
+          const searchInput = document.querySelector<HTMLInputElement>("[data-radio-search]") ??
             document.querySelector<HTMLInputElement>(".radio-search-input");
           if (searchInput) searchInput.focus(); break; }
-        case "s":
-        case "S": if (r.station) { const wasFav = f.has(r.station.stationuuid); f.toggle(r.station);
+        case "s": case "S": if (r.station) { const wasFav = f.has(r.station.stationuuid); f.toggle(r.station);
             toast(wasFav ? "Removed from favorites" : r.station.name, "star"); }
           break;
         case "Escape":
           // Priority: close topmost overlay first, then exit theater
           if (sc) setShowShortcuts(false); else if (eq) setShowEq(false); else if (tm) setTheaterMode(false); break;
         case "t": case "T": setTheaterMode(prev => !prev); break; case "e": case "E": setShowEq(prev => !prev); break;
-        case "l":
-        case "L": if (et?.title && r.station) {
+        case "l": case "L": if (et?.title && r.station) {
             const wasLiked = fs.has(et.title, et.artist ?? ''); fs.toggle(buildFavInput(et, r.station));
             toast(wasLiked ? "Song removed" : et.title, "heart"); }
           break;
@@ -377,24 +371,20 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const theaterBaseProps = { track: enrichedTrack, isPlaying: radio.status === "playing",
     frequencyDataRef: analyser.frequencyDataRef, artworkUrl: albumArt.artworkUrl,
     icyBitrate, onFavSong: enrichedTrack?.title ? handleFavSong : undefined, isSongLiked, lyrics,
-    currentTime: effectiveCurrentTime, activeLineOverride: realtimeLyrics?.activeLineIndex,
-  };
+    currentTime: effectiveCurrentTime, activeLineOverride: realtimeLyrics?.activeLineIndex, };
   const theaterFullProps = { ...theaterBaseProps, station: radio.station!,
     onBack: () => setTheaterMode(false), onToggleFav: radio.station ? handleToggleFav : undefined,
-    isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false,
-  };
+    isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false, };
   const nowPlayingBaseProps = {
     station: radio.station, track: enrichedTrack, status: radio.status, volume: radio.volume,
     muted: radio.muted, frequencyDataRef: analyser.frequencyDataRef, icyBitrate, streamQuality: radio.streamQuality,
     onTogglePlay: radio.togglePlay, onSetVolume: radio.setVolume,
-    onToggleMute: radio.toggleMute, sleepTimerMin: sleepTimer.remainingMin, onCycleSleepTimer: sleepTimer.cycle,
-  };
+    onToggleMute: radio.toggleMute, sleepTimerMin: sleepTimer.remainingMin, onCycleSleepTimer: sleepTimer.cycle, };
   const nowPlayingFullProps = { ...nowPlayingBaseProps, onToggleEq: () => setShowEq((s) => !s),
     onToggleTheater: () => setTheaterMode(true), onToggleFav: radio.station ? handleToggleFav : undefined,
     onFavSong: enrichedTrack?.title ? handleFavSong : undefined,
     isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false, songLiked: isSongLiked,
-    eqPresetActive: eqPreset !== null, showEq, theaterMode,
-  };
+    eqPresetActive: eqPreset !== null, showEq, theaterMode, };
   const browseViewElement = ( <BrowseView
       view={view}
       currentStation={radio.station}
@@ -474,8 +464,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     className="w-9 h-9 flex-center-row rounded-xl text-white/40 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
                     title="Settings"
                     data-testid="mobile-settings-btn"><Settings size={18} /></button>
-                  {radio.station && (
-                  <button
+                  {radio.station && ( <button
                     onClick={radio.station ? handleToggleFav : undefined}
                     aria-label={ radio.station && favs.has(radio.station.stationuuid) ? t("removeFromFavorites")
                         : t("addToFavorites")
@@ -517,8 +506,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               onPresetChange={setEqPreset}
               statsData={{ topStations: usageStats.topStations, topSongs: usageStats.topSongs,
                 topArtists: usageStats.topArtists, topGenres: usageStats.topGenres,
-                totalListenMs: usageStats.stats.totalListenMs,
-              }} />
+                totalListenMs: usageStats.stats.totalListenMs, }} />
           )}</AnimatePresence>
         {/* Toast notification */} <AnimatePresence>{toastElement}</AnimatePresence>
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}

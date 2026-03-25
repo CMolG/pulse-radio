@@ -24,8 +24,7 @@ const BASE_MESSAGES = {
   genreTrending: "Trending", genrePop: "Pop", genreRock: "Rock", genreJazz: "Jazz",
   genreClassical: "Classical", genreElectronic: "Electronic", genreHiphop: "Hip-Hop", genreCountry: "Country",
   genreAmbient: "Ambient", genreLofi: "Lo-Fi", genreNews: "News", genreLatin: "Latin",
-  genreMetal: "Metal", genreLocal: "Local", genreWorld: "World", seeMore: "See more",
-} as const;
+  genreMetal: "Metal", genreLocal: "Local", genreWorld: "World", seeMore: "See more", } as const;
 export type MessageKey = keyof typeof BASE_MESSAGES;
 export type MessageBundle = Record<MessageKey, string>;
 const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = { es: {
@@ -53,15 +52,13 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     searchStationsAria: "Sender suchen", retry: "Erneut versuchen",
     failedToLoad: "Laden fehlgeschlagen", noStationsFound: "Keine Sender gefunden", previous: "Zurück", next: "Weiter",
     addToFavorites: "Zu Favoriten hinzufügen", removeFromFavorites: "Aus Favoriten entfernen",
-    minimize: "Minimieren", expand: "Erweitern",
-  },
+    minimize: "Minimieren", expand: "Erweitern", },
   "pt-BR": {
     loadingStations: "Carregando…", stationCount: "{count} estações", allCountries: "Todos", favorites: "Favoritos",
     recent: "Recentes", discover: "Descobrir", history: "Histórico", searchStations: "Buscar estações…",
     searchStationsAria: "Buscar estações", retry: "Tentar novamente",
     failedToLoad: "Falha ao carregar", noStationsFound: "Nenhuma estação encontrada",
-    previous: "Anterior", next: "Próximo", minimize: "Minimizar", expand: "Expandir",
-  },
+    previous: "Anterior", next: "Próximo", minimize: "Minimizar", expand: "Expandir", },
   pt: { loadingStations: "A carregar…", stationCount: "{count} estações", allCountries: "Todos", favorites: "Favoritos",
     recent: "Recentes", discover: "Descobrir", history: "Histórico", searchStations: "Pesquisar estações…",
     searchStationsAria: "Pesquisar estações", retry: "Tentar novamente",
@@ -75,8 +72,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     recent: "الأخيرة", discover: "اكتشاف", history: "السجل", searchStations: "ابحث عن المحطات…",
     searchStationsAria: "ابحث عن المحطات", retry: "إعادة المحاولة",
     failedToLoad: "فشل التحميل", noStationsFound: "لم يتم العثور على محطات", previous: "السابق", next: "التالي",
-    minimize: "تصغير", expand: "توسيع",
-  }, };
+    minimize: "تصغير", expand: "توسيع", }, };
 function mergeBundle(locale: SupportedLocale): MessageBundle {
   const patch = DEEP_MESSAGES[locale] ?? {}; return { ...BASE_MESSAGES, ...patch }; }
 const MESSAGE_CACHE: Partial<Record<SupportedLocale, MessageBundle>> = {};

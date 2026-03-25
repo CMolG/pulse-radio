@@ -97,8 +97,7 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
           if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
           proxyFallbackUrlsRef.current.add(streamUrl); setSourceAndPlay(true).catch(onRejected); return; }
         onRejected(err);});
-    }, [preferDirectStream],
-  ); useEffect(() => { const audio = getAudio();
+    }, [preferDirectStream], ); useEffect(() => { const audio = getAudio();
     const clearReconnectTimer = () => { clearTimer(reconnectTimerRef); clearTimer(stallTimerRef); };
     const sessionId = playSessionRef.current;
     const reconnect = (delay: number) => {
@@ -337,5 +336,4 @@ export function useRadio() { const audioRef = useRef<HTMLAudioElement | null>(nu
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []); const ensureAudio = useCallback(() => getAudio(), [getAudio]);
   return { station, status, volume, muted, currentTime, streamQuality, audioRef, ensureAudio,
-    play, pause, resume, togglePlay, stop, setVolume, toggleMute, seek, prefetchStream,
-  }; }
+    play, pause, resume, togglePlay, stop, setVolume, toggleMute, seek, prefetchStream, }; }

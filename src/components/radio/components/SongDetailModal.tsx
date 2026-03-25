@@ -30,15 +30,12 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   const resolvedTrackNumber = song?.trackNumber ?? albumMeta.trackNumber ?? null;
   const resolvedTrackCount = song?.trackCount ?? albumMeta.trackCount ?? null;
   const showMetaHydration = Boolean( song && (song.durationMs == null || song.genre == null ||
-      song.releaseDate == null ||
-      song.trackNumber == null || song.trackCount == null),
+      song.releaseDate == null || song.trackNumber == null || song.trackCount == null),
   ) && albumMeta.isLoading;
   const { lyrics, loading: lyricsLoading, error: lyricsError, retry: retryLyrics } = useLyrics(
     song ? { title: song.title, artist: song.artist, album: resolvedAlbum, } : null, song?.stationName ?? null,);
-  const plainLyrics =
-    lyrics?.plainText?.trim() ||
-    lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n')
-      .trim() || '';
+  const plainLyrics = lyrics?.plainText?.trim() ||
+    lyrics?.lines ?.map((line) => line.text.trim()).filter(Boolean).join('\n').trim() || '';
   const skeletonWidths = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
   const lyricsSkeleton = (n: number) => ( <div className="space-y-2 animate-pulse">
       {skeletonWidths.slice(0, n).map((w, i) => <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />)}</div>

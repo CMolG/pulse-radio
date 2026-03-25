@@ -7,8 +7,7 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Station, NowPlayingTrack } from '../types';
 const CODEC_MAP: Record<string, string> = {
-  MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus', FLAC: 'FLAC', WMA: 'WMA',
-};
+  MP3: 'MP3', AAC: 'AAC', 'AAC+': 'AAC', OGG: 'OGG', VORBIS: 'OGG', OPUS: 'Opus', FLAC: 'FLAC', WMA: 'WMA', };
 // Patterns that indicate ads/spam rather than real song metadata
 const AD_PATTERNS = [ /\.(com|net|org|io|co|shop|store|ly|me|us|uk|de|fr|es|it|tv|fm|am)\b/i, /^https?:\/\//i,
   /\b(shopify|squarespace|wix|spotify\.com|instagram|facebook|twitter|tiktok|youtube)\b/i,

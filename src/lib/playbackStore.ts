@@ -20,5 +20,4 @@ export const usePlaybackStore = create<PlaybackState>((set) => ({
   setVolume: (volume) => set({ volume: Math.max(0, Math.min(1, volume)) }), setMuted: (muted) => set({ muted }),
   setTrackInfo: (title, artist, artwork) =>set({ trackTitle: title, trackArtist: artist, artworkUrl: artwork ?? null }),
   reset: () =>
-    set({ source: null, isPlaying: false, currentTime: 0, trackTitle: '', trackArtist: '', artworkUrl: null }),
-}));
+    set({ source: null, isPlaying: false, currentTime: 0, trackTitle: '', trackArtist: '', artworkUrl: null }), }));

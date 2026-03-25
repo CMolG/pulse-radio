@@ -1,7 +1,6 @@
 /** Fetch with an AbortController timeout, optional !ok and content-length guards. */
 export async function apiFetch( url: string,
-  opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string },
-): Promise<Response> {
+  opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string }, ): Promise<Response> {
   const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
   try { const res = await fetch(url, { ...opts.init, signal: controller.signal });
     if (!res.ok) {

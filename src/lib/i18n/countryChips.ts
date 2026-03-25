@@ -13,8 +13,7 @@ const GLOBAL_INTEREST_CODES = ["US", "GB", "DE", "FR", "ES", "BR", "JP", "KR", "
 const EXCLUDED_LOW_RELEVANCE_CODES = new Set([ "AD", "SM", "LI", "MC", "VA", "KI", "TV", "NR", "PW", "MH", "FM", "TO",
   "WS", "VU",]);
 const REGION_PRIORITY: Record<string, number> = {
-  Europe: 1, Asia: 2, Americas: 3, Africa: 4, Oceania: 5, Antarctic: 6, Other: 9,
-};
+  Europe: 1, Asia: 2, Americas: 3, Africa: 4, Oceania: 5, Antarctic: 6, Other: 9, };
 function localeCandidates(locale: SupportedLocale): SupportedLocale[] {
   return LOCALE_SELF_CANDIDATES[locale] ?? [locale]; }
 function localeFromLang3(code3: string): SupportedLocale | null { return LANG3_TO_LOCALE[code3] ?? null; }

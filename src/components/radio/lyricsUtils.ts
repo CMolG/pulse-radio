@@ -26,6 +26,5 @@ export function getRenderableLyricLines(lyrics: LyricsData | null): RenderableLy
     return lyrics.lines.map((line, index) => ({ id: `synced-${index}-${line.time}`, text: line.text || "♪", })); }
   if (!lyrics.plainText) return [];
   return lyrics.plainText .split(/\r?\n/) .map((line) => line.trim()).filter(Boolean).map((text, index) => ({
-      id: `plain-${index}`, text,
-    }));
+      id: `plain-${index}`, text, }));
 }

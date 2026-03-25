@@ -24,8 +24,7 @@ function fetchWithCancel(url: string, parentSignal?: AbortSignal): Promise<Respo
     clearTimeout(timeout); parentSignal.removeEventListener('abort', onParentAbort);});
 }
 export async function fetchLyrics( artist: string, title: string, album?: string, duration?: number,
-  fallbackArtist?: string, signal?: AbortSignal,
-): Promise<LyricsData | null> {
+  fallbackArtist?: string, signal?: AbortSignal, ): Promise<LyricsData | null> {
   const artistCandidates = [...new Set([artist, fallbackArtist].map(v => v?.trim()).filter((v): v is string => !!v),)];
   if (!artistCandidates.length || !title?.trim()) return null;
   for (const artistCandidate of artistCandidates) { if (signal?.aborted) return null;

@@ -30,8 +30,7 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
   const doFetch = (key: string, cached: CacheEntry[], controller: AbortController) => {
     if (controller.signal.aborted || !track?.title) return; setLoading(true); setError(false);
     fetchLyricsApi( track.artist || stationName || '', track.title, track.album, undefined, stationName ?? undefined,
-      controller.signal,
-    ).then(result => {
+      controller.signal, ).then(result => {
         if (controller.signal.aborted) return; retryCountRef.current = 0; if (result) { setLyrics(result);
           const updated = [{ key, data: result, ts: Date.now() }, ...cached.filter(e => e.key !== key)];
           saveCache(updated);
@@ -66,12 +65,9 @@ export function useLyrics( track: NowPlayingTrack | null, stationName?: string |
     lyrics, enabled: enableRealtime, languageHint: options?.languageHint ?? 'en',});
   return { lyrics, loading, error, retry,
     effectiveCurrentTime: enableRealtime ? (realtimeSync.effectiveCurrentTime ?? options?.currentTime)
-      : options?.currentTime,
-    realtime: enableRealtime
+      : options?.currentTime, realtime: enableRealtime
       ? { enabled: realtimeSync.enabled, supported: realtimeSync.supported,
           status: realtimeSync.status, activeLineIndex: realtimeSync.activeLineIndex,
           candidateLineIndex: realtimeSync.candidateLineIndex, confidence: realtimeSync.confidence,
-          diagnostics: realtimeSync.diagnostics, toggle: realtimeSync.toggle,
-        }
-      : undefined,
-  }; }
+          diagnostics: realtimeSync.diagnostics, toggle: realtimeSync.toggle, }
+      : undefined, }; }

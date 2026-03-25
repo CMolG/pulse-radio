@@ -12,8 +12,7 @@ export default React.memo(function AnimatedBars({ size = 'default' }: { size?: '
  <span key={i} className="bg-sys-orange rounded-full animate-eq-bar" style={{ width: w, height: h * 0.5, animationDelay: `${i * 0.15}s`, }} />
       ))} <style jsx>{`
         @keyframes eq-bar { 0%, 100% { height: ${h * 0.2}px; }
-          50% { height: ${h}px; } }
-        .animate-eq-bar { animation: eq-bar 0.8s ease-in-out infinite; }
+          50% { height: ${h}px; } }.animate-eq-bar { animation: eq-bar 0.8s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) { .animate-eq-bar { animation: none; height: ${h * 0.5}px; }
         }
       `}</style>

@@ -46,8 +46,7 @@ function extractColors(imgUrl: string): Promise<[string, string, string]> {
         if (sorted.length < 1) return resolve(FALLBACK_COLORS);
         const h1 = parseInt(sorted[0][0]); const h2 = sorted.length > 1 ? parseInt(sorted[1][0]) : (h1 + 120) % 360;
         const h3 = sorted.length > 2 ? parseInt(sorted[2][0]) : (h1 + 240) % 360;
-        resolve([ `hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`,
-        ]);
+        resolve([ `hsl(${h1}, 75%, 55%)`, `hsl(${h2}, 65%, 50%)`, `hsl(${h3}, 60%, 45%)`, ]);
       } catch { resolve(FALLBACK_COLORS); }
     }; img.onerror = () => resolve(FALLBACK_COLORS); img.src = imgUrl;});
   if (_colorCache.size >= MAX_COLOR_CACHE) {
@@ -95,13 +94,11 @@ export default function TheaterView({
         className="absolute inset-0 z-6 pointer-events-none"
         style={{
           background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-          backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay', opacity: 0.6,
-        }} />
+          backgroundSize: '100% 4px, 6px 100%', mixBlendMode: 'overlay', opacity: 0.6, }} />
       <div
         className="absolute inset-0 z-6 pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
-          boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
-        }} />
+          boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)', }} />
       <div
         className="absolute inset-0 z-6 pointer-events-none"
         style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)', }} />

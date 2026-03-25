@@ -13,8 +13,7 @@ export const STORAGE_KEYS = {
   BASS_ENHANCE: 'radio-bass-enhance', COMPRESSOR_ENABLED: 'radio-compressor-enabled',
   COMPRESSOR_AMOUNT: 'radio-compressor-amount', NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
   REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled', LOCALE: 'radio-locale',
-  USAGE_STATS: 'radio-usage-stats', ONBOARDING_DONE: 'radio-onboarding-done',
-} as const;
+  USAGE_STATS: 'radio-usage-stats', ONBOARDING_DONE: 'radio-onboarding-done', } as const;
 export const MAX_RECENT = 15;
 export const MAX_HISTORY = 100;
 export const GENRE_CATEGORIES: BrowseCategory[] = [
@@ -41,8 +40,7 @@ export const GENRE_GRADIENTS: Record<string, string> = {
   lofi: 'linear-gradient(135deg, #64748b, #52525b)', news: 'linear-gradient(135deg, #0ea5e9, #1d4ed8)',
   latin: 'linear-gradient(135deg, #f97316, #ef4444)', metal: 'linear-gradient(135deg, #4b5563, #27272a)',
   trending: 'linear-gradient(135deg, #facc15, #f97316)', local: 'linear-gradient(135deg, #4ade80, #10b981)',
-  world: 'linear-gradient(135deg, #60a5fa, #6366f1)', default: 'linear-gradient(135deg, #34c759, #0a84ff)',
-};
+  world: 'linear-gradient(135deg, #60a5fa, #6366f1)', default: 'linear-gradient(135deg, #34c759, #0a84ff)', };
 export const EQ_BANDS: EqBand[] = [ { id: 'low',     frequency: 60,    type: 'lowshelf',  gain: 0, label: '60' },
   { id: 'lo-mid',  frequency: 230,   type: 'peaking',   gain: 0, label: '230' },
   { id: 'mid',     frequency: 910,   type: 'peaking',   gain: 0, label: '910' },
@@ -63,5 +61,4 @@ export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
   trending: "genreTrending", pop: "genrePop", rock: "genreRock", jazz: "genreJazz",
   classical: "genreClassical", electronic: "genreElectronic", hiphop: "genreHiphop", country: "genreCountry",
   ambient: "genreAmbient", lofi: "genreLofi", news: "genreNews", latin: "genreLatin",
-  metal: "genreMetal", local: "genreLocal", world: "genreWorld",
-};
+  metal: "genreMetal", local: "genreLocal", world: "genreWorld", };

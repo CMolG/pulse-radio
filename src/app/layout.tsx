@@ -17,15 +17,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL), title: { default: SITE_TITLE, template: "%s | Pulse Radio", },
   description: SITE_DESCRIPTION, manifest: "/site.webmanifest", applicationName: "Pulse Radio",
   keywords: ["internet radio", "online radio", "free radio", "radio player", "music streaming", "audio visualizer", "radio stations", "live radio", "web radio", "pulse radio"],
-  authors: [{ name: "Pulse Radio", url: SITE_URL }], creator: "Pulse Radio", publisher: "Pulse Radio",
-  icons: {
+  authors: [{ name: "Pulse Radio", url: SITE_URL }], creator: "Pulse Radio", publisher: "Pulse Radio", icons: {
     icon: [{ url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" }, { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" }],
     shortcut: "/favicon.ico", apple: "/apple-touch-icon.png",
   }, appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Pulse Radio", },
   openGraph: { type: "website", locale: "en_US", url: SITE_URL, siteName: "Pulse Radio",
     title: SITE_TITLE, description: SITE_DESCRIPTION,
-    images: [{ url: "/android-chrome-512x512.png", width: 512, height: 512, alt: "Pulse Radio" }],
-  },
+    images: [{ url: "/android-chrome-512x512.png", width: 512, height: 512, alt: "Pulse Radio" }], },
   twitter: { card: "summary", title: SITE_TITLE, description: SITE_DESCRIPTION, images: ["/android-chrome-512x512.png"] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   alternates: { canonical: SITE_URL, }, category: "music", other: { "mobile-web-app-capable": "yes", }, };

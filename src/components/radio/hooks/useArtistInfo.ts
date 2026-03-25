@@ -30,8 +30,7 @@ export function useArtistInfo(artist: string | null): { info: ArtistInfo | null;
     fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal }).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json();
       }).then((data: ArtistInfo) => { if (!cancelled) { cacheSet(key, data); setFetched({ key, info: data }); }
-      }).catch(() => { if (!cancelled) setFetched({ key, info: null }); })
-      .finally(() => { clearTimeout(timeout); });
+      }).catch(() => { if (!cancelled) setFetched({ key, info: null }); }).finally(() => { clearTimeout(timeout); });
     return () => { cancelled = true; clearTimeout(timeout); controller.abort(); };
   }, [artist, key, cachedInfo]); const info = !key ? null : cachedInfo ?? (fetched?.key === key ? fetched.info : null);
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) }; }

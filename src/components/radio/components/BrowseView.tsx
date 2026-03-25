@@ -16,11 +16,9 @@ import { useLocale } from "@/context/LocaleContext";
 import { getCountryChipsForLocale } from "@/lib/i18n/countryChips";
 /** Order in which category sections appear on the home screen */
 const BROWSE_ORDER = [ 'trending', 'pop', 'rock', 'jazz', 'classical', 'electronic',
-  'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world',
-] as const;
+  'hiphop', 'country', 'ambient', 'lofi', 'news', 'latin', 'metal', 'local', 'world', ] as const;
 const CATEGORY_ICONS: Record<string, React.ReactNode> = { trending: <Zap size={14} className="text-amber-400/70" />,
-  local: <MapPin size={14} className="text-emerald-400/70" />,
-};
+  local: <MapPin size={14} className="text-emerald-400/70" />, };
 type Props = {
   view: ViewState; currentStation: Station | null; isPlaying: boolean; isFavorite: (uuid: string) => boolean;
   onPlay: (station: Station) => void; onToggleFav: (station: Station) => void;
@@ -57,13 +55,11 @@ function ScrollRow({ title, icon, children, isMobile, className, }: {
   ); }
 export default function BrowseView({
   view, currentStation, isPlaying, isFavorite, onPlay, onToggleFav, onPrefetch, favorites,
-  recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder,
-}: Props) {
+  recent, onSelectGenre, onSelectCountry, onGoHome, userGenreOrder, }: Props) {
   const { t, locale } = useLocale(); const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
   const translatedGenreCategories = useMemo(() => GENRE_CATEGORIES.map((category) => {
         const key = GENRE_LABEL_KEYS[category.id]; return key ? { ...category, label: t(key) } : category;
-      }),
-    [t],);
+      }), [t],);
   // Reorder browse sections based on user listening stats
   const effectiveBrowseOrder = useMemo(() => {
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER; const defaultOrder = [...BROWSE_ORDER];

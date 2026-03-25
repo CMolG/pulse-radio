@@ -12,8 +12,7 @@ interface AlbumInfo {
 const CACHE = new Map<string, AlbumInfo>();
 const MAX_CACHE = 200;
 const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, releaseDate: null, itunesUrl: null,
-  durationMs: null, genre: null, trackNumber: null, trackCount: null,
-};
+  durationMs: null, genre: null, trackNumber: null, trackCount: null, };
 type ItunesResult = { trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
   collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number;
   primaryGenreName?: string; trackNumber?: number; trackCount?: number; };
@@ -36,8 +35,7 @@ function jaroDistance(a: string, b: string): number { if (a === b) return 1; if 
   for (let i = 0; i < a.length; i++) {
     if (!_aMatches[i]) continue; while (k < b.length && !_bMatches[k]) k++; if (a[i] !== b[k]) t++; k++; }
   const transpositions = t / 2;
-  return ( matches / a.length +
-    matches / b.length +
+  return ( matches / a.length + matches / b.length +
     (matches - transpositions) / matches
   ) / 3; }
 function jaroWinkler(a: string, b: string): number {

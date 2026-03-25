@@ -36,8 +36,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   const hypoTokens = tokenize(hypothesisText);
   if (!hypoTokens.length) { return {
       candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: 0, stableSamples,
-      jumpRejected: false, relockTriggered: false,
-    }; }
+      jumpRejected: false, relockTriggered: false, }; }
   const center = previousConfirmedIndex >= 0 ? previousConfirmedIndex : previousCandidateIndex;
   const [start, end] = windowBounds(lyrics.lines.length, center, policy.relockWindow); let bestIndex = -1;
   let bestScore = 0;
@@ -46,8 +45,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     if (score > bestScore) { bestScore = score; bestIndex = i; } }
   if (bestIndex < 0 || bestScore < policy.candidateMinScore) { return {
       candidateIndex: previousCandidateIndex, confirmedIndex: previousConfirmedIndex, score: bestScore, stableSamples,
-      jumpRejected: false, relockTriggered: false,
-    }; }
+      jumpRejected: false, relockTriggered: false, }; }
   const sameCandidate = bestIndex === previousCandidateIndex; const nextStable = sameCandidate ? stableSamples + 1 : 1;
   const jumpDistance = previousConfirmedIndex >= 0 ? Math.abs(bestIndex - previousConfirmedIndex) : 0;
   const jumpRejected = previousConfirmedIndex >= 0 && jumpDistance > policy.maxJumpDistance;
@@ -58,8 +56,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
     // Strict relock path for distant jumps with very high confidence
     confirmed = bestIndex; relockTriggered = true; }
   return { candidateIndex: bestIndex, confirmedIndex: confirmed, score: bestScore, stableSamples: nextStable,
-    jumpRejected, relockTriggered,
-  }; }
+    jumpRejected, relockTriggered, }; }
 export function mapLineToEffectiveTime(lyrics: LyricsData, lineIndex: number): number | undefined {
   if (!lyrics.synced || !lyrics.lines.length || lineIndex < 0 || lineIndex >= lyrics.lines.length) return undefined;
   return lyrics.lines[lineIndex].time; }

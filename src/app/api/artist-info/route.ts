@@ -32,16 +32,14 @@ export async function GET(req: NextRequest) { const artist = req.nextUrl.searchP
     ]); const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
     let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
     // If Wikipedia didn't find the artist or result isn't music-related, try common disambiguations
-    if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) { const suffixes =
-        mb?.type === 'Person'
+    if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) { const suffixes = mb?.type === 'Person'
           ? ['(singer)', '(musician)', '(rapper)']
           : ['(band)', '(musical group)', '(singer)', '(musician)'];
       for (const suffix of suffixes) { const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
         if (attempt?.extract) { wiki = attempt; break; } }
     }
     const tags = mb?.tags ?.filter((t: { count: number }) => t.count > 0)
-        ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
-        ?.slice(0, 8)
+        ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)?.slice(0, 8)
         ?.map((t: { name: string }) => t.name) ?? [];
     const hasData = !!(mb || wiki?.extract);
     const cacheHeader = hasData

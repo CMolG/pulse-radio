@@ -234,8 +234,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     const clamped = Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gain));
     setBands(prev => prev.map(b => b.id === id ? { ...b, gain: clamped } : b));}, []);
   const applyPreset = useCallback((gains: number[]) => { setBands(prev => prev.map((b, i) => ({
-      ...b, gain: Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gains[i] ?? 0)),
-    })));
+      ...b, gain: Math.max(-MAX_GAIN_DB, Math.min(MAX_GAIN_DB, gains[i] ?? 0)), })));
   }, []); const toggleEnabled = useCallback(() => setEnabled(e => !e), []);
   const toggleNormalizer = useCallback(() => { setNormalizerEnabled(prev => {
       const next = !prev; saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, next);
@@ -302,5 +301,4 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
     customPresets, setBandGain, applyPreset, toggleEnabled,
     toggleNormalizer, setStereoWidth, setBassEnhance, toggleCompressor,
     setCompressorAmount, setNoiseReductionMode, setOutputVolume, connectSource,
-    disconnect, saveCustomPreset, removeCustomPreset,
-  }; }
+    disconnect, saveCustomPreset, removeCustomPreset, }; }

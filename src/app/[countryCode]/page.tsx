@@ -19,8 +19,7 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
   const canonical = `${SITE_URL}/${countryCode}`;
   return { title, description, alternates: { canonical, },
     openGraph: { title, description, type: "website", url: canonical, siteName: "Pulse Radio", },
-    twitter: { card: "summary", title, description, },
-  }; }
+    twitter: { card: "summary", title, description, }, }; }
 export default async function CountryPage({ params }: CountryPageProps) {
   const resolved = await params; const countryCode = normalizeCountryCode(resolved.countryCode);
   if (!COUNTRY_BY_CODE[countryCode]) notFound();

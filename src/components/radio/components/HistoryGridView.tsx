@@ -31,7 +31,6 @@ export default React.memo(function HistoryGridView({ history, onRemove, onClear,
             onSelect={onSelect}
             heart={onToggleFavSong ? {
               filled: !!isSongFavorite?.(entry.title, entry.artist), onClick: () => onToggleFavSong(entry),
-              label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song',
-            } : null} />
+              label: isSongFavorite?.(entry.title, entry.artist) ? 'Unlike song' : 'Like song', } : null} />
         ))}</div></div>
   );});

@@ -53,8 +53,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={{ background: "rgba(22, 24, 35, 0.92)", backdropFilter: "blur(24px) saturate(1.6)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.6)",
-        }}
+          WebkitBackdropFilter: "blur(24px) saturate(1.6)", }}
         data-testid="mobile-settings-panel"> {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
         {/* Header */} <div className="flex items-center justify-between px-5 pb-3">
@@ -186,8 +185,7 @@ export default function MobileSettingsPanel({ onClose, eq, onPresetChange, stats
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
               className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
               style={{ background: 'rgba(20, 22, 35, 0.75)', backdropFilter: 'blur(32px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)',
-              }}>
+                WebkitBackdropFilter: 'blur(32px) saturate(1.6)', border: '1px solid rgba(255,255,255,0.12)', }}>
               <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-white/20" /></div>
               <div className="flex items-center gap-3 px-5 pb-3"><button
                   onClick={() => setShowStats(false)}

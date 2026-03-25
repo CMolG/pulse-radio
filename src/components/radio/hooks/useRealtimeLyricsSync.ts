@@ -37,10 +37,8 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
           const effectiveCurrentTime = mapLineToEffectiveTime(lyrics, step.confirmedIndex);
           // Early bail — skip spread+setState when nothing observable changed
           if ( prev.status === 'listening' && prev.activeLineIndex === step.confirmedIndex &&
-            prev.candidateLineIndex === step.candidateIndex &&
-            prev.confidence === step.score &&
-            !step.jumpRejected &&
-            !step.relockTriggered
+            prev.candidateLineIndex === step.candidateIndex && prev.confidence === step.score &&
+            !step.jumpRejected && !step.relockTriggered
           ) { return prev; }
           return {
             ...prev, status: 'listening', activeLineIndex: step.confirmedIndex, candidateLineIndex: step.candidateIndex,
@@ -49,14 +47,11 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
               hypothesesSeen: prev.diagnostics.hypothesesSeen + 1,
               confirmedTransitions: prev.diagnostics.confirmedTransitions + (step.confirmedIndex !== prev.activeLineIndex ? 1 : 0),
               rejectedJumps: prev.diagnostics.rejectedJumps + (step.jumpRejected ? 1 : 0),
-              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0), errorMessage: null,
-            },
+              relockCount: prev.diagnostics.relockCount + (step.relockTriggered ? 1 : 0), errorMessage: null, },
           };});
-      },
-      onFatalError: (errorMessage) => { setRuntimeState(prev => ({
+      }, onFatalError: (errorMessage) => { setRuntimeState(prev => ({
           ...prev, status: 'error', activeLineIndex: -1, candidateLineIndex: -1,
-          confidence: 0, effectiveCurrentTime: undefined, diagnostics: { ...prev.diagnostics, errorMessage, },
-        })); },
+          confidence: 0, effectiveCurrentTime: undefined, diagnostics: { ...prev.diagnostics, errorMessage, }, })); },
     }); engineRef.current = engine; engine.start(languageHint); return () => { engine.stop(); };
   }, [lyrics, languageHint, realtimeActive]);
   useEffect(() => () => { engineRef.current?.destroy(); engineRef.current = null; }, []);
@@ -70,6 +65,5 @@ export function useRealtimeLyricsSync({ lyrics, enabled, languageHint, }: Params
     effectiveCurrentTime: isSyncing ? runtimeState.effectiveCurrentTime : undefined,
     diagnostics: { ...runtimeState.diagnostics, errorMessage: !supported
         ? 'Realtime lyrics sync is not supported in this browser.'
-        : runtimeState.diagnostics.errorMessage,
-    }, toggle,
+        : runtimeState.diagnostics.errorMessage, }, toggle,
   }; }

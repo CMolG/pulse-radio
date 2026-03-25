@@ -10,8 +10,7 @@ import { STORAGE_KEYS, MAX_HISTORY } from '../constants';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 export function useHistory( stationName: string | undefined, stationUuid: string | undefined,
-  track: NowPlayingTrack | null,
-) { const [history, setHistory] = useState<HistoryEntry[]>(() => {
+  track: NowPlayingTrack | null, ) { const [history, setHistory] = useState<HistoryEntry[]>(() => {
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
     // Dedup by id on load in case of corrupted storage
     const seen = new Set<string>();
@@ -31,8 +30,7 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, stationName, stationUuid, artist: track.artist,
       title: track.title, album: track.album, artworkUrl: track.artworkUrl, itunesUrl: track.itunesUrl,
       durationMs: track.durationMs, genre: track.genre, releaseDate: track.releaseDate, trackNumber: track.trackNumber,
-      trackCount: track.trackCount, timestamp: Date.now(),
-    };
+      trackCount: track.trackCount, timestamp: Date.now(), };
     setHistory(prev => {
       // Active dedup: remove older entries with same title+artist+station
       const deduped = prev.filter(

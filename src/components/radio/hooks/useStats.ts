@@ -23,8 +23,7 @@ export interface UsageStats {
   artistPlayCounts: Record<string, ArtistPlayCount>; genrePlayCounts: Record<string, GenrePlayCount>;
   totalListenMs: number; }
 const EMPTY_STATS: UsageStats = {
-  stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0,
-};
+  stationListenTimes: {}, songPlayCounts: {}, artistPlayCounts: {}, genrePlayCounts: {}, totalListenMs: 0, };
 /** Keep only the top N entries by a numeric field, dropping the lowest */
 function pruneTop<T>(map: Record<string, T>, max: number, key: keyof T): Record<string, T> {
   const entries = Object.entries(map); if (entries.length <= max) return map;
@@ -46,8 +45,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       const pSongs = pruneTop(current.songPlayCounts, MAX_SONGS, 'count');
       const pArtists = pruneTop(current.artistPlayCounts, MAX_ARTISTS, 'count');
       const pGenres = pruneTop(current.genrePlayCounts, MAX_GENRES, 'count');
-      const didPrune =
-        pStations !== current.stationListenTimes ||
+      const didPrune = pStations !== current.stationListenTimes ||
         pSongs !== current.songPlayCounts ||
         pArtists !== current.artistPlayCounts || pGenres !== current.genrePlayCounts;
       if (didPrune) {
@@ -64,8 +62,7 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       const entry = prev.stationListenTimes[stationUuid] ?? { name: stationName, uuid: stationUuid, totalMs: 0 };
       return { ...prev, stationListenTimes: {
           ...prev.stationListenTimes, [stationUuid]: { ...entry, name: stationName, totalMs: entry.totalMs + deltaMs },
-        }, totalListenMs: prev.totalListenMs + deltaMs,
-      };
+        }, totalListenMs: prev.totalListenMs + deltaMs, };
     }); dirtyRef.current = true;}, []);
   // Record a song play
   const recordSongPlay = useCallback((title: string, artist: string, genre?: string, artworkUrl?: string) => {
@@ -80,16 +77,14 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       if (normalizedGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
-          ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
-        }; }
+          ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 }, }; }
       return next;
     }); dirtyRef.current = true;
   }, []); const topStations = useMemo(() => topN(stats.stationListenTimes, 'totalMs', 10), [stats.stationListenTimes]);
   const topSongs = useMemo(() => topN(stats.songPlayCounts, 'count', 10), [stats.songPlayCounts]);
   const topArtists = useMemo(() => topN(stats.artistPlayCounts, 'count', 10), [stats.artistPlayCounts]);
   const sortedGenres = useMemo( () => Object.values(stats.genrePlayCounts).sort((a, b) => b.count - a.count),
-    [stats.genrePlayCounts],
-  ); const topGenres = useMemo(() => sortedGenres.slice(0, 10), [sortedGenres]);
+    [stats.genrePlayCounts], ); const topGenres = useMemo(() => sortedGenres.slice(0, 10), [sortedGenres]);
   const genreOrder = useMemo(() => sortedGenres.map(g => g.genre), [sortedGenres]);
   // Update artwork/genre on an existing song entry without incrementing counts.
   // Used when album metadata arrives after the initial recordSongPlay call.
@@ -107,11 +102,9 @@ export function useStats() { const [stats, setStats] = useState<UsageStats>(() =
       if (needsGenre) {
         const genreEntry = prev.genrePlayCounts[normalizedGenre] ?? { genre: normalizedGenre, count: 0 };
         next.genrePlayCounts = {
-          ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 },
-        }; }
+          ...prev.genrePlayCounts, [normalizedGenre]: { ...genreEntry, count: genreEntry.count + 1 }, }; }
       return next;
     }); dirtyRef.current = true;
   }, []); const clearStats = useCallback(() => { setStats(EMPTY_STATS); saveToStorage(STORAGE_KEY, EMPTY_STATS); }, []);
   return { stats, tickListenTime, recordSongPlay, updateSongMeta, topStations, topSongs, topArtists, topGenres,
-    genreOrder, clearStats,
-  }; }
+    genreOrder, clearStats, }; }

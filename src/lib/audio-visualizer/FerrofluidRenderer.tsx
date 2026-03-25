@@ -84,8 +84,7 @@ function drawMetaballs( ctx: CanvasRenderingContext2D, blobs: Blob[], w: number,
     ctx.drawImage(_offscreen, 0, 0, sw, sh, 0, 0, w, h);
   } catch { /* skip frame on canvas error */ } }
 export function FerrofluidRenderer({ frequencyDataRef, className = '', blobCount = 12, colorPrimary = '#1a1a2e',
-  colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false,
-}: FerrofluidRendererProps) {
+  colorSecondary = '#16213e', colorAccent = '#0f3460', sensitivity = 1.0, demo = false, }: FerrofluidRendererProps) {
   const blobsRef = useRef<Blob[]>([]); const timeRef = useRef(0); const sizeRef = useRef({ w: 0, h: 0 });
   const mkColors = () => ({ primary: hexToRgb(colorPrimary), secondary: hexToRgb(colorSecondary), accent: hexToRgb(colorAccent) });
   const colors = useRef(mkColors());

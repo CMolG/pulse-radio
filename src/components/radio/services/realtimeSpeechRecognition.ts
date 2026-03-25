@@ -39,11 +39,9 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
       callbacks.onHypothesis({ text: transcript,
         confidence: typeof result[0].confidence === 'number' && Number.isFinite(result[0].confidence)
           ? Math.max(0, Math.min(1, result[0].confidence))
-          : result.isFinal ? 0.7 : 0.55,
-        isFinal: result.isFinal, tsMs: performance.now(),});
+          : result.isFinal ? 0.7 : 0.55, isFinal: result.isFinal, tsMs: performance.now(),});
     }; recognition.onerror = (event: BrowserSpeechRecognitionErrorEvent) => { if (destroyed || !running) return;
-      const fatal = event.error === 'not-allowed'
-        || event.error === 'service-not-allowed'
+      const fatal = event.error === 'not-allowed'|| event.error === 'service-not-allowed'
         || event.error === 'language-not-supported';
       if (fatal) { running = false; callbacks.onFatalError(`Speech recognition error: ${event.error}`); return;
       }
