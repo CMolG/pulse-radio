@@ -4126,6 +4126,9 @@ const _MOTION_FADE_OUT = { opacity: 0 } as const;
 const _MOTION_SLIDE_UP_INIT = { y: '100%' } as const;
 const _MOTION_SLIDE_UP_VISIBLE = { y: 0 } as const;
 const _MOTION_SLIDE_UP_EXIT = { y: '100%' } as const;
+const _MOTION_T_02 = { duration: 0.2 } as const;
+const _MOTION_T_03 = { duration: 0.3 } as const;
+const _MOTION_T_SPRING = { type: 'spring' as const, damping: 28, stiffness: 300 };
 function TheaterView({
   station,
   track,
@@ -4170,7 +4173,7 @@ function TheaterView({
       initial={_MOTION_FADE_IN}
       animate={_MOTION_FADE_VISIBLE}
       exit={_MOTION_FADE_OUT}
-      transition={{ duration: 0.3 }}
+      transition={_MOTION_T_03}
       className="flex flex-col h-full w-full relative overflow-hidden"
     >
       {' '}
@@ -5732,7 +5735,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
       initial={_MOTION_FADE_IN}
       animate={_MOTION_FADE_VISIBLE}
       exit={_MOTION_FADE_OUT}
-      transition={{ duration: 0.2 }}
+      transition={_MOTION_T_02}
       className="absolute inset-0 z-50 flex flex-col"
     >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />{' '}
@@ -5740,7 +5743,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
         initial={_MOTION_SLIDE_UP_INIT}
         animate={_MOTION_SLIDE_UP_VISIBLE}
         exit={_MOTION_SLIDE_UP_EXIT}
-        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+        transition={_MOTION_T_SPRING}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}
       >
@@ -5780,7 +5783,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
                   </span>
                   <motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={_MOTION_T_02}
                     className="text-white/30 text-[12px]"
                   >
                     ▶
@@ -5793,7 +5796,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={_MOTION_T_02}
                       className="overflow-hidden"
                     >
                       {' '}
@@ -6060,7 +6063,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
       initial={_MOTION_FADE_IN}
       animate={_MOTION_FADE_VISIBLE}
       exit={_MOTION_FADE_OUT}
-      transition={{ duration: 0.2 }}
+      transition={_MOTION_T_02}
       className="absolute inset-0 z-50 flex flex-col"
     >
       {' '}
@@ -6070,7 +6073,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
         initial={_MOTION_SLIDE_UP_INIT}
         animate={_MOTION_SLIDE_UP_VISIBLE}
         exit={_MOTION_SLIDE_UP_EXIT}
-        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+        transition={_MOTION_T_SPRING}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={{
           background: 'rgba(22, 24, 35, 0.92)',
@@ -6382,7 +6385,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
             initial={_MOTION_FADE_IN}
             animate={_MOTION_FADE_VISIBLE}
             exit={_MOTION_FADE_OUT}
-            transition={{ duration: 0.2 }}
+            transition={_MOTION_T_02}
             className="absolute inset-0 z-50 flex flex-col"
           >
             {' '}
@@ -6394,7 +6397,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData }: MobileS
               initial={_MOTION_SLIDE_UP_INIT}
               animate={_MOTION_SLIDE_UP_VISIBLE}
               exit={_MOTION_SLIDE_UP_EXIT}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              transition={_MOTION_T_SPRING}
               className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
               style={{
                 background: 'rgba(20, 22, 35, 0.75)',
@@ -6530,7 +6533,7 @@ function GroupStack({
           {songs.length}
         </span>{' '}
         {hasMore && (
-          <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={_MOTION_T_02}>
             {' '}
             <ChevronDown size={14} className="text-white/30" />
           </motion.span>
@@ -7004,7 +7007,7 @@ function _OnboardingModal() {
                   initial={{ opacity: 0, x: 30 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -30 }}
-                  transition={{ duration: 0.2 }}
+                  transition={_MOTION_T_02}
                   className="flex flex-col items-center gap-4 text-center min-h-[200px] justify-center"
                 >
                   {' '}
@@ -9860,7 +9863,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 initial={_MOTION_FADE_IN}
                 animate={_MOTION_FADE_VISIBLE}
                 exit={_MOTION_FADE_OUT}
-                transition={{ duration: 0.3 }}
+                transition={_MOTION_T_03}
                 className="flex-1 min-h-0"
               >
                 <TheaterView {...theaterFullProps} lyricsVariant="desktop" />
