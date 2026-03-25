@@ -8,8 +8,7 @@ import { useStorageSync } from '@/lib/useStorageSync';
 export function useHistory( stationName: string | undefined, stationUuid: string | undefined,
   track: NowPlayingTrack | null, ) { const [history, setHistory] = useState<HistoryEntry[]>(() => {
     const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
-    // Dedup by id on load in case of corrupted storage
-    const seen = new Set<string>();
+    const seen = new Set<string>(); // Dedup by id on load in case of corrupted storage
     return loaded.filter(e => { if (!e.id || seen.has(e.id)) return false; seen.add(e.id); return true; });
   }); const lastTrackRef = useRef<string>(''); const lastStationRef = useRef<string | undefined>(stationUuid);
   useEffect(() => { saveToStorage(STORAGE_KEYS.HISTORY, history); }, [history]);
@@ -28,14 +27,12 @@ export function useHistory( stationName: string | undefined, stationUuid: string
       durationMs: track.durationMs, genre: track.genre, releaseDate: track.releaseDate, trackNumber: track.trackNumber,
       trackCount: track.trackCount, timestamp: Date.now(), };
     setHistory(prev => {
-      // Active dedup: remove older entries with same title+artist+station
-      const deduped = prev.filter(
+      const deduped = prev.filter( // Active dedup: remove older entries with same title+artist+station
         e => !(e.title === entry.title && e.artist === entry.artist && e.stationUuid === entry.stationUuid)
       ); return [entry, ...deduped].slice(0, MAX_HISTORY);});
   // Only trigger on title/artist change — NOT on artworkUrl/album which arrive late
   }, [track?.title, track?.artist, stationUuid, stationName]); // eslint-disable-next-line react-hooks/exhaustive-deps
-  // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
-  useEffect(() => {
+  useEffect(() => { // Update the latest history entry when artwork/album/itunesUrl/metadata arrives late
     if (!track?.title || !stationUuid) return; const artworkUrl = track.artworkUrl; const album = track.album;
     const itunesUrl = track.itunesUrl; const durationMs = track.durationMs;
     const genre = track.genre; const releaseDate = track.releaseDate;

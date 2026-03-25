@@ -32,8 +32,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
         streamTitle: null, icyName: icyName || null, icyGenre: icyGenre || null, icyBr: icyBr || null,});
     }
     const metaint = parseInt(icyMetaint, 10);
-    // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
-    const MAX_METAINT = 131072;
+    const MAX_METAINT = 131072; // Most streams use 8192 or 16384; cap at 128KB to prevent OOM on adversarial input
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout); res.body.cancel().catch(() => {});
       return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }); }
@@ -43,8 +42,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
         chunks.push(value); totalRead += value.length; }
     } finally { clearTimeout(timeout); reader.cancel().catch(() => {});
     }
-    // Concatenate chunks
-    const buffer = new Uint8Array(totalRead); let offset = 0;
+    const buffer = new Uint8Array(totalRead); let offset = 0; // Concatenate chunks
     for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.length; }
     // ICY metadata starts at position metaint
     if (buffer.length <= metaint) return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr });

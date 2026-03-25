@@ -6,8 +6,7 @@ import { getEffectiveActiveLyricIndex, getRenderableLyricLines } from "../lyrics
 type Props = { lyrics: LyricsData | null; currentTime?: number;
    activeLineOverride?: number;
   variant?: "mobile" | "desktop"; };
-// [base classes, mobile size, desktop size]
-const EMPHASIS: [string, string, string][] = [
+const EMPHASIS: [string, string, string][] = [ // [base classes, mobile size, desktop size]
   ["text-white font-bold opacity-100 scale-100", "text-[22px]", "text-[28px]"],
   ["text-white/82 font-semibold opacity-100 scale-[0.985]", "text-[18px]", "text-[23px]"],
   ["text-white/50 font-medium opacity-100 scale-95", "text-[15px]", "text-[19px]"],

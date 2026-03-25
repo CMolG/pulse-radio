@@ -6,13 +6,11 @@ const MAX_CACHE = 200;
 const cache = new Map<string, ArtistInfo>();
 function cacheGet(key: string): ArtistInfo | undefined { const val = cache.get(key);
   if (val !== undefined) {
-    // Move to end (most recently used)
-    cache.delete(key); cache.set(key, val); }
+    cache.delete(key); cache.set(key, val); } // Move to end (most recently used)
   return val; }
 function cacheSet(key: string, val: ArtistInfo) { cache.delete(key); // ensure fresh insertion order
   cache.set(key, val);
-  // Evict oldest entries beyond capacity
-  while (cache.size > MAX_CACHE) {
+  while (cache.size > MAX_CACHE) { // Evict oldest entries beyond capacity
     const oldest = cache.keys().next().value; if (oldest !== undefined) cache.delete(oldest); else break; }
 }
 export function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean; } {

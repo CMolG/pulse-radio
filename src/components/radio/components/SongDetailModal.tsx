@@ -45,12 +45,10 @@ function SongDetailModal({ song, onClose, onRemoveFromFavorites }: Props) {
   useEffect(() => { if (!song) return; const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
   }, [song, onClose]);
-  // Focus trap: keep Tab cycling within the modal
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null); // Focus trap: keep Tab cycling within the modal
   useEffect(() => { if (!song || !modalRef.current) return; const modal = modalRef.current;
     const prev = document.activeElement as HTMLElement | null;
-    // Focus first focusable element
-    const focusable = modal.querySelectorAll<HTMLElement>(
+    const focusable = modal.querySelectorAll<HTMLElement>( // Focus first focusable element
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     ); focusable[0]?.focus(); const onTab = (e: KeyboardEvent) => { if (e.key !== 'Tab') return;
       const nodes = modal.querySelectorAll<HTMLElement>(

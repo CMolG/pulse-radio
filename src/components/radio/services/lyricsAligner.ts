@@ -49,8 +49,7 @@ export function alignHypothesis(input: AlignerStepInput): AlignerStepResult {
   if (!jumpRejected && bestScore >= policy.confirmMinScore && nextStable >= policy.minStableSamples) {
     confirmed = bestIndex;
   } else if (jumpRejected && bestScore >= Math.min(0.98, policy.confirmMinScore + 0.08)) {
-    // Strict relock path for distant jumps with very high confidence
-    confirmed = bestIndex; relockTriggered = true; }
+    confirmed = bestIndex; relockTriggered = true; } // Strict relock path for distant jumps with very high confidence
   return { candidateIndex: bestIndex, confirmedIndex: confirmed, score: bestScore, stableSamples: nextStable,
     jumpRejected, relockTriggered, }; }
 export function mapLineToEffectiveTime(lyrics: LyricsData, lineIndex: number): number | undefined {

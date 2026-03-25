@@ -27,8 +27,7 @@ export async function fetchLyrics( artist: string, title: string, album?: string
     try { const match = await fetchLyricsForArtist(artistCandidate, title, album, duration, signal);
       if (match) return match;
     } catch (err) {
-      // Re-throw transient errors so useLyrics can retry
-      if (isTransientError(err)) throw err; }
+      if (isTransientError(err)) throw err; } // Re-throw transient errors so useLyrics can retry
   }
   return null; }
 async function tryFetch<T>(url: string, signal: AbortSignal | undefined, parse: (d: T) => LyricsData | null): Promise<LyricsData | null> {

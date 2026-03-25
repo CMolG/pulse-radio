@@ -95,8 +95,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
   }, [bands, enabled]);
   const connectSource = useCallback((audio: HTMLAudioElement) => {
     if (connectedAudioRef.current === audio && ctxRef.current) return;
-    // Disconnect any existing chain before building a new one
-    if (connectedAudioRef.current) teardownGraph(false);
+    if (connectedAudioRef.current) teardownGraph(false); // Disconnect any existing chain before building a new one
     try { const { ctx, source } = getOrCreateAudioSource(audio); ctxRef.current = ctx; sourceRef.current = source;
       connectedAudioRef.current = audio;
       const nrPreset = NR_PRESETS[noiseReductionMode]; const nyquist = ctx.sampleRate / 2;
@@ -113,8 +112,7 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       normalizer.attack.value = 0.01;    // 10ms attack — fast enough to catch transients
       normalizer.release.value = 0.25;   // 250ms release — smooth volume recovery
       normalizerRef.current = normalizer;
-      // Makeup gain compensates for normalizer's volume reduction (~4dB)
-      const normGain = ctx.createGain();
+      const normGain = ctx.createGain(); // Makeup gain compensates for normalizer's volume reduction (~4dB)
       normGain.gain.value = normalizerEnabled ? 1.6 : 1.0; // ~4dB makeup when active
       normGainRef.current = normGain;
       // Noise-reduction block: high-pass + soft gate + de-esser attenuation branch.
@@ -203,18 +201,15 @@ export function useEqualizer() { const [bands, setBands] = useState<EqBand[]>(()
       // Stereo widener: mid-side processing via channel split/merge
       // Width 1.0 = original, 0.0 = mono, 2.0 = max width
       // L_out = L * direct + R * cross, R_out = R * direct + L * cross
-      // where direct = (1+w)/2, cross = (1-w)/2
-      const w = stereoWidth; const direct = (1 + w) / 2;
+      const w = stereoWidth; const direct = (1 + w) / 2; // where direct = (1+w)/2, cross = (1-w)/2
       const cross = (1 - w) / 2; const splitter = ctx.createChannelSplitter(2);
       const merger = ctx.createChannelMerger(2); const outputGain = ctx.createGain();
       const directL = ctx.createGain(); const directR = ctx.createGain();
       const crossL = ctx.createGain(); const crossR = ctx.createGain(); directL.gain.value = direct;
       directR.gain.value = direct; crossL.gain.value = cross; crossR.gain.value = cross; limiter.connect(splitter);
-      // L channel: direct L + cross R
-      splitter.connect(directL, 0); splitter.connect(crossR, 1);
+      splitter.connect(directL, 0); splitter.connect(crossR, 1); // L channel: direct L + cross R
       directL.connect(merger, 0, 0); crossR.connect(merger, 0, 0);
-      // R channel: direct R + cross L
-      splitter.connect(directR, 1); splitter.connect(crossL, 0);
+      splitter.connect(directR, 1); splitter.connect(crossL, 0); // R channel: direct R + cross L
       directR.connect(merger, 0, 1); crossL.connect(merger, 0, 1);
       merger.connect(outputGain); outputGain.connect(ctx.destination);
       outputGainRef.current = outputGain; const initialOutput = outputMutedRef.current ? 0 : outputVolumeRef.current;

@@ -48,8 +48,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
     h: typeof window !== 'undefined' ? window.innerHeight : 600,
   })); useEffect(() => { const el = ref.current; if (!el) return;
     // Synchronous measurement replaces the window-based initial guess
-    // one frame earlier than waiting for the ResizeObserver callback.
-    const rect = el.getBoundingClientRect();
+    const rect = el.getBoundingClientRect(); // one frame earlier than waiting for the ResizeObserver callback.
     if (rect.width > 0 && rect.height > 0) setSize({ w: Math.round(rect.width), h: Math.round(rect.height) });
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect; if (width <= 0 || height <= 0) return;
@@ -105,8 +104,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const duckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback((msg: string, icon: "star" | "heart") => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current); setToast({ msg, icon, key: Date.now() });
-    // Brief audio duck: lower volume for 400ms then restore
-    const audio = radio.audioRef.current;
+    const audio = radio.audioRef.current; // Brief audio duck: lower volume for 400ms then restore
     if (audio && !audio.paused) { if (duckTimerRef.current) clearTimeout(duckTimerRef.current);
       // Only capture pre-duck volume if not already ducking
       if (duckOrigVolRef.current === null) duckOrigVolRef.current = audio.volume;
@@ -146,15 +144,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [initialCountryCode, locale, view.countryCode, view.mode, resetNav]);
   // Sync view state when the user navigates with browser back/forward.
   // pushState is used for country and home navigation but the browser's
-  // popstate event is the only way to detect back/forward.
-  useEffect(() => { const onPopState = () => {
+  useEffect(() => { const onPopState = () => { // popstate event is the only way to detect back/forward.
       const segment = window.location.pathname.replace(/^\//, "").toUpperCase();
       if (!segment) { resetNav(mkView("top", t("topStations"))); return; }
       if (isSovereignCountryCode(segment) && COUNTRY_BY_CODE[segment]) resetNav(countryView(segment));
     }; window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState);
   }, [locale, t, resetNav]);
-  // Reset compact state on layout change
-  useEffect(() => { if (layout === "pip") setMiniMode(false); }, [layout]);
+  useEffect(() => { if (layout === "pip") setMiniMode(false); }, [layout]); // Reset compact state on layout change
   // Track network connectivity for offline indicator
   useEffect(() => { const goOnline = () => setIsOnline(true); const goOffline = () => setIsOnline(false);
     window.addEventListener('online', goOnline); window.addEventListener('offline', goOffline);
@@ -207,8 +203,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, [radio.status]); const skipDepsRef = useRef({ radio, favs, stationQueue }); // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { skipDepsRef.current = { radio, favs, stationQueue }; }, [radio, favs, stationQueue]);
   const handleSkipNext = useCallback(() => { const { stationQueue: sq, radio: r, favs: f } = skipDepsRef.current;
-    // Prefer queue if it has entries
-    if (sq.hasNext) { const next = sq.skipToNext();
+    if (sq.hasNext) { const next = sq.skipToNext(); // Prefer queue if it has entries
       if (next) { handlePlay(next); return; } }
     if (r.station) { const next = f.playNext(r.station.stationuuid); if (next) handlePlay(next); }
   }, [handlePlay]);
@@ -233,16 +228,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const { radio: r, handleSkipNext: skipNext, handleSkipPrev: skipPrev, favs: f, favSongs: fs, enrichedTrack: et, theaterMode: tm, showEq: eq, showShortcuts: sc, selectedSong: ss, sleepTimer: st, showToast: toast, realtimeLyrics: rl } = keydownRef.current;
       const target = e.target as HTMLElement;
       const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
-      // Allow Escape even from inputs (to close panels/modals)
-      if (isInput && e.key !== "Escape") return;
+      if (isInput && e.key !== "Escape") return; // Allow Escape even from inputs (to close panels/modals)
       // When EQ panel is open, suppress single-letter shortcuts that could
       // trigger unintended actions (theater, favorites, search, etc.).
       // Allow Escape, E (to close EQ), R (sync toggle), space, arrows, and M (volume).
       if (eq) { const allowed = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
         if (!allowed.has(e.key)) return; }
       // When song detail modal is open, let it handle its own Escape;
-      // block all keys here to prevent shortcuts from firing behind the modal
-      if (ss) return;
+      if (ss) return; // block all keys here to prevent shortcuts from firing behind the modal
       switch (e.key) {
         case " ": e.preventDefault(); r.togglePlay(); break; case "ArrowLeft": e.preventDefault(); skipPrev(); break;
         case "ArrowRight": e.preventDefault(); skipNext(); break;

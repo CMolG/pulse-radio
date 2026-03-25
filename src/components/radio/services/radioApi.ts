@@ -12,8 +12,7 @@ const MAX_CACHE = 100;
 async function fetchCached(path: string, key: string): Promise<Station[]> { const hit = cache.get(key);
   if (hit && Date.now() - hit.ts < TTL) { cache.delete(key); cache.set(key, hit); return hit.data;
   }
-  // Try current server, failover to next on error
-  for (let attempt = 0; attempt < SERVERS.length; attempt++) { try {
+  for (let attempt = 0; attempt < SERVERS.length; attempt++) { try { // Try current server, failover to next on error
       const url = `${getBase()}${path}`; const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
       if (!res.ok) { await res.text().catch(() => {}); rotateServer(); continue;
       }

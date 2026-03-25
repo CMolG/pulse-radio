@@ -56,21 +56,18 @@ export default function BrowseView({
   const translatedGenreCategories = useMemo(() => GENRE_CATEGORIES.map((category) => {
         const key = GENRE_LABEL_KEYS[category.id]; return key ? { ...category, label: t(key) } : category;
       }), [t],);
-  // Reorder browse sections based on user listening stats
-  const effectiveBrowseOrder = useMemo(() => {
+  const effectiveBrowseOrder = useMemo(() => { // Reorder browse sections based on user listening stats
     if (!userGenreOrder || userGenreOrder.length === 0) return BROWSE_ORDER; const defaultOrder = [...BROWSE_ORDER];
     // Map genre stats to category IDs (handle partial matches: "hip hop" → "hiphop")
     const GENRE_TO_CAT: Record<string, string> = { 'hip hop': 'hiphop', 'hip-hop': 'hiphop', 'lo-fi': 'lofi' };
     const boostedIds = new Set<string>(); const ordered: string[] = [];
-    // Always keep trending first
-    ordered.push('trending'); boostedIds.add('trending');
+    ordered.push('trending'); boostedIds.add('trending'); // Always keep trending first
     for (const genre of userGenreOrder) {
       const catId = GENRE_TO_CAT[genre] ?? genre.replace(/[\s-]/g, '').toLowerCase();
       if (defaultOrder.includes(catId as typeof defaultOrder[number]) && !boostedIds.has(catId)) {
         ordered.push(catId); boostedIds.add(catId); }
     }
-    // Append remaining in default order
-    for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); }
+    for (const id of defaultOrder) { if (!boostedIds.has(id)) ordered.push(id); } // Append remaining in default order
     return ordered;
   }, [userGenreOrder]); const isMobile = useMediaQuery("(max-width: 768px)", { initializeWithValue: false, });
   const [stations, setStations] = useState<Station[]>([]);
@@ -81,8 +78,7 @@ export default function BrowseView({
   const [page, setPage] = useState(0); const PAGE_SIZE = 20;
   const discoveryRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // Tracks whether the initial immediate play has fired for the current
-  // discovery-mode session.  Reset when discovery mode is turned off.
-  const discoveryFiredRef = useRef(false);
+  const discoveryFiredRef = useRef(false); // discovery-mode session.  Reset when discovery mode is turned off.
   // Live track scanning
   type LiveInfo = { status: 'loading' | 'loaded' | 'error'; track: { title: string; artist: string } | null };
   const [liveData, setLiveData] = useState<Record<string, LiveInfo>>({});
@@ -119,8 +115,7 @@ export default function BrowseView({
   }, [fetchMeta]); const peekStation = useCallback((station: Station) => fetchMeta(station), [fetchMeta]);
   useEffect(() => { let cancelled = false; const flags = { cancelled: false }; setError(null);
     if (view.mode !== "top") {
-      // Search, genre, country modes — single list
-      setLoading(true);
+      setLoading(true); // Search, genre, country modes — single list
       const load = async () => { try {
           let result: Station[]; switch (view.mode) { case "search": result = await searchStations(view.query); break;
             case "genre": result = await stationsByTag(view.tag); break;
@@ -146,8 +141,7 @@ export default function BrowseView({
     if (pool.length > 0) {
       // Play a random station immediately the first time discovery mode
       // activates (or when stations finish loading after activation),
-      // so the user doesn't wait 30s staring at a button they just pressed.
-      if (!discoveryFiredRef.current) {
+      if (!discoveryFiredRef.current) { // so the user doesn't wait 30s staring at a button they just pressed.
         discoveryFiredRef.current = true; const random = pool[Math.floor(Math.random() * pool.length)];
         if (random) onPlay(random); }
       discoveryRef.current = setInterval(() => {
@@ -182,8 +176,7 @@ export default function BrowseView({
   // flash of empty results that the useEffect approach would cause.
   const [prevSongFilter, setPrevSongFilter] = useState(songFilter);
   if (songFilter !== prevSongFilter) { setPrevSongFilter(songFilter); setPage(0); }
-  // Filter grid by song/artist when songFilter is active — paginated
-  const allSongFilteredStations = useMemo(() => {
+  const allSongFilteredStations = useMemo(() => { // Filter grid by song/artist when songFilter is active — paginated
     const trimmed = songFilter.trim(); if (!trimmed) return []; const q = trimmed.toLowerCase();
     return stations.filter(s => {
       const live = liveData[s.stationuuid]; if (!live?.track) return false; const { title, artist } = live.track;

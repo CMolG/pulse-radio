@@ -19,8 +19,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
   const [isActive, setIsActive] = useState(false);
   const connectAudio = useCallback((audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
-      // Cancel any existing animation loop before starting a new one
-      cancelAnimationFrame(rafRef.current);
+      cancelAnimationFrame(rafRef.current); // Cancel any existing animation loop before starting a new one
       try { const { ctx, source } = getOrCreateAudioSource(audio); connectedRef.current = audio;
         if (!analyserRef.current) { const analyser = ctx.createAnalyser();
           analyser.fftSize = fftSize; analyser.smoothingTimeConstant = smoothingTimeConstant; source.connect(analyser);
@@ -30,8 +29,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         frequencyDataRef.current = new Uint8Array(analyserRef.current.frequencyBinCount);
         waveDataRef.current = new Uint8Array(analyserRef.current.fftSize); setIsActive(true);
         const tick = () => {
-          // Skip expensive analyser reads when tab is hidden to save CPU
-          if (!document.hidden) {
+          if (!document.hidden) { // Skip expensive analyser reads when tab is hidden to save CPU
             if (frequencyDataRef.current) analyserRef.current?.getByteFrequencyData(frequencyDataRef.current);
             if (waveDataRef.current) { analyserRef.current?.getByteTimeDomainData(waveDataRef.current);
               // Compute peak and RMS in integer domain (0-255 unsigned, 128=silence)
@@ -45,8 +43,7 @@ export function useAudioAnalyser(opts: UseAudioAnalyserOptions = {}): UseAudioAn
         }; rafRef.current = requestAnimationFrame(tick);} catch {
         // Some mobile browsers (notably iOS in background paths) can reject
         // WebAudio graph connections for cross-origin streams. Keep playback
-        // alive and just disable analyser updates.
-        cancelAnimationFrame(rafRef.current); setIsActive(false);
+        cancelAnimationFrame(rafRef.current); setIsActive(false); // alive and just disable analyser updates.
         frequencyDataRef.current = null; waveDataRef.current = null; }
     }, [fftSize, smoothingTimeConstant],);
   const disconnect = useCallback(() => {

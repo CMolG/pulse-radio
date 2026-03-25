@@ -28,8 +28,7 @@ function SongContextMenu({ menu, onRemove, onClose, }: {
     return () => { window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions); };
   }, [menu, onClose]); if (!menu) return null;
-  // Clamp so menu doesn't overflow viewport
-  const menuW = 200; const menuH = 48;
+  const menuW = 200; const menuH = 48; // Clamp so menu doesn't overflow viewport
   const x = Math.min(menu.x, window.innerWidth - menuW - 8); const y = Math.min(menu.y, window.innerHeight - menuH - 8);
   return createPortal( <div
       ref={ref}
@@ -107,15 +106,13 @@ export default function FavoriteSongsView({ songs, onRemove, onClear, onSelect }
   const handleContextMenu = useCallback((e: React.MouseEvent, songId: string) => {
     e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, songId });
   }, []); const closeContextMenu = useCallback(() => setContextMenu(null), []);
-  // Group by primary artist
-  const artistGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>();
+  const artistGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>(); // Group by primary artist
     for (const song of songs) {
       const artist = primaryArtist(song.artist); const existing = groups.get(artist) ?? []; existing.push(song);
       groups.set(artist, existing); }
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [songs]);
-  // Group by album
-  const albumGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>();
+  const albumGroups = useMemo(() => { const groups = new Map<string, FavoriteSong[]>(); // Group by album
     for (const song of songs) {
       const album = song.album || "Unknown Album"; const existing = groups.get(album) ?? []; existing.push(song);
       groups.set(album, existing); }

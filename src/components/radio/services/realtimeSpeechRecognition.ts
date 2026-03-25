@@ -28,8 +28,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
     recognition = new Ctor(); recognition.continuous = true; recognition.interimResults = true;
     recognition.maxAlternatives = 1; recognition.lang = lang === 'es' ? 'es-ES' : 'en-US';
     recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
-      // Reset restart counter on any successful recognition — proves engine is alive.
-      restartCount = 0;
+      restartCount = 0; // Reset restart counter on any successful recognition — proves engine is alive.
       const index = event.resultIndex; const result = event.results[index]; if (!result || !result[0]) return;
       const transcript = result[0].transcript.trim().toLowerCase(); if (!transcript) return;
       callbacks.onHypothesis({ text: transcript,
@@ -46,8 +45,7 @@ export function createRealtimeSpeechEngine(callbacks: EngineCallbacks): Realtime
         running = false; callbacks.onFatalError('Speech recognition stopped too many times.'); return; }
       restartCount++;
       // Capture the instance in scope — if stop()/destroy() has since nulled `recognition`,
-      // this is a stale onend firing and we should not restart.
-      const current = recognition; if (!current) return;
+      const current = recognition; if (!current) return; // this is a stale onend firing and we should not restart.
       try { current.start(); } catch { running = false; callbacks.onFatalError('Speech recognition failed to restart.');
       }
     }; };

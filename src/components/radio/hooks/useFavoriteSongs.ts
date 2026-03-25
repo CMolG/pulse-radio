@@ -13,8 +13,7 @@ function buildKeySet(songs: FavoriteSong[]): Set<string> { const s = new Set<str
 export function useFavoriteSongs() { const MAX_SONGS = 500;
   const [songs, setSongs] = useState<FavoriteSong[]>(() => {
     const loaded = loadFromStorage<FavoriteSong[]>(STORAGE_KEYS.FAVORITE_SONGS, []);
-    // Dedup on load in case of corrupted storage
-    const seen = new Set<string>();
+    const seen = new Set<string>(); // Dedup on load in case of corrupted storage
     return loaded.filter(s => {
       const key = songKey(s.title, s.artist); if (seen.has(key)) return false; seen.add(key); return true;});
   });

@@ -11,8 +11,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
   useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
   const stopFade = useCallback(() => {
     if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
-    // Restore original volume if we saved it
-    if (savedVolumeRef.current !== null && audioRef?.current) {
+    if (savedVolumeRef.current !== null && audioRef?.current) { // Restore original volume if we saved it
       audioRef.current.volume = savedVolumeRef.current; savedVolumeRef.current = null; }
     setIsFading(false);}, []);
   const clear = useCallback(() => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -49,7 +48,6 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
     } else { const currentIdx = PRESETS_MIN.findIndex(p => p >= remainingMin); const nextIdx = currentIdx + 1;
       if (nextIdx < PRESETS_MIN.length) start(PRESETS_MIN[nextIdx]); else clear(); }
   }, [remainingMin, start, clear]);
-  // Cleanup on unmount
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current);
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); // Cleanup on unmount
     if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
   }, []); return { remainingMin, isFading, cycle, cancel: clear }; }

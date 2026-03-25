@@ -63,8 +63,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (stationChanged) { prevStationUrlRef.current = station.url_resolved; lastTitleRef.current = '';
       // Intentionally NOT clearing track/icyBitrate/streamCodec here.
       // The previous station's data stays visible until the new station's
-      // first ICY response arrives — this is the "ICY swap" for smooth transitions.
-    }
+    } // first ICY response arrives — this is the "ICY swap" for smooth transitions.
     const abortController = new AbortController();
     const poll = async () => { if (abortController.signal.aborted || document.hidden) return;
       const { streamTitle, icyBr } = await fetchIcyMeta(station.url_resolved, abortController.signal);
@@ -77,8 +76,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
         setTrack(parsed && !isAdContent(parsed.title) ? parsed : null); return; }
       if (streamTitle) return; if (!lastTitleRef.current) setTrack(null); };
     // Fetch immediately on station change or when resuming playback,
-    // so we don't wait a full poll interval for fresh metadata.
-    if (stationChanged || isPlaying) poll();
+    if (stationChanged || isPlaying) poll(); // so we don't wait a full poll interval for fresh metadata.
     // Continuous polling only while actively playing
     if (isPlaying) intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
     // When the tab returns from background, poll immediately so the user

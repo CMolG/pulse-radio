@@ -16,8 +16,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
       return new Response(JSON.stringify({ error: 'Invalid protocol' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },});
     }
-    // Block loopback and private/internal IPs to prevent SSRF
-    const host = parsed.hostname.toLowerCase();
+    const host = parsed.hostname.toLowerCase(); // Block loopback and private/internal IPs to prevent SSRF
     if (isPrivateHost(host)) { return new Response(JSON.stringify({ error: 'Private/internal URLs not allowed' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },});
     }
@@ -38,8 +37,7 @@ export async function GET(req: NextRequest) { const streamUrl = req.nextUrl.sear
           return new Response(JSON.stringify({ error: 'Redirect to private IP not allowed' }), {
             status: 403, headers: { 'Content-Type': 'application/json' },});
         }} catch {
-        // URL parse failed — continue with original validation
-      } }
+      } } // URL parse failed — continue with original validation
     if (!upstream.ok || !upstream.body) { if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(() => {}); // release connection
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {

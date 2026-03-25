@@ -10,8 +10,7 @@ export function useParallaxBg(genre?: string, audioAmplitude = 0) {
   const audioAmplitudeRef = useRef(audioAmplitude);
   useEffect(() => { audioAmplitudeRef.current = audioAmplitude; }, [audioAmplitude]);
   const handleMouseMove = useCallback((e: MouseEvent) => { const el = containerRef.current; if (!el) return;
-    // Coalesce rapid mouse events into a single rAF update
-    cancelAnimationFrame(rafRef.current);
+    cancelAnimationFrame(rafRef.current); // Coalesce rapid mouse events into a single rAF update
     rafRef.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect(); const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2; const x = ((e.clientX - cx) / rect.width) * 20;

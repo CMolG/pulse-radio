@@ -12,13 +12,11 @@ const EMPTY_ALBUM_INFO: AlbumInfo = { artworkUrl: null, albumName: null, release
 type ItunesResult = { trackName?: string; artistName?: string; artworkUrl100?: string; trackViewUrl?: string;
   collectionViewUrl?: string; collectionName?: string; releaseDate?: string; trackTimeMillis?: number;
   primaryGenreName?: string; trackNumber?: number; trackCount?: number; };
-// Reusable match arrays for Jaro distance — avoids allocation per call
-let _aMatches: boolean[] = [];
+let _aMatches: boolean[] = []; // Reusable match arrays for Jaro distance — avoids allocation per call
 let _bMatches: boolean[] = [];
 function jaroDistance(a: string, b: string): number { if (a === b) return 1; if (!a.length || !b.length) return 0;
   const matchDistance = Math.floor(Math.max(a.length, b.length) / 2) - 1;
-  // Grow and reset reusable arrays
-  if (_aMatches.length < a.length) _aMatches = new Array(a.length);
+  if (_aMatches.length < a.length) _aMatches = new Array(a.length); // Grow and reset reusable arrays
   if (_bMatches.length < b.length) _bMatches = new Array(b.length);
   for (let i = 0; i < a.length; i++) _aMatches[i] = false; for (let i = 0; i < b.length; i++) _bMatches[i] = false;
   let matches = 0;
@@ -65,8 +63,7 @@ function selectBestItunesResult(results: ItunesResult[], requestedTitle: string,
   return best ?? null; }
 function cacheGet(key: string): AlbumInfo | undefined { const val = CACHE.get(key);
   if (val !== undefined) {
-    // Move to end for LRU ordering
-    CACHE.delete(key); CACHE.set(key, val); }
+    CACHE.delete(key); CACHE.set(key, val); } // Move to end for LRU ordering
   return val; }
 function cacheSet(key: string, value: AlbumInfo) { CACHE.delete(key); CACHE.set(key, value);
   while (CACHE.size > MAX_CACHE) {

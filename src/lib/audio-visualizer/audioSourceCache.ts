@@ -5,8 +5,7 @@
 const cache = new WeakMap< HTMLAudioElement, { ctx: AudioContext; source: MediaElementAudioSourceNode }
 >();
 // Singleton AudioContext — browsers limit the number of contexts (~6-20).
-// Reusing one context avoids exhaustion after many station switches.
-let sharedCtx: AudioContext | null = null;
+let sharedCtx: AudioContext | null = null; // Reusing one context avoids exhaustion after many station switches.
 function getSharedContext(): AudioContext {
   if (!sharedCtx || sharedCtx.state === 'closed') sharedCtx = new AudioContext();
   if (sharedCtx.state === 'suspended') sharedCtx.resume().catch(() => {}); return sharedCtx; }

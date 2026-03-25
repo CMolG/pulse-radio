@@ -7,8 +7,7 @@ import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { useStorageSync } from '@/lib/useStorageSync';
 export function useRecent() { const [recent, setRecent] = useState<Station[]>(() => {
     const loaded = loadFromStorage<Station[]>(STORAGE_KEYS.RECENT, []);
-    // Dedup by stationuuid on load in case of corrupted storage
-    const seen = new Set<string>();
+    const seen = new Set<string>(); // Dedup by stationuuid on load in case of corrupted storage
     return loaded.filter(s => {
       if (!s.stationuuid || seen.has(s.stationuuid)) return false; seen.add(s.stationuuid); return true;});
   }); useEffect(() => { saveToStorage(STORAGE_KEYS.RECENT, recent); }, [recent]);
