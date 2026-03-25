@@ -421,9 +421,14 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
 function getProximityCountries(seedCodes: string[]): string[] {
   if (seedCodes.length === 0) return [];
   const seed = seedCodes.map((code) => COUNTRY_BY_CODE[code]).filter(Boolean);
-  const regions = new Set(seed.map((country) => country.region));
-  const subregions = new Set(seed.map((country) => country.subregion));
-  const borders = new Set(seed.flatMap((country) => country.borders));
+  const regions = new Set<string>();
+  const subregions = new Set<string>();
+  const borders = new Set<string>();
+  for (const country of seed) {
+    if (country.region) regions.add(country.region);
+    if (country.subregion) subregions.add(country.subregion);
+    for (const b of country.borders) borders.add(b);
+  }
   return SOVEREIGN_COUNTRIES.map((country) => {
     let score = 0;
     if (borders.has(country.code)) score += 100;
