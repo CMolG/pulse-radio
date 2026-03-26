@@ -9941,10 +9941,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           {' '}
           {/* Sticky header — glassmorphism (content scrolls underneath) */}{' '}
           {!theaterMode && (
-            <div
+            <header
               data-testid="mobile-header"
               className="sticky top-0 z-30 safe-top border-b border-white/10"
               style={glassStyle}
+              role="banner"
             >
               {' '}
               <div className="flex items-center gap-2 px-4 pt-3 pb-2">
@@ -9981,7 +9982,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   </button>
                 )}
               </div>
-            </div>
+            </header>
           )}{' '}
           {theaterMode && radio.station ? (
             <div className="h-full flex flex-col">
@@ -9992,10 +9993,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               {/* Spacer for absolute bottom bar */} <div className="h-20 shrink-0" />
             </div>
           ) : (
-            <div className="flex flex-col min-h-full pb-24">
+                        <main className="flex flex-col min-h-full pb-24">
               {' '}
               {nowPlayingHeroElement} {/* ── Mobile top nav tabs + search ── */}{' '}
-              <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
+              <nav className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2" aria-label="Main navigation">
                 {navTabs14.map((tab) => (
                   <button
                     key={tab.id}
@@ -10006,7 +10007,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {tab.icon} {tab.label}
                   </button>
                 ))}
-              </div>
+              </nav>
               <div className="flex-shrink-0 px-4 pb-2">
                 {' '}
                 <form onSubmit={handleSearchSubmit}>
@@ -10034,7 +10035,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     ? historyViewElement
                     : favsViewElement}{' '}
               </div>
-            </div>
+            </main>
           )}
         </div>{' '}
         {/* EQ panel overlay */} {eqPanelElement} {/* Mobile settings panel */}{' '}
