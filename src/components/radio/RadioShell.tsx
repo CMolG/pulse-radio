@@ -3445,7 +3445,7 @@ function BrowseView({
         </div>
         <button
           onClick={() => setDiscoveryMode((d) => !d)}
-          className={`flex-row-1.5 px-3 py-2 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? 'bg-sys-purple/20 text-sys-purple border border-sys-purple/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
+          className={`flex-row-1.5 px-3 py-2 rounded-full text-[12px] font-medium transition-colors ${discoveryMode ? 'bg-sys-purple/20 text-sys-purple border border-sys-purple/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
           title={t('discoveryModeTitle')}
           aria-pressed={discoveryMode}
           aria-label={t('discoveryModeAria')}
@@ -3465,7 +3465,7 @@ function BrowseView({
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >
               {t('all')}
             </button>{' '}
@@ -3474,7 +3474,7 @@ function BrowseView({
                 key={cat.id}
                 onClick={() => onSelectGenre?.(cat)}
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-                className={`px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 {cat.label}
               </button>
@@ -3482,7 +3482,7 @@ function BrowseView({
             {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setGenreChipsExpanded(true)}
-                className="px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+                className="px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >
                 {t('seeMore')}
               </button>
@@ -3499,14 +3499,14 @@ function BrowseView({
           <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >{`🌐 ${t('allCountries')}`}</button>{' '}
             {visibleCountries.map((c) => (
               <button
                 key={c.code}
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
                 aria-current={countryChipActive(c.code) || undefined}
-                className={`flex items-center gap-1 px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`flex items-center gap-1 px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 <span>{c.flag}</span>
                 <span>{c.displayName}</span>
@@ -3515,7 +3515,7 @@ function BrowseView({
             {collapsed && countryChips.length > MOBILE_LIMIT && (
               <button
                 onClick={() => setCountryChipsExpanded(true)}
-                className="px-3 py-2 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+                className="px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
               >
                 {t('seeMore')}
               </button>
@@ -3601,7 +3601,7 @@ function BrowseView({
                           <p className="text-[12px] text-muted">{t('failedToLoadStations')}</p>
                           <button
                             onClick={() => loadCategory(catId)}
-                            className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
+                            className="px-3 py-1 rounded-lg bg-surface-4 text-[12px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
                           >
                             {t('retry')}
                           </button>
@@ -3635,7 +3635,7 @@ function BrowseView({
                     <div className={`flex items-center gap-2 mb-3 ${isMobile ? 'px-3' : 'px-0'}`}>
                       <button
                         onClick={() => setScanEnabled((v) => !v)}
-                        className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[12px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
                         title={t('scanNowPlaying')}
                       >
                         <ScanSearch size={12} />{' '}
@@ -3675,7 +3675,7 @@ function BrowseView({
                         </div>
                       )}{' '}
                       {scanEnabled && songFilter && (
-                        <span className="text-[11px] text-dim shrink-0">
+                        <span className="text-[12px] text-dim shrink-0">
                           {' '}
                           {t('stationCount', { count: allSongFilteredStations.length })}
                         </span>
@@ -4893,7 +4893,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />{' '}
               {/* ── Artist Info ── */}{' '}
               <div className="px-5">
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
+                <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
                   {' '}
                   About {song.artist}
                 </h3>{' '}
@@ -4948,7 +4948,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                           {info.name}
                         </p>{' '}
                         {info.disambiguation && (
-                          <p className="text-[11px] text-dim mt-0.5 line-clamp-1">
+                          <p className="text-[12px] text-dim mt-0.5 line-clamp-1">
                             {info.disambiguation}
                           </p>
                         )}{' '}
@@ -4991,7 +4991,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         {info.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[11px] font-medium text-white/50"
+                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[12px] font-medium text-white/50"
                           >
                             {' '}
                             {tag}
@@ -6369,7 +6369,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     <button
                       key={preset.name}
                       onClick={() => handleSelectPreset(preset.name, preset.gains)}
-                      className={`px-2.5 py-1.5 text-[11px] rounded-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50 hover:text-white/80'}`}
+                      className={`px-2.5 py-1.5 text-[12px] rounded-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50 hover:text-white/80'}`}
                     >
                       {' '}
                       {preset.name}
@@ -6380,7 +6380,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                       {' '}
                       <button
                         onClick={() => handleSelectPreset(preset.name, preset.gains)}
-                        className={`px-2.5 py-1.5 text-[11px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8'}`}
+                        className={`px-2.5 py-1.5 text-[12px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8'}`}
                       >
                         {' '}
                         {preset.name}
@@ -6388,7 +6388,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                       <button
                         onClick={() => eq.removeCustomPreset(preset.name)}
                         aria-label={`Delete ${preset.name} preset`}
-                        className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/45 hover:text-red-400 transition-colors"
+                        className="px-1.5 py-1.5 text-[12px] rounded-r-lg bg-white/5 border border-white/8 text-white/45 hover:text-red-400 transition-colors"
                       >
                         {' '}
                         <X size={10} />
@@ -6410,7 +6410,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                           if (e.key === 'Escape') setShowSaveInput(false);
                         }}
                         placeholder="Preset name…"
-                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
+                        className="flex-1 px-2.5 py-1.5 text-[12px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                         autoFocus
                       />{' '}
                       <button
@@ -6431,7 +6431,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   ) : (
                     <button
                       onClick={() => setShowSaveInput(true)}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/45 hover:text-white/60 transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[12px] rounded-lg bg-white/5 border border-white/8 text-white/45 hover:text-white/60 transition-colors"
                     >
                       {' '}
                       <Plus size={10} /> Save Custom
@@ -6479,7 +6479,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     <button
                       key={mode}
                       onClick={() => eq.setNoiseReductionMode(mode)}
-                      className={`flex-1 py-1.5 text-[11px] rounded-lg font-medium transition-colors ${eq.noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50'}`}
+                      className={`flex-1 py-1.5 text-[12px] rounded-lg font-medium transition-colors ${eq.noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50'}`}
                     >
                       {mode.charAt(0).toUpperCase() + mode.slice(1)}
                     </button>
@@ -6636,7 +6636,7 @@ type FavoriteSongsViewProps = {
 type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = 'none' | 'artist' | 'album';
 const filterBtnClass = (active: boolean) =>
-  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${active ? 'bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30' : 'bg-white/5 text-white/45 border border-white/8 hover:text-white/60'}`;
+  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-medium transition-colors ${active ? 'bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30' : 'bg-white/5 text-white/45 border border-white/8 hover:text-white/60'}`;
 function SongContextMenu({
   menu,
   onRemove,
