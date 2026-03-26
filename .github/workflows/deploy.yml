@@ -20,7 +20,7 @@ jobs:
           script: |
             cd /var/www/pulse-radio
             
-            git pull origin master
+            git pull origin main
             
             npm install
             
