@@ -3637,6 +3637,8 @@ function BrowseView({
                         onClick={() => setScanEnabled((v) => !v)}
                         className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[12px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
                         title={t('scanNowPlaying')}
+                        aria-label={t('scanNowPlaying')}
+                        aria-pressed={scanEnabled}
                       >
                         <ScanSearch size={12} />{' '}
                         {isScanning
@@ -5503,6 +5505,7 @@ function _NowPlayingBar({
               className="w-10 h-10 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95"
               title="Theater"
               aria-label="Theater mode"
+              aria-pressed={theaterMode}
             >
               <Maximize2 size={18} />
             </button>
@@ -5638,6 +5641,7 @@ function _NowPlayingBar({
             className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
             aria-label="Theater mode"
+            aria-pressed={theaterMode}
           >
             <Maximize2 size={14} />
           </button>
@@ -6357,6 +6361,8 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                 {' '}
                 <button
                   onClick={eq.toggleEnabled}
+                  aria-label={eq.enabled ? 'Disable equalizer' : 'Enable equalizer'}
+                  aria-pressed={eq.enabled}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
                   {' '}
@@ -6364,6 +6370,8 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                 </button>{' '}
                 <button
                   onClick={eq.toggleNormalizer}
+                  aria-label={eq.normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'}
+                  aria-pressed={eq.normalizerEnabled}
                   className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
                   {' '}
@@ -6538,6 +6546,8 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {' '}
                   <button
                     onClick={eq.toggleCompressor}
+                    aria-label={eq.compressorEnabled ? 'Disable compressor' : 'Enable compressor'}
+                    aria-pressed={eq.compressorEnabled}
                     className={`text-[12px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? 'text-sys-orange' : 'text-white/50'}`}
                   >
                     Comp
@@ -6888,6 +6898,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
           <button
             onClick={() => toggleFilter('artist')}
             className={filterBtnClass(filterMode === 'artist')}
+            aria-pressed={filterMode === 'artist'}
           >
             {' '}
             <Users size={10} /> By Artist{' '}
@@ -6906,6 +6917,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
           <button
             onClick={() => toggleFilter('album')}
             className={filterBtnClass(filterMode === 'album')}
+            aria-pressed={filterMode === 'album'}
           >
             {' '}
             <Disc3 size={10} /> By Album{' '}
@@ -7494,6 +7506,7 @@ const EqPanel = React.memo(function EqPanel({
           <button
             onClick={onToggleEnabled}
             aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'}
+            aria-pressed={enabled}
             className={`p-2 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`}
           >
             <Power size={13} />
@@ -7503,6 +7516,7 @@ const EqPanel = React.memo(function EqPanel({
             aria-label={
               normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'
             }
+            aria-pressed={normalizerEnabled}
             title="Loudness Normalizer"
             className={`px-1.5 py-0.5 text-[12px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
           >
@@ -7674,6 +7688,7 @@ const EqPanel = React.memo(function EqPanel({
           <button
             onClick={onToggleCompressor}
             aria-label={compressorEnabled ? 'Disable compressor' : 'Enable compressor'}
+            aria-pressed={compressorEnabled}
             title="Multiband Compressor"
             className={`text-[12px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}
           >
@@ -10262,6 +10277,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             className="pointer-events-auto shrink-0 p-2 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
             title={miniMode ? t('expand') : t('minimize')}
             aria-label={miniMode ? t('expand') : t('minimize')}
+            aria-pressed={miniMode}
           >
             {' '}
             {miniMode ? <Maximize2 size={12} aria-hidden="true" /> : <Minimize2 size={12} aria-hidden="true" />}
