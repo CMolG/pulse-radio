@@ -3141,7 +3141,7 @@ function ScrollRow({
           )}
         </div>
       )}{' '}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')}>
+      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')} role="region" aria-label={title ?? 'Station carousel'} tabIndex={0}>
         {children}
       </div>
     </div>
@@ -3920,6 +3920,8 @@ function LyricsReel({
           ref={scrollerRef}
           className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${isDesktop ? 'px-4' : 'px-2'}`}
           style={_LYRICS_MASK_STYLE}
+          role="region"
+          aria-label="Song lyrics"
         >
           <div className="flex min-h-full flex-col justify-center py-14">
             {' '}
