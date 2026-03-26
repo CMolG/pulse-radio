@@ -5518,7 +5518,7 @@ function _NowPlayingBar({
     );
   }
   return (
-    <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
+    <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x" role="region" aria-label="Now playing">
       {' '}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {statusAnnouncement}
