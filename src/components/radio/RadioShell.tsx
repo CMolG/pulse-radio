@@ -6287,6 +6287,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
         role="dialog"
         aria-modal="true"
         aria-label="Settings"
+        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
       >
         {' '}
         {/* Handle bar — mobile only */}{' '}
@@ -6621,6 +6622,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               role="dialog"
               aria-modal="true"
               aria-label="Your Statistics"
+              onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') setShowStats(false); }}
             >
               {' '}
               <div className="flex justify-center pt-3 pb-1">
