@@ -10030,12 +10030,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         <main id="main-content" className="flex flex-col min-h-full pb-24">
               {' '}
               {nowPlayingHeroElement} {/* ── Mobile top nav tabs + search ── */}{' '}
-              <nav className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2" aria-label="Main navigation">
+              <nav className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2" aria-label="Main navigation" role="tablist">
                 {navTabs14.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    aria-current={activeTab === tab.id ? 'page' : undefined}
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    tabIndex={activeTab === tab.id ? 0 : -1}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? 'bg-white/10 text-white shadow-sm' : 'text-white/45 hover:text-white/60 hover:bg-white/[0.04]'}`}
                   >
                     {tab.icon} {tab.label}
@@ -10151,12 +10153,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   </div>
                 </div>{' '}
                 {nowPlayingHeroElement} {/* ── Top nav: tabs + search ── */}{' '}
-                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
+                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1" role="tablist" aria-label="Main navigation">
                   {navTabs13.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      aria-current={activeTab === tab.id ? 'page' : undefined}
+                      role="tab"
+                      aria-selected={activeTab === tab.id}
+                      tabIndex={activeTab === tab.id ? 0 : -1}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors flex-shrink-0 ${activeTab === tab.id ? 'bg-surface-6 text-white' : 'text-dim hover:text-white/60 hover:bg-surface-2'}`}
                     >
                       {tab.icon} {tab.label}{' '}
