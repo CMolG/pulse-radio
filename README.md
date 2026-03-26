@@ -49,14 +49,18 @@
 ### 🎨 Visual Experience
 - **Album artwork** — automatic lookup via iTunes Search API with strict Jaro-distance matching and graceful fallback
 - **Audio visualizers** — ferrofluid, spiral, and circular renderers using Web Audio FFT analysis
-- **Audio-reactive background** — dynamic background that pulses with the music
+- **Audio-reactive background** — dynamic background that pulses with the music (works with or without audio effects enabled — uses a synthesized ambient pulse as fallback)
 - **Theater mode** — immersive full-screen playback with parallax album art background
+- **Concert ticker** — animated scrolling banner showing upcoming Bandsintown shows in theater mode
+- **Liquid Glass UI** — Aerolab-inspired liquid glass buttons with SVG distortion filter, specular lighting, and frosted tint layers on play controls and language selector
 - **Glassmorphism UI** — macOS-inspired dark theme with frosted glass surfaces
 
 ### 🎛️ Audio Control
 - **5-band parametric equalizer** — Low (60Hz), Lo-Mid (230Hz), Mid (910Hz), Hi-Mid (3.6kHz), High (14kHz)
 - **8 built-in presets** — Flat, Bass Boost, Treble, V-Shape, Vocal, Rock, Electronic, Acoustic
 - **Custom presets** — save and name your own EQ configurations
+- **Persistent EQ preset** — selected preset name persists across sessions
+- **Seamless effects toggle** — enable/disable audio enhancements without stream interruption (always-proxy architecture)
 - **Volume control** with mute toggle
 
 ### 📝 Lyrics
@@ -76,11 +80,18 @@
 - **Favorite songs** — bookmark tracks you love
 - **Recent stations** — last 15 played stations
 - **Play history** — up to 100 entries with artist, track, and artwork
+- **Artist detail modal** — view artist biography, upcoming Bandsintown concerts, and lyrics from history/favorites
+- **Social share** — share current station or track via Web Share API (or clipboard fallback) from cards, detail modals, theater mode, and the now-playing bar
+- **Uniform card layout** — all cards share the same height with station name anchored at the bottom
+- **Group by artist/album** — horizontal scrollable thumbnail row for grouped tracks
 
 ### 📱 Responsive Design
 - Adapts from desktop (sidebar + main) to tablet and mobile layouts
 - Touch-friendly controls throughout
 - **Mobile lyrics reel** — swipeable lyrics experience on small screens
+- **Single-row genre/country chips** — horizontally scrollable with a dropdown to access all genres and countries
+- **Desktop stats modal** — floating centered dialog instead of bottom sheet on desktop viewports
+- **Dev API console** — in-browser scrollable log of all ICY, iTunes, Lyrics, and Bandsintown API requests (development mode only, visible in theater mode)
 
 ## 🚀 Getting Started
 
@@ -127,6 +138,7 @@ src/
 │   │   ├── icy-meta/             # ICY metadata extraction endpoint
 │   │   ├── itunes/               # Album artwork lookup proxy
 │   │   ├── artist-info/          # Artist biography/info proxy
+│   │   ├── concerts/             # Bandsintown concert data proxy
 │   │   ├── archive-audio/        # Internet Archive audio proxy
 │   │   ├── librivox/             # LibriVox API proxy
 │   │   ├── open-library/         # Open Library metadata proxy
@@ -226,6 +238,7 @@ src/
 | [Radio Browser](https://www.radio-browser.info/) | Station discovery (40K+ stations) |
 | [LrcLib](https://lrclib.net/) | Synced & plain text lyrics |
 | [iTunes Search](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/) | Album artwork lookup |
+| [Bandsintown](https://www.bandsintown.com/) | Upcoming concert/tour dates |
 | [LibriVox](https://librivox.org/api/info) | Free public domain audiobooks |
 | [Internet Archive](https://archive.org/advancedsearch.php) | Open audio collection |
 | [Open Library](https://openlibrary.org/developers/api) | Book metadata |
@@ -281,6 +294,13 @@ Look for issues labeled [`good first issue`](../../labels/good%20first%20issue) 
 - [x] Audiobook support (LibriVox + Internet Archive)
 - [x] Realtime STT lyrics sync
 - [x] Station queue
+- [x] Bandsintown concert integration (theater mode ticker + artist detail modal)
+- [x] Audio-reactive background (with analyser fallback)
+- [x] Persistent EQ preset selection
+- [x] Always-proxy audio pipeline (no stream interruptions)
+- [x] Liquid Glass UI (Aerolab-style buttons)
+- [x] Social share (Web Share API + clipboard fallback)
+- [x] Dev API console (development mode)
 - [ ] Station search with fuzzy matching
 - [ ] Chromecast / AirPlay support
 - [ ] Shared playlists

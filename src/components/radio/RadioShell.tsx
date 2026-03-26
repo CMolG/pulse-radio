@@ -7,7 +7,7 @@ const MAX_AMPLITUDE = 0.35;
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
-function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amplitude: number } {
+function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean, analyserActive?: boolean): { amplitude: number } {
   const [amplitude, setAmplitude] = useState(0);
   const valueRef = useRef(0);
   const lastPublishedRef = useRef(0);
@@ -19,9 +19,19 @@ function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amp
       lastTsRef.current = ts;
       const dtSec = Math.max(0.001, (ts - lastTs) / 1000);
       const meter = meterRef.current;
-      const rms = enabled && meter ? clamp01(meter.rms) : 0;
-      const peak = enabled && meter ? clamp01(meter.peak) : 0;
-      const target = Math.min(MAX_AMPLITUDE, rms * 0.85 + peak * 0.15);
+      const hasRealData = analyserActive && meter && (meter.rms > 0 || meter.peak > 0);
+      let target: number;
+      if (enabled && hasRealData) {
+        const rms = clamp01(meter.rms);
+        const peak = clamp01(meter.peak);
+        target = Math.min(MAX_AMPLITUDE, rms * 0.85 + peak * 0.15);
+      } else if (enabled && !analyserActive) {
+        // Synthesize a gentle ambient pulse when playing without analyser
+        const pulse = 0.12 + 0.06 * Math.sin(ts / 800) + 0.03 * Math.sin(ts / 1300);
+        target = Math.min(MAX_AMPLITUDE, pulse);
+      } else {
+        target = 0;
+      }
       const attack = 1 - Math.exp(-dtSec / (ATTACK_MS / 1000));
       const release = 1 - Math.exp(-dtSec / (RELEASE_MS / 1000));
       const alpha = target > valueRef.current ? attack : release;
@@ -37,7 +47,7 @@ function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amp
       cancelAnimationFrame(rafRef.current);
       lastTsRef.current = 0;
     };
-  }, [enabled, meterRef]);
+  }, [enabled, meterRef, analyserActive]);
   return { amplitude };
 }
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ ('use client');
@@ -85,7 +95,186 @@ const usePlaybackStore = create<PlaybackState>((set) => ({
       artworkUrl: null,
     }),
 }));
-('use client');
+
+/* ── Dev API Console (development only) ── */
+type ApiLogEntry = {
+  id: number;
+  ts: number;
+  kind: 'request' | 'response' | 'error';
+  method: string;
+  url: string;
+  status?: number;
+  durationMs?: number;
+  requestPreview?: string;
+  responsePreview?: string;
+  error?: string;
+};
+type ApiLogStore = {
+  entries: ApiLogEntry[];
+  push: (e: Omit<ApiLogEntry, 'id'>) => void;
+  clear: () => void;
+};
+let _apiLogId = 0;
+const _DEV_API_PATTERNS = ['/api/icy-meta', '/api/itunes', '/api/lyrics', '/api/concerts', '/api/artist-info', 'lrclib.net'];
+const _DEV_API_NOISE_QUERY_KEYS = new Set(['_ts', 'ts', 't', '_']);
+function normalizeDevApiUrl(rawUrl: string): string {
+  try {
+    const parsed = new URL(
+      rawUrl,
+      typeof window === 'undefined' ? 'http://localhost' : window.location.origin,
+    );
+    const stableParams = new URLSearchParams();
+    const sorted = [...parsed.searchParams.entries()]
+      .filter(([key]) => !_DEV_API_NOISE_QUERY_KEYS.has(key))
+      .sort(([a], [b]) => a.localeCompare(b));
+    for (const [key, value] of sorted) stableParams.append(key, value);
+    const qs = stableParams.toString();
+    const sameOrigin = typeof window !== 'undefined' && parsed.origin === window.location.origin;
+    const prefix = sameOrigin ? '' : parsed.origin;
+    return `${prefix}${parsed.pathname}${qs ? `?${qs}` : ''}`;
+  } catch {
+    return rawUrl;
+  }
+}
+function isTrackedDevApiUrl(rawUrl: string): boolean {
+  const normalized = normalizeDevApiUrl(rawUrl);
+  return _DEV_API_PATTERNS.some((p) => rawUrl.includes(p) || normalized.includes(p));
+}
+function isIcyMetaUrl(url: string): boolean {
+  return url.includes('/api/icy-meta');
+}
+function buildIcyDedupeKey(entry: Omit<ApiLogEntry, 'id'>): string {
+  const url = normalizeDevApiUrl(entry.url);
+  const method = entry.method.toUpperCase();
+  if (entry.kind === 'request') return `${entry.kind}|${method}|${url}|${entry.requestPreview ?? ''}`;
+  if (entry.kind === 'response')
+    return `${entry.kind}|${method}|${url}|${entry.status ?? ''}|${entry.responsePreview ?? ''}`;
+  return `${entry.kind}|${method}|${url}|${entry.status ?? ''}|${entry.error ?? ''}`;
+}
+const useApiLogStore = create<ApiLogStore>((set) => ({
+  entries: [],
+  push: (e) =>
+    set((s) => {
+      if (isIcyMetaUrl(e.url)) {
+        const lastIcy = [...s.entries].reverse().find((entry) => isIcyMetaUrl(entry.url) && entry.kind === e.kind);
+        if (lastIcy && buildIcyDedupeKey(lastIcy) === buildIcyDedupeKey(e)) return s;
+      }
+      return {
+        entries: [...s.entries.slice(-149), { ...e, id: ++_apiLogId }],
+      };
+    }),
+  clear: () => set({ entries: [] }),
+}));
+let _devFetchPatched = false;
+function installDevFetchLogger() {
+  if (_devFetchPatched || typeof window === 'undefined') return;
+  if (process.env.NODE_ENV !== 'development') return;
+  _devFetchPatched = true;
+  const origFetch = window.fetch.bind(window);
+  window.fetch = async function devFetch(input: RequestInfo | URL, init?: RequestInit) {
+    const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    const url = normalizeDevApiUrl(rawUrl);
+    const matches = isTrackedDevApiUrl(rawUrl);
+    if (!matches) return origFetch(input, init);
+    const method =
+      (init?.method ??
+        (typeof Request !== 'undefined' && input instanceof Request ? input.method : undefined) ??
+        'GET').toUpperCase();
+    const requestPreview = init?.body
+      ? String(init.body).slice(0, 200)
+      : url.length > 240
+        ? `${url.slice(0, 240)}…`
+        : url;
+    useApiLogStore.getState().push({
+      ts: Date.now(),
+      kind: 'request',
+      method,
+      url,
+      requestPreview,
+    });
+    const t0 = performance.now();
+    try {
+      const res = await origFetch(input, init);
+      const durationMs = Math.round(performance.now() - t0);
+      let responsePreview = '';
+      try {
+        const clone = res.clone();
+        const text = await clone.text();
+        responsePreview = text.length > 200 ? text.slice(0, 200) + '…' : text;
+      } catch { /* ignore */ }
+      useApiLogStore.getState().push({
+        ts: Date.now(),
+        kind: 'response',
+        method,
+        url,
+        status: res.status,
+        durationMs,
+        responsePreview,
+      });
+      return res;
+    } catch (err) {
+      const durationMs = Math.round(performance.now() - t0);
+      useApiLogStore.getState().push({
+        ts: Date.now(),
+        kind: 'error',
+        method,
+        url,
+        durationMs,
+        error: String(err),
+      });
+      throw err;
+    }
+  } as typeof window.fetch;
+}
+
+/* ── Liquid Glass SVG Filter (rendered once via portal-free technique) ── */
+const LiquidGlassSvgFilter = React.memo(function LiquidGlassSvgFilter() {
+  return (
+    <svg style={{ position: 'fixed', width: 0, height: 0, pointerEvents: 'none' }} aria-hidden="true">
+      <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
+        <feComponentTransfer in="turbulence" result="mapped">
+          <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+          <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+          <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+        </feComponentTransfer>
+        <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+        <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lightingColor="white" result="specLight">
+          <fePointLight x="-200" y="-200" z="300" />
+        </feSpecularLighting>
+        <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+        <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+  );
+});
+
+type LiquidGlassButtonProps = {
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  'aria-label'?: string;
+  'aria-pressed'?: boolean;
+  className?: string;
+  children: React.ReactNode;
+};
+const LiquidGlassButton = React.memo(function LiquidGlassButton({ onClick, disabled, className = '', children, ...rest }: LiquidGlassButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`liquid-glass rounded-full ${className}`}
+      {...rest}
+    >
+      <div className="liquid-glass-effect rounded-full" />
+      <div className="liquid-glass-tint rounded-full" />
+      <div className="liquid-glass-shine rounded-full" />
+      <div className="liquid-glass-content">
+        {children}
+      </div>
+    </button>
+  );
+});
+
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -129,6 +318,7 @@ import {
   MapPin,
   Music2,
   ScanSearch,
+  Share2,
 } from 'lucide-react';
 import type {
   Station,
@@ -1467,28 +1657,21 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   }, []);
   const startPlayback = useCallback(
     (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void) => {
-      const shouldUseProxy =
-        proxyFallbackUrlsRef.current.has(streamUrl) || effectsEnabledRef.current;
-      const setSourceAndPlay = (useProxy: boolean) => {
+      // Always use server proxy to avoid stream interruptions when toggling effects
+      const setSourceAndPlay = () => {
         srcChangingRef.current = true;
-        audio.crossOrigin = useProxy ? 'anonymous' : null;
-        audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
+        audio.crossOrigin = 'anonymous';
+        audio.src = proxyUrl(streamUrl);
         Promise.resolve().then(() => {
           srcChangingRef.current = false;
         });
         return audio.play();
       };
-      setSourceAndPlay(shouldUseProxy).catch((err) => {
-        if (!shouldUseProxy && !isAutoplayBlocked(err)) {
-          if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
-          proxyFallbackUrlsRef.current.add(streamUrl);
-          setSourceAndPlay(true).catch(onRejected);
-          return;
-        }
+      setSourceAndPlay().catch((err) => {
         onRejected(err);
       });
     },
-    [effectsEnabledRef],
+    [],
   );
   useEffect(() => {
     const audio = getAudio();
@@ -1570,20 +1753,14 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
         if (station && !codecFallbackTriedRef.current.has(station.url_resolved)) {
           if (codecFallbackTriedRef.current.size >= 200) codecFallbackTriedRef.current.clear();
           codecFallbackTriedRef.current.add(station.url_resolved);
-          const isCurrentlyProxied = audio.src.startsWith(
-            window.location.origin + '/api/proxy-stream',
-          );
-          const setSourceAndPlay = (useProxy: boolean) => {
-            srcChangingRef.current = true;
-            audio.crossOrigin = useProxy ? 'anonymous' : null;
-            audio.src = useProxy ? proxyUrl(station.url_resolved) : station.url_resolved;
-            Promise.resolve().then(() => {
-              srcChangingRef.current = false;
-            });
-            return audio.play();
-          };
+          srcChangingRef.current = true;
+          audio.crossOrigin = 'anonymous';
+          audio.src = proxyUrl(station.url_resolved);
+          Promise.resolve().then(() => {
+            srcChangingRef.current = false;
+          });
           setStatus('loading');
-          setSourceAndPlay(!isCurrentlyProxied).catch((fallbackErr) => {
+          audio.play().catch((fallbackErr) => {
             if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return;
             setStatus('error');
           });
@@ -1831,7 +2008,6 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   const prefetchedUrlsRef = useRef<Set<string>>(null!);
   if (!prefetchedUrlsRef.current) prefetchedUrlsRef.current = new Set();
   const prefetchStream = useCallback((streamUrl: string) => {
-    if (!effectsEnabledRef.current) return;
     if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
     if (prefetchedUrlsRef.current.size >= 500) {
       const evictCount = prefetchedUrlsRef.current.size - 250;
@@ -2524,18 +2700,31 @@ async function fetchLyricsForArtist(
   );
 }
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
+  const resolvedTrack = data.trackName || title;
+  const resolvedArtist = data.artistName || artist;
+  const resolvedAlbum = data.albumName || undefined;
+  const resolvedDuration = data.duration || undefined;
+  const lyricsEnriched =
+    !!(data.artistName && data.artistName !== artist) ||
+    !!(data.trackName && data.trackName !== title);
   if (data.syncedLyrics) {
     return {
-      trackName: title,
-      artistName: artist,
+      trackName: resolvedTrack,
+      artistName: resolvedArtist,
+      albumName: resolvedAlbum,
+      duration: resolvedDuration,
+      lyricsEnriched,
       synced: true,
       lines: parseLrc(data.syncedLyrics),
     };
   }
   if (data.plainLyrics) {
     return {
-      trackName: title,
-      artistName: artist,
+      trackName: resolvedTrack,
+      artistName: resolvedArtist,
+      albumName: resolvedAlbum,
+      duration: resolvedDuration,
+      lyricsEnriched,
       synced: false,
       lines: [],
       plainText: data.plainLyrics,
@@ -2700,7 +2889,7 @@ const SongCard = React.memo(
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: Math.min(delay * 0.03, 0.5) }}
-        className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+        className="group h-full flex flex-col bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
         role="button"
         tabIndex={0}
         aria-label={`${item.title} by ${item.artist}`}
@@ -2776,8 +2965,22 @@ const SongCard = React.memo(
               <Trash2 size={12} />
             </button>
           )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              shareContent({
+                title: `${item.title} — ${item.artist}`,
+                text: `🎵 ${item.title} by ${item.artist} on Pulse Radio`,
+                url: typeof window !== 'undefined' ? window.location.href : '',
+              });
+            }}
+            aria-label="Share"
+            className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-white opacity-0 group-hover:opacity-100 transition-all"
+          >
+            <Share2 size={12} />
+          </button>
         </div>{' '}
-        <div className="p-3 space-y-0.5">
+        <div className="p-3 space-y-0.5 flex-1">
           <p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>{' '}
           <p className="text-[12px] text-secondary line-clamp-1">{item.artist}</p>{' '}
           {item.album && <p className="text-[12px] text-dim line-clamp-1">{item.album}</p>}{' '}
@@ -2795,7 +2998,7 @@ const SongCard = React.memo(
             </p>
           )}
         </div>{' '}
-        <div className="px-3 pb-2.5 space-y-1.5">
+        <div className="px-3 pb-2.5 space-y-1.5 mt-auto">
           <a
             href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
             target="_blank"
@@ -3245,8 +3448,7 @@ function BrowseView({
   const [songFilter, setSongFilter] = useState('');
   const songFilterTrimmed = useMemo(() => songFilter.trim(), [songFilter]);
   const scanGenRef = useRef(0);
-  const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
-  const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
+
   const loadCategory = useCallback(
     async (catId: string, flags?: { cancelled: boolean }) => {
       const cat = categoryById.get(catId);
@@ -3484,18 +3686,16 @@ function BrowseView({
           {discoveryMode ? ` ${t('discoveryOn')}` : ''}
         </button>
       </div>{' '}
-      {/* Genre chips — wrapping, limited on mobile */}{' '}
+      {/* Genre chips — single scrollable row + dropdown */}{' '}
       {(() => {
-        const MOBILE_LIMIT = 7;
-        const collapsed = isMobile && !genreChipsExpanded;
-        const visibleGenres = collapsed
-          ? translatedGenreCategories.slice(0, MOBILE_LIMIT)
-          : translatedGenreCategories;
+        const ROW_LIMIT = 6;
+        const visibleGenres = translatedGenreCategories.slice(0, ROW_LIMIT);
+        const allSorted = [...translatedGenreCategories].sort((a, b) => a.label.localeCompare(b.label));
         return (
-          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2`}>
+          <div className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >
               {t('all')}
             </button>{' '}
@@ -3504,52 +3704,80 @@ function BrowseView({
                 key={cat.id}
                 onClick={() => onSelectGenre?.(cat)}
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-                className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 {cat.label}
               </button>
             ))}{' '}
-            {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
-              <button
-                onClick={() => setGenreChipsExpanded(true)}
-                className="px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+            <LiquidGlassButton className="!rounded-full shrink-0 px-2 py-2 text-[12px]">
+              <select
+                value=""
+                onChange={(e) => {
+                  const id = e.target.value;
+                  if (!id) return;
+                  const cat = translatedGenreCategories.find((c) => c.id === id);
+                  if (cat) onSelectGenre?.(cat);
+                  e.target.value = '';
+                }}
+                className="bg-transparent text-white/50 text-[12px] font-medium cursor-pointer outline-none appearance-none"
+                aria-label="Browse all genres"
+                style={{ backgroundImage: 'none', paddingRight: '0px' }}
               >
-                {t('seeMore')}
-              </button>
-            )}
+                <option value="" disabled hidden>🔍 …</option>
+                {allSorted.map((cat) => (
+                  <option key={cat.id} value={cat.id} style={{ background: '#1a1a2e', color: '#fff' }}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </LiquidGlassButton>
           </div>
         );
       })()}{' '}
-      {/* Country chips — wrapping, limited on mobile */}{' '}
+      {/* Country chips — single scrollable row with top countries + dropdown */}{' '}
       {(() => {
-        const MOBILE_LIMIT = 7;
-        const collapsed = isMobile && !countryChipsExpanded;
-        const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
+        const COUNTRY_ROW_LIMIT = 6;
+        const visibleCountries = countryChips.slice(0, COUNTRY_ROW_LIMIT);
+        const allSorted = [...countryChips].sort((a, b) => a.displayName.localeCompare(b.displayName));
         return (
-          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3`}>
+          <div className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3 overflow-x-auto max-w-full [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >{`🌐 ${t('allCountries')}`}</button>{' '}
             {visibleCountries.map((c) => (
               <button
                 key={c.code}
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
                 aria-current={countryChipActive(c.code) || undefined}
-                className={`flex items-center gap-1 px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`flex items-center gap-1 px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 <span>{c.flag}</span>
                 <span>{c.displayName}</span>
               </button>
             ))}{' '}
-            {collapsed && countryChips.length > MOBILE_LIMIT && (
-              <button
-                onClick={() => setCountryChipsExpanded(true)}
-                className="px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+            <LiquidGlassButton className="!rounded-full shrink-0 px-2 py-2 text-[12px]">
+              <select
+                value=""
+                onChange={(e) => {
+                  const code = e.target.value;
+                  if (!code) return;
+                  const c = countryChips.find((x) => x.code === code);
+                  if (c) onSelectCountry?.(c.code, c.queryName, c.displayName);
+                  e.target.value = '';
+                }}
+                className="bg-transparent text-white/50 text-[12px] font-medium cursor-pointer outline-none appearance-none"
+                aria-label="Browse all countries"
+                style={{ backgroundImage: 'none', paddingRight: '0px' }}
               >
-                {t('seeMore')}
-              </button>
-            )}
+                <option value="" disabled hidden>🌍 …</option>
+                {allSorted.map((c) => (
+                  <option key={c.code} value={c.code} style={{ background: '#1a1a2e', color: '#fff' }}>
+                    {c.flag} {c.displayName}
+                  </option>
+                ))}
+              </select>
+            </LiquidGlassButton>
           </div>
         );
       })()}{' '}
@@ -4187,6 +4415,134 @@ const Badge = ({
     {children}
   </span>
 );
+
+/* ── DevApiConsole — only rendered in development mode inside TheaterView ── */
+const DevApiConsole = React.memo(function DevApiConsole() {
+  const entries = useApiLogStore((s) => s.entries);
+  const clear = useApiLogStore((s) => s.clear);
+  const [open, setOpen] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [entries.length, open]);
+  if (process.env.NODE_ENV !== 'development') return null;
+  const toggleExpand = (id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const statusColor = (s?: number) => {
+    if (!s) return 'text-red-400';
+    if (s >= 200 && s < 300) return 'text-green-400';
+    if (s >= 300 && s < 400) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+  const kindLabel = (kind: ApiLogEntry['kind']) => {
+    if (kind === 'request') return 'REQ';
+    if (kind === 'response') return 'RES';
+    return 'ERR';
+  };
+  const kindColor = (kind: ApiLogEntry['kind']) => {
+    if (kind === 'request') return 'bg-sky-600/80';
+    if (kind === 'response') return 'bg-emerald-600/80';
+    return 'bg-red-600/80';
+  };
+  const apiLabel = (url: string) => {
+    if (url.includes('/api/icy-meta')) return 'ICY';
+    if (url.includes('/api/itunes')) return 'iTunes';
+    if (url.includes('/api/concerts')) return 'CONCERTS';
+    if (url.includes('/api/artist-info')) return 'ARTIST';
+    if (url.includes('lrclib.net')) return 'LYRICS';
+    if (url.includes('/api/lyrics')) return 'LYRICS';
+    return 'API';
+  };
+  const labelColor = (url: string) => {
+    if (url.includes('/api/icy-meta')) return 'bg-cyan-600/80';
+    if (url.includes('/api/itunes')) return 'bg-pink-600/80';
+    if (url.includes('/api/concerts')) return 'bg-orange-600/80';
+    if (url.includes('/api/artist-info')) return 'bg-purple-600/80';
+    if (url.includes('lrclib.net') || url.includes('/api/lyrics')) return 'bg-emerald-600/80';
+    return 'bg-gray-600/80';
+  };
+  return (
+    <div className="fixed bottom-50 right-2 z-9999 pointer-events-auto" style={{ maxWidth: 480, width: 'calc(100vw - 16px)', zIndex: 9999 }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono bg-black/80 text-green-400 border border-green-500/30 hover:bg-black/90 transition-colors shadow-lg"
+      >
+        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <span>API Console ({entries.length})</span>
+        <span className="text-white/30 ml-1">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div
+          className="mt-1 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
+          style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+        >
+          <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
+            <span className="text-[11px] font-mono font-bold text-green-400/80">⚡ API Console</span>
+            <div className="flex items-center gap-3">
+              <button onClick={clear} className="text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors">Clear</button>
+              <button onClick={() => setOpen(false)} className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors">✕</button>
+            </div>
+          </div>
+          <div className="max-h-72 overflow-y-auto font-mono text-[10px] leading-relaxed [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+            {entries.length === 0 && (
+              <div className="px-3 py-6 text-white/30 text-center text-[11px]">Waiting for API requests…</div>
+            )}
+            {entries.map((e) => {
+              const time = new Date(e.ts).toLocaleTimeString('en', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const isExpanded = expandedIds.has(e.id);
+              const hasDetail = Boolean(e.requestPreview || e.responsePreview || e.error);
+              const statusText = e.kind === 'request' ? '--' : e.status ?? 'ERR';
+              const statusClass = e.kind === 'request' ? 'text-sky-300' : statusColor(e.status);
+              const durationText = e.durationMs != null ? `${e.durationMs}ms` : '—';
+              return (
+                <div
+                  key={e.id}
+                  className={`px-3 py-1.5 border-b border-white/5 transition-colors ${hasDetail ? 'cursor-pointer hover:bg-white/5' : ''}`}
+                  onClick={() => hasDetail && toggleExpand(e.id)}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {hasDetail && <span className="text-white/25 text-[9px] w-2.5">{isExpanded ? '▾' : '▸'}</span>}
+                    <span className="text-white/30">{time}</span>
+                    <span className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${kindColor(e.kind)}`}>{kindLabel(e.kind)}</span>
+                    <span className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${labelColor(e.url)}`}>{apiLabel(e.url)}</span>
+                    <span className="text-white/45">{e.method}</span>
+                    <span className={`font-bold ${statusClass}`}>{statusText}</span>
+                    <span className="text-white/30">{durationText}</span>
+                    <span className="text-white/15 truncate flex-1 ml-1">{e.url.split('?')[0].split('/api/').pop() ?? e.url}</span>
+                  </div>
+                  {isExpanded && e.requestPreview && (
+                    <div className="mt-1 ml-4 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 break-all whitespace-pre-wrap text-[10px] max-h-32 overflow-y-auto">
+                      {e.requestPreview}
+                    </div>
+                  )}
+                  {isExpanded && e.error && (
+                    <div className="mt-1 ml-4 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 break-all whitespace-pre-wrap text-[10px]">
+                      {e.error}
+                    </div>
+                  )}
+                  {isExpanded && e.responsePreview && (
+                    <div className="mt-1 ml-4 p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 break-all whitespace-pre-wrap text-[10px] max-h-48 overflow-y-auto">
+                      {e.responsePreview}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 type TheaterViewProps = {
   station: Station;
   track: NowPlayingTrack | null;
@@ -4595,43 +4951,54 @@ function TheaterView({
               <ExternalLink size={11} /> Listen on Apple Music
             </a>
           )}{' '}
-          {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
+          {/* Share button */}{' '}
+          {!compact && (
+            <ShareButton
+              title={track ? `${track.artist ?? station.name} — ${track.title}` : station.name}
+              text={track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`}
+              size={14}
+              className="mt-1 w-8 h-8"
+            />
+          )}{' '}
+          {/* ── Upcoming concerts (Bandsintown) — animated ticker banner ── */}{' '}
           {!compact && concerts.length > 0 && (
-            <div className="w-full mt-2">
-              <p className="text-[12px] font-semibold tracking-widest uppercase text-white/50 text-center mb-1.5">
-                Upcoming Shows
-              </p>
-              <div className="flex flex-col gap-1 w-full">
-                {concerts.slice(0, 3).map((ev) => {
-                  const d = new Date(ev.date);
-                  const dateStr = isNaN(d.getTime())
-                    ? ev.date
-                    : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                  const content = (
-                    <div className="flex items-start justify-between gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-[12px] font-medium text-white/80 truncate">{ev.venue}</span>
-                        <span className="text-[12px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
-                      </div>
-                      <span className="text-[12px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
-                    </div>
-                  );
-                  return ev.ticketUrl ? (
-                    <a
-                      key={ev.id}
-                      href={ev.ticketUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block min-h-[44px]"
-                      aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}
-                    >
-                      {content}
-                    </a>
-                  ) : (
-                    <div key={ev.id} className="min-h-[44px]">{content}</div>
-                  );
-                })}
+            <div className="w-full mt-2 overflow-hidden rounded-xl" style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="px-3 pt-2 pb-1">
+                <p className="text-[10px] font-semibold tracking-widest uppercase text-white/40 text-center">
+                  Upcoming Shows
+                </p>
               </div>
+              <div className="relative overflow-hidden h-10">
+                <div
+                  className="flex items-center gap-8 animate-marquee whitespace-nowrap absolute left-0 top-0 h-full"
+                  style={{ animation: `marquee ${Math.max(12, concerts.length * 6)}s linear infinite` }}
+                >
+                  {[...concerts.slice(0, 5), ...concerts.slice(0, 5)].map((ev, idx) => {
+                    const d = new Date(ev.date);
+                    const dateStr = isNaN(d.getTime())
+                      ? ev.date
+                      : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    const inner = (
+                      <span className="inline-flex items-center gap-2 text-[11px]">
+                        <span className="text-sys-orange font-mono font-bold">{dateStr}</span>
+                        <span className="text-white/70 font-medium">{ev.venue}</span>
+                        <span className="text-white/40">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                      </span>
+                    );
+                    return ev.ticketUrl ? (
+                      <a key={`${ev.id}-${idx}`} href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:text-white transition-colors pointer-events-auto">{inner}</a>
+                    ) : (
+                      <span key={`${ev.id}-${idx}`} className="inline-flex items-center">{inner}</span>
+                    );
+                  })}
+                </div>
+              </div>
+              <style jsx>{`
+                @keyframes marquee {
+                  0% { transform: translateX(0%); }
+                  100% { transform: translateX(-50%); }
+                }
+              `}</style>
             </div>
           )}{' '}
           {/* ── Lyrics reel inside glass panel ── */}{' '}
@@ -4647,16 +5014,16 @@ function TheaterView({
           )}
         </div>
         </div>
-      </div>
-    </motion.div>
+        </div>
+      </motion.div>
   );
 }
-const cache = new LRU<ArtistInfo>(200);
+const _artistInfoCache = new Map<string, ArtistInfo>();
 function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean } {
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => {
     if (!key) return null;
-    return cache.get(key) ?? null;
+    return _artistInfoCache.get(key) ?? null;
   }, [key]);
   const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
   useEffect(() => {
@@ -4671,7 +5038,7 @@ function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loadin
       })
       .then((data: ArtistInfo) => {
         if (!cancelled) {
-          cache.set(key, data);
+          _artistInfoCache.set(key, data);
           setFetched({ key, info: data });
         }
       })
@@ -4690,6 +5057,31 @@ function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loadin
   const info = !key ? null : (cachedInfo ?? (fetched?.key === key ? fetched.info : null));
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }
+
+/* ── Share utility ── */
+function shareContent(data: { title: string; text?: string; url?: string }) {
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    navigator.share(data).catch(() => {});
+  } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(data.url ?? window.location.href).catch(() => {});
+  }
+}
+function ShareButton({ title, text, url, size = 16, className = '' }: { title: string; text?: string; url?: string; size?: number; className?: string }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        shareContent({ title, text, url: url ?? window.location.href });
+      }}
+      className={`inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors ${className}`}
+      aria-label="Share"
+      title="Share"
+    >
+      <Share2 size={size} className="text-white/70" />
+    </button>
+  );
+}
+
 const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px]';
 const MetaBadge = ({
   icon: Icon,
@@ -4713,6 +5105,7 @@ type SongDetailModalProps = {
 const _SKELETON_WIDTHS = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
 function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailModalProps) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
+  const { concerts } = useConcerts(song?.artist ?? null, !!song);
   const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
   const resolvedArtworkUrl = song?.artworkUrl ?? albumMeta.artworkUrl ?? undefined;
   const resolvedAlbum = song?.album ?? albumMeta.albumName ?? undefined;
@@ -4839,8 +5232,15 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
             {' '}
             <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
               {' '}
-              {/* Close button */}{' '}
-              <div className="sticky top-0 z-10 flex justify-end p-3">
+              {/* Close + Share buttons */}{' '}
+              <div className="sticky top-0 z-10 flex justify-end gap-2 p-3">
+                <ShareButton
+                  title={`${song.title} — ${song.artist}`}
+                  text={`🎵 Listening to ${song.title} by ${song.artist} on Pulse Radio`}
+                  url={typeof window !== 'undefined' ? window.location.href : ''}
+                  size={16}
+                  className="p-2 !bg-surface-3/80 backdrop-blur-sm"
+                />
                 <button
                   onClick={onClose}
                   aria-label="Close song details"
@@ -5066,8 +5466,40 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                   <p className="text-[12px] text-dim">No artist information available</p>
                 )}
               </div>{' '}
+              {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
+              {concerts.length > 0 && (
+                <>
+                  <div className="mx-5 my-5 border-t border-border-default" />
+                  <div className="px-5">
+                    <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
+                      Upcoming Shows
+                    </h3>
+                    <div className="flex flex-col gap-1.5 w-full">
+                      {concerts.slice(0, 5).map((ev) => {
+                        const d = new Date(ev.date);
+                        const dateStr = isNaN(d.getTime())
+                          ? ev.date
+                          : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                        const content = (
+                          <div className="flex items-start justify-between gap-2 px-3 py-2.5 rounded-xl bg-surface-3/50 hover:bg-surface-3 transition-colors border border-border-subtle">
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[12px] font-medium text-white/80 truncate">{ev.venue}</span>
+                              <span className="text-[11px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                            </div>
+                            <span className="text-[11px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
+                          </div>
+                        );
+                        return ev.ticketUrl ? (
+                          <a key={ev.id} href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" className="block min-h-[44px]" aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}>{content}</a>
+                        ) : (
+                          <div key={ev.id} className="min-h-[44px]">{content}</div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}{' '}
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />{' '}
-              {/* ── Lyrics (mobile) ── */}{' '}
               <div className="px-5 md:hidden">
                 {' '}
                 <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
@@ -5499,21 +5931,21 @@ function _NowPlayingBar({
         style={SAFE_AREA_STYLE}
       >
         {' '}
-        {/* Play/Pause — 48px touch target */}{' '}
-        <button
+        {/* Play/Pause — 48px liquid glass touch target */}{' '}
+        <LiquidGlassButton
           onClick={onTogglePlay}
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
-          className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
+          className="w-12 h-12 shrink-0 active:scale-95 disabled:opacity-30"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
-            <Pause size={18} />
+            <Pause size={18} className="text-white" />
           ) : (
-            <Play size={18} className="ml-0.5" />
+            <Play size={18} className="text-white ml-0.5" />
           )}
-        </button>{' '}
+        </LiquidGlassButton>{' '}
         {/* Track info + LIVE indicator */}{' '}
         <div className="flex-1 min-w-0">
           {' '}
@@ -5644,21 +6076,21 @@ function _NowPlayingBar({
       </div>{' '}
       {/* Controls */}{' '}
       <div className="flex-row-0.5">
-        <button
+        <LiquidGlassButton
           onClick={onTogglePlay}
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           aria-pressed={isPlaying}
-          className="w-10 h-10 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
+          className="w-10 h-10 disabled:opacity-30"
         >
           {isLoading ? (
             <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
-            <Pause size={16} />
+            <Pause size={16} className="text-white" />
           ) : (
-            <Play size={16} className="ml-0.5" />
+            <Play size={16} className="text-white ml-0.5" />
           )}
-        </button>
+        </LiquidGlassButton>
       </div>{' '}
       {/* LIVE indicator + mini ferrofluid */}{' '}
       <div className="flex-1 flex-row-2 min-w-0 relative">
@@ -5765,6 +6197,20 @@ function _NowPlayingBar({
             className={`p-2.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
           >
             <SlidersHorizontal size={14} />
+          </button>
+        )}
+        {station && (
+          <button
+            onClick={() => shareContent({
+              title: track ? `${track.artist ?? station.name} — ${track.title}` : station.name,
+              text: track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`,
+              url: typeof window !== 'undefined' ? window.location.href : '',
+            })}
+            aria-label="Share"
+            className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
+            title="Share"
+          >
+            <Share2 size={14} />
           </button>
         )}
       </div>{' '}
@@ -6682,31 +7128,33 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, 
             animate={_MOTION_FADE_VISIBLE}
             exit={_MOTION_FADE_OUT}
             transition={_MOTION_T_02}
-            className="absolute inset-0 z-50 flex flex-col"
+            className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
           >
             {' '}
             <div
-              className="absolute inset-0 bg-black/50"
+              className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'}
               onClick={() => setShowStats(false)}
               aria-hidden="true"
             />{' '}
             <motion.div
-              initial={_MOTION_SLIDE_UP_INIT}
-              animate={_MOTION_SLIDE_UP_VISIBLE}
-              exit={_MOTION_SLIDE_UP_EXIT}
-              transition={_MOTION_T_SPRING}
-              className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
-              style={_GLASS_PANEL_STYLE}
+              initial={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_INIT}
+              animate={desktop ? { opacity: 1, scale: 1 } : _MOTION_SLIDE_UP_VISIBLE}
+              exit={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_EXIT}
+              transition={desktop ? { duration: 0.2 } : _MOTION_T_SPRING}
+              className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
+              style={desktop ? _GLASS_SETTINGS_STYLE : _GLASS_PANEL_STYLE}
               role="dialog"
               aria-modal="true"
               aria-label="Your Statistics"
               onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') setShowStats(false); }}
             >
               {' '}
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-white/20" />
-              </div>{' '}
-              <div className="flex items-center gap-3 px-5 pb-3">
+              {!desktop && (
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-white/20" />
+                </div>
+              )}{' '}
+              <div className={`flex items-center gap-3 px-5 pb-3 ${desktop ? 'pt-4' : ''}`}>
                 <button
                   onClick={() => setShowStats(false)}
                   aria-label="Close statistics"
@@ -6808,12 +7256,9 @@ function GroupStack({
   onContextMenu: (e: React.MouseEvent, songId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const VISIBLE_COUNT = 3;
+  const VISIBLE_COUNT = 6;
   const hasMore = songs.length > VISIBLE_COUNT;
-  const visibleSongs = useMemo(
-    () => (expanded ? songs : songs.slice(0, VISIBLE_COUNT)),
-    [expanded, songs],
-  );
+  const visibleSongs = expanded ? songs : songs.slice(0, VISIBLE_COUNT);
   return (
     <div className="mb-6">
       {' '}
@@ -6835,64 +7280,45 @@ function GroupStack({
           </motion.span>
         )}
       </button>{' '}
-      {/* Stacked/expanded cards */}{' '}
+      {/* Horizontal thumbnail row when collapsed, grid when expanded */}{' '}
       {!expanded && hasMore ? (
-        <div
-          className="relative cursor-pointer"
-          onClick={() => setExpanded(true)}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(true); } }}
-          role="button"
-          tabIndex={0}
-          aria-label={`Expand ${label} songs`}
-          style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}
-        >
-          {' '}
-          {songs.slice(0, VISIBLE_COUNT).map((song, i) => (
-            <div
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+          {songs.slice(0, VISIBLE_COUNT).map((song) => (
+            <button
               key={song.id}
-              className="absolute left-0 right-0 transition-all duration-300"
-              style={{
-                top: `${i * 16}px`,
-                zIndex: VISIBLE_COUNT - i,
-                transform: `scale(${1 - i * 0.03})`,
-                opacity: 1 - i * 0.15,
-                maxWidth: '200px',
-              }}
+              onClick={() => onSelect?.({
+                title: song.title,
+                artist: song.artist,
+                album: song.album,
+                artworkUrl: song.artworkUrl,
+                itunesUrl: song.itunesUrl,
+                durationMs: song.durationMs,
+                genre: song.genre,
+                releaseDate: song.releaseDate,
+                trackNumber: song.trackNumber,
+                trackCount: song.trackCount,
+                stationName: song.stationName,
+              })}
+              onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}
+              className="flex-shrink-0 w-20 group/thumb"
+              aria-label={`${song.title} by ${song.artist}`}
             >
-              <div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
-                {' '}
-                <div className="w-full aspect-square bg-surface-3 relative">
-                  {song.artworkUrl ? (
-                    <UiImage
-                      src={song.artworkUrl}
-                      alt=""
-                      className="object-cover"
-                      sizes="200px"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="size-full flex items-center justify-center">
-                      <Music size={28} className="text-dim" />
-                    </div>
-                  )}
-                </div>{' '}
-                <div className="p-2.5">
-                  <p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>{' '}
-                  <p className="text-[12px] text-secondary line-clamp-1">{song.artist}</p>
-                </div>
+              <div className="w-20 h-20 rounded-lg bg-surface-3 overflow-hidden relative">
+                {song.artworkUrl ? (
+                  <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="80px" loading="lazy" />
+                ) : (
+                  <div className="size-full flex items-center justify-center"><Music size={20} className="text-dim" /></div>
+                )}
               </div>
-            </div>
-          ))}{' '}
-          <div
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-            style={_MAX_WIDTH_200_STYLE}
+              <p className="text-[10px] text-white/60 line-clamp-1 mt-1 text-center">{song.title}</p>
+            </button>
+          ))}
+          <button
+            onClick={() => setExpanded(true)}
+            className="flex-shrink-0 w-20 h-20 rounded-lg bg-surface-3 border border-white/10 flex items-center justify-center text-[12px] text-white/70 font-medium hover:bg-surface-4 transition-colors"
           >
-            {' '}
-            <span className="text-[12px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
-              {' '}
-              +{songs.length - VISIBLE_COUNT} more
-            </span>
-          </div>
+            +{songs.length - VISIBLE_COUNT} more
+          </button>
         </div>
       ) : (
         <AnimatePresence>
@@ -7492,24 +7918,24 @@ const ParallaxBackground = React.memo(_ParallaxBackground);
 function _LanguageSelector() {
   const { locale, setLocale, locales } = useLocale();
   return (
-    <label className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.06] text-[12px] text-dim">
-      {' '}
-      <Languages size={12} className="text-white/70" /> <span className="sr-only">Language</span>
-      <select
-        value={locale}
-        onChange={(event) => setLocale(event.target.value as typeof locale)}
-        className="bg-transparent text-white outline-none cursor-pointer"
-        aria-label="Language selector"
-        data-language-selector
-      >
-        {' '}
-        {locales.map((item) => (
-          <option key={item.code} value={item.code} className="bg-[#0a0f1a] text-white">
-            {item.nativeName}
-          </option>
-        ))}
-      </select>
-    </label>
+    <LiquidGlassButton className="!rounded-full px-3 py-1.5 text-[12px]" aria-label="Language selector">
+      <label className="flex items-center gap-2 cursor-pointer">
+        <Languages size={12} className="text-white/70" />
+        <select
+          value={locale}
+          onChange={(event) => setLocale(event.target.value as typeof locale)}
+          className="bg-transparent text-white outline-none cursor-pointer text-[12px]"
+          aria-label="Language selector"
+          data-language-selector
+        >
+          {locales.map((item) => (
+            <option key={item.code} value={item.code} className="bg-[#0a0f1a] text-white">
+              {item.nativeName}
+            </option>
+          ))}
+        </select>
+      </label>
+    </LiquidGlassButton>
   );
 }
 const LanguageSelector = React.memo(_LanguageSelector);
@@ -9217,6 +9643,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
 }
 type RadioShellProps = { isPip?: boolean; initialCountryCode?: string };
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
+  useEffect(() => { installDevFetchLogger(); }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const containerSize = useContainerSize(containerRef);
   const pathname = usePathname();
@@ -9246,23 +9673,78 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const stationQueue = useStationQueue();
   useWakeLock(radio.status === 'playing');
   const analyser = useAudioAnalyser({ fftSize: 2048, smoothingTimeConstant: 0.8 });
-  const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === 'playing');
+  const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === 'playing', analyser.isActive);
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
+
+  // Lyrics → iTunes fallback: when the initial iTunes lookup found nothing but lyrics
+  // came back with enriched metadata (artist/title from lrclib), retry iTunes with that.
+  const [lyricsRetryArt, setLyricsRetryArt] = useState<AlbumInfo | null>(null);
+  const lyricsRetryKeyRef = useRef<string>('');
+  useEffect(() => {
+    setLyricsRetryArt(null);
+    lyricsRetryKeyRef.current = '';
+  }, [track?.title, track?.artist]);
+  useEffect(() => {
+    if (albumArt.isLoading || albumArt.artworkUrl !== null) return;
+    if (!lyrics?.lyricsEnriched || !lyrics.artistName || !lyrics.trackName) return;
+    const retryKey = `${lyrics.artistName}\n${lyrics.trackName}`.toLowerCase();
+    if (lyricsRetryKeyRef.current === retryKey) return;
+    lyricsRetryKeyRef.current = retryKey;
+    const controller = new AbortController();
+    const cleanArtist = primaryArtist(lyrics.artistName);
+    const cleanTitle = cleanFeatFromTitle(lyrics.trackName);
+    const term = `${cleanArtist} ${cleanTitle}`;
+    fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || controller.signal.aborted) return;
+        const result = selectBestItunesResult(
+          (data.results ?? []) as ItunesResult[],
+          lyrics.trackName,
+          lyrics.artistName,
+        );
+        if (!result) return;
+        const artworkUrl = result.artworkUrl100?.replace('100x100', '600x600') ?? null;
+        const rawItunesUrl: string | null = result.trackViewUrl ?? result.collectionViewUrl ?? null;
+        const info: AlbumInfo = {
+          artworkUrl,
+          albumName: result.collectionName ?? null,
+          releaseDate: result.releaseDate ?? null,
+          itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
+          durationMs: typeof result.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
+          genre: result.primaryGenreName ?? null,
+          trackNumber: typeof result.trackNumber === 'number' ? result.trackNumber : null,
+          trackCount: typeof result.trackCount === 'number' ? result.trackCount : null,
+        };
+        CACHE.set(retryKey, info);
+        if (track) {
+          const origKey = `${track.artist ?? ''}\n${track.title}`.toLowerCase();
+          if (origKey !== retryKey) CACHE.set(origKey, info);
+        }
+        if (artworkUrl) preloadImage(artworkUrl);
+        setLyricsRetryArt(info);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [albumArt.isLoading, albumArt.artworkUrl, lyrics?.lyricsEnriched, lyrics?.artistName, lyrics?.trackName]);
+
   const usageStats = useStats();
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
+    const artSource = albumArt.artworkUrl ? albumArt : (lyricsRetryArt ?? albumArt);
     return {
       ...track,
-      album: track.album || albumArt.albumName || undefined,
-      artworkUrl: track.artworkUrl || albumArt.artworkUrl || undefined,
-      itunesUrl: albumArt.itunesUrl ?? undefined,
-      durationMs: albumArt.durationMs ?? undefined,
-      genre: albumArt.genre || undefined,
-      releaseDate: albumArt.releaseDate || undefined,
-      trackNumber: albumArt.trackNumber ?? undefined,
-      trackCount: albumArt.trackCount ?? undefined,
+      artist: track.artist || (lyrics?.artistName ?? track.artist),
+      album: track.album || artSource.albumName || lyrics?.albumName || undefined,
+      artworkUrl: track.artworkUrl || artSource.artworkUrl || undefined,
+      itunesUrl: artSource.itunesUrl ?? undefined,
+      durationMs: artSource.durationMs ?? undefined,
+      genre: artSource.genre || undefined,
+      releaseDate: artSource.releaseDate || undefined,
+      trackNumber: artSource.trackNumber ?? undefined,
+      trackCount: artSource.trackCount ?? undefined,
     };
-  }, [track, albumArt]);
+  }, [track, albumArt, lyricsRetryArt, lyrics?.artistName, lyrics?.albumName]);
   const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
   const lastTickRef = useRef<number>(null!);
   if (lastTickRef.current === null) lastTickRef.current = Date.now();
@@ -9347,7 +9829,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (duckOrigVolRef.current !== null) duckOrigVolRef.current = radio.muted ? 0 : radio.volume;
   }, [radio.volume, radio.muted]);
-  const [eqPreset, setEqPreset] = useState<string | null>(null);
+  const [eqPreset, setEqPresetRaw] = useState<string | null>(() =>
+    loadFromStorage<string | null>(STORAGE_KEYS.EQ_PRESET_NAME, null),
+  );
+  const setEqPreset = useCallback((name: string | null) => {
+    setEqPresetRaw(name);
+    saveToStorage(STORAGE_KEYS.EQ_PRESET_NAME, name);
+  }, []);
   const [activeTab, setActiveTab] = useState<'discover' | 'history' | 'favorites'>('discover');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(null);
@@ -9444,9 +9932,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   ]);
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
   useEffect(() => {
-    if (effectsEnabled && radio.station && radio.audioRef.current) {
-      eqConnectSource(radio.audioRef.current);
+    if (radio.station && radio.audioRef.current) {
+      // Always connect analyser (proxy always provides CORS)
       analyser.connectAudio(radio.audioRef.current);
+      if (effectsEnabled) {
+        eqConnectSource(radio.audioRef.current);
+      }
     }
   }, [radio.station, effectsEnabled]);
   useEffect(() => {
@@ -9464,14 +9955,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       eqConnectSource: eqSrc,
       analyser: an,
     } = handlePlayRef.current;
-    // If effects disabled but old element captured by Web Audio, get fresh element
-    if (!effectsEnabledRef.current && r.audioRef.current && hasAudioSource(r.audioRef.current)) {
-      r.replaceAudio();
-    }
     const audio = r.ensureAudio();
+    // Always connect analyser (proxy always provides CORS headers)
+    an.connectAudio(audio);
     if (effectsEnabledRef.current) {
       eqSrc(audio);
-      an.connectAudio(audio);
     }
     r.play(station);
     rec.add(station);
@@ -9488,18 +9976,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const { radio: r, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
       const station = r.station;
       if (!station || r.status === 'idle') return next;
+      const audio = r.audioRef.current;
       if (next) {
-        // Turning ON: connect Web Audio, replay on proxy
-        const audio = r.ensureAudio();
-        eqSrc(audio);
-        an.connectAudio(audio);
-        r.play(station);
+        // Turning ON: just connect EQ + analyser — stream is already on proxy
+        if (audio) {
+          eqSrc(audio);
+          an.connectAudio(audio);
+        }
       } else {
-        // Turning OFF: disconnect, fresh audio, replay direct
+        // Turning OFF: disconnect EQ — analyser stays connected for background reactivity
         eq.disconnect();
-        an.disconnect();
-        r.replaceAudio();
-        r.play(station);
       }
       return next;
     });
@@ -9798,7 +10284,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
   const isLandingNavigation = !theaterMode;
   const theaterAudioBadges = useMemo(() => {
-    if (!theaterMode || !radio.station) return [] as string[];
+    if (!effectsEnabled || !theaterMode || !radio.station) return [] as string[];
     const badges: string[] = [];
     if (eq.noiseReductionMode !== 'off') badges.push(t('noiseReduction'));
     if (eq.normalizerEnabled) badges.push(t('audioNormalizer'));
@@ -9806,6 +10292,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (eq.enabled && eqPreset) badges.push(t('presetLabel', { name: eqPreset }));
     return badges;
   }, [
+    effectsEnabled,
     eq.enabled,
     eq.noiseReductionMode,
     eq.normalizerEnabled,
@@ -10017,6 +10504,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal />
     </>
   );
+  const devApiConsoleElement =
+    process.env.NODE_ENV === 'development' ? <DevApiConsole /> : null;
   const pulseLogoButton = (
     <button
       onClick={handleGoHome}
@@ -10092,6 +10581,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none"
       >
         {' '}
+        <LiquidGlassSvgFilter />
         {parallaxElement} {/* Single scrollable area — content scrolls behind sticky header */}{' '}
         <div className="h-full overflow-y-auto relative z-10">
           {' '}
@@ -10226,6 +10716,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           {' '}
           <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
+        {devApiConsoleElement}
         {sharedModals}
       </div>
     );
@@ -10239,6 +10730,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         Skip to main content
       </a>
       {' '}
+      <LiquidGlassSvgFilter />
       {parallaxElement}{' '}
       <div className="flex flex-1 min-h-0 relative z-10">
         {' '}
@@ -10436,6 +10928,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           />
         )}
       </AnimatePresence>
+      {devApiConsoleElement}
       {sharedModals}
     </div>
   );

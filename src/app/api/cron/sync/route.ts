@@ -14,7 +14,7 @@ export const maxDuration = 300; // allow up to 5 minutes
 const CRON_SECRET = process.env.CRON_SECRET;
 const _NOOP = () => {};
 
-const BANDSINTOWN_APP_ID = 'pulse-radio';
+const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
 const TIMEOUT_MS = 10_000;
 
 async function safeFetch(url: string): Promise<any | null> {

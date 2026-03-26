@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 
 export const runtime = 'nodejs';
-const BANDSINTOWN_APP_ID = 'pulse-radio';
+const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
 const TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
@@ -37,6 +37,15 @@ export interface ConcertEvent {
   ticketUrl: string | null;
 }
 
+/** Bandsintown requires double-encoding for /, ?, *, " in artist names. */
+function encodeBandsintownArtist(name: string): string {
+  return encodeURIComponent(name)
+    .replace(/%2F/gi, '%252F')
+    .replace(/%3F/gi, '%253F')
+    .replace(/%2A/gi, '%252A')
+    .replace(/%22/gi, '%27C');
+}
+
 function normKey(s: string): string {
   return s
     .normalize('NFKD')
@@ -64,11 +73,29 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const url = `${BANDSINTOWN_BASE}/artists/${encodeURIComponent(artist)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`;
-    const res = await fetch(url, { signal: controller.signal });
+    const encoded = encodeBandsintownArtist(artist);
+
+    // Step 1: Resolve artist to get their canonical ID.
+    const artistUrl = `${BANDSINTOWN_BASE}/artists/${encoded}?app_id=${BANDSINTOWN_APP_ID}`;
+    const artistRes = await fetch(artistUrl, { signal: controller.signal });
+    if (!artistRes.ok) {
+      const body = await artistRes.text().catch(() => '');
+      console.error(`[concerts] artist lookup ${artistRes.status} for "${artist}": ${body.slice(0, 200)}`);
+      return [];
+    }
+    const artistData = await artistRes.json();
+    const artistId: string | number | undefined = artistData?.id;
+
+    // Step 2: Fetch events — prefer by ID so name-encoding edge-cases don't matter.
+    const eventsPath = artistId
+      ? `/artists/id_${artistId}/events`
+      : `/artists/${encoded}/events`;
+    const eventsUrl = `${BANDSINTOWN_BASE}${eventsPath}?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`;
+    const res = await fetch(eventsUrl, { signal: controller.signal });
     clearTimeout(timer);
     if (!res.ok) {
-      await res.text().catch(_NOOP);
+      const body = await res.text().catch(() => '');
+      console.error(`[concerts] events ${res.status} for "${artist}" (id=${artistId}): ${body.slice(0, 200)}`);
       return [];
     }
     const cl = res.headers.get('content-length');

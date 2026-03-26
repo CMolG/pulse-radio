@@ -19,6 +19,7 @@ export const STORAGE_KEYS = {
   USAGE_STATS: 'radio-usage-stats',
   ONBOARDING_DONE: 'radio-onboarding-done',
   EFFECTS_ENABLED: 'radio-effects-enabled',
+  EQ_PRESET_NAME: 'radio-eq-preset-name',
 } as const;
 export const MAX_RECENT = 15;
 export const MAX_HISTORY = 100;
@@ -151,6 +152,8 @@ export type LyricsData = {
   plainText?: string;
   realtimeCapable?: boolean;
   realtimeLanguage?: 'en' | 'es' | null;
+  /** True when trackName/artistName/albumName came from lrclib and differ from the ICY input. */
+  lyricsEnriched?: boolean;
 };
 export type PlaybackStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 export type PlaybackState = {
