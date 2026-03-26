@@ -3049,8 +3049,8 @@ function _uid(): string {
 }
 const _SKELETON_INDICES = [0, 1, 2, 3, 4];
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  trending: <Zap size={14} className="text-amber-400/70" />,
-  local: <MapPin size={14} className="text-emerald-400/70" />,
+  trending: <Zap size={14} className="text-amber-400/70" aria-hidden="true" />,
+  local: <MapPin size={14} className="text-emerald-400/70" aria-hidden="true" />,
 };
 type BrowseViewProps = {
   view: ViewState;
@@ -3559,7 +3559,7 @@ function BrowseView({
                 {favorites && favorites.length > 0 && (
                   <ScrollRow
                     title={t('favorites')}
-                    icon={<Star size={14} className="text-sys-orange/70" />}
+                    icon={<Star size={14} className="text-sys-orange/70" aria-hidden="true" />}
                     isMobile={isMobile}
                   >
                     {renderScrollStations(favorites)}
@@ -3569,7 +3569,7 @@ function BrowseView({
                 {recent && recent.length > 0 && (
                   <ScrollRow
                     title={t('recent')}
-                    icon={<Clock size={14} className="text-blue-400/70" />}
+                    icon={<Clock size={14} className="text-blue-400/70" aria-hidden="true" />}
                     isMobile={isMobile}
                   >
                     {renderScrollStations(recent)}
@@ -5880,49 +5880,49 @@ const GLASS_STYLE: React.CSSProperties = {
 type GuideSection = { icon: React.ReactNode; title: string; content: string };
 const GUIDE_SECTIONS: GuideSection[] = [
   {
-    icon: <IoRadioOutline size={22} className="text-[#3478f6]" />,
+    icon: <IoRadioOutline size={22} className="text-[#3478f6]" aria-hidden="true" />,
     title: 'Listening to Radio',
     content:
       'Browse stations by genre, country or search. Tap any station card to start playing. The visualizer activates automatically with live audio-reactive effects.',
   },
   {
-    icon: <IoSearchOutline size={22} className="text-cyan-400" />,
+    icon: <IoSearchOutline size={22} className="text-cyan-400" aria-hidden="true" />,
     title: 'Search & Discover',
     content:
       'Use the search bar to find stations by name, genre or location. Enable Discovery Mode (lightning icon) to auto-play random stations every 30 seconds.',
   },
   {
-    icon: <IoHeartOutline size={22} className="text-pink-400" />,
+    icon: <IoHeartOutline size={22} className="text-pink-400" aria-hidden="true" />,
     title: 'Favorites',
     content:
       'Tap the star to save stations. Tap the heart to save songs. Filter your favorite songs by artist — songs are grouped in stacks you can expand.',
   },
   {
-    icon: <IoMusicalNotesOutline size={22} className="text-purple-400" />,
+    icon: <IoMusicalNotesOutline size={22} className="text-purple-400" aria-hidden="true" />,
     title: 'Lyrics & Track Info',
     content:
       'Pulse detects the current song and fetches lyrics automatically. Tap on any song in history for detailed info including artist bio and album art.',
   },
   {
-    icon: <IoColorPaletteOutline size={22} className="text-amber-400" />,
+    icon: <IoColorPaletteOutline size={22} className="text-amber-400" aria-hidden="true" />,
     title: 'Theater Mode',
     content:
       'Press T or tap the theater button to enter immersive mode. The Fibonacci spiral visualizer reacts to the music with a CRT retro effect overlay.',
   },
   {
-    icon: <IoStatsChartOutline size={22} className="text-emerald-400" />,
+    icon: <IoStatsChartOutline size={22} className="text-emerald-400" aria-hidden="true" />,
     title: 'Your Statistics',
     content:
       'Pulse tracks your listening: time per station, most played songs, top artists and genres. Your home screen reorders sections based on what you listen to most.',
   },
   {
-    icon: <IoTimerOutline size={22} className="text-orange-400" />,
+    icon: <IoTimerOutline size={22} className="text-orange-400" aria-hidden="true" />,
     title: 'Sleep Timer',
     content:
       'Press Z or use the timer icon to cycle through sleep durations (15, 30, 60, 90 min). Pulse will automatically stop playback when the timer ends.',
   },
   {
-    icon: <IoGlobeOutline size={22} className="text-sky-400" />,
+    icon: <IoGlobeOutline size={22} className="text-sky-400" aria-hidden="true" />,
     title: 'Keyboard Shortcuts',
     content:
       'Space: play/pause • ← →: skip station • ↑ ↓: volume • T: theater • E: equalizer • L: like song • S: star station • F: focus search • ?: show all shortcuts.',
@@ -6128,7 +6128,7 @@ const StatsView = React.memo(function StatsView({
       {topStations.length > 0 && (
         <StatSection
           title="Top Stations"
-          icon={<IoRadioOutline size={16} className="text-amber-400/70" />}
+          icon={<IoRadioOutline size={16} className="text-amber-400/70" aria-hidden="true" />}
         >
           {' '}
           {topStations.slice(0, 5).map((s) => (
@@ -6146,7 +6146,7 @@ const StatsView = React.memo(function StatsView({
       {topSongs.length > 0 && (
         <StatSection
           title="Most Played Songs"
-          icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" />}
+          icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" aria-hidden="true" />}
         >
           {' '}
           {topSongs.slice(0, 5).map((s) => (
@@ -6164,7 +6164,7 @@ const StatsView = React.memo(function StatsView({
       {topArtists.length > 0 && (
         <StatSection
           title="Top Artists"
-          icon={<IoPersonOutline size={16} className="text-purple-400/70" />}
+          icon={<IoPersonOutline size={16} className="text-purple-400/70" aria-hidden="true" />}
         >
           {' '}
           {topArtists.slice(0, 5).map((a) => (
@@ -6182,7 +6182,7 @@ const StatsView = React.memo(function StatsView({
       {topGenres.length > 0 && (
         <StatSection
           title="Top Genres"
-          icon={<IoDiscOutline size={16} className="text-emerald-400/70" />}
+          icon={<IoDiscOutline size={16} className="text-emerald-400/70" aria-hidden="true" />}
         >
           {' '}
           {topGenres.slice(0, 5).map((g) => (
@@ -9779,9 +9779,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </motion.div>
   ) : null;
   const mkNavTabs = (sz: number) => [
-    { id: 'discover' as const, label: t('discover'), icon: <RadioIcon size={sz} /> },
-    { id: 'history' as const, label: t('history'), icon: <Clock size={sz} /> },
-    { id: 'favorites' as const, label: t('favorites'), icon: <Heart size={sz} /> },
+    { id: 'discover' as const, label: t('discover'), icon: <RadioIcon size={sz} aria-hidden="true" /> },
+    { id: 'history' as const, label: t('history'), icon: <Clock size={sz} aria-hidden="true" /> },
+    { id: 'favorites' as const, label: t('favorites'), icon: <Heart size={sz} aria-hidden="true" /> },
   ];
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
