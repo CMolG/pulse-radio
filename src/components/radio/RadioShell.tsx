@@ -2707,6 +2707,24 @@ const SongCard = React.memo(
             stationName: item.stationName,
           })
         }
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.({
+              title: item.title,
+              artist: item.artist,
+              album: item.album,
+              artworkUrl: item.artworkUrl,
+              itunesUrl: item.itunesUrl,
+              durationMs: item.durationMs,
+              genre: item.genre,
+              releaseDate: item.releaseDate,
+              trackNumber: item.trackNumber,
+              trackCount: item.trackCount,
+              stationName: item.stationName,
+            });
+          }
+        }}
       >
         <div className="w-full aspect-square bg-surface-3 relative">
           {item.artworkUrl ? (
@@ -6762,6 +6780,7 @@ function GroupStack({
         <div
           className="relative cursor-pointer"
           onClick={() => setExpanded(true)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(true); } }}
           role="button"
           tabIndex={0}
           aria-label={`Expand ${label} songs`}
