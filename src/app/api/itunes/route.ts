@@ -24,9 +24,11 @@ async function apiFetch(
   }
 }
 import { NextRequest, NextResponse } from 'next/server';
+import { cacheResolve } from '@/lib/services/CacheRepository';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
-const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' };
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 /* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
   req: NextRequest,
 ) {
@@ -38,14 +40,22 @@ const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, stale-while-revali
   const media = isPodcast ? 'podcast' : 'music';
   const entity = isPodcast ? 'podcast' : 'song';
   const limit = isPodcast ? '20' : '3';
+  const cacheKey = `${media}:${term.toLowerCase().trim()}`;
   try {
-    const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
-    const res = await apiFetch(url, {
-      timeoutMs: 8_000,
-      maxBytes: 2 * 1024 * 1024,
-      label: 'iTunes API',
+    const data = await cacheResolve<unknown>({
+      namespace: 'itunes',
+      key: cacheKey,
+      ttlMs: CACHE_TTL_MS,
+      fetcher: async () => {
+        const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
+        const res = await apiFetch(url, {
+          timeoutMs: 8_000,
+          maxBytes: 2 * 1024 * 1024,
+          label: 'iTunes API',
+        });
+        return await res.json();
+      },
     });
-    const data = await res.json();
     return NextResponse.json(data, { headers: _CACHE_HDRS });
   } catch (e) {
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';

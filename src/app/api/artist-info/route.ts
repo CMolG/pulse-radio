@@ -2,6 +2,7 @@
   NextRequest,
   NextResponse,
 } from 'next/server';
+import { cacheResolve } from '@/lib/services/CacheRepository';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -43,53 +44,62 @@ async function fetchWikiSummary(title: string) {
   if (data?.type === 'disambiguation') return null;
   return data;
 }
+
+async function fetchArtistPayload(artist: string) {
+  const [mbResult, wikiResult] = await Promise.allSettled([
+    searchMusicBrainz(artist),
+    fetchWikiSummary(artist),
+  ]);
+  const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
+  let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
+  if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) {
+    const suffixes = mb?.type === 'Person' ? _PERSON_SUFFIXES : _BAND_SUFFIXES;
+    for (const suffix of suffixes) {
+      const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
+      if (attempt?.extract) {
+        wiki = attempt;
+        break;
+      }
+    }
+  }
+  const tags =
+    mb?.tags
+      ?.filter((t: { count: number }) => t.count > 0)
+      ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
+      ?.slice(0, 8)
+      ?.map((t: { name: string }) => t.name) ?? [];
+  return {
+    name: mb?.name ?? artist,
+    disambiguation: mb?.disambiguation ?? null,
+    type: mb?.type ?? null,
+    country: mb?.country ?? null,
+    beginArea: mb?.['begin-area']?.name ?? null,
+    lifeSpan: mb?.['life-span'] ?? null,
+    tags,
+    bio: wiki?.extract ?? null,
+    imageUrl: wiki?.thumbnail?.source ?? null,
+    wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
+  };
+}
+
 export async function GET(req: NextRequest) {
   const artist = req.nextUrl.searchParams.get('artist');
   if (!artist || artist.length > 200) {
     return NextResponse.json(_ERR_400, { status: 400 });
   }
+  const cacheKey = artist.toLowerCase().trim();
   try {
-    const [mbResult, wikiResult] = await Promise.allSettled([
-      searchMusicBrainz(artist),
-      fetchWikiSummary(artist),
-    ]);
-    const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
-    let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
-    if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) {
-      const suffixes = mb?.type === 'Person' ? _PERSON_SUFFIXES : _BAND_SUFFIXES;
-      for (const suffix of suffixes) {
-        const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
-        if (attempt?.extract) {
-          wiki = attempt;
-          break;
-        }
-      }
-    }
-    const tags =
-      mb?.tags
-        ?.filter((t: { count: number }) => t.count > 0)
-        ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
-        ?.slice(0, 8)
-        ?.map((t: { name: string }) => t.name) ?? [];
-    const hasData = !!(mb || wiki?.extract);
+    const payload = await cacheResolve<unknown>({
+      namespace: 'artist-info',
+      key: cacheKey,
+      ttlMs: 24 * 60 * 60 * 1000,
+      fetcher: () => fetchArtistPayload(artist),
+    });
+    const hasData = payload && typeof payload === 'object' && (('bio' in payload && payload.bio) || ('name' in payload));
     const cacheHeader = hasData
-      ? 'public, max-age=86400, stale-while-revalidate=604800'
-      : 'public, max-age=3600, stale-while-revalidate=7200';
-    return NextResponse.json(
-      {
-        name: mb?.name ?? artist,
-        disambiguation: mb?.disambiguation ?? null,
-        type: mb?.type ?? null,
-        country: mb?.country ?? null,
-        beginArea: mb?.['begin-area']?.name ?? null,
-        lifeSpan: mb?.['life-span'] ?? null,
-        tags,
-        bio: wiki?.extract ?? null,
-        imageUrl: wiki?.thumbnail?.source ?? null,
-        wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
-      },
-      { headers: { 'Cache-Control': cacheHeader } },
-    );
+      ? 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800'
+      : 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200';
+    return NextResponse.json(payload, { headers: { 'Cache-Control': cacheHeader } });
   } catch (err) {
     console.error('[Pulse Radio] Artist info fetch error:', err);
     return NextResponse.json(_ERR_500, { status: 500 });

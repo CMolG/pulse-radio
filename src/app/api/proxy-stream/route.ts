@@ -1,4 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest } from 'next/server';
+import { isStationBlacklisted, recordStationFailure, clearStationFailures } from '@/lib/server-cache';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKETS_RE = /^\[|\]$/g;
@@ -41,12 +42,14 @@ const MAX_DURATION_MS = 0;
 const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
 const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
 const _JSON_R5_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '5' } as const;
+const _JSON_BL_HDRS = { 'Content-Type': 'application/json', 'X-Station-Blacklisted': 'true' } as const;
 const _UPSTREAM_HDRS = { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0' } as const;
 const _ERR_MISSING_URL = JSON.stringify({ error: 'Missing or invalid url parameter' });
 const _ERR_INVALID_PROTOCOL = JSON.stringify({ error: 'Invalid protocol' });
 const _ERR_INVALID_URL = JSON.stringify({ error: 'Invalid URL' });
 const _ERR_PRIVATE_IP = JSON.stringify({ error: 'Redirect to private IP not allowed' });
 const _ERR_TIMEOUT = JSON.stringify({ error: 'Stream timed out' });
+const _ERR_BLACKLISTED = JSON.stringify({ error: 'Station temporarily unavailable', blacklisted: true });
 const _NOOP = () => {};
 const _EVT_ONCE = { once: true } as const;
 export async function GET(req: NextRequest) {
@@ -70,6 +73,13 @@ export async function GET(req: NextRequest) {
     return new Response(_ERR_INVALID_URL, {
       status: 400,
       headers: _JSON_HDRS,
+    });
+  }
+  // Blacklist check: reject immediately if station has repeated failures
+  if (isStationBlacklisted(streamUrl)) {
+    return new Response(_ERR_BLACKLISTED, {
+      status: 503,
+      headers: _JSON_BL_HDRS,
     });
   }
   const controller = new AbortController();
@@ -100,11 +110,14 @@ export async function GET(req: NextRequest) {
     if (!upstream.ok || !upstream.body) {
       if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(_NOOP);
+      recordStationFailure(streamUrl);
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: _JSON_R3_HDRS,
       });
     }
+    // Successful connection — clear any previous failure count
+    clearStationFailures(streamUrl);
     const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
     const icyBr = upstream.headers.get('icy-br');
     const icyName = upstream.headers.get('icy-name');
@@ -126,11 +139,13 @@ export async function GET(req: NextRequest) {
     if (timeout) clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) {
+      recordStationFailure(streamUrl);
       return new Response(_ERR_TIMEOUT, {
         status: 504,
         headers: _JSON_HDRS,
       });
     }
+    recordStationFailure(streamUrl);
     const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 502,

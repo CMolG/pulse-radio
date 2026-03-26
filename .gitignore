@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/flows/
 
 # testing
 /coverage
@@ -39,10 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/program.md
-/auto-refiner.md
-/auto-reducer.md
-/auto-optimizer.md
 /.idea/
 /.superpowers/
 /verify-lyrics-ui.mjs
@@ -53,3 +50,6 @@ next-env.d.ts
 # Playwright
 test-results/
 playwright-report/
+
+# SQLite cache database
+.data/

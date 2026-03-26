@@ -7,7 +7,7 @@ const MAX_AMPLITUDE = 0.35;
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
-function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amplitude: number } {
+function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean, analyserActive?: boolean): { amplitude: number } {
   const [amplitude, setAmplitude] = useState(0);
   const valueRef = useRef(0);
   const lastPublishedRef = useRef(0);
@@ -19,9 +19,19 @@ function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amp
       lastTsRef.current = ts;
       const dtSec = Math.max(0.001, (ts - lastTs) / 1000);
       const meter = meterRef.current;
-      const rms = enabled && meter ? clamp01(meter.rms) : 0;
-      const peak = enabled && meter ? clamp01(meter.peak) : 0;
-      const target = Math.min(MAX_AMPLITUDE, rms * 0.85 + peak * 0.15);
+      const hasRealData = analyserActive && meter && (meter.rms > 0 || meter.peak > 0);
+      let target: number;
+      if (enabled && hasRealData) {
+        const rms = clamp01(meter.rms);
+        const peak = clamp01(meter.peak);
+        target = Math.min(MAX_AMPLITUDE, rms * 0.85 + peak * 0.15);
+      } else if (enabled && !analyserActive) {
+        // Synthesize a gentle ambient pulse when playing without analyser
+        const pulse = 0.12 + 0.06 * Math.sin(ts / 800) + 0.03 * Math.sin(ts / 1300);
+        target = Math.min(MAX_AMPLITUDE, pulse);
+      } else {
+        target = 0;
+      }
       const attack = 1 - Math.exp(-dtSec / (ATTACK_MS / 1000));
       const release = 1 - Math.exp(-dtSec / (RELEASE_MS / 1000));
       const alpha = target > valueRef.current ? attack : release;
@@ -37,7 +47,7 @@ function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean): { amp
       cancelAnimationFrame(rafRef.current);
       lastTsRef.current = 0;
     };
-  }, [enabled, meterRef]);
+  }, [enabled, meterRef, analyserActive]);
   return { amplitude };
 }
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ ('use client');
@@ -85,7 +95,186 @@ const usePlaybackStore = create<PlaybackState>((set) => ({
       artworkUrl: null,
     }),
 }));
-('use client');
+
+/* ── Dev API Console (development only) ── */
+type ApiLogEntry = {
+  id: number;
+  ts: number;
+  kind: 'request' | 'response' | 'error';
+  method: string;
+  url: string;
+  status?: number;
+  durationMs?: number;
+  requestPreview?: string;
+  responsePreview?: string;
+  error?: string;
+};
+type ApiLogStore = {
+  entries: ApiLogEntry[];
+  push: (e: Omit<ApiLogEntry, 'id'>) => void;
+  clear: () => void;
+};
+let _apiLogId = 0;
+const _DEV_API_PATTERNS = ['/api/icy-meta', '/api/itunes', '/api/lyrics', '/api/concerts', '/api/artist-info', 'lrclib.net'];
+const _DEV_API_NOISE_QUERY_KEYS = new Set(['_ts', 'ts', 't', '_']);
+function normalizeDevApiUrl(rawUrl: string): string {
+  try {
+    const parsed = new URL(
+      rawUrl,
+      typeof window === 'undefined' ? 'http://localhost' : window.location.origin,
+    );
+    const stableParams = new URLSearchParams();
+    const sorted = [...parsed.searchParams.entries()]
+      .filter(([key]) => !_DEV_API_NOISE_QUERY_KEYS.has(key))
+      .sort(([a], [b]) => a.localeCompare(b));
+    for (const [key, value] of sorted) stableParams.append(key, value);
+    const qs = stableParams.toString();
+    const sameOrigin = typeof window !== 'undefined' && parsed.origin === window.location.origin;
+    const prefix = sameOrigin ? '' : parsed.origin;
+    return `${prefix}${parsed.pathname}${qs ? `?${qs}` : ''}`;
+  } catch {
+    return rawUrl;
+  }
+}
+function isTrackedDevApiUrl(rawUrl: string): boolean {
+  const normalized = normalizeDevApiUrl(rawUrl);
+  return _DEV_API_PATTERNS.some((p) => rawUrl.includes(p) || normalized.includes(p));
+}
+function isIcyMetaUrl(url: string): boolean {
+  return url.includes('/api/icy-meta');
+}
+function buildIcyDedupeKey(entry: Omit<ApiLogEntry, 'id'>): string {
+  const url = normalizeDevApiUrl(entry.url);
+  const method = entry.method.toUpperCase();
+  if (entry.kind === 'request') return `${entry.kind}|${method}|${url}|${entry.requestPreview ?? ''}`;
+  if (entry.kind === 'response')
+    return `${entry.kind}|${method}|${url}|${entry.status ?? ''}|${entry.responsePreview ?? ''}`;
+  return `${entry.kind}|${method}|${url}|${entry.status ?? ''}|${entry.error ?? ''}`;
+}
+const useApiLogStore = create<ApiLogStore>((set) => ({
+  entries: [],
+  push: (e) =>
+    set((s) => {
+      if (isIcyMetaUrl(e.url)) {
+        const lastIcy = [...s.entries].reverse().find((entry) => isIcyMetaUrl(entry.url) && entry.kind === e.kind);
+        if (lastIcy && buildIcyDedupeKey(lastIcy) === buildIcyDedupeKey(e)) return s;
+      }
+      return {
+        entries: [...s.entries.slice(-149), { ...e, id: ++_apiLogId }],
+      };
+    }),
+  clear: () => set({ entries: [] }),
+}));
+let _devFetchPatched = false;
+function installDevFetchLogger() {
+  if (_devFetchPatched || typeof window === 'undefined') return;
+  if (process.env.NODE_ENV !== 'development') return;
+  _devFetchPatched = true;
+  const origFetch = window.fetch.bind(window);
+  window.fetch = async function devFetch(input: RequestInfo | URL, init?: RequestInit) {
+    const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    const url = normalizeDevApiUrl(rawUrl);
+    const matches = isTrackedDevApiUrl(rawUrl);
+    if (!matches) return origFetch(input, init);
+    const method =
+      (init?.method ??
+        (typeof Request !== 'undefined' && input instanceof Request ? input.method : undefined) ??
+        'GET').toUpperCase();
+    const requestPreview = init?.body
+      ? String(init.body).slice(0, 200)
+      : url.length > 240
+        ? `${url.slice(0, 240)}…`
+        : url;
+    useApiLogStore.getState().push({
+      ts: Date.now(),
+      kind: 'request',
+      method,
+      url,
+      requestPreview,
+    });
+    const t0 = performance.now();
+    try {
+      const res = await origFetch(input, init);
+      const durationMs = Math.round(performance.now() - t0);
+      let responsePreview = '';
+      try {
+        const clone = res.clone();
+        const text = await clone.text();
+        responsePreview = text.length > 200 ? text.slice(0, 200) + '…' : text;
+      } catch { /* ignore */ }
+      useApiLogStore.getState().push({
+        ts: Date.now(),
+        kind: 'response',
+        method,
+        url,
+        status: res.status,
+        durationMs,
+        responsePreview,
+      });
+      return res;
+    } catch (err) {
+      const durationMs = Math.round(performance.now() - t0);
+      useApiLogStore.getState().push({
+        ts: Date.now(),
+        kind: 'error',
+        method,
+        url,
+        durationMs,
+        error: String(err),
+      });
+      throw err;
+    }
+  } as typeof window.fetch;
+}
+
+/* ── Liquid Glass SVG Filter (rendered once via portal-free technique) ── */
+const LiquidGlassSvgFilter = React.memo(function LiquidGlassSvgFilter() {
+  return (
+    <svg style={{ position: 'fixed', width: 0, height: 0, pointerEvents: 'none' }} aria-hidden="true">
+      <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+        <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
+        <feComponentTransfer in="turbulence" result="mapped">
+          <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
+          <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
+          <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
+        </feComponentTransfer>
+        <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
+        <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lightingColor="white" result="specLight">
+          <fePointLight x="-200" y="-200" z="300" />
+        </feSpecularLighting>
+        <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
+        <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+  );
+});
+
+type LiquidGlassButtonProps = {
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  'aria-label'?: string;
+  'aria-pressed'?: boolean;
+  className?: string;
+  children: React.ReactNode;
+};
+const LiquidGlassButton = React.memo(function LiquidGlassButton({ onClick, disabled, className = '', children, ...rest }: LiquidGlassButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`liquid-glass rounded-full ${className}`}
+      {...rest}
+    >
+      <div className="liquid-glass-effect rounded-full" />
+      <div className="liquid-glass-tint rounded-full" />
+      <div className="liquid-glass-shine rounded-full" />
+      <div className="liquid-glass-content">
+        {children}
+      </div>
+    </button>
+  );
+});
+
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -129,6 +318,7 @@ import {
   MapPin,
   Music2,
   ScanSearch,
+  Share2,
 } from 'lucide-react';
 import type {
   Station,
@@ -179,6 +369,7 @@ import {
   IoGlobeOutline,
   IoChevronBack,
 } from 'react-icons/io5';
+import { MdAutoAwesome } from 'react-icons/md';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ErrorBoundary } from '@/components/radio/components/ErrorBoundary';
@@ -299,6 +490,12 @@ function stationInitials(name: string) {
 function primaryArtist(artist: string): string {
   const i = artist.search(ARTIST_SPLIT_RE);
   return (i < 0 ? artist : artist.slice(0, i)).trim();
+}
+/** Strip feat./ft./featuring suffixes from a track title, e.g. "Title (feat. X)" → "Title" */
+const _FEAT_PARENS_RE = /\s*[\(\[](feat|ft|featuring)\.?\s+[^\)\]]*[\)\]]/gi;
+const _FEAT_BARE_RE = /\s+(feat|ft|featuring)\.?\s+.*/i;
+function cleanFeatFromTitle(title: string): string {
+  return title.replace(_FEAT_PARENS_RE, '').replace(_FEAT_BARE_RE, '').trim();
 }
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -502,7 +699,12 @@ type PaintFn = (
   h: number,
   freqData: Uint8Array | null,
 ) => void;
-/** Shared RAF-driven canvas loop with DPR-aware sizing. */ function useCanvasLoop(
+/** Returns true on touch-capable devices (mobile/tablet). Used to throttle canvas FPS. */
+const _isTouchDevice =
+  typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+/** Shared RAF-driven canvas loop with DPR-aware sizing.
+ *  Pauses when document is hidden; throttles to ~30fps on touch devices. */
+function useCanvasLoop(
   frequencyDataRef: React.RefObject<Uint8Array | null> | undefined,
   paint: PaintFn,
   dprScale = 1,
@@ -512,6 +714,9 @@ type PaintFn = (
   const paintRef = useRef(paint);
   const freqRef = useRef(frequencyDataRef);
   const sizeRef = useRef({ w: 0, h: 0 });
+  const lastPaintRef = useRef(0);
+  // ~30fps on mobile (33ms), uncapped on desktop
+  const minFrameMs = _isTouchDevice ? 33 : 0;
   useEffect(() => {
     paintRef.current = paint;
   });
@@ -532,26 +737,28 @@ type PaintFn = (
     return () => ro.disconnect();
   }, [dprScale]);
   useEffect(() => {
-    const loop = () => {
+    const loop = (now: number) => {
+      frameRef.current = requestAnimationFrame(loop);
+      // Pause rendering when tab/PWA is hidden
+      if (document.hidden) return;
+      // Throttle to target FPS on mobile
+      if (minFrameMs > 0 && now - lastPaintRef.current < minFrameMs) return;
+      lastPaintRef.current = now;
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       const { w, h } = sizeRef.current;
-      if (w < 1 || h < 1) {
-        frameRef.current = requestAnimationFrame(loop);
-        return;
-      }
+      if (w < 1 || h < 1) return;
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
       }
       paintRef.current(ctx, w, h, freqRef.current?.current ?? null);
-      frameRef.current = requestAnimationFrame(loop);
     };
     frameRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameRef.current);
-  }, [dprScale]);
+  }, [dprScale, minFrameMs]);
   return canvasRef;
 }
 const FETCH_TIMEOUT = 8_000;
@@ -642,8 +849,8 @@ function selectBestItunesResult(
   requestedArtist: string | null,
 ): ItunesResult | null {
   if (!results.length) return null;
-  const normalizedRequestedTitle = normalizeText(requestedTitle);
-  const normalizedRequestedArtist = normalizeText(requestedArtist);
+  const normalizedRequestedTitle = normalizeText(cleanFeatFromTitle(requestedTitle));
+  const normalizedRequestedArtist = normalizeText(requestedArtist ? primaryArtist(requestedArtist) : '');
   if (!normalizedRequestedTitle) return null;
   const normTitles = new Array<string>(results.length);
   const normArtists = new Array<string>(results.length);
@@ -732,7 +939,9 @@ function useAlbumArt(title: string | null, artist: string | null) {
     const controller = new AbortController();
     abortRef.current = controller;
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-    const term = artist ? `${artist} ${title}` : title;
+    const cleanArtist = artist ? primaryArtist(artist) : '';
+    const cleanTitle = cleanFeatFromTitle(title);
+    const term = cleanArtist ? `${cleanArtist} ${cleanTitle}` : cleanTitle;
     fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -794,6 +1003,42 @@ function useAlbumArt(title: string | null, artist: string | null) {
       isLoading,
     ],
   );
+}
+// ---------------------------------------------------------------------------
+// useConcerts — fetch upcoming concerts for the current artist via Bandsintown
+// ---------------------------------------------------------------------------
+interface ConcertEvent {
+  id: string;
+  date: string;
+  venue: string;
+  city: string;
+  country: string;
+  lineup: string[];
+  ticketUrl: string | null;
+}
+const _concertsCache = new LRU<ConcertEvent[]>(64);
+function useConcerts(artist: string | null | undefined, enabled: boolean) {
+  const [concerts, setConcerts] = useState<ConcertEvent[]>([]);
+  const [loading, setLoading] = useState(false);
+  const key = artist ? primaryArtist(artist).toLowerCase().trim() : null;
+  useEffect(() => {
+    if (!enabled || !key) { setConcerts([]); return; }
+    const cached = _concertsCache.get(key);
+    if (cached) { setConcerts(cached); return; }
+    const controller = new AbortController();
+    setLoading(true);
+    fetch(`/api/concerts?artist=${encodeURIComponent(key)}`, { signal: controller.signal })
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: ConcertEvent[]) => {
+        const list = Array.isArray(data) ? data : [];
+        _concertsCache.set(key, list);
+        setConcerts(list);
+      })
+      .catch(() => { /* silently ignore */ })
+      .finally(() => setLoading(false));
+    return () => controller.abort();
+  }, [key, enabled]);
+  return { concerts, loading };
 }
 const SERVERS = [
   'https://de1.api.radio-browser.info/json',
@@ -1142,7 +1387,7 @@ const AD_PATTERNS = [
   /\b(www\.)/i,
 ];
 const STATION_META_FETCH_TIMEOUT_MS = 10_000;
-const POLL_INTERVAL_MS = 5_000;
+const POLL_INTERVAL_MS = 10_000;
 const MAX_TITLE_LENGTH = 500;
 const _adCache = new LRU<boolean>(256);
 function isAdContent(text: string): boolean {
@@ -1155,7 +1400,7 @@ function isAdContent(text: string): boolean {
 async function fetchIcyMeta(
   streamUrl: string,
   signal?: AbortSignal,
-): Promise<{ streamTitle: string | null; icyBr: string | null }> {
+): Promise<{ streamTitle: string | null; icyBr: string | null; blacklisted?: boolean }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), STATION_META_FETCH_TIMEOUT_MS);
   if (signal) {
@@ -1178,6 +1423,11 @@ async function fetchIcyMeta(
     const res = await fetch(`/api/icy-meta?url=${encodeURIComponent(streamUrl)}`, {
       signal: controller.signal,
     });
+    if (res.status === 503) {
+      const data = await res.json().catch(() => ({}));
+      if (data?.blacklisted) return { streamTitle: null, icyBr: null, blacklisted: true };
+      return { streamTitle: null, icyBr: null };
+    }
     if (!res.ok) return { streamTitle: null, icyBr: null };
     const data = await res.json();
     return { streamTitle: data.streamTitle ?? null, icyBr: data.icyBr ?? null };
@@ -1209,6 +1459,7 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
   const [track, setTrack] = useState<NowPlayingTrack | null>(null);
   const [icyBitrate, setIcyBitrate] = useState<string | null>(null);
   const [streamCodec, setStreamCodec] = useState<string | null>(null);
+  const [stationBlacklisted, setStationBlacklisted] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastTitleRef = useRef<string>('');
   const prevStationUrlRef = useRef<string | null>(null);
@@ -1230,6 +1481,7 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (!station) {
       lastTitleRef.current = '';
       prevStationUrlRef.current = null;
+      setStationBlacklisted(false);
       return;
     }
     const stationChanged = station.url_resolved !== prevStationUrlRef.current;
@@ -1240,11 +1492,16 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     const abortController = new AbortController();
     const poll = async () => {
       if (abortController.signal.aborted || document.hidden) return;
-      const { streamTitle, icyBr } = await fetchIcyMeta(
+      const { streamTitle, icyBr, blacklisted } = await fetchIcyMeta(
         station.url_resolved,
         abortController.signal,
       );
       if (abortController.signal.aborted) return;
+      if (blacklisted) {
+        setStationBlacklisted(true);
+        return;
+      }
+      setStationBlacklisted(false);
       if (icyBr) setIcyBitrate(icyBr);
       if (station.codec) {
         const c = station.codec.toUpperCase();
@@ -1285,6 +1542,7 @@ function useStationMeta(station: Station | null, isPlaying: boolean) {
     track: station ? track : null,
     icyBitrate: station ? icyBitrate : null,
     streamCodec: station ? streamCodec : null,
+    stationBlacklisted,
   };
 }
 /** Route a stream URL through our CORS proxy so Web Audio API can access it */ function proxyUrl(
@@ -1316,7 +1574,7 @@ function isIOSDevice(): boolean {
 }
 type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 type StreamLatency = { url: string; latencyMs: number; timestamp: number };
-function useRadio() {
+function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -1331,7 +1589,7 @@ function useRadio() {
   const isReconnectingRef = useRef(false);
   const srcChangingRef = useRef(false);
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [preferDirectStream] = useState(() => isIOSDevice());
+  const [audioGen, setAudioGen] = useState(0);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() =>
@@ -1399,29 +1657,21 @@ function useRadio() {
   }, []);
   const startPlayback = useCallback(
     (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void) => {
-      const webAudioConnected = hasAudioSource(audio);
-      const shouldUseProxy =
-        !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected;
-      const setSourceAndPlay = (useProxy: boolean) => {
+      // Always use server proxy to avoid stream interruptions when toggling effects
+      const setSourceAndPlay = () => {
         srcChangingRef.current = true;
-        audio.crossOrigin = useProxy ? 'anonymous' : null;
-        audio.src = useProxy ? proxyUrl(streamUrl) : streamUrl;
+        audio.crossOrigin = 'anonymous';
+        audio.src = proxyUrl(streamUrl);
         Promise.resolve().then(() => {
           srcChangingRef.current = false;
         });
         return audio.play();
       };
-      setSourceAndPlay(shouldUseProxy).catch((err) => {
-        if (!shouldUseProxy && preferDirectStream && !isAutoplayBlocked(err)) {
-          if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
-          proxyFallbackUrlsRef.current.add(streamUrl);
-          setSourceAndPlay(true).catch(onRejected);
-          return;
-        }
+      setSourceAndPlay().catch((err) => {
         onRejected(err);
       });
     },
-    [preferDirectStream],
+    [],
   );
   useEffect(() => {
     const audio = getAudio();
@@ -1503,20 +1753,14 @@ function useRadio() {
         if (station && !codecFallbackTriedRef.current.has(station.url_resolved)) {
           if (codecFallbackTriedRef.current.size >= 200) codecFallbackTriedRef.current.clear();
           codecFallbackTriedRef.current.add(station.url_resolved);
-          const isCurrentlyProxied = audio.src.startsWith(
-            window.location.origin + '/api/proxy-stream',
-          );
-          const setSourceAndPlay = (useProxy: boolean) => {
-            srcChangingRef.current = true;
-            audio.crossOrigin = useProxy ? 'anonymous' : null;
-            audio.src = useProxy ? proxyUrl(station.url_resolved) : station.url_resolved;
-            Promise.resolve().then(() => {
-              srcChangingRef.current = false;
-            });
-            return audio.play();
-          };
+          srcChangingRef.current = true;
+          audio.crossOrigin = 'anonymous';
+          audio.src = proxyUrl(station.url_resolved);
+          Promise.resolve().then(() => {
+            srcChangingRef.current = false;
+          });
           setStatus('loading');
-          setSourceAndPlay(!isCurrentlyProxied).catch((fallbackErr) => {
+          audio.play().catch((fallbackErr) => {
             if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return;
             setStatus('error');
           });
@@ -1666,7 +1910,7 @@ function useRadio() {
       clearTimer(bufferCheckRef);
       pairs.forEach(([t, e, h]) => t.removeEventListener(e, h));
     };
-  }, [station, getAudio, startPlayback, handlePlayRejected]);
+  }, [station, getAudio, startPlayback, handlePlayRejected, audioGen]);
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
@@ -1792,6 +2036,16 @@ function useRadio() {
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
   const ensureAudio = useCallback(() => getAudio(), [getAudio]);
+  const replaceAudio = useCallback(() => {
+    const old = audioRef.current;
+    if (old) {
+      old.pause();
+      old.src = '';
+      old.removeAttribute('src');
+    }
+    audioRef.current = null;
+    setAudioGen((g) => g + 1);
+  }, []);
   return {
     station,
     status,
@@ -1801,6 +2055,7 @@ function useRadio() {
     streamQuality,
     audioRef,
     ensureAudio,
+    replaceAudio,
     play,
     pause,
     resume,
@@ -2395,7 +2650,11 @@ async function fetchLyricsApi(
   const a1 = artist?.trim();
   const a2 = fallbackArtist?.trim();
   const artistCandidates: string[] = [];
-  if (a1) artistCandidates.push(a1);
+  if (a1) {
+    artistCandidates.push(a1);
+    const primary = primaryArtist(a1);
+    if (primary && primary !== a1) artistCandidates.push(primary);
+  }
   if (a2 && a2 !== a1) artistCandidates.push(a2);
   if (!artistCandidates.length || !title?.trim()) return null;
   for (const artistCandidate of artistCandidates) {
@@ -2430,33 +2689,42 @@ async function fetchLyricsForArtist(
   duration?: number,
   signal?: AbortSignal,
 ): Promise<LyricsData | null> {
-  const params = new URLSearchParams({ artist_name: artist, track_name: title });
-  if (album) params.set('album_name', album);
+  const cleanTitle = cleanFeatFromTitle(title);
+  const params = new URLSearchParams({ artist, title: cleanTitle });
+  if (album) params.set('album', album);
   if (duration) params.set('duration', `${Math.round(duration)}`);
-  const exact = await tryFetch<LrcLibResponse>(`${LRCLIB_BASE}/get?${params}`, signal, (d) =>
-    transform(d, artist, title),
-  );
-  if (exact) return exact;
-  if (signal?.aborted) return null;
-  return tryFetch<LrcLibResponse[]>(
-    `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+  return tryFetch<LrcLibResponse>(
+    `/api/lyrics?${params}`,
     signal,
-    (r) => (r.length > 0 ? transform(r[0], artist, title) : null),
+    (d) => (d && (d.syncedLyrics || d.plainLyrics) ? transform(d, artist, title) : null),
   );
 }
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
+  const resolvedTrack = data.trackName || title;
+  const resolvedArtist = data.artistName || artist;
+  const resolvedAlbum = data.albumName || undefined;
+  const resolvedDuration = data.duration || undefined;
+  const lyricsEnriched =
+    !!(data.artistName && data.artistName !== artist) ||
+    !!(data.trackName && data.trackName !== title);
   if (data.syncedLyrics) {
     return {
-      trackName: title,
-      artistName: artist,
+      trackName: resolvedTrack,
+      artistName: resolvedArtist,
+      albumName: resolvedAlbum,
+      duration: resolvedDuration,
+      lyricsEnriched,
       synced: true,
       lines: parseLrc(data.syncedLyrics),
     };
   }
   if (data.plainLyrics) {
     return {
-      trackName: title,
-      artistName: artist,
+      trackName: resolvedTrack,
+      artistName: resolvedArtist,
+      albumName: resolvedAlbum,
+      duration: resolvedDuration,
+      lyricsEnriched,
       synced: false,
       lines: [],
       plainText: data.plainLyrics,
@@ -2621,7 +2889,7 @@ const SongCard = React.memo(
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: Math.min(delay * 0.03, 0.5) }}
-        className="group bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
+        className="group h-full flex flex-col bg-surface-2 rounded-xl border border-border-default overflow-hidden hover:bg-surface-3 transition-colors cursor-pointer"
         role="button"
         tabIndex={0}
         aria-label={`${item.title} by ${item.artist}`}
@@ -2640,6 +2908,24 @@ const SongCard = React.memo(
             stationName: item.stationName,
           })
         }
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.({
+              title: item.title,
+              artist: item.artist,
+              album: item.album,
+              artworkUrl: item.artworkUrl,
+              itunesUrl: item.itunesUrl,
+              durationMs: item.durationMs,
+              genre: item.genre,
+              releaseDate: item.releaseDate,
+              trackNumber: item.trackNumber,
+              trackCount: item.trackCount,
+              stationName: item.stationName,
+            });
+          }
+        }}
       >
         <div className="w-full aspect-square bg-surface-3 relative">
           {item.artworkUrl ? (
@@ -2662,7 +2948,7 @@ const SongCard = React.memo(
                 heart.onClick();
               }}
               aria-label={heart.label}
-              className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? 'bg-pink-500/20 text-pink-400' : 'bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400'}`}
+              className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? 'bg-pink-500/20 text-pink-400' : 'bg-black/50 text-white/50 opacity-0 group-hover:opacity-100 hover:text-pink-400'}`}
             >
               <Heart size={12} className={heart.filled ? 'fill-pink-400' : ''} />
             </button>
@@ -2679,13 +2965,27 @@ const SongCard = React.memo(
               <Trash2 size={12} />
             </button>
           )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              shareContent({
+                title: `${item.title} — ${item.artist}`,
+                text: `🎵 ${item.title} by ${item.artist} on Pulse Radio`,
+                url: typeof window !== 'undefined' ? window.location.href : '',
+              });
+            }}
+            aria-label="Share"
+            className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/50 text-white/60 hover:text-white opacity-0 group-hover:opacity-100 transition-all"
+          >
+            <Share2 size={12} />
+          </button>
         </div>{' '}
-        <div className="p-3 space-y-0.5">
+        <div className="p-3 space-y-0.5 flex-1">
           <p className="text-[13px] font-medium text-white line-clamp-1">{item.title}</p>{' '}
           <p className="text-[12px] text-secondary line-clamp-1">{item.artist}</p>{' '}
-          {item.album && <p className="text-[11px] text-dim line-clamp-1">{item.album}</p>}{' '}
+          {item.album && <p className="text-[12px] text-dim line-clamp-1">{item.album}</p>}{' '}
           {(item.genre || item.durationMs) && (
-            <p className="text-[10px] text-dim line-clamp-1 flex items-center gap-1">
+            <p className="text-[12px] text-dim line-clamp-1 flex items-center gap-1">
               {' '}
               {item.genre && <span>{item.genre}</span>}{' '}
               {item.durationMs && (
@@ -2698,13 +2998,13 @@ const SongCard = React.memo(
             </p>
           )}
         </div>{' '}
-        <div className="px-3 pb-2.5 space-y-1.5">
+        <div className="px-3 pb-2.5 space-y-1.5 mt-auto">
           <a
             href={item.itunesUrl || itunesSearchUrl(item.title, item.artist)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] font-medium text-white/60 hover:text-white/80 transition-colors"
+            className="flex items-center justify-center gap-1.5 w-full px-2 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
           >
             <ExternalLink size={10} />
             Listen on Apple Music
@@ -2712,8 +3012,8 @@ const SongCard = React.memo(
           <div className="flex items-center gap-1.5">
             {' '}
             <RadioIcon size={9} className="text-dim flex-shrink-0" />{' '}
-            <p className="text-[10px] text-dim truncate flex-1">{item.stationName}</p>{' '}
-            <span className="text-[10px] text-dim">{formatTimeAgo(item.timestamp)}</span>
+            <p className="text-[12px] text-dim truncate flex-1">{item.stationName}</p>{' '}
+            <span className="text-[12px] text-dim">{formatTimeAgo(item.timestamp)}</span>
           </div>
         </div>
       </motion.div>
@@ -2864,7 +3164,7 @@ const StationCard = React.memo(
             }}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={isFavorite}
-            className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50'}`}
+            className={`absolute top-1.5 right-1.5 p-2 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50'}`}
           >
             <Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} />
           </button>{' '}
@@ -2878,7 +3178,7 @@ const StationCard = React.memo(
         {/* Tags / Country / Format */}{' '}
         <div className="flex-row-1 mt-1 flex-wrap">
           {station.codec && (
-            <span className="pad-xs bg-surface-3 text-[9px] font-mono text-secondary uppercase flex-shrink-0">
+            <span className="pad-xs bg-surface-3 text-[12px] font-mono text-secondary uppercase flex-shrink-0">
               {' '}
               {station.codec}
               {station.bitrate > 0 ? ` ${station.bitrate}k` : ''}
@@ -2887,13 +3187,13 @@ const StationCard = React.memo(
           {tags.map((tag) => (
             <span
               key={tag}
-              className="pad-xs-full bg-surface-2 text-[9px] text-secondary truncate max-w-[80px]"
+              className="pad-xs-full bg-surface-2 text-[12px] text-secondary truncate max-w-[80px]"
             >
               {tag}
             </span>
           ))}{' '}
           {station.countrycode && (
-            <span className="text-[10px] text-dim leading-none">
+            <span className="text-[12px] text-dim leading-none">
               {countryFlag(station.countrycode)}
             </span>
           )}
@@ -2902,8 +3202,8 @@ const StationCard = React.memo(
         {liveStatus === 'loading' && (
           <div className="flex items-center gap-1 mt-1.5">
             {' '}
-            <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />{' '}
-            <span className="text-[9px] text-dim">Checking…</span>
+            <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" aria-hidden="true" />{' '}
+            <span className="text-[12px] text-dim" role="status">Checking…</span>
           </div>
         )}{' '}
         {liveStatus === 'loaded' && (
@@ -2912,13 +3212,13 @@ const StationCard = React.memo(
             {liveTrack ? (
               <>
                 <Music2 size={9} className="text-sys-orange flex-shrink-0" />{' '}
-                <span className="text-[9px] text-white/60 truncate leading-tight">
+                <span className="text-[12px] text-white/60 truncate leading-tight">
                   {' '}
                   {liveTrack.artist ? `${liveTrack.artist} – ${liveTrack.title}` : liveTrack.title}
                 </span>
               </>
             ) : (
-              <span className="text-[9px] text-white/20">No track info</span>
+              <span className="text-[12px] text-white/50">No track info</span>
             )}
           </div>
         )}{' '}
@@ -2928,7 +3228,7 @@ const StationCard = React.memo(
               e.stopPropagation();
               onPeek();
             }}
-            className="flex items-center gap-1 mt-1.5 text-[9px] text-dim hover:text-white/50 transition-colors"
+            className="flex items-center gap-1 mt-1.5 text-[12px] text-dim hover:text-white/50 transition-colors"
           >
             {' '}
             <Music2 size={9} /> Check track
@@ -2982,8 +3282,8 @@ function _uid(): string {
 }
 const _SKELETON_INDICES = [0, 1, 2, 3, 4];
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  trending: <Zap size={14} className="text-amber-400/70" />,
-  local: <MapPin size={14} className="text-emerald-400/70" />,
+  trending: <Zap size={14} className="text-amber-400/70" aria-hidden="true" />,
+  local: <MapPin size={14} className="text-emerald-400/70" aria-hidden="true" />,
 };
 type BrowseViewProps = {
   view: ViewState;
@@ -3056,7 +3356,7 @@ function ScrollRow({
             <div className="flex gap-1">
               <button
                 onClick={() => scroll(-1)}
-                className={`p-1 rounded-md transition-colors ${canLeft ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/10 cursor-default'}`}
+                className={`p-2 rounded-md transition-colors ${canLeft ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
                 disabled={!canLeft}
                 aria-label="Scroll left"
               >
@@ -3064,7 +3364,7 @@ function ScrollRow({
               </button>
               <button
                 onClick={() => scroll(1)}
-                className={`p-1 rounded-md transition-colors ${canRight ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/10 cursor-default'}`}
+                className={`p-2 rounded-md transition-colors ${canRight ? 'text-secondary hover:text-white hover:bg-surface-3' : 'text-white/35 cursor-default'}`}
                 disabled={!canRight}
                 aria-label="Scroll right"
               >
@@ -3074,7 +3374,7 @@ function ScrollRow({
           )}
         </div>
       )}{' '}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')}>
+      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')} role="region" aria-roledescription="carousel" aria-label={title ?? 'Station carousel'} tabIndex={0}>
         {children}
       </div>
     </div>
@@ -3148,8 +3448,7 @@ function BrowseView({
   const [songFilter, setSongFilter] = useState('');
   const songFilterTrimmed = useMemo(() => songFilter.trim(), [songFilter]);
   const scanGenRef = useRef(0);
-  const [genreChipsExpanded, setGenreChipsExpanded] = useState(false);
-  const [countryChipsExpanded, setCountryChipsExpanded] = useState(false);
+
   const loadCategory = useCallback(
     async (catId: string, flags?: { cancelled: boolean }) => {
       const cat = categoryById.get(catId);
@@ -3378,7 +3677,7 @@ function BrowseView({
         </div>
         <button
           onClick={() => setDiscoveryMode((d) => !d)}
-          className={`flex-row-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${discoveryMode ? 'bg-sys-purple/20 text-sys-purple border border-sys-purple/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
+          className={`flex-row-1.5 px-3 py-2 rounded-full text-[12px] font-medium transition-colors ${discoveryMode ? 'bg-sys-purple/20 text-sys-purple border border-sys-purple/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
           title={t('discoveryModeTitle')}
           aria-pressed={discoveryMode}
           aria-label={t('discoveryModeAria')}
@@ -3387,18 +3686,16 @@ function BrowseView({
           {discoveryMode ? ` ${t('discoveryOn')}` : ''}
         </button>
       </div>{' '}
-      {/* Genre chips — wrapping, limited on mobile */}{' '}
+      {/* Genre chips — single scrollable row + dropdown */}{' '}
       {(() => {
-        const MOBILE_LIMIT = 7;
-        const collapsed = isMobile && !genreChipsExpanded;
-        const visibleGenres = collapsed
-          ? translatedGenreCategories.slice(0, MOBILE_LIMIT)
-          : translatedGenreCategories;
+        const ROW_LIMIT = 6;
+        const visibleGenres = translatedGenreCategories.slice(0, ROW_LIMIT);
+        const allSorted = [...translatedGenreCategories].sort((a, b) => a.label.localeCompare(b.label));
         return (
-          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2`}>
+          <div className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >
               {t('all')}
             </button>{' '}
@@ -3407,65 +3704,93 @@ function BrowseView({
                 key={cat.id}
                 onClick={() => onSelectGenre?.(cat)}
                 aria-current={genreChipActive(cat.tag ?? cat.id) || undefined}
-                className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${genreChipActive(cat.tag ?? cat.id) ? `bg-linear-to-r ${cat.gradient} text-white` : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 {cat.label}
               </button>
             ))}{' '}
-            {collapsed && translatedGenreCategories.length > MOBILE_LIMIT && (
-              <button
-                onClick={() => setGenreChipsExpanded(true)}
-                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+            <LiquidGlassButton className="!rounded-full shrink-0 px-2 py-2 text-[12px]">
+              <select
+                value=""
+                onChange={(e) => {
+                  const id = e.target.value;
+                  if (!id) return;
+                  const cat = translatedGenreCategories.find((c) => c.id === id);
+                  if (cat) onSelectGenre?.(cat);
+                  e.target.value = '';
+                }}
+                className="bg-transparent text-white/50 text-[12px] font-medium cursor-pointer outline-none appearance-none"
+                aria-label="Browse all genres"
+                style={{ backgroundImage: 'none', paddingRight: '0px' }}
               >
-                {t('seeMore')}
-              </button>
-            )}
+                <option value="" disabled hidden>🔍 …</option>
+                {allSorted.map((cat) => (
+                  <option key={cat.id} value={cat.id} style={{ background: '#1a1a2e', color: '#fff' }}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </LiquidGlassButton>
           </div>
         );
       })()}{' '}
-      {/* Country chips — wrapping, limited on mobile */}{' '}
+      {/* Country chips — single scrollable row with top countries + dropdown */}{' '}
       {(() => {
-        const MOBILE_LIMIT = 7;
-        const collapsed = isMobile && !countryChipsExpanded;
-        const visibleCountries = collapsed ? countryChips.slice(0, MOBILE_LIMIT) : countryChips;
+        const COUNTRY_ROW_LIMIT = 6;
+        const visibleCountries = countryChips.slice(0, COUNTRY_ROW_LIMIT);
+        const allSorted = [...countryChips].sort((a, b) => a.displayName.localeCompare(b.displayName));
         return (
-          <div className={`shrink-0 flex flex-wrap gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3`}>
+          <div className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3 overflow-x-auto max-w-full [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
             <button
               onClick={() => onGoHome?.()}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+              className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
             >{`🌐 ${t('allCountries')}`}</button>{' '}
             {visibleCountries.map((c) => (
               <button
                 key={c.code}
                 onClick={() => onSelectCountry?.(c.code, c.queryName, c.displayName)}
                 aria-current={countryChipActive(c.code) || undefined}
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
+                className={`flex items-center gap-1 px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${countryChipActive(c.code) ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
               >
                 <span>{c.flag}</span>
                 <span>{c.displayName}</span>
               </button>
             ))}{' '}
-            {collapsed && countryChips.length > MOBILE_LIMIT && (
-              <button
-                onClick={() => setCountryChipsExpanded(true)}
-                className="px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap text-white/50 bg-white/[0.06] hover:bg-white/10 transition-colors"
+            <LiquidGlassButton className="!rounded-full shrink-0 px-2 py-2 text-[12px]">
+              <select
+                value=""
+                onChange={(e) => {
+                  const code = e.target.value;
+                  if (!code) return;
+                  const c = countryChips.find((x) => x.code === code);
+                  if (c) onSelectCountry?.(c.code, c.queryName, c.displayName);
+                  e.target.value = '';
+                }}
+                className="bg-transparent text-white/50 text-[12px] font-medium cursor-pointer outline-none appearance-none"
+                aria-label="Browse all countries"
+                style={{ backgroundImage: 'none', paddingRight: '0px' }}
               >
-                {t('seeMore')}
-              </button>
-            )}
+                <option value="" disabled hidden>🌍 …</option>
+                {allSorted.map((c) => (
+                  <option key={c.code} value={c.code} style={{ background: '#1a1a2e', color: '#fff' }}>
+                    {c.flag} {c.displayName}
+                  </option>
+                ))}
+              </select>
+            </LiquidGlassButton>
           </div>
         );
       })()}{' '}
       {/* Content */}{' '}
       <div className={`app-body ${isMobile ? 'px-0' : 'px-4'} pb-4 overflow-y-auto`}>
         {loading && (
-          <div className="flex-center-row py-16">
+          <div className="flex-center-row py-16" role="status" aria-label="Loading stations">
             <Loader2 size={24} className="text-dim animate-spin" />
           </div>
         )}{' '}
         {error && (
-          <div className="flex-center-col gap-3 py-16">
-            <RadioIcon size={32} className="text-muted" />{' '}
+          <div className="flex-center-col gap-3 py-16" role="alert">
+            <RadioIcon size={32} className="text-muted" aria-hidden="true" />{' '}
             <p className="text-[13px] text-secondary">{t('failedToLoad')}</p>
             <button
               onClick={() => setRetryKey((k) => k + 1)}
@@ -3492,7 +3817,7 @@ function BrowseView({
                 {favorites && favorites.length > 0 && (
                   <ScrollRow
                     title={t('favorites')}
-                    icon={<Star size={14} className="text-sys-orange/70" />}
+                    icon={<Star size={14} className="text-sys-orange/70" aria-hidden="true" />}
                     isMobile={isMobile}
                   >
                     {renderScrollStations(favorites)}
@@ -3502,7 +3827,7 @@ function BrowseView({
                 {recent && recent.length > 0 && (
                   <ScrollRow
                     title={t('recent')}
-                    icon={<Clock size={14} className="text-blue-400/70" />}
+                    icon={<Clock size={14} className="text-blue-400/70" aria-hidden="true" />}
                     isMobile={isMobile}
                   >
                     {renderScrollStations(recent)}
@@ -3530,11 +3855,11 @@ function BrowseView({
                           className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}
                         >
                           {' '}
-                          <RadioIcon size={18} className="text-muted" />{' '}
-                          <p className="text-[11px] text-muted">{t('failedToLoadStations')}</p>
+                          <RadioIcon size={18} className="text-muted" aria-hidden="true" />{' '}
+                          <p className="text-[12px] text-muted" role="alert">{t('failedToLoadStations')}</p>
                           <button
                             onClick={() => loadCategory(catId)}
-                            className="px-3 py-1 rounded-lg bg-surface-4 text-[11px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
+                            className="px-3 py-1 rounded-lg bg-surface-4 text-[12px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
                           >
                             {t('retry')}
                           </button>
@@ -3568,8 +3893,10 @@ function BrowseView({
                     <div className={`flex items-center gap-2 mb-3 ${isMobile ? 'px-3' : 'px-0'}`}>
                       <button
                         onClick={() => setScanEnabled((v) => !v)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[12px] font-medium transition-colors shrink-0 ${scanEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/30' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70 bdr'}`}
                         title={t('scanNowPlaying')}
+                        aria-label={t('scanNowPlaying')}
+                        aria-pressed={scanEnabled}
                       >
                         <ScanSearch size={12} />{' '}
                         {isScanning
@@ -3587,18 +3914,21 @@ function BrowseView({
                       {scanEnabled && (
                         <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                           {' '}
-                          <Music2 size={11} className="text-dim shrink-0" />{' '}
+                          <Music2 size={11} className="text-dim shrink-0" aria-hidden="true" />{' '}
                           <input
                             type="text"
                             placeholder={t('filterBySong')}
+                            aria-label={t('filterBySong')}
                             value={songFilter}
                             onChange={(e) => setSongFilter(e.target.value)}
-                            className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                            autoComplete="off"
+                            className="bg-transparent text-white placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-accent/70 w-full min-w-0"
                           />{' '}
                           {songFilter && (
                             <button
                               onClick={() => setSongFilter('')}
                               className="text-dim hover:text-white shrink-0"
+                              aria-label="Clear filter"
                             >
                               {' '}
                               <X size={11} />
@@ -3607,7 +3937,7 @@ function BrowseView({
                         </div>
                       )}{' '}
                       {scanEnabled && songFilter && (
-                        <span className="text-[11px] text-dim shrink-0">
+                        <span className="text-[12px] text-dim shrink-0">
                           {' '}
                           {t('stationCount', { count: allSongFilteredStations.length })}
                         </span>
@@ -3643,9 +3973,9 @@ function BrowseView({
                         <button
                           onClick={() => setPage((p) => Math.max(0, p - 1))}
                           disabled={page === 0}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? 'text-white/20 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? 'text-white/35 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
                         >
-                          <ChevronLeft size={14} /> {t('previous')}
+                          <ChevronLeft size={14} aria-hidden="true" /> {t('previous')}
                         </button>
                         <span className="text-[12px] text-dim tabular-nums">
                           {' '}
@@ -3654,7 +3984,7 @@ function BrowseView({
                         <button
                           onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                           disabled={page === totalPages - 1}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? 'text-white/20 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === totalPages - 1 ? 'text-white/35 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
                         >
                           {t('next')} <ChevronRight size={14} />
                         </button>
@@ -3723,8 +4053,8 @@ const EMPHASIS: [string, string, string][] = [
   ['text-white font-bold opacity-100 scale-100', 'text-[22px]', 'text-[28px]'],
   ['text-white/82 font-semibold opacity-100 scale-[0.985]', 'text-[18px]', 'text-[23px]'],
   ['text-white/50 font-medium opacity-100 scale-95', 'text-[15px]', 'text-[19px]'],
-  ['text-white/26 font-medium opacity-100 scale-[0.92]', 'text-[13px]', 'text-[17px]'],
-  ['text-white/14 font-medium opacity-100 scale-[0.88]', 'text-[12px]', 'text-[16px]'],
+  ['text-white/35 font-medium opacity-100 scale-[0.92]', 'text-[13px]', 'text-[17px]'],
+  ['text-white/30 font-medium opacity-100 scale-[0.88]', 'text-[12px]', 'text-[16px]'],
 ];
 const LyricReelLine = React.memo(
   function LyricReelLine({
@@ -3851,6 +4181,8 @@ function LyricsReel({
           ref={scrollerRef}
           className={`lyrics-reel custom-scrollbar h-full overflow-y-auto snap-y snap-mandatory ${isDesktop ? 'px-4' : 'px-2'}`}
           style={_LYRICS_MASK_STYLE}
+          role="region"
+          aria-label="Song lyrics"
         >
           <div className="flex min-h-full flex-col justify-center py-14">
             {' '}
@@ -3887,7 +4219,7 @@ interface SpiralRendererProps {
   sensitivity?: number;
   demo?: boolean;
 }
-const NUM_BARS = 250;
+const NUM_BARS = 128;
 const _EMPTY_F64 = () => new Float64Array(NUM_BARS);
 const _BASS_CURVE_LEN = 4096;
 const _BASS_CURVE = new Float32Array(_BASS_CURVE_LEN);
@@ -3896,7 +4228,7 @@ for (let i = 0; i < _BASS_CURVE_LEN; i++) {
   _BASS_CURVE[i] = ((Math.PI + 2) * x) / (Math.PI + 2 * Math.abs(x));
 }
 const CYCLES = 4;
-const SMOOTH_PASSES = 3;
+const SMOOTH_PASSES = 1;
 function SpiralRenderer({
   frequencyDataRef,
   className = '',
@@ -3928,7 +4260,11 @@ function SpiralRenderer({
   const colorsRef = useRef({ color1, color2, color3 });
   useEffect(() => {
     colorsRef.current = { color1, color2, color3 };
+    // Invalidate cached gradient when colors change
+    gradientCacheRef.current = null;
   }, [color1, color2, color3]);
+  // Cached gradient — recreated only when colors or canvas size changes
+  const gradientCacheRef = useRef<{ grad: CanvasGradient; w: number; h: number } | null>(null);
   const canvasRef = useCanvasLoop(frequencyDataRef, (ctx, w, h, freqData) => {
     const centerX = w / 2;
     const centerY = h / 2;
@@ -3980,20 +4316,27 @@ function SpiralRenderer({
     const rotation = rotationRef.current;
     ctx.clearRect(0, 0, w, h);
     const { color1: c1, color2: c2, color3: c3 } = colorsRef.current;
+    // Reuse cached gradient unless canvas size changed
     let fillStyle: string | CanvasGradient = c1;
-    try {
-      const gradient = ctx.createLinearGradient(
-        centerX - maxRadius,
-        centerY - maxRadius,
-        centerX + maxRadius,
-        centerY + maxRadius,
-      );
-      gradient.addColorStop(0, c1);
-      gradient.addColorStop(0.5, c2);
-      gradient.addColorStop(1, c3);
-      fillStyle = gradient;
-    } catch {
-      /* fallback to solid color */
+    const gc = gradientCacheRef.current;
+    if (gc && gc.w === w && gc.h === h) {
+      fillStyle = gc.grad;
+    } else {
+      try {
+        const gradient = ctx.createLinearGradient(
+          centerX - maxRadius,
+          centerY - maxRadius,
+          centerX + maxRadius,
+          centerY + maxRadius,
+        );
+        gradient.addColorStop(0, c1);
+        gradient.addColorStop(0.5, c2);
+        gradient.addColorStop(1, c3);
+        fillStyle = gradient;
+        gradientCacheRef.current = { grad: gradient, w, h };
+      } catch {
+        /* fallback to solid color */
+      }
     }
     const outerX = outerXRef.current;
     const outerY = outerYRef.current;
@@ -4014,8 +4357,8 @@ function SpiralRenderer({
       outerY[i] = centerY + sin * (radius + barHeight + 2);
     }
     ctx.fillStyle = fillStyle;
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = `${c1}66`;
+    // shadowBlur removed — extremely expensive on iOS Safari (forces Gaussian blur on every fill)
+    ctx.shadowBlur = 0;
     ctx.globalAlpha = 0.85;
     const barsPerCycle = Math.ceil(NUM_BARS / CYCLES);
     for (let c = 0; c < CYCLES; c++) {
@@ -4051,6 +4394,7 @@ function SpiralRenderer({
         ref={canvasRef}
         className="absolute inset-0 size-full"
         style={_CANVAS_SCALE_STYLE}
+        aria-hidden="true"
       />
     </div>
   );
@@ -4066,11 +4410,139 @@ const Badge = ({
   children: React.ReactNode;
 }) => (
   <span
-    className={`px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/50${mono ? ' font-mono' : ''}${upper ? ' uppercase' : ''}`}
+    className={`px-2 py-0.5 rounded-full bg-white/10 text-[12px] text-white/50${mono ? ' font-mono' : ''}${upper ? ' uppercase' : ''}`}
   >
     {children}
   </span>
 );
+
+/* ── DevApiConsole — only rendered in development mode inside TheaterView ── */
+const DevApiConsole = React.memo(function DevApiConsole() {
+  const entries = useApiLogStore((s) => s.entries);
+  const clear = useApiLogStore((s) => s.clear);
+  const [open, setOpen] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [entries.length, open]);
+  if (process.env.NODE_ENV !== 'development') return null;
+  const toggleExpand = (id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const statusColor = (s?: number) => {
+    if (!s) return 'text-red-400';
+    if (s >= 200 && s < 300) return 'text-green-400';
+    if (s >= 300 && s < 400) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+  const kindLabel = (kind: ApiLogEntry['kind']) => {
+    if (kind === 'request') return 'REQ';
+    if (kind === 'response') return 'RES';
+    return 'ERR';
+  };
+  const kindColor = (kind: ApiLogEntry['kind']) => {
+    if (kind === 'request') return 'bg-sky-600/80';
+    if (kind === 'response') return 'bg-emerald-600/80';
+    return 'bg-red-600/80';
+  };
+  const apiLabel = (url: string) => {
+    if (url.includes('/api/icy-meta')) return 'ICY';
+    if (url.includes('/api/itunes')) return 'iTunes';
+    if (url.includes('/api/concerts')) return 'CONCERTS';
+    if (url.includes('/api/artist-info')) return 'ARTIST';
+    if (url.includes('lrclib.net')) return 'LYRICS';
+    if (url.includes('/api/lyrics')) return 'LYRICS';
+    return 'API';
+  };
+  const labelColor = (url: string) => {
+    if (url.includes('/api/icy-meta')) return 'bg-cyan-600/80';
+    if (url.includes('/api/itunes')) return 'bg-pink-600/80';
+    if (url.includes('/api/concerts')) return 'bg-orange-600/80';
+    if (url.includes('/api/artist-info')) return 'bg-purple-600/80';
+    if (url.includes('lrclib.net') || url.includes('/api/lyrics')) return 'bg-emerald-600/80';
+    return 'bg-gray-600/80';
+  };
+  return (
+    <div className="fixed bottom-50 right-2 z-9999 pointer-events-auto" style={{ maxWidth: 480, width: 'calc(100vw - 16px)', zIndex: 9999 }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono bg-black/80 text-green-400 border border-green-500/30 hover:bg-black/90 transition-colors shadow-lg"
+      >
+        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <span>API Console ({entries.length})</span>
+        <span className="text-white/30 ml-1">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div
+          className="mt-1 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
+          style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+        >
+          <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
+            <span className="text-[11px] font-mono font-bold text-green-400/80">⚡ API Console</span>
+            <div className="flex items-center gap-3">
+              <button onClick={clear} className="text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors">Clear</button>
+              <button onClick={() => setOpen(false)} className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors">✕</button>
+            </div>
+          </div>
+          <div className="max-h-72 overflow-y-auto font-mono text-[10px] leading-relaxed [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+            {entries.length === 0 && (
+              <div className="px-3 py-6 text-white/30 text-center text-[11px]">Waiting for API requests…</div>
+            )}
+            {entries.map((e) => {
+              const time = new Date(e.ts).toLocaleTimeString('en', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const isExpanded = expandedIds.has(e.id);
+              const hasDetail = Boolean(e.requestPreview || e.responsePreview || e.error);
+              const statusText = e.kind === 'request' ? '--' : e.status ?? 'ERR';
+              const statusClass = e.kind === 'request' ? 'text-sky-300' : statusColor(e.status);
+              const durationText = e.durationMs != null ? `${e.durationMs}ms` : '—';
+              return (
+                <div
+                  key={e.id}
+                  className={`px-3 py-1.5 border-b border-white/5 transition-colors ${hasDetail ? 'cursor-pointer hover:bg-white/5' : ''}`}
+                  onClick={() => hasDetail && toggleExpand(e.id)}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {hasDetail && <span className="text-white/25 text-[9px] w-2.5">{isExpanded ? '▾' : '▸'}</span>}
+                    <span className="text-white/30">{time}</span>
+                    <span className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${kindColor(e.kind)}`}>{kindLabel(e.kind)}</span>
+                    <span className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${labelColor(e.url)}`}>{apiLabel(e.url)}</span>
+                    <span className="text-white/45">{e.method}</span>
+                    <span className={`font-bold ${statusClass}`}>{statusText}</span>
+                    <span className="text-white/30">{durationText}</span>
+                    <span className="text-white/15 truncate flex-1 ml-1">{e.url.split('?')[0].split('/api/').pop() ?? e.url}</span>
+                  </div>
+                  {isExpanded && e.requestPreview && (
+                    <div className="mt-1 ml-4 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 break-all whitespace-pre-wrap text-[10px] max-h-32 overflow-y-auto">
+                      {e.requestPreview}
+                    </div>
+                  )}
+                  {isExpanded && e.error && (
+                    <div className="mt-1 ml-4 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 break-all whitespace-pre-wrap text-[10px]">
+                      {e.error}
+                    </div>
+                  )}
+                  {isExpanded && e.responsePreview && (
+                    <div className="mt-1 ml-4 p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 break-all whitespace-pre-wrap text-[10px] max-h-48 overflow-y-auto">
+                      {e.responsePreview}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 type TheaterViewProps = {
   station: Station;
   track: NowPlayingTrack | null;
@@ -4171,23 +4643,19 @@ const MAX_COLOR_CACHE = 32;
   _colorCache.set(imgUrl, p);
   return p;
 }
-const _CRT_SCANLINE_STYLE: React.CSSProperties = {
+/** Merged CRT overlay: scanlines + vignette + glare in a single DOM node (saves 2 composite layers). */
+const _CRT_COMBINED_STYLE: React.CSSProperties = {
   background:
-    'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-  backgroundSize: '100% 4px, 6px 100%',
-  mixBlendMode: 'overlay' as const,
-  opacity: 0.6,
-};
-const _CRT_VIGNETTE_STYLE: React.CSSProperties = {
-  background: 'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.9) 100%)',
-  boxShadow: 'inset 0 0 60px rgba(0,0,0,0.9)',
-};
-const _CRT_GLARE_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%)',
+    'radial-gradient(circle, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%), ' +
+    'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 40%), ' +
+    'linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%), ' +
+    'linear-gradient(90deg, rgba(255,0,0,0.04), rgba(0,255,0,0.01), rgba(0,0,255,0.04))',
+  backgroundSize: '100% 100%, 100% 100%, 100% 4px, 6px 100%',
+  boxShadow: 'inset 0 0 40px rgba(0,0,0,0.7)',
 };
 const _SAFE_AREA_TOP_STYLE: React.CSSProperties = { top: 'env(safe-area-inset-top, 0px)' };
-const _BLUR_6_STYLE: React.CSSProperties = { WebkitFilter: 'blur(6px)', filter: 'blur(6px)' };
-const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto', transform: 'scale(1.12)' };
+const _BLUR_6_STYLE: React.CSSProperties = { opacity: 0.75 };
+const _CANVAS_SCALE_STYLE: React.CSSProperties = { imageRendering: 'auto' };
 const _IMAGE_RENDER_STYLE: React.CSSProperties = { imageRendering: 'auto' };
 const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = { height: 'env(safe-area-inset-bottom, 0px)' };
 const _OBJECT_COVER_STYLE: React.CSSProperties = { objectFit: 'cover' };
@@ -4208,6 +4676,11 @@ const _GLASS_BADGE_STYLE: React.CSSProperties = {
   backdropFilter: 'blur(16px) saturate(1.3)',
   WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
   border: '1px solid rgba(255,255,255,0.06)',
+};
+const _THEATER_BLUR_OVERLAY_STYLE: React.CSSProperties = {
+  background: 'rgba(15, 23, 42, 0.15)',
+  backdropFilter: 'blur(20px) saturate(1.2)',
+  WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
 };
 const _MOTION_FADE_IN = { opacity: 0 } as const;
 const _MOTION_FADE_VISIBLE = { opacity: 1 } as const;
@@ -4254,6 +4727,7 @@ function TheaterView({
   }, [artworkUrl]);
   const [color1, color2, color3] = colors;
   const theaterTags = useMemo(() => _tagsDisplay(station.tags), [station.tags]);
+  const { concerts } = useConcerts(track?.artist, !compact);
   return (
     <motion.div
       initial={_MOTION_FADE_IN}
@@ -4270,7 +4744,7 @@ function TheaterView({
           <UiImage
             src={coverUrl}
             alt=""
-            className="object-cover animate-ambient-drift blur-lg opacity-25"
+            className="object-cover animate-ambient-drift blur-sm opacity-20"
             sizes="100vw"
             onError={() => setFailedCoverUrl(coverUrl)}
           />{' '}
@@ -4291,18 +4765,15 @@ function TheaterView({
           />
         </ErrorBoundary>
       </div>{' '}
-      {/* ── Layer 3: CRT scanlines + vignette overlay ── */}{' '}
+      {/* ── Layer 3: CRT scanlines + vignette overlay (merged into one div) ── */}{' '}
       <div
         className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_SCANLINE_STYLE}
+        style={_CRT_COMBINED_STYLE}
       />{' '}
+      {/* ── Layer 3.5: glassmorphism blur overlay — softens raw spiral animation ── */}{' '}
       <div
-        className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_VIGNETTE_STYLE}
-      />{' '}
-      <div
-        className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_GLARE_STYLE}
+        className="absolute inset-0 z-7 pointer-events-none"
+        style={_THEATER_BLUR_OVERLAY_STYLE}
       />{' '}
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}{' '}
       {!compact && (
@@ -4342,13 +4813,14 @@ function TheaterView({
         </div>
       )}{' '}
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}{' '}
-      <div className="flex-1 flex items-center justify-center relative z-10 px-4">
+      <div className="flex-1 overflow-y-auto relative z-10 px-4 py-4">
+        <div className="flex flex-col items-center justify-center min-h-full">
         <div
           className={`flex flex-col items-center ${compact ? 'gap-2 px-4 py-3' : 'gap-3 px-6 py-5'} rounded-3xl max-w-sm w-full`}
           style={{
             background: 'rgba(0, 0, 0, 0.35)',
-            backdropFilter: 'blur(24px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
+            backdropFilter: 'blur(12px) saturate(1.3)',
+            WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
             border: '1px solid rgba(255,255,255,0.08)',
             boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
           }}
@@ -4360,7 +4832,7 @@ function TheaterView({
               <div className="justify-self-start">
                 {' '}
                 {track?.durationMs && (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/80 inline-flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-mono text-white/80 inline-flex items-center gap-1">
                     {' '}
                     <Clock size={10} /> {formatDuration(track.durationMs)}
                   </span>
@@ -4369,7 +4841,7 @@ function TheaterView({
               <div className="justify-self-end">
                 {' '}
                 {track?.trackNumber != null && track?.trackCount != null && (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-medium text-white/80">
+                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-medium text-white/80">
                     {' '}
                     #{track.trackNumber}/{track.trackCount}
                   </span>
@@ -4406,32 +4878,32 @@ function TheaterView({
           </div>{' '}
           {/* Station name */}{' '}
           <h2
-            className={`${compact ? 'text-[11px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
+            className={`${compact ? 'text-[12px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
           >
             {station.name}
           </h2>{' '}
           {/* Track info */}{' '}
           {track?.title ? (
             <p
-              className={`${compact ? 'text-[9px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
+              className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
             >
               {track.artist ? `${track.artist} — ${track.title}` : track.title}
             </p>
           ) : (
-            <p className={`${compact ? 'text-[8px]' : 'text-[12px]'} text-white/40 text-center`}>
+            <p className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center`}>
               {theaterTags}
             </p>
           )}{' '}
           {track?.album && (
             <p
-              className={`${compact ? 'text-[8px]' : 'text-[11px]'} text-white/40 text-center line-clamp-1`}
+              className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center line-clamp-1`}
             >
               {' '}
               {track.album}
             </p>
           )}{' '}
           {!compact && track?.releaseDate && (
-            <p className="text-[10px] text-white/40 text-center -mt-1">
+            <p className="text-[12px] text-white/50 text-center -mt-1">
               {' '}
               Released on: {formatReleaseDate(track.releaseDate)}
             </p>
@@ -4442,7 +4914,7 @@ function TheaterView({
               {' '}
               <span className={`${compact ? 'dot-1.5' : 'dot-2'} bg-red-500 animate-pulse`} />{' '}
               <span
-                className={`${compact ? 'text-[8px]' : 'text-[11px]'} font-semibold tracking-wider uppercase text-red-400`}
+                className={`${compact ? 'text-[12px]' : 'text-[12px]'} font-semibold tracking-wider uppercase text-red-400`}
               >
                 LIVE
               </span>
@@ -4474,10 +4946,60 @@ function TheaterView({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-medium text-white/60 hover:text-white/80 transition-colors"
+              className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
             >
               <ExternalLink size={11} /> Listen on Apple Music
             </a>
+          )}{' '}
+          {/* Share button */}{' '}
+          {!compact && (
+            <ShareButton
+              title={track ? `${track.artist ?? station.name} — ${track.title}` : station.name}
+              text={track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`}
+              size={14}
+              className="mt-1 w-8 h-8"
+            />
+          )}{' '}
+          {/* ── Upcoming concerts (Bandsintown) — animated ticker banner ── */}{' '}
+          {!compact && concerts.length > 0 && (
+            <div className="w-full mt-2 overflow-hidden rounded-xl" style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="px-3 pt-2 pb-1">
+                <p className="text-[10px] font-semibold tracking-widest uppercase text-white/40 text-center">
+                  Upcoming Shows
+                </p>
+              </div>
+              <div className="relative overflow-hidden h-10">
+                <div
+                  className="flex items-center gap-8 animate-marquee whitespace-nowrap absolute left-0 top-0 h-full"
+                  style={{ animation: `marquee ${Math.max(12, concerts.length * 6)}s linear infinite` }}
+                >
+                  {[...concerts.slice(0, 5), ...concerts.slice(0, 5)].map((ev, idx) => {
+                    const d = new Date(ev.date);
+                    const dateStr = isNaN(d.getTime())
+                      ? ev.date
+                      : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    const inner = (
+                      <span className="inline-flex items-center gap-2 text-[11px]">
+                        <span className="text-sys-orange font-mono font-bold">{dateStr}</span>
+                        <span className="text-white/70 font-medium">{ev.venue}</span>
+                        <span className="text-white/40">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                      </span>
+                    );
+                    return ev.ticketUrl ? (
+                      <a key={`${ev.id}-${idx}`} href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:text-white transition-colors pointer-events-auto">{inner}</a>
+                    ) : (
+                      <span key={`${ev.id}-${idx}`} className="inline-flex items-center">{inner}</span>
+                    );
+                  })}
+                </div>
+              </div>
+              <style jsx>{`
+                @keyframes marquee {
+                  0% { transform: translateX(0%); }
+                  100% { transform: translateX(-50%); }
+                }
+              `}</style>
+            </div>
           )}{' '}
           {/* ── Lyrics reel inside glass panel ── */}{' '}
           {!compact && (
@@ -4491,16 +5013,17 @@ function TheaterView({
             </div>
           )}
         </div>
-      </div>
-    </motion.div>
+        </div>
+        </div>
+      </motion.div>
   );
 }
-const cache = new LRU<ArtistInfo>(200);
+const _artistInfoCache = new Map<string, ArtistInfo>();
 function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean } {
   const key = artist ? artist.toLowerCase().trim() : '';
   const cachedInfo = useMemo(() => {
     if (!key) return null;
-    return cache.get(key) ?? null;
+    return _artistInfoCache.get(key) ?? null;
   }, [key]);
   const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
   useEffect(() => {
@@ -4515,7 +5038,7 @@ function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loadin
       })
       .then((data: ArtistInfo) => {
         if (!cancelled) {
-          cache.set(key, data);
+          _artistInfoCache.set(key, data);
           setFetched({ key, info: data });
         }
       })
@@ -4534,7 +5057,32 @@ function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loadin
   const info = !key ? null : (cachedInfo ?? (fetched?.key === key ? fetched.info : null));
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }
-const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]';
+
+/* ── Share utility ── */
+function shareContent(data: { title: string; text?: string; url?: string }) {
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    navigator.share(data).catch(() => {});
+  } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(data.url ?? window.location.href).catch(() => {});
+  }
+}
+function ShareButton({ title, text, url, size = 16, className = '' }: { title: string; text?: string; url?: string; size?: number; className?: string }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        shareContent({ title, text, url: url ?? window.location.href });
+      }}
+      className={`inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors ${className}`}
+      aria-label="Share"
+      title="Share"
+    >
+      <Share2 size={size} className="text-white/70" />
+    </button>
+  );
+}
+
+const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px]';
 const MetaBadge = ({
   icon: Icon,
   cls,
@@ -4557,6 +5105,7 @@ type SongDetailModalProps = {
 const _SKELETON_WIDTHS = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
 function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailModalProps) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
+  const { concerts } = useConcerts(song?.artist ?? null, !!song);
   const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
   const resolvedArtworkUrl = song?.artworkUrl ?? albumMeta.artworkUrl ?? undefined;
   const resolvedAlbum = song?.album ?? albumMeta.albumName ?? undefined;
@@ -4604,14 +5153,14 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
     </div>
   );
   const lyricsEmpty = (
-    <div>
+    <div role={lyricsError ? 'alert' : undefined}>
       <p className="text-[12px] text-dim">
         {lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}
       </p>{' '}
       {lyricsError && (
         <button
           onClick={retryLyrics}
-          className="mt-2 px-3 py-1 text-[11px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
+          className="mt-2 px-3 py-1 text-[12px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
         >
           {' '}
           Retry
@@ -4683,8 +5232,15 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
             {' '}
             <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
               {' '}
-              {/* Close button */}{' '}
-              <div className="sticky top-0 z-10 flex justify-end p-3">
+              {/* Close + Share buttons */}{' '}
+              <div className="sticky top-0 z-10 flex justify-end gap-2 p-3">
+                <ShareButton
+                  title={`${song.title} — ${song.artist}`}
+                  text={`🎵 Listening to ${song.title} by ${song.artist} on Pulse Radio`}
+                  url={typeof window !== 'undefined' ? window.location.href : ''}
+                  size={16}
+                  className="p-2 !bg-surface-3/80 backdrop-blur-sm"
+                />
                 <button
                   onClick={onClose}
                   aria-label="Close song details"
@@ -4752,7 +5308,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         </div>
                       </div>{' '}
                       {resolvedReleaseDate && (
-                        <p className="text-[10px] text-white/50">
+                        <p className="text-[12px] text-white/50">
                           {' '}
                           Released on: {formatReleaseDate(resolvedReleaseDate)}
                         </p>
@@ -4765,7 +5321,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                           </MetaBadge>
                         )}{' '}
                         {showMetaHydration && (
-                          <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">
+                          <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/45 animate-pulse">
                             Fetching metadata…
                           </MetaBadge>
                         )}{' '}
@@ -4786,7 +5342,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />{' '}
               {/* ── Artist Info ── */}{' '}
               <div className="px-5">
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
+                <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
                   {' '}
                   About {song.artist}
                 </h3>{' '}
@@ -4841,7 +5397,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                           {info.name}
                         </p>{' '}
                         {info.disambiguation && (
-                          <p className="text-[11px] text-dim mt-0.5 line-clamp-1">
+                          <p className="text-[12px] text-dim mt-0.5 line-clamp-1">
                             {info.disambiguation}
                           </p>
                         )}{' '}
@@ -4884,7 +5440,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         {info.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[10px] font-medium text-white/50"
+                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[12px] font-medium text-white/50"
                           >
                             {' '}
                             {tag}
@@ -4898,7 +5454,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         href={info.wikipediaUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
+                        className="inline-flex items-center gap-1.5 text-[12px] text-blue-400/70 hover:text-blue-400 transition-colors"
                       >
                         <Globe size={11} /> Read more on Wikipedia
                       </a>
@@ -4910,11 +5466,43 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                   <p className="text-[12px] text-dim">No artist information available</p>
                 )}
               </div>{' '}
+              {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
+              {concerts.length > 0 && (
+                <>
+                  <div className="mx-5 my-5 border-t border-border-default" />
+                  <div className="px-5">
+                    <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
+                      Upcoming Shows
+                    </h3>
+                    <div className="flex flex-col gap-1.5 w-full">
+                      {concerts.slice(0, 5).map((ev) => {
+                        const d = new Date(ev.date);
+                        const dateStr = isNaN(d.getTime())
+                          ? ev.date
+                          : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                        const content = (
+                          <div className="flex items-start justify-between gap-2 px-3 py-2.5 rounded-xl bg-surface-3/50 hover:bg-surface-3 transition-colors border border-border-subtle">
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[12px] font-medium text-white/80 truncate">{ev.venue}</span>
+                              <span className="text-[11px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                            </div>
+                            <span className="text-[11px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
+                          </div>
+                        );
+                        return ev.ticketUrl ? (
+                          <a key={ev.id} href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" className="block min-h-[44px]" aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}>{content}</a>
+                        ) : (
+                          <div key={ev.id} className="min-h-[44px]">{content}</div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}{' '}
               {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />{' '}
-              {/* ── Lyrics (mobile) ── */}{' '}
               <div className="px-5 md:hidden">
                 {' '}
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider mb-3">
+                <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider mb-3">
                   Lyrics (plain)
                 </h3>{' '}
                 {lyricsLoading && lyricsSkeleton(4)}{' '}
@@ -4950,7 +5538,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                 <div className="flex items-center gap-2">
                   {' '}
                   <RadioIcon size={12} className="text-dim flex-shrink-0" />{' '}
-                  <p className="text-[11px] text-dim">
+                  <p className="text-[12px] text-dim">
                     {' '}
                     Played on <span className="text-secondary">{song.stationName}</span>
                   </p>
@@ -4962,10 +5550,10 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
               {' '}
               <div className="px-5 pt-5 pb-3 border-b border-border-default">
                 {' '}
-                <h3 className="text-[11px] font-semibold text-dim uppercase tracking-wider">
+                <h3 className="text-[12px] font-semibold text-dim uppercase tracking-wider">
                   Lyrics (plain)
                 </h3>{' '}
-                <p className="text-[11px] text-dim mt-1 line-clamp-1">
+                <p className="text-[12px] text-dim mt-1 line-clamp-1">
                   {song.title} · {song.artist}
                 </p>
               </div>{' '}
@@ -5219,7 +5807,7 @@ function FerrofluidRenderer({
   return (
     <div className={`relative ${className}`}>
       {' '}
-      <canvas ref={canvasRef} className="size-full" style={_IMAGE_RENDER_STYLE} />{' '}
+      <canvas ref={canvasRef} className="size-full" style={_IMAGE_RENDER_STYLE} aria-hidden="true" />{' '}
       {/* SVG filter for smoothing the metaballs */}{' '}
       <svg className="absolute w-0 h-0" aria-hidden="true">
         <defs>
@@ -5263,6 +5851,8 @@ type NowPlayingBarProps = {
   sleepTimerMin?: number | null;
   onCycleSleepTimer?: () => void;
   streamQuality?: StreamQuality;
+  effectsEnabled?: boolean;
+  onToggleEffects?: () => void;
 };
 const SAFE_AREA_STYLE: React.CSSProperties = {
   paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))',
@@ -5291,6 +5881,8 @@ function _NowPlayingBar({
   sleepTimerMin,
   onCycleSleepTimer,
   streamQuality,
+  effectsEnabled,
+  onToggleEffects,
 }: NowPlayingBarProps) {
   const isPlaying = status === 'playing';
   const isLoading = status === 'loading';
@@ -5339,21 +5931,21 @@ function _NowPlayingBar({
         style={SAFE_AREA_STYLE}
       >
         {' '}
-        {/* Play/Pause — 48px touch target */}{' '}
-        <button
+        {/* Play/Pause — 48px liquid glass touch target */}{' '}
+        <LiquidGlassButton
           onClick={onTogglePlay}
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
-          className="w-12 h-12 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30 shrink-0 active:scale-95"
+          className="w-12 h-12 shrink-0 active:scale-95 disabled:opacity-30"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
-            <Pause size={18} />
+            <Pause size={18} className="text-white" />
           ) : (
-            <Play size={18} className="ml-0.5" />
+            <Play size={18} className="text-white ml-0.5" />
           )}
-        </button>{' '}
+        </LiquidGlassButton>{' '}
         {/* Track info + LIVE indicator */}{' '}
         <div className="flex-1 min-w-0">
           {' '}
@@ -5368,13 +5960,13 @@ function _NowPlayingBar({
                 {isPlaying && (
                   <>
                     <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />{' '}
-                    <span className="text-[9px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
+                    <span className="text-[12px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
                       {' '}
                       LIVE
                     </span>
                   </>
                 )}{' '}
-                <span className="text-[11px] text-secondary truncate">
+                <span className="text-[12px] text-secondary truncate">
                   {track?.artist || compactTags || ''}
                 </span>
               </div>{' '}
@@ -5386,12 +5978,24 @@ function _NowPlayingBar({
         {/* Action buttons — 44px touch targets */}{' '}
         <div className="flex items-center gap-0.5 shrink-0">
           {' '}
+          {onToggleEffects && (
+            <button
+              onClick={onToggleEffects}
+              className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 ${effectsEnabled ? 'text-sys-orange' : 'text-white/45 hover:text-white/60'}`}
+              title={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+              aria-label={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+              aria-pressed={!!effectsEnabled}
+            >
+              <MdAutoAwesome size={18} />
+            </button>
+          )}
           {station && !theaterMode && (
             <button
               onClick={onToggleTheater}
-              className="w-10 h-10 flex-center-row rounded-xl text-white/30 hover:text-white/50 transition-colors active:scale-95"
+              className="w-10 h-10 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95"
               title="Theater"
               aria-label="Theater mode"
+              aria-pressed={theaterMode}
             >
               <Maximize2 size={18} />
             </button>
@@ -5399,7 +6003,7 @@ function _NowPlayingBar({
         </div>{' '}
         {/* Fill iPhone safe-area inset below the bar without adding layout height */}{' '}
         <div
-          aria-hidden
+          aria-hidden="true"
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
           style={_SAFE_AREA_BOTTOM_STYLE}
         />
@@ -5407,7 +6011,7 @@ function _NowPlayingBar({
     );
   }
   return (
-    <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x">
+    <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x" role="region" aria-label="Now playing">
       {' '}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {statusAnnouncement}
@@ -5420,7 +6024,7 @@ function _NowPlayingBar({
           {showFallback ? (
             <div className="size-full dawn-gradient flex-center-row">
               {' '}
-              <span className="text-white text-[10px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+              <span className="text-white text-[11px] font-bold select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                 {' '}
                 {station ? (
                   stationInitials(station.name) || <RadioIcon size={14} className="text-white/60" />
@@ -5446,7 +6050,7 @@ function _NowPlayingBar({
           <p className="text-[12px] font-medium text-white truncate">
             {station?.name || 'Not Playing'}
           </p>{' '}
-          <p className="text-[10px] text-secondary truncate">
+          <p className="text-[12px] text-secondary truncate">
             {' '}
             {track?.title
               ? track.artist
@@ -5454,10 +6058,10 @@ function _NowPlayingBar({
                 : track.title
               : firstTag}
           </p>{' '}
-          {track?.album && <p className="text-[9px] text-dim truncate">{track.album}</p>}
+          {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}
         </div>{' '}
         {icyBitrate && (
-          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 shrink-0 self-center">
+          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[12px] font-mono text-white/50 shrink-0 self-center">
             {' '}
             {icyBitrate}kbps
           </span>
@@ -5472,21 +6076,21 @@ function _NowPlayingBar({
       </div>{' '}
       {/* Controls */}{' '}
       <div className="flex-row-0.5">
-        <button
+        <LiquidGlassButton
           onClick={onTogglePlay}
           disabled={!station}
           aria-label={isPlaying ? 'Pause' : 'Play'}
           aria-pressed={isPlaying}
-          className="w-8 h-8 flex-center-row rounded-full bg-surface-3 hover:bg-surface-5 text-white transition-colors disabled:opacity-30"
+          className="w-10 h-10 disabled:opacity-30"
         >
           {isLoading ? (
             <div className="icon-md border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
-            <Pause size={16} />
+            <Pause size={16} className="text-white" />
           ) : (
-            <Play size={16} className="ml-0.5" />
+            <Play size={16} className="text-white ml-0.5" />
           )}
-        </button>
+        </LiquidGlassButton>
       </div>{' '}
       {/* LIVE indicator + mini ferrofluid */}{' '}
       <div className="flex-1 flex-row-2 min-w-0 relative">
@@ -5511,7 +6115,7 @@ function _NowPlayingBar({
             <div className="flex-row-1.5 relative z-10">
               {' '}
               <span className="dot-2 bg-red-500 animate-pulse" />{' '}
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-red-500">
+              <span className="text-[12px] font-semibold tracking-wider uppercase text-red-500">
                 LIVE
               </span>{' '}
               <AnimatedBars size="small" />
@@ -5520,13 +6124,14 @@ function _NowPlayingBar({
         )}
       </div>{' '}
       {/* Toggles */}{' '}
-      <div className="flex-row-0.5">
+      <div className="flex-row-1">
         {station && !theaterMode && (
           <button
             onClick={onToggleTheater}
-            className="p-1.5 rounded-md transition-colors text-subtle hover:text-white/50"
+            className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Theater Mode"
             aria-label="Theater mode"
+            aria-pressed={theaterMode}
           >
             <Maximize2 size={14} />
           </button>
@@ -5536,7 +6141,7 @@ function _NowPlayingBar({
             onClick={onToggleFav}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={!!isFavorite}
-            className={`p-1.5 rounded-md transition-colors ${isFavorite ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
+            className={`p-2.5 rounded-md transition-colors ${isFavorite ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
             title="Favorita"
           >
             <Star size={14} className={isFavorite ? 'fill-sys-orange' : ''} />
@@ -5547,7 +6152,7 @@ function _NowPlayingBar({
             onClick={onFavSong}
             aria-label={songLiked ? 'Unlike song' : 'Like song'}
             aria-pressed={!!songLiked}
-            className={`p-1.5 rounded-md transition-colors ${songLiked ? 'text-pink-400' : 'text-subtle hover:text-white/50'}`}
+            className={`p-2.5 rounded-md transition-colors ${songLiked ? 'text-pink-400' : 'text-subtle hover:text-white/50'}`}
             title="Me gusta canción"
           >
             <Heart size={14} className={songLiked ? 'fill-pink-400' : ''} />
@@ -5556,7 +6161,7 @@ function _NowPlayingBar({
         {onCycleSleepTimer && (
           <button
             onClick={onCycleSleepTimer}
-            className={`p-1.5 rounded-md transition-colors relative ${sleepTimerMin != null ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
+            className={`p-2.5 rounded-md transition-colors relative ${sleepTimerMin != null ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
             title={sleepTimerMin != null ? `Sleep in ${sleepTimerMin}m` : 'Sleep Timer'}
             aria-label={
               sleepTimerMin != null
@@ -5567,20 +6172,47 @@ function _NowPlayingBar({
             {' '}
             <Clock size={14} />{' '}
             {sleepTimerMin != null && (
-              <span className="absolute -top-1 -right-1 text-[8px] font-bold text-sys-orange leading-none">
+              <span className="absolute -top-1 -right-1 text-[11px] font-bold text-sys-orange leading-none">
                 {' '}
                 {sleepTimerMin}
               </span>
             )}
           </button>
         )}{' '}
-        <button
-          onClick={onToggleEq}
-          aria-label="Toggle equalizer"
-          className={`p-1.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
-        >
-          <SlidersHorizontal size={14} />
-        </button>
+        {onToggleEffects && (
+          <button
+            onClick={onToggleEffects}
+            aria-label={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+            aria-pressed={!!effectsEnabled}
+            className={`p-2.5 rounded-md transition-colors ${effectsEnabled ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
+            title={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+          >
+            <MdAutoAwesome size={14} />
+          </button>
+        )}{' '}
+        {effectsEnabled && (
+          <button
+            onClick={onToggleEq}
+            aria-label="Toggle equalizer"
+            className={`p-2.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
+          >
+            <SlidersHorizontal size={14} />
+          </button>
+        )}
+        {station && (
+          <button
+            onClick={() => shareContent({
+              title: track ? `${track.artist ?? station.name} — ${track.title}` : station.name,
+              text: track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`,
+              url: typeof window !== 'undefined' ? window.location.href : '',
+            })}
+            aria-label="Share"
+            className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
+            title="Share"
+          >
+            <Share2 size={14} />
+          </button>
+        )}
       </div>{' '}
       {/* Volume */}{' '}
       <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
@@ -5588,7 +6220,7 @@ function _NowPlayingBar({
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
-          className="p-1 text-muted hover:text-white/60 transition-colors shrink-0"
+          className="p-2 text-muted hover:text-white/60 transition-colors shrink-0"
         >
           {' '}
           {muted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -5601,7 +6233,7 @@ function _NowPlayingBar({
           value={volume}
           onChange={handleVolumeChange}
           aria-label="Volume"
-          className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
+          className="flex-fill h-0.75 appearance-none bg-surface-3 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_3px_rgba(0,0,0,0.3)]"
         />
       </div>
     </div>
@@ -5694,7 +6326,7 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
       {onTheater && (
         <button
           onClick={onTheater}
-          className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
+          className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[12px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
           title="Theater mode"
         >
           <Maximize2 size={12} /> Theater
@@ -5734,16 +6366,16 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )}{' '}
-          {track?.album && <p className="text-[11px] text-dim truncate">{track.album}</p>}{' '}
+          {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}{' '}
           {isPlaying && (
             <div className="flex-row-1.5 mt-1">
               <span className="dot-1.5 bg-sys-orange" />{' '}
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-sys-orange">
+              <span className="text-[12px] font-semibold tracking-wider uppercase text-sys-orange">
                 LIVE
               </span>{' '}
               <AnimatedBars size="small" />{' '}
               {icyBitrate && (
-                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 ml-1">
+                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[12px] font-mono text-white/50 ml-1">
                   {' '}
                   {icyBitrate}kbps
                 </span>
@@ -5765,49 +6397,49 @@ const GLASS_STYLE: React.CSSProperties = {
 type GuideSection = { icon: React.ReactNode; title: string; content: string };
 const GUIDE_SECTIONS: GuideSection[] = [
   {
-    icon: <IoRadioOutline size={22} className="text-[#3478f6]" />,
+    icon: <IoRadioOutline size={22} className="text-[#3478f6]" aria-hidden="true" />,
     title: 'Listening to Radio',
     content:
       'Browse stations by genre, country or search. Tap any station card to start playing. The visualizer activates automatically with live audio-reactive effects.',
   },
   {
-    icon: <IoSearchOutline size={22} className="text-cyan-400" />,
+    icon: <IoSearchOutline size={22} className="text-cyan-400" aria-hidden="true" />,
     title: 'Search & Discover',
     content:
       'Use the search bar to find stations by name, genre or location. Enable Discovery Mode (lightning icon) to auto-play random stations every 30 seconds.',
   },
   {
-    icon: <IoHeartOutline size={22} className="text-pink-400" />,
+    icon: <IoHeartOutline size={22} className="text-pink-400" aria-hidden="true" />,
     title: 'Favorites',
     content:
       'Tap the star to save stations. Tap the heart to save songs. Filter your favorite songs by artist — songs are grouped in stacks you can expand.',
   },
   {
-    icon: <IoMusicalNotesOutline size={22} className="text-purple-400" />,
+    icon: <IoMusicalNotesOutline size={22} className="text-purple-400" aria-hidden="true" />,
     title: 'Lyrics & Track Info',
     content:
       'Pulse detects the current song and fetches lyrics automatically. Tap on any song in history for detailed info including artist bio and album art.',
   },
   {
-    icon: <IoColorPaletteOutline size={22} className="text-amber-400" />,
+    icon: <IoColorPaletteOutline size={22} className="text-amber-400" aria-hidden="true" />,
     title: 'Theater Mode',
     content:
       'Press T or tap the theater button to enter immersive mode. The Fibonacci spiral visualizer reacts to the music with a CRT retro effect overlay.',
   },
   {
-    icon: <IoStatsChartOutline size={22} className="text-emerald-400" />,
+    icon: <IoStatsChartOutline size={22} className="text-emerald-400" aria-hidden="true" />,
     title: 'Your Statistics',
     content:
       'Pulse tracks your listening: time per station, most played songs, top artists and genres. Your home screen reorders sections based on what you listen to most.',
   },
   {
-    icon: <IoTimerOutline size={22} className="text-orange-400" />,
+    icon: <IoTimerOutline size={22} className="text-orange-400" aria-hidden="true" />,
     title: 'Sleep Timer',
     content:
       'Press Z or use the timer icon to cycle through sleep durations (15, 30, 60, 90 min). Pulse will automatically stop playback when the timer ends.',
   },
   {
-    icon: <IoGlobeOutline size={22} className="text-sky-400" />,
+    icon: <IoGlobeOutline size={22} className="text-sky-400" aria-hidden="true" />,
     title: 'Keyboard Shortcuts',
     content:
       'Space: play/pause • ← →: skip station • ↑ ↓: volume • T: theater • E: equalizer • L: like song • S: star station • F: focus search • ?: show all shortcuts.',
@@ -5824,7 +6456,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
       transition={_MOTION_T_02}
       className="absolute inset-0 z-50 flex flex-col"
     >
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />{' '}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />{' '}
       <motion.div
         initial={_MOTION_SLIDE_UP_INIT}
         animate={_MOTION_SLIDE_UP_VISIBLE}
@@ -5832,6 +6464,10 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
         transition={_MOTION_T_SPRING}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}
+        role="dialog"
+        aria-modal="true"
+        aria-label="How to use Pulse"
+        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
       >
         {' '}
         {/* Handle bar */}{' '}
@@ -5843,7 +6479,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
           <button
             onClick={onClose}
             aria-label="Close guide"
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <IoChevronBack size={16} />
           </button>{' '}
@@ -5862,6 +6498,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
                 <button
                   onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
+                  aria-expanded={isExpanded}
                 >
                   <div className="flex-shrink-0">{section.icon}</div>{' '}
                   <span className="text-[14px] font-medium text-white/80 flex-1">
@@ -5870,7 +6507,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
                   <motion.span
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={_MOTION_T_02}
-                    className="text-white/30 text-[12px]"
+                    className="text-white/45 text-[12px]"
                   >
                     ▶
                   </motion.span>
@@ -5962,7 +6599,7 @@ const BarRow = React.memo(function BarRow({
           style={{ width: `${pct}%` }}
         />{' '}
       </div>
-      <span className="text-[11px] text-white/40 tabular-nums w-[50px] text-right shrink-0">
+      <span className="text-[12px] text-white/50 tabular-nums w-[50px] text-right shrink-0">
         {suffix}
       </span>
     </div>
@@ -5980,9 +6617,9 @@ const StatsView = React.memo(function StatsView({
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
         {' '}
-        <IoTimeOutline size={40} className="text-white/20 mb-3" />{' '}
-        <p className="text-[14px] text-white/40">No listening data yet</p>{' '}
-        <p className="text-[12px] text-white/25 mt-1">Start playing stations to see your stats</p>
+        <IoTimeOutline size={40} className="text-white/35 mb-3" />{' '}
+        <p className="text-[14px] text-white/55">No listening data yet</p>{' '}
+        <p className="text-[12px] text-white/50 mt-1">Start playing stations to see your stats</p>
       </div>
     );
   }
@@ -5998,7 +6635,7 @@ const StatsView = React.memo(function StatsView({
         {' '}
         <IoTimeOutline size={20} className="text-[#3478f6]" />{' '}
         <div>
-          <p className="text-[11px] text-white/40 uppercase tracking-wider">Total Listen Time</p>{' '}
+          <p className="text-[12px] text-white/50 uppercase tracking-wider">Total Listen Time</p>{' '}
           <p className="text-[18px] font-bold text-white tabular-nums">
             {formatListenTime(totalListenMs)}
           </p>
@@ -6008,7 +6645,7 @@ const StatsView = React.memo(function StatsView({
       {topStations.length > 0 && (
         <StatSection
           title="Top Stations"
-          icon={<IoRadioOutline size={16} className="text-amber-400/70" />}
+          icon={<IoRadioOutline size={16} className="text-amber-400/70" aria-hidden="true" />}
         >
           {' '}
           {topStations.slice(0, 5).map((s) => (
@@ -6026,7 +6663,7 @@ const StatsView = React.memo(function StatsView({
       {topSongs.length > 0 && (
         <StatSection
           title="Most Played Songs"
-          icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" />}
+          icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" aria-hidden="true" />}
         >
           {' '}
           {topSongs.slice(0, 5).map((s) => (
@@ -6044,7 +6681,7 @@ const StatsView = React.memo(function StatsView({
       {topArtists.length > 0 && (
         <StatSection
           title="Top Artists"
-          icon={<IoPersonOutline size={16} className="text-purple-400/70" />}
+          icon={<IoPersonOutline size={16} className="text-purple-400/70" aria-hidden="true" />}
         >
           {' '}
           {topArtists.slice(0, 5).map((a) => (
@@ -6062,7 +6699,7 @@ const StatsView = React.memo(function StatsView({
       {topGenres.length > 0 && (
         <StatSection
           title="Top Genres"
-          icon={<IoDiscOutline size={16} className="text-emerald-400/70" />}
+          icon={<IoDiscOutline size={16} className="text-emerald-400/70" aria-hidden="true" />}
         >
           {' '}
           {topGenres.slice(0, 5).map((g) => (
@@ -6112,8 +6749,10 @@ type MobileSettingsPanelProps = {
     totalListenMs: number;
   };
   desktop?: boolean;
+  effectsEnabled: boolean;
+  onToggleEffects: () => void;
 };
-function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }: MobileSettingsPanelProps) {
+function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, effectsEnabled, onToggleEffects }: MobileSettingsPanelProps) {
   const { locale, setLocale, locales } = useLocale();
   const [showEq, setShowEq] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -6154,7 +6793,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
       className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
     >
       {' '}
-      {/* Backdrop */} <div className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'} onClick={onClose} />{' '}
+      {/* Backdrop */} <div className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'} onClick={onClose} aria-hidden="true" />{' '}
       {/* Panel */}{' '}
       <motion.div
         initial={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_INIT}
@@ -6164,6 +6803,10 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
         className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
         style={_GLASS_SETTINGS_STYLE}
         data-testid={desktop ? 'desktop-settings-modal' : 'mobile-settings-panel'}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Settings"
+        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
       >
         {' '}
         {/* Handle bar — mobile only */}{' '}
@@ -6179,7 +6822,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
           <button
             onClick={onClose}
             aria-label="Close settings"
-            className="w-8 h-8 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
+            className="w-10 h-10 flex-center-row rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <X size={16} />
           </button>
@@ -6207,8 +6850,15 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
         <div className="px-5 py-4">
           {' '}
           <button
-            onClick={() => setShowEq((s) => !s)}
+            onClick={() => {
+              setShowEq((s) => !s);
+              if (!effectsEnabled) {
+                onToggleEffects();
+              }
+            }}
             className="flex items-center justify-between w-full"
+            aria-label="Toggle equalizer section"
+            aria-expanded={showEq}
           >
             {' '}
             <div className="flex items-center gap-2">
@@ -6218,14 +6868,14 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
             <div className="flex items-center gap-2">
               {' '}
               <span
-                className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange' : 'bg-white/5 text-white/40'}`}
+                className={`text-[12px] font-medium px-2 py-0.5 rounded-full ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange' : 'bg-white/5 text-white/45'}`}
               >
                 {eq.enabled ? 'ON' : 'OFF'}
               </span>{' '}
               {showEq ? (
-                <ChevronUp size={14} className="text-white/40" />
+                <ChevronUp size={14} className="text-white/45" />
               ) : (
-                <ChevronDown size={14} className="text-white/40" />
+                <ChevronDown size={14} className="text-white/45" />
               )}{' '}
             </div>
           </button>{' '}
@@ -6237,14 +6887,18 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                 {' '}
                 <button
                   onClick={eq.toggleEnabled}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/40 border border-white/8'}`}
+                  aria-label={eq.enabled ? 'Disable equalizer' : 'Enable equalizer'}
+                  aria-pressed={eq.enabled}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
                   {' '}
                   <Power size={12} /> {eq.enabled ? 'Enabled' : 'Disabled'}
                 </button>{' '}
                 <button
                   onClick={eq.toggleNormalizer}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/40 border border-white/8'}`}
+                  aria-label={eq.normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'}
+                  aria-pressed={eq.normalizerEnabled}
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
                   {' '}
                   NORM
@@ -6252,7 +6906,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               </div>{' '}
               {/* Presets */}{' '}
               <div>
-                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">
+                <span className="text-[12px] text-white/50 uppercase tracking-wider mb-2 block">
                   Presets
                 </span>{' '}
                 <div className="flex flex-wrap gap-1.5">
@@ -6260,7 +6914,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     <button
                       key={preset.name}
                       onClick={() => handleSelectPreset(preset.name, preset.gains)}
-                      className={`px-2.5 py-1.5 text-[11px] rounded-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50 hover:text-white/80'}`}
+                      className={`px-2.5 py-1.5 text-[12px] rounded-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50 hover:text-white/80'}`}
                     >
                       {' '}
                       {preset.name}
@@ -6271,7 +6925,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                       {' '}
                       <button
                         onClick={() => handleSelectPreset(preset.name, preset.gains)}
-                        className={`px-2.5 py-1.5 text-[11px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8'}`}
+                        className={`px-2.5 py-1.5 text-[12px] rounded-l-lg transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 text-sys-orange border-l border-t border-b border-white/8'}`}
                       >
                         {' '}
                         {preset.name}
@@ -6279,7 +6933,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                       <button
                         onClick={() => eq.removeCustomPreset(preset.name)}
                         aria-label={`Delete ${preset.name} preset`}
-                        className="px-1.5 py-1.5 text-[11px] rounded-r-lg bg-white/5 border border-white/8 text-white/30 hover:text-red-400 transition-colors"
+                        className="px-1.5 py-1.5 text-[12px] rounded-r-lg bg-white/5 border border-white/8 text-white/45 hover:text-red-400 transition-colors"
                       >
                         {' '}
                         <X size={10} />
@@ -6301,20 +6955,21 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                           if (e.key === 'Escape') setShowSaveInput(false);
                         }}
                         placeholder="Preset name…"
-                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/25 outline-none focus:border-sys-orange/50"
+                        aria-label="Preset name"
+                        className="flex-1 px-2.5 py-1.5 text-[12px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                         autoFocus
                       />{' '}
                       <button
                         onClick={handleSave}
                         aria-label="Save preset"
-                        className="p-1.5 rounded-lg bg-sys-orange/20 text-sys-orange"
+                        className="p-2 rounded-lg bg-sys-orange/20 text-sys-orange"
                       >
                         <Save size={12} />
                       </button>{' '}
                       <button
                         onClick={() => setShowSaveInput(false)}
                         aria-label="Cancel"
-                        className="p-1.5 rounded-lg bg-white/5 text-white/40"
+                        className="p-2 rounded-lg bg-white/5 text-white/45"
                       >
                         <X size={12} />
                       </button>{' '}
@@ -6322,7 +6977,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   ) : (
                     <button
                       onClick={() => setShowSaveInput(true)}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/40 hover:text-white/60 transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[12px] rounded-lg bg-white/5 border border-white/8 text-white/45 hover:text-white/60 transition-colors"
                     >
                       {' '}
                       <Plus size={10} /> Save Custom
@@ -6332,7 +6987,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               </div>{' '}
               {/* Band sliders — horizontal scroll */}{' '}
               <div>
-                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">
+                <span className="text-[12px] text-white/50 uppercase tracking-wider mb-2 block">
                   Bands
                 </span>{' '}
                 <div className="flex items-end justify-between gap-1.5 px-1">
@@ -6340,7 +6995,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {eq.bands.map((band) => (
                     <div key={band.id} className="flex flex-col items-center gap-1">
                       {' '}
-                      <span className="text-[9px] text-white/40 tabular-nums">
+                      <span className="text-[12px] text-white/50 tabular-nums">
                         {band.gain > 0 ? `+${band.gain}` : band.gain}
                       </span>{' '}
                       <input
@@ -6352,9 +7007,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                         onChange={(e) => handleSetGain(band.id, parseInt(e.target.value, 10))}
                         disabled={!eq.enabled}
                         aria-label={`${band.label} Hz gain`}
-                        className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                        className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />{' '}
-                      <span className="text-[8px] text-white/40">{band.label}</span>
+                      <span className="text-[12px] text-white/50">{band.label}</span>
                     </div>
                   ))}
                 </div>
@@ -6362,7 +7017,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               {/* Noise Reduction */}{' '}
               <div>
                 {' '}
-                <span className="text-[11px] text-white/40 uppercase tracking-wider mb-2 block">
+                <span className="text-[12px] text-white/50 uppercase tracking-wider mb-2 block">
                   Noise Reduction
                 </span>{' '}
                 <div className="flex gap-1.5">
@@ -6370,7 +7025,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     <button
                       key={mode}
                       onClick={() => eq.setNoiseReductionMode(mode)}
-                      className={`flex-1 py-1.5 text-[11px] rounded-lg font-medium transition-colors ${eq.noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50'}`}
+                      className={`flex-1 py-1.5 text-[12px] rounded-lg font-medium transition-colors ${eq.noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 border border-white/8 text-white/50'}`}
                     >
                       {mode.charAt(0).toUpperCase() + mode.slice(1)}
                     </button>
@@ -6381,7 +7036,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   {' '}
-                  <span className="text-[11px] text-white/50 w-10 shrink-0">Width</span>{' '}
+                  <span className="text-[12px] text-white/50 w-10 shrink-0">Width</span>{' '}
                   <input
                     type="range"
                     min={0}
@@ -6390,15 +7045,15 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     value={Math.round(eq.stereoWidth * 100)}
                     onChange={(e) => eq.setStereoWidth(parseInt(e.target.value, 10) / 100)}
                     aria-label="Stereo width"
-                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+                  <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.stereoWidth * 100)}%
                   </span>{' '}
                 </div>
                 <div className="flex items-center gap-3">
                   {' '}
-                  <span className="text-[11px] text-white/50 w-10 shrink-0">Bass+</span>{' '}
+                  <span className="text-[12px] text-white/50 w-10 shrink-0">Bass+</span>{' '}
                   <input
                     type="range"
                     min={0}
@@ -6407,9 +7062,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     value={Math.round(eq.bassEnhance * 100)}
                     onChange={(e) => eq.setBassEnhance(parseInt(e.target.value, 10) / 100)}
                     aria-label="Bass enhance"
-                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+                  <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.bassEnhance * 100)}%
                   </span>{' '}
                 </div>
@@ -6417,7 +7072,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   {' '}
                   <button
                     onClick={eq.toggleCompressor}
-                    className={`text-[11px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? 'text-sys-orange' : 'text-white/50'}`}
+                    aria-label={eq.compressorEnabled ? 'Disable compressor' : 'Enable compressor'}
+                    aria-pressed={eq.compressorEnabled}
+                    className={`text-[12px] w-10 shrink-0 text-left font-medium transition-colors ${eq.compressorEnabled ? 'text-sys-orange' : 'text-white/50'}`}
                   >
                     Comp
                   </button>{' '}
@@ -6430,9 +7087,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     onChange={(e) => eq.setCompressorAmount(parseInt(e.target.value, 10) / 100)}
                     disabled={!eq.compressorEnabled}
                     aria-label="Compressor amount"
-                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
-                  <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+                  <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.compressorAmount * 100)}%
                   </span>{' '}
                 </div>
@@ -6471,30 +7128,37 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
             animate={_MOTION_FADE_VISIBLE}
             exit={_MOTION_FADE_OUT}
             transition={_MOTION_T_02}
-            className="absolute inset-0 z-50 flex flex-col"
+            className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
           >
             {' '}
             <div
-              className="absolute inset-0 bg-black/50"
+              className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'}
               onClick={() => setShowStats(false)}
+              aria-hidden="true"
             />{' '}
             <motion.div
-              initial={_MOTION_SLIDE_UP_INIT}
-              animate={_MOTION_SLIDE_UP_VISIBLE}
-              exit={_MOTION_SLIDE_UP_EXIT}
-              transition={_MOTION_T_SPRING}
-              className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
-              style={_GLASS_PANEL_STYLE}
+              initial={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_INIT}
+              animate={desktop ? { opacity: 1, scale: 1 } : _MOTION_SLIDE_UP_VISIBLE}
+              exit={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_EXIT}
+              transition={desktop ? { duration: 0.2 } : _MOTION_T_SPRING}
+              className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
+              style={desktop ? _GLASS_SETTINGS_STYLE : _GLASS_PANEL_STYLE}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Your Statistics"
+              onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') setShowStats(false); }}
             >
               {' '}
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-white/20" />
-              </div>{' '}
-              <div className="flex items-center gap-3 px-5 pb-3">
+              {!desktop && (
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-white/20" />
+                </div>
+              )}{' '}
+              <div className={`flex items-center gap-3 px-5 pb-3 ${desktop ? 'pt-4' : ''}`}>
                 <button
                   onClick={() => setShowStats(false)}
                   aria-label="Close statistics"
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -6527,7 +7191,7 @@ type FavoriteSongsViewProps = {
 type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = 'none' | 'artist' | 'album';
 const filterBtnClass = (active: boolean) =>
-  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${active ? 'bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30' : 'bg-white/5 text-white/40 border border-white/8 hover:text-white/60'}`;
+  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-medium transition-colors ${active ? 'bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30' : 'bg-white/5 text-white/45 border border-white/8 hover:text-white/60'}`;
 function SongContextMenu({
   menu,
   onRemove,
@@ -6592,12 +7256,9 @@ function GroupStack({
   onContextMenu: (e: React.MouseEvent, songId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const VISIBLE_COUNT = 3;
+  const VISIBLE_COUNT = 6;
   const hasMore = songs.length > VISIBLE_COUNT;
-  const visibleSongs = useMemo(
-    () => (expanded ? songs : songs.slice(0, VISIBLE_COUNT)),
-    [expanded, songs],
-  );
+  const visibleSongs = expanded ? songs : songs.slice(0, VISIBLE_COUNT);
   return (
     <div className="mb-6">
       {' '}
@@ -6607,75 +7268,57 @@ function GroupStack({
         className={`flex items-center gap-2 mb-3 group ${hasMore ? 'cursor-pointer' : 'cursor-default'}`}
       >
         {' '}
-        <Icon size={14} className="text-white/40" />{' '}
+        <Icon size={14} className="text-white/50" />{' '}
         <span className="text-[14px] font-semibold text-white/80">{label}</span>{' '}
-        <span className="text-[11px] text-white/30 bg-white/[0.06] px-2 py-0.5 rounded-full">
+        <span className="text-[12px] text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-full">
           {songs.length}
         </span>{' '}
         {hasMore && (
           <motion.span animate={{ rotate: expanded ? 180 : 0 }} transition={_MOTION_T_02}>
             {' '}
-            <ChevronDown size={14} className="text-white/30" />
+            <ChevronDown size={14} className="text-white/45" />
           </motion.span>
         )}
       </button>{' '}
-      {/* Stacked/expanded cards */}{' '}
+      {/* Horizontal thumbnail row when collapsed, grid when expanded */}{' '}
       {!expanded && hasMore ? (
-        <div
-          className="relative cursor-pointer"
-          onClick={() => setExpanded(true)}
-          role="button"
-          tabIndex={0}
-          aria-label={`Expand ${label} songs`}
-          style={{ height: `${250 + (Math.min(songs.length, VISIBLE_COUNT) - 1) * 16}px` }}
-        >
-          {' '}
-          {songs.slice(0, VISIBLE_COUNT).map((song, i) => (
-            <div
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+          {songs.slice(0, VISIBLE_COUNT).map((song) => (
+            <button
               key={song.id}
-              className="absolute left-0 right-0 transition-all duration-300"
-              style={{
-                top: `${i * 16}px`,
-                zIndex: VISIBLE_COUNT - i,
-                transform: `scale(${1 - i * 0.03})`,
-                opacity: 1 - i * 0.15,
-                maxWidth: '200px',
-              }}
+              onClick={() => onSelect?.({
+                title: song.title,
+                artist: song.artist,
+                album: song.album,
+                artworkUrl: song.artworkUrl,
+                itunesUrl: song.itunesUrl,
+                durationMs: song.durationMs,
+                genre: song.genre,
+                releaseDate: song.releaseDate,
+                trackNumber: song.trackNumber,
+                trackCount: song.trackCount,
+                stationName: song.stationName,
+              })}
+              onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}
+              className="flex-shrink-0 w-20 group/thumb"
+              aria-label={`${song.title} by ${song.artist}`}
             >
-              <div className="bg-surface-2 rounded-xl border border-border-default overflow-hidden">
-                {' '}
-                <div className="w-full aspect-square bg-surface-3 relative">
-                  {song.artworkUrl ? (
-                    <UiImage
-                      src={song.artworkUrl}
-                      alt=""
-                      className="object-cover"
-                      sizes="200px"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="size-full flex items-center justify-center">
-                      <Music size={28} className="text-dim" />
-                    </div>
-                  )}
-                </div>{' '}
-                <div className="p-2.5">
-                  <p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>{' '}
-                  <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p>
-                </div>
+              <div className="w-20 h-20 rounded-lg bg-surface-3 overflow-hidden relative">
+                {song.artworkUrl ? (
+                  <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="80px" loading="lazy" />
+                ) : (
+                  <div className="size-full flex items-center justify-center"><Music size={20} className="text-dim" /></div>
+                )}
               </div>
-            </div>
-          ))}{' '}
-          <div
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-            style={_MAX_WIDTH_200_STYLE}
+              <p className="text-[10px] text-white/60 line-clamp-1 mt-1 text-center">{song.title}</p>
+            </button>
+          ))}
+          <button
+            onClick={() => setExpanded(true)}
+            className="flex-shrink-0 w-20 h-20 rounded-lg bg-surface-3 border border-white/10 flex items-center justify-center text-[12px] text-white/70 font-medium hover:bg-surface-4 transition-colors"
           >
-            {' '}
-            <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
-              {' '}
-              +{songs.length - VISIBLE_COUNT} more
-            </span>
-          </div>
+            +{songs.length - VISIBLE_COUNT} more
+          </button>
         </div>
       ) : (
         <AnimatePresence>
@@ -6705,7 +7348,7 @@ function GroupStack({
       {expanded && hasMore && (
         <button
           onClick={() => setExpanded(false)}
-          className="mt-3 flex items-center gap-1 text-[11px] text-white/40 hover:text-white/60 transition-colors"
+          className="mt-3 flex items-center gap-1 text-[12px] text-white/50 hover:text-white/60 transition-colors"
         >
           {' '}
           <ChevronDown size={12} className="rotate-180" /> Collapse
@@ -6763,6 +7406,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
           <button
             onClick={() => toggleFilter('artist')}
             className={filterBtnClass(filterMode === 'artist')}
+            aria-pressed={filterMode === 'artist'}
           >
             {' '}
             <Users size={10} /> By Artist{' '}
@@ -6781,6 +7425,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
           <button
             onClick={() => toggleFilter('album')}
             className={filterBtnClass(filterMode === 'album')}
+            aria-pressed={filterMode === 'album'}
           >
             {' '}
             <Disc3 size={10} /> By Album{' '}
@@ -6798,7 +7443,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
         </div>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
+          className="flex items-center gap-1 text-[12px] text-dim hover:text-red-400 transition-colors"
         >
           {' '}
           <Trash2 size={11} /> Clear all
@@ -6892,7 +7537,7 @@ const HistoryGridView = React.memo(function HistoryGridView({
         <p className="text-[12px] text-dim">{history.length} songs</p>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
+          className="flex items-center gap-1 text-[12px] text-dim hover:text-red-400 transition-colors"
         >
           {' '}
           <Trash2 size={11} /> Clear all
@@ -6928,31 +7573,31 @@ const ONBOARDING_KEY = 'radio-onboarding-done';
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string };
 const STEPS: OnboardingStep[] = [
   {
-    icon: <IoRadioOutline size={48} className="text-[#3478f6]" />,
+    icon: <IoRadioOutline size={48} className="text-[#3478f6]" aria-hidden="true" />,
     title: 'Welcome to Pulse',
     description:
       'Your free internet radio experience. Discover thousands of stations, genres and artists from around the world.',
   },
   {
-    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" />,
+    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" aria-hidden="true" />,
     title: 'Live Radio & Lyrics',
     description:
       'Listen to live radio with real-time song detection, synchronized lyrics, and detailed track information.',
   },
   {
-    icon: <IoHeartOutline size={48} className="text-red-400" />,
+    icon: <IoHeartOutline size={48} className="text-red-400" aria-hidden="true" />,
     title: 'Favorites & History',
     description:
       'Save your favorite stations and songs. Browse your listening history and rediscover music you loved.',
   },
   {
-    icon: <IoColorPaletteOutline size={48} className="text-purple-400" />,
+    icon: <IoColorPaletteOutline size={48} className="text-purple-400" aria-hidden="true" />,
     title: 'Immersive Visualizer',
     description:
       'Enjoy a reactive audio visualizer with CRT effects. Customize the sound with the built-in equalizer.',
   },
   {
-    icon: <IoStatsChartOutline size={48} className="text-emerald-400" />,
+    icon: <IoStatsChartOutline size={48} className="text-emerald-400" aria-hidden="true" />,
     title: 'Your Stats',
     description:
       'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
@@ -7031,7 +7676,7 @@ function PWAStep() {
           </div>
         </div>
       ) : (
-        <p className="text-[12px] text-white/40 mt-1">
+        <p className="text-[12px] text-white/50 mt-1">
           {' '}
           Use Chrome or Edge for the install option, or add this page to your home screen.
         </p>
@@ -7066,9 +7711,10 @@ function _OnboardingModal() {
           animate={_MOTION_FADE_VISIBLE}
           exit={_MOTION_FADE_OUT}
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+          onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') handleClose(); }}
         >
           {' '}
-          {/* Backdrop */} <div className="absolute inset-0 bg-black/70" onClick={handleClose} />{' '}
+          {/* Backdrop */} <div className="absolute inset-0 bg-black/70" onClick={handleClose} aria-hidden="true" />{' '}
           {/* Modal */}{' '}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -7077,6 +7723,9 @@ function _OnboardingModal() {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
             style={GLASS_STYLE}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Welcome to Pulse Radio"
           >
             {' '}
             {/* Content */}{' '}
@@ -7125,13 +7774,14 @@ function _OnboardingModal() {
               <div className="flex items-center justify-between gap-3">
                 <button
                   onClick={step > 0 ? () => setStep((s) => s - 1) : handleClose}
-                  className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
+                  className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/45 hover:text-white/60'}`}
                 >
                   {step > 0 ? 'Back' : 'Skip'}
                 </button>
                 <button
                   onClick={() => (step < _TOTAL_STEPS - 1 ? setStep((s) => s + 1) : handleClose())}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
+                  autoFocus
                 >
                   {isLast ? "Let's Go!" : 'Next'}
                 </button>
@@ -7268,24 +7918,24 @@ const ParallaxBackground = React.memo(_ParallaxBackground);
 function _LanguageSelector() {
   const { locale, setLocale, locales } = useLocale();
   return (
-    <label className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.06] text-[12px] text-dim">
-      {' '}
-      <Languages size={12} className="text-white/70" /> <span className="sr-only">Language</span>
-      <select
-        value={locale}
-        onChange={(event) => setLocale(event.target.value as typeof locale)}
-        className="bg-transparent text-white outline-none cursor-pointer"
-        aria-label="Language selector"
-        data-language-selector
-      >
-        {' '}
-        {locales.map((item) => (
-          <option key={item.code} value={item.code} className="bg-[#0a0f1a] text-white">
-            {item.nativeName}
-          </option>
-        ))}
-      </select>
-    </label>
+    <LiquidGlassButton className="!rounded-full px-3 py-1.5 text-[12px]" aria-label="Language selector">
+      <label className="flex items-center gap-2 cursor-pointer">
+        <Languages size={12} className="text-white/70" />
+        <select
+          value={locale}
+          onChange={(event) => setLocale(event.target.value as typeof locale)}
+          className="bg-transparent text-white outline-none cursor-pointer text-[12px]"
+          aria-label="Language selector"
+          data-language-selector
+        >
+          {locales.map((item) => (
+            <option key={item.code} value={item.code} className="bg-[#0a0f1a] text-white">
+              {item.nativeName}
+            </option>
+          ))}
+        </select>
+      </label>
+    </LiquidGlassButton>
   );
 }
 const LanguageSelector = React.memo(_LanguageSelector);
@@ -7359,7 +8009,7 @@ const EqPanel = React.memo(function EqPanel({
     }
   };
   return (
-    <div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50">
+    <div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50" role="dialog" aria-modal="false" aria-label="Equalizer">
       {' '}
       {/* Header */}{' '}
       <div className="flex-between mb-4">
@@ -7369,7 +8019,8 @@ const EqPanel = React.memo(function EqPanel({
           <button
             onClick={onToggleEnabled}
             aria-label={enabled ? 'Disable equalizer' : 'Enable equalizer'}
-            className={`p-1 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`}
+            aria-pressed={enabled}
+            className={`p-2 rounded transition-colors ${enabled ? 'text-sys-orange' : 'text-dim'}`}
           >
             <Power size={13} />
           </button>{' '}
@@ -7378,13 +8029,14 @@ const EqPanel = React.memo(function EqPanel({
             aria-label={
               normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'
             }
+            aria-pressed={normalizerEnabled}
             title="Loudness Normalizer"
-            className={`px-1.5 py-0.5 text-[9px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
+            className={`px-1.5 py-0.5 text-[12px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
           >
             NORM
           </button>
         </div>{' '}
-        <button onClick={onClose} aria-label="Close equalizer" className="p-1 text-subtle-hover">
+        <button onClick={onClose} aria-label="Close equalizer" className="p-2 text-subtle-hover">
           <X size={14} />
         </button>
       </div>{' '}
@@ -7394,7 +8046,7 @@ const EqPanel = React.memo(function EqPanel({
           <button
             key={preset.name}
             onClick={() => handleSelectPreset(preset.name, preset.gains)}
-            className={`px-2 py-1 text-[10px] rounded-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
+            className={`px-2 py-1 text-[12px] rounded-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
           >
             {' '}
             {preset.name}
@@ -7405,7 +8057,7 @@ const EqPanel = React.memo(function EqPanel({
             {' '}
             <button
               onClick={() => handleSelectPreset(preset.name, preset.gains)}
-              className={`px-2 py-1 text-[10px] rounded-l-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 hover:bg-sys-orange/20 text-sys-orange hover:text-white'}`}
+              className={`px-2 py-1 text-[12px] rounded-l-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 hover:bg-sys-orange/20 text-sys-orange hover:text-white'}`}
             >
               {' '}
               {preset.name}
@@ -7414,7 +8066,7 @@ const EqPanel = React.memo(function EqPanel({
               <button
                 onClick={() => onRemoveCustomPreset(preset.name)}
                 aria-label={`Delete ${preset.name} preset`}
-                className="px-1 py-1 text-[10px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors"
+                className="px-1 py-1 text-[12px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors"
               >
                 {' '}
                 <X size={8} />
@@ -7440,20 +8092,20 @@ const EqPanel = React.memo(function EqPanel({
                 }}
                 placeholder="Preset name…"
                 aria-label="Preset name"
-                className="flex-1 px-2 py-1 text-[10px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/30 outline-none focus:border-sys-orange/50"
+                className="flex-1 px-2 py-1 text-[12px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                 autoFocus
               />{' '}
               <button
                 onClick={handleSave}
                 aria-label="Save preset"
-                className="p-1 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
+                className="p-2 rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
               >
                 <Save size={10} />
               </button>{' '}
               <button
                 onClick={() => setShowSaveInput(false)}
                 aria-label="Cancel"
-                className="p-1 rounded-md bg-surface-2 text-subtle-hover"
+                className="p-2 rounded-md bg-surface-2 text-subtle-hover"
               >
                 <X size={10} />
               </button>
@@ -7461,7 +8113,7 @@ const EqPanel = React.memo(function EqPanel({
           ) : (
             <button
               onClick={() => setShowSaveInput(true)}
-              className="flex-row-1 px-2 py-1 text-[10px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors"
+              className="flex-row-1 px-2 py-1 text-[12px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors"
             >
               {' '}
               <Plus size={10} /> Save Custom
@@ -7475,7 +8127,7 @@ const EqPanel = React.memo(function EqPanel({
         {bands.map((band) => (
           <div key={band.id} className="col-center gap-1">
             {' '}
-            <span className="text-[9px] text-dim tabular-nums">
+            <span className="text-[12px] text-dim tabular-nums">
               {band.gain > 0 ? `+${band.gain}` : band.gain}
             </span>{' '}
             <input
@@ -7489,7 +8141,7 @@ const EqPanel = React.memo(function EqPanel({
               aria-label={`${band.label} gain`}
               className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />{' '}
-            <span className="text-[9px] text-secondary">{band.label}</span>
+            <span className="text-[12px] text-secondary">{band.label}</span>
           </div>
         ))}
       </div>{' '}
@@ -7497,13 +8149,13 @@ const EqPanel = React.memo(function EqPanel({
       <div className="mt-3 pt-3 border-t border-white/10">
         {' '}
         <div className="mb-2">
-          <div className="text-[10px] text-secondary mb-1">Noise Reduction</div>{' '}
+          <div className="text-[12px] text-secondary mb-1">Noise Reduction</div>{' '}
           <div className="flex-wrap-1.5">
             {(['off', 'low', 'medium', 'high'] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => onSetNoiseReductionMode(mode)}
-                className={`px-2 py-1 text-[10px] rounded-md transition-colors ${noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
+                className={`px-2 py-1 text-[12px] rounded-md transition-colors ${noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
                 aria-label={`Noise reduction ${mode}`}
               >
                 {mode.toUpperCase()}
@@ -7512,7 +8164,7 @@ const EqPanel = React.memo(function EqPanel({
           </div>
         </div>{' '}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-secondary shrink-0 w-12">Width</span>{' '}
+          <span className="text-[12px] text-secondary shrink-0 w-12">Width</span>{' '}
           <input
             type="range"
             min={0}
@@ -7521,15 +8173,15 @@ const EqPanel = React.memo(function EqPanel({
             value={Math.round(stereoWidth * 100)}
             onChange={(e) => onSetStereoWidth(parseInt(e.target.value, 10) / 100)}
             aria-label="Stereo width"
-            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[12px] text-dim tabular-nums w-8 text-right">
             {Math.round(stereoWidth * 100)}%
           </span>{' '}
         </div>
         <div className="flex items-center gap-2 mt-2">
           {' '}
-          <span className="text-[10px] text-secondary shrink-0 w-12">Bass+</span>{' '}
+          <span className="text-[12px] text-secondary shrink-0 w-12">Bass+</span>{' '}
           <input
             type="range"
             min={0}
@@ -7538,9 +8190,9 @@ const EqPanel = React.memo(function EqPanel({
             value={Math.round(bassEnhance * 100)}
             onChange={(e) => onSetBassEnhance(parseInt(e.target.value, 10) / 100)}
             aria-label="Bass enhance"
-            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[12px] text-dim tabular-nums w-8 text-right">
             {Math.round(bassEnhance * 100)}%
           </span>{' '}
         </div>
@@ -7549,8 +8201,9 @@ const EqPanel = React.memo(function EqPanel({
           <button
             onClick={onToggleCompressor}
             aria-label={compressorEnabled ? 'Disable compressor' : 'Enable compressor'}
+            aria-pressed={compressorEnabled}
             title="Multiband Compressor"
-            className={`text-[10px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}
+            className={`text-[12px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}
           >
             Comp
           </button>{' '}
@@ -7563,9 +8216,9 @@ const EqPanel = React.memo(function EqPanel({
             onChange={(e) => onSetCompressorAmount(parseInt(e.target.value, 10) / 100)}
             disabled={!compressorEnabled}
             aria-label="Compressor amount"
-            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
+            className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[9px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[12px] text-dim tabular-nums w-8 text-right">
             {Math.round(compressorAmount * 100)}%
           </span>{' '}
         </div>{' '}
@@ -7601,6 +8254,7 @@ const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClos
       aria-modal="true"
       aria-label="Keyboard shortcuts"
       onClick={onClose}
+      onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
     >
       <div
         className="bg-surface-2 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 relative"
@@ -7611,7 +8265,7 @@ const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClos
           <h2 className="text-[15px] font-semibold text-white">Keyboard Shortcuts</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-surface-3 transition-colors text-secondary"
+            className="p-2 rounded-lg hover:bg-surface-3 transition-colors text-secondary"
             aria-label="Close shortcuts help"
           >
             <X size={16} />
@@ -8989,14 +9643,20 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
 }
 type RadioShellProps = { isPip?: boolean; initialCountryCode?: string };
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
+  useEffect(() => { installDevFetchLogger(); }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const containerSize = useContainerSize(containerRef);
   const pathname = usePathname();
   const { t, locale } = useLocale();
   const layout: LayoutMode = isPipProp ? 'pip' : containerSize.w <= 640 ? 'mobile' : 'desktop';
-  const radio = useRadio();
+  const [effectsEnabled, setEffectsEnabled] = useState(() =>
+    loadFromStorage<boolean>(STORAGE_KEYS.EFFECTS_ENABLED, false),
+  );
+  const effectsEnabledRef = useRef(effectsEnabled);
+  effectsEnabledRef.current = effectsEnabled;
+  const radio = useRadio(effectsEnabledRef);
   const eq = useEqualizer();
-  const { track, icyBitrate } = useStationMeta(radio.station, radio.status === 'playing');
+  const { track, icyBitrate, stationBlacklisted } = useStationMeta(radio.station, radio.status === 'playing');
   const {
     lyrics,
     effectiveCurrentTime,
@@ -9013,23 +9673,78 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const stationQueue = useStationQueue();
   useWakeLock(radio.status === 'playing');
   const analyser = useAudioAnalyser({ fftSize: 2048, smoothingTimeConstant: 0.8 });
-  const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === 'playing');
+  const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === 'playing', analyser.isActive);
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
+
+  // Lyrics → iTunes fallback: when the initial iTunes lookup found nothing but lyrics
+  // came back with enriched metadata (artist/title from lrclib), retry iTunes with that.
+  const [lyricsRetryArt, setLyricsRetryArt] = useState<AlbumInfo | null>(null);
+  const lyricsRetryKeyRef = useRef<string>('');
+  useEffect(() => {
+    setLyricsRetryArt(null);
+    lyricsRetryKeyRef.current = '';
+  }, [track?.title, track?.artist]);
+  useEffect(() => {
+    if (albumArt.isLoading || albumArt.artworkUrl !== null) return;
+    if (!lyrics?.lyricsEnriched || !lyrics.artistName || !lyrics.trackName) return;
+    const retryKey = `${lyrics.artistName}\n${lyrics.trackName}`.toLowerCase();
+    if (lyricsRetryKeyRef.current === retryKey) return;
+    lyricsRetryKeyRef.current = retryKey;
+    const controller = new AbortController();
+    const cleanArtist = primaryArtist(lyrics.artistName);
+    const cleanTitle = cleanFeatFromTitle(lyrics.trackName);
+    const term = `${cleanArtist} ${cleanTitle}`;
+    fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || controller.signal.aborted) return;
+        const result = selectBestItunesResult(
+          (data.results ?? []) as ItunesResult[],
+          lyrics.trackName,
+          lyrics.artistName,
+        );
+        if (!result) return;
+        const artworkUrl = result.artworkUrl100?.replace('100x100', '600x600') ?? null;
+        const rawItunesUrl: string | null = result.trackViewUrl ?? result.collectionViewUrl ?? null;
+        const info: AlbumInfo = {
+          artworkUrl,
+          albumName: result.collectionName ?? null,
+          releaseDate: result.releaseDate ?? null,
+          itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
+          durationMs: typeof result.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
+          genre: result.primaryGenreName ?? null,
+          trackNumber: typeof result.trackNumber === 'number' ? result.trackNumber : null,
+          trackCount: typeof result.trackCount === 'number' ? result.trackCount : null,
+        };
+        CACHE.set(retryKey, info);
+        if (track) {
+          const origKey = `${track.artist ?? ''}\n${track.title}`.toLowerCase();
+          if (origKey !== retryKey) CACHE.set(origKey, info);
+        }
+        if (artworkUrl) preloadImage(artworkUrl);
+        setLyricsRetryArt(info);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [albumArt.isLoading, albumArt.artworkUrl, lyrics?.lyricsEnriched, lyrics?.artistName, lyrics?.trackName]);
+
   const usageStats = useStats();
   const enrichedTrack = useMemo(() => {
     if (!track) return null;
+    const artSource = albumArt.artworkUrl ? albumArt : (lyricsRetryArt ?? albumArt);
     return {
       ...track,
-      album: track.album || albumArt.albumName || undefined,
-      artworkUrl: track.artworkUrl || albumArt.artworkUrl || undefined,
-      itunesUrl: albumArt.itunesUrl ?? undefined,
-      durationMs: albumArt.durationMs ?? undefined,
-      genre: albumArt.genre || undefined,
-      releaseDate: albumArt.releaseDate || undefined,
-      trackNumber: albumArt.trackNumber ?? undefined,
-      trackCount: albumArt.trackCount ?? undefined,
+      artist: track.artist || (lyrics?.artistName ?? track.artist),
+      album: track.album || artSource.albumName || lyrics?.albumName || undefined,
+      artworkUrl: track.artworkUrl || artSource.artworkUrl || undefined,
+      itunesUrl: artSource.itunesUrl ?? undefined,
+      durationMs: artSource.durationMs ?? undefined,
+      genre: artSource.genre || undefined,
+      releaseDate: artSource.releaseDate || undefined,
+      trackNumber: artSource.trackNumber ?? undefined,
+      trackCount: artSource.trackCount ?? undefined,
     };
-  }, [track, albumArt]);
+  }, [track, albumArt, lyricsRetryArt, lyrics?.artistName, lyrics?.albumName]);
   const songHistory = useHistory(radio.station?.name, radio.station?.stationuuid, enrichedTrack);
   const lastTickRef = useRef<number>(null!);
   if (lastTickRef.current === null) lastTickRef.current = Date.now();
@@ -9086,14 +9801,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
-  const [toast, setToast] = useState<{ msg: string; icon: 'star' | 'heart'; key: number } | null>(
+  const [toast, setToast] = useState<{ msg: string; icon: 'star' | 'heart' | 'info'; key: number } | null>(
     null,
   );
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const duckOrigVolRef = useRef<number | null>(null);
   const duckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback(
-    (msg: string, icon: 'star' | 'heart') => {
+    (msg: string, icon: 'star' | 'heart' | 'info') => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       setToast({ msg, icon, key: Date.now() });
       const audio = radio.audioRef.current;
@@ -9114,7 +9829,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (duckOrigVolRef.current !== null) duckOrigVolRef.current = radio.muted ? 0 : radio.volume;
   }, [radio.volume, radio.muted]);
-  const [eqPreset, setEqPreset] = useState<string | null>(null);
+  const [eqPreset, setEqPresetRaw] = useState<string | null>(() =>
+    loadFromStorage<string | null>(STORAGE_KEYS.EQ_PRESET_NAME, null),
+  );
+  const setEqPreset = useCallback((name: string | null) => {
+    setEqPresetRaw(name);
+    saveToStorage(STORAGE_KEYS.EQ_PRESET_NAME, name);
+  }, []);
   const [activeTab, setActiveTab] = useState<'discover' | 'history' | 'favorites'>('discover');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(null);
@@ -9212,10 +9933,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
-      eqConnectSource(radio.audioRef.current);
+      // Always connect analyser (proxy always provides CORS)
       analyser.connectAudio(radio.audioRef.current);
+      if (effectsEnabled) {
+        eqConnectSource(radio.audioRef.current);
+      }
     }
-  }, [radio.station]);
+  }, [radio.station, effectsEnabled]);
   useEffect(() => {
     setOutputVolume(1, false);
   }, [setOutputVolume]);
@@ -9232,8 +9956,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       analyser: an,
     } = handlePlayRef.current;
     const audio = r.ensureAudio();
-    eqSrc(audio);
+    // Always connect analyser (proxy always provides CORS headers)
     an.connectAudio(audio);
+    if (effectsEnabledRef.current) {
+      eqSrc(audio);
+    }
     r.play(station);
     rec.add(station);
     sq.setPlaying(station.stationuuid);
@@ -9241,6 +9968,33 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const nextIdx = sq.queue.findIndex((s) => s.stationuuid === station.stationuuid) + 1;
     if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
   }, []);
+  const toggleEffects = useCallback(() => {
+    setEffectsEnabled((prev) => {
+      const next = !prev;
+      saveToStorage(STORAGE_KEYS.EFFECTS_ENABLED, next);
+      effectsEnabledRef.current = next;
+      const { radio: r, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
+      const station = r.station;
+      if (!station || r.status === 'idle') return next;
+      const audio = r.audioRef.current;
+      if (next) {
+        // Turning ON: just connect EQ + analyser — stream is already on proxy
+        if (audio) {
+          eqSrc(audio);
+          an.connectAudio(audio);
+        }
+      } else {
+        // Turning OFF: disconnect EQ — analyser stays connected for background reactivity
+        eq.disconnect();
+      }
+      return next;
+    });
+  }, [eq]);
+  useEffect(() => {
+    if (stationBlacklisted && radio.station) {
+      showToast('This station is temporarily unavailable', 'info');
+    }
+  }, [stationBlacklisted, radio.station?.stationuuid]);
   useEffect(() => {
     let cancelled = false;
     if (radio.status === 'error') {
@@ -9530,7 +10284,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
   const isLandingNavigation = !theaterMode;
   const theaterAudioBadges = useMemo(() => {
-    if (!theaterMode || !radio.station) return [] as string[];
+    if (!effectsEnabled || !theaterMode || !radio.station) return [] as string[];
     const badges: string[] = [];
     if (eq.noiseReductionMode !== 'off') badges.push(t('noiseReduction'));
     if (eq.normalizerEnabled) badges.push(t('audioNormalizer'));
@@ -9538,6 +10292,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (eq.enabled && eqPreset) badges.push(t('presetLabel', { name: eqPreset }));
     return badges;
   }, [
+    effectsEnabled,
     eq.enabled,
     eq.noiseReductionMode,
     eq.normalizerEnabled,
@@ -9611,23 +10366,27 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       exit={{ opacity: 0, y: 4 }}
       transition={{ duration: 0.18 }}
       className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+      role="status"
+      aria-live="polite"
     >
       {' '}
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[13px] font-medium shadow-lg whitespace-nowrap max-w-[260px] overflow-hidden">
         {' '}
         {toast.icon === 'star' ? (
           <Star size={13} className="fill-sys-orange text-sys-orange flex-shrink-0" />
-        ) : (
+        ) : toast.icon === 'heart' ? (
           <Heart size={13} className="fill-pink-400 text-pink-400 flex-shrink-0" />
+        ) : (
+          <span className="text-[13px] flex-shrink-0">⚠️</span>
         )}{' '}
         <span className="truncate">{toast.msg}</span>
       </div>
     </motion.div>
   ) : null;
   const mkNavTabs = (sz: number) => [
-    { id: 'discover' as const, label: t('discover'), icon: <RadioIcon size={sz} /> },
-    { id: 'history' as const, label: t('history'), icon: <Clock size={sz} /> },
-    { id: 'favorites' as const, label: t('favorites'), icon: <Heart size={sz} /> },
+    { id: 'discover' as const, label: t('discover'), icon: <RadioIcon size={sz} aria-hidden="true" /> },
+    { id: 'history' as const, label: t('history'), icon: <Clock size={sz} aria-hidden="true" /> },
+    { id: 'favorites' as const, label: t('favorites'), icon: <Heart size={sz} aria-hidden="true" /> },
   ];
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
@@ -9676,6 +10435,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     eqPresetActive: eqPreset !== null,
     showEq,
     theaterMode,
+    effectsEnabled,
+    onToggleEffects: toggleEffects,
   };
   const browseViewElement = (
     <BrowseView
@@ -9743,10 +10504,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal />
     </>
   );
+  const devApiConsoleElement =
+    process.env.NODE_ENV === 'development' ? <DevApiConsole /> : null;
   const pulseLogoButton = (
     <button
       onClick={handleGoHome}
       className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+      aria-label="Go to home"
     >
       {' '}
       <div className="relative w-5 h-5 flex-shrink-0">
@@ -9817,15 +10581,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         className="relative h-full bg-[#0a0f1a] text-white overflow-hidden select-none"
       >
         {' '}
+        <LiquidGlassSvgFilter />
         {parallaxElement} {/* Single scrollable area — content scrolls behind sticky header */}{' '}
         <div className="h-full overflow-y-auto relative z-10">
           {' '}
           {/* Sticky header — glassmorphism (content scrolls underneath) */}{' '}
           {!theaterMode && (
-            <div
+            <header
               data-testid="mobile-header"
               className="sticky top-0 z-30 safe-top border-b border-white/10"
               style={glassStyle}
+              role="banner"
             >
               {' '}
               <div className="flex items-center gap-2 px-4 pt-3 pb-2">
@@ -9833,8 +10599,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                 {pulseLogoButton} <div className="flex-1" />{' '}
                 <button
                   onClick={() => setShowMobileSettings(true)}
-                  className="w-9 h-9 flex-center-row rounded-xl text-white/40 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
+                  className="w-11 h-11 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
                   title="Settings"
+                  aria-label="Settings"
                   data-testid="mobile-settings-btn"
                 >
                   <Settings size={18} />
@@ -9847,7 +10614,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         ? t('removeFromFavorites')
                         : t('addToFavorites')
                     }
-                    className={`w-9 h-9 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? 'text-sys-orange' : 'text-white/30'}`}
+                    className={`w-11 h-11 flex-center-row rounded-xl transition-colors active:scale-95 flex-shrink-0 ${radio.station && favs.has(radio.station.stationuuid) ? 'text-sys-orange' : 'text-white/45'}`}
                   >
                     {' '}
                     <Star
@@ -9861,7 +10628,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   </button>
                 )}
               </div>
-            </div>
+            </header>
           )}{' '}
           {theaterMode && radio.station ? (
             <div className="h-full flex flex-col">
@@ -9872,34 +10639,38 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               {/* Spacer for absolute bottom bar */} <div className="h-20 shrink-0" />
             </div>
           ) : (
-            <div className="flex flex-col min-h-full pb-24">
+                        <main id="main-content" className="flex flex-col min-h-full pb-24">
               {' '}
               {nowPlayingHeroElement} {/* ── Mobile top nav tabs + search ── */}{' '}
-              <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2">
+              <nav className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2" aria-label="Main navigation" role="tablist">
                 {navTabs14.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white/60 hover:bg-white/[0.04]'}`}
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    tabIndex={activeTab === tab.id ? 0 : -1}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? 'bg-white/10 text-white shadow-sm' : 'text-white/45 hover:text-white/60 hover:bg-white/[0.04]'}`}
                   >
                     {tab.icon} {tab.label}
                   </button>
                 ))}
-              </div>
+              </nav>
               <div className="flex-shrink-0 px-4 pb-2">
                 {' '}
                 <form onSubmit={handleSearchSubmit}>
                   {' '}
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     {' '}
-                    <Search size={13} className="text-white/30 flex-shrink-0" />{' '}
+                    <Search size={13} className="text-white/45 flex-shrink-0" aria-hidden="true" />{' '}
                     <input
                       type="search"
                       placeholder={t('searchStations')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t('searchStationsAria')}
-                      className="bg-transparent text-white text-[13px] placeholder:text-white/25 outline-none w-full min-w-0"
+                      autoComplete="off"
+                      className="bg-transparent text-white text-[13px] placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-accent/70 w-full min-w-0"
                       data-radio-search
                     />
                   </div>
@@ -9913,7 +10684,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     ? historyViewElement
                     : favsViewElement}{' '}
               </div>
-            </div>
+            </main>
           )}
         </div>{' '}
         {/* EQ panel overlay */} {eqPanelElement} {/* Mobile settings panel */}{' '}
@@ -9923,6 +10694,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               onClose={() => setShowMobileSettings(false)}
               eq={eq}
               onPresetChange={setEqPreset}
+              effectsEnabled={effectsEnabled}
+              onToggleEffects={toggleEffects}
               statsData={{
                 topStations: usageStats.topStations,
                 topSongs: usageStats.topSongs,
@@ -9943,6 +10716,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           {' '}
           <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
+        {devApiConsoleElement}
         {sharedModals}
       </div>
     );
@@ -9952,7 +10726,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       ref={containerRef}
       className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
     >
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[999] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-accent focus:text-white focus:text-sm focus:font-medium">
+        Skip to main content
+      </a>
       {' '}
+      <LiquidGlassSvgFilter />
       {parallaxElement}{' '}
       <div className="flex flex-1 min-h-0 relative z-10">
         {' '}
@@ -9981,8 +10759,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {pulseLogoButton} <div className="flex-1" /> <LanguageSelector />
                     <button
                       onClick={() => setShowDesktopSettings(true)}
-                      className="w-9 h-9 flex items-center justify-center rounded-xl text-white/40 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
+                      className="w-11 h-11 flex items-center justify-center rounded-xl text-white/45 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
                       title="Settings"
+                      aria-label="Settings"
                       data-testid="desktop-settings-btn"
                     >
                       <Settings size={18} />
@@ -9990,21 +10769,24 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   </div>
                 </div>{' '}
                 {nowPlayingHeroElement} {/* ── Top nav: tabs + search ── */}{' '}
-                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1">
+                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1" role="tablist" aria-label="Main navigation">
                   {navTabs13.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
+                      role="tab"
+                      aria-selected={activeTab === tab.id}
+                      tabIndex={activeTab === tab.id ? 0 : -1}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors flex-shrink-0 ${activeTab === tab.id ? 'bg-surface-6 text-white' : 'text-dim hover:text-white/60 hover:bg-surface-2'}`}
                     >
                       {tab.icon} {tab.label}{' '}
                       {tab.id === 'history' && songHistory.history.length > 0 && (
-                        <span className="text-[9px] text-dim ml-0.5">
+                        <span className="text-[12px] text-dim ml-0.5">
                           {songHistory.history.length}
                         </span>
                       )}{' '}
                       {tab.id === 'favorites' && favSongs.songs.length > 0 && (
-                        <span className="text-[9px] text-dim ml-0.5">{favSongs.songs.length}</span>
+                        <span className="text-[12px] text-dim ml-0.5">{favSongs.songs.length}</span>
                       )}
                     </button>
                   ))}{' '}
@@ -10013,14 +10795,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {' '}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.05]">
                       {' '}
-                      <Search size={12} className="text-dim flex-shrink-0" />{' '}
+                      <Search size={12} className="text-dim flex-shrink-0" aria-hidden="true" />{' '}
                       <input
                         type="search"
                         placeholder={t('searchStations')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label={t('searchStationsAria')}
-                        className="bg-transparent text-white placeholder:text-white/25 outline-none w-full min-w-0"
+                        autoComplete="off"
+                        className="bg-transparent text-white placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-accent/70 w-full min-w-0"
                         data-radio-search
                       />
                     </div>
@@ -10091,7 +10874,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {' '}
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           {' '}
-          <div className="min-w-0 flex flex-col items-start gap-1.5 text-[10px] overflow-hidden">
+          <div className="min-w-0 flex flex-col items-start gap-1.5 text-[12px] overflow-hidden">
             {' '}
             {theaterAudioBadges.length > 0 && (
               <div
@@ -10114,11 +10897,13 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           </div>
           <button
             onClick={() => setMiniMode((m) => !m)}
-            className="pointer-events-auto shrink-0 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
+            className="pointer-events-auto shrink-0 p-2 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
             title={miniMode ? t('expand') : t('minimize')}
+            aria-label={miniMode ? t('expand') : t('minimize')}
+            aria-pressed={miniMode}
           >
             {' '}
-            {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
+            {miniMode ? <Maximize2 size={12} aria-hidden="true" /> : <Minimize2 size={12} aria-hidden="true" />}
           </button>{' '}
         </div>
         <NowPlayingBar {...nowPlayingFullProps} />
@@ -10130,6 +10915,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             onClose={() => setShowDesktopSettings(false)}
             eq={eq}
             onPresetChange={setEqPreset}
+            effectsEnabled={effectsEnabled}
+            onToggleEffects={toggleEffects}
             statsData={{
               topStations: usageStats.topStations,
               topSongs: usageStats.topSongs,
@@ -10141,6 +10928,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           />
         )}
       </AnimatePresence>
+      {devApiConsoleElement}
       {sharedModals}
     </div>
   );
