@@ -20,6 +20,8 @@ jobs:
           script: |
             cd /var/www/pulse-radio
             
+            git reset --hard HEAD
+            
             git pull origin main
             
             npm install
