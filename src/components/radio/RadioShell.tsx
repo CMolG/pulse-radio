@@ -2729,7 +2729,7 @@ const SongCard = React.memo(
                 heart.onClick();
               }}
               aria-label={heart.label}
-              className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? 'bg-pink-500/20 text-pink-400' : 'bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400'}`}
+              className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? 'bg-pink-500/20 text-pink-400' : 'bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400'}`}
             >
               <Heart size={12} className={heart.filled ? 'fill-pink-400' : ''} />
             </button>
@@ -2931,7 +2931,7 @@ const StationCard = React.memo(
             }}
             aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             aria-pressed={isFavorite}
-            className={`absolute top-1.5 right-1.5 p-1 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50'}`}
+            className={`absolute top-1.5 right-1.5 p-2 rounded-full transition-all duration-150 ${isFavorite ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100 bg-black/30 hover:bg-black/50'}`}
           >
             <Heart size={12} className={isFavorite ? 'text-pink-400 fill-pink-400' : 'text-soft'} />
           </button>{' '}
@@ -3660,7 +3660,7 @@ function BrowseView({
                             placeholder={t('filterBySong')}
                             value={songFilter}
                             onChange={(e) => setSongFilter(e.target.value)}
-                            className="bg-transparent text-white placeholder:text-white/40 outline-none w-full min-w-0"
+                            className="bg-transparent text-white placeholder:text-white/50 outline-none w-full min-w-0"
                           />{' '}
                           {songFilter && (
                             <button
@@ -5674,7 +5674,7 @@ function _NowPlayingBar({
             {' '}
             <Clock size={14} />{' '}
             {sleepTimerMin != null && (
-              <span className="absolute -top-1 -right-1 text-[9px] font-bold text-sys-orange leading-none">
+              <span className="absolute -top-1 -right-1 text-[11px] font-bold text-sys-orange leading-none">
                 {' '}
                 {sleepTimerMin}
               </span>
@@ -6346,14 +6346,14 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                 {' '}
                 <button
                   onClick={eq.toggleEnabled}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/40 border border-white/8'}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.enabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
                   {' '}
                   <Power size={12} /> {eq.enabled ? 'Enabled' : 'Disabled'}
                 </button>{' '}
                 <button
                   onClick={eq.toggleNormalizer}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/40 border border-white/8'}`}
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
                   {' '}
                   NORM
@@ -6410,20 +6410,20 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                           if (e.key === 'Escape') setShowSaveInput(false);
                         }}
                         placeholder="Preset name…"
-                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/40 outline-none focus:border-sys-orange/50"
+                        className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                         autoFocus
                       />{' '}
                       <button
                         onClick={handleSave}
                         aria-label="Save preset"
-                        className="p-1.5 rounded-lg bg-sys-orange/20 text-sys-orange"
+                        className="p-2 rounded-lg bg-sys-orange/20 text-sys-orange"
                       >
                         <Save size={12} />
                       </button>{' '}
                       <button
                         onClick={() => setShowSaveInput(false)}
                         aria-label="Cancel"
-                        className="p-1.5 rounded-lg bg-white/5 text-white/45"
+                        className="p-2 rounded-lg bg-white/5 text-white/45"
                       >
                         <X size={12} />
                       </button>{' '}
@@ -6431,7 +6431,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                   ) : (
                     <button
                       onClick={() => setShowSaveInput(true)}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/40 hover:text-white/60 transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/8 text-white/45 hover:text-white/60 transition-colors"
                     >
                       {' '}
                       <Plus size={10} /> Save Custom
@@ -6636,7 +6636,7 @@ type FavoriteSongsViewProps = {
 type ContextMenuState = { x: number; y: number; songId: string } | null;
 type FilterMode = 'none' | 'artist' | 'album';
 const filterBtnClass = (active: boolean) =>
-  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${active ? 'bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30' : 'bg-white/5 text-white/40 border border-white/8 hover:text-white/60'}`;
+  `flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${active ? 'bg-[#3478f6]/20 text-[#3478f6] border border-[#3478f6]/30' : 'bg-white/5 text-white/45 border border-white/8 hover:text-white/60'}`;
 function SongContextMenu({
   menu,
   onRemove,
@@ -7234,7 +7234,7 @@ function _OnboardingModal() {
               <div className="flex items-center justify-between gap-3">
                 <button
                   onClick={step > 0 ? () => setStep((s) => s - 1) : handleClose}
-                  className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/40 hover:text-white/60'}`}
+                  className={`px-5 py-2.5 rounded-xl text-[14px] font-medium transition-colors ${step > 0 ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-white/45 hover:text-white/60'}`}
                 >
                   {step > 0 ? 'Back' : 'Skip'}
                 </button>
@@ -7549,7 +7549,7 @@ const EqPanel = React.memo(function EqPanel({
                 }}
                 placeholder="Preset name…"
                 aria-label="Preset name"
-                className="flex-1 px-2 py-1 text-[11px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/40 outline-none focus:border-sys-orange/50"
+                className="flex-1 px-2 py-1 text-[11px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                 autoFocus
               />{' '}
               <button
@@ -7720,7 +7720,7 @@ const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClos
           <h2 className="text-[15px] font-semibold text-white">Keyboard Shortcuts</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-surface-3 transition-colors text-secondary"
+            className="p-2 rounded-lg hover:bg-surface-3 transition-colors text-secondary"
             aria-label="Close shortcuts help"
           >
             <X size={16} />
@@ -9999,7 +9999,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white/60 hover:bg-white/[0.04]'}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? 'bg-white/10 text-white shadow-sm' : 'text-white/45 hover:text-white/60 hover:bg-white/[0.04]'}`}
                   >
                     {tab.icon} {tab.label}
                   </button>
@@ -10018,7 +10018,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t('searchStationsAria')}
-                      className="bg-transparent text-white text-[13px] placeholder:text-white/40 outline-none w-full min-w-0"
+                      className="bg-transparent text-white text-[13px] placeholder:text-white/50 outline-none w-full min-w-0"
                       data-radio-search
                     />
                   </div>
@@ -10139,7 +10139,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label={t('searchStationsAria')}
-                        className="bg-transparent text-white placeholder:text-white/40 outline-none w-full min-w-0"
+                        className="bg-transparent text-white placeholder:text-white/50 outline-none w-full min-w-0"
                         data-radio-search
                       />
                     </div>
@@ -10233,7 +10233,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           </div>
           <button
             onClick={() => setMiniMode((m) => !m)}
-            className="pointer-events-auto shrink-0 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
+            className="pointer-events-auto shrink-0 p-2 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
             title={miniMode ? t('expand') : t('minimize')}
           >
             {' '}
