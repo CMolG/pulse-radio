@@ -5940,6 +5940,9 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
         transition={_MOTION_T_SPRING}
         className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
         style={GLASS_STYLE}
+        role="dialog"
+        aria-modal="true"
+        aria-label="How to use Pulse"
       >
         {' '}
         {/* Handle bar */}{' '}
@@ -6272,6 +6275,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
         className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
         style={_GLASS_SETTINGS_STYLE}
         data-testid={desktop ? 'desktop-settings-modal' : 'mobile-settings-panel'}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Settings"
       >
         {' '}
         {/* Handle bar — mobile only */}{' '}
@@ -6596,6 +6602,9 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
               transition={_MOTION_T_SPRING}
               className="absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom"
               style={_GLASS_PANEL_STYLE}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Your Statistics"
             >
               {' '}
               <div className="flex justify-center pt-3 pb-1">
