@@ -7273,6 +7273,7 @@ function _OnboardingModal() {
                 <button
                   onClick={() => (step < _TOTAL_STEPS - 1 ? setStep((s) => s + 1) : handleClose())}
                   className="px-6 py-2.5 rounded-xl bg-[#3478f6] text-white font-semibold text-[14px] hover:bg-[#2968d9] transition-colors active:scale-95"
+                  autoFocus
                 >
                   {isLast ? "Let's Go!" : 'Next'}
                 </button>
