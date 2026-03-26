@@ -4154,6 +4154,7 @@ function SpiralRenderer({
         ref={canvasRef}
         className="absolute inset-0 size-full"
         style={_CANVAS_SCALE_STYLE}
+        aria-hidden="true"
       />
     </div>
   );
@@ -5350,7 +5351,7 @@ function FerrofluidRenderer({
   return (
     <div className={`relative ${className}`}>
       {' '}
-      <canvas ref={canvasRef} className="size-full" style={_IMAGE_RENDER_STYLE} />{' '}
+      <canvas ref={canvasRef} className="size-full" style={_IMAGE_RENDER_STYLE} aria-hidden="true" />{' '}
       {/* SVG filter for smoothing the metaballs */}{' '}
       <svg className="absolute w-0 h-0" aria-hidden="true">
         <defs>
