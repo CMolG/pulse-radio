@@ -4145,7 +4145,7 @@ const Badge = ({
   children: React.ReactNode;
 }) => (
   <span
-    className={`px-2 py-0.5 rounded-full bg-white/10 text-[11px] text-white/50${mono ? ' font-mono' : ''}${upper ? ' uppercase' : ''}`}
+    className={`px-2 py-0.5 rounded-full bg-white/10 text-[12px] text-white/50${mono ? ' font-mono' : ''}${upper ? ' uppercase' : ''}`}
   >
     {children}
   </span>
@@ -4474,25 +4474,25 @@ function TheaterView({
           </div>{' '}
           {/* Station name */}{' '}
           <h2
-            className={`${compact ? 'text-[11px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
+            className={`${compact ? 'text-[12px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
           >
             {station.name}
           </h2>{' '}
           {/* Track info */}{' '}
           {track?.title ? (
             <p
-              className={`${compact ? 'text-[11px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
+              className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
             >
               {track.artist ? `${track.artist} — ${track.title}` : track.title}
             </p>
           ) : (
-            <p className={`${compact ? 'text-[11px]' : 'text-[12px]'} text-white/50 text-center`}>
+            <p className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center`}>
               {theaterTags}
             </p>
           )}{' '}
           {track?.album && (
             <p
-              className={`${compact ? 'text-[11px]' : 'text-[11px]'} text-white/50 text-center line-clamp-1`}
+              className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center line-clamp-1`}
             >
               {' '}
               {track.album}
@@ -4510,7 +4510,7 @@ function TheaterView({
               {' '}
               <span className={`${compact ? 'dot-1.5' : 'dot-2'} bg-red-500 animate-pulse`} />{' '}
               <span
-                className={`${compact ? 'text-[11px]' : 'text-[11px]'} font-semibold tracking-wider uppercase text-red-400`}
+                className={`${compact ? 'text-[12px]' : 'text-[12px]'} font-semibold tracking-wider uppercase text-red-400`}
               >
                 LIVE
               </span>
@@ -4641,7 +4641,7 @@ function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loadin
   const info = !key ? null : (cachedInfo ?? (fetched?.key === key ? fetched.info : null));
   return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
 }
-const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px]';
+const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px]';
 const MetaBadge = ({
   icon: Icon,
   cls,
@@ -5475,7 +5475,7 @@ function _NowPlayingBar({
                 {isPlaying && (
                   <>
                     <span className="dot-1.5 bg-red-500 animate-pulse shrink-0" />{' '}
-                    <span className="text-[11px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
+                    <span className="text-[12px] font-semibold tracking-wider uppercase text-red-500 shrink-0">
                       {' '}
                       LIVE
                     </span>
@@ -5564,7 +5564,7 @@ function _NowPlayingBar({
           {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}
         </div>{' '}
         {icyBitrate && (
-          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] font-mono text-white/50 shrink-0 self-center">
+          <span className="px-1.5 py-0.5 rounded bg-white/10 text-[12px] font-mono text-white/50 shrink-0 self-center">
             {' '}
             {icyBitrate}kbps
           </span>
@@ -5618,7 +5618,7 @@ function _NowPlayingBar({
             <div className="flex-row-1.5 relative z-10">
               {' '}
               <span className="dot-2 bg-red-500 animate-pulse" />{' '}
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-red-500">
+              <span className="text-[12px] font-semibold tracking-wider uppercase text-red-500">
                 LIVE
               </span>{' '}
               <AnimatedBars size="small" />
@@ -5801,7 +5801,7 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
       {onTheater && (
         <button
           onClick={onTheater}
-          className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[11px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
+          className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 text-[12px] font-medium text-white/60 hover:text-white hover:bg-black/60 transition-all"
           title="Theater mode"
         >
           <Maximize2 size={12} /> Theater
@@ -5845,12 +5845,12 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
           {isPlaying && (
             <div className="flex-row-1.5 mt-1">
               <span className="dot-1.5 bg-sys-orange" />{' '}
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-sys-orange">
+              <span className="text-[12px] font-semibold tracking-wider uppercase text-sys-orange">
                 LIVE
               </span>{' '}
               <AnimatedBars size="small" />{' '}
               {icyBitrate && (
-                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[11px] font-mono text-white/50 ml-1">
+                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[12px] font-mono text-white/50 ml-1">
                   {' '}
                   {icyBitrate}kbps
                 </span>
@@ -6718,7 +6718,7 @@ function GroupStack({
         {' '}
         <Icon size={14} className="text-white/50" />{' '}
         <span className="text-[14px] font-semibold text-white/80">{label}</span>{' '}
-        <span className="text-[11px] text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-full">
+        <span className="text-[12px] text-white/50 bg-white/[0.06] px-2 py-0.5 rounded-full">
           {songs.length}
         </span>{' '}
         {hasMore && (
@@ -6770,7 +6770,7 @@ function GroupStack({
                 </div>{' '}
                 <div className="p-2.5">
                   <p className="text-[12px] font-medium text-white line-clamp-1">{song.title}</p>{' '}
-                  <p className="text-[11px] text-secondary line-clamp-1">{song.artist}</p>
+                  <p className="text-[12px] text-secondary line-clamp-1">{song.artist}</p>
                 </div>
               </div>
             </div>
@@ -6780,7 +6780,7 @@ function GroupStack({
             style={_MAX_WIDTH_200_STYLE}
           >
             {' '}
-            <span className="text-[11px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
+            <span className="text-[12px] text-[#3478f6] font-medium bg-[#3478f6]/10 px-3 py-1 rounded-full border border-[#3478f6]/20">
               {' '}
               +{songs.length - VISIBLE_COUNT} more
             </span>
@@ -6814,7 +6814,7 @@ function GroupStack({
       {expanded && hasMore && (
         <button
           onClick={() => setExpanded(false)}
-          className="mt-3 flex items-center gap-1 text-[11px] text-white/50 hover:text-white/60 transition-colors"
+          className="mt-3 flex items-center gap-1 text-[12px] text-white/50 hover:text-white/60 transition-colors"
         >
           {' '}
           <ChevronDown size={12} className="rotate-180" /> Collapse
@@ -6907,7 +6907,7 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
         </div>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
+          className="flex items-center gap-1 text-[12px] text-dim hover:text-red-400 transition-colors"
         >
           {' '}
           <Trash2 size={11} /> Clear all
@@ -7001,7 +7001,7 @@ const HistoryGridView = React.memo(function HistoryGridView({
         <p className="text-[12px] text-dim">{history.length} songs</p>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[11px] text-dim hover:text-red-400 transition-colors"
+          className="flex items-center gap-1 text-[12px] text-dim hover:text-red-400 transition-colors"
         >
           {' '}
           <Trash2 size={11} /> Clear all
@@ -7488,7 +7488,7 @@ const EqPanel = React.memo(function EqPanel({
               normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'
             }
             title="Loudness Normalizer"
-            className={`px-1.5 py-0.5 text-[11px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
+            className={`px-1.5 py-0.5 text-[12px] font-semibold rounded transition-colors ${normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 text-dim hover:text-secondary'}`}
           >
             NORM
           </button>
@@ -7503,7 +7503,7 @@ const EqPanel = React.memo(function EqPanel({
           <button
             key={preset.name}
             onClick={() => handleSelectPreset(preset.name, preset.gains)}
-            className={`px-2 py-1 text-[11px] rounded-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
+            className={`px-2 py-1 text-[12px] rounded-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
           >
             {' '}
             {preset.name}
@@ -7514,7 +7514,7 @@ const EqPanel = React.memo(function EqPanel({
             {' '}
             <button
               onClick={() => handleSelectPreset(preset.name, preset.gains)}
-              className={`px-2 py-1 text-[11px] rounded-l-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 hover:bg-sys-orange/20 text-sys-orange hover:text-white'}`}
+              className={`px-2 py-1 text-[12px] rounded-l-md transition-colors ${selectedPreset === preset.name ? 'bg-sys-orange/20 text-sys-orange border-l border-t border-b border-sys-orange/40' : 'bg-sys-orange/10 hover:bg-sys-orange/20 text-sys-orange hover:text-white'}`}
             >
               {' '}
               {preset.name}
@@ -7523,7 +7523,7 @@ const EqPanel = React.memo(function EqPanel({
               <button
                 onClick={() => onRemoveCustomPreset(preset.name)}
                 aria-label={`Delete ${preset.name} preset`}
-                className="px-1 py-1 text-[11px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors"
+                className="px-1 py-1 text-[12px] rounded-r-md bg-sys-orange/10 hover:bg-red-500/30 text-dim hover:text-red-400 transition-colors"
               >
                 {' '}
                 <X size={8} />
@@ -7549,7 +7549,7 @@ const EqPanel = React.memo(function EqPanel({
                 }}
                 placeholder="Preset name…"
                 aria-label="Preset name"
-                className="flex-1 px-2 py-1 text-[11px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
+                className="flex-1 px-2 py-1 text-[12px] rounded-md bg-surface-2 border border-border-strong text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                 autoFocus
               />{' '}
               <button
@@ -7570,7 +7570,7 @@ const EqPanel = React.memo(function EqPanel({
           ) : (
             <button
               onClick={() => setShowSaveInput(true)}
-              className="flex-row-1 px-2 py-1 text-[11px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors"
+              className="flex-row-1 px-2 py-1 text-[12px] rounded-md bg-surface-1 hover:bg-surface-3 text-muted hover:text-white/60 transition-colors"
             >
               {' '}
               <Plus size={10} /> Save Custom
@@ -7584,7 +7584,7 @@ const EqPanel = React.memo(function EqPanel({
         {bands.map((band) => (
           <div key={band.id} className="col-center gap-1">
             {' '}
-            <span className="text-[11px] text-dim tabular-nums">
+            <span className="text-[12px] text-dim tabular-nums">
               {band.gain > 0 ? `+${band.gain}` : band.gain}
             </span>{' '}
             <input
@@ -7598,7 +7598,7 @@ const EqPanel = React.memo(function EqPanel({
               aria-label={`${band.label} gain`}
               className="eq-slider h-24 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-surface-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
             />{' '}
-            <span className="text-[11px] text-secondary">{band.label}</span>
+            <span className="text-[12px] text-secondary">{band.label}</span>
           </div>
         ))}
       </div>{' '}
@@ -7606,13 +7606,13 @@ const EqPanel = React.memo(function EqPanel({
       <div className="mt-3 pt-3 border-t border-white/10">
         {' '}
         <div className="mb-2">
-          <div className="text-[11px] text-secondary mb-1">Noise Reduction</div>{' '}
+          <div className="text-[12px] text-secondary mb-1">Noise Reduction</div>{' '}
           <div className="flex-wrap-1.5">
             {(['off', 'low', 'medium', 'high'] as const).map((mode) => (
               <button
                 key={mode}
                 onClick={() => onSetNoiseReductionMode(mode)}
-                className={`px-2 py-1 text-[11px] rounded-md transition-colors ${noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
+                className={`px-2 py-1 text-[12px] rounded-md transition-colors ${noiseReductionMode === mode ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-surface-2 hover:bg-surface-4 text-secondary hover:text-white'}`}
                 aria-label={`Noise reduction ${mode}`}
               >
                 {mode.toUpperCase()}
@@ -7621,7 +7621,7 @@ const EqPanel = React.memo(function EqPanel({
           </div>
         </div>{' '}
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-secondary shrink-0 w-12">Width</span>{' '}
+          <span className="text-[12px] text-secondary shrink-0 w-12">Width</span>{' '}
           <input
             type="range"
             min={0}
@@ -7632,13 +7632,13 @@ const EqPanel = React.memo(function EqPanel({
             aria-label="Stereo width"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[11px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[12px] text-dim tabular-nums w-8 text-right">
             {Math.round(stereoWidth * 100)}%
           </span>{' '}
         </div>
         <div className="flex items-center gap-2 mt-2">
           {' '}
-          <span className="text-[11px] text-secondary shrink-0 w-12">Bass+</span>{' '}
+          <span className="text-[12px] text-secondary shrink-0 w-12">Bass+</span>{' '}
           <input
             type="range"
             min={0}
@@ -7649,7 +7649,7 @@ const EqPanel = React.memo(function EqPanel({
             aria-label="Bass enhance"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[11px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[12px] text-dim tabular-nums w-8 text-right">
             {Math.round(bassEnhance * 100)}%
           </span>{' '}
         </div>
@@ -7659,7 +7659,7 @@ const EqPanel = React.memo(function EqPanel({
             onClick={onToggleCompressor}
             aria-label={compressorEnabled ? 'Disable compressor' : 'Enable compressor'}
             title="Multiband Compressor"
-            className={`text-[11px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}
+            className={`text-[12px] font-semibold shrink-0 w-12 text-left transition-colors ${compressorEnabled ? 'text-sys-orange' : 'text-secondary'}`}
           >
             Comp
           </button>{' '}
@@ -7674,7 +7674,7 @@ const EqPanel = React.memo(function EqPanel({
             aria-label="Compressor amount"
             className="flex-1 h-1 appearance-none bg-surface-4 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange [&::-webkit-slider-thumb]:shadow-[0_0_4px_rgba(255,159,10,0.4)]"
           />{' '}
-          <span className="text-[11px] text-dim tabular-nums w-8 text-right">
+          <span className="text-[12px] text-dim tabular-nums w-8 text-right">
             {Math.round(compressorAmount * 100)}%
           </span>{' '}
         </div>{' '}
@@ -10118,12 +10118,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     >
                       {tab.icon} {tab.label}{' '}
                       {tab.id === 'history' && songHistory.history.length > 0 && (
-                        <span className="text-[11px] text-dim ml-0.5">
+                        <span className="text-[12px] text-dim ml-0.5">
                           {songHistory.history.length}
                         </span>
                       )}{' '}
                       {tab.id === 'favorites' && favSongs.songs.length > 0 && (
-                        <span className="text-[11px] text-dim ml-0.5">{favSongs.songs.length}</span>
+                        <span className="text-[12px] text-dim ml-0.5">{favSongs.songs.length}</span>
                       )}
                     </button>
                   ))}{' '}
@@ -10210,7 +10210,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {' '}
         <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
           {' '}
-          <div className="min-w-0 flex flex-col items-start gap-1.5 text-[11px] overflow-hidden">
+          <div className="min-w-0 flex flex-col items-start gap-1.5 text-[12px] overflow-hidden">
             {' '}
             {theaterAudioBadges.length > 0 && (
               <div
