@@ -6597,6 +6597,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
             <div
               className="absolute inset-0 bg-black/50"
               onClick={() => setShowStats(false)}
+              aria-hidden="true"
             />{' '}
             <motion.div
               initial={_MOTION_SLIDE_UP_INIT}
