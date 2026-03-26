@@ -19,6 +19,10 @@ In BrowseView (~lines 3687-3783), the genre selection row and country selection 
 
 This is ~90 lines of duplicated markup that could be a single `<ChipRow>` component.
 
+## Dependencies
+
+- **Run AFTER ARCH-001** (Extract BrowseView) if possible. If ARCH-001 is complete, the ChipRow extraction targets `src/components/radio/views/BrowseView.tsx`. If not, target `RadioShell.tsx` directly.
+
 ## Directive
 
 1. Create a `ChipRow` component (can live in the BrowseView file or in `src/components/radio/components/ChipRow.tsx`).

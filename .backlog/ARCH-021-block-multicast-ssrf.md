@@ -14,9 +14,13 @@ The SSRF protection in `proxy-stream/route.ts` and `icy-meta/route.ts` blocks pr
 
 Additionally, `.local` mDNS domains (e.g., `myserver.local`) are not blocked, though `localhost` variants are.
 
+## Dependencies
+
+- **Run AFTER ARCH-024** (Extract SSRF shared utility) if possible. If ARCH-024 completes first, apply the multicast fix only in `src/lib/ssrf.ts`. If ARCH-024 has not run yet, apply to both route files individually.
+
 ## Directive
 
-1. In the `isPrivateIP()` function in both `proxy-stream/route.ts` and `icy-meta/route.ts`:
+1. In the `isPrivateIP()` function in both `proxy-stream/route.ts` and `icy-meta/route.ts` (or in `src/lib/ssrf.ts` if ARCH-024 was completed):
    - Add a check for IPv4 multicast: first octet >= 224 && first octet <= 239
 2. In the hostname validation (where `localhost` is blocked):
    - Also block hostnames ending in `.local` (mDNS)
