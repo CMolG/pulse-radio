@@ -7068,31 +7068,31 @@ const ONBOARDING_KEY = 'radio-onboarding-done';
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string };
 const STEPS: OnboardingStep[] = [
   {
-    icon: <IoRadioOutline size={48} className="text-[#3478f6]" />,
+    icon: <IoRadioOutline size={48} className="text-[#3478f6]" aria-hidden="true" />,
     title: 'Welcome to Pulse',
     description:
       'Your free internet radio experience. Discover thousands of stations, genres and artists from around the world.',
   },
   {
-    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" />,
+    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" aria-hidden="true" />,
     title: 'Live Radio & Lyrics',
     description:
       'Listen to live radio with real-time song detection, synchronized lyrics, and detailed track information.',
   },
   {
-    icon: <IoHeartOutline size={48} className="text-red-400" />,
+    icon: <IoHeartOutline size={48} className="text-red-400" aria-hidden="true" />,
     title: 'Favorites & History',
     description:
       'Save your favorite stations and songs. Browse your listening history and rediscover music you loved.',
   },
   {
-    icon: <IoColorPaletteOutline size={48} className="text-purple-400" />,
+    icon: <IoColorPaletteOutline size={48} className="text-purple-400" aria-hidden="true" />,
     title: 'Immersive Visualizer',
     description:
       'Enjoy a reactive audio visualizer with CRT effects. Customize the sound with the built-in equalizer.',
   },
   {
-    icon: <IoStatsChartOutline size={48} className="text-emerald-400" />,
+    icon: <IoStatsChartOutline size={48} className="text-emerald-400" aria-hidden="true" />,
     title: 'Your Stats',
     description:
       'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
