@@ -7218,6 +7218,9 @@ function _OnboardingModal() {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-sm rounded-3xl overflow-hidden"
             style={GLASS_STYLE}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Welcome to Pulse Radio"
           >
             {' '}
             {/* Content */}{' '}
