@@ -179,6 +179,7 @@ import {
   IoGlobeOutline,
   IoChevronBack,
 } from 'react-icons/io5';
+import { MdAutoAwesome } from 'react-icons/md';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ErrorBoundary } from '@/components/radio/components/ErrorBoundary';
@@ -1383,7 +1384,7 @@ function isIOSDevice(): boolean {
 }
 type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 type StreamLatency = { url: string; latencyMs: number; timestamp: number };
-function useRadio() {
+function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -1398,7 +1399,7 @@ function useRadio() {
   const isReconnectingRef = useRef(false);
   const srcChangingRef = useRef(false);
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [preferDirectStream] = useState(() => isIOSDevice());
+  const [audioGen, setAudioGen] = useState(0);
   const [station, setStation] = useState<Station | null>(null);
   const [status, setStatus] = useState<PlaybackStatus>('idle');
   const [volume, setVolumeState] = useState(() =>
@@ -1466,9 +1467,8 @@ function useRadio() {
   }, []);
   const startPlayback = useCallback(
     (audio: HTMLAudioElement, streamUrl: string, onRejected: (err: unknown) => void) => {
-      const webAudioConnected = hasAudioSource(audio);
       const shouldUseProxy =
-        !preferDirectStream || proxyFallbackUrlsRef.current.has(streamUrl) || webAudioConnected;
+        proxyFallbackUrlsRef.current.has(streamUrl) || effectsEnabledRef.current;
       const setSourceAndPlay = (useProxy: boolean) => {
         srcChangingRef.current = true;
         audio.crossOrigin = useProxy ? 'anonymous' : null;
@@ -1479,7 +1479,7 @@ function useRadio() {
         return audio.play();
       };
       setSourceAndPlay(shouldUseProxy).catch((err) => {
-        if (!shouldUseProxy && preferDirectStream && !isAutoplayBlocked(err)) {
+        if (!shouldUseProxy && !isAutoplayBlocked(err)) {
           if (proxyFallbackUrlsRef.current.size >= 200) proxyFallbackUrlsRef.current.clear();
           proxyFallbackUrlsRef.current.add(streamUrl);
           setSourceAndPlay(true).catch(onRejected);
@@ -1488,7 +1488,7 @@ function useRadio() {
         onRejected(err);
       });
     },
-    [preferDirectStream],
+    [effectsEnabledRef],
   );
   useEffect(() => {
     const audio = getAudio();
@@ -1733,7 +1733,7 @@ function useRadio() {
       clearTimer(bufferCheckRef);
       pairs.forEach(([t, e, h]) => t.removeEventListener(e, h));
     };
-  }, [station, getAudio, startPlayback, handlePlayRejected]);
+  }, [station, getAudio, startPlayback, handlePlayRejected, audioGen]);
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
@@ -1831,6 +1831,7 @@ function useRadio() {
   const prefetchedUrlsRef = useRef<Set<string>>(null!);
   if (!prefetchedUrlsRef.current) prefetchedUrlsRef.current = new Set();
   const prefetchStream = useCallback((streamUrl: string) => {
+    if (!effectsEnabledRef.current) return;
     if (!isValidStreamUrl(streamUrl) || prefetchedUrlsRef.current.has(streamUrl)) return;
     if (prefetchedUrlsRef.current.size >= 500) {
       const evictCount = prefetchedUrlsRef.current.size - 250;
@@ -1859,6 +1860,16 @@ function useRadio() {
     audio.currentTime = Math.max(0, duration ? Math.min(t, duration) : t);
   }, []);
   const ensureAudio = useCallback(() => getAudio(), [getAudio]);
+  const replaceAudio = useCallback(() => {
+    const old = audioRef.current;
+    if (old) {
+      old.pause();
+      old.src = '';
+      old.removeAttribute('src');
+    }
+    audioRef.current = null;
+    setAudioGen((g) => g + 1);
+  }, []);
   return {
     station,
     status,
@@ -1868,6 +1879,7 @@ function useRadio() {
     streamQuality,
     audioRef,
     ensureAudio,
+    replaceAudio,
     play,
     pause,
     resume,
@@ -5395,6 +5407,8 @@ type NowPlayingBarProps = {
   sleepTimerMin?: number | null;
   onCycleSleepTimer?: () => void;
   streamQuality?: StreamQuality;
+  effectsEnabled?: boolean;
+  onToggleEffects?: () => void;
 };
 const SAFE_AREA_STYLE: React.CSSProperties = {
   paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))',
@@ -5423,6 +5437,8 @@ function _NowPlayingBar({
   sleepTimerMin,
   onCycleSleepTimer,
   streamQuality,
+  effectsEnabled,
+  onToggleEffects,
 }: NowPlayingBarProps) {
   const isPlaying = status === 'playing';
   const isLoading = status === 'loading';
@@ -5518,6 +5534,17 @@ function _NowPlayingBar({
         {/* Action buttons — 44px touch targets */}{' '}
         <div className="flex items-center gap-0.5 shrink-0">
           {' '}
+          {onToggleEffects && (
+            <button
+              onClick={onToggleEffects}
+              className={`w-10 h-10 flex-center-row rounded-xl transition-colors active:scale-95 ${effectsEnabled ? 'text-sys-orange' : 'text-white/45 hover:text-white/60'}`}
+              title={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+              aria-label={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+              aria-pressed={!!effectsEnabled}
+            >
+              <MdAutoAwesome size={18} />
+            </button>
+          )}
           {station && !theaterMode && (
             <button
               onClick={onToggleTheater}
@@ -5708,13 +5735,26 @@ function _NowPlayingBar({
             )}
           </button>
         )}{' '}
-        <button
-          onClick={onToggleEq}
-          aria-label="Toggle equalizer"
-          className={`p-2.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
-        >
-          <SlidersHorizontal size={14} />
-        </button>
+        {onToggleEffects && (
+          <button
+            onClick={onToggleEffects}
+            aria-label={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+            aria-pressed={!!effectsEnabled}
+            className={`p-2.5 rounded-md transition-colors ${effectsEnabled ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
+            title={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
+          >
+            <MdAutoAwesome size={14} />
+          </button>
+        )}{' '}
+        {effectsEnabled && (
+          <button
+            onClick={onToggleEq}
+            aria-label="Toggle equalizer"
+            className={`p-2.5 rounded-md transition-colors ${eqPresetActive ? 'text-sys-orange' : showEq ? 'text-sys-orange bg-surface-2' : 'text-subtle hover:text-white/50'}`}
+          >
+            <SlidersHorizontal size={14} />
+          </button>
+        )}
       </div>{' '}
       {/* Volume */}{' '}
       <div className="flex-row-1 w-24 min-w-0 shrink-0 overflow-hidden ml-2">
@@ -6251,8 +6291,10 @@ type MobileSettingsPanelProps = {
     totalListenMs: number;
   };
   desktop?: boolean;
+  effectsEnabled: boolean;
+  onToggleEffects: () => void;
 };
-function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }: MobileSettingsPanelProps) {
+function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, effectsEnabled, onToggleEffects }: MobileSettingsPanelProps) {
   const { locale, setLocale, locales } = useLocale();
   const [showEq, setShowEq] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -6350,7 +6392,12 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
         <div className="px-5 py-4">
           {' '}
           <button
-            onClick={() => setShowEq((s) => !s)}
+            onClick={() => {
+              setShowEq((s) => !s);
+              if (!effectsEnabled) {
+                onToggleEffects();
+              }
+            }}
             className="flex items-center justify-between w-full"
             aria-label="Toggle equalizer section"
             aria-expanded={showEq}
@@ -9163,7 +9210,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const pathname = usePathname();
   const { t, locale } = useLocale();
   const layout: LayoutMode = isPipProp ? 'pip' : containerSize.w <= 640 ? 'mobile' : 'desktop';
-  const radio = useRadio();
+  const [effectsEnabled, setEffectsEnabled] = useState(() =>
+    loadFromStorage<boolean>(STORAGE_KEYS.EFFECTS_ENABLED, false),
+  );
+  const effectsEnabledRef = useRef(effectsEnabled);
+  effectsEnabledRef.current = effectsEnabled;
+  const radio = useRadio(effectsEnabledRef);
   const eq = useEqualizer();
   const { track, icyBitrate, stationBlacklisted } = useStationMeta(radio.station, radio.status === 'playing');
   const {
@@ -9380,11 +9432,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   ]);
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
   useEffect(() => {
-    if (radio.station && radio.audioRef.current) {
+    if (effectsEnabled && radio.station && radio.audioRef.current) {
       eqConnectSource(radio.audioRef.current);
       analyser.connectAudio(radio.audioRef.current);
     }
-  }, [radio.station]);
+  }, [radio.station, effectsEnabled]);
   useEffect(() => {
     setOutputVolume(1, false);
   }, [setOutputVolume]);
@@ -9400,9 +9452,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       eqConnectSource: eqSrc,
       analyser: an,
     } = handlePlayRef.current;
+    // If effects disabled but old element captured by Web Audio, get fresh element
+    if (!effectsEnabledRef.current && r.audioRef.current && hasAudioSource(r.audioRef.current)) {
+      r.replaceAudio();
+    }
     const audio = r.ensureAudio();
-    eqSrc(audio);
-    an.connectAudio(audio);
+    if (effectsEnabledRef.current) {
+      eqSrc(audio);
+      an.connectAudio(audio);
+    }
     r.play(station);
     rec.add(station);
     sq.setPlaying(station.stationuuid);
@@ -9410,6 +9468,30 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const nextIdx = sq.queue.findIndex((s) => s.stationuuid === station.stationuuid) + 1;
     if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
   }, []);
+  const toggleEffects = useCallback(() => {
+    setEffectsEnabled((prev) => {
+      const next = !prev;
+      saveToStorage(STORAGE_KEYS.EFFECTS_ENABLED, next);
+      effectsEnabledRef.current = next;
+      const { radio: r, eqConnectSource: eqSrc, analyser: an } = handlePlayRef.current;
+      const station = r.station;
+      if (!station || r.status === 'idle') return next;
+      if (next) {
+        // Turning ON: connect Web Audio, replay on proxy
+        const audio = r.ensureAudio();
+        eqSrc(audio);
+        an.connectAudio(audio);
+        r.play(station);
+      } else {
+        // Turning OFF: disconnect, fresh audio, replay direct
+        eq.disconnect();
+        an.disconnect();
+        r.replaceAudio();
+        r.play(station);
+      }
+      return next;
+    });
+  }, [eq]);
   useEffect(() => {
     if (stationBlacklisted && radio.station) {
       showToast('This station is temporarily unavailable', 'info');
@@ -9854,6 +9936,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     eqPresetActive: eqPreset !== null,
     showEq,
     theaterMode,
+    effectsEnabled,
+    onToggleEffects: toggleEffects,
   };
   const browseViewElement = (
     <BrowseView
@@ -10108,6 +10192,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               onClose={() => setShowMobileSettings(false)}
               eq={eq}
               onPresetChange={setEqPreset}
+              effectsEnabled={effectsEnabled}
+              onToggleEffects={toggleEffects}
               statsData={{
                 topStations: usageStats.topStations,
                 topSongs: usageStats.topSongs,
@@ -10325,6 +10411,8 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             onClose={() => setShowDesktopSettings(false)}
             eq={eq}
             onPresetChange={setEqPreset}
+            effectsEnabled={effectsEnabled}
+            onToggleEffects={toggleEffects}
             statsData={{
               topStations: usageStats.topStations,
               topSongs: usageStats.topSongs,
