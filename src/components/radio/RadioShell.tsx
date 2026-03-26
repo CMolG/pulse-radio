@@ -4321,6 +4321,11 @@ const _GLASS_BADGE_STYLE: React.CSSProperties = {
   WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
   border: '1px solid rgba(255,255,255,0.06)',
 };
+const _THEATER_BLUR_OVERLAY_STYLE: React.CSSProperties = {
+  background: 'rgba(15, 23, 42, 0.15)',
+  backdropFilter: 'blur(20px) saturate(1.2)',
+  WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
+};
 const _MOTION_FADE_IN = { opacity: 0 } as const;
 const _MOTION_FADE_VISIBLE = { opacity: 1 } as const;
 const _MOTION_FADE_OUT = { opacity: 0 } as const;
@@ -4409,6 +4414,11 @@ function TheaterView({
         className="absolute inset-0 z-6 pointer-events-none"
         style={_CRT_COMBINED_STYLE}
       />{' '}
+      {/* ── Layer 3.5: glassmorphism blur overlay — softens raw spiral animation ── */}{' '}
+      <div
+        className="absolute inset-0 z-7 pointer-events-none"
+        style={_THEATER_BLUR_OVERLAY_STYLE}
+      />{' '}
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}{' '}
       {!compact && (
         <div
@@ -4447,7 +4457,8 @@ function TheaterView({
         </div>
       )}{' '}
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}{' '}
-      <div className="flex-1 flex items-center justify-center relative z-10 px-4">
+      <div className="flex-1 overflow-y-auto relative z-10 px-4 py-4">
+        <div className="flex flex-col items-center justify-center min-h-full">
         <div
           className={`flex flex-col items-center ${compact ? 'gap-2 px-4 py-3' : 'gap-3 px-6 py-5'} rounded-3xl max-w-sm w-full`}
           style={{
@@ -4634,6 +4645,7 @@ function TheaterView({
               />
             </div>
           )}
+        </div>
         </div>
       </div>
     </motion.div>

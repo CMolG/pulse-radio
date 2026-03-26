@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
-import { cacheGet, cacheSet } from '@/lib/server-cache';
+import { cacheResolve } from '@/lib/services/CacheRepository';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -43,6 +43,39 @@ function normKey(s: string): string {
     .toLowerCase();
 }
 
+async function fetchLyrics(
+  artist: string,
+  title: string,
+  album: string,
+  duration: number | undefined,
+): Promise<LrcLibResponse | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LRCLIB_TIMEOUT_MS);
+  try {
+    const exactParams = new URLSearchParams({ artist_name: artist, track_name: title });
+    if (album) exactParams.set('album_name', album);
+    if (duration) exactParams.set('duration', `${Math.round(duration)}`);
+
+    let result = await fetchLrcLib<LrcLibResponse>(
+      `${LRCLIB_BASE}/get?${exactParams}`,
+      controller.signal,
+    );
+
+    if (!result?.syncedLyrics && !result?.plainLyrics) {
+      const searchResult = await fetchLrcLib<LrcLibResponse[]>(
+        `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+        controller.signal,
+      );
+      result = searchResult?.[0] ?? null;
+    }
+
+    const hasLyrics = !!(result?.syncedLyrics || result?.plainLyrics);
+    return hasLyrics ? result : null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const artist = searchParams.get('artist')?.trim() ?? '';
@@ -56,48 +89,21 @@ export async function GET(req: NextRequest) {
   }
 
   const cacheKey = `${normKey(artist)}|${normKey(title)}`;
-  const cached = cacheGet<LrcLibResponse | null>('lyrics', cacheKey);
-  if (cached !== undefined) {
-    if (cached === null) return NextResponse.json(null, { headers: _NO_CACHE_HDRS });
-    return NextResponse.json(cached, { headers: _CACHE_HDRS });
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), LRCLIB_TIMEOUT_MS);
-
   try {
-    // Try exact match first
-    const exactParams = new URLSearchParams({ artist_name: artist, track_name: title });
-    if (album) exactParams.set('album_name', album);
-    if (duration) exactParams.set('duration', `${Math.round(duration)}`);
+    const result = await cacheResolve<LrcLibResponse | null>({
+      namespace: 'lyrics',
+      key: cacheKey,
+      ttlMs: CACHE_TTL_MS,
+      fetcher: () => fetchLyrics(artist, title, album, duration),
+    });
 
-    let result = await fetchLrcLib<LrcLibResponse>(
-      `${LRCLIB_BASE}/get?${exactParams}`,
-      controller.signal,
-    );
-
-    // If no exact match, try search
-    if (!result?.syncedLyrics && !result?.plainLyrics) {
-      const searchResult = await fetchLrcLib<LrcLibResponse[]>(
-        `${LRCLIB_BASE}/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
-        controller.signal,
-      );
-      result = searchResult?.[0] ?? null;
-    }
-
-    const hasLyrics = !!(result?.syncedLyrics || result?.plainLyrics);
-    cacheSet('lyrics', cacheKey, hasLyrics ? result : null, CACHE_TTL_MS);
-
-    if (!hasLyrics) return NextResponse.json(null, { headers: _NO_CACHE_HDRS });
+    if (!result) return NextResponse.json(null, { headers: _NO_CACHE_HDRS });
     return NextResponse.json(result, { headers: _CACHE_HDRS });
   } catch (err) {
-    clearTimeout(timer);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : 'Internal error' },
       { status: isTimeout ? 504 : 500 },
     );
-  } finally {
-    clearTimeout(timer);
   }
 }

@@ -5,7 +5,7 @@
  * Cache entries expire automatically via TTL and eviction when max size is reached.
  */
 
-type Namespace = 'itunes' | 'artist-info' | 'concerts' | 'lyrics' | 'station-blacklist';
+export type Namespace = 'itunes' | 'artist-info' | 'concerts' | 'lyrics' | 'station-blacklist';
 
 interface CacheEntry<T> {
   value: T;

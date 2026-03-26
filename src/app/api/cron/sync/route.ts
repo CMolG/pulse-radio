@@ -1,0 +1,141 @@
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+/**
+ * Background sync endpoint for stale cache records.
+ * Protected by CRON_SECRET env var — call from VPS cron:
+ *   curl -H "Authorization: Bearer $CRON_SECRET" https://yourhost/api/cron/sync
+ */
+import { NextRequest, NextResponse } from 'next/server';
+import { getStaleKeys, persistToDb } from '@/lib/services/CacheRepository';
+import { cacheSet, type Namespace } from '@/lib/server-cache';
+
+export const runtime = 'nodejs';
+export const maxDuration = 300; // allow up to 5 minutes
+
+const CRON_SECRET = process.env.CRON_SECRET;
+const _NOOP = () => {};
+
+const BANDSINTOWN_APP_ID = 'pulse-radio';
+const TIMEOUT_MS = 10_000;
+
+async function safeFetch(url: string): Promise<any | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (!res.ok) { await res.text().catch(_NOOP); return null; }
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+type SyncFn = (key: string) => Promise<{ data: unknown; ttlMs: number } | null>;
+
+const syncers: Record<string, SyncFn> = {
+  itunes: async (key) => {
+    // key format: "media:term"
+    const [media, ...termParts] = key.split(':');
+    const term = termParts.join(':');
+    if (!term) return null;
+    const entity = media === 'podcast' ? 'podcast' : 'song';
+    const limit = media === 'podcast' ? '20' : '3';
+    const data = await safeFetch(
+      `https://itunes.apple.com/search?${new URLSearchParams({ term, media: media || 'music', entity, limit })}`,
+    );
+    return data ? { data, ttlMs: 60 * 60 * 1000 } : null;
+  },
+
+  'artist-info': async (key) => {
+    // Re-fetch via internal route would be circular; fetch externally
+    const MB_BASE = 'https://musicbrainz.org/ws/2';
+    const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
+    const hdrs = { 'User-Agent': 'PulseRadio/1.0 (https://pulse-radio.online)' };
+
+    const mbData = await safeFetch(`${MB_BASE}/artist/?query=artist:${encodeURIComponent(key)}&fmt=json&limit=1`);
+    const mb = mbData?.artists?.[0] ?? null;
+    const wiki = await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`);
+
+    const tags = mb?.tags?.filter((t: any) => t.count > 0)?.sort((a: any, b: any) => b.count - a.count)?.slice(0, 8)?.map((t: any) => t.name) ?? [];
+    const payload = {
+      name: mb?.name ?? key,
+      disambiguation: mb?.disambiguation ?? null,
+      type: mb?.type ?? null,
+      country: mb?.country ?? null,
+      beginArea: mb?.['begin-area']?.name ?? null,
+      lifeSpan: mb?.['life-span'] ?? null,
+      tags,
+      bio: wiki?.extract ?? null,
+      imageUrl: wiki?.thumbnail?.source ?? null,
+      wikipediaUrl: wiki?.content_urls?.desktop?.page ?? null,
+    };
+    return { data: payload, ttlMs: 24 * 60 * 60 * 1000 };
+  },
+
+  concerts: async (key) => {
+    const raw = await safeFetch(
+      `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`,
+    );
+    if (!Array.isArray(raw)) return { data: [], ttlMs: 12 * 60 * 60 * 1000 };
+    const events = raw.slice(0, 5).map((e: any) => ({
+      id: e.id,
+      date: e.datetime,
+      venue: e.venue?.name,
+      city: e.venue?.city,
+      country: e.venue?.country,
+      lineup: e.lineup ?? [],
+      ticketUrl: e.offers?.find((o: any) => o.type === 'Tickets' && o.status === 'available')?.url ?? e.url ?? null,
+    }));
+    return { data: events, ttlMs: 12 * 60 * 60 * 1000 };
+  },
+
+  lyrics: async (key) => {
+    // key format: "artist|title"
+    const [artist, title] = key.split('|');
+    if (!artist || !title) return null;
+    const data = await safeFetch(
+      `https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+    );
+    const result = Array.isArray(data) ? data[0] ?? null : null;
+    const hasLyrics = !!(result?.syncedLyrics || result?.plainLyrics);
+    return { data: hasLyrics ? result : null, ttlMs: 24 * 60 * 60 * 1000 };
+  },
+};
+
+export async function GET(req: NextRequest) {
+  // Auth check
+  if (CRON_SECRET) {
+    const auth = req.headers.get('authorization');
+    if (auth !== `Bearer ${CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  }
+
+  const namespaces: Namespace[] = ['itunes', 'artist-info', 'concerts', 'lyrics'];
+  const summary: Record<string, { stale: number; synced: number; failed: number }> = {};
+
+  for (const ns of namespaces) {
+    const staleKeys = getStaleKeys(ns);
+    const syncer = syncers[ns];
+    let synced = 0;
+    let failed = 0;
+
+    for (const key of staleKeys) {
+      try {
+        const result = syncer ? await syncer(key) : null;
+        if (result) {
+          persistToDb(ns, key, result.data, result.ttlMs);
+          cacheSet(ns, key, result.data, result.ttlMs);
+          synced++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    summary[ns] = { stale: staleKeys.length, synced, failed };
+  }
+
+  return NextResponse.json({ ok: true, summary }, {
+    headers: { 'Cache-Control': 'no-cache, no-store' },
+  });
+}

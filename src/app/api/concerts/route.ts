@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
-import { cacheGet, cacheSet } from '@/lib/server-cache';
+import { cacheResolve } from '@/lib/services/CacheRepository';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_APP_ID = 'pulse-radio';
@@ -60,6 +60,31 @@ function mapEvent(e: BandsintownEvent): ConcertEvent {
   };
 }
 
+async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const url = `${BANDSINTOWN_BASE}/artists/${encodeURIComponent(artist)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`;
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) {
+      await res.text().catch(_NOOP);
+      return [];
+    }
+    const cl = res.headers.get('content-length');
+    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
+      await res.body?.cancel().catch(_NOOP);
+      return [];
+    }
+    const data: BandsintownEvent[] = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.slice(0, MAX_EVENTS).map(mapEvent);
+  } catch {
+    clearTimeout(timer);
+    return [];
+  }
+}
+
 export async function GET(req: NextRequest) {
   const artist = req.nextUrl.searchParams.get('artist')?.trim() ?? '';
   if (!artist || artist.length > 200) {
@@ -67,43 +92,16 @@ export async function GET(req: NextRequest) {
   }
 
   const cacheKey = normKey(artist);
-  const cached = cacheGet<ConcertEvent[]>('concerts', cacheKey);
-  if (cached !== undefined) {
-    return NextResponse.json(cached, { headers: _CACHE_HDRS });
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
   try {
-    const url = `${BANDSINTOWN_BASE}/artists/${encodeURIComponent(artist)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`;
-    const res = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
-
-    if (!res.ok) {
-      await res.text().catch(_NOOP);
-      // Artist not found or no events — cache empty result briefly
-      cacheSet<ConcertEvent[]>('concerts', cacheKey, [], 60 * 60 * 1000);
-      return NextResponse.json([], { headers: _NO_CACHE_HDRS });
-    }
-
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(_NOOP);
-      return NextResponse.json([], { headers: _NO_CACHE_HDRS });
-    }
-
-    const data: BandsintownEvent[] = await res.json();
-    if (!Array.isArray(data)) {
-      cacheSet<ConcertEvent[]>('concerts', cacheKey, [], 60 * 60 * 1000);
-      return NextResponse.json([], { headers: _NO_CACHE_HDRS });
-    }
-
-    const events = data.slice(0, MAX_EVENTS).map(mapEvent);
-    cacheSet('concerts', cacheKey, events, CACHE_TTL_MS);
-    return NextResponse.json(events, { headers: _CACHE_HDRS });
+    const events = await cacheResolve<ConcertEvent[]>({
+      namespace: 'concerts',
+      key: cacheKey,
+      ttlMs: CACHE_TTL_MS,
+      fetcher: () => fetchConcerts(artist),
+    });
+    const list = events ?? [];
+    return NextResponse.json(list, { headers: list.length > 0 ? _CACHE_HDRS : _NO_CACHE_HDRS });
   } catch (err) {
-    clearTimeout(timer);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return NextResponse.json(
       { error: isTimeout ? 'Request timed out' : 'Internal error' },
