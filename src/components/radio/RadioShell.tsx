@@ -9999,6 +9999,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all active:scale-95 flex-shrink-0 ${activeTab === tab.id ? 'bg-white/10 text-white shadow-sm' : 'text-white/45 hover:text-white/60 hover:bg-white/[0.04]'}`}
                   >
                     {tab.icon} {tab.label}
@@ -10114,6 +10115,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
+                      aria-current={activeTab === tab.id ? 'page' : undefined}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors flex-shrink-0 ${activeTab === tab.id ? 'bg-surface-6 text-white' : 'text-dim hover:text-white/60 hover:bg-surface-2'}`}
                     >
                       {tab.icon} {tab.label}{' '}
