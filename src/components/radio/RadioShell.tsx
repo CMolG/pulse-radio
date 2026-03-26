@@ -3159,7 +3159,7 @@ function ScrollRow({
           )}
         </div>
       )}{' '}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')} role="region" aria-label={title ?? 'Station carousel'} tabIndex={0}>
+      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')} role="region" aria-roledescription="carousel" aria-label={title ?? 'Station carousel'} tabIndex={0}>
         {children}
       </div>
     </div>
