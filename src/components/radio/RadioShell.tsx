@@ -5934,7 +5934,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
       transition={_MOTION_T_02}
       className="absolute inset-0 z-50 flex flex-col"
     >
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />{' '}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />{' '}
       <motion.div
         initial={_MOTION_SLIDE_UP_INIT}
         animate={_MOTION_SLIDE_UP_VISIBLE}
@@ -5975,6 +5975,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
                 <button
                   onClick={() => setExpandedIdx(isExpanded ? null : idx)}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
+                  aria-expanded={isExpanded}
                 >
                   <div className="flex-shrink-0">{section.icon}</div>{' '}
                   <span className="text-[14px] font-medium text-white/80 flex-1">
@@ -6267,7 +6268,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
       className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
     >
       {' '}
-      {/* Backdrop */} <div className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'} onClick={onClose} />{' '}
+      {/* Backdrop */} <div className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'} onClick={onClose} aria-hidden="true" />{' '}
       {/* Panel */}{' '}
       <motion.div
         initial={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_INIT}
@@ -7190,7 +7191,7 @@ function _OnboardingModal() {
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"
         >
           {' '}
-          {/* Backdrop */} <div className="absolute inset-0 bg-black/70" onClick={handleClose} />{' '}
+          {/* Backdrop */} <div className="absolute inset-0 bg-black/70" onClick={handleClose} aria-hidden="true" />{' '}
           {/* Modal */}{' '}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -10253,9 +10254,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             onClick={() => setMiniMode((m) => !m)}
             className="pointer-events-auto shrink-0 p-2 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
             title={miniMode ? t('expand') : t('minimize')}
+            aria-label={miniMode ? t('expand') : t('minimize')}
           >
             {' '}
-            {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}
+            {miniMode ? <Maximize2 size={12} aria-hidden="true" /> : <Minimize2 size={12} aria-hidden="true" />}
           </button>{' '}
         </div>
         <NowPlayingBar {...nowPlayingFullProps} />
