@@ -4896,7 +4896,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                           </MetaBadge>
                         )}{' '}
                         {showMetaHydration && (
-                          <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/40 animate-pulse">
+                          <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/45 animate-pulse">
                             Fetching metadata…
                           </MetaBadge>
                         )}{' '}
