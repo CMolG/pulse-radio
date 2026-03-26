@@ -3661,7 +3661,7 @@ function BrowseView({
                             aria-label={t('filterBySong')}
                             value={songFilter}
                             onChange={(e) => setSongFilter(e.target.value)}
-                            className="bg-transparent text-white placeholder:text-white/50 outline-none w-full min-w-0"
+                            className="bg-transparent text-white placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-accent/70 w-full min-w-0"
                           />{' '}
                           {songFilter && (
                             <button
@@ -10032,7 +10032,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       aria-label={t('searchStationsAria')}
-                      className="bg-transparent text-white text-[13px] placeholder:text-white/50 outline-none w-full min-w-0"
+                      className="bg-transparent text-white text-[13px] placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-accent/70 w-full min-w-0"
                       data-radio-search
                     />
                   </div>
@@ -10155,7 +10155,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label={t('searchStationsAria')}
-                        className="bg-transparent text-white placeholder:text-white/50 outline-none w-full min-w-0"
+                        className="bg-transparent text-white placeholder:text-white/50 outline-none focus-visible:ring-2 focus-visible:ring-accent/70 w-full min-w-0"
                         data-radio-search
                       />
                     </div>
