@@ -2747,7 +2747,7 @@ const SongCard = React.memo(
                 heart.onClick();
               }}
               aria-label={heart.label}
-              className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? 'bg-pink-500/20 text-pink-400' : 'bg-black/50 text-white/40 opacity-0 group-hover:opacity-100 hover:text-pink-400'}`}
+              className={`absolute top-2 left-2 p-2.5 rounded-full backdrop-blur-sm transition-all ${heart.filled ? 'bg-pink-500/20 text-pink-400' : 'bg-black/50 text-white/50 opacity-0 group-hover:opacity-100 hover:text-pink-400'}`}
             >
               <Heart size={12} className={heart.filled ? 'fill-pink-400' : ''} />
             </button>
