@@ -10009,7 +10009,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               {/* Spacer for absolute bottom bar */} <div className="h-20 shrink-0" />
             </div>
           ) : (
-                        <main className="flex flex-col min-h-full pb-24">
+                        <main id="main-content" className="flex flex-col min-h-full pb-24">
               {' '}
               {nowPlayingHeroElement} {/* ── Mobile top nav tabs + search ── */}{' '}
               <nav className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2" aria-label="Main navigation">
@@ -10091,6 +10091,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       ref={containerRef}
       className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
     >
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[999] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-accent focus:text-white focus:text-sm focus:font-medium">
+        Skip to main content
+      </a>
       {' '}
       {parallaxElement}{' '}
       <div className="flex flex-1 min-h-0 relative z-10">
