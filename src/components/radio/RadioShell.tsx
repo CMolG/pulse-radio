@@ -3714,7 +3714,7 @@ function BrowseView({
                           disabled={page === 0}
                           className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium transition-colors ${page === 0 ? 'text-white/35 cursor-default' : 'bg-surface-2 text-secondary hover:bg-surface-4 hover:text-white'}`}
                         >
-                          <ChevronLeft size={14} /> {t('previous')}
+                          <ChevronLeft size={14} aria-hidden="true" /> {t('previous')}
                         </button>
                         <span className="text-[12px] text-dim tabular-nums">
                           {' '}
