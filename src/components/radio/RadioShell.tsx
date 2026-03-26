@@ -5950,6 +5950,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
         role="dialog"
         aria-modal="true"
         aria-label="How to use Pulse"
+        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
       >
         {' '}
         {/* Handle bar */}{' '}
@@ -7203,6 +7204,7 @@ function _OnboardingModal() {
           animate={_MOTION_FADE_VISIBLE}
           exit={_MOTION_FADE_OUT}
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+          onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') handleClose(); }}
         >
           {' '}
           {/* Backdrop */} <div className="absolute inset-0 bg-black/70" onClick={handleClose} aria-hidden="true" />{' '}
@@ -7741,6 +7743,7 @@ const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClos
       aria-modal="true"
       aria-label="Keyboard shortcuts"
       onClick={onClose}
+      onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
     >
       <div
         className="bg-surface-2 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 relative"
