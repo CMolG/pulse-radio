@@ -7479,7 +7479,7 @@ const EqPanel = React.memo(function EqPanel({
     }
   };
   return (
-    <div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50">
+    <div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50" role="dialog" aria-modal="false" aria-label="Equalizer">
       {' '}
       {/* Header */}{' '}
       <div className="flex-between mb-4">
