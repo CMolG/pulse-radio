@@ -2969,8 +2969,8 @@ const StationCard = React.memo(
         {liveStatus === 'loading' && (
           <div className="flex items-center gap-1 mt-1.5">
             {' '}
-            <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" />{' '}
-            <span className="text-[12px] text-dim">Checking…</span>
+            <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" aria-hidden="true" />{' '}
+            <span className="text-[12px] text-dim" role="status">Checking…</span>
           </div>
         )}{' '}
         {liveStatus === 'loaded' && (
@@ -3526,13 +3526,13 @@ function BrowseView({
       {/* Content */}{' '}
       <div className={`app-body ${isMobile ? 'px-0' : 'px-4'} pb-4 overflow-y-auto`}>
         {loading && (
-          <div className="flex-center-row py-16">
+          <div className="flex-center-row py-16" role="status" aria-label="Loading stations">
             <Loader2 size={24} className="text-dim animate-spin" />
           </div>
         )}{' '}
         {error && (
-          <div className="flex-center-col gap-3 py-16">
-            <RadioIcon size={32} className="text-muted" />{' '}
+          <div className="flex-center-col gap-3 py-16" role="alert">
+            <RadioIcon size={32} className="text-muted" aria-hidden="true" />{' '}
             <p className="text-[13px] text-secondary">{t('failedToLoad')}</p>
             <button
               onClick={() => setRetryKey((k) => k + 1)}
@@ -3597,8 +3597,8 @@ function BrowseView({
                           className={`snap-start shrink-0 ${itemWidth} h-45 rounded-xl bg-surface-2 flex-center-col gap-2`}
                         >
                           {' '}
-                          <RadioIcon size={18} className="text-muted" />{' '}
-                          <p className="text-[12px] text-muted">{t('failedToLoadStations')}</p>
+                          <RadioIcon size={18} className="text-muted" aria-hidden="true" />{' '}
+                          <p className="text-[12px] text-muted" role="alert">{t('failedToLoadStations')}</p>
                           <button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[12px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
@@ -4717,7 +4717,7 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
     </div>
   );
   const lyricsEmpty = (
-    <div>
+    <div role={lyricsError ? 'alert' : undefined}>
       <p className="text-[12px] text-dim">
         {lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}
       </p>{' '}
