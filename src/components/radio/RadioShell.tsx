@@ -6502,7 +6502,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                         onChange={(e) => handleSetGain(band.id, parseInt(e.target.value, 10))}
                         disabled={!eq.enabled}
                         aria-label={`${band.label} Hz gain`}
-                        className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                        className="eq-slider h-20 appearance-none bg-transparent cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 rounded [writing-mode:vertical-lr] [direction:rtl] [&::-webkit-slider-runnable-track]:w-[3px] [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                       />{' '}
                       <span className="text-[12px] text-white/50">{band.label}</span>
                     </div>
@@ -6540,7 +6540,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     value={Math.round(eq.stereoWidth * 100)}
                     onChange={(e) => eq.setStereoWidth(parseInt(e.target.value, 10) / 100)}
                     aria-label="Stereo width"
-                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
                   <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.stereoWidth * 100)}%
@@ -6557,7 +6557,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     value={Math.round(eq.bassEnhance * 100)}
                     onChange={(e) => eq.setBassEnhance(parseInt(e.target.value, 10) / 100)}
                     aria-label="Bass enhance"
-                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
                   <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.bassEnhance * 100)}%
@@ -6582,7 +6582,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                     onChange={(e) => eq.setCompressorAmount(parseInt(e.target.value, 10) / 100)}
                     disabled={!eq.compressorEnabled}
                     aria-label="Compressor amount"
-                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
+                    className="flex-1 h-1 appearance-none bg-white/10 rounded-full cursor-pointer disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sys-orange/60 focus-visible:outline-offset-2 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sys-orange"
                   />{' '}
                   <span className="text-[12px] text-white/50 tabular-nums w-8 text-right">
                     {Math.round(eq.compressorAmount * 100)}%
