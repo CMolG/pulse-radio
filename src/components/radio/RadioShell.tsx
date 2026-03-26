@@ -9954,6 +9954,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   onClick={() => setShowMobileSettings(true)}
                   className="w-11 h-11 flex-center-row rounded-xl text-white/45 hover:text-white/60 transition-colors active:scale-95 flex-shrink-0"
                   title="Settings"
+                  aria-label="Settings"
                   data-testid="mobile-settings-btn"
                 >
                   <Settings size={18} />
@@ -10103,6 +10104,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                       onClick={() => setShowDesktopSettings(true)}
                       className="w-11 h-11 flex items-center justify-center rounded-xl text-white/45 hover:text-white/60 hover:bg-white/[0.06] transition-colors"
                       title="Settings"
+                      aria-label="Settings"
                       data-testid="desktop-settings-btn"
                     >
                       <Settings size={18} />
