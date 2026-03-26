@@ -3654,10 +3654,11 @@ function BrowseView({
                       {scanEnabled && (
                         <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                           {' '}
-                          <Music2 size={11} className="text-dim shrink-0" />{' '}
+                          <Music2 size={11} className="text-dim shrink-0" aria-hidden="true" />{' '}
                           <input
                             type="text"
                             placeholder={t('filterBySong')}
+                            aria-label={t('filterBySong')}
                             value={songFilter}
                             onChange={(e) => setSongFilter(e.target.value)}
                             className="bg-transparent text-white placeholder:text-white/50 outline-none w-full min-w-0"
@@ -5506,7 +5507,7 @@ function _NowPlayingBar({
         </div>{' '}
         {/* Fill iPhone safe-area inset below the bar without adding layout height */}{' '}
         <div
-          aria-hidden
+          aria-hidden="true"
           className="pointer-events-none absolute left-0 right-0 top-full glass-blur"
           style={_SAFE_AREA_BOTTOM_STYLE}
         />
@@ -6410,6 +6411,7 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop }
                           if (e.key === 'Escape') setShowSaveInput(false);
                         }}
                         placeholder="Preset name…"
+                        aria-label="Preset name"
                         className="flex-1 px-2.5 py-1.5 text-[12px] rounded-lg bg-white/5 border border-white/8 text-white placeholder:text-white/50 outline-none focus:border-sys-orange/50"
                         autoFocus
                       />{' '}
@@ -10014,7 +10016,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   {' '}
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     {' '}
-                    <Search size={13} className="text-white/45 flex-shrink-0" />{' '}
+                    <Search size={13} className="text-white/45 flex-shrink-0" aria-hidden="true" />{' '}
                     <input
                       type="search"
                       placeholder={t('searchStations')}
@@ -10137,7 +10139,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {' '}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.05]">
                       {' '}
-                      <Search size={12} className="text-dim flex-shrink-0" />{' '}
+                      <Search size={12} className="text-dim flex-shrink-0" aria-hidden="true" />{' '}
                       <input
                         type="search"
                         placeholder={t('searchStations')}
