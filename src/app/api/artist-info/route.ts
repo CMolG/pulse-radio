@@ -112,10 +112,11 @@ export async function GET(req: NextRequest) {
   if (!artist) return NextResponse.json(_ERR_400, { status: 400 });
   const cacheKey = artistInfoKey(artist);
   try {
-    const payload = await cacheResolve<unknown>({
+    const payload = await getCachedOrFetch({
       namespace: 'artist-info',
       key: cacheKey,
       ttlMs: 24 * 60 * 60 * 1000,
+      schema: ArtistInfoSchema,
       fetcher: async () => {
         const { data } = await artistInfoCircuit.call(() => fetchArtistPayload(artist), null);
         return data;

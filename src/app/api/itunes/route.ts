@@ -11,6 +11,7 @@ import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { apiError } from '@/lib/api-response';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
 import { safeErrorResponse } from '@/lib/api-error-sanitizer';
+import { itunesKey } from '@/lib/cache-keys';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };

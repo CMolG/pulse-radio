@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
-import { cacheResolve } from '@/lib/services/CacheRepository';
+import { getCachedOrFetch } from '@/lib/services/CacheRepository';
+import { ConcertEventsSchema } from '@/lib/schemas/api-responses';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
@@ -118,10 +119,11 @@ export async function GET(req: NextRequest) {
 
   const cacheKey = concertsKey(artist);
   try {
-    const events = await cacheResolve<ConcertEvent[]>({
+    const events = await getCachedOrFetch({
       namespace: 'concerts',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
+      schema: ConcertEventsSchema,
       fetcher: async () => {
         const { data } = await concertsCircuit.call(
           () => fetchConcerts(artist),
