@@ -1,8 +1,8 @@
 ---
 type: execution-order
 generated_by: auto-architect
-iteration: 20
-total_cards: 140
+iteration: 23
+total_cards: 142
 ---
 
 # Pulse Radio Backlog — Execution Order
@@ -36,16 +36,18 @@ total_cards: 140
 ### Critical (14)
 ARCH-001, 002, 003, 004, 005, 017, 031, 032, 042, 060, 061, 073, 079, 101
 
-### High (40)
+### High (41)
 ARCH-006, 007, 008, 009, 010, 018, 019, 024, 027, 033, 034, 035, 036,
 043, 044, 050, 054, 062, 063, 066, 069, 074, 075, 080, 087, 088, 091,
-092, 093, 098, 099, 102, 103, 107, 108, 110, 111, 127, 128, 129, 132
+092, 093, 098, 099, 102, 103, 107, 108, 110, 111, 127, 128, 129, 132,
+141
 
-### Medium (57)
+### Medium (58)
 ARCH-011, 012, 013, 014, 015, 016, 020, 028, 037, 038, 039, 040, 041,
 045, 046, 047, 048, 051, 052, 053, 055, 056, 057, 058, 064, 065, 067,
 068, 070, 071, 072, 077, 078, 081, 082, 084, 089, 090, 094, 095,
-096, 105, 106, 109, 113, 118, 119, 123, 124, 130, 133, 134, 135, 138, 139, 140
+096, 105, 106, 109, 113, 118, 119, 123, 124, 130, 133, 134, 135, 138,
+139, 140, 142
 
 ### Low (11)
 ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
@@ -76,6 +78,13 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 |------|----------|------------|
 | ARCH-125 | high | ARCH-115 (podcast API) |
 | ARCH-126 | high | ARCH-116 (audiobook API) |
+
+## Iteration 23 — Cross-Cutting Utilities
+
+- **ARCH-141** (NEW): Debounce & throttle utility — needed by 5+ cards (high)
+- **ARCH-142** (NEW): Feature flag system — standardizes NEXT_PUBLIC_* toggles (medium)
+- Identified RadioShell.tsx hotspot: 50 cards target it — recommend extraction cards (ARCH-001-009) land first
+- Shared test mocks and type definitions deferred — individual cards can handle these
 
 ## Iteration 22 — Monitoring Pass (No Changes)
 
