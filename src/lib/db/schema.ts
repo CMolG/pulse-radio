@@ -45,3 +45,16 @@ export const stationHealth = sqliteTable('station_health', {
   lastFailure: integer('last_failure', { mode: 'number' }),
   avgResponseMs: integer('avg_response_ms', { mode: 'number' }),
 });
+
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'number' }).notNull(),
+});
+
+export const userData = sqliteTable('user_data', {
+  userId: text('user_id').notNull(),
+  key: text('key').notNull(),
+  value: text('value').notNull(),
+  updatedAt: integer('updated_at', { mode: 'number' }).notNull(),
+});
