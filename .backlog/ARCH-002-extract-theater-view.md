@@ -3,7 +3,7 @@ task_id: ARCH-002
 target_agent: auto-reducer-finite
 target_module: src/components/radio/RadioShell.tsx
 priority: critical
-status: pending
+status: completed
 ---
 
 # Extract TheaterView and Lyrics Components from RadioShell
