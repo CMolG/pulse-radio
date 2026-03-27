@@ -20,6 +20,7 @@ import { cacheGet, cacheSet, type Namespace } from '@/lib/server-cache';
 import { eq, sql } from 'drizzle-orm';
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
 import { logger } from '@/lib/logger';
+import { z } from 'zod';
 
 type CacheTable = typeof itunesCache | typeof artistInfoCache | typeof concertsCache | typeof lyricsCache;
 

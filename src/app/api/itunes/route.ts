@@ -1,5 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest, NextResponse } from 'next/server';
-import { cacheResolve, getCachedOrFetch } from '@/lib/services/CacheRepository';
+import { cacheResolve } from '@/lib/services/CacheRepository';
 import { ItunesSearchResultSchema } from '@/lib/schemas/api-responses';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -14,6 +14,7 @@ const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const itunesCircuit = createCircuitBreaker('itunes');
+const _NOOP = () => {};
 /* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
   req: NextRequest,
 ) {

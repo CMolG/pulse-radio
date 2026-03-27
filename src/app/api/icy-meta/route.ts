@@ -4,7 +4,7 @@
 } from 'next/server';
 import { isStationBlacklisted, recordStationFailure } from '@/lib/server-cache';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeUrl } from '@/lib/sanitize';
+import { sanitizeUrl, sanitizeTextContent } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';

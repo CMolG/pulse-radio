@@ -61,7 +61,7 @@ function trySave(key: string, raw: string): boolean {
   const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
   if (!raw) return defaultValue;
   try {
-    return JSON.parse(raw);
+    return safeJsonParse<T>(raw);
   } catch {
     return defaultValue;
   }

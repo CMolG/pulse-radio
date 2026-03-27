@@ -73,13 +73,12 @@ const itunesCircuit = createCircuitBreaker('itunes-lookup');
   } catch (e) {
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     const status = isTimeout ? 504 : 500;
+    const code = isTimeout ? 'TIMEOUT' : 'UPSTREAM_ERROR';
     reqLog.done(status);
-    return NextResponse.json(
-      {
-        error: isTimeout ? 'Request timed out' : e instanceof Error ? e.message : 'Internal error',
-        results: [],
-      },
-      { status },
+    return apiError(
+      isTimeout ? 'Request timed out' : e instanceof Error ? e.message : 'Internal error',
+      code,
+      status,
     );
   }
 }
