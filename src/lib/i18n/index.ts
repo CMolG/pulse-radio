@@ -6,6 +6,10 @@ export {
   type SovereignCountry,
 } from './countries';
 export {
+  getDirFromLocale,
+  getLocaleFromCountryCode,
+} from './countryLocale';
+export {
   LANG3_TO_LOCALE,
   LOCALE_SELF_CANDIDATES,
   SUPPORTED_LOCALES,
