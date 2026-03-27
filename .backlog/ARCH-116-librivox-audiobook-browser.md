@@ -3,7 +3,7 @@ task_id: ARCH-116
 target_agent: auto-feature-engineer-finite
 target_module: src/app/api/librivox/route.ts
 priority: high
-status: pending
+status: blocked
 ---
 
 # ARCH-116: Audiobook API Routes — LibriVox, Open Library, Internet Archive

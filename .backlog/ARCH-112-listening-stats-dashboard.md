@@ -3,7 +3,7 @@ task_id: ARCH-112
 target_agent: auto-feature-engineer-finite
 target_module: src/components/radio/RadioShell.tsx
 priority: medium
-status: pending
+status: blocked
 ---
 
 # ARCH-112: Listening Statistics Dashboard

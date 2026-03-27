@@ -3,7 +3,7 @@ task_id: ARCH-115
 target_agent: auto-feature-engineer-finite
 target_module: src/app/api/podcast-search/route.ts
 priority: high
-status: pending
+status: blocked
 ---
 
 # ARCH-115: Podcast API Routes & RSS Parser

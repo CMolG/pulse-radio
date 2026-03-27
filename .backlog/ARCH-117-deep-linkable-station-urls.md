@@ -3,7 +3,7 @@ task_id: ARCH-117
 target_agent: auto-feature-engineer-finite
 target_module: src/app/[countryCode]/page.tsx
 priority: medium
-status: pending
+status: blocked
 ---
 
 # ARCH-117: Deep-Linkable Station URLs with Query Parameters
