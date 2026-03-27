@@ -8,7 +8,10 @@
     "cache:purge:deep": "rm -rf .next node_modules/.cache",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.1",
