@@ -178,9 +178,6 @@ export async function GET(req: NextRequest) {
     recordStationFailure(streamUrl);
     recordFailure(streamUrl);
     console.error('[proxy-stream] Connection failed:', err);
-    return new Response(JSON.stringify(safeErrorResponse('Stream connection failed', err)), {
-      status: 502,
-      headers: _JSON_R5_HDRS,
-    });
+    return apiError('Stream connection failed', 'UPSTREAM_ERROR', 502, { 'Retry-After': '5' });
   }
 }
