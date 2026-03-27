@@ -3,7 +3,7 @@ task_id: ARCH-102
 target_agent: auto-feature-engineer-finite
 target_module: src/components/radio/RadioShell.tsx
 priority: high
-status: pending
+status: blocked
 ---
 
 # ARCH-102: Podcast & Audiobook Resume Position Tracking
