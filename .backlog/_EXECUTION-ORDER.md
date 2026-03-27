@@ -79,6 +79,12 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 | ARCH-125 | high | ARCH-115 (podcast API) |
 | ARCH-126 | high | ARCH-116 (audiobook API) |
 
+## Iterations 25+ — Monitoring (Stable)
+
+- Backlog locked at 142 cards, all pending
+- No source code changes detected
+- Monitoring continues per auto-architect flow
+
 ## Iteration 24 — Monitoring Pass (Stable)
 
 - 142 ARCH-*.md files verified, all `status: pending`
