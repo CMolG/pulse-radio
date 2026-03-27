@@ -3,7 +3,7 @@ task_id: ARCH-031
 target_agent: auto-feature-engineer-finite
 target_module: src/middleware.ts
 priority: critical
-status: pending
+status: completed
 ---
 
 # Add Security Headers Middleware
@@ -33,10 +33,10 @@ Create a Next.js middleware file at `src/middleware.ts` that injects the followi
 
 ## Acceptance Criteria
 
-- [ ] `src/middleware.ts` exists and applies headers to all routes.
-- [ ] CSP header present on page responses (verify via browser DevTools → Network → Response Headers).
-- [ ] Audio streaming still works (proxy-stream not blocked by CSP).
-- [ ] iTunes album artwork still loads.
-- [ ] No console CSP violation errors during normal usage.
-- [ ] HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy all present.
-- [ ] All existing Playwright tests pass after the change.
+- [x] `src/middleware.ts` exists and applies headers to all routes.
+- [x] CSP header present on page responses (verify via browser DevTools → Network → Response Headers).
+- [x] Audio streaming still works (proxy-stream not blocked by CSP).
+- [x] iTunes album artwork still loads.
+- [x] No console CSP violation errors during normal usage.
+- [x] HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy all present.
+- [x] All existing Playwright tests pass after the change.
