@@ -6,6 +6,7 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
 import { validateRequest } from '@/lib/validate-request';
 import { concertsSchema } from '@/lib/validation-schemas';
+import { createCircuitBreaker } from '@/lib/circuit-breaker';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
@@ -16,6 +17,7 @@ const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=14400, s-maxage=43200, s
 const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200' };
 const _NOOP = () => {};
 const MAX_EVENTS = 5;
+const concertsCircuit = createCircuitBreaker('bandsintown');
 
 interface BandsintownEvent {
   id: string;
@@ -132,10 +134,18 @@ export async function GET(req: NextRequest) {
       namespace: 'concerts',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
-      fetcher: () => fetchConcerts(artist),
+      fetcher: async () => {
+        const { data } = await concertsCircuit.call(
+          () => fetchConcerts(artist),
+          [],
+        );
+        return data;
+      },
     });
     const list = events ?? [];
-    return NextResponse.json(list, { headers: list.length > 0 ? _CACHE_HDRS : _NO_CACHE_HDRS });
+    const headers: Record<string, string> = { ...(list.length > 0 ? _CACHE_HDRS : _NO_CACHE_HDRS) };
+    if (concertsCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = concertsCircuit.state.toLowerCase();
+    return NextResponse.json(list, { headers });
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return NextResponse.json(

@@ -30,10 +30,12 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { itunesSchema } from '@/lib/validation-schemas';
+import { createCircuitBreaker } from '@/lib/circuit-breaker';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const itunesCircuit = createCircuitBreaker('itunes');
 /* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
   req: NextRequest,
 ) {
@@ -56,17 +58,22 @@ const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
       fetcher: async () => {
-        const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
-        const res = await apiFetch(url, {
-          timeoutMs: 8_000,
-          maxBytes: 2 * 1024 * 1024,
-          label: 'iTunes API',
-        });
-        return await res.json();
+        const { data } = await itunesCircuit.call(async () => {
+          const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
+          const res = await apiFetch(url, {
+            timeoutMs: 8_000,
+            maxBytes: 2 * 1024 * 1024,
+            label: 'iTunes API',
+          });
+          return await res.json();
+        }, { resultCount: 0, results: [] });
+        return data;
       },
     });
     reqLog.done(200);
-    return NextResponse.json(data, { headers: _CACHE_HDRS });
+    const headers: Record<string, string> = { ..._CACHE_HDRS };
+    if (itunesCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = itunesCircuit.state.toLowerCase();
+    return NextResponse.json(data, { headers });
   } catch (e) {
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     const status = isTimeout ? 504 : 500;

@@ -5,6 +5,7 @@ import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { validateRequest } from '@/lib/validate-request';
 import { lyricsSchema } from '@/lib/validation-schemas';
+import { createCircuitBreaker } from '@/lib/circuit-breaker';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -12,6 +13,7 @@ const LRCLIB_TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800' };
 const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200' };
+const lyricsCircuit = createCircuitBreaker('lrclib');
 const _NOOP = () => {};
 
 interface LrcLibResponse {
@@ -97,11 +99,19 @@ export async function GET(req: NextRequest) {
       namespace: 'lyrics',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
-      fetcher: () => fetchLyrics(artist, title, album, duration),
+      fetcher: async () => {
+        const { data } = await lyricsCircuit.call(
+          () => fetchLyrics(artist, title, album, duration),
+          null,
+        );
+        return data;
+      },
     });
 
-    if (!result) return NextResponse.json(null, { headers: _NO_CACHE_HDRS });
-    return NextResponse.json(result, { headers: _CACHE_HDRS });
+    const headers: Record<string, string> = { ...(!result ? _NO_CACHE_HDRS : _CACHE_HDRS) };
+    if (lyricsCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = lyricsCircuit.state.toLowerCase();
+    if (!result) return NextResponse.json(null, { headers });
+    return NextResponse.json(result, { headers });
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return NextResponse.json(

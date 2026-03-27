@@ -8,6 +8,7 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
 import { validateRequest } from '@/lib/validate-request';
 import { artistInfoSchema } from '@/lib/validation-schemas';
+import { createCircuitBreaker } from '@/lib/circuit-breaker';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -18,6 +19,7 @@ const _PERSON_SUFFIXES = ['(singer)', '(musician)', '(rapper)'] as const;
 const _BAND_SUFFIXES = ['(band)', '(musical group)', '(singer)', '(musician)'] as const;
 const _ERR_400 = { error: 'Missing or invalid artist parameter' };
 const _ERR_500 = { error: 'Internal error' };
+const artistInfoCircuit = createCircuitBreaker('artist-info');
 const _NOOP = () => {};
 const _MB_HDRS = { 'User-Agent': USER_AGENT, Accept: 'application/json' } as const;
 const _WIKI_HDRS = { 'User-Agent': USER_AGENT } as const;
@@ -101,13 +103,21 @@ export async function GET(req: NextRequest) {
       namespace: 'artist-info',
       key: cacheKey,
       ttlMs: 24 * 60 * 60 * 1000,
-      fetcher: () => fetchArtistPayload(artist),
+      fetcher: async () => {
+        const { data } = await artistInfoCircuit.call(
+          () => fetchArtistPayload(artist),
+          null,
+        );
+        return data;
+      },
     });
     const hasData = payload && typeof payload === 'object' && (('bio' in payload && payload.bio) || ('name' in payload));
     const cacheHeader = hasData
       ? 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800'
       : 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200';
-    return NextResponse.json(payload, { headers: { 'Cache-Control': cacheHeader } });
+    const headers: Record<string, string> = { 'Cache-Control': cacheHeader };
+    if (artistInfoCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = artistInfoCircuit.state.toLowerCase();
+    return NextResponse.json(payload, { headers });
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
     return NextResponse.json(_ERR_500, { status: 500 });
