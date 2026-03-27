@@ -42,12 +42,28 @@ async function fetchJson<T>(url: string, headers: Record<string, string>): Promi
 }
 async function searchMusicBrainz(artist: string) {
   const url = `${MB_BASE}/artist/?query=artist:${encodeURIComponent(artist)}&fmt=json&limit=1`;
-  const data = await fetchJson<{ artists?: any[] }>(url, _MB_HDRS);
+  interface ArtistInfo {
+    name?: string;
+    type?: string;
+    country?: string;
+    disambiguation?: string;
+    'begin-area'?: { name?: string };
+    'life-span'?: Record<string, unknown>;
+    tags?: Array<{ count: number; name: string }>;
+  }
+  const data = await fetchJson<{ artists?: ArtistInfo[] }>(url, _MB_HDRS);
   return data?.artists?.[0] ?? null;
 }
 async function fetchWikiSummary(title: string) {
   const url = `${WIKI_BASE}/page/summary/${encodeURIComponent(title)}`;
-  const data = await fetchJson<any>(url, _WIKI_HDRS);
+  interface WikiData {
+    type?: string;
+    description?: string;
+    extract?: string;
+    thumbnail?: { source?: string };
+    content_urls?: { desktop?: { page?: string } };
+  }
+  const data = await fetchJson<WikiData>(url, _WIKI_HDRS);
   if (data?.type === 'disambiguation') return null;
   return data;
 }
@@ -59,7 +75,7 @@ async function fetchArtistPayload(artist: string) {
   ]);
   const mb = mbResult.status === 'fulfilled' ? mbResult.value : null;
   let wiki = wikiResult.status === 'fulfilled' ? wikiResult.value : null;
-  if (!wiki || (wiki.description && !MUSIC_KEYWORDS.test(wiki.description))) {
+  if (!wiki || (typeof wiki.description === 'string' && !MUSIC_KEYWORDS.test(wiki.description))) {
     const suffixes = mb?.type === 'Person' ? _PERSON_SUFFIXES : _BAND_SUFFIXES;
     for (const suffix of suffixes) {
       const attempt = await fetchWikiSummary(`${artist} ${suffix}`);
@@ -69,12 +85,11 @@ async function fetchArtistPayload(artist: string) {
       }
     }
   }
-  const tags =
-    mb?.tags
-      ?.filter((t: { count: number }) => t.count > 0)
-      ?.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
-      ?.slice(0, 8)
-      ?.map((t: { name: string }) => t.name) ?? [];
+  const tags = (mb?.tags ?? [])
+    .filter((t) => t.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8)
+    .map((t) => t.name);
   return {
     name: mb?.name ?? artist,
     disambiguation: mb?.disambiguation ?? null,
@@ -104,19 +119,20 @@ export async function GET(req: NextRequest) {
       key: cacheKey,
       ttlMs: 24 * 60 * 60 * 1000,
       fetcher: async () => {
-        const { data } = await artistInfoCircuit.call(
-          () => fetchArtistPayload(artist),
-          null,
-        );
+        const { data } = await artistInfoCircuit.call(() => fetchArtistPayload(artist), null);
         return data;
       },
     });
-    const hasData = payload && typeof payload === 'object' && (('bio' in payload && payload.bio) || ('name' in payload));
+    const hasData =
+      payload &&
+      typeof payload === 'object' &&
+      (('bio' in payload && payload.bio) || 'name' in payload);
     const cacheHeader = hasData
       ? 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800'
       : 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200';
     const headers: Record<string, string> = { 'Cache-Control': cacheHeader };
-    if (artistInfoCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = artistInfoCircuit.state.toLowerCase();
+    if (artistInfoCircuit.state !== 'CLOSED')
+      headers['X-Circuit-State'] = artistInfoCircuit.state.toLowerCase();
     return NextResponse.json(payload, { headers });
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });

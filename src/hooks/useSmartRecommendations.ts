@@ -89,6 +89,7 @@ export function useSmartRecommendations(
   // Compute similar to current station
   useEffect(() => {
     if (!currentStation) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSimilarToCurrent([]);
       return;
     }
@@ -100,7 +101,10 @@ export function useSmartRecommendations(
     }
 
     const currentTags = new Set(
-      (currentStation.tags || '').split(',').map((t) => t.trim().toLowerCase()).filter(Boolean),
+      (currentStation.tags || '')
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean),
     );
     if (currentTags.size === 0) {
       setSimilarToCurrent([]);

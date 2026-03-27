@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 type Quality = 'auto' | 'high' | 'standard' | 'low';

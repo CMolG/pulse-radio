@@ -18,10 +18,13 @@ const _NOOP = () => {};
 
 const TIMEOUT_MS = 10_000;
 
-async function safeFetch(url: string): Promise<any | null> {
+async function safeFetch(url: string): Promise<Record<string, unknown> | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-    if (!res.ok) { await res.text().catch(_NOOP); return null; }
+    if (!res.ok) {
+      await res.text().catch(_NOOP);
+      return null;
+    }
     return await res.json();
   } catch {
     return null;
@@ -50,11 +53,31 @@ const syncers: Record<string, SyncFn> = {
     const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
     const hdrs = { 'User-Agent': 'PulseRadio/1.0 (https://pulse-radio.online)' };
 
-    const mbData = await safeFetch(`${MB_BASE}/artist/?query=artist:${encodeURIComponent(key)}&fmt=json&limit=1`);
-    const mb = mbData?.artists?.[0] ?? null;
-    const wiki = await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`);
+    interface ArtistInfo {
+      name?: string;
+      type?: string;
+      country?: string;
+      disambiguation?: string;
+      'begin-area'?: { name?: string };
+      'life-span'?: Record<string, unknown>;
+      tags?: Array<{ count: number; name: string }>;
+    }
 
-    const tags = mb?.tags?.filter((t: any) => t.count > 0)?.sort((a: any, b: any) => b.count - a.count)?.slice(0, 8)?.map((t: any) => t.name) ?? [];
+    const mbData = (await safeFetch(
+      `${MB_BASE}/artist/?query=artist:${encodeURIComponent(key)}&fmt=json&limit=1`,
+    )) as { artists?: ArtistInfo[] } | null;
+    const mb = mbData?.artists?.[0] ?? null;
+    const wiki = (await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`)) as {
+      extract?: string;
+      thumbnail?: { source?: string };
+      content_urls?: { desktop?: { page?: string } };
+    } | null;
+
+    const tags = (mb?.tags ?? [])
+      .filter((t) => t.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8)
+      .map((t) => t.name);
     const payload = {
       name: mb?.name ?? key,
       disambiguation: mb?.disambiguation ?? null,
@@ -75,14 +98,19 @@ const syncers: Record<string, SyncFn> = {
       `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${env.BANDSINTOWN_APP_ID}&date=upcoming`,
     );
     if (!Array.isArray(raw)) return { data: [], ttlMs: 12 * 60 * 60 * 1000 };
-    const events = raw.slice(0, 5).map((e: any) => ({
+    const events = raw.slice(0, 5).map((e: Record<string, unknown>) => ({
       id: e.id,
       date: e.datetime,
-      venue: e.venue?.name,
-      city: e.venue?.city,
-      country: e.venue?.country,
+      venue: (e.venue as Record<string, unknown>)?.name,
+      city: (e.venue as Record<string, unknown>)?.city,
+      country: (e.venue as Record<string, unknown>)?.country,
       lineup: e.lineup ?? [],
-      ticketUrl: e.offers?.find((o: any) => o.type === 'Tickets' && o.status === 'available')?.url ?? e.url ?? null,
+      ticketUrl:
+        (e.offers as Array<Record<string, unknown>>)?.find(
+          (o) => o.type === 'Tickets' && o.status === 'available',
+        )?.url ??
+        e.url ??
+        null,
     }));
     return { data: events, ttlMs: 12 * 60 * 60 * 1000 };
   },
@@ -94,7 +122,7 @@ const syncers: Record<string, SyncFn> = {
     const data = await safeFetch(
       `https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
     );
-    const result = Array.isArray(data) ? data[0] ?? null : null;
+    const result = Array.isArray(data) ? (data[0] ?? null) : null;
     const hasLyrics = !!(result?.syncedLyrics || result?.plainLyrics);
     return { data: hasLyrics ? result : null, ttlMs: 24 * 60 * 60 * 1000 };
   },
@@ -141,7 +169,10 @@ export async function GET(req: NextRequest) {
     summary[ns] = { stale: staleKeys.length, synced, failed };
   }
 
-  return NextResponse.json({ ok: true, summary }, {
-    headers: { 'Cache-Control': 'no-cache, no-store' },
-  });
+  return NextResponse.json(
+    { ok: true, summary },
+    {
+      headers: { 'Cache-Control': 'no-cache, no-store' },
+    },
+  );
 }

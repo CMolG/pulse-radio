@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 import { useRef, useCallback, useEffect } from 'react';
 import type { VisualizerInput, VisualizerOutput } from './visualizer.worker';
 
@@ -13,10 +14,9 @@ export function useVisualizerWorker() {
 
     if (!workerRef.current) {
       try {
-        workerRef.current = new Worker(
-          new URL('./visualizer.worker.ts', import.meta.url),
-          { type: 'module' },
-        );
+        workerRef.current = new Worker(new URL('./visualizer.worker.ts', import.meta.url), {
+          type: 'module',
+        });
         workerRef.current.onmessage = (e: MessageEvent<VisualizerOutput>) => {
           callbackRef.current?.(e.data);
         };

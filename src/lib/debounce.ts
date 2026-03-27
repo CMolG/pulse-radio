@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
-export interface DebouncedFn<T extends (...args: any[]) => any> {
+export interface DebouncedFn<T extends (...args: unknown[]) => unknown> {
   (...args: Parameters<T>): void;
   cancel(): void;
   flush(): void;
@@ -10,7 +10,7 @@ export interface DebouncedFn<T extends (...args: any[]) => any> {
  * Returns a debounced function that delays invocation until `delayMs`
  * after the last call. Includes `.cancel()` and `.flush()` methods.
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delayMs: number,
 ): DebouncedFn<T> {

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { create } from 'zustand';
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ ('use client');
 type MeterRef = React.RefObject<{ peak: number; rms: number }>;
@@ -7,7 +8,11 @@ const MAX_AMPLITUDE = 0.35;
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
-function useAudioReactiveBackground(meterRef: MeterRef, enabled: boolean, analyserActive?: boolean): { amplitude: number } {
+function useAudioReactiveBackground(
+  meterRef: MeterRef,
+  enabled: boolean,
+  analyserActive?: boolean,
+): { amplitude: number } {
   const [amplitude, setAmplitude] = useState(0);
   const valueRef = useRef(0);
   const lastPublishedRef = useRef(0);
@@ -117,7 +122,14 @@ type ApiLogStore = {
   clear: () => void;
 };
 let _apiLogId = 0;
-const _DEV_API_PATTERNS = ['/api/icy-meta', '/api/itunes', '/api/lyrics', '/api/concerts', '/api/artist-info', 'lrclib.net'];
+const _DEV_API_PATTERNS = [
+  '/api/icy-meta',
+  '/api/itunes',
+  '/api/lyrics',
+  '/api/concerts',
+  '/api/artist-info',
+  'lrclib.net',
+];
 const _DEV_API_NOISE_QUERY_KEYS = new Set(['_ts', 'ts', 't', '_']);
 function normalizeDevApiUrl(rawUrl: string): string {
   try {
@@ -148,7 +160,8 @@ function isIcyMetaUrl(url: string): boolean {
 function buildIcyDedupeKey(entry: Omit<ApiLogEntry, 'id'>): string {
   const url = normalizeDevApiUrl(entry.url);
   const method = entry.method.toUpperCase();
-  if (entry.kind === 'request') return `${entry.kind}|${method}|${url}|${entry.requestPreview ?? ''}`;
+  if (entry.kind === 'request')
+    return `${entry.kind}|${method}|${url}|${entry.requestPreview ?? ''}`;
   if (entry.kind === 'response')
     return `${entry.kind}|${method}|${url}|${entry.status ?? ''}|${entry.responsePreview ?? ''}`;
   return `${entry.kind}|${method}|${url}|${entry.status ?? ''}|${entry.error ?? ''}`;
@@ -158,7 +171,9 @@ const useApiLogStore = create<ApiLogStore>((set) => ({
   push: (e) =>
     set((s) => {
       if (isIcyMetaUrl(e.url)) {
-        const lastIcy = [...s.entries].reverse().find((entry) => isIcyMetaUrl(entry.url) && entry.kind === e.kind);
+        const lastIcy = [...s.entries]
+          .reverse()
+          .find((entry) => isIcyMetaUrl(entry.url) && entry.kind === e.kind);
         if (lastIcy && buildIcyDedupeKey(lastIcy) === buildIcyDedupeKey(e)) return s;
       }
       return {
@@ -174,22 +189,22 @@ function installDevFetchLogger() {
   _devFetchPatched = true;
   const origFetch = window.fetch.bind(window);
   window.fetch = async function devFetch(input: RequestInfo | URL, init?: RequestInit) {
-    const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    const rawUrl =
+      typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const url = normalizeDevApiUrl(rawUrl);
     const matches = isTrackedDevApiUrl(rawUrl);
     if (!matches) return origFetch(input, init);
-    const method =
-      (init?.method ??
-        (typeof Request !== 'undefined' && input instanceof Request ? input.method : undefined) ??
-        'GET').toUpperCase();
+    const method = (
+      init?.method ??
+      (typeof Request !== 'undefined' && input instanceof Request ? input.method : undefined) ??
+      'GET'
+    ).toUpperCase();
     const requestPreview = init?.body
       ? String(init.body).slice(0, 200)
       : url.length > 240
         ? `${url.slice(0, 240)}…`
         : url;
-    const requestFull = init?.body
-      ? String(init.body)
-      : url;
+    const requestFull = init?.body ? String(init.body) : url;
     useApiLogStore.getState().push({
       ts: Date.now(),
       kind: 'request',
@@ -209,7 +224,9 @@ function installDevFetchLogger() {
         const text = await clone.text();
         responseFull = text;
         responsePreview = text.length > 200 ? text.slice(0, 200) + '…' : text;
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       useApiLogStore.getState().push({
         ts: Date.now(),
         kind: 'response',
@@ -239,20 +256,57 @@ function installDevFetchLogger() {
 /* ── Liquid Glass SVG Filter (rendered once via portal-free technique) ── */
 const LiquidGlassSvgFilter = React.memo(function LiquidGlassSvgFilter() {
   return (
-    <svg style={{ position: 'fixed', width: 0, height: 0, pointerEvents: 'none' }} aria-hidden="true">
-      <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
-        <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" seed="5" result="turbulence" />
+    <svg
+      style={{ position: 'fixed', width: 0, height: 0, pointerEvents: 'none' }}
+      aria-hidden="true"
+    >
+      <filter
+        id="glass-distortion"
+        x="0%"
+        y="0%"
+        width="100%"
+        height="100%"
+        filterUnits="objectBoundingBox"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.01 0.01"
+          numOctaves="1"
+          seed="5"
+          result="turbulence"
+        />
         <feComponentTransfer in="turbulence" result="mapped">
           <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5" />
           <feFuncG type="gamma" amplitude="0" exponent="1" offset="0" />
           <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5" />
         </feComponentTransfer>
         <feGaussianBlur in="turbulence" stdDeviation="3" result="softMap" />
-        <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lightingColor="white" result="specLight">
+        <feSpecularLighting
+          in="softMap"
+          surfaceScale="5"
+          specularConstant="1"
+          specularExponent="100"
+          lightingColor="white"
+          result="specLight"
+        >
           <fePointLight x="-200" y="-200" z="300" />
         </feSpecularLighting>
-        <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage" />
-        <feDisplacementMap in="SourceGraphic" in2="softMap" scale="150" xChannelSelector="R" yChannelSelector="G" />
+        <feComposite
+          in="specLight"
+          operator="arithmetic"
+          k1="0"
+          k2="1"
+          k3="1"
+          k4="0"
+          result="litImage"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="softMap"
+          scale="150"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
       </filter>
     </svg>
   );
@@ -266,7 +320,13 @@ type LiquidGlassButtonProps = {
   className?: string;
   children: React.ReactNode;
 };
-const LiquidGlassButton = React.memo(function LiquidGlassButton({ onClick, disabled, className = '', children, ...rest }: LiquidGlassButtonProps) {
+const LiquidGlassButton = React.memo(function LiquidGlassButton({
+  onClick,
+  disabled,
+  className = '',
+  children,
+  ...rest
+}: LiquidGlassButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -277,9 +337,7 @@ const LiquidGlassButton = React.memo(function LiquidGlassButton({ onClick, disab
       <div className="liquid-glass-effect rounded-full" />
       <div className="liquid-glass-tint rounded-full" />
       <div className="liquid-glass-shine rounded-full" />
-      <div className="liquid-glass-content">
-        {children}
-      </div>
+      <div className="liquid-glass-content">{children}</div>
     </button>
   );
 });
@@ -508,7 +566,8 @@ function cleanFeatFromTitle(title: string): string {
 }
 function slugify(text: string): string {
   return text
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -632,7 +691,10 @@ function getSameLanguageCountries(locale: SupportedLocale): string[] {
   for (const country of SOVEREIGN_COUNTRIES) {
     for (const lang3 of country.lang3) {
       const mapped = localeFromLang3(lang3);
-      if (mapped && candidates.has(mapped)) { result.push(country.code); break; }
+      if (mapped && candidates.has(mapped)) {
+        result.push(country.code);
+        break;
+      }
     }
   }
   return result;
@@ -653,7 +715,6 @@ function _tagsDisplay(tags: string | undefined): string {
   return result || 'Internet RadioIcon';
 }
 function getProximityCountries(seedCodes: string[]): string[] {
-
   if (seedCodes.length === 0) return [];
   const seed: (typeof SOVEREIGN_COUNTRIES)[number][] = [];
   for (let i = 0; i < seedCodes.length; i++) {
@@ -683,7 +744,10 @@ function getProximityCountries(seedCodes: string[]): string[] {
 }
 function uniquePush(target: string[], seen: Set<string>, values: string[]) {
   for (const value of values) {
-    if (!seen.has(value)) { seen.add(value); target.push(value); }
+    if (!seen.has(value)) {
+      seen.add(value);
+      target.push(value);
+    }
   }
 }
 function getCountryChipsForLocale(locale: SupportedLocale, maxChips = 36): CountryChip[] {
@@ -855,7 +919,8 @@ function jaroWinkler(a: string, b: string): number {
   const jaro = jaroDistance(a, b);
   if (jaro < 0.7) return jaro;
   let prefix = 0;
-  const maxLen = 4 < a.length ? (4 < b.length ? 4 : b.length) : a.length < b.length ? a.length : b.length;
+  const maxLen =
+    4 < a.length ? (4 < b.length ? 4 : b.length) : a.length < b.length ? a.length : b.length;
   for (let i = 0; i < maxLen; i++) {
     if (a[i] === b[i]) prefix++;
     else break;
@@ -869,7 +934,9 @@ function selectBestItunesResult(
 ): ItunesResult | null {
   if (!results.length) return null;
   const normalizedRequestedTitle = normalizeText(cleanFeatFromTitle(requestedTitle));
-  const normalizedRequestedArtist = normalizeText(requestedArtist ? primaryArtist(requestedArtist) : '');
+  const normalizedRequestedArtist = normalizeText(
+    requestedArtist ? primaryArtist(requestedArtist) : '',
+  );
   if (!normalizedRequestedTitle) return null;
   const normTitles = new Array<string>(results.length);
   const normArtists = new Array<string>(results.length);
@@ -1041,19 +1108,27 @@ function useConcerts(artist: string | null | undefined, enabled: boolean) {
   const [loading, setLoading] = useState(false);
   const key = artist ? primaryArtist(artist).toLowerCase().trim() : null;
   useEffect(() => {
-    if (!enabled || !key) { setConcerts([]); return; }
+    if (!enabled || !key) {
+      setConcerts([]);
+      return;
+    }
     const cached = _concertsCache.get(key);
-    if (cached) { setConcerts(cached); return; }
+    if (cached) {
+      setConcerts(cached);
+      return;
+    }
     const controller = new AbortController();
     setLoading(true);
     fetch(`/api/concerts?artist=${encodeURIComponent(key)}`, { signal: controller.signal })
-      .then((r) => r.ok ? r.json() : [])
+      .then((r) => (r.ok ? r.json() : []))
       .then((data: ConcertEvent[]) => {
         const list = Array.isArray(data) ? data : [];
         _concertsCache.set(key, list);
         setConcerts(list);
       })
-      .catch(() => { /* silently ignore */ })
+      .catch(() => {
+        /* silently ignore */
+      })
       .finally(() => setLoading(false));
     return () => controller.abort();
   }, [key, enabled]);
@@ -1110,11 +1185,16 @@ async function fetchStationByUuid(uuid: string): Promise<Station | null> {
     try {
       const url = `${getBase()}/stations/byuuid/${encodeURIComponent(uuid)}`;
       const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-      if (!res.ok) { rotateServer(); continue; }
+      if (!res.ok) {
+        rotateServer();
+        continue;
+      }
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) return data[0] as Station;
       return null;
-    } catch { rotateServer(); }
+    } catch {
+      rotateServer();
+    }
   }
   return null;
 }
@@ -1161,7 +1241,10 @@ async function similarStations(station: Station, limit = 5): Promise<Station[]> 
   if (station.tags) {
     for (const raw of station.tags.split(',')) {
       const trimmed = raw.trim();
-      if (trimmed) { firstTag = trimmed; break; }
+      if (trimmed) {
+        firstTag = trimmed;
+        break;
+      }
     }
   }
   if (!firstTag) return topStations(limit);
@@ -1599,10 +1682,7 @@ function isValidStreamUrl(url: string | undefined): url is string {
 function isIOSDevice(): boolean {
   if (typeof navigator === 'undefined') return false;
   const ua = navigator.userAgent || '';
-  return (
-    _IOS_UA_RE.test(ua) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  );
+  return _IOS_UA_RE.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 type StreamLatency = { url: string; latencyMs: number; timestamp: number };
@@ -1631,7 +1711,7 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   const [currentTime, setCurrentTime] = useState(0);
   const [streamQuality, setStreamQuality] = useState<StreamQuality>('good');
   const lastBufferEndRef = useRef<number>(0);
-  const clearTimer = (ref: React.MutableRefObject<any>) => {
+  const clearTimer = (ref: React.MutableRefObject<ReturnType<typeof setTimeout> | null>) => {
     if (ref.current != null) {
       clearTimeout(ref.current);
       ref.current = null;
@@ -2360,7 +2440,11 @@ function tokenize(value: string): string[] {
   const matches = normalized.match(WORD_RE) ?? [];
   return matches.filter((token) => token.length > 1 && !STOPWORDS.has(token));
 }
-function scoreLine(lineTokens: string[], hypoTokens: string[], prebuiltLineSet?: Set<string>): number {
+function scoreLine(
+  lineTokens: string[],
+  hypoTokens: string[],
+  prebuiltLineSet?: Set<string>,
+): number {
   if (!lineTokens.length || !hypoTokens.length) return 0;
   const lineSet = prebuiltLineSet ?? new Set(lineTokens);
   let overlaps = 0;
@@ -2725,10 +2809,8 @@ async function fetchLyricsForArtist(
   const params = new URLSearchParams({ artist, title: cleanTitle });
   if (album) params.set('album', album);
   if (duration) params.set('duration', `${Math.round(duration)}`);
-  return tryFetch<LrcLibResponse>(
-    `/api/lyrics?${params}`,
-    signal,
-    (d) => (d && (d.syncedLyrics || d.plainLyrics) ? transform(d, artist, title) : null),
+  return tryFetch<LrcLibResponse>(`/api/lyrics?${params}`, signal, (d) =>
+    d && (d.syncedLyrics || d.plainLyrics) ? transform(d, artist, title) : null,
   );
 }
 function transform(data: LrcLibResponse, artist: string, title: string): LyricsData | null {
@@ -3234,8 +3316,14 @@ const StationCard = React.memo(
         {liveStatus === 'loading' && (
           <div className="flex items-center gap-1 mt-1.5">
             {' '}
-            <Loader2 size={9} className="text-dim animate-spin flex-shrink-0" aria-hidden="true" />{' '}
-            <span className="text-[12px] text-dim" role="status">Checking…</span>
+            <Loader2
+              size={9}
+              className="text-dim animate-spin flex-shrink-0"
+              aria-hidden="true"
+            />{' '}
+            <span className="text-[12px] text-dim" role="status">
+              Checking…
+            </span>
           </div>
         )}{' '}
         {liveStatus === 'loaded' && (
@@ -3302,7 +3390,18 @@ const _GENRE_TO_CAT: Record<string, string> = {
 };
 const _GENRE_NORMALIZE_RE = /[\s-]/g;
 const _IOS_UA_RE = /iPad|iPhone|iPod/;
-const _EQ_ALLOWED_KEYS = new Set([' ', 'Escape', 'e', 'E', 'r', 'R', 'ArrowUp', 'ArrowDown', 'm', 'M']);
+const _EQ_ALLOWED_KEYS = new Set([
+  ' ',
+  'Escape',
+  'e',
+  'E',
+  'r',
+  'R',
+  'ArrowUp',
+  'ArrowDown',
+  'm',
+  'M',
+]);
 const _NEWLINE_RE = /\r?\n/;
 const _EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>();
 const _EVT_PASSIVE: AddEventListenerOptions = { passive: true };
@@ -3406,7 +3505,14 @@ function ScrollRow({
           )}
         </div>
       )}{' '}
-      <div ref={ref} className={SCROLL_CLASS + (isMobile ? ' px-4' : '')} role="region" aria-roledescription="carousel" aria-label={title ?? 'Station carousel'} tabIndex={0}>
+      <div
+        ref={ref}
+        className={SCROLL_CLASS + (isMobile ? ' px-4' : '')}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={title ?? 'Station carousel'}
+        tabIndex={0}
+      >
         {children}
       </div>
     </div>
@@ -3722,9 +3828,13 @@ function BrowseView({
       {(() => {
         const ROW_LIMIT = 6;
         const visibleGenres = translatedGenreCategories.slice(0, ROW_LIMIT);
-        const allSorted = [...translatedGenreCategories].sort((a, b) => a.label.localeCompare(b.label));
+        const allSorted = [...translatedGenreCategories].sort((a, b) =>
+          a.label.localeCompare(b.label),
+        );
         return (
-          <div className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
+          <div
+            className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}
+          >
             <button
               onClick={() => onGoHome?.()}
               className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${view.mode !== 'genre' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
@@ -3755,9 +3865,15 @@ function BrowseView({
                 aria-label="Browse all genres"
                 style={{ backgroundImage: 'none', paddingRight: '0px' }}
               >
-                <option value="" disabled hidden>🔍 …</option>
+                <option value="" disabled hidden>
+                  🔍 …
+                </option>
                 {allSorted.map((cat) => (
-                  <option key={cat.id} value={cat.id} style={{ background: '#1a1a2e', color: '#fff' }}>
+                  <option
+                    key={cat.id}
+                    value={cat.id}
+                    style={{ background: '#1a1a2e', color: '#fff' }}
+                  >
                     {cat.label}
                   </option>
                 ))}
@@ -3770,9 +3886,13 @@ function BrowseView({
       {(() => {
         const COUNTRY_ROW_LIMIT = 6;
         const visibleCountries = countryChips.slice(0, COUNTRY_ROW_LIMIT);
-        const allSorted = [...countryChips].sort((a, b) => a.displayName.localeCompare(b.displayName));
+        const allSorted = [...countryChips].sort((a, b) =>
+          a.displayName.localeCompare(b.displayName),
+        );
         return (
-          <div className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3 overflow-x-auto max-w-full [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}>
+          <div
+            className={`shrink-0 flex items-center gap-1.5 ${isMobile ? 'px-3' : 'px-4'} pb-3 overflow-x-auto max-w-full [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}
+          >
             <button
               onClick={() => onGoHome?.()}
               className={`px-3 py-2 rounded-full text-[12px] font-medium whitespace-nowrap transition-colors shrink-0 ${view.mode !== 'country' ? 'bg-surface-6 text-white' : 'bg-surface-2 text-dim hover:bg-surface-4 hover:text-white/70'}`}
@@ -3802,9 +3922,15 @@ function BrowseView({
                 aria-label="Browse all countries"
                 style={{ backgroundImage: 'none', paddingRight: '0px' }}
               >
-                <option value="" disabled hidden>🌍 …</option>
+                <option value="" disabled hidden>
+                  🌍 …
+                </option>
                 {allSorted.map((c) => (
-                  <option key={c.code} value={c.code} style={{ background: '#1a1a2e', color: '#fff' }}>
+                  <option
+                    key={c.code}
+                    value={c.code}
+                    style={{ background: '#1a1a2e', color: '#fff' }}
+                  >
                     {c.flag} {c.displayName}
                   </option>
                 ))}
@@ -3888,7 +4014,9 @@ function BrowseView({
                         >
                           {' '}
                           <RadioIcon size={18} className="text-muted" aria-hidden="true" />{' '}
-                          <p className="text-[12px] text-muted" role="alert">{t('failedToLoadStations')}</p>
+                          <p className="text-[12px] text-muted" role="alert">
+                            {t('failedToLoadStations')}
+                          </p>
                           <button
                             onClick={() => loadCategory(catId)}
                             className="px-3 py-1 rounded-lg bg-surface-4 text-[12px] text-secondary hover:text-white hover:bg-surface-5 transition-colors"
@@ -4132,7 +4260,8 @@ const LyricReelLine = React.memo(
     prev.isDesktop === next.isDesktop,
 );
 const _LYRICS_MASK_STYLE: React.CSSProperties = {
-  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
+  WebkitMaskImage:
+    'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
   maskImage: 'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)',
 };
 function LyricsReel({
@@ -4217,14 +4346,18 @@ function LyricsReel({
     const onWheel = () => {
       userScrolling.current = true;
       clearTimeout(scrollTimeout.current);
-      scrollTimeout.current = setTimeout(() => { userScrolling.current = false; }, 3000);
+      scrollTimeout.current = setTimeout(() => {
+        userScrolling.current = false;
+      }, 3000);
     };
     const onTouch = () => {
       userScrolling.current = true;
       clearTimeout(scrollTimeout.current);
     };
     const onTouchEnd = () => {
-      scrollTimeout.current = setTimeout(() => { userScrolling.current = false; }, 3000);
+      scrollTimeout.current = setTimeout(() => {
+        userScrolling.current = false;
+      }, 3000);
     };
     scroller.addEventListener('wheel', onWheel, _EVT_PASSIVE);
     scroller.addEventListener('touchstart', onTouch, _EVT_PASSIVE);
@@ -4249,7 +4382,12 @@ function LyricsReel({
         tabIndex={0}
         aria-label={syncEnabled ? 'Disable lyrics sync' : 'Enable lyrics sync'}
         aria-pressed={syncEnabled}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSyncEnabled((s) => !s); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setSyncEnabled((s) => !s);
+          }
+        }}
       >
         Sync {syncEnabled ? 'ON' : 'OFF'}
       </span>
@@ -4465,10 +4603,7 @@ function SpiralRenderer({
     ctx.globalAlpha = 1.0;
   });
   return (
-    <div
-      className={`relative overflow-hidden ${className}`}
-      style={_BLUR_6_STYLE}
-    >
+    <div className={`relative overflow-hidden ${className}`} style={_BLUR_6_STYLE}>
       <canvas
         ref={canvasRef}
         className="absolute inset-0 size-full"
@@ -4517,10 +4652,13 @@ const DevApiConsole = React.memo(function DevApiConsole() {
   };
   const copyToClipboard = (text: string, key: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopiedId(key);
-        setTimeout(() => setCopiedId((prev) => (prev === key ? null : prev)), 1500);
-      }).catch(() => {});
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          setCopiedId(key);
+          setTimeout(() => setCopiedId((prev) => (prev === key ? null : prev)), 1500);
+        })
+        .catch(() => {});
     }
   };
   const statusColor = (s?: number) => {
@@ -4557,7 +4695,10 @@ const DevApiConsole = React.memo(function DevApiConsole() {
     return 'bg-gray-600/80';
   };
   return (
-    <div className="fixed bottom-50 right-2 z-9999 pointer-events-auto" style={{ maxWidth: 480, width: 'calc(100vw - 16px)', zIndex: 9999 }}>
+    <div
+      className="fixed bottom-50 right-2 z-9999 pointer-events-auto"
+      style={{ maxWidth: 480, width: 'calc(100vw - 16px)', zIndex: 9999 }}
+    >
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono bg-black/80 text-green-400 border border-green-500/30 hover:bg-black/90 transition-colors shadow-lg"
@@ -4569,24 +4710,47 @@ const DevApiConsole = React.memo(function DevApiConsole() {
       {open && (
         <div
           className="mt-1 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
-          style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+          style={{
+            background: 'rgba(0,0,0,0.92)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
         >
           <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-            <span className="text-[11px] font-mono font-bold text-green-400/80">⚡ API Console</span>
+            <span className="text-[11px] font-mono font-bold text-green-400/80">
+              ⚡ API Console
+            </span>
             <div className="flex items-center gap-3">
-              <button onClick={clear} className="text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors">Clear</button>
-              <button onClick={() => setOpen(false)} className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors">✕</button>
+              <button
+                onClick={clear}
+                className="text-[10px] font-mono text-red-400 hover:text-red-300 transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => setOpen(false)}
+                className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors"
+              >
+                ✕
+              </button>
             </div>
           </div>
           <div className="max-h-72 overflow-y-auto font-mono text-[10px] leading-relaxed [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
             {entries.length === 0 && (
-              <div className="px-3 py-6 text-white/30 text-center text-[11px]">Waiting for API requests…</div>
+              <div className="px-3 py-6 text-white/30 text-center text-[11px]">
+                Waiting for API requests…
+              </div>
             )}
             {entries.map((e) => {
-              const time = new Date(e.ts).toLocaleTimeString('en', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const time = new Date(e.ts).toLocaleTimeString('en', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              });
               const isExpanded = expandedIds.has(e.id);
               const hasDetail = Boolean(e.requestPreview || e.responsePreview || e.error);
-              const statusText = e.kind === 'request' ? '--' : e.status ?? 'ERR';
+              const statusText = e.kind === 'request' ? '--' : (e.status ?? 'ERR');
               const statusClass = e.kind === 'request' ? 'text-sky-300' : statusColor(e.status);
               const durationText = e.durationMs != null ? `${e.durationMs}ms` : '—';
               return (
@@ -4596,43 +4760,78 @@ const DevApiConsole = React.memo(function DevApiConsole() {
                   onClick={() => hasDetail && toggleExpand(e.id)}
                 >
                   <div className="flex items-center gap-1.5">
-                    {hasDetail && <span className="text-white/25 text-[9px] w-2.5">{isExpanded ? '▾' : '▸'}</span>}
+                    {hasDetail && (
+                      <span className="text-white/25 text-[9px] w-2.5">
+                        {isExpanded ? '▾' : '▸'}
+                      </span>
+                    )}
                     <span className="text-white/30">{time}</span>
-                    <span className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${kindColor(e.kind)}`}>{kindLabel(e.kind)}</span>
-                    <span className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${labelColor(e.url)}`}>{apiLabel(e.url)}</span>
+                    <span
+                      className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${kindColor(e.kind)}`}
+                    >
+                      {kindLabel(e.kind)}
+                    </span>
+                    <span
+                      className={`px-1 py-0.5 rounded text-[9px] font-bold text-white ${labelColor(e.url)}`}
+                    >
+                      {apiLabel(e.url)}
+                    </span>
                     <span className="text-white/45">{e.method}</span>
                     <span className={`font-bold ${statusClass}`}>{statusText}</span>
                     <span className="text-white/30">{durationText}</span>
-                    <span className="text-white/15 truncate flex-1 ml-1">{e.url.split('?')[0].split('/api/').pop() ?? e.url}</span>
+                    <span className="text-white/15 truncate flex-1 ml-1">
+                      {e.url.split('?')[0].split('/api/').pop() ?? e.url}
+                    </span>
                   </div>
                   {isExpanded && e.requestPreview && (
                     <div
                       className="mt-1 ml-4 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 break-all whitespace-pre-wrap text-[10px] max-h-32 overflow-y-auto cursor-pointer hover:bg-sky-500/15 transition-colors relative"
-                      onClick={(ev) => { ev.stopPropagation(); copyToClipboard(e.requestFull || e.requestPreview!, `req-${e.id}`); }}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        copyToClipboard(e.requestFull || e.requestPreview!, `req-${e.id}`);
+                      }}
                       title="Click to copy"
                     >
                       {e.requestPreview}
-                      {copiedId === `req-${e.id}` && <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">Copied!</span>}
+                      {copiedId === `req-${e.id}` && (
+                        <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">
+                          Copied!
+                        </span>
+                      )}
                     </div>
                   )}
                   {isExpanded && e.error && (
                     <div
                       className="mt-1 ml-4 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 break-all whitespace-pre-wrap text-[10px] cursor-pointer hover:bg-red-500/15 transition-colors relative"
-                      onClick={(ev) => { ev.stopPropagation(); copyToClipboard(e.error!, `err-${e.id}`); }}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        copyToClipboard(e.error!, `err-${e.id}`);
+                      }}
                       title="Click to copy"
                     >
                       {e.error}
-                      {copiedId === `err-${e.id}` && <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">Copied!</span>}
+                      {copiedId === `err-${e.id}` && (
+                        <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">
+                          Copied!
+                        </span>
+                      )}
                     </div>
                   )}
                   {isExpanded && e.responsePreview && (
                     <div
                       className="mt-1 ml-4 p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 break-all whitespace-pre-wrap text-[10px] max-h-48 overflow-y-auto cursor-pointer hover:bg-white/10 transition-colors relative"
-                      onClick={(ev) => { ev.stopPropagation(); copyToClipboard(e.responseFull || e.responsePreview!, `res-${e.id}`); }}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        copyToClipboard(e.responseFull || e.responsePreview!, `res-${e.id}`);
+                      }}
                       title="Click to copy"
                     >
                       {e.responsePreview}
-                      {copiedId === `res-${e.id}` && <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">Copied!</span>}
+                      {copiedId === `res-${e.id}` && (
+                        <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">
+                          Copied!
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -4648,15 +4847,50 @@ const DevApiConsole = React.memo(function DevApiConsole() {
 
 /* ── ApiPlayground — manual API request tool (dev-only) ── */
 const _API_ENDPOINTS = [
-  { label: 'ICY Metadata', path: '/api/icy-meta', params: [{ key: 'url', placeholder: 'Stream URL' }] },
-  { label: 'iTunes Search', path: '/api/itunes', params: [{ key: 'term', placeholder: 'Artist - Song' }] },
-  { label: 'iTunes Lookup', path: '/api/itunes/lookup', params: [{ key: 'id', placeholder: 'iTunes ID' }] },
-  { label: 'Concerts', path: '/api/concerts', params: [{ key: 'artist', placeholder: 'Artist name' }] },
-  { label: 'Artist Info', path: '/api/artist-info', params: [{ key: 'name', placeholder: 'Artist name' }] },
-  { label: 'Lyrics', path: '/api/lyrics', params: [{ key: 'artist', placeholder: 'Artist' }, { key: 'title', placeholder: 'Song title' }] },
-  { label: 'Now Playing', path: '/api/now-playing', params: [{ key: 'stationuuid', placeholder: 'Station UUID' }] },
+  {
+    label: 'ICY Metadata',
+    path: '/api/icy-meta',
+    params: [{ key: 'url', placeholder: 'Stream URL' }],
+  },
+  {
+    label: 'iTunes Search',
+    path: '/api/itunes',
+    params: [{ key: 'term', placeholder: 'Artist - Song' }],
+  },
+  {
+    label: 'iTunes Lookup',
+    path: '/api/itunes/lookup',
+    params: [{ key: 'id', placeholder: 'iTunes ID' }],
+  },
+  {
+    label: 'Concerts',
+    path: '/api/concerts',
+    params: [{ key: 'artist', placeholder: 'Artist name' }],
+  },
+  {
+    label: 'Artist Info',
+    path: '/api/artist-info',
+    params: [{ key: 'name', placeholder: 'Artist name' }],
+  },
+  {
+    label: 'Lyrics',
+    path: '/api/lyrics',
+    params: [
+      { key: 'artist', placeholder: 'Artist' },
+      { key: 'title', placeholder: 'Song title' },
+    ],
+  },
+  {
+    label: 'Now Playing',
+    path: '/api/now-playing',
+    params: [{ key: 'stationuuid', placeholder: 'Station UUID' }],
+  },
   { label: 'Trending', path: '/api/now-playing/trending', params: [] },
-  { label: 'Station Health', path: '/api/station-health', params: [{ key: 'url', placeholder: 'Stream URL' }] },
+  {
+    label: 'Station Health',
+    path: '/api/station-health',
+    params: [{ key: 'url', placeholder: 'Stream URL' }],
+  },
   { label: 'Health', path: '/api/health', params: [] },
   { label: 'Analytics', path: '/api/analytics/summary', params: [] },
 ];
@@ -4696,7 +4930,11 @@ const ApiPlayground = React.memo(function ApiPlayground() {
       setDurationMs(elapsed);
       setStatus(res.status);
       const text = await res.text();
-      try { setResponse(JSON.stringify(JSON.parse(text), null, 2)); } catch { setResponse(text); }
+      try {
+        setResponse(JSON.stringify(JSON.parse(text), null, 2));
+      } catch {
+        setResponse(text);
+      }
     } catch (err: unknown) {
       setDurationMs(Math.round(performance.now() - start));
       setStatus(0);
@@ -4714,7 +4952,10 @@ const ApiPlayground = React.memo(function ApiPlayground() {
     }
   };
   return (
-    <div className="fixed bottom-50 left-2 z-9999 pointer-events-auto" style={{ maxWidth: 540, width: 'calc(100vw - 16px)', zIndex: 9999 }}>
+    <div
+      className="fixed bottom-50 left-2 z-9999 pointer-events-auto"
+      style={{ maxWidth: 540, width: 'calc(100vw - 16px)', zIndex: 9999 }}
+    >
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono bg-black/80 text-purple-400 border border-purple-500/30 hover:bg-black/90 transition-colors shadow-lg"
@@ -4726,21 +4967,38 @@ const ApiPlayground = React.memo(function ApiPlayground() {
       {open && (
         <div
           className="mt-1 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
-          style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+          style={{
+            background: 'rgba(0,0,0,0.92)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
         >
           <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-            <span className="text-[11px] font-mono font-bold text-purple-400/80">🧪 API Playground</span>
-            <button onClick={() => setOpen(false)} className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors">✕</button>
+            <span className="text-[11px] font-mono font-bold text-purple-400/80">
+              🧪 API Playground
+            </span>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors"
+            >
+              ✕
+            </button>
           </div>
           <div className="p-3 space-y-2">
             <div className="flex items-center gap-2">
               <select
                 className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-mono text-white/80 outline-none focus:border-purple-500/50"
                 value={selectedIdx}
-                onChange={(e) => { setSelectedIdx(Number(e.target.value)); setParamValues({}); setCustomUrl(''); }}
+                onChange={(e) => {
+                  setSelectedIdx(Number(e.target.value));
+                  setParamValues({});
+                  setCustomUrl('');
+                }}
               >
                 {_API_ENDPOINTS.map((ep, i) => (
-                  <option key={ep.path} value={i} className="bg-black text-white">{ep.label} — {ep.path}</option>
+                  <option key={ep.path} value={i} className="bg-black text-white">
+                    {ep.label} — {ep.path}
+                  </option>
                 ))}
               </select>
             </div>
@@ -4754,13 +5012,19 @@ const ApiPlayground = React.memo(function ApiPlayground() {
               <div className="space-y-1.5">
                 {endpoint.params.map((p) => (
                   <div key={p.key} className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono text-white/40 w-16 text-right shrink-0">{p.key}</span>
+                    <span className="text-[10px] font-mono text-white/40 w-16 text-right shrink-0">
+                      {p.key}
+                    </span>
                     <input
                       className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-mono text-white/70 outline-none focus:border-purple-500/50 placeholder:text-white/20"
                       placeholder={p.placeholder}
                       value={paramValues[p.key] ?? ''}
-                      onChange={(e) => setParamValues((prev) => ({ ...prev, [p.key]: e.target.value }))}
-                      onKeyDown={(e) => { if (e.key === 'Enter') sendRequest(); }}
+                      onChange={(e) =>
+                        setParamValues((prev) => ({ ...prev, [p.key]: e.target.value }))
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') sendRequest();
+                      }}
                     />
                   </div>
                 ))}
@@ -4775,7 +5039,9 @@ const ApiPlayground = React.memo(function ApiPlayground() {
                 {loading ? 'Sending…' : 'Send'}
               </button>
               {status !== null && (
-                <span className={`text-[11px] font-mono font-bold ${status >= 200 && status < 300 ? 'text-green-400' : status === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
+                <span
+                  className={`text-[11px] font-mono font-bold ${status >= 200 && status < 300 ? 'text-green-400' : status === 0 ? 'text-red-400' : 'text-yellow-400'}`}
+                >
                   {status} {durationMs != null && `(${durationMs}ms)`}
                 </span>
               )}
@@ -4790,8 +5056,13 @@ const ApiPlayground = React.memo(function ApiPlayground() {
             </div>
           </div>
           {response !== null && (
-            <div ref={responseRef} className="border-t border-white/10 max-h-72 overflow-y-auto p-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-              <pre className="text-[10px] font-mono text-white/50 whitespace-pre-wrap break-all leading-relaxed">{response}</pre>
+            <div
+              ref={responseRef}
+              className="border-t border-white/10 max-h-72 overflow-y-auto p-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full"
+            >
+              <pre className="text-[10px] font-mono text-white/50 whitespace-pre-wrap break-all leading-relaxed">
+                {response}
+              </pre>
             </div>
           )}
         </div>
@@ -4823,7 +5094,9 @@ function ConcertSidePanel({ concerts }: { concerts: ConcertEvent[] }) {
       bottom: Math.ceil(scrollTop + clientHeight) < scrollHeight,
     });
   }, []);
-  useEffect(() => { handleScroll(); }, [handleScroll]);
+  useEffect(() => {
+    handleScroll();
+  }, [handleScroll]);
   return (
     <div
       className="relative rounded-2xl p-2 flex-none w-full max-w-[300px] overflow-hidden self-center"
@@ -4860,7 +5133,8 @@ function ConcertSidePanel({ concerts }: { concerts: ConcertEvent[] }) {
                   </span>
                 </div>
                 <p className="text-[11px] text-white/40 text-center truncate w-full mb-1">
-                  {ev.city}{ev.country ? `, ${ev.country}` : ''}
+                  {ev.city}
+                  {ev.country ? `, ${ev.country}` : ''}
                 </p>
                 {ev.ticketUrl ? (
                   <a
@@ -4868,14 +5142,20 @@ function ConcertSidePanel({ concerts }: { concerts: ConcertEvent[] }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-5 py-1.5 rounded-full text-[11px] font-bold text-white/70 hover:text-white transition-all hover:-translate-y-[1px]"
-                    style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                    }}
                   >
                     Get Tickets
                   </a>
                 ) : (
                   <span
                     className="px-5 py-1.5 rounded-full text-[11px] font-medium text-white/40"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
                   >
                     No tickets yet
                   </span>
@@ -4898,7 +5178,13 @@ function ConcertSidePanel({ concerts }: { concerts: ConcertEvent[] }) {
 }
 
 /* ── ConcertMobileBanner — thin marquee banner for mobile, above bottom player ── */
-function ConcertMobileBanner({ concerts, onClick }: { concerts: ConcertEvent[]; onClick?: () => void }) {
+function ConcertMobileBanner({
+  concerts,
+  onClick,
+}: {
+  concerts: ConcertEvent[];
+  onClick?: () => void;
+}) {
   if (concerts.length === 0) return null;
   return (
     <div
@@ -4907,7 +5193,16 @@ function ConcertMobileBanner({ concerts, onClick }: { concerts: ConcertEvent[]; 
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       <div className="relative overflow-hidden h-7 flex items-center">
         <span className="text-[9px] font-semibold tracking-widest uppercase text-white/30 pl-3 pr-2 shrink-0">
@@ -4927,20 +5222,29 @@ function ConcertMobileBanner({ concerts, onClick }: { concerts: ConcertEvent[]; 
                 <span className="text-sys-orange font-mono font-bold">{dateStr}</span>
                 <span className="text-white/50 font-medium">{ev.venue}</span>
                 {(ev.city || ev.country) && (
-                  <span className="text-white/30">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                  <span className="text-white/30">
+                    {ev.city}
+                    {ev.country ? `, ${ev.country}` : ''}
+                  </span>
                 )}
               </span>
             );
             return (
-              <span key={`${ev.id}-${idx}`} className="inline-flex items-center">{inner}</span>
+              <span key={`${ev.id}-${idx}`} className="inline-flex items-center">
+                {inner}
+              </span>
             );
           })}
         </div>
       </div>
       <style jsx>{`
         @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
         }
       `}</style>
     </div>
@@ -4948,9 +5252,19 @@ function ConcertMobileBanner({ concerts, onClick }: { concerts: ConcertEvent[]; 
 }
 
 /* ── ConcertModal — full upcoming shows widget in a modal ── */
-function ConcertModal({ concerts, artistName, onClose }: { concerts: ConcertEvent[]; artistName?: string | null; onClose: () => void }) {
+function ConcertModal({
+  concerts,
+  artistName,
+  onClose,
+}: {
+  concerts: ConcertEvent[];
+  artistName?: string | null;
+  onClose: () => void;
+}) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -4983,9 +5297,7 @@ function ConcertModal({ concerts, artistName, onClose }: { concerts: ConcertEven
                 Upcoming Shows
               </p>
               {artistName && (
-                <p className="text-[14px] font-bold text-white truncate mt-0.5">
-                  {artistName}
-                </p>
+                <p className="text-[14px] font-bold text-white truncate mt-0.5">{artistName}</p>
               )}
             </div>
             <button
@@ -5002,7 +5314,9 @@ function ConcertModal({ concerts, artistName, onClose }: { concerts: ConcertEven
                 const d = new Date(ev.date);
                 const dateStr = isNaN(d.getTime())
                   ? ev.date
-                  : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase();
+                  : d
+                      .toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                      .toUpperCase();
                 return (
                   <li
                     key={ev.id}
@@ -5018,7 +5332,8 @@ function ConcertModal({ concerts, artistName, onClose }: { concerts: ConcertEven
                       </span>
                     </div>
                     <p className="text-[11px] text-white/40 text-center truncate w-full mt-1">
-                      {ev.city}{ev.country ? `, ${ev.country}` : ''}
+                      {ev.city}
+                      {ev.country ? `, ${ev.country}` : ''}
                     </p>
                     <div className="mt-2">
                       {ev.ticketUrl ? (
@@ -5027,14 +5342,20 @@ function ConcertModal({ concerts, artistName, onClose }: { concerts: ConcertEven
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-5 py-1.5 rounded-full text-[11px] font-bold text-white/70 hover:text-white transition-all hover:-translate-y-[1px]"
-                          style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
+                          style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                          }}
                         >
                           Get Tickets
                         </a>
                       ) : (
                         <span
                           className="px-5 py-1.5 rounded-full text-[11px] font-medium text-white/40"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                          }}
                         >
                           No tickets yet
                         </span>
@@ -5277,10 +5598,7 @@ function TheaterView({
         </ErrorBoundary>
       </div>{' '}
       {/* ── Layer 3: CRT scanlines + vignette overlay (merged into one div) ── */}{' '}
-      <div
-        className="absolute inset-0 z-6 pointer-events-none"
-        style={_CRT_COMBINED_STYLE}
-      />{' '}
+      <div className="absolute inset-0 z-6 pointer-events-none" style={_CRT_COMBINED_STYLE} />{' '}
       {/* ── Layer 3.5: glassmorphism blur overlay — softens raw spiral animation ── */}{' '}
       <div
         className="absolute inset-0 z-7 pointer-events-none"
@@ -5300,9 +5618,7 @@ function TheaterView({
             <ArrowLeft size={16} />
           </button>{' '}
           {/* Station name — centered, discrete, semi-translucent */}
-          <span
-            className="flex-1 text-[11px] font-medium text-white/35 truncate text-center px-4 pointer-events-none select-none"
-          >
+          <span className="flex-1 text-[11px] font-medium text-white/35 truncate text-center px-4 pointer-events-none select-none">
             {station.name}
           </span>{' '}
           <div className="flex flex-row gap-2 sm:flex-col">
@@ -5332,175 +5648,181 @@ function TheaterView({
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}{' '}
       <div className="flex-1 overflow-y-auto relative z-10 px-4 py-4">
         <div className="flex items-center justify-center min-h-full flex-col relative">
-        <div
-          className={`flex flex-col items-center ${compact ? 'gap-2 px-4 py-3' : 'gap-3 px-6 py-5'} rounded-3xl max-w-sm w-full`}
-          style={{
-            background: 'rgba(0, 0, 0, 0.35)',
-            backdropFilter: 'blur(12px) saturate(1.3)',
-            WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
-          }}
-        >
-          {' '}
-          {/* Corner metadata badges (panel corners, never over album art) */}{' '}
-          {!compact && (
-            <div className="w-full grid grid-cols-2 items-start">
-              <div className="justify-self-start">
-                {' '}
-                {track?.durationMs && (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-mono text-white/80 inline-flex items-center gap-1">
-                    {' '}
-                    <Clock size={10} /> {formatDuration(track.durationMs)}
-                  </span>
-                )}
-              </div>
-              <div className="justify-self-end">
-                {' '}
-                {track?.trackNumber != null && track?.trackCount != null && (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-medium text-white/80">
-                    {' '}
-                    #{track.trackNumber}/{track.trackCount}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}{' '}
-          {/* Artist name above cover */}{' '}
-          {track?.artist && (
-            <p
-              className={`${compact ? 'text-[11px]' : 'text-[13px] sm:text-[14px]'} font-semibold text-white/80 text-center line-clamp-1 leading-snug`}
-            >
-              {track.artist}
-            </p>
-          )}{' '}
-          {/* Cover art */}{' '}
           <div
-            className={`${compact ? 'w-14 h-14 rounded-xl' : 'w-36 h-36 sm:w-44 sm:h-44 rounded-2xl'} relative overflow-hidden flex-center-row flex-shrink-0`}
-            style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50` }}
+            className={`flex flex-col items-center ${compact ? 'gap-2 px-4 py-3' : 'gap-3 px-6 py-5'} rounded-3xl max-w-sm w-full`}
+            style={{
+              background: 'rgba(0, 0, 0, 0.35)',
+              backdropFilter: 'blur(12px) saturate(1.3)',
+              WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: `0 8px 48px rgba(0,0,0,0.6), 0 0 80px ${color1}25`,
+            }}
           >
             {' '}
-            {showFallback ? (
-              <div className="size-full dawn-gradient flex-center-row">
-                <span
-                  className={`${compact ? 'text-base' : 'text-4xl'} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
-                >
-                  {stationInitials(station.name) || (
-                    <RadioIcon size={compact ? 24 : 52} className="text-white/60" />
+            {/* Corner metadata badges (panel corners, never over album art) */}{' '}
+            {!compact && (
+              <div className="w-full grid grid-cols-2 items-start">
+                <div className="justify-self-start">
+                  {' '}
+                  {track?.durationMs && (
+                    <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-mono text-white/80 inline-flex items-center gap-1">
+                      {' '}
+                      <Clock size={10} /> {formatDuration(track.durationMs)}
+                    </span>
                   )}
-                </span>
+                </div>
+                <div className="justify-self-end">
+                  {' '}
+                  {track?.trackNumber != null && track?.trackCount != null && (
+                    <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[12px] font-medium text-white/80">
+                      {' '}
+                      #{track.trackNumber}/{track.trackCount}
+                    </span>
+                  )}
+                </div>
               </div>
-            ) : (
-              <UiImage
-                src={coverUrl}
-                alt=""
-                className="object-cover"
-                sizes={compact ? '56px' : '176px'}
-                loading="lazy"
-                onError={() => setFailedCoverUrl(coverUrl)}
-              />
-            )}
-          </div>{' '}
-          {/* Song name (was: station name) */}{' '}
-          <h2
-            className={`${compact ? 'text-[12px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
-          >
-            {track?.title || station.name}
-          </h2>{' '}
-          {/* Album (was: track info) */}{' '}
-          {track?.album ? (
-            <p
-              className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
-            >
-              {track.album}
-            </p>
-          ) : track?.artist ? (
-            <p
-              className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
-            >
-              {track.artist}
-            </p>
-          ) : (
-            <p className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center`}>
-              {theaterTags}
-            </p>
-          )}{' '}
-          {!compact && track?.releaseDate && (
-            <p className="text-[12px] text-white/50 text-center -mt-1">
-              {' '}
-              Released on: {formatReleaseDate(track.releaseDate)}
-            </p>
-          )}{' '}
-          {/* LIVE badge */}{' '}
-          {isPlaying && (
-            <div className={`flex-row-2 ${compact ? 'mt-0' : 'mt-1'}`}>
-              {' '}
-              <span className={`${compact ? 'dot-1.5' : 'dot-2'} bg-red-500 animate-pulse`} />{' '}
-              <span
-                className={`${compact ? 'text-[12px]' : 'text-[12px]'} font-semibold tracking-wider uppercase text-red-400`}
+            )}{' '}
+            {/* Artist name above cover */}{' '}
+            {track?.artist && (
+              <p
+                className={`${compact ? 'text-[11px]' : 'text-[13px] sm:text-[14px]'} font-semibold text-white/80 text-center line-clamp-1 leading-snug`}
               >
-                LIVE
-              </span>
-              {!compact && <AnimatedBars size="small" />}
-            </div>
-          )}{' '}
-          {/* Station details badges */}{' '}
-          {!compact && (
-            <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                {track.artist}
+              </p>
+            )}{' '}
+            {/* Cover art */}{' '}
+            <div
+              className={`${compact ? 'w-14 h-14 rounded-xl' : 'w-36 h-36 sm:w-44 sm:h-44 rounded-2xl'} relative overflow-hidden flex-center-row flex-shrink-0`}
+              style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.7), 0 0 48px ${color1}50` }}
+            >
               {' '}
-              {station.codec && (
-                <Badge mono upper>
-                  {station.codec}
-                </Badge>
-              )}{' '}
-              {(icyBitrate || station.bitrate > 0) && (
-                <Badge mono>{icyBitrate ?? station.bitrate}kbps</Badge>
-              )}{' '}
-              {station.country && <Badge>{station.country}</Badge>}{' '}
-              {track?.genre && <Badge>{track.genre}</Badge>}
-            </div>
-          )}{' '}
-          {/* Listen on Apple Music + Share */}{' '}
-          {!compact && (
-            <div className="flex items-center justify-center gap-2 mt-2">
-              {track && (
-                <a
-                  href={
-                    track.itunesUrl ||
-                    `https://music.apple.com/search?term=${encodeURIComponent(`${track.artist} ${track.title}`.trim())}&pt=pulse-radio&ct=www.pulse-radio.online`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
-                >
-                  <ExternalLink size={11} /> Listen on Apple Music
-                </a>
+              {showFallback ? (
+                <div className="size-full dawn-gradient flex-center-row">
+                  <span
+                    className={`${compact ? 'text-base' : 'text-4xl'} text-white/90 font-bold select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}
+                  >
+                    {stationInitials(station.name) || (
+                      <RadioIcon size={compact ? 24 : 52} className="text-white/60" />
+                    )}
+                  </span>
+                </div>
+              ) : (
+                <UiImage
+                  src={coverUrl}
+                  alt=""
+                  className="object-cover"
+                  sizes={compact ? '56px' : '176px'}
+                  loading="lazy"
+                  onError={() => setFailedCoverUrl(coverUrl)}
+                />
               )}
-              <ShareButton
-                title={track ? `${track.artist ?? station.name} — ${track.title}` : station.name}
-                text={track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`}
-                url={buildStationShareUrl(station)}
-                size={14}
-                className="w-8 h-8"
-              />
-            </div>
-          )}{' '}
-          {/* ── Lyrics reel inside glass panel ── */}{' '}
-          {!compact && (
-            <div className={`w-full ${lyricsVariant === 'desktop' ? 'px-2 pb-2' : 'px-0 pb-1'}`}>
-              <LyricsReel
-                lyrics={lyrics ?? null}
-                currentTime={currentTime}
-                activeLineOverride={activeLineOverride}
-                variant={lyricsVariant}
-              />
-            </div>
-          )}
+            </div>{' '}
+            {/* Song name (was: station name) */}{' '}
+            <h2
+              className={`${compact ? 'text-[12px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
+            >
+              {track?.title || station.name}
+            </h2>{' '}
+            {/* Album (was: track info) */}{' '}
+            {track?.album ? (
+              <p
+                className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
+              >
+                {track.album}
+              </p>
+            ) : track?.artist ? (
+              <p
+                className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
+              >
+                {track.artist}
+              </p>
+            ) : (
+              <p className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center`}>
+                {theaterTags}
+              </p>
+            )}{' '}
+            {!compact && track?.releaseDate && (
+              <p className="text-[12px] text-white/50 text-center -mt-1">
+                {' '}
+                Released on: {formatReleaseDate(track.releaseDate)}
+              </p>
+            )}{' '}
+            {/* LIVE badge */}{' '}
+            {isPlaying && (
+              <div className={`flex-row-2 ${compact ? 'mt-0' : 'mt-1'}`}>
+                {' '}
+                <span
+                  className={`${compact ? 'dot-1.5' : 'dot-2'} bg-red-500 animate-pulse`}
+                />{' '}
+                <span
+                  className={`${compact ? 'text-[12px]' : 'text-[12px]'} font-semibold tracking-wider uppercase text-red-400`}
+                >
+                  LIVE
+                </span>
+                {!compact && <AnimatedBars size="small" />}
+              </div>
+            )}{' '}
+            {/* Station details badges */}{' '}
+            {!compact && (
+              <div className="flex flex-wrap justify-center gap-1.5 mt-1">
+                {' '}
+                {station.codec && (
+                  <Badge mono upper>
+                    {station.codec}
+                  </Badge>
+                )}{' '}
+                {(icyBitrate || station.bitrate > 0) && (
+                  <Badge mono>{icyBitrate ?? station.bitrate}kbps</Badge>
+                )}{' '}
+                {station.country && <Badge>{station.country}</Badge>}{' '}
+                {track?.genre && <Badge>{track.genre}</Badge>}
+              </div>
+            )}{' '}
+            {/* Listen on Apple Music + Share */}{' '}
+            {!compact && (
+              <div className="flex items-center justify-center gap-2 mt-2">
+                {track && (
+                  <a
+                    href={
+                      track.itunesUrl ||
+                      `https://music.apple.com/search?term=${encodeURIComponent(`${track.artist} ${track.title}`.trim())}&pt=pulse-radio&ct=www.pulse-radio.online`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
+                  >
+                    <ExternalLink size={11} /> Listen on Apple Music
+                  </a>
+                )}
+                <ShareButton
+                  title={track ? `${track.artist ?? station.name} — ${track.title}` : station.name}
+                  text={
+                    track
+                      ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio`
+                      : `🎵 Listening to ${station.name} on Pulse Radio`
+                  }
+                  url={buildStationShareUrl(station)}
+                  size={14}
+                  className="w-8 h-8"
+                />
+              </div>
+            )}{' '}
+            {/* ── Lyrics reel inside glass panel ── */}{' '}
+            {!compact && (
+              <div className={`w-full ${lyricsVariant === 'desktop' ? 'px-2 pb-2' : 'px-0 pb-1'}`}>
+                <LyricsReel
+                  lyrics={lyrics ?? null}
+                  currentTime={currentTime}
+                  activeLineOverride={activeLineOverride}
+                  variant={lyricsVariant}
+                />
+              </div>
+            )}
+          </div>
+          {/* ── Concert ticket widget removed — now shown as banner above bottom bar ── */}
         </div>
-        {/* ── Concert ticket widget removed — now shown as banner above bottom bar ── */}
-        </div>
-        </div>
-      </motion.div>
+      </div>
+    </motion.div>
   );
 }
 const _artistInfoCache = new Map<string, ArtistInfo>();
@@ -5557,7 +5879,19 @@ function shareContent(data: { title: string; text?: string; url?: string }) {
     navigator.clipboard.writeText(data.url ?? window.location.href).catch(() => {});
   }
 }
-function ShareButton({ title, text, url, size = 16, className = '' }: { title: string; text?: string; url?: string; size?: number; className?: string }) {
+function ShareButton({
+  title,
+  text,
+  url,
+  size = 16,
+  className = '',
+}: {
+  title: string;
+  text?: string;
+  url?: string;
+  size?: number;
+  className?: string;
+}) {
   return (
     <button
       onClick={(e) => {
@@ -5970,20 +6304,42 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                         const d = new Date(ev.date);
                         const dateStr = isNaN(d.getTime())
                           ? ev.date
-                          : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                          : d.toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            });
                         const content = (
                           <div className="flex items-start justify-between gap-2 px-3 py-2.5 rounded-xl bg-surface-3/50 hover:bg-surface-3 transition-colors border border-border-subtle">
                             <div className="flex flex-col min-w-0">
-                              <span className="text-[12px] font-medium text-white/80 truncate">{ev.venue}</span>
-                              <span className="text-[11px] text-white/50 truncate">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                              <span className="text-[12px] font-medium text-white/80 truncate">
+                                {ev.venue}
+                              </span>
+                              <span className="text-[11px] text-white/50 truncate">
+                                {ev.city}
+                                {ev.country ? `, ${ev.country}` : ''}
+                              </span>
                             </div>
-                            <span className="text-[11px] text-white/50 shrink-0 mt-0.5">{dateStr}</span>
+                            <span className="text-[11px] text-white/50 shrink-0 mt-0.5">
+                              {dateStr}
+                            </span>
                           </div>
                         );
                         return ev.ticketUrl ? (
-                          <a key={ev.id} href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" className="block min-h-[44px]" aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}>{content}</a>
+                          <a
+                            key={ev.id}
+                            href={ev.ticketUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block min-h-[44px]"
+                            aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}
+                          >
+                            {content}
+                          </a>
                         ) : (
-                          <div key={ev.id} className="min-h-[44px]">{content}</div>
+                          <div key={ev.id} className="min-h-[44px]">
+                            {content}
+                          </div>
                         );
                       })}
                     </div>
@@ -6298,7 +6654,12 @@ function FerrofluidRenderer({
   return (
     <div className={`relative ${className}`}>
       {' '}
-      <canvas ref={canvasRef} className="size-full" style={_IMAGE_RENDER_STYLE} aria-hidden="true" />{' '}
+      <canvas
+        ref={canvasRef}
+        className="size-full"
+        style={_IMAGE_RENDER_STYLE}
+        aria-hidden="true"
+      />{' '}
       {/* SVG filter for smoothing the metaballs */}{' '}
       <svg className="absolute w-0 h-0" aria-hidden="true">
         <defs>
@@ -6444,7 +6805,11 @@ function _NowPlayingBar({
             <>
               <p className="text-[13px] font-medium text-white truncate leading-tight">
                 {' '}
-                {track?.title ? (track.artist ? `${track.title} - ${track.artist}` : track.title) : station.name}
+                {track?.title
+                  ? track.artist
+                    ? `${track.title} - ${track.artist}`
+                    : track.title
+                  : station.name}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {' '}
@@ -6507,7 +6872,11 @@ function _NowPlayingBar({
     );
   }
   return (
-    <div className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x" role="region" aria-label="Now playing">
+    <div
+      className="flex-row-3 px-4 min-h-18 glass-blur border-t border-border-default shrink-0 safe-bottom safe-x"
+      role="region"
+      aria-label="Now playing"
+    >
       {' '}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {statusAnnouncement}
@@ -6612,9 +6981,7 @@ function _NowPlayingBar({
                 <AnimatedBars size="small" />
               </div>
               {station && (
-                <span className="text-[10px] text-white/25 truncate">
-                  {station.name}
-                </span>
+                <span className="text-[10px] text-white/25 truncate">{station.name}</span>
               )}
             </div>
           </>
@@ -6698,11 +7065,15 @@ function _NowPlayingBar({
         )}
         {station && (
           <button
-            onClick={() => shareContent({
-              title: track ? `${track.artist ?? station.name} — ${track.title}` : station.name,
-              text: track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`,
-              url: buildStationShareUrl(station),
-            })}
+            onClick={() =>
+              shareContent({
+                title: track ? `${track.artist ?? station.name} — ${track.title}` : station.name,
+                text: track
+                  ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio`
+                  : `🎵 Listening to ${station.name} on Pulse Radio`,
+                url: buildStationShareUrl(station),
+              })
+            }
             aria-label="Share"
             className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
             title="Share"
@@ -6854,13 +7225,13 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
         </div>
         <div className="flex-fill pr-20">
           {' '}
-          <h3 className="text-[15px] font-semibold text-white truncate">{track?.title || station.name}</h3>{' '}
+          <h3 className="text-[15px] font-semibold text-white truncate">
+            {track?.title || station.name}
+          </h3>{' '}
           {track?.album ? (
             <p className="text-[13px] text-secondary truncate mt-0.5">{track.album}</p>
           ) : track?.title ? (
-            <p className="text-[13px] text-secondary truncate mt-0.5">
-              {track.artist || ''}
-            </p>
+            <p className="text-[13px] text-secondary truncate mt-0.5">{track.artist || ''}</p>
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )}{' '}
@@ -6967,7 +7338,9 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
         role="dialog"
         aria-modal="true"
         aria-label="How to use Pulse"
-        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Escape') onClose();
+        }}
       >
         {' '}
         {/* Handle bar */}{' '}
@@ -7252,7 +7625,15 @@ type MobileSettingsPanelProps = {
   effectsEnabled: boolean;
   onToggleEffects: () => void;
 };
-function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, effectsEnabled, onToggleEffects }: MobileSettingsPanelProps) {
+function MobileSettingsPanel({
+  onClose,
+  eq,
+  onPresetChange,
+  statsData,
+  desktop,
+  effectsEnabled,
+  onToggleEffects,
+}: MobileSettingsPanelProps) {
   const { locale, setLocale, locales } = useLocale();
   const [showEq, setShowEq] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -7290,23 +7671,38 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, 
       animate={_MOTION_FADE_VISIBLE}
       exit={_MOTION_FADE_OUT}
       transition={_MOTION_T_02}
-      className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
+      className={
+        desktop
+          ? 'fixed inset-0 z-50 flex items-center justify-center'
+          : 'absolute inset-0 z-50 flex flex-col'
+      }
     >
       {' '}
-      {/* Backdrop */} <div className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'} onClick={onClose} aria-hidden="true" />{' '}
+      {/* Backdrop */}{' '}
+      <div
+        className={desktop ? 'fixed inset-0 bg-black/60' : 'absolute inset-0 bg-black/50'}
+        onClick={onClose}
+        aria-hidden="true"
+      />{' '}
       {/* Panel */}{' '}
       <motion.div
         initial={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_INIT}
         animate={desktop ? { opacity: 1, scale: 1 } : _MOTION_SLIDE_UP_VISIBLE}
         exit={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_EXIT}
         transition={desktop ? { duration: 0.2 } : _MOTION_T_SPRING}
-        className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
+        className={
+          desktop
+            ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl'
+            : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'
+        }
         style={_GLASS_SETTINGS_STYLE}
         data-testid={desktop ? 'desktop-settings-modal' : 'mobile-settings-panel'}
         role="dialog"
         aria-modal="true"
         aria-label="Settings"
-        onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Escape') onClose();
+        }}
       >
         {' '}
         {/* Handle bar — mobile only */}{' '}
@@ -7396,7 +7792,11 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, 
                 </button>{' '}
                 <button
                   onClick={eq.toggleNormalizer}
-                  aria-label={eq.normalizerEnabled ? 'Disable loudness normalizer' : 'Enable loudness normalizer'}
+                  aria-label={
+                    eq.normalizerEnabled
+                      ? 'Disable loudness normalizer'
+                      : 'Enable loudness normalizer'
+                  }
                   aria-pressed={eq.normalizerEnabled}
                   className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors ${eq.normalizerEnabled ? 'bg-sys-orange/20 text-sys-orange border border-sys-orange/40' : 'bg-white/5 text-white/45 border border-white/8'}`}
                 >
@@ -7628,7 +8028,11 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, 
             animate={_MOTION_FADE_VISIBLE}
             exit={_MOTION_FADE_OUT}
             transition={_MOTION_T_02}
-            className={desktop ? 'fixed inset-0 z-50 flex items-center justify-center' : 'absolute inset-0 z-50 flex flex-col'}
+            className={
+              desktop
+                ? 'fixed inset-0 z-50 flex items-center justify-center'
+                : 'absolute inset-0 z-50 flex flex-col'
+            }
           >
             {' '}
             <div
@@ -7641,12 +8045,18 @@ function MobileSettingsPanel({ onClose, eq, onPresetChange, statsData, desktop, 
               animate={desktop ? { opacity: 1, scale: 1 } : _MOTION_SLIDE_UP_VISIBLE}
               exit={desktop ? { opacity: 0, scale: 0.95 } : _MOTION_SLIDE_UP_EXIT}
               transition={desktop ? { duration: 0.2 } : _MOTION_T_SPRING}
-              className={desktop ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl' : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'}
+              className={
+                desktop
+                  ? 'relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl'
+                  : 'absolute bottom-0 inset-x-0 max-h-[85vh] overflow-y-auto rounded-t-2xl safe-bottom'
+              }
               style={desktop ? _GLASS_SETTINGS_STYLE : _GLASS_PANEL_STYLE}
               role="dialog"
               aria-modal="true"
               aria-label="Your Statistics"
-              onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') setShowStats(false); }}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Escape') setShowStats(false);
+              }}
             >
               {' '}
               {!desktop && (
@@ -7786,31 +8196,46 @@ function GroupStack({
           {songs.slice(0, VISIBLE_COUNT).map((song) => (
             <button
               key={song.id}
-              onClick={() => onSelect?.({
-                title: song.title,
-                artist: song.artist,
-                album: song.album,
-                artworkUrl: song.artworkUrl,
-                itunesUrl: song.itunesUrl,
-                durationMs: song.durationMs,
-                genre: song.genre,
-                releaseDate: song.releaseDate,
-                trackNumber: song.trackNumber,
-                trackCount: song.trackCount,
-                stationName: song.stationName,
-              })}
-              onContextMenu={(e) => { e.preventDefault(); onContextMenu(e, song.id); }}
+              onClick={() =>
+                onSelect?.({
+                  title: song.title,
+                  artist: song.artist,
+                  album: song.album,
+                  artworkUrl: song.artworkUrl,
+                  itunesUrl: song.itunesUrl,
+                  durationMs: song.durationMs,
+                  genre: song.genre,
+                  releaseDate: song.releaseDate,
+                  trackNumber: song.trackNumber,
+                  trackCount: song.trackCount,
+                  stationName: song.stationName,
+                })
+              }
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onContextMenu(e, song.id);
+              }}
               className="flex-shrink-0 w-20 group/thumb"
               aria-label={`${song.title} by ${song.artist}`}
             >
               <div className="w-20 h-20 rounded-lg bg-surface-3 overflow-hidden relative">
                 {song.artworkUrl ? (
-                  <UiImage src={song.artworkUrl} alt="" className="object-cover" sizes="80px" loading="lazy" />
+                  <UiImage
+                    src={song.artworkUrl}
+                    alt=""
+                    className="object-cover"
+                    sizes="80px"
+                    loading="lazy"
+                  />
                 ) : (
-                  <div className="size-full flex items-center justify-center"><Music size={20} className="text-dim" /></div>
+                  <div className="size-full flex items-center justify-center">
+                    <Music size={20} className="text-dim" />
+                  </div>
                 )}
               </div>
-              <p className="text-[10px] text-white/60 line-clamp-1 mt-1 text-center">{song.title}</p>
+              <p className="text-[10px] text-white/60 line-clamp-1 mt-1 text-center">
+                {song.title}
+              </p>
             </button>
           ))}
           <button
@@ -7870,7 +8295,10 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
     for (const song of songs) {
       const artist = primaryArtist(song.artist);
       let arr = groups.get(artist);
-      if (!arr) { arr = []; groups.set(artist, arr); }
+      if (!arr) {
+        arr = [];
+        groups.set(artist, arr);
+      }
       arr.push(song);
     }
     return [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
@@ -7880,7 +8308,10 @@ function FavoriteSongsView({ songs, onRemove, onClear, onSelect }: FavoriteSongs
     for (const song of songs) {
       const album = song.album || 'Unknown Album';
       let arr = groups.get(album);
-      if (!arr) { arr = []; groups.set(album, arr); }
+      if (!arr) {
+        arr = [];
+        groups.set(album, arr);
+      }
       arr.push(song);
     }
     return [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
@@ -8211,10 +8642,13 @@ function _OnboardingModal() {
           animate={_MOTION_FADE_VISIBLE}
           exit={_MOTION_FADE_OUT}
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"
-          onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') handleClose(); }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Escape') handleClose();
+          }}
         >
           {' '}
-          {/* Backdrop */} <div className="absolute inset-0 bg-black/70" onClick={handleClose} aria-hidden="true" />{' '}
+          {/* Backdrop */}{' '}
+          <div className="absolute inset-0 bg-black/70" onClick={handleClose} aria-hidden="true" />{' '}
           {/* Modal */}{' '}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -8418,7 +8852,10 @@ const ParallaxBackground = React.memo(_ParallaxBackground);
 function _LanguageSelector() {
   const { locale, setLocale, locales } = useLocale();
   return (
-    <LiquidGlassButton className="!rounded-full px-3 py-1.5 text-[12px]" aria-label="Language selector">
+    <LiquidGlassButton
+      className="!rounded-full px-3 py-1.5 text-[12px]"
+      aria-label="Language selector"
+    >
       <label className="flex items-center gap-2 cursor-pointer">
         <Languages size={12} className="text-white/70" />
         <select
@@ -8509,7 +8946,12 @@ const EqPanel = React.memo(function EqPanel({
     }
   };
   return (
-    <div className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50" role="dialog" aria-modal="false" aria-label="Equalizer">
+    <div
+      className="absolute bottom-16 right-4 w-72 bg-sys-surface/95 backdrop-blur-xl border border-border-strong rounded-xl p-4 shadow-2xl z-50"
+      role="dialog"
+      aria-modal="false"
+      aria-label="Equalizer"
+    >
       {' '}
       {/* Header */}{' '}
       <div className="flex-between mb-4">
@@ -8754,7 +9196,9 @@ const KeyboardShortcutsHelp = React.memo(function KeyboardShortcutsHelp({ onClos
       aria-modal="true"
       aria-label="Keyboard shortcuts"
       onClick={onClose}
-      onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Escape') onClose(); }}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      }}
     >
       <div
         className="bg-surface-2 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 relative"
@@ -8804,7 +9248,9 @@ interface UseAudioAnalyserReturn {
   reconnect: (audio: HTMLAudioElement) => void;
 }
 const _EMPTY_ANALYSER_OPTS: UseAudioAnalyserOptions = {};
-function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS): UseAudioAnalyserReturn {
+function useAudioAnalyser(
+  opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS,
+): UseAudioAnalyserReturn {
   const { fftSize = 256, smoothingTimeConstant = 0.8 } = opts;
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number>(0);
@@ -8882,7 +9328,11 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS):
     waveDataRef.current = null;
   }, []);
   const disablePassthrough = useCallback(() => {
-    try { passthroughRef.current?.disconnect(); } catch { /* ok */ }
+    try {
+      passthroughRef.current?.disconnect();
+    } catch {
+      /* ok */
+    }
   }, []);
   const enablePassthrough = useCallback((audio: HTMLAudioElement) => {
     try {
@@ -8894,14 +9344,18 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS):
       }
       source.connect(passthroughRef.current);
       passthroughRef.current.connect(ctx.destination);
-    } catch { /* ok */ }
+    } catch {
+      /* ok */
+    }
   }, []);
   const reconnect = useCallback((audio: HTMLAudioElement) => {
     try {
       const { source } = getOrCreateAudioSource(audio);
       if (analyserRef.current) source.connect(analyserRef.current);
       if (passthroughRef.current) source.connect(passthroughRef.current);
-    } catch { /* ok */ }
+    } catch {
+      /* ok */
+    }
   }, []);
   useEffect(
     () => () => {
@@ -8909,7 +9363,17 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS):
     },
     [],
   );
-  return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect, disablePassthrough, enablePassthrough, reconnect };
+  return {
+    connectAudio,
+    frequencyDataRef,
+    waveDataRef,
+    meterRef,
+    isActive,
+    disconnect,
+    disablePassthrough,
+    enablePassthrough,
+    reconnect,
+  };
 }
 const NR_PRESETS: Record<
   NoiseReductionMode,
@@ -9489,7 +9953,11 @@ function useStationQueue() {
       removedIdx = -1;
       const filtered: Station[] = [];
       for (let i = 0; i < q.length; i++) {
-        if (q[i].stationuuid === station.stationuuid) { removedIdx = i; } else { filtered.push(q[i]); }
+        if (q[i].stationuuid === station.stationuuid) {
+          removedIdx = i;
+        } else {
+          filtered.push(q[i]);
+        }
       }
       if (removedIdx < 0 && filtered.length >= MAX_QUEUE_SIZE) return prevIdx;
       let adjusted = prevIdx;
@@ -9506,7 +9974,11 @@ function useStationQueue() {
       const result: Station[] = [];
       removedIdx = -1;
       for (let i = 0; i < prev.length; i++) {
-        if (prev[i].stationuuid === stationuuid) { removedIdx = i; } else { result.push(prev[i]); }
+        if (prev[i].stationuuid === stationuuid) {
+          removedIdx = i;
+        } else {
+          result.push(prev[i]);
+        }
       }
       return removedIdx < 0 ? prev : result;
     });
@@ -9642,7 +10114,7 @@ function useFavoriteSongs() {
       timestamp: now,
     };
     const next = [entry, ...prev];
-    return next.length > MAX_SONGS ? (next.length = MAX_SONGS, next) : next;
+    return next.length > MAX_SONGS ? ((next.length = MAX_SONGS), next) : next;
   };
   const add = useCallback((song: Omit<FavoriteSong, 'id' | 'timestamp'>) => {
     setSongs((prev) =>
@@ -9690,7 +10162,7 @@ function useFavorites() {
     setFavorites((prev) => {
       if (prev.some((s) => s.stationuuid === station.stationuuid)) return prev;
       const next = [station, ...prev];
-      return next.length > MAX_FAVORITES ? (next.length = MAX_FAVORITES, next) : next;
+      return next.length > MAX_FAVORITES ? ((next.length = MAX_FAVORITES), next) : next;
     });
   }, []);
   const remove = useCallback((uuid: string) => {
@@ -9701,13 +10173,10 @@ function useFavorites() {
       const exists = prev.some((s) => s.stationuuid === station.stationuuid);
       if (exists) return prev.filter((s) => s.stationuuid !== station.stationuuid);
       const next = [station, ...prev];
-      return next.length > MAX_FAVORITES ? (next.length = MAX_FAVORITES, next) : next;
+      return next.length > MAX_FAVORITES ? ((next.length = MAX_FAVORITES), next) : next;
     });
   }, []);
-  const has = useCallback(
-    (uuid: string) => favUuids.has(uuid),
-    [favUuids],
-  );
+  const has = useCallback((uuid: string) => favUuids.has(uuid), [favUuids]);
   const playNext = useCallback(
     (currentUuid: string): Station | null => {
       const idx = favorites.findIndex((s) => s.stationuuid === currentUuid);
@@ -10181,7 +10650,9 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
 }
 type RadioShellProps = { isPip?: boolean; initialCountryCode?: string };
 export default function RadioShell({ isPip: isPipProp, initialCountryCode }: RadioShellProps) {
-  useEffect(() => { installDevFetchLogger(); }, []);
+  useEffect(() => {
+    installDevFetchLogger();
+  }, []);
   const containerRef = useRef<HTMLDivElement>(null);
   const containerSize = useContainerSize(containerRef);
   const pathname = usePathname();
@@ -10194,7 +10665,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   effectsEnabledRef.current = effectsEnabled;
   const radio = useRadio(effectsEnabledRef);
   const eq = useEqualizer();
-  const { track, icyBitrate, stationBlacklisted } = useStationMeta(radio.station, radio.status === 'playing');
+  const { track, icyBitrate, stationBlacklisted } = useStationMeta(
+    radio.station,
+    radio.status === 'playing',
+  );
   const {
     lyrics,
     effectiveCurrentTime,
@@ -10211,7 +10685,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const stationQueue = useStationQueue();
   useWakeLock(radio.status === 'playing');
   const analyser = useAudioAnalyser({ fftSize: 2048, smoothingTimeConstant: 0.8 });
-  const bgAudio = useAudioReactiveBackground(analyser.meterRef, radio.status === 'playing', analyser.isActive);
+  const bgAudio = useAudioReactiveBackground(
+    analyser.meterRef,
+    radio.status === 'playing',
+    analyser.isActive,
+  );
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
 
   // Lyrics → iTunes fallback: when the initial iTunes lookup found nothing but lyrics
@@ -10256,15 +10734,20 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     async function fetchByAlbum(): Promise<boolean> {
       if (!lyrics?.albumName) return false;
       const albumTerm = `${cleanArtist} ${lyrics.albumName}`;
-      const albumRes = await fetch(`/api/itunes?term=${encodeURIComponent(albumTerm)}&entity=album`, {
-        signal: controller.signal,
-      });
+      const albumRes = await fetch(
+        `/api/itunes?term=${encodeURIComponent(albumTerm)}&entity=album`,
+        {
+          signal: controller.signal,
+        },
+      );
       if (!albumRes.ok || controller.signal.aborted) return false;
       const albumData = await albumRes.json();
       const albumResult = (albumData.results ?? []) as ItunesResult[];
       const collectionId = albumResult[0]?.collectionId;
       if (!collectionId) return false;
-      const tracksRes = await fetch(`/api/itunes/lookup?id=${collectionId}`, { signal: controller.signal });
+      const tracksRes = await fetch(`/api/itunes/lookup?id=${collectionId}`, {
+        signal: controller.signal,
+      });
       if (!tracksRes.ok || controller.signal.aborted) return false;
       const tracksData = await tracksRes.json();
       const best = selectBestItunesResult(
@@ -10297,7 +10780,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       })
       .catch(() => {});
     return () => controller.abort();
-  }, [albumArt.isLoading, albumArt.artworkUrl, lyrics?.lyricsEnriched, lyrics?.artistName, lyrics?.trackName, lyrics?.albumName]);
+  }, [
+    albumArt.isLoading,
+    albumArt.artworkUrl,
+    lyrics?.lyricsEnriched,
+    lyrics?.artistName,
+    lyrics?.trackName,
+    lyrics?.albumName,
+  ]);
 
   const usageStats = useStats();
   const enrichedTrack = useMemo(() => {
@@ -10373,9 +10863,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
-  const [toast, setToast] = useState<{ msg: string; icon: 'star' | 'heart' | 'info'; key: number } | null>(
-    null,
-  );
+  const [toast, setToast] = useState<{
+    msg: string;
+    icon: 'star' | 'heart' | 'info';
+    key: number;
+  } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const duckOrigVolRef = useRef<number | null>(null);
   const duckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -10580,7 +11072,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           const url = new URL(window.location.href);
           url.searchParams.delete('sid');
           url.searchParams.delete('tune');
-          window.history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ''));
+          window.history.replaceState(
+            {},
+            '',
+            url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ''),
+          );
         }
       }
     });
@@ -10791,8 +11287,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         case 'f':
         case 'F': {
           e.preventDefault();
-          const searchInput =
-            document.querySelector<HTMLInputElement>('[data-radio-search], .radio-search-input');
+          const searchInput = document.querySelector<HTMLInputElement>(
+            '[data-radio-search], .radio-search-input',
+          );
           if (searchInput) searchInput.focus();
           break;
         }
@@ -10988,9 +11485,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </motion.div>
   ) : null;
   const mkNavTabs = (sz: number) => [
-    { id: 'discover' as const, label: t('discover'), icon: <RadioIcon size={sz} aria-hidden="true" /> },
+    {
+      id: 'discover' as const,
+      label: t('discover'),
+      icon: <RadioIcon size={sz} aria-hidden="true" />,
+    },
     { id: 'history' as const, label: t('history'), icon: <Clock size={sz} aria-hidden="true" /> },
-    { id: 'favorites' as const, label: t('favorites'), icon: <Heart size={sz} aria-hidden="true" /> },
+    {
+      id: 'favorites' as const,
+      label: t('favorites'),
+      icon: <Heart size={sz} aria-hidden="true" />,
+    },
   ];
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
@@ -11111,7 +11616,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </>
   );
   const devApiConsoleElement =
-    process.env.NODE_ENV === 'development' ? <><DevApiConsole /><ApiPlayground /></> : null;
+    process.env.NODE_ENV === 'development' ? (
+      <>
+        <DevApiConsole />
+        <ApiPlayground />
+      </>
+    ) : null;
   const pulseLogoButton = (
     <button
       onClick={handleGoHome}
@@ -11245,10 +11755,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
               {/* Spacer for absolute bottom bar */} <div className="h-20 shrink-0" />
             </div>
           ) : (
-                        <main id="main-content" className="flex flex-col min-h-full pb-24">
+            <main id="main-content" className="flex flex-col min-h-full pb-24">
               {' '}
               {nowPlayingHeroElement} {/* ── Mobile top nav tabs + search ── */}{' '}
-              <nav className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2" aria-label="Main navigation" role="tablist">
+              <nav
+                className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-2"
+                aria-label="Main navigation"
+                role="tablist"
+              >
                 {navTabs14.map((tab) => (
                   <button
                     key={tab.id}
@@ -11268,7 +11782,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   {' '}
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.05]">
                     {' '}
-                    <Search size={13} className="text-white/45 flex-shrink-0" aria-hidden="true" />{' '}
+                    <Search
+                      size={13}
+                      className="text-white/45 flex-shrink-0"
+                      aria-hidden="true"
+                    />{' '}
                     <input
                       type="search"
                       placeholder={t('searchStations')}
@@ -11321,10 +11839,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         >
           {' '}
           {shellConcerts.length > 0 && radio.station && (
-            <ConcertMobileBanner concerts={shellConcerts} onClick={() => setShowConcertModal(true)} />
+            <ConcertMobileBanner
+              concerts={shellConcerts}
+              onClick={() => setShowConcertModal(true)}
+            />
           )}
           {showConcertModal && shellConcerts.length > 0 && (
-            <ConcertModal concerts={shellConcerts} artistName={enrichedTrack?.artist} onClose={() => setShowConcertModal(false)} />
+            <ConcertModal
+              concerts={shellConcerts}
+              artistName={enrichedTrack?.artist}
+              onClose={() => setShowConcertModal(false)}
+            />
           )}
           <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
@@ -11338,10 +11863,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       ref={containerRef}
       className="flex flex-col h-full bg-[#0a0f1a] text-white overflow-hidden select-none relative"
     >
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[999] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-accent focus:text-white focus:text-sm focus:font-medium">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[999] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-accent focus:text-white focus:text-sm focus:font-medium"
+      >
         Skip to main content
-      </a>
-      {' '}
+      </a>{' '}
       <LiquidGlassSvgFilter />
       {parallaxElement}{' '}
       <div className="flex flex-1 min-h-0 relative z-10">
@@ -11381,7 +11908,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   </div>
                 </div>{' '}
                 {nowPlayingHeroElement} {/* ── Top nav: tabs + search ── */}{' '}
-                <div className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1" role="tablist" aria-label="Main navigation">
+                <div
+                  className="flex-shrink-0 px-4 pt-2 pb-1 flex items-center gap-1"
+                  role="tablist"
+                  aria-label="Main navigation"
+                >
                   {navTabs13.map((tab) => (
                     <button
                       key={tab.id}
@@ -11407,7 +11938,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                     {' '}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-2 border border-white/[0.05]">
                       {' '}
-                      <Search size={12} className="text-dim flex-shrink-0" aria-hidden="true" />{' '}
+                      <Search
+                        size={12}
+                        className="text-dim flex-shrink-0"
+                        aria-hidden="true"
+                      />{' '}
                       <input
                         type="search"
                         placeholder={t('searchStations')}
@@ -11506,7 +12041,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
             aria-pressed={miniMode}
           >
             {' '}
-            {miniMode ? <Maximize2 size={12} aria-hidden="true" /> : <Minimize2 size={12} aria-hidden="true" />}
+            {miniMode ? (
+              <Maximize2 size={12} aria-hidden="true" />
+            ) : (
+              <Minimize2 size={12} aria-hidden="true" />
+            )}
           </button>{' '}
         </div>
         <NowPlayingBar {...nowPlayingFullProps} />

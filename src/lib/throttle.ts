@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
-export interface ThrottledFn<T extends (...args: any[]) => any> {
+export interface ThrottledFn<T extends (...args: unknown[]) => unknown> {
   (...args: Parameters<T>): void;
   cancel(): void;
 }
@@ -9,7 +9,7 @@ export interface ThrottledFn<T extends (...args: any[]) => any> {
  * Returns a throttled function that executes at most once per `intervalMs`.
  * Leading-edge: fires immediately on first call.
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   fn: T,
   intervalMs: number,
 ): ThrottledFn<T> {

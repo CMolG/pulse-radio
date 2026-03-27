@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 import { useRef, useCallback } from 'react';
 
 const CROSSFADE_DURATION = 1500; // ms
@@ -5,7 +6,9 @@ const STORAGE_KEY = 'radio-crossfade-enabled';
 
 function isIOS(): boolean {
   if (typeof navigator === 'undefined') return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as { MSStream?: unknown }).MSStream;
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as { MSStream?: unknown }).MSStream
+  );
 }
 
 /**
@@ -35,11 +38,7 @@ export function useCrossfade(audioContext: AudioContext | null) {
    * Returns a Promise that resolves when the crossfade completes.
    */
   const crossfade = useCallback(
-    (
-      outGain: GainNode | null,
-      inGain: GainNode | null,
-      targetVolume: number,
-    ): Promise<void> => {
+    (outGain: GainNode | null, inGain: GainNode | null, targetVolume: number): Promise<void> => {
       if (!audioContext || !getEnabled() || !outGain || !inGain) {
         // Instant switch
         if (outGain) outGain.gain.value = 0;

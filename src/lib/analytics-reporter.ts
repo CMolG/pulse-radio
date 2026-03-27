@@ -14,7 +14,7 @@ interface EventEntry {
 }
 
 const BATCH_INTERVAL = 10_000; // 10 seconds
-let queue: EventEntry[] = [];
+const queue: EventEntry[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function shouldTrack(): boolean {

@@ -17,10 +17,10 @@ export function useDebounce<T>(value: T, delayMs: number): T {
 }
 
 /** Returns a debounced callback that auto-cancels on unmount. */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delayMs: number,
-  deps: any[],
+  deps: unknown[],
 ): DebouncedFn<T> {
   const ref = useRef<DebouncedFn<T> | null>(null);
 
@@ -31,7 +31,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
       ref.current = debounce(fn, delayMs);
       return ref.current;
     })(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [delayMs, ...deps],
   );
 
