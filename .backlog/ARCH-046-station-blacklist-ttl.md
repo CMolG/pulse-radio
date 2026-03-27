@@ -10,6 +10,8 @@ status: pending
 
 ## Context
 
+> **Related:** See ARCH-038 (Station Reliability Scoring) for the persistent SQLite-based scoring system. This card handles the ephemeral in-memory blacklist in the proxy-stream route. If ARCH-038 is completed first, this card's TTL map should use ARCH-038's scoring data as input.
+
 The `/api/proxy-stream` route maintains a station blacklist (`stationBlacklist` Set) for URLs that fail to connect. Once a station URL is added to this Set, it stays there forever — until the server process restarts. This creates a silent, permanent ban on stations that may have temporary issues:
 
 1. A station has a 5-minute maintenance window → blacklisted permanently.

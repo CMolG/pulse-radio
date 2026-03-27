@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-035
-target_agent: auto-feature-engineer-finite
+target_agent: auto-optimizer-finite
 target_module: .github/workflows/deploy.yml
 priority: high
 status: pending
