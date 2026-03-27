@@ -10,9 +10,17 @@ import { cacheSet, type Namespace } from '@/lib/server-cache';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { logRequest } from '@/lib/logger';
 import { env } from '@/lib/env';
+import { db } from '@/lib/db';
+import { sql } from 'drizzle-orm';
+import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // allow up to 5 minutes
+
+/* ── Mutex gate: prevent concurrent / too-frequent sync runs ── */
+let syncInProgress = false;
+let lastSyncTimestamp = 0;
+const MIN_SYNC_INTERVAL_MS = 60_000; // 1 minute minimum between syncs
 
 const _NOOP = () => {};
 

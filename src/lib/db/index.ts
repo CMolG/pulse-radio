@@ -27,6 +27,8 @@ function initDb(): BetterSQLite3Database<typeof schema> {
   const sqlite = new Database(DB_PATH);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('busy_timeout = 5000');
+  sqlite.pragma('analysis_limit = 1000');
+  sqlite.exec('ANALYZE;');
   _db = drizzle(sqlite, { schema });
   migrate(_db, { migrationsFolder: MIGRATIONS_DIR });
   return _db;
