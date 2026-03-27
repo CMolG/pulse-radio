@@ -1,1 +1,1 @@
-export { cacheResolve, getStaleKeys, persistToDb } from './CacheRepository';
+export { cacheResolve, getCachedOrFetch, getStaleKeys, persistToDb } from './CacheRepository';
