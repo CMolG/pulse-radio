@@ -6,7 +6,7 @@ priority: high
 status: pending
 ---
 
-# ARCH-115: Implement Podcast Discovery & Playback
+# ARCH-115: Podcast API Routes & RSS Parser
 
 ## Context
 
@@ -17,9 +17,7 @@ The README roadmap marks "Podcast support" as complete (`[x]`), but **no podcast
 - No podcast search functionality
 - No episode listing or playback controls
 
-The only podcast-adjacent code is a `media=podcast` query parameter in the iTunes API route for artwork lookup. ARCH-048 will correct the README, but this card implements the actual feature.
-
-Podcast support is a natural extension of a radio app — users who listen to live radio also consume on-demand audio content. This is a high-value feature that increases daily active usage (podcast episodes give users a reason to return).
+The only podcast-adjacent code is a `media=podcast` query parameter in the iTunes API route for artwork lookup. ARCH-048 will correct the README. This card implements the **backend infrastructure** (API routes + RSS parser). The companion card ARCH-125 handles the podcast UI and playback integration.
 
 ## Directive
 
@@ -43,29 +41,14 @@ Podcast support is a natural extension of a radio app — users who listen to li
    - Handle both RSS 2.0 and Atom feed formats.
    - Do NOT add external XML parsing dependencies — use `TextDecoder` + string parsing.
 
-4. **Podcast UI** (in RadioShell.tsx or extracted component):
-   - Add a "Podcasts" tab in the browse navigation (alongside genres/countries).
-   - Search bar for podcast discovery (reuse the search input pattern).
-   - Podcast cards showing: artwork, name, author.
-   - Clicking a podcast opens an episode list view.
-   - Episode cards showing: title, duration, date.
-   - Play button on each episode that feeds the audio URL to the existing player.
-   - Integrate with ARCH-102 (resume position tracking) if available.
-
-5. **Playback integration**:
-   - Set `source: 'podcast'` in the Zustand playback store.
-   - Update Media Session metadata with episode info.
-   - Show episode progress bar (seek-enabled) instead of the live radio indicator.
+4. **Type definitions** — Add podcast/episode types to `src/lib/parsers/podcastTypes.ts`.
 
 ## Acceptance Criteria
 
 - [ ] `/api/podcast-search` returns podcast results from iTunes
 - [ ] `/api/podcast-feed` parses RSS feeds and returns episodes
-- [ ] Podcasts tab appears in browse navigation
-- [ ] Users can search for podcasts by name
-- [ ] Episode list displays for selected podcast
-- [ ] Clicking an episode plays the audio
-- [ ] Player shows episode title, podcast name, and artwork
-- [ ] Seek bar works (not live streaming — on-demand content)
+- [ ] RSS parser handles both RSS 2.0 and Atom formats
 - [ ] SSRF protections applied to feed URL fetching
-- [ ] Playwright test: search podcast → select → play episode → verify audio src set
+- [ ] Standard timeout (8s) and error handling on both routes
+- [ ] Cache headers set on both routes
+- [ ] Type definitions for podcast/episode data structures

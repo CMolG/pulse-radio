@@ -2,7 +2,7 @@
 task_id: ARCH-091
 target_agent: auto-optimizer-finite
 target_module: src/app/api/cron/sync/route.ts
-priority: medium
+priority: high
 status: pending
 ---
 

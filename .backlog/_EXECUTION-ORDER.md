@@ -1,15 +1,15 @@
 ---
 type: execution-order
 generated_by: auto-architect
-iteration: 15
-total_cards: 124
+iteration: 16
+total_cards: 126
 ---
 
 # Pulse Radio Backlog — Execution Order
 
 ## Dependency Graph
 
-14 blocking dependencies identified:
+16 blocking dependencies identified:
 
 | Card | Depends On | Reason |
 |------|-----------|--------|
@@ -27,21 +27,23 @@ total_cards: 124
 | ARCH-115 | ARCH-024 | Podcast feed fetcher needs SSRF validation utility |
 | ARCH-116 | ARCH-024 | Audiobook API routes need SSRF validation utility |
 | ARCH-117 | ARCH-100 | Deep-linkable URLs build on station search resolution |
+| ARCH-125 | ARCH-115 | Podcast UI requires podcast API routes |
+| ARCH-126 | ARCH-116 | Audiobook UI requires audiobook API routes |
 
 ## Wave 1 — No Dependencies (106 cards, fully parallel)
 
 ### Critical (14)
 ARCH-001, 002, 003, 004, 005, 017, 031, 032, 042, 060, 061, 073, 079, 101
 
-### High (34)
+### High (35)
 ARCH-006, 007, 008, 009, 010, 018, 019, 024, 027, 033, 034, 035, 036,
-043, 044, 050, 054, 062, 063, 066, 069, 074, 075, 080, 087, 088, 092,
-093, 098, 099, 102, 103, 107, 108, 110, 111
+043, 044, 050, 054, 062, 063, 066, 069, 074, 075, 080, 087, 088, 091,
+092, 093, 098, 099, 102, 103, 107, 108, 110, 111
 
-### Medium (53)
+### Medium (52)
 ARCH-011, 012, 013, 014, 015, 016, 020, 028, 037, 038, 039, 040, 041,
 045, 046, 047, 048, 051, 052, 053, 055, 056, 057, 058, 064, 065, 067,
-068, 070, 071, 072, 077, 078, 081, 082, 084, 089, 090, 091, 094, 095,
+068, 070, 071, 072, 077, 078, 081, 082, 084, 089, 090, 094, 095,
 096, 105, 106, 109, 113, 118, 119, 123, 124
 
 ### Low (9)
@@ -66,10 +68,26 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122
 | ARCH-114 | medium | ARCH-103 |
 | ARCH-117 | medium | ARCH-100 |
 
+## Wave 3 — Depends on Wave 2 (2 cards)
+
+| Card | Priority | Blocked By |
+|------|----------|------------|
+| ARCH-125 | high | ARCH-115 (podcast API) |
+| ARCH-126 | high | ARCH-116 (audiobook API) |
+
+## Iteration 16 Changes
+
+- **ARCH-091** priority elevated: medium → high (cron sync mutex — race condition risk in production)
+- **ARCH-115** scope narrowed to API routes + RSS parser only (UI split to ARCH-125)
+- **ARCH-116** scope narrowed to API routes only (UI split to ARCH-126)
+- **ARCH-125** (NEW): Podcast browse UI & playback integration — depends on ARCH-115
+- **ARCH-126** (NEW): Audiobook browse UI & chapter playback — depends on ARCH-116
+
 ## Recommended Execution Strategy
 
 1. **Start Wave 1** with max parallelism across all available agents
 2. **Critical path**: ARCH-001, ARCH-003, ARCH-024, ARCH-031, ARCH-033, ARCH-073, ARCH-075, ARCH-103 (unblock Wave 2)
-3. **Highest impact new cards**: ARCH-101 (iOS audio), ARCH-115/116 (podcast+audiobook — features falsely claimed in README)
+3. **Highest impact new cards**: ARCH-101 (iOS audio), ARCH-115/116 (podcast+audiobook APIs — features falsely claimed in README)
 4. **Wave 2 auto-starts** as blocking cards complete
-5. **Estimated total**: 16-20 iteration cycles at full parallelism
+5. **Wave 3** (ARCH-125, ARCH-126) starts after respective Wave 2 APIs ship
+6. **Estimated total**: 16-20 iteration cycles at full parallelism
