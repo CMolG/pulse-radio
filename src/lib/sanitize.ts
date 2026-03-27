@@ -74,3 +74,13 @@ export function sanitizeHeaderValue(value: string): string {
 export function sanitizeTextContent(value: string): string {
   return value.replace(CONTROL_CHARS, '').trim();
 }
+
+/** Sanitize user-controlled input before logging to prevent log injection attacks.
+ * Strips newlines and control characters to prevent fake log entries from being injected.
+ */
+export function sanitizeForLog(input: string): string {
+  return input
+    .replace(/[\r\n]/g, ' ')       // Collapse newlines to spaces
+    .replace(/[\x00-\x1f]/g, '')   // Strip control characters
+    .slice(0, 200);                // Limit length
+}

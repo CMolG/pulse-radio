@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     siteName: 'Pulse Radio',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: '/android-chrome-512x512.png', width: 512, height: 512, alt: 'Pulse Radio' }],
+    images: [{ url: '/android-chrome-512x512.png', width: 512, height: 512, alt: 'Pulse Radio', type: 'image/png' }],
   },
   twitter: {
     card: 'summary',

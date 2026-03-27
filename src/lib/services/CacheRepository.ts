@@ -8,8 +8,11 @@
  *
  * Every successful external fetch is mirrored into both Tier 2 and Tier 1
  * so subsequent requests never touch the network again until TTL expires.
+ *
+ * Request Deduplication (ARCH-053): Concurrent identical Tier 3 requests share
+ * a single in-flight Promise to avoid duplicate API calls.
  */
-import { db } from '@/lib/db';
+import { db, timedQuery, recordCacheHit, recordCacheMiss, recordCacheWrite } from '@/lib/db';
 import {
   itunesCache,
   artistInfoCache,
@@ -31,6 +34,9 @@ const TABLE_MAP: Record<string, CacheTable> = {
   concerts: concertsCache,
   lyrics: lyricsCache,
 };
+
+// ARCH-053: In-flight request deduplication tracker (module-scoped singleton)
+const inflight = new Map<string, Promise<unknown>>();
 
 interface CacheOptions<T> {
   /** server-cache namespace */
@@ -77,8 +83,28 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
     }
   }
 
-  // ── Tier 3: External API ──
-  const fresh = await fetcher();
+  // ── Tier 3: External API (with request deduplication) ──
+  const inflightKey = `${namespace}:${key}`;
+  const existing = inflight.get(inflightKey);
+  
+  let fresh: T | null;
+  if (existing) {
+    // An identical request is already in-flight; share the Promise
+    fresh = await existing as T | null;
+  } else {
+    // Start new fetch and track it
+    const fetchPromise = (async () => {
+      try {
+        return await fetcher();
+      } finally {
+        // Clean up after resolution (success or error)
+        inflight.delete(inflightKey);
+      }
+    })();
+    
+    inflight.set(inflightKey, fetchPromise);
+    fresh = await fetchPromise;
+  }
 
   // Persist into both tiers (even null results to avoid repeated lookups)
   const payload = JSON.stringify(fresh);

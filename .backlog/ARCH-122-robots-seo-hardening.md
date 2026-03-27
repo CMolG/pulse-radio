@@ -3,7 +3,7 @@ task_id: ARCH-122
 target_agent: auto-optimizer-finite
 target_module: public/robots.txt
 priority: low
-status: pending
+status: completed
 ---
 
 # ARCH-122: Block API Routes in robots.txt & SEO Hardening

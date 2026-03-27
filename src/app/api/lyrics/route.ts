@@ -7,6 +7,7 @@ import { validateRequest } from '@/lib/validate-request';
 import { lyricsSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { lyricsKey } from '@/lib/cache-keys';
+import { apiError } from '@/lib/api-response';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -106,9 +107,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(result, { headers });
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    return NextResponse.json(
-      { error: isTimeout ? 'Request timed out' : 'Internal error' },
-      { status: isTimeout ? 504 : 500 },
+    return apiError(
+      isTimeout ? 'Request timed out' : 'Internal error',
+      isTimeout ? 'TIMEOUT' : 'INTERNAL_ERROR',
+      isTimeout ? 504 : 500,
     );
   }
 }

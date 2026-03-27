@@ -12,6 +12,7 @@ import { artistInfoSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { artistInfoKey } from '@/lib/cache-keys';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
+import { apiError } from '@/lib/api-response';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -20,8 +21,6 @@ const MUSIC_KEYWORDS =
   /band|singer|musician|artist|rapper|group|duo|dj|producer|composer|vocalist|songwriter|hip.hop|rock|pop|jazz|classical|electronic|country|metal|r&b|soul|blues|funk|reggae|punk|folk/i;
 const _PERSON_SUFFIXES = ['(singer)', '(musician)', '(rapper)'] as const;
 const _BAND_SUFFIXES = ['(band)', '(musical group)', '(singer)', '(musician)'] as const;
-const _ERR_400 = { error: 'Missing or invalid artist parameter' };
-const _ERR_500 = { error: 'Internal error' };
 const artistInfoCircuit = createCircuitBreaker('artist-info');
 const _NOOP = () => {};
 const _MB_HDRS = { 'User-Agent': USER_AGENT, Accept: 'application/json' } as const;
@@ -109,7 +108,7 @@ export async function GET(req: NextRequest) {
   const validated = validateRequest(artistInfoSchema, req.nextUrl.searchParams);
   if (!validated.success) return validated.error;
   const artist = sanitizeSearchQuery(validated.data.artist);
-  if (!artist) return NextResponse.json(_ERR_400, { status: 400 });
+  if (!artist) return apiError('Missing or invalid artist parameter', 'INVALID_PARAM', 400);
   const cacheKey = artistInfoKey(artist);
   try {
     const payload = await getCachedOrFetch({
@@ -136,9 +135,10 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    return NextResponse.json(
-      { error: isTimeout ? 'timeout' : 'internal' },
-      { status: isTimeout ? 504 : 500 },
+    return apiError(
+      isTimeout ? 'Request timed out' : 'Internal error',
+      isTimeout ? 'TIMEOUT' : 'INTERNAL_ERROR',
+      isTimeout ? 504 : 500,
     );
   }
 }
