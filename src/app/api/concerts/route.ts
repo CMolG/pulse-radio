@@ -7,9 +7,9 @@ import { logError } from '@/lib/error-logger';
 import { validateRequest } from '@/lib/validate-request';
 import { concertsSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
+import { env } from '@/lib/env';
 
 export const runtime = 'nodejs';
-const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
 const TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
@@ -83,7 +83,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     const encoded = encodeBandsintownArtist(artist);
 
     // Step 1: Resolve artist to get their canonical ID.
-    const artistUrl = `${BANDSINTOWN_BASE}/artists/${encoded}?app_id=${BANDSINTOWN_APP_ID}`;
+    const artistUrl = `${BANDSINTOWN_BASE}/artists/${encoded}?app_id=${env.BANDSINTOWN_APP_ID}`;
     const artistRes = await fetch(artistUrl, { signal: controller.signal });
     if (!artistRes.ok) {
       const body = await artistRes.text().catch(() => '');
@@ -97,7 +97,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     const eventsPath = artistId
       ? `/artists/id_${artistId}/events`
       : `/artists/${encoded}/events`;
-    const eventsUrl = `${BANDSINTOWN_BASE}${eventsPath}?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`;
+    const eventsUrl = `${BANDSINTOWN_BASE}${eventsPath}?app_id=${env.BANDSINTOWN_APP_ID}&date=upcoming`;
     const res = await fetch(eventsUrl, { signal: controller.signal });
     clearTimeout(timer);
     if (!res.ok) {

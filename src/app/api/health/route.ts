@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
+import { env } from '@/lib/env';
 
-const APP_VERSION = process.env.npm_package_version ?? '0.1.0';
 const RADIO_BROWSER_STATS = 'https://de1.api.radio-browser.info/json/stats';
 const DEEP_TIMEOUT_MS = 3_000;
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     status: 'healthy' as 'healthy' | 'degraded',
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: APP_VERSION,
+    version: env.APP_VERSION,
   };
 
   if (!deep) {

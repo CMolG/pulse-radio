@@ -9,14 +9,13 @@ import { getStaleKeys, persistToDb } from '@/lib/services/CacheRepository';
 import { cacheSet, type Namespace } from '@/lib/server-cache';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { logRequest } from '@/lib/logger';
+import { env } from '@/lib/env';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // allow up to 5 minutes
 
-const CRON_SECRET = process.env.CRON_SECRET;
 const _NOOP = () => {};
 
-const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
 const TIMEOUT_MS = 10_000;
 
 async function safeFetch(url: string): Promise<any | null> {
@@ -73,7 +72,7 @@ const syncers: Record<string, SyncFn> = {
 
   concerts: async (key) => {
     const raw = await safeFetch(
-      `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`,
+      `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${env.BANDSINTOWN_APP_ID}&date=upcoming`,
     );
     if (!Array.isArray(raw)) return { data: [], ttlMs: 12 * 60 * 60 * 1000 };
     const events = raw.slice(0, 5).map((e: any) => ({
@@ -107,9 +106,10 @@ export async function GET(req: NextRequest) {
   logRequest(req);
 
   // Auth check
-  if (CRON_SECRET) {
+  const cronSecret = env.CRON_SECRET;
+  if (cronSecret) {
     const auth = req.headers.get('authorization');
-    if (auth !== `Bearer ${CRON_SECRET}`) {
+    if (auth !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
