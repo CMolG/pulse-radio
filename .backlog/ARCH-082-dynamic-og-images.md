@@ -3,7 +3,7 @@ task_id: ARCH-082
 target_agent: auto-feature-engineer-finite
 target_module: src/app/[countryCode]/opengraph-image.tsx
 priority: medium
-status: pending
+status: completed
 ---
 
 # Add Dynamic Open Graph Image Generation for Country Pages

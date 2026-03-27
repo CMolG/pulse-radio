@@ -3,7 +3,7 @@ task_id: ARCH-058
 target_agent: auto-feature-engineer-finite
 target_module: src/hooks/useOnboardingPreferences.ts
 priority: medium
-status: pending
+status: completed
 ---
 
 # Add Genre & Country Selection to Onboarding Flow
