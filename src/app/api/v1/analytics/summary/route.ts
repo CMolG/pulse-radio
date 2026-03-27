@@ -3,13 +3,14 @@ import { db, schema } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 import { env } from '@/lib/env';
 import { withApiVersion } from '@/lib/api-versioning';
+import { apiError } from '@/lib/api-response';
 
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   const secret = req.headers.get('authorization')?.replace('Bearer ', '');
   if (secret !== env.CRON_SECRET) {
-    return withApiVersion(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }));
+    return withApiVersion(apiError('Unauthorized', 'INTERNAL_ERROR', 401));
   }
 
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getScores } from '@/lib/station-health';
 import { rateLimit } from '@/lib/rate-limiter';
 import { withApiVersion } from '@/lib/api-versioning';
+import { apiError } from '@/lib/api-response';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     .slice(0, 50);
 
   if (urls.length === 0) {
-    return withApiVersion(NextResponse.json({ error: 'Missing urls parameter' }, { status: 400 }));
+    return withApiVersion(apiError('Missing urls parameter', 'MISSING_PARAM', 400));
   }
 
   const scores = getScores(urls);

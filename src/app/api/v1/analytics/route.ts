@@ -3,6 +3,7 @@ import { rateLimit } from '@/lib/rate-limiter';
 import { db, schema } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 import { withApiVersion } from '@/lib/api-versioning';
+import { apiError } from '@/lib/api-response';
 
 export const runtime = 'nodejs';
 
@@ -61,6 +62,6 @@ export async function POST(req: NextRequest) {
 
     return withApiVersion(NextResponse.json({ inserted }, { status: 201 }));
   } catch {
-    return withApiVersion(NextResponse.json({ error: 'Invalid request' }, { status: 400 }));
+    return withApiVersion(apiError('Invalid request', 'INVALID_PARAM', 400));
   }
 }
