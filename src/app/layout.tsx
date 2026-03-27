@@ -86,6 +86,11 @@ const _JSON_LD_SCHEMA = JSON.stringify({
   browserRequirements: 'Requires JavaScript. Requires HTML5.',
   softwareVersion: '1.0',
   screenshot: `${SITE_URL}/android-chrome-512x512.png`,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/?search={search_term_string}` },
+    'query-input': 'required name=search_term_string',
+  },
 });
 function JsonLd() {
   return (
