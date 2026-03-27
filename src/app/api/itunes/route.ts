@@ -9,6 +9,7 @@ import { itunesSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { apiError } from '@/lib/api-response';
+import { readJsonWithLimit } from '@/lib/fetch-utils';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
@@ -48,15 +49,10 @@ const _NOOP = () => {};
               return status ? status >= 500 : false;
             },
           });
-          const cl = res.headers.get('content-length');
-          if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-            await res.body?.cancel();
-            throw new Error('Response too large');
-          }
           if (!res.ok) {
             throw new Error(`iTunes API returned ${res.status}`);
           }
-          return await res.json();
+          return await readJsonWithLimit<unknown>(res, 1 * 1024 * 1024, url);
         }, { resultCount: 0, results: [] });
         return data;
       },

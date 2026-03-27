@@ -6,7 +6,7 @@ import { sanitizeUrl, sanitizeHeaderValue } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { proxyStreamSchema } from '@/lib/validation-schemas';
-import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
+import { isPrivateHost, ALLOWED_PROTOCOLS, resolveDnsAndValidate } from '@/lib/ssrf';
 import { safeErrorResponse } from '@/lib/api-error-sanitizer';
 export const runtime = 'nodejs';
 const MAX_DURATION_MS = 25_000;
@@ -155,8 +155,8 @@ export async function GET(req: NextRequest) {
       'Cache-Control': 'no-cache, no-store',
       'Transfer-Encoding': 'chunked',
     };
-    if (icyBr) responseHeaders['X-Stream-Bitrate'] = icyBr;
-    if (icyName) responseHeaders['X-Stream-Name'] = icyName;
+    if (icyBr) responseHeaders['X-Stream-Bitrate'] = sanitizeHeaderValue(icyBr);
+    if (icyName) responseHeaders['X-Stream-Name'] = sanitizeHeaderValue(icyName);
     if (req.method === 'HEAD') {
       if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(_NOOP);

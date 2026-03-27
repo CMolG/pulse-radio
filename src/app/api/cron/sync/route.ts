@@ -10,6 +10,7 @@ import { getStaleKeys, persistToDb } from '@/lib/services/CacheRepository';
 import { cacheSet, type Namespace } from '@/lib/server-cache';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { logRequest } from '@/lib/logger';
+import { safeJsonParse } from '@/lib/sanitize';
 import { env } from '@/lib/env';
 import {
   isShuttingDown,
@@ -46,7 +47,8 @@ async function safeFetch(url: string, signal?: AbortSignal): Promise<Record<stri
       await res.text().catch(_NOOP);
       return null;
     }
-    return await res.json();
+    const text = await res.text();
+    return safeJsonParse<Record<string, unknown>>(text);
   } catch {
     return null;
   }

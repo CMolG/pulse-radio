@@ -9,6 +9,7 @@ import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';
 import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
+import { safeErrorResponse } from '@/lib/api-error-sanitizer';
 const _TRAILING_NULLS_RE = /\0+$/;
 const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 export const runtime = 'nodejs';
