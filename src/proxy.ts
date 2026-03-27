@@ -15,13 +15,19 @@ const cspDirectives = [
     'https://de2.api.radio-browser.info',
     'https://nl1.api.radio-browser.info',
     'https://lrclib.net',
+    'https://itunes.apple.com',
+    'https://rest.bandsintown.com',
+    'https://musicbrainz.org',
+    'https://en.wikipedia.org',
+    'https://upload.wikimedia.org',
   ].join(' '),
-  'media-src *',
+  "media-src 'self' http: https: data: blob:",
   "worker-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'self'",
+  'report-uri /api/csp-report',
 ];
 
 const contentSecurityPolicy = cspDirectives.join('; ');
