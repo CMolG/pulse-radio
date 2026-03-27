@@ -9358,7 +9358,11 @@ function useMediaSession(config: MediaSessionConfig): void {
     const metaKey = `${trackTitle}\t${trackArtist}\t${album}\t${artSrc || ''}`;
     if (metaKey === lastMetaRef.current) return;
     lastMetaRef.current = metaKey;
-    const imgSrc = artSrc || '/android-chrome-512x512.png';
+    // iOS Dynamic Island requires absolute HTTPS artwork URLs
+    let imgSrc = artSrc || '/android-chrome-512x512.png';
+    if (imgSrc.startsWith('/')) {
+      imgSrc = `${window.location.origin}${imgSrc}`;
+    }
     const artwork: MediaImage[] = [
       { src: imgSrc, sizes: '96x96', type: 'image/png' },
       { src: imgSrc, sizes: '128x128', type: 'image/png' },
@@ -9931,10 +9935,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     pbStore,
   ]);
   const { setOutputVolume, connectSource: eqConnectSource } = eq;
+  // On iOS, skip AudioContext pipeline unless effects are explicitly enabled —
+  // createMediaElementSource() routes audio through AudioContext, and iOS
+  // suspends the context when backgrounded, killing playback.
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
-      // Always connect analyser (proxy always provides CORS)
-      analyser.connectAudio(radio.audioRef.current);
+      const ios = isIOSDevice();
+      if (!ios || effectsEnabled) {
+        analyser.connectAudio(radio.audioRef.current);
+      }
       if (effectsEnabled) {
         eqConnectSource(radio.audioRef.current);
       }
@@ -9943,6 +9952,18 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     setOutputVolume(1, false);
   }, [setOutputVolume]);
+  // iOS: resume AudioContext when returning to foreground (iOS suspends it on background)
+  useEffect(() => {
+    if (!isIOSDevice()) return;
+    const onVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+      const audio = radio.audioRef.current;
+      if (!audio) return;
+      resumeAudioContext(audio);
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [radio]);
   const handlePlayRef = useRef({ radio, recent, stationQueue, eqConnectSource, analyser });
   useEffect(() => {
     handlePlayRef.current = { radio, recent, stationQueue, eqConnectSource, analyser };
@@ -9956,8 +9977,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       analyser: an,
     } = handlePlayRef.current;
     const audio = r.ensureAudio();
-    // Always connect analyser (proxy always provides CORS headers)
-    an.connectAudio(audio);
+    // On iOS, skip AudioContext unless effects are on (background playback)
+    if (!isIOSDevice() || effectsEnabledRef.current) {
+      an.connectAudio(audio);
+    }
     if (effectsEnabledRef.current) {
       eqSrc(audio);
     }
