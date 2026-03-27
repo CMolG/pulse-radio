@@ -1,7 +1,7 @@
 ---
 type: execution-order
 generated_by: auto-architect
-iteration: 19
+iteration: 20
 total_cards: 140
 ---
 
@@ -9,7 +9,7 @@ total_cards: 140
 
 ## Dependency Graph
 
-18 blocking dependencies identified:
+17 blocking dependencies identified:
 
 | Card | Depends On | Reason |
 |------|-----------|--------|
@@ -30,9 +30,8 @@ total_cards: 140
 | ARCH-125 | ARCH-115 | Podcast UI requires podcast API routes |
 | ARCH-126 | ARCH-116 | Audiobook UI requires audiobook API routes |
 | ARCH-131 | ARCH-031 | CSP policy goes into the security headers middleware |
-| ARCH-130 | ARCH-128 | Retry utility should use validated request types |
 
-## Wave 1 — No Dependencies (112 cards, fully parallel)
+## Wave 1 — No Dependencies (119 cards, fully parallel)
 
 ### Critical (14)
 ARCH-001, 002, 003, 004, 005, 017, 031, 032, 042, 060, 061, 073, 079, 101
@@ -46,12 +45,12 @@ ARCH-006, 007, 008, 009, 010, 018, 019, 024, 027, 033, 034, 035, 036,
 ARCH-011, 012, 013, 014, 015, 016, 020, 028, 037, 038, 039, 040, 041,
 045, 046, 047, 048, 051, 052, 053, 055, 056, 057, 058, 064, 065, 067,
 068, 070, 071, 072, 077, 078, 081, 082, 084, 089, 090, 094, 095,
-096, 105, 106, 109, 113, 118, 119, 123, 124, 133, 134, 135, 138, 139, 140
+096, 105, 106, 109, 113, 118, 119, 123, 124, 130, 133, 134, 135, 138, 139, 140
 
 ### Low (11)
 ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 
-## Wave 2 — Depends on Wave 1 (16 cards)
+## Wave 2 — Depends on Wave 1 (15 cards)
 
 | Card | Priority | Blocked By |
 |------|----------|------------|
@@ -70,7 +69,6 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 | ARCH-112 | medium | ARCH-003 |
 | ARCH-114 | medium | ARCH-103 |
 | ARCH-117 | medium | ARCH-100 |
-| ARCH-130 | medium | ARCH-128 |
 
 ## Wave 3 — Depends on Wave 2 (2 cards)
 
@@ -78,6 +76,15 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 |------|----------|------------|
 | ARCH-125 | high | ARCH-115 (podcast API) |
 | ARCH-126 | high | ARCH-116 (audiobook API) |
+
+## Iteration 20 Changes (Quality Audit)
+
+- **ARCH-012** agent reassigned: `auto-visual-fixer-finite` → `auto-reducer-finite` (refactoring, not visual)
+- **ARCH-128** context clarified: complementary to ARCH-034, not dependent
+- **ARCH-129** context clarified: extends ARCH-036 foundation, independently implementable
+- **ARCH-130** false dependency on ARCH-128 removed (retry utility doesn't need Zod types)
+- ARCH-130 moved from Wave 2 → Wave 1 (no actual blockers)
+- Dependency count: 18 → 17
 
 ## Iteration 19 Changes
 

@@ -12,7 +12,7 @@ status: pending
 
 All 6 public API routes use ad-hoc manual validation — inconsistent `length >` checks, no type coercion, no schema validation. Zod is already in `node_modules` (transitive dependency) but not used for request validation. Each route hand-rolls its own parameter extraction and validation, leading to inconsistent error responses and potential bypass vectors.
 
-ARCH-034 (input sanitization) covers XSS/injection sanitization but not structured schema validation. This card provides the validation layer that ARCH-034's sanitization sits on top of.
+ARCH-034 (input sanitization) covers XSS/injection sanitization but not structured schema validation. This card provides the validation layer that complements ARCH-034's sanitization. Both can be implemented independently — validation enforces types/bounds, sanitization strips dangerous content. Together they form a defense-in-depth input pipeline.
 
 ## Directive
 

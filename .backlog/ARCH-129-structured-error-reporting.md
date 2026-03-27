@@ -12,7 +12,7 @@ status: pending
 
 The app has 5+ scattered `console.error()` calls with inconsistent formatting. The ErrorBoundary component catches render errors but doesn't report them anywhere. There's no error classification (network vs. client vs. API), no error rate tracking, and no way to detect production errors on the self-hosted VPS deployment.
 
-ARCH-075 covers server-side structured logging. ARCH-036 covers Web Vitals scaffolding. This card adds **client-side error classification, context enrichment, and a reporting pipeline** that can later integrate with Sentry/Datadog.
+ARCH-075 covers server-side structured logging. ARCH-036 covers Web Vitals scaffolding (console-level). This card adds **client-side error classification, context enrichment, and a reporting pipeline** that extends ARCH-036's foundation. Both can be implemented independently — ARCH-036 creates the scaffolding, this card builds the production-grade pipeline on top.
 
 ## Directive
 

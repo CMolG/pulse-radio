@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-012
-target_agent: auto-visual-fixer-finite
+target_agent: auto-reducer-finite
 target_module: src/app/[countryCode]/head.tsx
 priority: medium
 status: pending
