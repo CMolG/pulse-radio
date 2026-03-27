@@ -410,6 +410,10 @@ import type {
   LyricsData,
   LrcLibResponse,
   LyricLine,
+  StationListenTime,
+  SongPlayCount,
+  ArtistPlayCount,
+  GenrePlayCount,
 } from './constants';
 import {
   GENRE_LABEL_KEYS,
@@ -429,6 +433,7 @@ import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ErrorBoundary } from '@/components/radio/components/ErrorBoundary';
 import TheaterView from './views/TheaterView';
+import StatsView from './views/StatsView';
 import { useMediaQuery } from 'usehooks-ts';
 import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from '@/lib/i18n/locales';
 import type { SupportedLocale } from '@/lib/i18n/locales';
@@ -1247,16 +1252,6 @@ const MAX_STATIONS = 300;
 const MAX_SONGS = 500;
 const MAX_ARTISTS = 200;
 const MAX_GENRES = 100;
-type StationListenTime = { name: string; uuid: string; totalMs: number };
-type SongPlayCount = {
-  title: string;
-  artist: string;
-  count: number;
-  artworkUrl?: string;
-  genre?: string;
-};
-type ArtistPlayCount = { name: string; count: number };
-type GenrePlayCount = { genre: string; count: number };
 interface UsageStats {
   stationListenTimes: Record<string, StationListenTime>;
   songPlayCounts: Record<string, SongPlayCount>;
@@ -6506,183 +6501,6 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
   );
 }
 const UsageGuide = React.memo(_UsageGuide);
-function formatListenTime(ms: number): string {
-  const totalSec = Math.floor(ms / 1000);
-  if (totalSec < 60) return `${totalSec}s`;
-  const mins = Math.floor(totalSec / 60);
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  const remMins = mins % 60;
-  if (hours < 24) return `${hours}h ${remMins}m`;
-  const days = Math.floor(hours / 24);
-  const remHours = hours % 24;
-  return `${days}d ${remHours}h`;
-}
-type StatsViewProps = {
-  topStations: StationListenTime[];
-  topSongs: SongPlayCount[];
-  topArtists: ArtistPlayCount[];
-  topGenres: GenrePlayCount[];
-  totalListenMs: number;
-};
-const StatSection = React.memo(function StatSection({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        {' '}
-        {icon} <span className="text-[13px] font-semibold text-white/80">{title}</span>{' '}
-      </div>
-      <div className="space-y-1">{children}</div>
-    </div>
-  );
-});
-const BarRow = React.memo(function BarRow({
-  label,
-  value,
-  maxValue,
-  suffix,
-}: {
-  label: string;
-  value: number;
-  maxValue: number;
-  suffix: string;
-}) {
-  const pct = maxValue > 0 ? Math.max(8, (value / maxValue) * 100) : 0;
-  return (
-    <div className="flex items-center gap-2 group">
-      {' '}
-      <span className="text-[12px] text-white/50 w-[100px] truncate shrink-0">{label}</span>{' '}
-      <div className="flex-1 h-4 rounded-full bg-white/[0.04] overflow-hidden relative">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#3478f6]/60 to-[#3478f6]/30 transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />{' '}
-      </div>
-      <span className="text-[12px] text-white/50 tabular-nums w-[50px] text-right shrink-0">
-        {suffix}
-      </span>
-    </div>
-  );
-});
-const StatsView = React.memo(function StatsView({
-  topStations,
-  topSongs,
-  topArtists,
-  topGenres,
-  totalListenMs,
-}: StatsViewProps) {
-  const hasData = totalListenMs > 0 || topSongs.length > 0;
-  if (!hasData) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        {' '}
-        <Clock size={40} className="text-white/35 mb-3" />{' '}
-        <p className="text-[14px] text-white/55">No listening data yet</p>{' '}
-        <p className="text-[12px] text-white/50 mt-1">Start playing stations to see your stats</p>
-      </div>
-    );
-  }
-  const maxStationTime = topStations[0]?.totalMs ?? 1;
-  const maxSongCount = topSongs[0]?.count ?? 1;
-  const maxArtistCount = topArtists[0]?.count ?? 1;
-  const maxGenreCount = topGenres[0]?.count ?? 1;
-  return (
-    <div className="p-4 space-y-6">
-      {' '}
-      {/* Total listen time */}{' '}
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/8">
-        {' '}
-        <Clock size={20} className="text-[#3478f6]" />{' '}
-        <div>
-          <p className="text-[12px] text-white/50 uppercase tracking-wider">Total Listen Time</p>{' '}
-          <p className="text-[18px] font-bold text-white tabular-nums">
-            {formatListenTime(totalListenMs)}
-          </p>
-        </div>
-      </div>{' '}
-      {/* Top Stations */}{' '}
-      {topStations.length > 0 && (
-        <StatSection
-          title="Top Stations"
-          icon={<RadioIcon size={16} className="text-amber-400/70" aria-hidden="true" />}
-        >
-          {' '}
-          {topStations.slice(0, 5).map((s) => (
-            <BarRow
-              key={s.uuid}
-              label={s.name}
-              value={s.totalMs}
-              maxValue={maxStationTime}
-              suffix={formatListenTime(s.totalMs)}
-            />
-          ))}
-        </StatSection>
-      )}{' '}
-      {/* Top Songs */}{' '}
-      {topSongs.length > 0 && (
-        <StatSection
-          title="Most Played Songs"
-          icon={<Music size={16} className="text-pink-400/70" aria-hidden="true" />}
-        >
-          {' '}
-          {topSongs.slice(0, 5).map((s) => (
-            <BarRow
-              key={`${s.title}|||${s.artist}`}
-              label={`${s.artist} — ${s.title}`}
-              value={s.count}
-              maxValue={maxSongCount}
-              suffix={`${s.count}×`}
-            />
-          ))}
-        </StatSection>
-      )}{' '}
-      {/* Top Artists */}{' '}
-      {topArtists.length > 0 && (
-        <StatSection
-          title="Top Artists"
-          icon={<User size={16} className="text-purple-400/70" aria-hidden="true" />}
-        >
-          {' '}
-          {topArtists.slice(0, 5).map((a) => (
-            <BarRow
-              key={a.name}
-              label={a.name}
-              value={a.count}
-              maxValue={maxArtistCount}
-              suffix={`${a.count}×`}
-            />
-          ))}
-        </StatSection>
-      )}{' '}
-      {/* Top Genres */}{' '}
-      {topGenres.length > 0 && (
-        <StatSection
-          title="Top Genres"
-          icon={<Disc3 size={16} className="text-emerald-400/70" aria-hidden="true" />}
-        >
-          {' '}
-          {topGenres.slice(0, 5).map((g) => (
-            <BarRow
-              key={g.genre}
-              label={g.genre}
-              value={g.count}
-              maxValue={maxGenreCount}
-              suffix={`${g.count}×`}
-            />
-          ))}
-        </StatSection>
-      )}
-    </div>
-  );
-});
 type MobileSettingsPanelProps = {
   onClose: () => void;
   eq: {

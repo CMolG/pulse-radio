@@ -17,6 +17,10 @@ export type {
   FavoriteSong,
   ArtistInfo,
   NoiseReductionMode,
+  StationListenTime,
+  SongPlayCount,
+  ArtistPlayCount,
+  GenrePlayCount,
 } from './constants';
 
 export type WidgetPlaybackState = {

@@ -213,3 +213,13 @@ export type ArtistInfo = {
   wikipediaUrl: string | null;
 };
 export type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';
+export type StationListenTime = { name: string; uuid: string; totalMs: number };
+export type SongPlayCount = {
+  title: string;
+  artist: string;
+  count: number;
+  artworkUrl?: string;
+  genre?: string;
+};
+export type ArtistPlayCount = { name: string; count: number };
+export type GenrePlayCount = { genre: string; count: number };
