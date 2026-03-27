@@ -86,10 +86,11 @@ export async function GET(req: NextRequest) {
 
   const cacheKey = lyricsKey(artist, title);
   try {
-    const result = await getCachedOrFetch<LrcLibResponse | null>({
+    const result = await getCachedOrFetch({
       namespace: 'lyrics',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
+      schema: LyricsResponseSchema,
       fetcher: async () => {
         const { data } = await lyricsCircuit.call(
           () => fetchLyrics(artist, title, album, duration),
