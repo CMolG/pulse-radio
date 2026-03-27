@@ -27,7 +27,7 @@ test.describe('Offline Resilience (ARCH-040)', () => {
   });
 
   test('API responses for itunes are cacheable', async ({ request }) => {
-    const res = await request.get('/api/itunes?term=test');
+    const res = await request.get('/api/v1/itunes?term=test');
     expect([200, 504]).toContain(res.status());
   });
 

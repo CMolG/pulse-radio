@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('API Rate Limiting (ARCH-032)', () => {
   test('normal API call succeeds with 200', async ({ request }) => {
-    const res = await request.get('/api/itunes?term=test');
+    const res = await request.get('/api/v1/itunes?term=test');
     expect(res.status()).not.toBe(429);
   });
 
@@ -12,7 +12,7 @@ test.describe('API Rate Limiting (ARCH-032)', () => {
     // proxy-stream has limit of 10/min — send 12 requests rapidly
     const results: number[] = [];
     for (let i = 0; i < 12; i++) {
-      const res = await request.get('/api/proxy-stream');
+      const res = await request.get('/api/v1/proxy-stream');
       results.push(res.status());
     }
 
@@ -20,7 +20,7 @@ test.describe('API Rate Limiting (ARCH-032)', () => {
     expect(has429).toBe(true);
 
     // The 429 response should include Retry-After header
-    const lastRes = await request.get('/api/proxy-stream');
+    const lastRes = await request.get('/api/v1/proxy-stream');
     if (lastRes.status() === 429) {
       const retryAfter = lastRes.headers()['retry-after'];
       expect(retryAfter).toBeDefined();
@@ -34,16 +34,16 @@ test.describe('API Rate Limiting (ARCH-032)', () => {
     request,
   }) => {
     // Even if proxy-stream is limited, itunes should still work
-    const itunesRes = await request.get('/api/itunes?term=hello');
+    const itunesRes = await request.get('/api/v1/itunes?term=hello');
     expect(itunesRes.status()).not.toBe(429);
   });
 
   test('all API routes respond without crashing', async ({ request }) => {
     const routes = [
-      '/api/itunes?term=test',
-      '/api/lyrics?title=test&artist=test',
-      '/api/artist-info?artist=test',
-      '/api/concerts?artist=test',
+      '/api/v1/itunes?term=test',
+      '/api/v1/lyrics?title=test&artist=test',
+      '/api/v1/artist-info?artist=test',
+      '/api/v1/concerts?artist=test',
     ];
 
     for (const route of routes) {

@@ -3,7 +3,7 @@ task_id: ARCH-137
 target_agent: auto-optimizer-finite
 target_module: src/app/api
 priority: low
-status: pending
+status: completed
 ---
 
 # ARCH-137: API Route Versioning Strategy
@@ -39,9 +39,22 @@ Currently the API serves only the internal web app (no public API consumers), so
 
 ## Acceptance Criteria
 
-- [ ] All public API routes accessible under `/api/v1/`
-- [ ] Old paths redirect to v1 (301)
-- [ ] API version indicated in response (header or envelope)
-- [ ] Deprecation process documented
-- [ ] Client-side fetches updated to v1 paths
-- [ ] No breaking changes to existing functionality
+- [x] All public API routes accessible under `/api/v1/`
+- [x] Old paths redirect to v1 (301)
+- [x] API version indicated in response (header or envelope)
+- [x] Deprecation process documented
+- [x] Client-side fetches updated to v1 paths
+- [x] No breaking changes to existing functionality
+
+## Implementation Summary
+
+✅ **Completed on 2026-03-27**
+
+1. Created `/api/v1/` versioned route handlers for all 13 public routes
+2. Implemented `withApiVersion()` utility in `src/lib/api-versioning.ts` to add `X-API-Version: 1` header
+3. Added permanent 301 redirects from old paths to v1 equivalents
+4. Updated all 11 test files to use v1 endpoints
+5. Updated client-side `analytics-reporter.ts` to use v1 endpoints
+6. Created comprehensive deprecation documentation in `deploy/API-VERSIONING.md`
+
+All API responses now include the `X-API-Version: 1` response header. The old paths continue to work with automatic 301 redirects for backward compatibility.

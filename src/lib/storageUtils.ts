@@ -1,6 +1,13 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
 import { safeJsonParse } from './sanitize';
+import type { Station, HistoryEntry } from '../components/radio/schemas';
+import {
+  validateStation,
+  validateHistoryEntry,
+  validateStations,
+  validateHistoryEntries,
+} from '../components/radio/schemas';
 
 const _memoryFallback = new Map<string, string>();
 
@@ -228,4 +235,54 @@ export function listenForStorageUpdates(
   return () => {
     channel.removeEventListener('message', handler);
   };
+}
+
+/**
+ * Load and validate station data from storage.
+ * Filters out invalid stations gracefully without crashing.
+ */
+export function loadStationsFromStorage(key: string, defaultValue: Station[] = []): Station[] {
+  try {
+    const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
+    if (!raw) return defaultValue;
+    const parsed = safeJsonParse<unknown[]>(raw);
+    if (!Array.isArray(parsed)) return defaultValue;
+    return validateStations(parsed);
+  } catch (err) {
+    console.warn(`[Pulse Radio] Failed to load stations from storage key "${key}":`, err);
+    return defaultValue;
+  }
+}
+
+/**
+ * Load and validate history entries from storage.
+ * Filters out invalid entries gracefully without crashing.
+ */
+export function loadHistoryFromStorage(key: string, defaultValue: HistoryEntry[] = []): HistoryEntry[] {
+  try {
+    const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
+    if (!raw) return defaultValue;
+    const parsed = safeJsonParse<unknown[]>(raw);
+    if (!Array.isArray(parsed)) return defaultValue;
+    return validateHistoryEntries(parsed);
+  } catch (err) {
+    console.warn(`[Pulse Radio] Failed to load history from storage key "${key}":`, err);
+    return defaultValue;
+  }
+}
+
+/**
+ * Load and validate a single station from storage.
+ * Returns null if validation fails.
+ */
+export function loadStationFromStorage(key: string, defaultValue: Station | null = null): Station | null {
+  try {
+    const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
+    if (!raw) return defaultValue;
+    const parsed = safeJsonParse<unknown>(raw);
+    return validateStation(parsed) ?? defaultValue;
+  } catch (err) {
+    console.warn(`[Pulse Radio] Failed to load station from storage key "${key}":`, err);
+    return defaultValue;
+  }
 }

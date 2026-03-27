@@ -27,7 +27,7 @@ async function flush() {
   if (queue.length === 0) return;
   const batch = queue.splice(0, queue.length);
   try {
-    await fetch('/api/analytics', {
+    await fetch('/api/v1/analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(batch),

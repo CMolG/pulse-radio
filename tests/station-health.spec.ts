@@ -2,14 +2,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Station Reliability Scoring (ARCH-038)', () => {
   test('station-health endpoint returns 400 without urls param', async ({ request }) => {
-    const res = await request.get('/api/station-health');
+    const res = await request.get('/api/v1/station-health');
     expect(res.status()).toBe(400);
     const body = await res.json();
     expect(body.error).toContain('Missing');
   });
 
   test('station-health endpoint returns scores for urls', async ({ request }) => {
-    const res = await request.get('/api/station-health?urls=http://example.com/stream,http://other.com/stream');
+    const res = await request.get('/api/v1/station-health?urls=http://example.com/stream,http://other.com/stream');
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body['http://example.com/stream']).toBeDefined();
@@ -39,7 +39,7 @@ test.describe('Station Reliability Scoring (ARCH-038)', () => {
   });
 
   test('station_health table is accessible', async ({ request }) => {
-    const res = await request.get('/api/health?deep=true');
+    const res = await request.get('/api/v1/health?deep=true');
     expect(res.status()).toBe(200);
     const body = await res.json();
     expect(body.status).toBeDefined();
