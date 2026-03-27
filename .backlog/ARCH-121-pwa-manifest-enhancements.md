@@ -3,7 +3,7 @@ task_id: ARCH-121
 target_agent: auto-feature-engineer-finite
 target_module: public/site.webmanifest
 priority: low
-status: pending
+status: completed
 ---
 
 # ARCH-121: PWA Manifest Enhancements — Screenshots, Shortcuts, Share Target
