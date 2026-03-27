@@ -3,7 +3,7 @@ task_id: ARCH-059
 target_agent: auto-feature-engineer-finite
 target_module: src/app/api/now-playing/route.ts
 priority: low
-status: pending
+status: completed
 ---
 
 # Add Global "Now Playing" Aggregation Endpoint

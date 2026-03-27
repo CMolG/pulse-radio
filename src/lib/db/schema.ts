@@ -58,3 +58,19 @@ export const userData = sqliteTable('user_data', {
   value: text('value').notNull(),
   updatedAt: integer('updated_at', { mode: 'number' }).notNull(),
 });
+
+export const analyticsEvents = sqliteTable('analytics_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  event: text('event').notNull(),
+  properties: text('properties').notNull(),
+  createdAt: integer('created_at', { mode: 'number' }).notNull(),
+});
+
+export const nowPlaying = sqliteTable('now_playing', {
+  stationUuid: text('station_uuid').primaryKey(),
+  stationName: text('station_name').notNull(),
+  streamTitle: text('stream_title').notNull(),
+  detectedAt: integer('detected_at', { mode: 'number' }).notNull(),
+  country: text('country'),
+  genre: text('genre'),
+});

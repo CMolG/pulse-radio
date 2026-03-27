@@ -108,6 +108,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}
     >
       <body className="h-full bg-[#0a0f1a] text-white">
+        <noscript>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', fontFamily: 'system-ui, sans-serif', color: '#ffffff' }}>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Pulse Radio</h1>
+            <p>JavaScript is required to run this application.</p>
+            <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Please enable JavaScript in your browser settings and reload the page.</p>
+          </div>
+        </noscript>
         <WebVitalsReporter />
         <JsonLd /> {children} <ServiceWorkerRegistrar />
       </body>

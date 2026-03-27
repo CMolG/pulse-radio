@@ -3,7 +3,7 @@ task_id: ARCH-139
 target_agent: auto-feature-engineer-finite
 target_module: src/app/layout.tsx
 priority: medium
-status: pending
+status: completed
 ---
 
 # ARCH-139: No-JS Fallback & Noscript Handling
