@@ -22,10 +22,10 @@ import {
   AnimatedBars,
   FerrofluidRenderer,
   stationInitials,
-  shareContent,
   buildStationShareUrl,
   _SAFE_AREA_BOTTOM_STYLE,
 } from '../RadioShell';
+import { shareContent } from './SongDetailModal';
 import type { StreamQuality } from '../RadioShell';
 
 type NowPlayingBarProps = {
@@ -58,7 +58,7 @@ type NowPlayingBarProps = {
 const SAFE_AREA_STYLE: React.CSSProperties = {
   paddingLeft: 'max(1.5rem, env(safe-area-inset-left, 0px))',
 };
-function _NowPlayingBar({
+function NowPlayingBarInner({
   station,
   track,
   status,
@@ -171,7 +171,7 @@ function _NowPlayingBar({
                     </span>
                   </>
                 )}{' '}
-                <span className="text-[12px] text-white/60 truncate">
+                <span className="text-[12px] text-secondary truncate">
                   {track?.album || track?.artist || compactTags || ''}
                 </span>
               </div>{' '}
@@ -182,7 +182,7 @@ function _NowPlayingBar({
               )}
             </>
           ) : (
-            <p className="text-[13px]text-white/50">No station selected</p>
+            <p className="text-[13px] text-dim">No station selected</p>
           )}
         </div>{' '}
         {/* Action buttons — 44px touch targets */}{' '}
@@ -264,7 +264,7 @@ function _NowPlayingBar({
           <p className="text-[12px] font-medium text-white truncate">
             {track?.title || station?.name || 'Not Playing'}
           </p>{' '}
-          <p className="text-[12px] text-white/60 truncate">
+          <p className="text-[12px] text-secondary truncate">
             {track?.album || (track?.artist ? track.artist : firstTag)}
           </p>
         </div>{' '}
@@ -437,7 +437,7 @@ function _NowPlayingBar({
           onClick={onToggleMute}
           aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
           aria-pressed={muted || volume === 0}
-          className="p-2 text-white/55 hover:text-white/60 transition-colors shrink-0"
+          className="p-2 text-muted hover:text-white/60 transition-colors shrink-0"
         >
           {' '}
           {muted || volume === 0 ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -456,5 +456,5 @@ function _NowPlayingBar({
     </div>
   );
 }
-const NowPlayingBar = React.memo(_NowPlayingBar);
+const NowPlayingBar = React.memo(NowPlayingBarInner);
 export { NowPlayingBar };

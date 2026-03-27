@@ -1,12 +1,10 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { create } from 'zustand';
 'use client';
+/* eslint-disable react-hooks/rules-of-hooks */
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+import { create } from 'zustand';
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ ('use client');
 type MeterRef = React.RefObject<{ peak: number; rms: number }>;
 const ATTACK_MS = 80;
 const RELEASE_MS = 350;
@@ -348,6 +346,7 @@ export const LiquidGlassButton = React.memo(function LiquidGlassButton({
   );
 });
 
+import {
   Minimize2,
   Maximize2,
   Radio as RadioIcon,
@@ -437,6 +436,7 @@ import StatsView from './views/StatsView';
 import MobileSettingsPanel from './views/MobileSettingsPanel';
 import EqPanel from './components/EqPanel';
 import { NowPlayingBar } from './components/NowPlayingBar';
+import { shareContent, SongDetailModal } from './components/SongDetailModal';
 import { useMediaQuery } from 'usehooks-ts';
 import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES } from '@/lib/i18n/locales';
 import type { SupportedLocale } from '@/lib/i18n/locales';
@@ -577,18 +577,18 @@ function formatTimeAgo(ts: number): string {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
   return `${Math.floor(diff / 86400)}d`;
 }
-function itunesSearchUrl(title: string, artist: string): string {
+export function itunesSearchUrl(title: string, artist: string): string {
   const q = encodeURIComponent(`${artist} ${title}`.trim());
   return `https://music.apple.com/search?term=${q}&${FORMAT_UTILS_ITUNES_REFERRER}`;
 }
-/** Format milliseconds to mm:ss */ function formatDuration(ms: number): string {
+/** Format milliseconds to mm:ss */ export function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return '0:00';
   const totalSeconds = Math.round(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
-/** Format an ISO date string to a readable year */ function formatReleaseDate(
+/** Format an ISO date string to a readable year */ export function formatReleaseDate(
   isoDate: string,
 ): string {
   return isoDate.slice(0, 4);
@@ -1004,7 +1004,7 @@ const _preloadedUrls = new Set<string>();
   };
   img.src = url;
 }
-function useAlbumArt(title: string | null, artist: string | null) {
+export function useAlbumArt(title: string | null, artist: string | null) {
   const hasTitle = Boolean(title);
   const cacheKey = useMemo(
     () => (title ? `${artist ?? ''}\n${title}`.toLowerCase() : ''),
@@ -1100,7 +1100,7 @@ interface ConcertEvent {
   ticketUrl: string | null;
 }
 const _concertsCache = new LRU<ConcertEvent[]>(64);
-function useConcerts(artist: string | null | undefined, enabled: boolean) {
+export function useConcerts(artist: string | null | undefined, enabled: boolean) {
   const [concerts, setConcerts] = useState<ConcertEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const key = artist ? primaryArtist(artist).toLowerCase().trim() : null;
@@ -1707,6 +1707,9 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   const mutedRef = useRef(muted);
   volumeRef.current = volume;
   mutedRef.current = muted;
+  /** When effects chain is active, audio.volume must stay at 1 (full signal into the pipeline). */
+  const resolveAudioVolume = () =>
+    effectsEnabledRef.current ? 1 : mutedRef.current ? 0 : volumeRef.current;
   const userPausedRef = useRef(false);
   const bcRef = useRef<BroadcastChannel | null>(null);
   const tabIdRef = useRef<string>(null!);
@@ -2012,7 +2015,15 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
-    if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume;
+    if (audio && !fadeTimerRef.current) {
+      if (effectsEnabledRef.current) {
+        // Effects active: keep audio.volume at 1 for full signal into processing chain;
+        // actual volume is controlled via the output gain node at the end of the chain.
+        audio.volume = 1;
+      } else {
+        audio.volume = muted ? 0 : volume;
+      }
+    }
   }, [volume, muted]);
   const play = useCallback(
     (s: Station) => {
@@ -2046,12 +2057,12 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
           if (step >= steps) {
             clearInterval(fadeTimerRef.current!);
             fadeTimerRef.current = null;
-            audio.volume = mutedRef.current ? 0 : volumeRef.current;
+            audio.volume = resolveAudioVolume();
             startPlayback(audio, s.url_resolved, handlePlayRejected);
           }
         }, interval);
       } else {
-        audio.volume = mutedRef.current ? 0 : volumeRef.current;
+        audio.volume = resolveAudioVolume();
         startPlayback(audio, s.url_resolved, handlePlayRejected);
       }
     },
@@ -2067,7 +2078,7 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
     const audio = audioRef.current;
     if (audio) {
       resumeAudioContext(audio);
-      audio.volume = mutedRef.current ? 0 : volumeRef.current;
+      audio.volume = resolveAudioVolume();
     }
     audio?.play().catch(_NOOP);
   }, []);
@@ -2077,7 +2088,7 @@ function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
     if (audio.paused) {
       userPausedRef.current = false;
       resumeAudioContext(audio);
-      audio.volume = mutedRef.current ? 0 : volumeRef.current;
+      audio.volume = resolveAudioVolume();
       audio.play().catch(_NOOP);
     } else {
       userPausedRef.current = true;
@@ -2848,7 +2859,7 @@ function loadCache(): CacheEntry[] {
 function saveCache(entries: CacheEntry[]) {
   saveToStorage(STORAGE_KEYS.LYRICS_CACHE, entries.slice(0, LYRICS_MAX_CACHE));
 }
-function useLyrics(
+export function useLyrics(
   track: NowPlayingTrack | null,
   stationName?: string | null,
   options?: { currentTime?: number; enableRealtime?: boolean; languageHint?: 'en' | 'es' },
@@ -4060,7 +4071,11 @@ function BrowseView({
                       {scanEnabled && (
                         <div className="flex-1 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface-2 border border-white/5 min-w-0">
                           {' '}
-                          <Music2 size={11} className="text-white/50 shrink-0" aria-hidden="true" />{' '}
+                          <Music2
+                            size={11}
+                            className="text-white/50 shrink-0"
+                            aria-hidden="true"
+                          />{' '}
                           <input
                             type="text"
                             placeholder={t('filterBySong')}
@@ -4888,7 +4903,9 @@ function ConcertModal({
 }
 
 const _IMAGE_RENDER_STYLE: React.CSSProperties = { imageRendering: 'auto' };
-export const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = { height: 'env(safe-area-inset-bottom, 0px)' };
+export const _SAFE_AREA_BOTTOM_STYLE: React.CSSProperties = {
+  height: 'env(safe-area-inset-bottom, 0px)',
+};
 const _OBJECT_COVER_STYLE: React.CSSProperties = { objectFit: 'cover' };
 const _GLASS_SETTINGS_STYLE: React.CSSProperties = {
   background: 'rgba(22, 24, 35, 0.92)',
@@ -4917,45 +4934,6 @@ const _MOTION_SLIDE_UP_EXIT = { y: '100%' } as const;
 const _MOTION_T_02 = { duration: 0.2 } as const;
 const _MOTION_T_03 = { duration: 0.3 } as const;
 const _MOTION_T_SPRING = { type: 'spring' as const, damping: 28, stiffness: 300 };
-const _artistInfoCache = new Map<string, ArtistInfo>();
-function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loading: boolean } {
-  const key = artist ? artist.toLowerCase().trim() : '';
-  const cachedInfo = useMemo(() => {
-    if (!key) return null;
-    return _artistInfoCache.get(key) ?? null;
-  }, [key]);
-  const [fetched, setFetched] = useState<{ key: string; info: ArtistInfo | null } | null>(null);
-  useEffect(() => {
-    if (!key || !artist || cachedInfo) return;
-    let cancelled = false;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15_000);
-    fetch(`/api/artist-info?artist=${encodeURIComponent(artist)}`, { signal: controller.signal })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: ArtistInfo) => {
-        if (!cancelled) {
-          _artistInfoCache.set(key, data);
-          setFetched({ key, info: data });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setFetched({ key, info: null });
-      })
-      .finally(() => {
-        clearTimeout(timeout);
-      });
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-      controller.abort();
-    };
-  }, [artist, key, cachedInfo]);
-  const info = !key ? null : (cachedInfo ?? (fetched?.key === key ? fetched.info : null));
-  return { info, loading: Boolean(key && !cachedInfo && fetched?.key !== key) };
-}
 
 /* ── Share utility ── */
 export function buildStationShareUrl(station: { name: string; stationuuid: string }): string {
@@ -4964,557 +4942,6 @@ export function buildStationShareUrl(station: { name: string; stationuuid: strin
   const base = window.location.origin + window.location.pathname;
   return `${base}?tune=${slug}&sid=${station.stationuuid}`;
 }
-export function shareContent(data: { title: string; text?: string; url?: string }) {
-  if (typeof navigator !== 'undefined' && navigator.share) {
-    navigator.share(data).catch(() => {});
-  } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-    navigator.clipboard.writeText(data.url ?? window.location.href).catch(() => {});
-  }
-}
-function ShareButton({
-  title,
-  text,
-  url,
-  size = 16,
-  className = '',
-}: {
-  title: string;
-  text?: string;
-  url?: string;
-  size?: number;
-  className?: string;
-}) {
-  return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        shareContent({ title, text, url: url ?? window.location.href });
-      }}
-      className={`inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors ${className}`}
-      aria-label="Share"
-      title="Share"
-    >
-      <Share2 size={size} className="text-white/70" />
-    </button>
-  );
-}
-
-const BADGE_CLS = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px]';
-const MetaBadge = ({
-  icon: Icon,
-  cls,
-  children,
-}: {
-  icon: typeof Clock;
-  cls: string;
-  children: React.ReactNode;
-}) => (
-  <span className={`${BADGE_CLS} ${cls}`}>
-    <Icon size={9} />
-    {children}
-  </span>
-);
-type SongDetailModalProps = {
-  song: SongDetailData | null;
-  onClose: () => void;
-  onRemoveFromFavorites?: () => void;
-};
-const _SKELETON_WIDTHS = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
-function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailModalProps) {
-  const { info, loading } = useArtistInfo(song?.artist ?? null);
-  const { concerts } = useConcerts(song?.artist ?? null, !!song);
-  const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
-  const resolvedArtworkUrl = song?.artworkUrl ?? albumMeta.artworkUrl ?? undefined;
-  const resolvedAlbum = song?.album ?? albumMeta.albumName ?? undefined;
-  const resolvedItunesUrl = song?.itunesUrl ?? albumMeta.itunesUrl ?? undefined;
-  const resolvedDurationMs = song?.durationMs ?? albumMeta.durationMs ?? null;
-  const resolvedGenre = song?.genre ?? albumMeta.genre ?? null;
-  const resolvedReleaseDate = song?.releaseDate ?? albumMeta.releaseDate ?? null;
-  const resolvedTrackNumber = song?.trackNumber ?? albumMeta.trackNumber ?? null;
-  const resolvedTrackCount = song?.trackCount ?? albumMeta.trackCount ?? null;
-  const showMetaHydration =
-    Boolean(
-      song &&
-      (song.durationMs == null ||
-        song.genre == null ||
-        song.releaseDate == null ||
-        song.trackNumber == null ||
-        song.trackCount == null),
-    ) && albumMeta.isLoading;
-  const {
-    lyrics,
-    loading: lyricsLoading,
-    error: lyricsError,
-    retry: retryLyrics,
-  } = useLyrics(
-    song ? { title: song.title, artist: song.artist, album: resolvedAlbum } : null,
-    song?.stationName ?? null,
-  );
-  const plainLyrics = useMemo(
-    () =>
-      lyrics?.plainText?.trim() ||
-      lyrics?.lines
-        ?.map((line) => line.text.trim())
-        .filter(Boolean)
-        .join('\n')
-        .trim() ||
-      '',
-    [lyrics],
-  );
-  const lyricsSkeleton = (n: number) => (
-    <div className="space-y-2 animate-pulse">
-      {' '}
-      {_SKELETON_WIDTHS.slice(0, n).map((w, i) => (
-        <div key={i} className={`h-2.5 bg-surface-3 rounded ${w}`} />
-      ))}
-    </div>
-  );
-  const lyricsEmpty = (
-    <div role={lyricsError ? 'alert' : undefined}>
-      <p className="text-[12px]text-white/50">
-        {lyricsError ? 'Failed to load lyrics' : 'No lyrics available'}
-      </p>{' '}
-      {lyricsError && (
-        <button
-          onClick={retryLyrics}
-          className="mt-2 px-3 py-1 text-[12px] rounded-md bg-sys-orange/20 text-sys-orange hover:bg-sys-orange/30 transition-colors"
-        >
-          {' '}
-          Retry
-        </button>
-      )}
-    </div>
-  );
-  useEffect(() => {
-    if (!song) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [song, onClose]);
-  const modalRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!song || !modalRef.current) return;
-    const modal = modalRef.current;
-    const prev = document.activeElement as HTMLElement | null;
-    const focusable = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    focusable[0]?.focus();
-    const onTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    window.addEventListener('keydown', onTab);
-    return () => {
-      window.removeEventListener('keydown', onTab);
-      prev?.focus();
-    };
-  }, [song]);
-  return (
-    <AnimatePresence>
-      {' '}
-      {song && (
-        <motion.div
-          key="song-detail-backdrop"
-          initial={_MOTION_FADE_IN}
-          animate={_MOTION_FADE_VISIBLE}
-          exit={_MOTION_FADE_OUT}
-          className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-          onClick={onClose}
-        >
-          <motion.div
-            key="song-detail-modal"
-            ref={modalRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Song details: ${song.title} by ${song.artist}`}
-            initial={{ y: 30, opacity: 0, scale: 0.96 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 30, opacity: 0, scale: 0.96 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-            className="w-full max-w-[860px] mx-4 md:flex md:items-stretch md:gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {' '}
-            <div className="bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-full max-w-[380px] max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-              {' '}
-              {/* Close + Share buttons */}{' '}
-              <div className="sticky top-0 z-10 flex justify-end gap-2 p-3">
-                <ShareButton
-                  title={`${song.title} — ${song.artist}`}
-                  text={`🎵 Listening to ${song.title} by ${song.artist} on Pulse Radio`}
-                  url={typeof window !== 'undefined' ? window.location.href : ''}
-                  size={16}
-                  className="p-2 !bg-surface-3/80 backdrop-blur-sm"
-                />
-                <button
-                  onClick={onClose}
-                  aria-label="Close song details"
-                  className="p-2 rounded-full bg-surface-3/80 backdrop-blur-sm text-white/60 hover:text-white hover:bg-surface-4 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>{' '}
-              {/* ── Song Info ── */}{' '}
-              <div className="px-5 -mt-2">
-                {/* Artwork */}{' '}
-                <div className="relative w-full aspect-square max-w-[240px] mx-auto rounded-2xl overflow-hidden bg-surface-3 shadow-xl">
-                  {' '}
-                  {resolvedArtworkUrl ? (
-                    <UiImage
-                      src={resolvedArtworkUrl}
-                      alt={`Album art for ${song.title} by ${song.artist}`}
-                      className="object-cover"
-                      sizes="240px"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="size-full flex items-center justify-center">
-                      {' '}
-                      <Music size={56} className="text-white/50" />
-                    </div>
-                  )}
-                </div>{' '}
-                {/* Title & artist */}{' '}
-                <div className="mt-5 text-center">
-                  {' '}
-                  <h2 className="text-[17px] font-bold text-white leading-snug line-clamp-2">
-                    {song.title}
-                  </h2>{' '}
-                  <p className="text-[14px] text-white/60 mt-1">{song.artist}</p>{' '}
-                  {resolvedAlbum && <p className="text-[12px] text-white/50 mt-0.5">{resolvedAlbum}</p>}{' '}
-                  {/* Extended metadata: corner-style row + release line + context badges */}{' '}
-                  {(resolvedDurationMs ||
-                    resolvedTrackNumber != null ||
-                    resolvedReleaseDate ||
-                    resolvedGenre) && (
-                    <div className="mt-2 space-y-1.5">
-                      <div className="grid grid-cols-2 items-start">
-                        {' '}
-                        <div className="justify-self-start">
-                          {resolvedDurationMs && (
-                            <MetaBadge
-                              icon={Clock}
-                              cls="bg-white/[0.08] border border-white/10 font-mono text-white/70"
-                            >
-                              {formatDuration(resolvedDurationMs)}
-                            </MetaBadge>
-                          )}
-                        </div>
-                        <div className="justify-self-end">
-                          {' '}
-                          {resolvedTrackNumber != null && resolvedTrackCount != null && (
-                            <MetaBadge
-                              icon={Disc3}
-                              cls="bg-white/[0.08] border border-white/10 text-white/70"
-                            >
-                              #{resolvedTrackNumber}/{resolvedTrackCount}
-                            </MetaBadge>
-                          )}
-                        </div>
-                      </div>{' '}
-                      {resolvedReleaseDate && (
-                        <p className="text-[12px] text-white/50">
-                          {' '}
-                          Released on: {formatReleaseDate(resolvedReleaseDate)}
-                        </p>
-                      )}{' '}
-                      <div className="flex flex-wrap justify-center gap-1.5">
-                        {' '}
-                        {resolvedGenre && (
-                          <MetaBadge icon={Tag} cls="bg-white/[0.06] text-white/50">
-                            {resolvedGenre}
-                          </MetaBadge>
-                        )}{' '}
-                        {showMetaHydration && (
-                          <MetaBadge icon={Clock} cls="bg-white/[0.06] text-white/45 animate-pulse">
-                            Fetching metadata…
-                          </MetaBadge>
-                        )}{' '}
-                      </div>
-                    </div>
-                  )}
-                </div>{' '}
-                {/* Apple Music button */}{' '}
-                <a
-                  href={resolvedItunesUrl || itunesSearchUrl(song.title, song.artist)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-[13px] font-medium text-white/70 hover:text-white transition-colors"
-                >
-                  <ExternalLink size={14} /> Listen on Apple Music
-                </a>
-              </div>{' '}
-              {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />{' '}
-              {/* ── Artist Info ── */}{' '}
-              <div className="px-5">
-                <h3 className="text-[12px] font-semibold text-white/50 uppercase tracking-wider mb-3">
-                  {' '}
-                  About {song.artist}
-                </h3>{' '}
-                {/* Loading skeleton */}{' '}
-                {loading && (
-                  <div className="space-y-3 animate-pulse">
-                    <div className="flex gap-3">
-                      {' '}
-                      <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0" />{' '}
-                      <div className="flex-1 space-y-2 pt-1">
-                        <div className="h-3 bg-surface-3 rounded w-2/3" />{' '}
-                        <div className="h-2.5 bg-surface-3 rounded w-1/2" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      {' '}
-                      <div className="h-2.5 bg-surface-3 rounded w-full" />{' '}
-                      <div className="h-2.5 bg-surface-3 rounded w-5/6" />{' '}
-                      <div className="h-2.5 bg-surface-3 rounded w-4/6" />
-                    </div>
-                  </div>
-                )}{' '}
-                {/* Loaded artist data */}{' '}
-                {!loading && info && (
-                  <div className="space-y-3">
-                    {' '}
-                    {/* Artist header with image */}{' '}
-                    <div className="flex gap-3">
-                      {info.imageUrl ? (
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                          <UiImage
-                            src={info.imageUrl}
-                            alt={info.name}
-                            className="object-cover bg-surface-3"
-                            sizes="64px"
-                            loading="lazy"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-16 h-16 rounded-xl bg-surface-3 flex-shrink-0 flex items-center justify-center">
-                          {' '}
-                          {info.type === 'Group' ? (
-                            <Users size={24} className="text-white/50" />
-                          ) : (
-                            <User size={24} className="text-white/50" />
-                          )}
-                        </div>
-                      )}{' '}
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        {' '}
-                        <p className="text-[14px] font-semibold text-white truncate">
-                          {info.name}
-                        </p>{' '}
-                        {info.disambiguation && (
-                          <p className="text-[12px] text-white/50 mt-0.5 line-clamp-1">
-                            {info.disambiguation}
-                          </p>
-                        )}{' '}
-                        {/* Metadata badges */}{' '}
-                        <div className="flex flex-wrap gap-1.5 mt-1.5">
-                          {' '}
-                          {info.type && (
-                            <MetaBadge
-                              icon={info.type === 'Group' ? Users : User}
-                              cls="bg-surface-3 text-white/60"
-                            >
-                              {info.type}
-                            </MetaBadge>
-                          )}{' '}
-                          {info.country && (
-                            <MetaBadge icon={Globe} cls="bg-surface-3 text-white/60">
-                              {info.country}
-                            </MetaBadge>
-                          )}{' '}
-                          {info.lifeSpan?.begin && (
-                            <MetaBadge icon={Calendar} cls="bg-surface-3 text-white/60">
-                              {' '}
-                              {info.lifeSpan.begin}
-                              {info.lifeSpan.ended && info.lifeSpan.end
-                                ? ` – ${info.lifeSpan.end}`
-                                : ' – present'}{' '}
-                            </MetaBadge>
-                          )}
-                        </div>
-                      </div>
-                    </div>{' '}
-                    {/* Bio */}{' '}
-                    {info.bio && (
-                      <p className="text-[12px] text-white/60/90 leading-relaxed">{info.bio}</p>
-                    )}{' '}
-                    {/* Genre tags */}{' '}
-                    {info.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {' '}
-                        {info.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2.5 py-1 rounded-full bg-white/[0.06] text-[12px] font-medium text-white/50"
-                          >
-                            {' '}
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}{' '}
-                    {/* Wikipedia link */}{' '}
-                    {info.wikipediaUrl && (
-                      <a
-                        href={info.wikipediaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[12px] text-blue-400/70 hover:text-blue-400 transition-colors"
-                      >
-                        <Globe size={11} /> Read more on Wikipedia
-                      </a>
-                    )}
-                  </div>
-                )}{' '}
-                {/* No data */}{' '}
-                {!loading && !info && (
-                  <p className="text-[12px]text-white/50">No artist information available</p>
-                )}
-              </div>{' '}
-              {/* ── Upcoming concerts (Bandsintown) ── */}{' '}
-              {concerts.length > 0 && (
-                <>
-                  <div className="mx-5 my-5 border-t border-border-default" />
-                  <div className="px-5">
-                    <h3 className="text-[12px] font-semibold text-white/50 uppercase tracking-wider mb-3">
-                      Upcoming Shows
-                    </h3>
-                    <div className="flex flex-col gap-1.5 w-full">
-                      {concerts.slice(0, 5).map((ev) => {
-                        const d = new Date(ev.date);
-                        const dateStr = isNaN(d.getTime())
-                          ? ev.date
-                          : d.toLocaleDateString(undefined, {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            });
-                        const content = (
-                          <div className="flex items-start justify-between gap-2 px-3 py-2.5 rounded-xl bg-surface-3/50 hover:bg-surface-3 transition-colors border border-border-subtle">
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[12px] font-medium text-white/80 truncate">
-                                {ev.venue}
-                              </span>
-                              <span className="text-[11px] text-white/50 truncate">
-                                {ev.city}
-                                {ev.country ? `, ${ev.country}` : ''}
-                              </span>
-                            </div>
-                            <span className="text-[11px] text-white/50 shrink-0 mt-0.5">
-                              {dateStr}
-                            </span>
-                          </div>
-                        );
-                        return ev.ticketUrl ? (
-                          <a
-                            key={ev.id}
-                            href={ev.ticketUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block min-h-[44px]"
-                            aria-label={`Get tickets for ${ev.venue} on ${dateStr}`}
-                          >
-                            {content}
-                          </a>
-                        ) : (
-                          <div key={ev.id} className="min-h-[44px]">
-                            {content}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </>
-              )}{' '}
-              {/* Divider */} <div className="mx-5 my-5 border-t border-border-default" />{' '}
-              <div className="px-5 md:hidden">
-                {' '}
-                <h3 className="text-[12px] font-semibold text-white/50 uppercase tracking-wider mb-3">
-                  Lyrics (plain)
-                </h3>{' '}
-                {lyricsLoading && lyricsSkeleton(4)}{' '}
-                {!lyricsLoading && plainLyrics && (
-                  <div className="max-h-52 overflow-y-auto rounded-xl bg-surface-3/50 border border-border-subtle p-3 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-                    {' '}
-                    <pre className="whitespace-pre-wrap break-words font-sans text-[12px] leading-relaxed text-white/60/90">
-                      {' '}
-                      {plainLyrics}
-                    </pre>
-                  </div>
-                )}{' '}
-                {!lyricsLoading && !plainLyrics && lyricsEmpty}
-              </div>{' '}
-              {/* Divider (mobile) */}{' '}
-              <div className="mx-5 my-5 border-t border-border-default md:hidden" />{' '}
-              {/* ── Remove from favorites ── */}{' '}
-              {onRemoveFromFavorites && (
-                <>
-                  <div className="mx-5 my-5 border-t border-border-default" />{' '}
-                  <div className="px-5 pb-2">
-                    <button
-                      onClick={onRemoveFromFavorites}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-[13px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/20"
-                    >
-                      <Trash2 size={14} /> Borrar de favoritos
-                    </button>
-                  </div>
-                </>
-              )}{' '}
-              {/* ── Station ── */}{' '}
-              <div className="px-5 pb-6 pt-4">
-                <div className="flex items-center gap-2">
-                  {' '}
-                  <RadioIcon size={12} className="text-white/50 flex-shrink-0" />{' '}
-                  <p className="text-[12px]text-white/50">
-                    {' '}
-                    Played on <span className="text-white/60">{song.stationName}</span>
-                  </p>
-                </div>
-              </div>
-            </div>{' '}
-            {/* ── Lyrics side panel (desktop) ── */}{' '}
-            <div className="hidden md:flex md:flex-col bg-surface-2 rounded-2xl border border-border-default shadow-2xl w-[420px] max-h-[85vh]">
-              {' '}
-              <div className="px-5 pt-5 pb-3 border-b border-border-default">
-                {' '}
-                <h3 className="text-[12px] font-semibold text-white/50 uppercase tracking-wider">
-                  Lyrics (plain)
-                </h3>{' '}
-                <p className="text-[12px] text-white/50 mt-1 line-clamp-1">
-                  {song.title} · {song.artist}
-                </p>
-              </div>{' '}
-              <div className="flex-1 p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
-                {' '}
-                {lyricsLoading && lyricsSkeleton(7)}{' '}
-                {!lyricsLoading && plainLyrics && (
-                  <pre className="whitespace-pre-wrap break-words font-sans text-[13px] leading-relaxed text-white/60/90">
-                    {' '}
-                    {plainLyrics}
-                  </pre>
-                )}{' '}
-                {!lyricsLoading && !plainLyrics && lyricsEmpty}
-              </div>
-            </div>
-          </motion.div>{' '}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-const SongDetailModal = React.memo(_SongDetailModal);
 function hexToRgb(hex: string): [number, number, number] {
   const num = parseInt(hex.charAt(0) === '#' ? hex.slice(1) : hex, 16);
   return [(num >> 16) & 0xff, (num >> 8) & 0xff, num & 0xff];
@@ -7092,6 +6519,15 @@ function useEqualizer() {
   }, [bands, enabled]);
   const connectSource = useCallback(
     (audio: HTMLAudioElement) => {
+      const _BASS_CURVE = (() => {
+        const n = 256;
+        const curve = new Float32Array(n);
+        for (let i = 0; i < n; i++) {
+          const x = (i * 2) / n - 1;
+          curve[i] = ((Math.PI + 3) * x) / (Math.PI + 3 * Math.abs(x));
+        }
+        return curve;
+      })();
       if (connectedAudioRef.current === audio && ctxRef.current) return;
       if (connectedAudioRef.current) teardownGraph(false);
       try {
@@ -7470,7 +6906,9 @@ function useEqualizer() {
 }
 const MAX_QUEUE_SIZE = 20;
 function useStationQueue() {
-  const [queue, setQueue] = useState<Station[]>(() => loadFromStorage<Station[]>(STORAGE_KEYS.STATION_QUEUE, []));
+  const [queue, setQueue] = useState<Station[]>(() =>
+    loadFromStorage<Station[]>(STORAGE_KEYS.STATION_QUEUE, []),
+  );
   const [currentIndex, setCurrentIndex] = useState(-1);
   const persistRef = useRef(false);
   const queueRef = useRef(queue);
@@ -8557,8 +7995,17 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     }
   }, [radio.station, effectsEnabled]);
   useEffect(() => {
-    setOutputVolume(1, false);
-  }, [setOutputVolume]);
+    if (effectsEnabled) {
+      // Effects active: output gain controls the user's desired volume
+      setOutputVolume(radio.volume, radio.muted);
+      // Keep audio.volume at 1 for full signal into processing chain
+      const audio = radio.audioRef.current;
+      if (audio) audio.volume = 1;
+    } else {
+      // No effects: output gain stays at 1, audio.volume controls volume
+      setOutputVolume(1, false);
+    }
+  }, [setOutputVolume, effectsEnabled, radio.volume, radio.muted]);
   // iOS: resume AudioContext when returning to foreground (iOS suspends it on background)
   useEffect(() => {
     if (!isIOSDevice()) return;
@@ -9471,7 +8918,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         </span>
                       )}{' '}
                       {tab.id === 'favorites' && favSongs.songs.length > 0 && (
-                        <span className="text-[12px] text-white/50 ml-0.5">{favSongs.songs.length}</span>
+                        <span className="text-[12px] text-white/50 ml-0.5">
+                          {favSongs.songs.length}
+                        </span>
                       )}
                     </button>
                   ))}{' '}
