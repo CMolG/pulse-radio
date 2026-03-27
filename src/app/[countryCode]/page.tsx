@@ -27,7 +27,8 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
     title,
     description,
     alternates: { canonical, languages },
-    openGraph: { title, description, type: 'website', url: canonical, siteName: 'Pulse Radio' },
+    openGraph: { title, description, type: 'website', url: canonical, siteName: 'Pulse Radio', locale: 'en_US' },
+    other: { 'geo.region': countryCode, 'geo.placename': country.name },
     twitter: { card: 'summary', title, description },
   };
 }

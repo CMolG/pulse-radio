@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Connect to VPS and deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -18,14 +23,56 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
+            set -e
             cd /var/www/pulse-radio
-            
+
+            # Backup current .next build before overwriting
+            echo "Backing up current build..."
+            rm -rf .next.backup
+            cp -r .next .next.backup 2>/dev/null || echo "No existing .next to back up (first deploy)"
+
             git reset --hard HEAD
-            
+
             git pull origin main
-            
+
             npm install
-            
+
             npm run build
-            
+
             pm2 startOrRestart ecosystem.config.js --env production
+
+            # Post-deploy health check
+            echo "Waiting for app to start..."
+            sleep 5
+
+            HEALTH_OK=false
+            for i in 1 2 3; do
+              if curl --fail --silent --max-time 10 http://localhost:3000/ > /dev/null 2>&1; then
+                HEALTH_OK=true
+                break
+              fi
+              echo "Health check attempt $i failed, retrying in 3s..."
+              sleep 3
+            done
+
+            if [ "$HEALTH_OK" = "false" ]; then
+              echo "Health check failed after 3 attempts! Rolling back..."
+              if [ -d .next.backup ]; then
+                rm -rf .next
+                mv .next.backup .next
+                pm2 startOrRestart ecosystem.config.js --env production
+                echo "Rollback complete — previous build restored."
+              else
+                echo "No backup available to rollback to!"
+              fi
+              exit 1
+            fi
+
+            echo "Health check passed — deployment successful."
+
+      - name: Tag successful deployment
+        if: success()
+        run: |
+          DEPLOY_TAG="deploy-$(date -u +%Y%m%d-%H%M%S)"
+          git tag -a "$DEPLOY_TAG" -m "Deployed ${GITHUB_SHA} from CI"
+          git push origin "$DEPLOY_TAG"

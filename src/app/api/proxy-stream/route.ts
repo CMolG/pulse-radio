@@ -44,7 +44,7 @@ const _IPV6_BRACKETS_RE = /^\[|\]$/g;
 }
 export const runtime = 'nodejs';
 const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
-const MAX_DURATION_MS = 0;
+const MAX_DURATION_MS = 25_000;
 const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
 const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
 const _JSON_R5_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '5' } as const;
