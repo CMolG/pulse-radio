@@ -1,0 +1,53 @@
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from 'drizzle-orm';
+import { db } from '@/lib/db';
+
+const APP_VERSION = process.env.npm_package_version ?? '0.1.0';
+const RADIO_BROWSER_STATS = 'https://de1.api.radio-browser.info/json/stats';
+const DEEP_TIMEOUT_MS = 3_000;
+
+export async function GET(request: NextRequest) {
+  const deep = request.nextUrl.searchParams.get('deep') === 'true';
+
+  const base = {
+    status: 'healthy' as 'healthy' | 'degraded',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    version: APP_VERSION,
+  };
+
+  if (!deep) {
+    return NextResponse.json(base, { status: 200 });
+  }
+
+  let database: string;
+  try {
+    db.run(sql`SELECT 1`);
+    database = 'ok';
+  } catch (err: unknown) {
+    database = `error: ${err instanceof Error ? err.message : 'unknown'}`;
+  }
+
+  let radioBrowser: string;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), DEEP_TIMEOUT_MS);
+    const res = await fetch(RADIO_BROWSER_STATS, { signal: ctrl.signal });
+    clearTimeout(timer);
+    radioBrowser = res.ok ? 'ok' : 'unreachable';
+  } catch {
+    radioBrowser = 'unreachable';
+  }
+
+  const degraded = database !== 'ok' || radioBrowser !== 'ok';
+
+  return NextResponse.json(
+    {
+      ...base,
+      status: degraded ? 'degraded' : 'healthy',
+      checks: { database, radioBrowser },
+    },
+    { status: 200 },
+  );
+}
