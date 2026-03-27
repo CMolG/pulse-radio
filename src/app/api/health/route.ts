@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
     db.run(sql`SELECT 1`);
     database = 'ok';
   } catch (err: unknown) {
-    database = `error: ${err instanceof Error ? err.message : 'unknown'}`;
+    const errorMsg = err instanceof Error ? err.message : 'unknown';
+    database = process.env.NODE_ENV === 'production' ? 'error' : `error: ${errorMsg}`;
   }
 
   let radioBrowser: string;

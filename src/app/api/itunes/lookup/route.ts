@@ -47,10 +47,11 @@ const itunesCircuit = createCircuitBreaker('itunes-lookup');
   const { id } = validated.data;
   const cacheKey = `lookup:${id}`;
   try {
-    const data = await cacheResolve<unknown>({
+    const data = await getCachedOrFetch({
       namespace: 'itunes',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
+      schema: ItunesSearchResultSchema,
       fetcher: async () => {
         const { data } = await itunesCircuit.call(async () => {
           const url = `https://itunes.apple.com/lookup?${new URLSearchParams({ id, entity: 'song' })}`;
