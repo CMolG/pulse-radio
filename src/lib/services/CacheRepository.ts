@@ -19,6 +19,7 @@ import {
 import { cacheGet, cacheSet, type Namespace } from '@/lib/server-cache';
 import { eq, sql } from 'drizzle-orm';
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
+import { logger } from '@/lib/logger';
 
 type CacheTable = typeof itunesCache | typeof artistInfoCache | typeof concertsCache | typeof lyricsCache;
 
@@ -69,8 +70,8 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
         }
         // Stale but exists — we'll re-fetch, but keep stale as fallback
       }
-    } catch {
-      // SQLite read failure — proceed to Tier 3
+    } catch (e) {
+      logger.error('cache_read_failed', e, { namespace, key });
     }
   }
 
@@ -90,8 +91,8 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
           set: { payload, fetchedAt: Date.now(), ttlMs },
         })
         .run();
-    } catch {
-      // SQLite write failure — non-fatal, data still in LRU
+    } catch (e) {
+      logger.error('cache_write_failed', e, { namespace, key });
     }
   }
 
@@ -112,7 +113,8 @@ export function getStaleKeys(namespace: Namespace): string[] {
       .where(sql`${table.fetchedAt} + ${table.ttlMs} < ${Date.now()}`)
       .all();
     return rows.map((r) => r.key);
-  } catch {
+  } catch (e) {
+    logger.error('cache_stale_keys_failed', e, { namespace });
     return [];
   }
 }
@@ -132,7 +134,7 @@ export function persistToDb<T>(namespace: Namespace, key: string, value: T, ttlM
         set: { payload, fetchedAt: Date.now(), ttlMs },
       })
       .run();
-  } catch {
-    // non-fatal
+  } catch (e) {
+    logger.error('cache_persist_failed', e, { namespace, key });
   }
 }

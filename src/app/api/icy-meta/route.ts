@@ -5,6 +5,7 @@
 import { isStationBlacklisted, recordStationFailure } from '@/lib/server-cache';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeUrl } from '@/lib/sanitize';
+import { logRequest } from '@/lib/logger';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKETS_RE = /^\[|\]$/g;
@@ -60,6 +61,7 @@ const _NOOP = () => {};
 export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.icyMeta);
   if (limited) return limited;
+  logRequest(req);
 
   const streamUrl = sanitizeUrl(req.nextUrl.searchParams.get('url') ?? '');
   if (!streamUrl) {
