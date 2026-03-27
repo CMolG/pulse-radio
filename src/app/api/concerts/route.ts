@@ -50,7 +50,7 @@ function encodeBandsintownArtist(name: string): string {
     .replace(/%2F/gi, '%252F')
     .replace(/%3F/gi, '%253F')
     .replace(/%2A/gi, '%252A')
-    .replace(/%22/gi, '%27C');
+    .replace(/%22/gi, '%2522');
 }
 
 function normKey(s: string): string {
