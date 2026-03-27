@@ -12,7 +12,6 @@ import { logRequest } from '@/lib/logger';
 import { env } from '@/lib/env';
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
-import { db } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // allow up to 5 minutes
@@ -141,11 +140,11 @@ export async function GET(req: NextRequest) {
   if (limited) return limited;
   logRequest(req);
 
-  // Auth check
+  // Auth check — timing-safe comparison (see ARCH-032 for rate limiting)
   const cronSecret = env.CRON_SECRET;
   if (cronSecret) {
     const auth = req.headers.get('authorization');
-    if (auth !== `Bearer ${cronSecret}`) {
+    if (!safeCompare(auth ?? '', `Bearer ${cronSecret}`)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
