@@ -123,6 +123,18 @@ npm run build
 npm start
 ```
 
+### Environment Setup
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `CRON_SECRET` | Yes (prod) | Secures `/api/cron/sync` endpoint. Generate with `openssl rand -hex 32` |
+| `BANDSINTOWN_APP_ID` | No | Bandsintown API key for concert data. Falls back to demo key |
+| `NODE_ENV` | Auto | Set by Next.js (`development` / `production` / `test`) |
+
 ## 🏗️ Architecture
 
 ```
