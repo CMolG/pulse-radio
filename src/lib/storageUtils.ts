@@ -1,4 +1,33 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ function tryLoad(
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+
+const _memoryFallback = new Map<string, string>();
+
+/** Detect whether localStorage is functional (false in private/incognito on some browsers). */
+export function isStorageAvailable(): boolean {
+  try {
+    const testKey = '__pulse_storage_test__';
+    localStorage.setItem(testKey, '1');
+    localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+let _storageAvailable: boolean | null = null;
+function getCachedAvailability(): boolean {
+  if (_storageAvailable === null) {
+    _storageAvailable = typeof window !== 'undefined' && isStorageAvailable();
+  }
+  return _storageAvailable;
+}
+
+/** Indicates whether data persists across sessions or is memory-only (e.g. private mode). */
+export function storageMode(): 'persistent' | 'memory-only' {
+  return getCachedAvailability() ? 'persistent' : 'memory-only';
+}
+
+function tryLoad(
   key: string,
 ): string | null {
   if (typeof window === 'undefined') return null;
@@ -27,7 +56,7 @@ function trySave(key: string, raw: string): boolean {
 /** Load a JSON value from localStorage with a fallback default */ export function loadFromStorage<
   T,
 >(key: string, defaultValue: T): T {
-  const raw = tryLoad(key);
+  const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
   if (!raw) return defaultValue;
   try {
     return JSON.parse(raw);
@@ -35,12 +64,25 @@ function trySave(key: string, raw: string): boolean {
     return defaultValue;
   }
 }
-/** Save a JSON value to localStorage. Returns false if quota is exceeded. */ export const saveToStorage =
-  <T>(key: string, value: T) => trySave(key, JSON.stringify(value));
+/** Save a JSON value to localStorage. Returns false if quota is exceeded. */ export function saveToStorage<T>(key: string, value: T): boolean {
+  const raw = JSON.stringify(value);
+  const saved = trySave(key, raw);
+  if (!saved) {
+    _memoryFallback.set(key, raw);
+    return false;
+  }
+  return true;
+}
 /** Load a plain string value from localStorage with fallback */ export const loadStringFromStorage =
-  (key: string, defaultValue = '') => tryLoad(key) ?? defaultValue;
-/** Save a plain string value to localStorage. Returns false if quota is exceeded. */ export const saveStringToStorage =
-  (key: string, value: string) => trySave(key, value);
+  (key: string, defaultValue = '') => tryLoad(key) ?? _memoryFallback.get(key) ?? defaultValue;
+/** Save a plain string value to localStorage. Returns false if quota is exceeded. */ export function saveStringToStorage(key: string, value: string): boolean {
+  const saved = trySave(key, value);
+  if (!saved) {
+    _memoryFallback.set(key, value);
+    return false;
+  }
+  return true;
+}
 const STORAGE_SCHEMA_VERSION = '1';
 const VERSION_KEY = 'radio-schema-version';
 export function ensureStorageVersion(managedKeys: readonly string[]): void {
