@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
 
   const cacheKey = lyricsKey(artist, title);
   try {
-    const result = await getCachedOrFetch(LrcLibResponse | null>({
+    const result = await getCachedOrFetch<LrcLibResponse | null>({
       namespace: 'lyrics',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
