@@ -6,44 +6,8 @@ import { sanitizeUrl } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { proxyStreamSchema } from '@/lib/validation-schemas';
-const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
-const _IPV6_BRACKETS_RE = /^\[|\]$/g;
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ function isPrivateHost(
-  hostname: string,
-): boolean {
-  const host = hostname.toLowerCase();
-  if (
-    host === 'localhost' ||
-    host === '127.0.0.1' ||
-    host === '::1' ||
-    host === '0.0.0.0' ||
-    host.endsWith('.localhost')
-  ) {
-    return true;
-  }
-  const ipv4Match = host.match(_IPV4_RE);
-  if (ipv4Match) {
-    const a = Number(ipv4Match[1]);
-    const b = Number(ipv4Match[2]);
-    if (a === 10) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a === 127) return true;
-    if (a === 0) return true;
-  }
-  const ipv6 = host.replace(_IPV6_BRACKETS_RE, '');
-  if (ipv6.startsWith('fe80:')) return true;
-  if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true;
-  if (ipv6 === '::1' || ipv6 === '::') return true;
-  const mappedMatch = ipv6.match(_IPV6_MAPPED_RE);
-  if (mappedMatch) return isPrivateHost(mappedMatch[1]);
-  return false;
-}
+import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
 export const runtime = 'nodejs';
-const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const MAX_DURATION_MS = 25_000;
 const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
 const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
@@ -58,10 +22,60 @@ const _ERR_TIMEOUT = JSON.stringify({ error: 'Stream timed out' });
 const _ERR_BLACKLISTED = JSON.stringify({ error: 'Station temporarily unavailable', blacklisted: true });
 const _NOOP = () => {};
 const _EVT_ONCE = { once: true } as const;
+
+// --- Stream connection limits & backpressure (ARCH-042) ---
+const MAX_STREAMS_PER_IP = 5;
+const MAX_STREAMS_TOTAL = 200;
+const BACKPRESSURE_LIMIT = 256 * 1024; // 256KB (4 × 64KB chunks)
+const _ERR_LIMIT_IP = JSON.stringify({ error: 'Too many concurrent streams from this IP' });
+const _ERR_LIMIT_TOTAL = JSON.stringify({ error: 'Server stream capacity reached' });
+const _JSON_R10_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '10' } as const;
+
+const ipStreamCounts = new Map<string, number>();
+let totalActiveStreams = 0;
+let peakStreams = 0;
+let totalServed = 0;
+let backpressureAborts = 0;
+
+function getClientIp(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const first = forwarded.split(',')[0].trim();
+    if (first) return first;
+  }
+  return req.headers.get('x-real-ip') ?? '127.0.0.1';
+}
+
+function incrementStreamCount(ip: string): void {
+  ipStreamCounts.set(ip, (ipStreamCounts.get(ip) ?? 0) + 1);
+  totalActiveStreams++;
+  totalServed++;
+  if (totalActiveStreams > peakStreams) peakStreams = totalActiveStreams;
+}
+
+function decrementStreamCount(ip: string): void {
+  const current = ipStreamCounts.get(ip) ?? 0;
+  if (current <= 1) ipStreamCounts.delete(ip);
+  else ipStreamCounts.set(ip, current - 1);
+  totalActiveStreams = Math.max(0, totalActiveStreams - 1);
+}
+
+export function getStreamMetrics() {
+  return { activeStreams: totalActiveStreams, peakStreams, totalServed, backpressureAborts };
+}
+
 export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.proxyStream);
   if (limited) return limited;
   logRequest(req);
+
+  const clientIp = getClientIp(req);
+  if ((ipStreamCounts.get(clientIp) ?? 0) >= MAX_STREAMS_PER_IP) {
+    return new Response(_ERR_LIMIT_IP, { status: 503, headers: _JSON_R10_HDRS });
+  }
+  if (totalActiveStreams >= MAX_STREAMS_TOTAL) {
+    return new Response(_ERR_LIMIT_TOTAL, { status: 503, headers: _JSON_R10_HDRS });
+  }
 
   const validated = validateRequest(proxyStreamSchema, req.nextUrl.searchParams);
   if (!validated.success) return new Response(_ERR_MISSING_URL, { status: 400, headers: _JSON_HDRS });
@@ -89,6 +103,7 @@ export async function GET(req: NextRequest) {
       headers: _JSON_BL_HDRS,
     });
   }
+  incrementStreamCount(clientIp);
   const controller = new AbortController();
   const connectStart = Date.now();
   const timeout =
@@ -108,6 +123,7 @@ export async function GET(req: NextRequest) {
         if (isPrivateHost(finalUrl.hostname)) {
           if (timeout) clearTimeout(timeout);
           upstream.body?.cancel().catch(_NOOP);
+          decrementStreamCount(clientIp);
           return new Response(_ERR_PRIVATE_IP, {
             status: 403,
             headers: _JSON_HDRS,
@@ -120,6 +136,7 @@ export async function GET(req: NextRequest) {
       upstream.body?.cancel().catch(_NOOP);
       recordStationFailure(streamUrl);
       recordFailure(streamUrl);
+      decrementStreamCount(clientIp);
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: _JSON_R3_HDRS,
@@ -142,11 +159,32 @@ export async function GET(req: NextRequest) {
     if (req.method === 'HEAD') {
       if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(_NOOP);
+      decrementStreamCount(clientIp);
       return new Response(null, { status: 200, headers: responseHeaders });
     }
-    return new Response(upstream.body, { status: 200, headers: responseHeaders });
+    // Backpressure-aware intermediary stream (ARCH-042)
+    const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>(
+      {
+        transform(chunk, ctrl) {
+          ctrl.enqueue(chunk);
+          if (ctrl.desiredSize !== null && ctrl.desiredSize < 0) {
+            backpressureAborts++;
+            console.warn('[proxy-stream] Backpressure limit exceeded, aborting slow client');
+            ctrl.error(new Error('Backpressure limit exceeded'));
+          }
+        },
+      },
+      undefined,
+      { highWaterMark: BACKPRESSURE_LIMIT, size: (chunk) => chunk.byteLength },
+    );
+    upstream.body.pipeTo(writable).catch(_NOOP).finally(() => {
+      decrementStreamCount(clientIp);
+      if (timeout) clearTimeout(timeout);
+    });
+    return new Response(readable, { status: 200, headers: responseHeaders });
   } catch (err) {
     if (timeout) clearTimeout(timeout);
+    decrementStreamCount(clientIp);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) {
       recordStationFailure(streamUrl);

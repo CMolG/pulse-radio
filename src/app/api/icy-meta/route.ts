@@ -8,46 +8,10 @@ import { sanitizeUrl } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';
-const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
-const _IPV6_BRACKETS_RE = /^\[|\]$/g;
+import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
 const _TRAILING_NULLS_RE = /\0+$/;
 const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ function isPrivateHost(
-  hostname: string,
-): boolean {
-  const host = hostname.toLowerCase();
-  if (
-    host === 'localhost' ||
-    host === '127.0.0.1' ||
-    host === '::1' ||
-    host === '0.0.0.0' ||
-    host.endsWith('.localhost')
-  ) {
-    return true;
-  }
-  const ipv4Match = host.match(_IPV4_RE);
-  if (ipv4Match) {
-    const a = Number(ipv4Match[1]);
-    const b = Number(ipv4Match[2]);
-    if (a === 10) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a === 127) return true;
-    if (a === 0) return true;
-  }
-  const ipv6 = host.replace(_IPV6_BRACKETS_RE, '');
-  if (ipv6.startsWith('fe80:')) return true;
-  if (ipv6.startsWith('fc') || ipv6.startsWith('fd')) return true;
-  if (ipv6 === '::1' || ipv6 === '::') return true;
-  const mappedMatch = ipv6.match(_IPV6_MAPPED_RE);
-  if (mappedMatch) return isPrivateHost(mappedMatch[1]);
-  return false;
-}
 export const runtime = 'nodejs';
-const _ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
 const _ERR_INVALID_PARAM = { error: 'Missing or invalid url parameter' } as const;
 const _ERR_INVALID_PROTO = { error: 'Invalid protocol' } as const;
 const _ERR_PRIVATE_IP = { error: 'Private/internal URLs not allowed' } as const;
@@ -71,7 +35,7 @@ export async function GET(req: NextRequest) {
   if (!streamUrl) return NextResponse.json(_ERR_INVALID_PARAM, { status: 400, headers: _CACHE_BAD_REQ });
   try {
     const url = new URL(streamUrl);
-    if (!_ALLOWED_PROTOCOLS.has(url.protocol)) {
+    if (!ALLOWED_PROTOCOLS.has(url.protocol)) {
       return NextResponse.json(_ERR_INVALID_PROTO, { status: 400, headers: _CACHE_BAD_REQ });
     }
     if (isPrivateHost(url.hostname))
