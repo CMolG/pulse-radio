@@ -1,5 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest } from 'next/server';
 import { isStationBlacklisted, recordStationFailure, clearStationFailures } from '@/lib/server-cache';
+import { recordSuccess, recordFailure, isUnhealthy } from '@/lib/station-health';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeUrl } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
@@ -82,13 +83,14 @@ export async function GET(req: NextRequest) {
     });
   }
   // Blacklist check: reject immediately if station has repeated failures
-  if (isStationBlacklisted(streamUrl)) {
+  if (isStationBlacklisted(streamUrl) || isUnhealthy(streamUrl)) {
     return new Response(_ERR_BLACKLISTED, {
       status: 503,
       headers: _JSON_BL_HDRS,
     });
   }
   const controller = new AbortController();
+  const connectStart = Date.now();
   const timeout =
     MAX_DURATION_MS > 0 ? setTimeout(() => controller.abort(), MAX_DURATION_MS) : null;
   if (req.signal) {
@@ -117,6 +119,7 @@ export async function GET(req: NextRequest) {
       if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(_NOOP);
       recordStationFailure(streamUrl);
+      recordFailure(streamUrl);
       return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
         status: 502,
         headers: _JSON_R3_HDRS,
@@ -124,6 +127,7 @@ export async function GET(req: NextRequest) {
     }
     // Successful connection — clear any previous failure count
     clearStationFailures(streamUrl);
+    recordSuccess(streamUrl, Date.now() - connectStart);
     const contentType = upstream.headers.get('content-type') || 'audio/mpeg';
     const icyBr = upstream.headers.get('icy-br');
     const icyName = upstream.headers.get('icy-name');
@@ -146,12 +150,14 @@ export async function GET(req: NextRequest) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) {
       recordStationFailure(streamUrl);
+      recordFailure(streamUrl);
       return new Response(_ERR_TIMEOUT, {
         status: 504,
         headers: _JSON_HDRS,
       });
     }
     recordStationFailure(streamUrl);
+    recordFailure(streamUrl);
     const message = err instanceof Error ? err.message : 'Unknown error';
     return new Response(JSON.stringify({ error: message }), {
       status: 502,

@@ -36,3 +36,12 @@ export const lyricsCache = sqliteTable('lyrics_cache', {
   fetchedAt: integer('fetched_at', { mode: 'number' }).notNull(),
   ttlMs: integer('ttl_ms', { mode: 'number' }).notNull(),
 });
+
+export const stationHealth = sqliteTable('station_health', {
+  url: text('url').primaryKey(),
+  successCount: integer('success_count', { mode: 'number' }).notNull().default(0),
+  failureCount: integer('failure_count', { mode: 'number' }).notNull().default(0),
+  lastSuccess: integer('last_success', { mode: 'number' }),
+  lastFailure: integer('last_failure', { mode: 'number' }),
+  avgResponseMs: integer('avg_response_ms', { mode: 'number' }),
+});
