@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { logError } from '@/lib/error-logger';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
@@ -82,7 +83,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     const artistRes = await fetch(artistUrl, { signal: controller.signal });
     if (!artistRes.ok) {
       const body = await artistRes.text().catch(() => '');
-      console.error(`[concerts] artist lookup ${artistRes.status} for "${artist}": ${body.slice(0, 200)}`);
+      logError(new Error(`[concerts] artist lookup ${artistRes.status}`), { artist, body: body.slice(0, 200) });
       return [];
     }
     const artistData = await artistRes.json();
@@ -97,7 +98,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     clearTimeout(timer);
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      console.error(`[concerts] events ${res.status} for "${artist}" (id=${artistId}): ${body.slice(0, 200)}`);
+      logError(new Error(`[concerts] events ${res.status}`), { artist, artistId, body: body.slice(0, 200) });
       return [];
     }
     const cl = res.headers.get('content-length');

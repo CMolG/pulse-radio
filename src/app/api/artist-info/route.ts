@@ -5,6 +5,7 @@
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { logError } from '@/lib/error-logger';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -107,7 +108,7 @@ export async function GET(req: NextRequest) {
       : 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200';
     return NextResponse.json(payload, { headers: { 'Cache-Control': cacheHeader } });
   } catch (err) {
-    console.error('[Pulse Radio] Artist info fetch error:', err);
+    logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
     return NextResponse.json(_ERR_500, { status: 500 });
   }
 }

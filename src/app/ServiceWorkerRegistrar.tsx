@@ -1,5 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ 'use client';
 import { useEffect, useState, useCallback } from 'react';
+import { setupGlobalErrorHandlers } from '@/lib/error-logger';
 
 const _SW_OPTS: RegistrationOptions = { scope: '/', updateViaCache: 'none' };
 const _NOOP = () => {};
@@ -18,6 +19,7 @@ export function ServiceWorkerRegistrar() {
   }, [waitingWorker]);
 
   useEffect(() => {
+    setupGlobalErrorHandlers();
     if (!('serviceWorker' in navigator)) return;
 
     let refreshing = false;
