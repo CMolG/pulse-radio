@@ -64,6 +64,7 @@ const syncers: Record<string, SyncFn> = {
     const limit = media === 'podcast' ? '20' : '3';
     const data = await safeFetch(
       `https://itunes.apple.com/search?${new URLSearchParams({ term, media: media || 'music', entity, limit })}`,
+      signal,
     );
     return data ? { data, ttlMs: 60 * 60 * 1000 } : null;
   },
@@ -86,9 +87,10 @@ const syncers: Record<string, SyncFn> = {
 
     const mbData = (await safeFetch(
       `${MB_BASE}/artist/?query=artist:${encodeURIComponent(key)}&fmt=json&limit=1`,
+      signal,
     )) as { artists?: ArtistInfo[] } | null;
     const mb = mbData?.artists?.[0] ?? null;
-    const wiki = (await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`)) as {
+    const wiki = (await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`, signal)) as {
       extract?: string;
       thumbnail?: { source?: string };
       content_urls?: { desktop?: { page?: string } };
@@ -117,6 +119,7 @@ const syncers: Record<string, SyncFn> = {
   concerts: async (key, signal) => {
     const raw = await safeFetch(
       `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${env.BANDSINTOWN_APP_ID}&date=upcoming`,
+      signal,
     );
     if (!Array.isArray(raw)) return { data: [], ttlMs: 12 * 60 * 60 * 1000 };
     const events = raw.slice(0, 5).map((e: Record<string, unknown>) => ({
@@ -142,6 +145,7 @@ const syncers: Record<string, SyncFn> = {
     if (!artist || !title) return null;
     const data = await safeFetch(
       `https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+      signal,
     );
     const result = Array.isArray(data) ? (data[0] ?? null) : null;
     const hasLyrics = !!(result?.syncedLyrics || result?.plainLyrics);

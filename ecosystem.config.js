@@ -19,7 +19,7 @@ module.exports = {
       error_file: '/var/log/pulse-radio/error.log',
       out_file: '/var/log/pulse-radio/out.log',
       merge_logs: true,
-      kill_timeout: 5000,
+      kill_timeout: 15000,
     },
   ],
 };
