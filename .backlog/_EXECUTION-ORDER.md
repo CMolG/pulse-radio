@@ -1,8 +1,8 @@
 ---
 type: execution-order
 generated_by: auto-architect
-iteration: 17
-total_cards: 133
+iteration: 18
+total_cards: 137
 ---
 
 # Pulse Radio Backlog — Execution Order
@@ -46,10 +46,10 @@ ARCH-006, 007, 008, 009, 010, 018, 019, 024, 027, 033, 034, 035, 036,
 ARCH-011, 012, 013, 014, 015, 016, 020, 028, 037, 038, 039, 040, 041,
 045, 046, 047, 048, 051, 052, 053, 055, 056, 057, 058, 064, 065, 067,
 068, 070, 071, 072, 077, 078, 081, 082, 084, 089, 090, 094, 095,
-096, 105, 106, 109, 113, 118, 119, 123, 124, 133
+096, 105, 106, 109, 113, 118, 119, 123, 124, 133, 134, 135
 
-### Low (9)
-ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122
+### Low (11)
+ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 
 ## Wave 2 — Depends on Wave 1 (16 cards)
 
@@ -78,6 +78,14 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122
 |------|----------|------------|
 | ARCH-125 | high | ARCH-115 (podcast API) |
 | ARCH-126 | high | ARCH-116 (audiobook API) |
+
+## Iteration 18 Changes
+
+- **ARCH-134** (NEW): Optional user authentication & favorites cloud sync (medium)
+- **ARCH-135** (NEW): Docker & reverse proxy production configuration (medium)
+- **ARCH-136** (NEW): Privacy-first server-side analytics (low)
+- **ARCH-137** (NEW): API route versioning strategy (low)
+- Confirmed existing cards cover: rate limiting (ARCH-032), memory leaks (ARCH-107), keyboard shortcuts (ARCH-039), stats dashboard (ARCH-112), env validation (ARCH-110), PM2 config (ARCH-084), contributing guide (ARCH-081)
 
 ## Iteration 17 Changes
 
