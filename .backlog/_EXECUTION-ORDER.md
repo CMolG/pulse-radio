@@ -77,6 +77,13 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 | ARCH-125 | high | ARCH-115 (podcast API) |
 | ARCH-126 | high | ARCH-116 (audiobook API) |
 
+## Iteration 21 — No New Cards (Saturation Confirmed)
+
+- Full rescan of 10 niche areas: drag-and-drop, print styles, RTL, color contrast, touch gestures, URL state, WebSocket/SSE, animation perf, third-party scripts, SRI
+- Only candidate: URL station sharing — already covered by ARCH-117
+- RTL support already covered by ARCH-099
+- **Conclusion: Backlog is saturated. 140 cards provide comprehensive coverage.**
+
 ## Iteration 20 Changes (Quality Audit)
 
 - **ARCH-012** agent reassigned: `auto-visual-fixer-finite` → `auto-reducer-finite` (refactoring, not visual)
