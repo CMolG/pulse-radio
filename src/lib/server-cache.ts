@@ -11,11 +11,14 @@ interface CacheEntry<T> {
   value: T;
   fetchedAt: number;
   ttlMs: number;
+  bytes: number;
 }
 
 const MAX_ENTRIES_PER_NS = 1000;
+const MAX_BYTES_PER_NS = 25 * 1024 * 1024; // 25MB per namespace
 
 const _stores = new Map<Namespace, Map<string, CacheEntry<unknown>>>();
+const _bytesByNs: Record<string, number> = {};
 
 function _store(ns: Namespace): Map<string, CacheEntry<unknown>> {
   let s = _stores.get(ns);
@@ -26,20 +29,47 @@ function _store(ns: Namespace): Map<string, CacheEntry<unknown>> {
   return s;
 }
 
-function _evict(store: Map<string, CacheEntry<unknown>>): void {
+function estimateBytes(value: unknown): number {
+  return JSON.stringify(value).length * 2; // Rough: 2 bytes per char in V8
+}
+
+function _evict(store: Map<string, CacheEntry<unknown>>, ns: Namespace): void {
   const now = Date.now();
   // First pass: remove expired entries
   for (const [k, e] of store) {
-    if (now - e.fetchedAt >= e.ttlMs) store.delete(k);
+    if (now - e.fetchedAt >= e.ttlMs) {
+      _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - e.bytes;
+      store.delete(k);
+    }
   }
   // Second pass: if still too large, remove oldest (first inserted) entries
   if (store.size >= MAX_ENTRIES_PER_NS) {
     const toDelete = store.size - MAX_ENTRIES_PER_NS + 1;
     let deleted = 0;
-    for (const k of store.keys()) {
+    for (const [k, e] of store) {
+      _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - e.bytes;
       store.delete(k);
       if (++deleted >= toDelete) break;
     }
+  }
+}
+
+function _evictOne(store: Map<string, CacheEntry<unknown>>, ns: Namespace): void {
+  const now = Date.now();
+  // First try to remove an expired entry
+  for (const [k, e] of store) {
+    if (now - e.fetchedAt >= e.ttlMs) {
+      _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - e.bytes;
+      store.delete(k);
+      return;
+    }
+  }
+  // If no expired entries, remove oldest
+  if (store.size > 0) {
+    const firstKey = store.keys().next().value;
+    const entry = store.get(firstKey) as CacheEntry<unknown>;
+    _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - entry.bytes;
+    store.delete(firstKey);
   }
 }
 
@@ -48,6 +78,7 @@ export function cacheGet<T>(ns: Namespace, key: string): T | undefined {
   const entry = store.get(key) as CacheEntry<T> | undefined;
   if (!entry) return undefined;
   if (Date.now() - entry.fetchedAt >= entry.ttlMs) {
+    _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - entry.bytes;
     store.delete(key);
     return undefined;
   }
@@ -59,8 +90,22 @@ export function cacheGet<T>(ns: Namespace, key: string): T | undefined {
 
 export function cacheSet<T>(ns: Namespace, key: string, value: T, ttlMs: number): void {
   const store = _store(ns);
-  if (store.size >= MAX_ENTRIES_PER_NS) _evict(store);
-  store.set(key, { value, fetchedAt: Date.now(), ttlMs });
+  const bytes = estimateBytes(value);
+
+  // Evict until within both count AND byte limits
+  while (store.size >= MAX_ENTRIES_PER_NS || (_bytesByNs[ns] ?? 0) + bytes > MAX_BYTES_PER_NS) {
+    if (store.size === 0) break; // Safety: don't loop forever
+    _evictOne(store, ns);
+  }
+
+  _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) + bytes;
+  store.set(key, { value, fetchedAt: Date.now(), ttlMs, bytes });
+
+  // Log warning at 80% capacity
+  const byteUsage = _bytesByNs[ns] ?? 0;
+  if (byteUsage > MAX_BYTES_PER_NS * 0.8) {
+    console.warn(`[server-cache] Namespace "${ns}" at ${(byteUsage / MAX_BYTES_PER_NS * 100).toFixed(0)}% capacity`);
+  }
 }
 
 export function cacheHas(ns: Namespace, key: string): boolean {
@@ -68,7 +113,23 @@ export function cacheHas(ns: Namespace, key: string): boolean {
 }
 
 export function cacheDelete(ns: Namespace, key: string): void {
-  _store(ns).delete(key);
+  const store = _store(ns);
+  const entry = store.get(key) as CacheEntry<unknown> | undefined;
+  if (entry) {
+    _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - entry.bytes;
+  }
+  store.delete(key);
+}
+
+export function getCacheStats(): Record<string, { entries: number; bytes: number }> {
+  const stats: Record<string, { entries: number; bytes: number }> = {};
+  for (const [ns, store] of _stores) {
+    stats[ns] = {
+      entries: store.size,
+      bytes: _bytesByNs[ns] ?? 0,
+    };
+  }
+  return stats;
 }
 
 // ---------------------------------------------------------------------------

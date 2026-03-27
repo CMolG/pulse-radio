@@ -100,3 +100,132 @@ export function ensureStorageVersion(managedKeys: readonly string[]): void {
     /* ignore in SSR / restricted environments */
   }
 }
+
+type StorageValue<T> = {
+  value: T;
+  _ts: number;
+};
+
+/**
+ * Updates a storage value using a read-modify-write transaction.
+ * This consolidates the pattern and makes it atomic within a single tab,
+ * reducing race condition window for cross-tab updates.
+ */
+export function updateStorage<T>(
+  key: string,
+  updater: (current: T) => T,
+  defaultValue: T,
+): T {
+  const current = loadFromStorage<T>(key, defaultValue);
+  const updated = updater(current);
+  saveToStorage(key, updated);
+  return updated;
+}
+
+/**
+ * Wraps a value with a timestamp for last-write-wins conflict resolution.
+ * Used internally for cross-tab synchronization.
+ */
+export function wrapWithTimestamp<T>(value: T): StorageValue<T> {
+  return {
+    value,
+    _ts: Date.now(),
+  };
+}
+
+/**
+ * Unwraps a timestamped value, returning the value and timestamp separately.
+ */
+export function unwrapTimestamp<T>(
+  stored: unknown,
+): { value: T; timestamp: number } | null {
+  if (
+    stored !== null &&
+    typeof stored === 'object' &&
+    '_ts' in stored &&
+    'value' in stored
+  ) {
+    return {
+      value: (stored as StorageValue<T>).value,
+      timestamp: (stored as StorageValue<T>)._ts,
+    };
+  }
+  return null;
+}
+
+/**
+ * For array values, merge on conflict instead of overwriting.
+ * Deduplicates by object reference equality.
+ */
+export function mergeArrays<T>(a: T[], b: T[]): T[] {
+  const merged = [...a];
+  for (const item of b) {
+    if (!merged.includes(item)) {
+      merged.push(item);
+    }
+  }
+  return merged;
+}
+
+/**
+ * BroadcastChannel for cross-tab synchronization.
+ * Posts updates to other tabs when storage changes.
+ */
+let _broadcastChannel: BroadcastChannel | null = null;
+
+function getBroadcastChannel(): BroadcastChannel | null {
+  if (typeof window === 'undefined') return null;
+  if (_broadcastChannel) return _broadcastChannel;
+  try {
+    _broadcastChannel = new BroadcastChannel('pulse-radio-sync');
+    return _broadcastChannel;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Notifies other tabs that a storage key has been updated.
+ * Other tabs should re-read the key from localStorage (source of truth).
+ */
+export function notifyStorageUpdate(key: string): void {
+  const channel = getBroadcastChannel();
+  if (channel) {
+    try {
+      channel.postMessage({
+        type: 'storage-updated',
+        key,
+        timestamp: Date.now(),
+      });
+    } catch {
+      /* channel may not be available */
+    }
+  }
+}
+
+/**
+ * Listen for cross-tab storage updates via BroadcastChannel.
+ * When a key is updated in another tab, the callback is invoked so
+ * the receiver can re-read from localStorage.
+ */
+export function listenForStorageUpdates(
+  callback: (key: string, timestamp: number) => void,
+): () => void {
+  const channel = getBroadcastChannel();
+  if (!channel) return () => {};
+
+  const handler = (event: MessageEvent) => {
+    if (
+      event.data &&
+      event.data.type === 'storage-updated' &&
+      event.data.key
+    ) {
+      callback(event.data.key, event.data.timestamp || Date.now());
+    }
+  };
+
+  channel.addEventListener('message', handler);
+  return () => {
+    channel.removeEventListener('message', handler);
+  };
+}

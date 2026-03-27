@@ -26,6 +26,7 @@ async function apiFetch(
 import { NextRequest, NextResponse } from 'next/server';
 import { getCachedOrFetch } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { sanitizeForLog } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { itunesLookupSchema } from '@/lib/validation-schemas';
@@ -76,7 +77,7 @@ const itunesCircuit = createCircuitBreaker('itunes-lookup');
     const status = isTimeout ? 504 : 500;
     const code = isTimeout ? 'TIMEOUT' : 'UPSTREAM_ERROR';
     reqLog.done(status);
-    if (!isTimeout) console.error('[itunes-lookup] Lookup request failed:', e);
+    if (!isTimeout) console.error('[itunes-lookup] Lookup request failed:', sanitizeForLog(e instanceof Error ? e.message : String(e)));
     return apiError(
       isTimeout ? 'Request timed out' : 'Lookup request failed',
       code,

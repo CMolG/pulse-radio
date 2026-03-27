@@ -16,7 +16,14 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.radio-browser.info' },
+      { protocol: 'https', hostname: 'is1-ssl.mzstatic.com' },
+      { protocol: 'https', hostname: 'images.sk-static.com' },
+    ],
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [390, 640, 750, 1080],
+    minimumCacheTTL: 86400,
   },
 };
 

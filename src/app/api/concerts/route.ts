@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCachedOrFetch } from '@/lib/services/CacheRepository';
 import { ConcertEventsSchema } from '@/lib/schemas/api-responses';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { sanitizeSearchQuery, sanitizeForLog } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
 import { validateRequest } from '@/lib/validate-request';
 import { concertsSchema } from '@/lib/validation-schemas';
@@ -81,7 +81,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     const artistRes = await fetch(artistUrl, { signal: controller.signal });
     if (!artistRes.ok) {
       const body = await artistRes.text().catch(() => '');
-      logError(new Error(`[concerts] artist lookup ${artistRes.status}`), { artist, body: body.slice(0, 200) });
+      logError(new Error(`[concerts] artist lookup ${artistRes.status}`), { artist: sanitizeForLog(artist), body: sanitizeForLog(body.slice(0, 200)) });
       return [];
     }
     const artistData = await artistRes.json();
@@ -96,7 +96,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     clearTimeout(timer);
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      logError(new Error(`[concerts] events ${res.status}`), { artist, artistId, body: body.slice(0, 200) });
+      logError(new Error(`[concerts] events ${res.status}`), { artist: sanitizeForLog(artist), artistId, body: sanitizeForLog(body.slice(0, 200)) });
       return [];
     }
     const data: BandsintownEvent[] | null = await readJsonWithLimit<BandsintownEvent[]>(res, 512 * 1024, eventsUrl);
