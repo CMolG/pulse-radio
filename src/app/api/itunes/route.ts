@@ -1,36 +1,14 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ const _NOOP = () => {};
-async function apiFetch(
-  url: string,
-  opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string },
-): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
-  try {
-    const res = await fetch(url, { ...opts.init, signal: controller.signal });
-    if (!res.ok) {
-      await res.text().catch(_NOOP);
-      throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`);
-    }
-    if (opts.maxBytes) {
-      const cl = res.headers.get('content-length');
-      if (cl && parseInt(cl, 10) > opts.maxBytes) {
-        await res.body?.cancel().catch(_NOOP);
-        throw new Error('Response too large');
-      }
-    }
-    return res;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-import { NextRequest, NextResponse } from 'next/server';
-import { cacheResolve } from '@/lib/services/CacheRepository';
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest, NextResponse } from 'next/server';
+import { cacheResolve, getCachedOrFetch } from '@/lib/services/CacheRepository';
+import { ItunesSearchResultSchema } from '@/lib/schemas/api-responses';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { itunesSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
+import { fetchWithRetry } from '@/lib/fetch-with-retry';
+import { apiError } from '@/lib/api-response';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
@@ -60,11 +38,23 @@ const itunesCircuit = createCircuitBreaker('itunes');
       fetcher: async () => {
         const { data } = await itunesCircuit.call(async () => {
           const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
-          const res = await apiFetch(url, {
-            timeoutMs: 8_000,
-            maxBytes: 2 * 1024 * 1024,
-            label: 'iTunes API',
+          // iTunes route: 8s timeout, 2 retries
+          const res = await fetchWithRetry(url, {
+            timeout: 8000,
+            retries: 2,
+            retryOn: (status, error) => {
+              if (error?.name === 'AbortError') return true;
+              return status ? status >= 500 : false;
+            },
           });
+          const cl = res.headers.get('content-length');
+          if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
+            await res.body?.cancel();
+            throw new Error('Response too large');
+          }
+          if (!res.ok) {
+            throw new Error(`iTunes API returned ${res.status}`);
+          }
           return await res.json();
         }, { resultCount: 0, results: [] });
         return data;

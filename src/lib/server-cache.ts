@@ -9,7 +9,8 @@ export type Namespace = 'itunes' | 'artist-info' | 'concerts' | 'lyrics' | 'stat
 
 interface CacheEntry<T> {
   value: T;
-  expires: number;
+  fetchedAt: number;
+  ttlMs: number;
 }
 
 const MAX_ENTRIES_PER_NS = 1000;
@@ -29,7 +30,7 @@ function _evict(store: Map<string, CacheEntry<unknown>>): void {
   const now = Date.now();
   // First pass: remove expired entries
   for (const [k, e] of store) {
-    if (e.expires <= now) store.delete(k);
+    if (now - e.fetchedAt >= e.ttlMs) store.delete(k);
   }
   // Second pass: if still too large, remove oldest (first inserted) entries
   if (store.size >= MAX_ENTRIES_PER_NS) {
@@ -46,7 +47,7 @@ export function cacheGet<T>(ns: Namespace, key: string): T | undefined {
   const store = _store(ns);
   const entry = store.get(key) as CacheEntry<T> | undefined;
   if (!entry) return undefined;
-  if (entry.expires <= Date.now()) {
+  if (Date.now() - entry.fetchedAt >= entry.ttlMs) {
     store.delete(key);
     return undefined;
   }
@@ -59,7 +60,7 @@ export function cacheGet<T>(ns: Namespace, key: string): T | undefined {
 export function cacheSet<T>(ns: Namespace, key: string, value: T, ttlMs: number): void {
   const store = _store(ns);
   if (store.size >= MAX_ENTRIES_PER_NS) _evict(store);
-  store.set(key, { value, expires: Date.now() + ttlMs });
+  store.set(key, { value, fetchedAt: Date.now(), ttlMs });
 }
 
 export function cacheHas(ns: Namespace, key: string): boolean {
@@ -71,33 +72,79 @@ export function cacheDelete(ns: Namespace, key: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// Station blacklist helpers
+// Station blacklist helpers (ARCH-046: TTL-based blacklist with progressive expiry)
 // ---------------------------------------------------------------------------
 
 interface BlacklistEntry {
-  failures: number;
-  lastFailure: number;
+  failedAt: number;
+  failCount: number;
 }
 
-const BLACKLIST_TTL_MS = 15 * 60 * 1000; // 15 minutes
-const BLACKLIST_THRESHOLD = 3;
+// TTL thresholds based on failure count
+function getTTLForFailCount(failCount: number): number {
+  if (failCount <= 2) return 5 * 60 * 1000; // 5 minutes
+  if (failCount <= 5) return 30 * 60 * 1000; // 30 minutes
+  return 2 * 60 * 60 * 1000; // 2 hours
+}
 
-/** Returns true if the station URL is currently blacklisted. */
+// Direct in-memory blacklist map (separate from general cache for deterministic cleanup)
+const stationBlacklistMap = new Map<string, BlacklistEntry>();
+const CLEANUP_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours
+
+let cleanupHandle: NodeJS.Timeout | null = null;
+
+function startCleanupSweep() {
+  if (cleanupHandle) return;
+  cleanupHandle = setInterval(() => {
+    const now = Date.now();
+    const toDelete: string[] = [];
+    for (const [url, entry] of stationBlacklistMap) {
+      if (now - entry.failedAt > MAX_AGE_MS) {
+        toDelete.push(url);
+      }
+    }
+    for (const url of toDelete) {
+      stationBlacklistMap.delete(url);
+    }
+  }, CLEANUP_INTERVAL_MS);
+}
+
+/** Returns true if the station URL is currently blacklisted (TTL not expired). */
 export function isStationBlacklisted(stationUrl: string): boolean {
-  const entry = cacheGet<BlacklistEntry>('station-blacklist', stationUrl);
+  const entry = stationBlacklistMap.get(stationUrl);
   if (!entry) return false;
-  return entry.failures >= BLACKLIST_THRESHOLD;
+  
+  const now = Date.now();
+  const ttl = getTTLForFailCount(entry.failCount);
+  const isExpired = now - entry.failedAt > ttl;
+  
+  if (isExpired) {
+    // TTL expired; allow retry on next request (remove from blacklist)
+    stationBlacklistMap.delete(stationUrl);
+    return false;
+  }
+  
+  return true;
 }
 
 /** Record a failure for a station URL. Returns true if it is now blacklisted. */
 export function recordStationFailure(stationUrl: string): boolean {
-  const existing = cacheGet<BlacklistEntry>('station-blacklist', stationUrl);
-  const failures = (existing?.failures ?? 0) + 1;
-  cacheSet<BlacklistEntry>('station-blacklist', stationUrl, { failures, lastFailure: Date.now() }, BLACKLIST_TTL_MS);
-  return failures >= BLACKLIST_THRESHOLD;
+  startCleanupSweep();
+  
+  const existing = stationBlacklistMap.get(stationUrl);
+  const failCount = (existing?.failCount ?? 0) + 1;
+  
+  stationBlacklistMap.set(stationUrl, {
+    failedAt: Date.now(),
+    failCount,
+  });
+  
+  // Blacklist only if failCount >= 3
+  return failCount >= 3;
 }
 
 /** Reset a station's failure count (e.g., on successful connection). */
 export function clearStationFailures(stationUrl: string): void {
-  cacheDelete('station-blacklist', stationUrl);
+  stationBlacklistMap.delete(stationUrl);
 }

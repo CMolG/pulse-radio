@@ -8,6 +8,7 @@ import { validateRequest } from '@/lib/validate-request';
 import { concertsSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { env } from '@/lib/env';
+import { apiError } from '@/lib/api-response';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
@@ -126,7 +127,7 @@ export async function GET(req: NextRequest) {
   const validated = validateRequest(concertsSchema, req.nextUrl.searchParams);
   if (!validated.success) return validated.error;
   const artist = sanitizeSearchQuery(validated.data.artist);
-  if (!artist) return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
+  if (!artist) return apiError('Missing or invalid artist parameter', 'INVALID_PARAM', 400);
 
   const cacheKey = normKey(artist);
   try {
@@ -148,9 +149,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(list, { headers });
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
-    return NextResponse.json(
-      { error: isTimeout ? 'Request timed out' : 'Internal error' },
-      { status: isTimeout ? 504 : 500 },
+    return apiError(
+      isTimeout ? 'Request timed out' : 'Internal error',
+      isTimeout ? 'TIMEOUT' : 'INTERNAL_ERROR',
+      isTimeout ? 504 : 500,
     );
   }
 }

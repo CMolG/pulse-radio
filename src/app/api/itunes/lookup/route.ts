@@ -30,8 +30,8 @@ import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { itunesLookupSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
+import { apiError } from '@/lib/api-response';
 export const runtime = 'nodejs';
-const _ERR_400 = { error: 'Missing or invalid id parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const itunesCircuit = createCircuitBreaker('itunes-lookup');

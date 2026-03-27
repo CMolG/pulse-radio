@@ -386,6 +386,11 @@ import {
   Music2,
   ScanSearch,
   Share2,
+  BarChart3,
+  Palette,
+  Smartphone,
+  CheckCircle,
+  HelpCircle,
 } from 'lucide-react';
 import type {
   Station,
@@ -418,25 +423,6 @@ import {
 import { useLocale } from '@/context/LocaleContext';
 import { COUNTRY_BY_CODE, isSovereignCountryCode, SOVEREIGN_COUNTRIES } from '@/lib/i18n/countries';
 import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
-import {
-  IoRadioOutline,
-  IoMusicalNotesOutline,
-  IoHeartOutline,
-  IoStatsChartOutline,
-  IoColorPaletteOutline,
-  IoPhonePortraitOutline,
-  IoShareOutline,
-  IoCheckmarkCircleOutline,
-  IoHelpCircleOutline,
-  IoPersonOutline,
-  IoDiscOutline,
-  IoTimeOutline,
-  IoSearchOutline,
-  IoTimerOutline,
-  IoGlobeOutline,
-  IoChevronBack,
-} from 'react-icons/io5';
-import { MdAutoAwesome } from 'react-icons/md';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ErrorBoundary } from '@/components/radio/components/ErrorBoundary';
@@ -6846,7 +6832,7 @@ function _NowPlayingBar({
               aria-label={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
               aria-pressed={!!effectsEnabled}
             >
-              <MdAutoAwesome size={18} />
+              <Sparkles size={18} />
             </button>
           )}
           {station && !theaterMode && (
@@ -7050,7 +7036,7 @@ function _NowPlayingBar({
             className={`p-2.5 rounded-md transition-colors ${effectsEnabled ? 'text-sys-orange' : 'text-subtle hover:text-white/50'}`}
             title={effectsEnabled ? 'Disable audio effects' : 'Enable audio effects'}
           >
-            <MdAutoAwesome size={14} />
+            <Sparkles size={14} />
           </button>
         )}{' '}
         {effectsEnabled && (
@@ -7267,49 +7253,49 @@ const GLASS_STYLE: React.CSSProperties = {
 type GuideSection = { icon: React.ReactNode; title: string; content: string };
 const GUIDE_SECTIONS: GuideSection[] = [
   {
-    icon: <IoRadioOutline size={22} className="text-[#3478f6]" aria-hidden="true" />,
+    icon: <RadioIcon size={22} className="text-[#3478f6]" aria-hidden="true" />,
     title: 'Listening to Radio',
     content:
       'Browse stations by genre, country or search. Tap any station card to start playing. The visualizer activates automatically with live audio-reactive effects.',
   },
   {
-    icon: <IoSearchOutline size={22} className="text-cyan-400" aria-hidden="true" />,
+    icon: <Search size={22} className="text-cyan-400" aria-hidden="true" />,
     title: 'Search & Discover',
     content:
       'Use the search bar to find stations by name, genre or location. Enable Discovery Mode (lightning icon) to auto-play random stations every 30 seconds.',
   },
   {
-    icon: <IoHeartOutline size={22} className="text-pink-400" aria-hidden="true" />,
+    icon: <Heart size={22} className="text-pink-400" aria-hidden="true" />,
     title: 'Favorites',
     content:
       'Tap the star to save stations. Tap the heart to save songs. Filter your favorite songs by artist — songs are grouped in stacks you can expand.',
   },
   {
-    icon: <IoMusicalNotesOutline size={22} className="text-purple-400" aria-hidden="true" />,
+    icon: <Music size={22} className="text-purple-400" aria-hidden="true" />,
     title: 'Lyrics & Track Info',
     content:
       'Pulse detects the current song and fetches lyrics automatically. Tap on any song in history for detailed info including artist bio and album art.',
   },
   {
-    icon: <IoColorPaletteOutline size={22} className="text-amber-400" aria-hidden="true" />,
+    icon: <Palette size={22} className="text-amber-400" aria-hidden="true" />,
     title: 'Theater Mode',
     content:
       'Press T or tap the theater button to enter immersive mode. The Fibonacci spiral visualizer reacts to the music with a CRT retro effect overlay.',
   },
   {
-    icon: <IoStatsChartOutline size={22} className="text-emerald-400" aria-hidden="true" />,
+    icon: <BarChart3 size={22} className="text-emerald-400" aria-hidden="true" />,
     title: 'Your Statistics',
     content:
       'Pulse tracks your listening: time per station, most played songs, top artists and genres. Your home screen reorders sections based on what you listen to most.',
   },
   {
-    icon: <IoTimerOutline size={22} className="text-orange-400" aria-hidden="true" />,
+    icon: <Timer size={22} className="text-orange-400" aria-hidden="true" />,
     title: 'Sleep Timer',
     content:
       'Press Z or use the timer icon to cycle through sleep durations (15, 30, 60, 90 min). Pulse will automatically stop playback when the timer ends.',
   },
   {
-    icon: <IoGlobeOutline size={22} className="text-sky-400" aria-hidden="true" />,
+    icon: <Globe size={22} className="text-sky-400" aria-hidden="true" />,
     title: 'Keyboard Shortcuts',
     content:
       'Space: play/pause • ← →: skip station • ↑ ↓: volume • T: theater • E: equalizer • L: like song • S: star station • F: focus search • ?: show all shortcuts.',
@@ -7353,7 +7339,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
             aria-label="Close guide"
             className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:text-white transition-colors"
           >
-            <IoChevronBack size={16} />
+            <ChevronLeft size={16} />
           </button>{' '}
           <h2 className="text-[17px] font-semibold text-white">How to use Pulse</h2>
         </div>{' '}
@@ -7489,7 +7475,7 @@ const StatsView = React.memo(function StatsView({
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
         {' '}
-        <IoTimeOutline size={40} className="text-white/35 mb-3" />{' '}
+        <Clock size={40} className="text-white/35 mb-3" />{' '}
         <p className="text-[14px] text-white/55">No listening data yet</p>{' '}
         <p className="text-[12px] text-white/50 mt-1">Start playing stations to see your stats</p>
       </div>
@@ -7505,7 +7491,7 @@ const StatsView = React.memo(function StatsView({
       {/* Total listen time */}{' '}
       <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/8">
         {' '}
-        <IoTimeOutline size={20} className="text-[#3478f6]" />{' '}
+        <Clock size={20} className="text-[#3478f6]" />{' '}
         <div>
           <p className="text-[12px] text-white/50 uppercase tracking-wider">Total Listen Time</p>{' '}
           <p className="text-[18px] font-bold text-white tabular-nums">
@@ -7517,7 +7503,7 @@ const StatsView = React.memo(function StatsView({
       {topStations.length > 0 && (
         <StatSection
           title="Top Stations"
-          icon={<IoRadioOutline size={16} className="text-amber-400/70" aria-hidden="true" />}
+          icon={<RadioIcon size={16} className="text-amber-400/70" aria-hidden="true" />}
         >
           {' '}
           {topStations.slice(0, 5).map((s) => (
@@ -7535,7 +7521,7 @@ const StatsView = React.memo(function StatsView({
       {topSongs.length > 0 && (
         <StatSection
           title="Most Played Songs"
-          icon={<IoMusicalNotesOutline size={16} className="text-pink-400/70" aria-hidden="true" />}
+          icon={<Music size={16} className="text-pink-400/70" aria-hidden="true" />}
         >
           {' '}
           {topSongs.slice(0, 5).map((s) => (
@@ -7553,7 +7539,7 @@ const StatsView = React.memo(function StatsView({
       {topArtists.length > 0 && (
         <StatSection
           title="Top Artists"
-          icon={<IoPersonOutline size={16} className="text-purple-400/70" aria-hidden="true" />}
+          icon={<User size={16} className="text-purple-400/70" aria-hidden="true" />}
         >
           {' '}
           {topArtists.slice(0, 5).map((a) => (
@@ -7571,7 +7557,7 @@ const StatsView = React.memo(function StatsView({
       {topGenres.length > 0 && (
         <StatSection
           title="Top Genres"
-          icon={<IoDiscOutline size={16} className="text-emerald-400/70" aria-hidden="true" />}
+          icon={<Disc3 size={16} className="text-emerald-400/70" aria-hidden="true" />}
         >
           {' '}
           {topGenres.slice(0, 5).map((g) => (
@@ -8002,14 +7988,14 @@ function MobileSettingsPanel({
             onClick={() => setShowGuide(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:bg-white/[0.06] transition-colors text-left"
           >
-            <IoHelpCircleOutline size={18} className="text-[#3478f6] flex-shrink-0" />{' '}
+            <HelpCircle size={18} className="text-[#3478f6] flex-shrink-0" />{' '}
             <span className="text-[14px] font-medium text-white/70">How to use Pulse</span>
           </button>
           <button
             onClick={() => setShowStats(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:bg-white/[0.06] transition-colors text-left"
           >
-            <IoStatsChartOutline size={18} className="text-emerald-400 flex-shrink-0" />{' '}
+            <BarChart3 size={18} className="text-emerald-400 flex-shrink-0" />{' '}
             <span className="text-[14px] font-medium text-white/70">Your Statistics</span>
           </button>
         </div>{' '}
@@ -8502,31 +8488,31 @@ const HistoryGridView = React.memo(function HistoryGridView({
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string };
 const STEPS: OnboardingStep[] = [
   {
-    icon: <IoRadioOutline size={48} className="text-[#3478f6]" aria-hidden="true" />,
+    icon: <RadioIcon size={48} className="text-[#3478f6]" aria-hidden="true" />,
     title: 'Welcome to Pulse',
     description:
       'Your free internet radio experience. Discover thousands of stations, genres and artists from around the world.',
   },
   {
-    icon: <IoMusicalNotesOutline size={48} className="text-pink-400" aria-hidden="true" />,
+    icon: <Music size={48} className="text-pink-400" aria-hidden="true" />,
     title: 'Live Radio & Lyrics',
     description:
       'Listen to live radio with real-time song detection, synchronized lyrics, and detailed track information.',
   },
   {
-    icon: <IoHeartOutline size={48} className="text-red-400" aria-hidden="true" />,
+    icon: <Heart size={48} className="text-red-400" aria-hidden="true" />,
     title: 'Favorites & History',
     description:
       'Save your favorite stations and songs. Browse your listening history and rediscover music you loved.',
   },
   {
-    icon: <IoColorPaletteOutline size={48} className="text-purple-400" aria-hidden="true" />,
+    icon: <Palette size={48} className="text-purple-400" aria-hidden="true" />,
     title: 'Immersive Visualizer',
     description:
       'Enjoy a reactive audio visualizer with CRT effects. Customize the sound with the built-in equalizer.',
   },
   {
-    icon: <IoStatsChartOutline size={48} className="text-emerald-400" aria-hidden="true" />,
+    icon: <BarChart3 size={48} className="text-emerald-400" aria-hidden="true" />,
     title: 'Your Stats',
     description:
       'Track your listening habits — most played artists, genres, stations and songs. Your home adapts to your taste.',
@@ -8566,7 +8552,7 @@ function PWAStep() {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
         {' '}
-        <IoCheckmarkCircleOutline size={48} className="text-emerald-400" />{' '}
+        <CheckCircle size={48} className="text-emerald-400" />{' '}
         <h2 className="text-xl font-bold text-white">Already Installed!</h2>{' '}
         <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
           {' '}
@@ -8578,7 +8564,7 @@ function PWAStep() {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
       {' '}
-      <IoPhonePortraitOutline size={48} className="text-[#3478f6]" />{' '}
+      <Smartphone size={48} className="text-[#3478f6]" />{' '}
       <h2 className="text-xl font-bold text-white">Install as App</h2>{' '}
       <p className="text-[14px] text-white/60 leading-relaxed max-w-xs">
         {' '}
@@ -8597,7 +8583,7 @@ function PWAStep() {
           {' '}
           <div className="flex items-center gap-2 text-[13px] text-white/70">
             {' '}
-            <IoShareOutline size={18} className="text-[#3478f6] flex-shrink-0" />{' '}
+            <Share2 size={18} className="text-[#3478f6] flex-shrink-0" />{' '}
             <span>
               Tap <strong className="text-white">Share</strong> →{' '}
               <strong className="text-white">Add to Home Screen</strong>

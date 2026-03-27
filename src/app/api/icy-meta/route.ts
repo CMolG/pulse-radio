@@ -51,10 +51,12 @@ export async function GET(req: NextRequest) {
     );
   }
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
-    const res = await fetch(streamUrl, {
-      headers: _ICY_FETCH_HDRS,
+    // Metadata route: 8s timeout, 2 retries
+    const res = await fetchWithRetry(streamUrl, {
+      timeout: 8000,
+      retries: 2,
+      init: { headers: _ICY_FETCH_HDRS },
       signal: controller.signal,
     });
     if (res.url) {

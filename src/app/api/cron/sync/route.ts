@@ -158,6 +158,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Server is shutting down' }, { status: 503 });
   }
 
+  // Mutex check: prevent concurrent sync executions
+  if (syncInProgress) {
+    const nextAllowedAt = new Date(lastSyncTimestamp + MIN_SYNC_INTERVAL_MS);
+    return NextResponse.json(
+      { error: 'Sync already in progress', nextAllowedAt: nextAllowedAt.toISOString() },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(MIN_SYNC_INTERVAL_MS / 1000)) } },
+    );
+  }
+
+  // Minimum interval check: prevent re-syncing too soon
+  if (Date.now() - lastSyncTimestamp < MIN_SYNC_INTERVAL_MS) {
+    const nextAllowedAt = new Date(lastSyncTimestamp + MIN_SYNC_INTERVAL_MS);
+    const waitMs = lastSyncTimestamp + MIN_SYNC_INTERVAL_MS - Date.now();
+    return NextResponse.json(
+      { error: 'Too soon since last sync', nextAllowedAt: nextAllowedAt.toISOString() },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(waitMs / 1000)) } },
+    );
+  }
+
   const limited = rateLimit(req, RATE_LIMITS.cronSync);
   if (limited) return limited;
   logRequest(req);
@@ -171,6 +190,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Acquire mutex
+  syncInProgress = true;
+  lastSyncTimestamp = Date.now();
+
   // Register an AbortController so the shutdown coordinator can cancel in-flight requests
   const ac = new AbortController();
   registerAbortController(ac);
@@ -178,6 +201,9 @@ export async function GET(req: NextRequest) {
   const namespaces: Namespace[] = ['itunes', 'artist-info', 'concerts', 'lyrics'];
   const summary: Record<string, { stale: number; synced: number; failed: number }> = {};
   let aborted = false;
+  let totalSynced = 0;
+  let totalFailed = 0;
+  const startTime = Date.now();
 
   try {
     for (const ns of namespaces) {
@@ -214,13 +240,27 @@ export async function GET(req: NextRequest) {
       }
 
       summary[ns] = { stale: staleKeys.length, synced, failed };
+      totalSynced += synced;
+      totalFailed += failed;
     }
   } finally {
+    syncInProgress = false;
     unregisterAbortController(ac);
   }
 
+  const durationMs = Date.now() - startTime;
+  const nextAllowedAt = new Date(lastSyncTimestamp + MIN_SYNC_INTERVAL_MS);
+
   return NextResponse.json(
-    { ok: true, partial: aborted, summary },
+    {
+      ok: true,
+      partial: aborted,
+      synced: totalSynced,
+      failed: totalFailed,
+      duration_ms: durationMs,
+      next_allowed_at: nextAllowedAt.toISOString(),
+      summary,
+    },
     {
       headers: { 'Cache-Control': 'no-cache, no-store' },
     },

@@ -1,5 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
+import { safeJsonParse } from './sanitize';
+
 const _memoryFallback = new Map<string, string>();
 
 /** Detect whether localStorage is functional (false in private/incognito on some browsers). */

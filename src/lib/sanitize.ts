@@ -36,3 +36,41 @@ export function sanitizeMetadata(input: string): string {
     .replace(HTML_ESCAPE_RE, (ch) => HTML_ENTITY_MAP[ch] ?? ch)
     .slice(0, 500);
 }
+
+/** Dangerous prototype keys that can pollute Object.prototype. */
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/** Recursively strip dangerous prototype pollution keys from an object. */
+export function stripPrototypeKeys(obj: unknown): unknown {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(stripPrototypeKeys);
+  }
+
+  const result = {} as Record<string, unknown>;
+  for (const [key, value] of Object.entries(obj)) {
+    if (!DANGEROUS_KEYS.has(key)) {
+      result[key] = stripPrototypeKeys(value);
+    }
+  }
+  return result;
+}
+
+/** Safely parse JSON, stripping dangerous prototype pollution keys. */
+export function safeJsonParse<T = unknown>(text: string): T {
+  const parsed = JSON.parse(text) as unknown;
+  return stripPrototypeKeys(parsed) as T;
+}
+
+/** Sanitize HTTP header values — strip CRLF and null bytes to prevent header injection. */
+export function sanitizeHeaderValue(value: string): string {
+  return value.replace(/[\r\n\x00]/g, '').trim();
+}
+
+/** Sanitize text content — strip control characters. */
+export function sanitizeTextContent(value: string): string {
+  return value.replace(CONTROL_CHARS, '').trim();
+}

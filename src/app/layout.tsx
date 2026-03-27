@@ -7,8 +7,18 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ServiceWorkerRegistrar } from './ServiceWorkerRegistrar';
 import { WebVitalsReporter } from '@/components/WebVitalsReporter';
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
-const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+});
 const SITE_URL = 'https://www.pulse-radio.online';
 const SITE_TITLE = 'Pulse Radio — Free Internet Radio with Visualizer';
 const SITE_DESCRIPTION =

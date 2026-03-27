@@ -2,11 +2,12 @@
 import { isStationBlacklisted, recordStationFailure, clearStationFailures } from '@/lib/server-cache';
 import { recordSuccess, recordFailure, isUnhealthy } from '@/lib/station-health';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeUrl } from '@/lib/sanitize';
+import { sanitizeUrl, sanitizeHeaderValue } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { proxyStreamSchema } from '@/lib/validation-schemas';
 import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
+import { safeErrorResponse } from '@/lib/api-error-sanitizer';
 export const runtime = 'nodejs';
 const MAX_DURATION_MS = 25_000;
 const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;

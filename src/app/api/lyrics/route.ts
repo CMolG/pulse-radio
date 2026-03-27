@@ -6,6 +6,7 @@ import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { validateRequest } from '@/lib/validate-request';
 import { lyricsSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
+import { lyricsKey } from '@/lib/cache-keys';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -93,7 +94,7 @@ export async function GET(req: NextRequest) {
   const album = validated.data.album?.trim() ?? '';
   const duration = validated.data.duration;
 
-  const cacheKey = `${normKey(artist)}|${normKey(title)}`;
+  const cacheKey = lyricsKey(artist, title);
   try {
     const result = await cacheResolve<LrcLibResponse | null>({
       namespace: 'lyrics',
