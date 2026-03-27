@@ -1,5 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest, NextResponse } from 'next/server';
-import { cacheResolve } from '@/lib/services/CacheRepository';
+import { getCachedOrFetch } from '@/lib/services/CacheRepository';
 import { ItunesSearchResultSchema } from '@/lib/schemas/api-responses';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
@@ -35,7 +35,7 @@ const _NOOP = () => {};
   const limit = isPodcast ? '20' : '3';
   const cacheKey = itunesKey(term, media);
   try {
-    const data = await cacheResolve<unknown>({
+    const data = await getCachedOrFetch({
       namespace: 'itunes',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,

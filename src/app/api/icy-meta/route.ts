@@ -8,7 +8,7 @@ import { sanitizeUrl, sanitizeTextContent } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';
-import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
+import { isPrivateHost, ALLOWED_PROTOCOLS, resolveDnsAndValidate } from '@/lib/ssrf';
 import { safeErrorResponse } from '@/lib/api-error-sanitizer';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
 const _TRAILING_NULLS_RE = /\0+$/;
@@ -42,6 +42,11 @@ export async function GET(req: NextRequest) {
     }
     if (isPrivateHost(url.hostname))
       return NextResponse.json(_ERR_PRIVATE_IP, { status: 400, headers: _CACHE_BAD_REQ });
+    try {
+      await resolveDnsAndValidate(url.hostname);
+    } catch {
+      return NextResponse.json(_ERR_PRIVATE_IP, { status: 400, headers: _CACHE_BAD_REQ });
+    }
   } catch {
     return NextResponse.json(_ERR_INVALID_URL, { status: 400, headers: _CACHE_BAD_REQ });
   }

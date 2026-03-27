@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
-import { cacheResolve } from '@/lib/services/CacheRepository';
+import { getCachedOrFetch } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { validateRequest } from '@/lib/validate-request';
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
 
   const cacheKey = lyricsKey(artist, title);
   try {
-    const result = await cacheResolve<LrcLibResponse | null>({
+    const result = await getCachedOrFetch(LrcLibResponse | null>({
       namespace: 'lyrics',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,

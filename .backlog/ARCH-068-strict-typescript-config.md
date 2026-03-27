@@ -64,3 +64,9 @@ These should be replaced with proper interfaces.
 - [ ] `clearTimer` properly typed.
 - [ ] `npm run build` passes with zero TypeScript errors.
 - [ ] No runtime behavior changes.
+
+## Blocker
+
+**BLOCKED**: Repository has a pre-existing build failure in `src/components/radio/RadioShell.tsx` (line 9) due to malformed import statements. The file contains a syntax error: `/* Copyright...  */ ('use client');` which is invalid JavaScript. This corruption exists in the commit history (at least 20+ commits back) and prevents building the project to test the TypeScript strict configuration changes.
+
+**Recommendation**: Fix ARCH-xxx-fix-radioshell-syntax (prerequisite) before proceeding with ARCH-068.

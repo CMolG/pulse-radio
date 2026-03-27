@@ -24,7 +24,7 @@ async function apiFetch(
   }
 }
 import { NextRequest, NextResponse } from 'next/server';
-import { cacheResolve } from '@/lib/services/CacheRepository';
+import { getCachedOrFetch } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
