@@ -257,14 +257,14 @@ src/
 
 ## 🤝 Contributing
 
-We welcome contributions of all kinds! Whether it's a bug fix, new feature, documentation improvement, or design suggestion — every contribution matters.
+We welcome contributions of all kinds! See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide covering setup, testing, code style, and architecture.
 
-### How to Contribute
+### Quick Start
 
 1. **Fork** the repository
 2. **Create** a feature branch: `git checkout -b feat/my-feature`
 3. **Make** your changes
-4. **Test** locally: `npm run dev` and verify in browser
+4. **Test** locally: `npm run build && npx playwright test --project=mobile-chrome`
 5. **Lint**: `npm run lint`
 6. **Commit** with a descriptive message: `git commit -m "feat: add sleep timer"`
 7. **Push** to your fork: `git push origin feat/my-feature`
