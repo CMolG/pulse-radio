@@ -4,6 +4,11 @@ import { z } from 'zod';
 export const itunesSchema = z.object({
   term: z.string().min(1).max(200),
   media: z.enum(['music', 'podcast']).optional(),
+  entity: z.enum(['song', 'album']).optional(),
+});
+
+export const itunesLookupSchema = z.object({
+  id: z.string().regex(/^\d+$/).max(15),
 });
 
 export const lyricsSchema = z.object({

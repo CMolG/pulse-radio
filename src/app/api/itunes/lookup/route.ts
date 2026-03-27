@@ -26,32 +26,26 @@ async function apiFetch(
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
-import { itunesSchema } from '@/lib/validation-schemas';
+import { itunesLookupSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 export const runtime = 'nodejs';
-const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
+const _ERR_400 = { error: 'Missing or invalid id parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-const itunesCircuit = createCircuitBreaker('itunes');
-/* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
+const itunesCircuit = createCircuitBreaker('itunes-lookup');
+/* Server-side proxy for iTunes Lookup API. Returns songs for a given collectionId. */ export async function GET(
   req: NextRequest,
 ) {
   const limited = rateLimit(req, RATE_LIMITS.itunes);
   if (limited) return limited;
   const reqLog = logRequest(req);
 
-  const validated = validateRequest(itunesSchema, req.nextUrl.searchParams);
+  const validated = validateRequest(itunesLookupSchema, req.nextUrl.searchParams);
   if (!validated.success) return validated.error;
-  const term = sanitizeSearchQuery(validated.data.term);
-  if (!term) return NextResponse.json(_ERR_400, { status: 400 });
-  const media = validated.data.media ?? 'music';
-  const isPodcast = media === 'podcast';
-  const entity = isPodcast ? 'podcast' : (validated.data.entity ?? 'song');
-  const limit = isPodcast ? '20' : '3';
-  const cacheKey = `${media}:${term.toLowerCase().trim()}`;
+  const { id } = validated.data;
+  const cacheKey = `lookup:${id}`;
   try {
     const data = await cacheResolve<unknown>({
       namespace: 'itunes',
@@ -59,13 +53,15 @@ const itunesCircuit = createCircuitBreaker('itunes');
       ttlMs: CACHE_TTL_MS,
       fetcher: async () => {
         const { data } = await itunesCircuit.call(async () => {
-          const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
+          const url = `https://itunes.apple.com/lookup?${new URLSearchParams({ id, entity: 'song' })}`;
           const res = await apiFetch(url, {
             timeoutMs: 8_000,
             maxBytes: 2 * 1024 * 1024,
-            label: 'iTunes API',
+            label: 'iTunes Lookup API',
           });
-          return await res.json();
+          const json = await res.json();
+          // Filter out the album entry (wrapperType=collection), keep only tracks
+          return { ...json, results: (json.results ?? []).filter((r: { wrapperType?: string }) => r.wrapperType === 'track') };
         }, { resultCount: 0, results: [] });
         return data;
       },

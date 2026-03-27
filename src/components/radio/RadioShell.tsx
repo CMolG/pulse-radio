@@ -107,6 +107,8 @@ type ApiLogEntry = {
   durationMs?: number;
   requestPreview?: string;
   responsePreview?: string;
+  requestFull?: string;
+  responseFull?: string;
   error?: string;
 };
 type ApiLogStore = {
@@ -185,21 +187,27 @@ function installDevFetchLogger() {
       : url.length > 240
         ? `${url.slice(0, 240)}…`
         : url;
+    const requestFull = init?.body
+      ? String(init.body)
+      : url;
     useApiLogStore.getState().push({
       ts: Date.now(),
       kind: 'request',
       method,
       url,
       requestPreview,
+      requestFull,
     });
     const t0 = performance.now();
     try {
       const res = await origFetch(input, init);
       const durationMs = Math.round(performance.now() - t0);
       let responsePreview = '';
+      let responseFull = '';
       try {
         const clone = res.clone();
         const text = await clone.text();
+        responseFull = text;
         responsePreview = text.length > 200 ? text.slice(0, 200) + '…' : text;
       } catch { /* ignore */ }
       useApiLogStore.getState().push({
@@ -210,6 +218,7 @@ function installDevFetchLogger() {
         status: res.status,
         durationMs,
         responsePreview,
+        responseFull,
       });
       return res;
     } catch (err) {
@@ -276,7 +285,7 @@ const LiquidGlassButton = React.memo(function LiquidGlassButton({ onClick, disab
 });
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Minimize2,
@@ -496,6 +505,14 @@ const _FEAT_PARENS_RE = /\s*[\(\[](feat|ft|featuring)\.?\s+[^\)\]]*[\)\]]/gi;
 const _FEAT_BARE_RE = /\s+(feat|ft|featuring)\.?\s+.*/i;
 function cleanFeatFromTitle(title: string): string {
   return title.replace(_FEAT_PARENS_RE, '').replace(_FEAT_BARE_RE, '').trim();
+}
+function slugify(text: string): string {
+  return text
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
 }
 function formatTimeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -790,11 +807,13 @@ type ItunesResult = {
   trackViewUrl?: string;
   collectionViewUrl?: string;
   collectionName?: string;
+  collectionId?: number;
   releaseDate?: string;
   trackTimeMillis?: number;
   primaryGenreName?: string;
   trackNumber?: number;
   trackCount?: number;
+  wrapperType?: string;
 };
 let _aMatches: boolean[] = [];
 let _bMatches: boolean[] = [];
@@ -1085,6 +1104,19 @@ async function fetchCached(path: string, key: string): Promise<Station[]> {
     }
   }
   throw new Error('All Radio-Browser API servers unavailable');
+}
+async function fetchStationByUuid(uuid: string): Promise<Station | null> {
+  for (let attempt = 0; attempt < SERVERS.length; attempt++) {
+    try {
+      const url = `${getBase()}/stations/byuuid/${encodeURIComponent(uuid)}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+      if (!res.ok) { rotateServer(); continue; }
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) return data[0] as Station;
+      return null;
+    } catch { rotateServer(); }
+  }
+  return null;
 }
 async function topStations(limit = 20): Promise<Station[]> {
   return fetchCached(`/stations/topvote?limit=${limit}`, `top-${limit}`);
@@ -2767,11 +2799,11 @@ function useLyrics(
     setLoading(true);
     setError(false);
     fetchLyricsApi(
-      track.artist || stationName || '',
+      track.artist || '',
       track.title,
       track.album,
       undefined,
-      stationName ?? undefined,
+      undefined,
       controller.signal,
     )
       .then((result) => {
@@ -2801,7 +2833,7 @@ function useLyrics(
       });
   };
   const lyricsKey = (t: NowPlayingTrack): string => {
-    const a = (t.artist || stationName || 'unknown').trim();
+    const a = (t.artist || 'unknown').trim();
     return `${a}\n${t.title}`.toLowerCase();
   };
   useEffect(() => {
@@ -4112,6 +4144,9 @@ function LyricsReel({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [focusedIdx, setFocusedIdx] = useState(0);
+  const [syncEnabled, setSyncEnabled] = useState(false);
+  const userScrolling = useRef(false);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const isDesktop = variant === 'desktop';
   const renderableLines = useMemo(() => getRenderableLyricLines(lyrics), [lyrics]);
   const activeIdx = useMemo(
@@ -4170,10 +4205,54 @@ function LyricsReel({
       scroller.removeEventListener('scroll', handleScroll);
     };
   }, [renderableLines.length, updateFocusedIdx]);
+  // Auto-scroll when sync is enabled
+  useEffect(() => {
+    if (!syncEnabled || activeIdx < 0) return;
+    scrollToIndex(activeIdx, 'smooth');
+  }, [syncEnabled, activeIdx, scrollToIndex]);
+  // Detect user scroll to temporarily pause sync auto-scroll
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || !syncEnabled) return;
+    const onWheel = () => {
+      userScrolling.current = true;
+      clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => { userScrolling.current = false; }, 3000);
+    };
+    const onTouch = () => {
+      userScrolling.current = true;
+      clearTimeout(scrollTimeout.current);
+    };
+    const onTouchEnd = () => {
+      scrollTimeout.current = setTimeout(() => { userScrolling.current = false; }, 3000);
+    };
+    scroller.addEventListener('wheel', onWheel, _EVT_PASSIVE);
+    scroller.addEventListener('touchstart', onTouch, _EVT_PASSIVE);
+    scroller.addEventListener('touchend', onTouchEnd, _EVT_PASSIVE);
+    return () => {
+      scroller.removeEventListener('wheel', onWheel);
+      scroller.removeEventListener('touchstart', onTouch);
+      scroller.removeEventListener('touchend', onTouchEnd);
+      clearTimeout(scrollTimeout.current);
+    };
+  }, [syncEnabled]);
+  const emphasisSource = syncEnabled ? activeIdx : focusedIdx;
   if (renderableLines.length === 0) return null;
   return (
     <div className={`relative flex-shrink-0 ${isDesktop ? 'h-[256px] lg:h-[272px]' : 'h-[192px]'}`}>
-      {' '}
+      {/* Sync toggle button */}
+      <span
+        onClick={() => setSyncEnabled((s) => !s)}
+        className={`absolute bottom-2 z-30 text-[10px] font-medium cursor-pointer transition-colors select-none ${isDesktop ? 'right-10' : 'right-7'} ${syncEnabled ? 'text-sys-orange' : 'text-white/30 hover:text-white/50'}`}
+        title={syncEnabled ? 'Disable lyrics sync' : 'Enable lyrics sync'}
+        role="button"
+        tabIndex={0}
+        aria-label={syncEnabled ? 'Disable lyrics sync' : 'Enable lyrics sync'}
+        aria-pressed={syncEnabled}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSyncEnabled((s) => !s); } }}
+      >
+        Sync {syncEnabled ? 'ON' : 'OFF'}
+      </span>
       <div
         className={`relative z-20 flex h-full flex-col ${isDesktop ? 'px-8 pb-5 pt-3' : 'px-5 pb-4 pt-2'}`}
       >
@@ -4190,7 +4269,7 @@ function LyricsReel({
               const ei =
                 activeIdx >= 0 && index === activeIdx
                   ? 0
-                  : Math.min(Math.abs(index - focusedIdx), 3) + 1;
+                  : Math.min(Math.abs(index - emphasisSource), 3) + 1;
               return (
                 <LyricReelLine
                   key={line.id}
@@ -4422,6 +4501,7 @@ const DevApiConsole = React.memo(function DevApiConsole() {
   const clear = useApiLogStore((s) => s.clear);
   const [open, setOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -4434,6 +4514,14 @@ const DevApiConsole = React.memo(function DevApiConsole() {
       else next.add(id);
       return next;
     });
+  };
+  const copyToClipboard = (text: string, key: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedId(key);
+        setTimeout(() => setCopiedId((prev) => (prev === key ? null : prev)), 1500);
+      }).catch(() => {});
+    }
   };
   const statusColor = (s?: number) => {
     if (!s) return 'text-red-400';
@@ -4518,18 +4606,33 @@ const DevApiConsole = React.memo(function DevApiConsole() {
                     <span className="text-white/15 truncate flex-1 ml-1">{e.url.split('?')[0].split('/api/').pop() ?? e.url}</span>
                   </div>
                   {isExpanded && e.requestPreview && (
-                    <div className="mt-1 ml-4 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 break-all whitespace-pre-wrap text-[10px] max-h-32 overflow-y-auto">
+                    <div
+                      className="mt-1 ml-4 p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-300 break-all whitespace-pre-wrap text-[10px] max-h-32 overflow-y-auto cursor-pointer hover:bg-sky-500/15 transition-colors relative"
+                      onClick={(ev) => { ev.stopPropagation(); copyToClipboard(e.requestFull || e.requestPreview!, `req-${e.id}`); }}
+                      title="Click to copy"
+                    >
                       {e.requestPreview}
+                      {copiedId === `req-${e.id}` && <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">Copied!</span>}
                     </div>
                   )}
                   {isExpanded && e.error && (
-                    <div className="mt-1 ml-4 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 break-all whitespace-pre-wrap text-[10px]">
+                    <div
+                      className="mt-1 ml-4 p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 break-all whitespace-pre-wrap text-[10px] cursor-pointer hover:bg-red-500/15 transition-colors relative"
+                      onClick={(ev) => { ev.stopPropagation(); copyToClipboard(e.error!, `err-${e.id}`); }}
+                      title="Click to copy"
+                    >
                       {e.error}
+                      {copiedId === `err-${e.id}` && <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">Copied!</span>}
                     </div>
                   )}
                   {isExpanded && e.responsePreview && (
-                    <div className="mt-1 ml-4 p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 break-all whitespace-pre-wrap text-[10px] max-h-48 overflow-y-auto">
+                    <div
+                      className="mt-1 ml-4 p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 break-all whitespace-pre-wrap text-[10px] max-h-48 overflow-y-auto cursor-pointer hover:bg-white/10 transition-colors relative"
+                      onClick={(ev) => { ev.stopPropagation(); copyToClipboard(e.responseFull || e.responsePreview!, `res-${e.id}`); }}
+                      title="Click to copy"
+                    >
                       {e.responsePreview}
+                      {copiedId === `res-${e.id}` && <span className="absolute top-1 right-2 text-[9px] text-green-400 font-bold">Copied!</span>}
                     </div>
                   )}
                 </div>
@@ -4542,6 +4645,411 @@ const DevApiConsole = React.memo(function DevApiConsole() {
     </div>
   );
 });
+
+/* ── ApiPlayground — manual API request tool (dev-only) ── */
+const _API_ENDPOINTS = [
+  { label: 'ICY Metadata', path: '/api/icy-meta', params: [{ key: 'url', placeholder: 'Stream URL' }] },
+  { label: 'iTunes Search', path: '/api/itunes', params: [{ key: 'term', placeholder: 'Artist - Song' }] },
+  { label: 'iTunes Lookup', path: '/api/itunes/lookup', params: [{ key: 'id', placeholder: 'iTunes ID' }] },
+  { label: 'Concerts', path: '/api/concerts', params: [{ key: 'artist', placeholder: 'Artist name' }] },
+  { label: 'Artist Info', path: '/api/artist-info', params: [{ key: 'name', placeholder: 'Artist name' }] },
+  { label: 'Lyrics', path: '/api/lyrics', params: [{ key: 'artist', placeholder: 'Artist' }, { key: 'title', placeholder: 'Song title' }] },
+  { label: 'Now Playing', path: '/api/now-playing', params: [{ key: 'stationuuid', placeholder: 'Station UUID' }] },
+  { label: 'Trending', path: '/api/now-playing/trending', params: [] },
+  { label: 'Station Health', path: '/api/station-health', params: [{ key: 'url', placeholder: 'Stream URL' }] },
+  { label: 'Health', path: '/api/health', params: [] },
+  { label: 'Analytics', path: '/api/analytics/summary', params: [] },
+];
+const ApiPlayground = React.memo(function ApiPlayground() {
+  const [open, setOpen] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [customUrl, setCustomUrl] = useState('');
+  const [paramValues, setParamValues] = useState<Record<string, string>>({});
+  const [response, setResponse] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<number | null>(null);
+  const [durationMs, setDurationMs] = useState<number | null>(null);
+  const [copiedPg, setCopiedPg] = useState(false);
+  const responseRef = useRef<HTMLDivElement>(null);
+  if (process.env.NODE_ENV !== 'development') return null;
+  const endpoint = _API_ENDPOINTS[selectedIdx];
+  const sendRequest = async () => {
+    setLoading(true);
+    setResponse(null);
+    setStatus(null);
+    setDurationMs(null);
+    const start = performance.now();
+    try {
+      let url: string;
+      if (customUrl) {
+        url = customUrl;
+      } else {
+        const qs = new URLSearchParams();
+        for (const p of endpoint.params) {
+          const v = paramValues[p.key];
+          if (v) qs.set(p.key, v);
+        }
+        url = `${endpoint.path}${qs.toString() ? `?${qs}` : ''}`;
+      }
+      const res = await fetch(url);
+      const elapsed = Math.round(performance.now() - start);
+      setDurationMs(elapsed);
+      setStatus(res.status);
+      const text = await res.text();
+      try { setResponse(JSON.stringify(JSON.parse(text), null, 2)); } catch { setResponse(text); }
+    } catch (err: unknown) {
+      setDurationMs(Math.round(performance.now() - start));
+      setStatus(0);
+      setResponse(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+  const copyResponse = () => {
+    if (response && navigator.clipboard) {
+      navigator.clipboard.writeText(response).then(() => {
+        setCopiedPg(true);
+        setTimeout(() => setCopiedPg(false), 1500);
+      });
+    }
+  };
+  return (
+    <div className="fixed bottom-50 left-2 z-9999 pointer-events-auto" style={{ maxWidth: 540, width: 'calc(100vw - 16px)', zIndex: 9999 }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono bg-black/80 text-purple-400 border border-purple-500/30 hover:bg-black/90 transition-colors shadow-lg"
+      >
+        <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+        <span>API Playground</span>
+        <span className="text-white/30 ml-1">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div
+          className="mt-1 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
+          style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+        >
+          <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
+            <span className="text-[11px] font-mono font-bold text-purple-400/80">🧪 API Playground</span>
+            <button onClick={() => setOpen(false)} className="text-[12px] font-mono text-white/40 hover:text-white/70 transition-colors">✕</button>
+          </div>
+          <div className="p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <select
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-mono text-white/80 outline-none focus:border-purple-500/50"
+                value={selectedIdx}
+                onChange={(e) => { setSelectedIdx(Number(e.target.value)); setParamValues({}); setCustomUrl(''); }}
+              >
+                {_API_ENDPOINTS.map((ep, i) => (
+                  <option key={ep.path} value={i} className="bg-black text-white">{ep.label} — {ep.path}</option>
+                ))}
+              </select>
+            </div>
+            <input
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-mono text-white/60 outline-none focus:border-purple-500/50 placeholder:text-white/20"
+              placeholder="Custom URL (overrides selection)"
+              value={customUrl}
+              onChange={(e) => setCustomUrl(e.target.value)}
+            />
+            {!customUrl && endpoint.params.length > 0 && (
+              <div className="space-y-1.5">
+                {endpoint.params.map((p) => (
+                  <div key={p.key} className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-white/40 w-16 text-right shrink-0">{p.key}</span>
+                    <input
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] font-mono text-white/70 outline-none focus:border-purple-500/50 placeholder:text-white/20"
+                      placeholder={p.placeholder}
+                      value={paramValues[p.key] ?? ''}
+                      onChange={(e) => setParamValues((prev) => ({ ...prev, [p.key]: e.target.value }))}
+                      onKeyDown={(e) => { if (e.key === 'Enter') sendRequest(); }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={sendRequest}
+                disabled={loading}
+                className="px-4 py-1.5 rounded-lg text-[11px] font-mono font-bold bg-purple-600/80 text-white hover:bg-purple-500/80 disabled:opacity-50 transition-colors"
+              >
+                {loading ? 'Sending…' : 'Send'}
+              </button>
+              {status !== null && (
+                <span className={`text-[11px] font-mono font-bold ${status >= 200 && status < 300 ? 'text-green-400' : status === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
+                  {status} {durationMs != null && `(${durationMs}ms)`}
+                </span>
+              )}
+              {response && (
+                <button
+                  onClick={copyResponse}
+                  className="ml-auto text-[10px] font-mono text-white/40 hover:text-white/70 transition-colors"
+                >
+                  {copiedPg ? '✓ Copied' : 'Copy'}
+                </button>
+              )}
+            </div>
+          </div>
+          {response !== null && (
+            <div ref={responseRef} className="border-t border-white/10 max-h-72 overflow-y-auto p-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+              <pre className="text-[10px] font-mono text-white/50 whitespace-pre-wrap break-all leading-relaxed">{response}</pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
+/* ── ConcertSidePanel — glassmorphism scrollable panel for desktop theater ── */
+const _CONCERT_PANEL_STYLE: React.CSSProperties = {
+  background: 'rgba(0, 0, 0, 0.25)',
+  backdropFilter: 'blur(12px) saturate(1.3)',
+  WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+};
+const _CONCERT_ITEM_STYLE: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.08)',
+};
+function ConcertSidePanel({ concerts }: { concerts: ConcertEvent[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [shadows, setShadows] = useState({ top: false, bottom: true });
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    setShadows({
+      top: scrollTop > 0,
+      bottom: Math.ceil(scrollTop + clientHeight) < scrollHeight,
+    });
+  }, []);
+  useEffect(() => { handleScroll(); }, [handleScroll]);
+  return (
+    <div
+      className="relative rounded-2xl p-2 flex-none w-full max-w-[300px] overflow-hidden self-center"
+      style={{ ..._CONCERT_PANEL_STYLE, height: 'calc((2.5 * (90px + 0.5rem)) + 1rem)' }}
+    >
+      <div className="px-3 pt-1.5 pb-1">
+        <p className="text-[10px] font-semibold tracking-widest uppercase text-white/40 text-center">
+          Upcoming Shows
+        </p>
+      </div>
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="h-[calc(100%-2rem)] overflow-y-auto overflow-x-hidden snap-y snap-mandatory pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      >
+        <ul className="m-0 p-0 list-none">
+          {concerts.slice(0, 10).map((ev) => {
+            const d = new Date(ev.date);
+            const dateStr = isNaN(d.getTime())
+              ? ev.date
+              : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase();
+            return (
+              <li
+                key={ev.id}
+                className="w-full h-[90px] my-1 p-2 rounded-lg flex flex-col items-center justify-center snap-start box-border"
+                style={_CONCERT_ITEM_STYLE}
+              >
+                <div className="flex flex-row items-center justify-center gap-4 m-1.5 w-full box-border">
+                  <span className="text-sys-orange text-[0.95em] font-bold font-mono whitespace-nowrap">
+                    {dateStr}
+                  </span>
+                  <span className="font-semibold text-[0.9em] text-white/80 text-center truncate">
+                    {ev.venue}
+                  </span>
+                </div>
+                <p className="text-[11px] text-white/40 text-center truncate w-full mb-1">
+                  {ev.city}{ev.country ? `, ${ev.country}` : ''}
+                </p>
+                {ev.ticketUrl ? (
+                  <a
+                    href={ev.ticketUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-1.5 rounded-full text-[11px] font-bold text-white/70 hover:text-white transition-all hover:-translate-y-[1px]"
+                    style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
+                  >
+                    Get Tickets
+                  </a>
+                ) : (
+                  <span
+                    className="px-5 py-1.5 rounded-full text-[11px] font-medium text-white/40"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    No tickets yet
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div
+        className={`pointer-events-none absolute top-8 left-0 right-0 h-6 shadow-[0_1rem_1rem_-1rem_rgba(0,0,0,0.2)_inset] transition-opacity duration-200 ${shadows.top ? 'opacity-100' : 'opacity-0'}`}
+        aria-hidden="true"
+      />
+      <div
+        className={`pointer-events-none absolute bottom-0 left-0 right-0 h-6 shadow-[0_-1rem_1rem_-1rem_rgba(0,0,0,0.2)_inset] transition-opacity duration-200 ${shadows.bottom ? 'opacity-100' : 'opacity-0'}`}
+        aria-hidden="true"
+      />
+    </div>
+  );
+}
+
+/* ── ConcertMobileBanner — thin marquee banner for mobile, above bottom player ── */
+function ConcertMobileBanner({ concerts, onClick }: { concerts: ConcertEvent[]; onClick?: () => void }) {
+  if (concerts.length === 0) return null;
+  return (
+    <div
+      className={`w-full overflow-hidden ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ background: 'rgba(0,0,0,0.5)', borderTop: '1px solid rgba(255,255,255,0.06)' }}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+    >
+      <div className="relative overflow-hidden h-7 flex items-center">
+        <span className="text-[9px] font-semibold tracking-widest uppercase text-white/30 pl-3 pr-2 shrink-0">
+          LIVE
+        </span>
+        <div
+          className="flex items-center gap-6 whitespace-nowrap"
+          style={{ animation: `marquee ${Math.max(10, concerts.length * 5)}s linear infinite` }}
+        >
+          {[...concerts.slice(0, 5), ...concerts.slice(0, 5)].map((ev, idx) => {
+            const d = new Date(ev.date);
+            const dateStr = isNaN(d.getTime())
+              ? ev.date
+              : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            const inner = (
+              <span className="inline-flex items-center gap-1.5 text-[10px]">
+                <span className="text-sys-orange font-mono font-bold">{dateStr}</span>
+                <span className="text-white/50 font-medium">{ev.venue}</span>
+                {(ev.city || ev.country) && (
+                  <span className="text-white/30">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
+                )}
+              </span>
+            );
+            return (
+              <span key={`${ev.id}-${idx}`} className="inline-flex items-center">{inner}</span>
+            );
+          })}
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ── ConcertModal — full upcoming shows widget in a modal ── */
+function ConcertModal({ concerts, artistName, onClose }: { concerts: ConcertEvent[]; artistName?: string | null; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="concert-modal-backdrop"
+        initial={_MOTION_FADE_IN}
+        animate={_MOTION_FADE_VISIBLE}
+        exit={_MOTION_FADE_OUT}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+        onClick={onClose}
+      >
+        <motion.div
+          key="concert-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Upcoming shows"
+          initial={{ y: 30, opacity: 0, scale: 0.96 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 30, opacity: 0, scale: 0.96 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+          className="w-full max-w-[400px] mx-4 max-h-[80vh] overflow-hidden rounded-2xl"
+          style={{ ..._CONCERT_PANEL_STYLE }}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-white/40">
+                Upcoming Shows
+              </p>
+              {artistName && (
+                <p className="text-[14px] font-bold text-white truncate mt-0.5">
+                  {artistName}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              aria-label="Close upcoming shows"
+              className="p-2 rounded-full bg-white/10 text-white/60 hover:text-white hover:bg-white/20 transition-colors shrink-0"
+            >
+              <X size={16} />
+            </button>
+          </div>
+          <div className="overflow-y-auto px-2 pb-3 max-h-[calc(80vh-5rem)] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+            <ul className="m-0 p-0 list-none">
+              {concerts.slice(0, 15).map((ev) => {
+                const d = new Date(ev.date);
+                const dateStr = isNaN(d.getTime())
+                  ? ev.date
+                  : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase();
+                return (
+                  <li
+                    key={ev.id}
+                    className="w-full my-1.5 p-3 rounded-xl flex flex-col items-center justify-center"
+                    style={_CONCERT_ITEM_STYLE}
+                  >
+                    <div className="flex flex-row items-center justify-center gap-3 w-full">
+                      <span className="text-sys-orange text-[0.95em] font-bold font-mono whitespace-nowrap">
+                        {dateStr}
+                      </span>
+                      <span className="font-semibold text-[0.9em] text-white/80 text-center truncate">
+                        {ev.venue}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-white/40 text-center truncate w-full mt-1">
+                      {ev.city}{ev.country ? `, ${ev.country}` : ''}
+                    </p>
+                    <div className="mt-2">
+                      {ev.ticketUrl ? (
+                        <a
+                          href={ev.ticketUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-5 py-1.5 rounded-full text-[11px] font-bold text-white/70 hover:text-white transition-all hover:-translate-y-[1px]"
+                          style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
+                        >
+                          Get Tickets
+                        </a>
+                      ) : (
+                        <span
+                          className="px-5 py-1.5 rounded-full text-[11px] font-medium text-white/40"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                        >
+                          No tickets yet
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 type TheaterViewProps = {
   station: Station;
@@ -4560,6 +5068,7 @@ type TheaterViewProps = {
   activeLineOverride?: number;
   lyricsVariant?: 'mobile' | 'desktop';
   compact?: boolean;
+  concerts?: ConcertEvent[];
 };
 const _colorCache = new Map<string, Promise<[string, string, string]>>();
 const MAX_COLOR_CACHE = 32;
@@ -4708,6 +5217,7 @@ function TheaterView({
   activeLineOverride,
   lyricsVariant = 'mobile',
   compact,
+  concerts: concertsProp,
 }: TheaterViewProps) {
   const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
   const [colors, setColors] = useState<[string, string, string]>(FALLBACK_COLORS);
@@ -4727,7 +5237,8 @@ function TheaterView({
   }, [artworkUrl]);
   const [color1, color2, color3] = colors;
   const theaterTags = useMemo(() => _tagsDisplay(station.tags), [station.tags]);
-  const { concerts } = useConcerts(track?.artist, !compact);
+  const { concerts: fetchedConcerts } = useConcerts(track?.artist, !compact && !concertsProp);
+  const concerts = concertsProp ?? fetchedConcerts;
   return (
     <motion.div
       initial={_MOTION_FADE_IN}
@@ -4778,7 +5289,7 @@ function TheaterView({
       {/* ── Top controls (back + favorites) — offset by safe-area-inset-top ── */}{' '}
       {!compact && (
         <div
-          className="absolute left-0 right-0 z-20 flex items-start justify-between px-4 pt-4"
+          className="absolute left-0 right-0 z-20 flex items-center justify-between px-4 pt-4"
           style={_SAFE_AREA_TOP_STYLE}
         >
           <button
@@ -4788,6 +5299,12 @@ function TheaterView({
           >
             <ArrowLeft size={16} />
           </button>{' '}
+          {/* Station name — centered, discrete, semi-translucent */}
+          <span
+            className="flex-1 text-[11px] font-medium text-white/35 truncate text-center px-4 pointer-events-none select-none"
+          >
+            {station.name}
+          </span>{' '}
           <div className="flex flex-row gap-2 sm:flex-col">
             {onToggleFav && (
               <button
@@ -4814,7 +5331,7 @@ function TheaterView({
       )}{' '}
       {/* ── Layer 4: content — glassmorphism panel centered over the spiral ── */}{' '}
       <div className="flex-1 overflow-y-auto relative z-10 px-4 py-4">
-        <div className="flex flex-col items-center justify-center min-h-full">
+        <div className="flex items-center justify-center min-h-full flex-col relative">
         <div
           className={`flex flex-col items-center ${compact ? 'gap-2 px-4 py-3' : 'gap-3 px-6 py-5'} rounded-3xl max-w-sm w-full`}
           style={{
@@ -4849,6 +5366,14 @@ function TheaterView({
               </div>
             </div>
           )}{' '}
+          {/* Artist name above cover */}{' '}
+          {track?.artist && (
+            <p
+              className={`${compact ? 'text-[11px]' : 'text-[13px] sm:text-[14px]'} font-semibold text-white/80 text-center line-clamp-1 leading-snug`}
+            >
+              {track.artist}
+            </p>
+          )}{' '}
           {/* Cover art */}{' '}
           <div
             className={`${compact ? 'w-14 h-14 rounded-xl' : 'w-36 h-36 sm:w-44 sm:h-44 rounded-2xl'} relative overflow-hidden flex-center-row flex-shrink-0`}
@@ -4876,30 +5401,28 @@ function TheaterView({
               />
             )}
           </div>{' '}
-          {/* Station name */}{' '}
+          {/* Song name (was: station name) */}{' '}
           <h2
             className={`${compact ? 'text-[12px] mb-0' : 'text-lg sm:text-xl mb-0'} font-bold text-white text-center drop-shadow-lg line-clamp-2 leading-tight`}
           >
-            {station.name}
+            {track?.title || station.name}
           </h2>{' '}
-          {/* Track info */}{' '}
-          {track?.title ? (
+          {/* Album (was: track info) */}{' '}
+          {track?.album ? (
             <p
               className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
             >
-              {track.artist ? `${track.artist} — ${track.title}` : track.title}
+              {track.album}
+            </p>
+          ) : track?.artist ? (
+            <p
+              className={`${compact ? 'text-[12px]' : 'text-[13px] sm:text-[14px]'} text-white/70 text-center line-clamp-2 leading-snug`}
+            >
+              {track.artist}
             </p>
           ) : (
             <p className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center`}>
               {theaterTags}
-            </p>
-          )}{' '}
-          {track?.album && (
-            <p
-              className={`${compact ? 'text-[12px]' : 'text-[12px]'} text-white/50 text-center line-clamp-1`}
-            >
-              {' '}
-              {track.album}
             </p>
           )}{' '}
           {!compact && track?.releaseDate && (
@@ -4937,68 +5460,29 @@ function TheaterView({
               {track?.genre && <Badge>{track.genre}</Badge>}
             </div>
           )}{' '}
-          {/* Listen on Apple Music */}{' '}
-          {!compact && track && (
-            <a
-              href={
-                track.itunesUrl ||
-                `https://music.apple.com/search?term=${encodeURIComponent(`${track.artist} ${track.title}`.trim())}&pt=pulse-radio&ct=www.pulse-radio.online`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 mt-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
-            >
-              <ExternalLink size={11} /> Listen on Apple Music
-            </a>
-          )}{' '}
-          {/* Share button */}{' '}
+          {/* Listen on Apple Music + Share */}{' '}
           {!compact && (
-            <ShareButton
-              title={track ? `${track.artist ?? station.name} — ${track.title}` : station.name}
-              text={track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`}
-              size={14}
-              className="mt-1 w-8 h-8"
-            />
-          )}{' '}
-          {/* ── Upcoming concerts (Bandsintown) — animated ticker banner ── */}{' '}
-          {!compact && concerts.length > 0 && (
-            <div className="w-full mt-2 overflow-hidden rounded-xl" style={{ background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div className="px-3 pt-2 pb-1">
-                <p className="text-[10px] font-semibold tracking-widest uppercase text-white/40 text-center">
-                  Upcoming Shows
-                </p>
-              </div>
-              <div className="relative overflow-hidden h-10">
-                <div
-                  className="flex items-center gap-8 animate-marquee whitespace-nowrap absolute left-0 top-0 h-full"
-                  style={{ animation: `marquee ${Math.max(12, concerts.length * 6)}s linear infinite` }}
+            <div className="flex items-center justify-center gap-2 mt-2">
+              {track && (
+                <a
+                  href={
+                    track.itunesUrl ||
+                    `https://music.apple.com/search?term=${encodeURIComponent(`${track.artist} ${track.title}`.trim())}&pt=pulse-radio&ct=www.pulse-radio.online`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-[12px] font-medium text-white/60 hover:text-white/80 transition-colors"
                 >
-                  {[...concerts.slice(0, 5), ...concerts.slice(0, 5)].map((ev, idx) => {
-                    const d = new Date(ev.date);
-                    const dateStr = isNaN(d.getTime())
-                      ? ev.date
-                      : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                    const inner = (
-                      <span className="inline-flex items-center gap-2 text-[11px]">
-                        <span className="text-sys-orange font-mono font-bold">{dateStr}</span>
-                        <span className="text-white/70 font-medium">{ev.venue}</span>
-                        <span className="text-white/40">{ev.city}{ev.country ? `, ${ev.country}` : ''}</span>
-                      </span>
-                    );
-                    return ev.ticketUrl ? (
-                      <a key={`${ev.id}-${idx}`} href={ev.ticketUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:text-white transition-colors pointer-events-auto">{inner}</a>
-                    ) : (
-                      <span key={`${ev.id}-${idx}`} className="inline-flex items-center">{inner}</span>
-                    );
-                  })}
-                </div>
-              </div>
-              <style jsx>{`
-                @keyframes marquee {
-                  0% { transform: translateX(0%); }
-                  100% { transform: translateX(-50%); }
-                }
-              `}</style>
+                  <ExternalLink size={11} /> Listen on Apple Music
+                </a>
+              )}
+              <ShareButton
+                title={track ? `${track.artist ?? station.name} — ${track.title}` : station.name}
+                text={track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`}
+                url={buildStationShareUrl(station)}
+                size={14}
+                className="w-8 h-8"
+              />
             </div>
           )}{' '}
           {/* ── Lyrics reel inside glass panel ── */}{' '}
@@ -5013,6 +5497,7 @@ function TheaterView({
             </div>
           )}
         </div>
+        {/* ── Concert ticket widget removed — now shown as banner above bottom bar ── */}
         </div>
         </div>
       </motion.div>
@@ -5059,6 +5544,12 @@ function useArtistInfo(artist: string | null): { info: ArtistInfo | null; loadin
 }
 
 /* ── Share utility ── */
+function buildStationShareUrl(station: { name: string; stationuuid: string }): string {
+  if (typeof window === 'undefined') return '';
+  const slug = slugify(station.name);
+  const base = window.location.origin + window.location.pathname;
+  return `${base}?tune=${slug}&sid=${station.stationuuid}`;
+}
 function shareContent(data: { title: string; text?: string; url?: string }) {
   if (typeof navigator !== 'undefined' && navigator.share) {
     navigator.share(data).catch(() => {});
@@ -5953,7 +6444,7 @@ function _NowPlayingBar({
             <>
               <p className="text-[13px] font-medium text-white truncate leading-tight">
                 {' '}
-                {track?.title || station.name}
+                {track?.title ? (track.artist ? `${track.title} - ${track.artist}` : track.title) : station.name}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 {' '}
@@ -5967,9 +6458,14 @@ function _NowPlayingBar({
                   </>
                 )}{' '}
                 <span className="text-[12px] text-secondary truncate">
-                  {track?.artist || compactTags || ''}
+                  {track?.album || track?.artist || compactTags || ''}
                 </span>
               </div>{' '}
+              {station && track?.title && (
+                <p className="text-[10px] text-white/25 truncate leading-tight mt-0.5">
+                  {station.name}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-[13px] text-dim">No station selected</p>
@@ -6048,17 +6544,11 @@ function _NowPlayingBar({
         <div className="min-w-0">
           {' '}
           <p className="text-[12px] font-medium text-white truncate">
-            {station?.name || 'Not Playing'}
+            {track?.title || station?.name || 'Not Playing'}
           </p>{' '}
           <p className="text-[12px] text-secondary truncate">
-            {' '}
-            {track?.title
-              ? track.artist
-                ? `${track.artist} — ${track.title}`
-                : track.title
-              : firstTag}
-          </p>{' '}
-          {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}
+            {track?.album || (track?.artist ? track.artist : firstTag)}
+          </p>
         </div>{' '}
         {icyBitrate && (
           <span className="px-1.5 py-0.5 rounded bg-white/10 text-[12px] font-mono text-white/50 shrink-0 self-center">
@@ -6093,7 +6583,7 @@ function _NowPlayingBar({
         </LiquidGlassButton>
       </div>{' '}
       {/* LIVE indicator + mini ferrofluid */}{' '}
-      <div className="flex-1 flex-row-2 min-w-0 relative">
+      <div className="flex-1 flex items-center gap-2 min-w-0 relative">
         {' '}
         {station && isPlaying && (
           <>
@@ -6112,13 +6602,20 @@ function _NowPlayingBar({
                 />
               </ErrorBoundary>
             </div>
-            <div className="flex-row-1.5 relative z-10">
-              {' '}
-              <span className="dot-2 bg-red-500 animate-pulse" />{' '}
-              <span className="text-[12px] font-semibold tracking-wider uppercase text-red-500">
-                LIVE
-              </span>{' '}
-              <AnimatedBars size="small" />
+            <div className="flex flex-col gap-0.5 relative z-10 min-w-0">
+              <div className="flex-row-1.5">
+                {' '}
+                <span className="dot-2 bg-red-500 animate-pulse" />{' '}
+                <span className="text-[12px] font-semibold tracking-wider uppercase text-red-500">
+                  LIVE
+                </span>{' '}
+                <AnimatedBars size="small" />
+              </div>
+              {station && (
+                <span className="text-[10px] text-white/25 truncate">
+                  {station.name}
+                </span>
+              )}
             </div>
           </>
         )}
@@ -6204,7 +6701,7 @@ function _NowPlayingBar({
             onClick={() => shareContent({
               title: track ? `${track.artist ?? station.name} — ${track.title}` : station.name,
               text: track ? `🎵 Listening to ${track.title} by ${track.artist} on Pulse Radio` : `🎵 Listening to ${station.name} on Pulse Radio`,
-              url: typeof window !== 'undefined' ? window.location.href : '',
+              url: buildStationShareUrl(station),
             })}
             aria-label="Share"
             className="p-2.5 rounded-md transition-colors text-subtle hover:text-white/50"
@@ -6357,16 +6854,19 @@ const NowPlayingHero = React.memo(function NowPlayingHero({
         </div>
         <div className="flex-fill pr-20">
           {' '}
-          <h3 className="text-[15px] font-semibold text-white truncate">{station.name}</h3>{' '}
-          {track?.title ? (
+          <h3 className="text-[15px] font-semibold text-white truncate">{track?.title || station.name}</h3>{' '}
+          {track?.album ? (
+            <p className="text-[13px] text-secondary truncate mt-0.5">{track.album}</p>
+          ) : track?.title ? (
             <p className="text-[13px] text-secondary truncate mt-0.5">
-              {' '}
-              {track.artist ? `${track.artist} — ${track.title}` : track.title}
+              {track.artist || ''}
             </p>
           ) : (
             <p className="text-[12px] text-secondary truncate mt-0.5">{heroTags}</p>
           )}{' '}
-          {track?.album && <p className="text-[12px] text-dim truncate">{track.album}</p>}{' '}
+          {track?.title && (
+            <p className="text-[10px] text-white/25 truncate mt-0.5">{station.name}</p>
+          )}{' '}
           {isPlaying && (
             <div className="flex-row-1.5 mt-1">
               <span className="dot-1.5 bg-sys-orange" />{' '}
@@ -8299,6 +8799,9 @@ interface UseAudioAnalyserReturn {
   }>;
   isActive: boolean;
   disconnect: () => void;
+  disablePassthrough: () => void;
+  enablePassthrough: (audio: HTMLAudioElement) => void;
+  reconnect: (audio: HTMLAudioElement) => void;
 }
 const _EMPTY_ANALYSER_OPTS: UseAudioAnalyserOptions = {};
 function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS): UseAudioAnalyserReturn {
@@ -8310,6 +8813,7 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS):
   const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 });
   const [isActive, setIsActive] = useState(false);
+  const passthroughRef = useRef<GainNode | null>(null);
   const connectAudio = useCallback(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
@@ -8324,6 +8828,14 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS):
           source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
+        // Create passthrough gain so audio reaches speakers even without EQ chain
+        if (!passthroughRef.current) {
+          const gain = ctx.createGain();
+          gain.gain.value = 1;
+          passthroughRef.current = gain;
+        }
+        source.connect(passthroughRef.current);
+        passthroughRef.current.connect(ctx.destination);
         const binCount = analyserRef.current.frequencyBinCount;
         const fftLen = analyserRef.current.fftSize;
         if (!frequencyDataRef.current || frequencyDataRef.current.length !== binCount)
@@ -8369,13 +8881,35 @@ function useAudioAnalyser(opts: UseAudioAnalyserOptions = _EMPTY_ANALYSER_OPTS):
     frequencyDataRef.current = null;
     waveDataRef.current = null;
   }, []);
+  const disablePassthrough = useCallback(() => {
+    try { passthroughRef.current?.disconnect(); } catch { /* ok */ }
+  }, []);
+  const enablePassthrough = useCallback((audio: HTMLAudioElement) => {
+    try {
+      const { ctx, source } = getOrCreateAudioSource(audio);
+      if (!passthroughRef.current) {
+        const gain = ctx.createGain();
+        gain.gain.value = 1;
+        passthroughRef.current = gain;
+      }
+      source.connect(passthroughRef.current);
+      passthroughRef.current.connect(ctx.destination);
+    } catch { /* ok */ }
+  }, []);
+  const reconnect = useCallback((audio: HTMLAudioElement) => {
+    try {
+      const { source } = getOrCreateAudioSource(audio);
+      if (analyserRef.current) source.connect(analyserRef.current);
+      if (passthroughRef.current) source.connect(passthroughRef.current);
+    } catch { /* ok */ }
+  }, []);
   useEffect(
     () => () => {
       cancelAnimationFrame(rafRef.current);
     },
     [],
   );
-  return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect };
+  return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect, disablePassthrough, enablePassthrough, reconnect };
 }
 const NR_PRESETS: Record<
   NoiseReductionMode,
@@ -9696,41 +10230,74 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     lyricsRetryKeyRef.current = retryKey;
     const controller = new AbortController();
     const cleanArtist = primaryArtist(lyrics.artistName);
-    const cleanTitle = cleanFeatFromTitle(lyrics.trackName);
-    const term = `${cleanArtist} ${cleanTitle}`;
-    fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!data || controller.signal.aborted) return;
-        const result = selectBestItunesResult(
-          (data.results ?? []) as ItunesResult[],
-          lyrics.trackName,
-          lyrics.artistName,
-        );
-        if (!result) return;
-        const artworkUrl = result.artworkUrl100?.replace('100x100', '600x600') ?? null;
-        const rawItunesUrl: string | null = result.trackViewUrl ?? result.collectionViewUrl ?? null;
-        const info: AlbumInfo = {
-          artworkUrl,
-          albumName: result.collectionName ?? null,
-          releaseDate: result.releaseDate ?? null,
-          itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
-          durationMs: typeof result.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
-          genre: result.primaryGenreName ?? null,
-          trackNumber: typeof result.trackNumber === 'number' ? result.trackNumber : null,
-          trackCount: typeof result.trackCount === 'number' ? result.trackCount : null,
-        };
-        CACHE.set(retryKey, info);
-        if (track) {
-          const origKey = `${track.artist ?? ''}\n${track.title}`.toLowerCase();
-          if (origKey !== retryKey) CACHE.set(origKey, info);
-        }
-        if (artworkUrl) preloadImage(artworkUrl);
-        setLyricsRetryArt(info);
+
+    function applyResult(result: ItunesResult) {
+      const artworkUrl = result.artworkUrl100?.replace('100x100', '600x600') ?? null;
+      const rawItunesUrl: string | null = result.trackViewUrl ?? result.collectionViewUrl ?? null;
+      const info: AlbumInfo = {
+        artworkUrl,
+        albumName: result.collectionName ?? null,
+        releaseDate: result.releaseDate ?? null,
+        itunesUrl: rawItunesUrl ? appendReferrer(rawItunesUrl) : null,
+        durationMs: typeof result.trackTimeMillis === 'number' ? result.trackTimeMillis : null,
+        genre: result.primaryGenreName ?? null,
+        trackNumber: typeof result.trackNumber === 'number' ? result.trackNumber : null,
+        trackCount: typeof result.trackCount === 'number' ? result.trackCount : null,
+      };
+      CACHE.set(retryKey, info);
+      if (track) {
+        const origKey = `${track.artist ?? ''}\n${track.title}`.toLowerCase();
+        if (origKey !== retryKey) CACHE.set(origKey, info);
+      }
+      if (artworkUrl) preloadImage(artworkUrl);
+      setLyricsRetryArt(info);
+    }
+
+    async function fetchByAlbum(): Promise<boolean> {
+      if (!lyrics?.albumName) return false;
+      const albumTerm = `${cleanArtist} ${lyrics.albumName}`;
+      const albumRes = await fetch(`/api/itunes?term=${encodeURIComponent(albumTerm)}&entity=album`, {
+        signal: controller.signal,
+      });
+      if (!albumRes.ok || controller.signal.aborted) return false;
+      const albumData = await albumRes.json();
+      const albumResult = (albumData.results ?? []) as ItunesResult[];
+      const collectionId = albumResult[0]?.collectionId;
+      if (!collectionId) return false;
+      const tracksRes = await fetch(`/api/itunes/lookup?id=${collectionId}`, { signal: controller.signal });
+      if (!tracksRes.ok || controller.signal.aborted) return false;
+      const tracksData = await tracksRes.json();
+      const best = selectBestItunesResult(
+        (tracksData.results ?? []) as ItunesResult[],
+        lyrics!.trackName,
+        lyrics!.artistName,
+      );
+      if (!best) return false;
+      applyResult(best);
+      return true;
+    }
+
+    fetchByAlbum()
+      .then((found) => {
+        if (found || controller.signal.aborted) return;
+        // Fallback: search by artist + title
+        const cleanTitle = cleanFeatFromTitle(lyrics!.trackName);
+        const term = `${cleanArtist} ${cleanTitle}`;
+        return fetch(`/api/itunes?term=${encodeURIComponent(term)}`, { signal: controller.signal })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => {
+            if (!data || controller.signal.aborted) return;
+            const result = selectBestItunesResult(
+              (data.results ?? []) as ItunesResult[],
+              lyrics!.trackName,
+              lyrics!.artistName,
+            );
+            if (result) applyResult(result);
+          });
       })
       .catch(() => {});
     return () => controller.abort();
-  }, [albumArt.isLoading, albumArt.artworkUrl, lyrics?.lyricsEnriched, lyrics?.artistName, lyrics?.trackName]);
+  }, [albumArt.isLoading, albumArt.artworkUrl, lyrics?.lyricsEnriched, lyrics?.artistName, lyrics?.trackName, lyrics?.albumName]);
 
   const usageStats = useStats();
   const enrichedTrack = useMemo(() => {
@@ -9799,6 +10366,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [showEq, setShowEq] = useState(false);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [showDesktopSettings, setShowDesktopSettings] = useState(false);
+  const [showConcertModal, setShowConcertModal] = useState(false);
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -9945,7 +10513,12 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         analyser.connectAudio(radio.audioRef.current);
       }
       if (effectsEnabled) {
+        // EQ chain routes to destination — disable analyser passthrough to avoid double output
+        analyser.disablePassthrough();
         eqConnectSource(radio.audioRef.current);
+      } else {
+        // No EQ — ensure analyser passthrough routes to speakers
+        analyser.enablePassthrough(radio.audioRef.current);
       }
     }
   }, [radio.station, effectsEnabled]);
@@ -9991,6 +10564,27 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     const nextIdx = sq.queue.findIndex((s) => s.stationuuid === station.stationuuid) + 1;
     if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
   }, []);
+  // Auto-tune: if URL has ?sid=<uuid>, fetch station and auto-play
+  const searchParams = useSearchParams();
+  const autoTuneHandled = useRef(false);
+  useEffect(() => {
+    if (autoTuneHandled.current) return;
+    const sid = searchParams.get('sid');
+    if (!sid) return;
+    autoTuneHandled.current = true;
+    fetchStationByUuid(sid).then((station) => {
+      if (station) {
+        handlePlay(station);
+        // Clean up URL params without reload
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('sid');
+          url.searchParams.delete('tune');
+          window.history.replaceState({}, '', url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : ''));
+        }
+      }
+    });
+  }, [searchParams, handlePlay]);
   const toggleEffects = useCallback(() => {
     setEffectsEnabled((prev) => {
       const next = !prev;
@@ -10001,14 +10595,19 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (!station || r.status === 'idle') return next;
       const audio = r.audioRef.current;
       if (next) {
-        // Turning ON: just connect EQ + analyser — stream is already on proxy
+        // Turning ON: connect EQ chain, disable passthrough (EQ routes to destination)
         if (audio) {
+          an.disablePassthrough();
           eqSrc(audio);
           an.connectAudio(audio);
         }
       } else {
-        // Turning OFF: disconnect EQ — analyser stays connected for background reactivity
+        // Turning OFF: disconnect EQ, re-enable passthrough so audio reaches speakers
         eq.disconnect();
+        if (audio) {
+          // EQ teardown severed source from all destinations — reconnect analyser + passthrough
+          an.reconnect(audio);
+        }
       }
       return next;
     });
@@ -10306,24 +10905,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   );
   const viewKey = `${view.mode}-${view.tag}-${view.query}-${view.countryCode}`;
   const isLandingNavigation = !theaterMode;
-  const theaterAudioBadges = useMemo(() => {
-    if (!effectsEnabled || !theaterMode || !radio.station) return [] as string[];
-    const badges: string[] = [];
-    if (eq.noiseReductionMode !== 'off') badges.push(t('noiseReduction'));
-    if (eq.normalizerEnabled) badges.push(t('audioNormalizer'));
-    if (eq.enabled) badges.push(t('equalizer'));
-    if (eq.enabled && eqPreset) badges.push(t('presetLabel', { name: eqPreset }));
-    return badges;
-  }, [
-    effectsEnabled,
-    eq.enabled,
-    eq.noiseReductionMode,
-    eq.normalizerEnabled,
-    eqPreset,
-    radio.station,
-    theaterMode,
-    t,
-  ]);
   const selectedFavSong = selectedSong
     ? (favSongs.songs.find(
         (s) => s.title === selectedSong.title && s.artist === selectedSong.artist,
@@ -10413,6 +10994,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   ];
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
+  const { concerts: shellConcerts } = useConcerts(enrichedTrack?.artist, !!radio.station);
   const theaterBaseProps = {
     track: enrichedTrack,
     isPlaying: radio.status === 'playing',
@@ -10424,6 +11006,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     lyrics,
     currentTime: effectiveCurrentTime,
     activeLineOverride: realtimeLyrics?.activeLineIndex,
+    concerts: shellConcerts,
   };
   const theaterFullProps = {
     ...theaterBaseProps,
@@ -10528,7 +11111,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     </>
   );
   const devApiConsoleElement =
-    process.env.NODE_ENV === 'development' ? <DevApiConsole /> : null;
+    process.env.NODE_ENV === 'development' ? <><DevApiConsole /><ApiPlayground /></> : null;
   const pulseLogoButton = (
     <button
       onClick={handleGoHome}
@@ -10733,10 +11316,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         {/* Bottom bar — glassmorphism — absolute so content scrolls behind it */}{' '}
         <div
           data-testid="mobile-bottom-bar"
-          className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10"
+          className="absolute bottom-0 inset-x-0 z-20 border-t border-white/10 flex flex-col"
           style={glassStyle}
         >
           {' '}
+          {shellConcerts.length > 0 && radio.station && (
+            <ConcertMobileBanner concerts={shellConcerts} onClick={() => setShowConcertModal(true)} />
+          )}
+          {showConcertModal && shellConcerts.length > 0 && (
+            <ConcertModal concerts={shellConcerts} artistName={enrichedTrack?.artist} onClose={() => setShowConcertModal(false)} />
+          )}
           <NowPlayingBar {...nowPlayingFullProps} compact />
         </div>
         {devApiConsoleElement}
@@ -10892,32 +11481,23 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         </div>
       </div>{' '}
       {/* EQ panel overlay */} {eqPanelElement} {/* Toast notification */}{' '}
-      <AnimatePresence>{toastElement}</AnimatePresence> {/* Bottom bar — glassmorphism */}{' '}
+      <AnimatePresence>{toastElement}</AnimatePresence>
+      {/* Concert banner above desktop bottom bar */}
+      {shellConcerts.length > 0 && (
+        <ConcertMobileBanner concerts={shellConcerts} onClick={() => setShowConcertModal(true)} />
+      )}
+      {/* Concert modal */}
+      {showConcertModal && shellConcerts.length > 0 && (
+        <ConcertModal
+          concerts={shellConcerts}
+          artistName={enrichedTrack?.artist}
+          onClose={() => setShowConcertModal(false)}
+        />
+      )}
+      {/* Bottom bar — glassmorphism */}{' '}
       <div className="relative z-10 border-t border-white/10" style={glassStyle}>
         {' '}
-        <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-between gap-3">
-          {' '}
-          <div className="min-w-0 flex flex-col items-start gap-1.5 text-[12px] overflow-hidden">
-            {' '}
-            {theaterAudioBadges.length > 0 && (
-              <div
-                className="pointer-events-auto flex items-center gap-1.5 px-3 py-2 rounded-full"
-                style={_GLASS_BADGE_STYLE}
-              >
-                {' '}
-                <span className="text-white/70 shrink-0">{t('autoAudioEnhancements')}</span>{' '}
-                {theaterAudioBadges.map((label) => (
-                  <span
-                    key={label}
-                    className="px-2 py-0.5 rounded-full bg-sys-orange/20 border border-sys-orange/40 text-sys-orange font-medium whitespace-nowrap shrink-0"
-                  >
-                    {' '}
-                    {label}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="pointer-events-none absolute -top-14 inset-x-3 z-10 flex items-center justify-end gap-3">
           <button
             onClick={() => setMiniMode((m) => !m)}
             className="pointer-events-auto shrink-0 p-2 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
