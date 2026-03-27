@@ -1253,7 +1253,6 @@ async function similarStations(station: Station, limit = 5): Promise<Station[]> 
     .filter((s) => s.stationuuid !== station.stationuuid && s.url_resolved)
     .slice(0, limit);
 }
-const STATS_STORAGE_KEY = 'radio-usage-stats';
 const SAVE_INTERVAL_MS = 10_000;
 const MAX_STATIONS = 300;
 const MAX_SONGS = 500;
@@ -1305,14 +1304,14 @@ const EMPTY_STATS: UsageStats = {
 }
 function useStats() {
   const [stats, setStats] = useState<UsageStats>(() =>
-    loadFromStorage<UsageStats>(STATS_STORAGE_KEY, EMPTY_STATS),
+    loadFromStorage<UsageStats>(STORAGE_KEYS.USAGE_STATS, EMPTY_STATS),
   );
   const statsRef = useRef(stats);
   useEffect(() => {
     statsRef.current = stats;
   }, [stats]);
   useStorageSync<UsageStats>(
-    STATS_STORAGE_KEY,
+    STORAGE_KEYS.USAGE_STATS,
     setStats,
     (v): v is UsageStats => !!v && typeof (v as UsageStats).totalListenMs === 'number',
   );
@@ -1339,8 +1338,8 @@ function useStats() {
           genrePlayCounts: pGenres,
         };
         setStats(pruned);
-        saveToStorage(STATS_STORAGE_KEY, pruned);
-      } else saveToStorage(STATS_STORAGE_KEY, current);
+        saveToStorage(STORAGE_KEYS.USAGE_STATS, pruned);
+      } else saveToStorage(STORAGE_KEYS.USAGE_STATS, current);
       dirtyRef.current = false;
     }
   }, []);
@@ -1469,7 +1468,7 @@ function useStats() {
   );
   const clearStats = useCallback(() => {
     setStats(EMPTY_STATS);
-    saveToStorage(STATS_STORAGE_KEY, EMPTY_STATS);
+    saveToStorage(STORAGE_KEYS.USAGE_STATS, EMPTY_STATS);
   }, []);
   return {
     stats,
@@ -8500,7 +8499,6 @@ const HistoryGridView = React.memo(function HistoryGridView({
     </div>
   );
 });
-const ONBOARDING_KEY = 'radio-onboarding-done';
 type OnboardingStep = { icon: React.ReactNode; title: string; description: string };
 const STEPS: OnboardingStep[] = [
   {
@@ -8619,7 +8617,7 @@ function _OnboardingModal() {
   const [show, setShow] = useState(false);
   const [step, setStep] = useState(0);
   useEffect(() => {
-    const done = loadFromStorage<boolean>(ONBOARDING_KEY, false);
+    const done = loadFromStorage<boolean>(STORAGE_KEYS.ONBOARDING_DONE, false);
     if (!done) {
       const timer = setTimeout(() => setShow(true), 800);
       return () => clearTimeout(timer);
@@ -8627,7 +8625,7 @@ function _OnboardingModal() {
   }, []);
   const handleClose = useCallback(() => {
     setShow(false);
-    saveToStorage(ONBOARDING_KEY, true);
+    saveToStorage(STORAGE_KEYS.ONBOARDING_DONE, true);
   }, []);
   if (!show) return null;
   const currentStep = step < STEPS.length ? STEPS[step] : null;
@@ -9390,12 +9388,11 @@ const NR_PRESETS: Record<
   medium: { hpfHz: 35, gateThreshold: -48, gateRatio: 2.0, deEsserCenterHz: 6000, deEsserGain: -3 },
   high: { hpfHz: 35, gateThreshold: -42, gateRatio: 3.0, deEsserCenterHz: 6500, deEsserGain: -4.5 },
 };
-const QUALITY_DEFAULTS_MIGRATION_KEY = 'radio-quality-defaults-v2-applied';
 function ensureQualityMigration(): void {
-  if (loadFromStorage<boolean>(QUALITY_DEFAULTS_MIGRATION_KEY, false)) return;
+  if (loadFromStorage<boolean>(STORAGE_KEYS.QUALITY_MIGRATION, false)) return;
   saveToStorage(STORAGE_KEYS.NOISE_REDUCTION_MODE, 'low');
   saveToStorage(STORAGE_KEYS.NORMALIZER_ENABLED, true);
-  saveToStorage(QUALITY_DEFAULTS_MIGRATION_KEY, true);
+  saveToStorage(STORAGE_KEYS.QUALITY_MIGRATION, true);
 }
 function getDefaultNoiseReductionMode(): NoiseReductionMode {
   ensureQualityMigration();
@@ -9925,10 +9922,9 @@ function useEqualizer() {
     removeCustomPreset,
   };
 }
-const STORAGE_KEY = 'radio-station-queue';
 const MAX_QUEUE_SIZE = 20;
 function useStationQueue() {
-  const [queue, setQueue] = useState<Station[]>(() => loadFromStorage<Station[]>(STORAGE_KEY, []));
+  const [queue, setQueue] = useState<Station[]>(() => loadFromStorage<Station[]>(STORAGE_KEYS.STATION_QUEUE, []));
   const [currentIndex, setCurrentIndex] = useState(-1);
   const persistRef = useRef(false);
   const queueRef = useRef(queue);
@@ -9936,7 +9932,7 @@ function useStationQueue() {
     queueRef.current = queue;
   }, [queue]);
   useEffect(() => {
-    if (persistRef.current) saveToStorage(STORAGE_KEY, queue);
+    if (persistRef.current) saveToStorage(STORAGE_KEYS.STATION_QUEUE, queue);
     persistRef.current = true;
   }, [queue]);
   const add = useCallback((station: Station) => {

@@ -11,6 +11,7 @@ import {
 } from '@/lib/i18n/locales';
 import { COUNTRY_BY_CODE } from '@/lib/i18n/countries';
 import { loadStringFromStorage, saveStringToStorage } from '@/lib/storageUtils';
+import { STORAGE_KEYS } from '@/components/radio/constants';
 const COUNTRY_LOCALE_OVERRIDES: Partial<Record<string, SupportedLocale>> = {
   BR: 'pt-BR',
   TW: 'zh-TW',
@@ -29,7 +30,6 @@ function getDefaultLocaleForCountry(countryCode: string): SupportedLocale | null
   }
   return null;
 }
-const LOCALE_STORAGE_KEY = 'radio-locale';
 function getBrowserLocale(): SupportedLocale {
   if (typeof navigator === 'undefined') return 'en';
   const nav = navigator as Navigator & { languages?: string[] };
@@ -39,7 +39,7 @@ function getBrowserLocale(): SupportedLocale {
 }
 function getStoredLocale(): SupportedLocale | null {
   if (typeof window === 'undefined') return null;
-  const raw = loadStringFromStorage(LOCALE_STORAGE_KEY, '');
+  const raw = loadStringFromStorage(STORAGE_KEYS.LOCALE, '');
   return raw ? normalizeLocale(raw) : null;
 }
 function getInitialLocale(): SupportedLocale {
@@ -50,7 +50,7 @@ function getInitialLocaleForCountry(countryCode: string): SupportedLocale {
 }
 function saveLocale(locale: SupportedLocale): void {
   if (typeof window === 'undefined') return;
-  saveStringToStorage(LOCALE_STORAGE_KEY, locale);
+  saveStringToStorage(STORAGE_KEYS.LOCALE, locale);
 }
 type TranslateFn = (key: MessageKey, vars?: Record<string, string | number>) => string;
 type LocaleContextValue = {
