@@ -6,6 +6,8 @@ import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
+import { validateRequest } from '@/lib/validate-request';
+import { artistInfoSchema } from '@/lib/validation-schemas';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -89,11 +91,10 @@ export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.artistInfo);
   if (limited) return limited;
 
-  const rawArtist = req.nextUrl.searchParams.get('artist');
-  const artist = rawArtist ? sanitizeSearchQuery(rawArtist) : '';
-  if (!artist) {
-    return NextResponse.json(_ERR_400, { status: 400 });
-  }
+  const validated = validateRequest(artistInfoSchema, req.nextUrl.searchParams);
+  if (!validated.success) return validated.error;
+  const artist = sanitizeSearchQuery(validated.data.artist);
+  if (!artist) return NextResponse.json(_ERR_400, { status: 400 });
   const cacheKey = artist.toLowerCase().trim();
   try {
     const payload = await cacheResolve<unknown>({

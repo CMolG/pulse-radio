@@ -28,6 +28,8 @@ import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
+import { validateRequest } from '@/lib/validate-request';
+import { itunesSchema } from '@/lib/validation-schemas';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
@@ -39,13 +41,12 @@ const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
   if (limited) return limited;
   const reqLog = logRequest(req);
 
-  const rawTerm = req.nextUrl.searchParams.get('term');
-  const term = rawTerm ? sanitizeSearchQuery(rawTerm) : '';
-  if (!term) {
-    return NextResponse.json(_ERR_400, { status: 400 });
-  }
-  const isPodcast = req.nextUrl.searchParams.get('media') === 'podcast';
-  const media = isPodcast ? 'podcast' : 'music';
+  const validated = validateRequest(itunesSchema, req.nextUrl.searchParams);
+  if (!validated.success) return validated.error;
+  const term = sanitizeSearchQuery(validated.data.term);
+  if (!term) return NextResponse.json(_ERR_400, { status: 400 });
+  const media = validated.data.media ?? 'music';
+  const isPodcast = media === 'podcast';
   const entity = isPodcast ? 'podcast' : 'song';
   const limit = isPodcast ? '20' : '3';
   const cacheKey = `${media}:${term.toLowerCase().trim()}`;

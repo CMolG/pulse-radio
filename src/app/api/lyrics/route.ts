@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
+import { validateRequest } from '@/lib/validate-request';
+import { lyricsSchema } from '@/lib/validation-schemas';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -82,16 +84,12 @@ export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.lyrics);
   if (limited) return limited;
 
-  const { searchParams } = req.nextUrl;
-  const artist = sanitizeSearchQuery(searchParams.get('artist') ?? '');
-  const title = sanitizeSearchQuery(searchParams.get('title') ?? '');
-  const album = searchParams.get('album')?.trim() ?? '';
-  const durationParam = searchParams.get('duration');
-  const duration = durationParam ? parseFloat(durationParam) : undefined;
-
-  if (!title || title.length > 300 || artist.length > 300) {
-    return NextResponse.json({ error: 'Missing or invalid parameters' }, { status: 400 });
-  }
+  const validated = validateRequest(lyricsSchema, req.nextUrl.searchParams);
+  if (!validated.success) return validated.error;
+  const artist = sanitizeSearchQuery(validated.data.artist);
+  const title = sanitizeSearchQuery(validated.data.title);
+  const album = validated.data.album?.trim() ?? '';
+  const duration = validated.data.duration;
 
   const cacheKey = `${normKey(artist)}|${normKey(title)}`;
   try {

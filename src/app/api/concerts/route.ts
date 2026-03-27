@@ -4,6 +4,8 @@ import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
+import { validateRequest } from '@/lib/validate-request';
+import { concertsSchema } from '@/lib/validation-schemas';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
@@ -119,10 +121,10 @@ export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.concerts);
   if (limited) return limited;
 
-  const artist = sanitizeSearchQuery(req.nextUrl.searchParams.get('artist') ?? '');
-  if (!artist) {
-    return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
-  }
+  const validated = validateRequest(concertsSchema, req.nextUrl.searchParams);
+  if (!validated.success) return validated.error;
+  const artist = sanitizeSearchQuery(validated.data.artist);
+  if (!artist) return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
 
   const cacheKey = normKey(artist);
   try {

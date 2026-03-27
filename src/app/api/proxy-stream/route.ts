@@ -3,6 +3,8 @@ import { isStationBlacklisted, recordStationFailure, clearStationFailures } from
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeUrl } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
+import { validateRequest } from '@/lib/validate-request';
+import { proxyStreamSchema } from '@/lib/validation-schemas';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKETS_RE = /^\[|\]$/g;
@@ -60,13 +62,10 @@ export async function GET(req: NextRequest) {
   if (limited) return limited;
   logRequest(req);
 
-  const streamUrl = sanitizeUrl(req.nextUrl.searchParams.get('url') ?? '');
-  if (!streamUrl) {
-    return new Response(_ERR_MISSING_URL, {
-      status: 400,
-      headers: _JSON_HDRS,
-    });
-  }
+  const validated = validateRequest(proxyStreamSchema, req.nextUrl.searchParams);
+  if (!validated.success) return new Response(_ERR_MISSING_URL, { status: 400, headers: _JSON_HDRS });
+  const streamUrl = sanitizeUrl(validated.data.url);
+  if (!streamUrl) return new Response(_ERR_MISSING_URL, { status: 400, headers: _JSON_HDRS });
   let parsed: URL;
   try {
     parsed = new URL(streamUrl);
