@@ -66,10 +66,12 @@ function _evictOne(store: Map<string, CacheEntry<unknown>>, ns: Namespace): void
   }
   // If no expired entries, remove oldest
   if (store.size > 0) {
-    const firstKey = store.keys().next().value;
-    const entry = store.get(firstKey) as CacheEntry<unknown>;
-    _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - entry.bytes;
-    store.delete(firstKey);
+    const firstKey = store.keys().next().value as string | undefined;
+    if (firstKey !== undefined) {
+      const entry = store.get(firstKey) as CacheEntry<unknown>;
+      _bytesByNs[ns] = (_bytesByNs[ns] ?? 0) - entry.bytes;
+      store.delete(firstKey);
+    }
   }
 }
 

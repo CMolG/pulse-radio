@@ -5,6 +5,12 @@ import {
   loadStringFromStorage,
   saveStringToStorage,
   ensureStorageVersion,
+  updateStorage,
+  wrapWithTimestamp,
+  unwrapTimestamp,
+  mergeArrays,
+  listenForStorageUpdates,
+  notifyStorageUpdate,
 } from '../storageUtils';
 
 const store = new Map<string, string>();
@@ -105,6 +111,99 @@ describe('storageUtils', () => {
       });
       expect(loadFromStorage('key', 'default')).toBe('default');
       expect(loadStringFromStorage('key', 'def')).toBe('def');
+    });
+  });
+
+  describe('updateStorage (read-modify-write transaction)', () => {
+    it('consolidates read-modify-write into single synchronous block', () => {
+      saveToStorage('counter', { count: 5 });
+      const result = updateStorage('counter', (current) => {
+        return { count: current.count + 1 };
+      }, { count: 0 });
+      expect(result).toEqual({ count: 6 });
+      expect(loadFromStorage('counter', null)).toEqual({ count: 6 });
+    });
+
+    it('uses default value when key is missing', () => {
+      const result = updateStorage('newkey', (current) => {
+        return current + 1;
+      }, 0);
+      expect(result).toBe(1);
+      expect(loadFromStorage('newkey', null)).toBe(1);
+    });
+  });
+
+  describe('wrapWithTimestamp / unwrapTimestamp', () => {
+    it('wraps value with current timestamp', () => {
+      const value = { foo: 'bar' };
+      const wrapped = wrapWithTimestamp(value);
+      expect(wrapped.value).toEqual(value);
+      expect(wrapped._ts).toBeGreaterThan(0);
+      expect(wrapped._ts).toBeLessThanOrEqual(Date.now());
+    });
+
+    it('unwraps timestamped value', () => {
+      const value = { foo: 'bar' };
+      const wrapped = wrapWithTimestamp(value);
+      const unwrapped = unwrapTimestamp(wrapped);
+      expect(unwrapped).not.toBeNull();
+      expect(unwrapped?.value).toEqual(value);
+      expect(unwrapped?.timestamp).toBe(wrapped._ts);
+    });
+
+    it('returns null for non-timestamped values', () => {
+      expect(unwrapTimestamp({ foo: 'bar' })).toBeNull();
+      expect(unwrapTimestamp('plain-string')).toBeNull();
+      expect(unwrapTimestamp(null)).toBeNull();
+    });
+  });
+
+  describe('mergeArrays (union with deduplication)', () => {
+    it('merges two arrays without duplicates', () => {
+      const a = ['x', 'y'];
+      const b = ['y', 'z'];
+      expect(mergeArrays(a, b)).toEqual(['x', 'y', 'z']);
+    });
+
+    it('preserves order from first array', () => {
+      const a = [1, 2, 3];
+      const b = [2, 3, 4];
+      expect(mergeArrays(a, b)).toEqual([1, 2, 3, 4]);
+    });
+
+    it('handles empty arrays', () => {
+      expect(mergeArrays([], [1, 2])).toEqual([1, 2]);
+      expect(mergeArrays([1, 2], [])).toEqual([1, 2]);
+    });
+
+    it('deduplicates objects by reference', () => {
+      const obj = { id: 1 };
+      expect(mergeArrays([obj], [obj])).toEqual([obj]);
+    });
+  });
+
+  describe('BroadcastChannel cross-tab sync', () => {
+    it('notifyStorageUpdate handles missing BroadcastChannel gracefully', () => {
+      Object.defineProperty(globalThis, 'BroadcastChannel', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      // Should not throw
+      expect(() => notifyStorageUpdate('test-key')).not.toThrow();
+    });
+
+    it('listenForStorageUpdates returns unsubscribe function when BroadcastChannel unavailable', () => {
+      Object.defineProperty(globalThis, 'BroadcastChannel', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+      const callback = vi.fn();
+      const unsubscribe = listenForStorageUpdates(callback);
+      expect(typeof unsubscribe).toBe('function');
+      // Should not throw
+      expect(() => unsubscribe()).not.toThrow();
     });
   });
 });

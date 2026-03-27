@@ -177,7 +177,7 @@ export async function GET(req: NextRequest) {
     }
     recordStationFailure(streamUrl);
     recordFailure(streamUrl);
-    console.error('[proxy-stream] Connection failed:', sanitizeForLog(err instanceof Error ? err.message : String(err)));
+    console.error('[proxy-stream] Connection failed:', err);
     return apiError('Stream connection failed', 'UPSTREAM_ERROR', 502, { 'Retry-After': '5' });
   }
 }

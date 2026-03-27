@@ -167,9 +167,11 @@ export async function getCachedOrFetch<T>(
   const table = TABLE_MAP[namespace];
   if (table) {
     try {
-      const row = db.select().from(table).where(eq(table.key, key)).get() as
-        | { key: string; payload: string; fetchedAt: number; ttlMs: number }
-        | undefined;
+      const row = timedQuery(`cache_read_${namespace}`, () =>
+        db.select().from(table).where(eq(table.key, key)).get() as
+          | { key: string; payload: string; fetchedAt: number; ttlMs: number }
+          | undefined
+      );
 
       if (row) {
         const age = Date.now() - row.fetchedAt;
@@ -179,6 +181,7 @@ export async function getCachedOrFetch<T>(
           const validation = schema.safeParse(parsed);
 
           if (validation.success) {
+            recordCacheHit();
             cacheSet(namespace, key, validation.data, row.ttlMs - age);
             return validation.data;
           }
@@ -197,6 +200,8 @@ export async function getCachedOrFetch<T>(
           }
         }
         // Stale or invalid — re-fetch
+      } else {
+        recordCacheMiss();
       }
     } catch (e) {
       logger.error('cache_read_failed', e, { namespace, key });
@@ -232,13 +237,16 @@ export async function getCachedOrFetch<T>(
 
   if (table) {
     try {
-      db.insert(table)
-        .values({ key, payload, fetchedAt: Date.now(), ttlMs })
-        .onConflictDoUpdate({
-          target: table.key,
-          set: { payload, fetchedAt: Date.now(), ttlMs },
-        })
-        .run();
+      timedQuery(`cache_write_${namespace}`, () =>
+        db.insert(table)
+          .values({ key, payload, fetchedAt: Date.now(), ttlMs })
+          .onConflictDoUpdate({
+            target: table.key,
+            set: { payload, fetchedAt: Date.now(), ttlMs },
+          })
+          .run()
+      );
+      recordCacheWrite();
     } catch (e) {
       logger.error('cache_write_failed', e, { namespace, key });
     }
@@ -254,11 +262,13 @@ export function getStaleKeys(namespace: Namespace): string[] {
   const table = TABLE_MAP[namespace];
   if (!table) return [];
   try {
-    const rows = db
-      .select({ key: table.key })
-      .from(table)
-      .where(sql`${table.fetchedAt} + ${table.ttlMs} < ${Date.now()}`)
-      .all();
+    const rows = timedQuery(`cache_scan_stale_${namespace}`, () =>
+      db
+        .select({ key: table.key })
+        .from(table)
+        .where(sql`${table.fetchedAt} + ${table.ttlMs} < ${Date.now()}`)
+        .all()
+    );
     return rows.map((r) => r.key);
   } catch (e) {
     logger.error('cache_stale_keys_failed', e, { namespace });
@@ -274,13 +284,16 @@ export function persistToDb<T>(namespace: Namespace, key: string, value: T, ttlM
   if (!table) return;
   const payload = JSON.stringify(value);
   try {
-    db.insert(table)
-      .values({ key, payload, fetchedAt: Date.now(), ttlMs })
-      .onConflictDoUpdate({
-        target: table.key,
-        set: { payload, fetchedAt: Date.now(), ttlMs },
-      })
-      .run();
+    timedQuery(`cache_persist_${namespace}`, () =>
+      db.insert(table)
+        .values({ key, payload, fetchedAt: Date.now(), ttlMs })
+        .onConflictDoUpdate({
+          target: table.key,
+          set: { payload, fetchedAt: Date.now(), ttlMs },
+        })
+        .run()
+    );
+    recordCacheWrite();
   } catch (e) {
     logger.error('cache_persist_failed', e, { namespace, key });
   }
