@@ -3,7 +3,7 @@ task_id: ARCH-133
 target_agent: auto-optimizer-finite
 target_module: src/app/layout.tsx
 priority: medium
-status: pending
+status: completed
 ---
 
 # ARCH-133: Font Loading Optimization & FOUT Prevention
@@ -47,9 +47,9 @@ This causes FOUT (Flash of Unstyled Text) or FOIT (Flash of Invisible Text) on f
 
 ## Acceptance Criteria
 
-- [ ] `display: 'swap'` set on both Geist font imports
-- [ ] Font weights subsetted to only those used
-- [ ] Fallback font stack defined in CSS
-- [ ] No FOIT on first load (text visible immediately with fallback)
-- [ ] Playwright screenshot shows correct font rendering
-- [ ] No increase in layout shift (CLS) from font swap
+- [x] `display: 'swap'` set on both Geist font imports
+- [x] Font weights subsetted to only those used
+- [x] Fallback font stack defined in CSS
+- [x] No FOIT on first load (text visible immediately with fallback)
+- [x] Playwright screenshot shows correct font rendering
+- [x] No increase in layout shift (CLS) from font swap
