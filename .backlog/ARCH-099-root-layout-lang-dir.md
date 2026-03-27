@@ -3,7 +3,7 @@ task_id: ARCH-099
 target_agent: auto-optimizer-finite
 target_module: src/app/layout.tsx
 priority: high
-status: pending
+status: completed
 ---
 
 # Sync Root Layout html[lang/dir] with Locale — Fix SSR Mismatch
