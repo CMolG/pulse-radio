@@ -69,3 +69,23 @@ export function validateStreamUrl(
   }
   return { url };
 }
+
+/**
+ * Resolve hostname via DNS and validate that the resolved IP is not private.
+ * Protects against DNS rebinding attacks by resolving before fetch().
+ * Throws an error if the resolved IP is in private ranges.
+ */
+export async function resolveDnsAndValidate(hostname: string): Promise<string> {
+  try {
+    const { address } = await lookup(hostname, { family: 4 });
+    if (isPrivateHost(address)) {
+      throw new Error(`Resolved to private IP: ${address}`);
+    }
+    return address;
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('Resolved to private IP')) {
+      throw err;
+    }
+    throw new Error(`DNS resolution failed or private IP detected for ${hostname}`);
+  }
+}

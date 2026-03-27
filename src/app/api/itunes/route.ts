@@ -39,6 +39,7 @@ const _NOOP = () => {};
       namespace: 'itunes',
       key: cacheKey,
       ttlMs: CACHE_TTL_MS,
+      schema: ItunesSearchResultSchema,
       fetcher: async () => {
         const { data } = await itunesCircuit.call(async () => {
           const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
