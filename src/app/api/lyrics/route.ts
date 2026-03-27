@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -77,6 +78,9 @@ async function fetchLyrics(
 }
 
 export async function GET(req: NextRequest) {
+  const limited = rateLimit(req, RATE_LIMITS.lyrics);
+  if (limited) return limited;
+
   const { searchParams } = req.nextUrl;
   const artist = searchParams.get('artist')?.trim() ?? '';
   const title = searchParams.get('title')?.trim() ?? '';

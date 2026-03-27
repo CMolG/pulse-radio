@@ -3,6 +3,7 @@
   NextResponse,
 } from 'next/server';
 import { isStationBlacklisted, recordStationFailure } from '@/lib/server-cache';
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKETS_RE = /^\[|\]$/g;
@@ -56,6 +57,9 @@ const _UTF8_DECODER = new TextDecoder('utf-8');
 const _ICY_FETCH_HDRS = { 'Icy-MetaData': '1' } as const;
 const _NOOP = () => {};
 export async function GET(req: NextRequest) {
+  const limited = rateLimit(req, RATE_LIMITS.icyMeta);
+  if (limited) return limited;
+
   const streamUrl = req.nextUrl.searchParams.get('url');
   if (!streamUrl || streamUrl.length > 2048) {
     return NextResponse.json(_ERR_INVALID_PARAM, { status: 400, headers: _CACHE_BAD_REQ });

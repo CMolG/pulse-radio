@@ -3,7 +3,7 @@ task_id: ARCH-032
 target_agent: auto-feature-engineer-finite
 target_module: src/lib/rate-limiter.ts
 priority: critical
-status: pending
+status: completed
 ---
 
 # Implement API Rate Limiting
@@ -44,10 +44,10 @@ Create a lightweight, in-memory sliding-window rate limiter at `src/lib/rate-lim
 
 ## Acceptance Criteria
 
-- [ ] `src/lib/rate-limiter.ts` exists with exported `rateLimit()` function.
-- [ ] All 7 API routes import and call `rateLimit()` at the top of their handler.
-- [ ] Exceeding the limit returns HTTP 429 with `Retry-After` header.
-- [ ] Normal usage (1 user browsing stations) never triggers rate limiting.
-- [ ] Memory cleanup prevents unbounded Map growth.
-- [ ] All existing Playwright tests pass (they should not trigger rate limits).
-- [ ] TypeScript compiles without errors.
+- [x] `src/lib/rate-limiter.ts` exists with exported `rateLimit()` function.
+- [x] All 7 API routes import and call `rateLimit()` at the top of their handler.
+- [x] Exceeding the limit returns HTTP 429 with `Retry-After` header.
+- [x] Normal usage (1 user browsing stations) never triggers rate limiting.
+- [x] Memory cleanup prevents unbounded Map growth.
+- [x] All existing Playwright tests pass (they should not trigger rate limits).
+- [x] TypeScript compiles without errors.

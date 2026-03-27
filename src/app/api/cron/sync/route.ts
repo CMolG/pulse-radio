@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStaleKeys, persistToDb } from '@/lib/services/CacheRepository';
 import { cacheSet, type Namespace } from '@/lib/server-cache';
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // allow up to 5 minutes
@@ -100,6 +101,9 @@ const syncers: Record<string, SyncFn> = {
 };
 
 export async function GET(req: NextRequest) {
+  const limited = rateLimit(req, RATE_LIMITS.cronSync);
+  if (limited) return limited;
+
   // Auth check
   if (CRON_SECRET) {
     const auth = req.headers.get('authorization');

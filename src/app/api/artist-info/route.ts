@@ -3,6 +3,7 @@
   NextResponse,
 } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -83,6 +84,9 @@ async function fetchArtistPayload(artist: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const limited = rateLimit(req, RATE_LIMITS.artistInfo);
+  if (limited) return limited;
+
   const artist = req.nextUrl.searchParams.get('artist');
   if (!artist || artist.length > 200) {
     return NextResponse.json(_ERR_400, { status: 400 });

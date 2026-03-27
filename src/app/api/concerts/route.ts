@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
@@ -113,6 +114,9 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
 }
 
 export async function GET(req: NextRequest) {
+  const limited = rateLimit(req, RATE_LIMITS.concerts);
+  if (limited) return limited;
+
   const artist = req.nextUrl.searchParams.get('artist')?.trim() ?? '';
   if (!artist || artist.length > 200) {
     return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
