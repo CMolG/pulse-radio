@@ -40,12 +40,6 @@
 - **Wake Lock** — prevents screen from sleeping during playback
 - **Sleep timer** — auto-stop playback after a configurable duration
 
-### 🎙️ Podcasts & Audiobooks
-- **Podcast search & playback** — browse and stream podcasts via RSS feeds
-- **LibriVox audiobooks** — free public domain audiobooks streamed in-browser
-- **Internet Archive audio** — access the vast archive.org audio collection
-- **Open Library integration** — book metadata for audiobook content
-
 ### 🎨 Visual Experience
 - **Album artwork** — automatic lookup via iTunes Search API with strict Jaro-distance matching and graceful fallback
 - **Audio visualizers** — ferrofluid, spiral, and circular renderers using Web Audio FFT analysis
@@ -151,11 +145,11 @@ src/
 │   │   ├── itunes/               # Album artwork lookup proxy
 │   │   ├── artist-info/          # Artist biography/info proxy
 │   │   ├── concerts/             # Bandsintown concert data proxy
-│   │   ├── archive-audio/        # Internet Archive audio proxy
-│   │   ├── librivox/             # LibriVox API proxy
-│   │   ├── open-library/         # Open Library metadata proxy
-│   │   ├── podcast-feed/         # Podcast RSS feed proxy
-│   │   └── podcast-search/       # Podcast search proxy
+│   │   ├── lyrics/               # Lyrics fetching endpoint
+│   │   ├── health/               # Health check endpoint
+│   │   ├── analytics/            # Analytics endpoint
+│   │   ├── cron/                 # Scheduled sync jobs
+│   │   └── station-health/       # Station reliability scoring
 │   ├── layout.tsx                # Root layout (fonts, metadata)
 │   ├── page.tsx                  # Home page → <Radio />
 │   ├── sitemap.ts                # Dynamic sitemap generation
@@ -251,9 +245,6 @@ src/
 | [LrcLib](https://lrclib.net/) | Synced & plain text lyrics |
 | [iTunes Search](https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/) | Album artwork lookup |
 | [Bandsintown](https://www.bandsintown.com/) | Upcoming concert/tour dates |
-| [LibriVox](https://librivox.org/api/info) | Free public domain audiobooks |
-| [Internet Archive](https://archive.org/advancedsearch.php) | Open audio collection |
-| [Open Library](https://openlibrary.org/developers/api) | Book metadata |
 
 ## 🤝 Contributing
 
@@ -302,8 +293,6 @@ Look for issues labeled [`good first issue`](../../labels/good%20first%20issue) 
 - [x] Sleep timer
 - [x] Keyboard shortcuts
 - [x] i18n / localization
-- [x] Podcast support
-- [x] Audiobook support (LibriVox + Internet Archive)
 - [x] Realtime STT lyrics sync
 - [x] Station queue
 - [x] Bandsintown concert integration (theater mode ticker + artist detail modal)
@@ -313,6 +302,8 @@ Look for issues labeled [`good first issue`](../../labels/good%20first%20issue) 
 - [x] Liquid Glass UI (Aerolab-style buttons)
 - [x] Social share (Web Share API + clipboard fallback)
 - [x] Dev API console (development mode)
+- [ ] Podcast support (search & RSS playback)
+- [ ] Audiobook support (LibriVox + Internet Archive)
 - [ ] Station search with fuzzy matching
 - [ ] Chromecast / AirPlay support
 - [ ] Shared playlists
