@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-030
-target_agent: auto-reducer
+target_agent: auto-reducer-finite
 target_module: src/components/radio/RadioShell.tsx
 priority: low
 status: pending

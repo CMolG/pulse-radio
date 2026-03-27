@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-025
-target_agent: auto-reducer
+target_agent: auto-reducer-finite
 target_module: public/
 priority: low
 status: pending

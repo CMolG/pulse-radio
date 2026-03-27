@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-027
-target_agent: auto-optimizer
+target_agent: auto-optimizer-finite
 target_module: src/components/radio/RadioShell.tsx
 priority: high
 status: pending

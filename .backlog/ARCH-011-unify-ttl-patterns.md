@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-011
-target_agent: auto-optimizer
+target_agent: auto-optimizer-finite
 target_module: src/lib/server-cache.ts
 priority: medium
 status: pending

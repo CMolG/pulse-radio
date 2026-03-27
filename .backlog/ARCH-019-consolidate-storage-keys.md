@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-019
-target_agent: auto-reducer
+target_agent: auto-reducer-finite
 target_module: src/components/radio/constants.ts
 priority: high
 status: pending

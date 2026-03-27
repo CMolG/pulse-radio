@@ -1,6 +1,6 @@
 ---
 task_id: ARCH-017
-target_agent: auto-optimizer
+target_agent: auto-optimizer-finite
 target_module: src/app/api/proxy-stream/route.ts
 priority: critical
 status: pending
