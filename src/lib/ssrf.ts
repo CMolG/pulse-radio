@@ -17,7 +17,8 @@ export function isPrivateHost(hostname: string): boolean {
     host === '127.0.0.1' ||
     host === '::1' ||
     host === '0.0.0.0' ||
-    host.endsWith('.localhost')
+    host.endsWith('.localhost') ||
+    host.endsWith('.local')
   ) {
     return true;
   }
@@ -32,6 +33,7 @@ export function isPrivateHost(hostname: string): boolean {
     if (a === 100 && b >= 64 && b <= 127) return true;
     if (a === 127) return true;
     if (a === 0) return true;
+    if (a >= 224 && a <= 239) return true;
   }
   const ipv6 = host.replace(_IPV6_BRACKETS_RE, '');
   if (ipv6.startsWith('fe80:')) return true;
