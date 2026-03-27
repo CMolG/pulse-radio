@@ -3,7 +3,7 @@ task_id: ARCH-061
 target_agent: auto-feature-engineer-finite
 target_module: src/components/radio/components/ServiceWorkerRegistrar.tsx
 priority: critical
-status: pending
+status: completed
 ---
 
 # Add PWA Update Prompt — Users Are Stuck on Stale Versions
@@ -49,10 +49,10 @@ This is a production-critical gap — users on the stale version may experience 
 
 ## Acceptance Criteria
 
-- [ ] New service worker versions are detected via `updatefound` event.
-- [ ] User sees a "New version available" prompt when an update is ready.
-- [ ] Tapping the prompt triggers `skipWaiting()` and page reload.
-- [ ] `registration.update()` runs every 60 seconds.
-- [ ] No refresh loops (guarded by `refreshing` flag).
-- [ ] `public/sw.js` handles `SKIP_WAITING` message.
-- [ ] `npm run build` passes.
+- [x] New service worker versions are detected via `updatefound` event.
+- [x] User sees a "New version available" prompt when an update is ready.
+- [x] Tapping the prompt triggers `skipWaiting()` and page reload.
+- [x] `registration.update()` runs every 60 seconds.
+- [x] No refresh loops (guarded by `refreshing` flag).
+- [x] `public/sw.js` handles `SKIP_WAITING` message.
+- [x] `npm run build` passes.
