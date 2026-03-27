@@ -8,6 +8,7 @@ import { lyricsSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { lyricsKey } from '@/lib/cache-keys';
 import { apiError } from '@/lib/api-response';
+import { withApiVersion } from '@/lib/api-versioning';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -103,8 +104,8 @@ export async function GET(req: NextRequest) {
 
     const headers: Record<string, string> = { ...(!result ? _NO_CACHE_HDRS : _CACHE_HDRS) };
     if (lyricsCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = lyricsCircuit.state.toLowerCase();
-    if (!result) return NextResponse.json(null, { headers });
-    return NextResponse.json(result, { headers });
+    if (!result) return withApiVersion(NextResponse.json(null, { headers }));
+    return withApiVersion(NextResponse.json(result, { headers }));
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return apiError(

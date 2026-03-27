@@ -11,6 +11,7 @@ import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';
 import { isPrivateHost, ALLOWED_PROTOCOLS, resolveDnsAndValidate } from '@/lib/ssrf';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
+import { withApiVersion } from '@/lib/api-versioning';
 const _TRAILING_NULLS_RE = /\0+$/;
 const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 export const runtime = 'nodejs';
@@ -87,19 +88,19 @@ export async function GET(req: NextRequest) {
     if (!icyMetaint || !res.body) {
       clearTimeout(timeout);
       res.body?.cancel().catch(_NOOP);
-      return NextResponse.json({
+      return withApiVersion(NextResponse.json({
         streamTitle: null,
         icyName: icyName ? sanitizeTextContent(icyName) : null,
         icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null,
         icyBr: icyBr || null,
-      }, { headers: _CACHE_OK });
+      }, { headers: _CACHE_OK }));
     }
     const metaint = parseInt(icyMetaint, 10);
     const MAX_METAINT = 131072;
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout);
       res.body.cancel().catch(_NOOP);
-      return NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK });
+      return withApiVersion(NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK }));
     }
     const reader = res.body.getReader();
     const chunks: Uint8Array[] = [];
@@ -123,15 +124,15 @@ export async function GET(req: NextRequest) {
       offset += chunk.length;
     }
     if (buffer.length <= metaint)
-      return NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK });
+      return withApiVersion(NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK }));
     const metaLength = buffer[metaint] * 16;
     if (metaLength === 0 || buffer.length < metaint + 1 + metaLength) {
-      return NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK });
+      return withApiVersion(NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK }));
     }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength);
     const metaString = _UTF8_DECODER.decode(metaBytes).replace(_TRAILING_NULLS_RE, '');
     const match = metaString.match(_STREAM_TITLE_RE);    const streamTitle = match?.[1]?.trim() || null;
-    return NextResponse.json({ streamTitle, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
+    return withApiVersion(NextResponse.json({ streamTitle, icyName, icyGenre, icyBr }, { headers: _CACHE_OK }));
   } catch (err) {
     clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';

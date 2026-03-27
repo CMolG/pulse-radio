@@ -12,6 +12,7 @@ import { env } from '@/lib/env';
 import { concertsKey } from '@/lib/cache-keys';
 import { apiError } from '@/lib/api-response';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
+import { withApiVersion } from '@/lib/api-versioning';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
@@ -135,7 +136,7 @@ export async function GET(req: NextRequest) {
     const list = events ?? [];
     const headers: Record<string, string> = { ...(list.length > 0 ? _CACHE_HDRS : _NO_CACHE_HDRS) };
     if (concertsCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = concertsCircuit.state.toLowerCase();
-    return NextResponse.json(list, { headers });
+    return withApiVersion(NextResponse.json(list, { headers }));
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return apiError(

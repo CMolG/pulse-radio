@@ -8,6 +8,7 @@ import { validateRequest } from '@/lib/validate-request';
 import { proxyStreamSchema } from '@/lib/validation-schemas';
 import { isPrivateHost, ALLOWED_PROTOCOLS, resolveDnsAndValidate } from '@/lib/ssrf';
 import { apiError } from '@/lib/api-response';
+import { withApiVersion } from '@/lib/api-versioning';
 export const runtime = 'nodejs';
 const MAX_DURATION_MS = 25_000;
 const _UPSTREAM_HDRS = { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0' } as const;
@@ -177,7 +178,7 @@ export async function GET(req: NextRequest) {
     }
     recordStationFailure(streamUrl);
     recordFailure(streamUrl);
-    console.error('[proxy-stream] Connection failed:', err);
+    console.error('[proxy-stream] Connection failed:', sanitizeForLog(err instanceof Error ? err.message : String(err)));
     return apiError('Stream connection failed', 'UPSTREAM_ERROR', 502, { 'Retry-After': '5' });
   }
 }

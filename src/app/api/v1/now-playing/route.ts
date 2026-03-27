@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, schema } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 import { rateLimit } from '@/lib/rate-limiter';
+import { withApiVersion } from '@/lib/api-versioning';
 
 export const runtime = 'nodejs';
 
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
 
   const results = query.all();
 
-  return NextResponse.json(results, {
+  return withApiVersion(NextResponse.json(results, {
     headers: { 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=20' },
-  });
+  }));
 }

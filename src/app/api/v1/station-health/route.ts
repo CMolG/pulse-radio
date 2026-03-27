@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getScores } from '@/lib/station-health';
 import { rateLimit } from '@/lib/rate-limiter';
+import { withApiVersion } from '@/lib/api-versioning';
 
 export const runtime = 'nodejs';
 
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     .slice(0, 50);
 
   if (urls.length === 0) {
-    return NextResponse.json({ error: 'Missing urls parameter' }, { status: 400 });
+    return withApiVersion(NextResponse.json({ error: 'Missing urls parameter' }, { status: 400 }));
   }
 
   const scores = getScores(urls);
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
     };
   }
 
-  return NextResponse.json(enriched, {
+  return withApiVersion(NextResponse.json(enriched, {
     headers: { 'Cache-Control': 'public, max-age=60, s-maxage=300' },
-  });
+  }));
 }

@@ -8,8 +8,8 @@ import {
   translate,
   type MessageKey,
   type SupportedLocale,
-} from '@/lib/i18n/locales';
-import { COUNTRY_BY_CODE } from '@/lib/i18n/countries';
+} from '@/lib/i18n';
+import { COUNTRY_BY_CODE } from '@/lib/i18n';
 import { loadStringFromStorage, saveStringToStorage } from '@/lib/storageUtils';
 import { STORAGE_KEYS } from '@/components/radio/constants';
 const COUNTRY_LOCALE_OVERRIDES: Partial<Record<string, SupportedLocale>> = {

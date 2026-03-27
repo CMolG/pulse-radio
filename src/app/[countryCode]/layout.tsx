@@ -1,5 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import { getLocaleFromCountryCode, getDirFromLocale } from '@/lib/i18n/countryLocale';
+import { getLocaleFromCountryCode, getDirFromLocale } from '@/lib/i18n';
 
 export default async function CountryLayout({
   children,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rate-limiter';
 import { db, schema } from '@/lib/db';
 import { sql } from 'drizzle-orm';
+import { withApiVersion } from '@/lib/api-versioning';
 
 export const runtime = 'nodejs';
 
@@ -58,8 +59,8 @@ export async function POST(req: NextRequest) {
         .run();
     }
 
-    return NextResponse.json({ inserted }, { status: 201 });
+    return withApiVersion(NextResponse.json({ inserted }, { status: 201 }));
   } catch {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+    return withApiVersion(NextResponse.json({ error: 'Invalid request' }, { status: 400 }));
   }
 }

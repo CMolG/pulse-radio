@@ -12,6 +12,7 @@ import { apiError } from '@/lib/api-response';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
 import { safeErrorResponse } from '@/lib/api-error-sanitizer';
 import { itunesKey } from '@/lib/cache-keys';
+import { withApiVersion } from '@/lib/api-versioning';
 export const runtime = 'nodejs';
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -62,7 +63,7 @@ const _NOOP = () => {};
     reqLog.done(200);
     const headers: Record<string, string> = { ..._CACHE_HDRS };
     if (itunesCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = itunesCircuit.state.toLowerCase();
-    return NextResponse.json(data, { headers });
+    return withApiVersion(NextResponse.json(data, { headers }));
   } catch (e) {
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     const status = isTimeout ? 504 : 500;

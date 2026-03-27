@@ -13,6 +13,7 @@ import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { artistInfoKey } from '@/lib/cache-keys';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
 import { apiError } from '@/lib/api-response';
+import { withApiVersion } from '@/lib/api-versioning';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -131,7 +132,7 @@ export async function GET(req: NextRequest) {
     const headers: Record<string, string> = { 'Cache-Control': cacheHeader };
     if (artistInfoCircuit.state !== 'CLOSED')
       headers['X-Circuit-State'] = artistInfoCircuit.state.toLowerCase();
-    return NextResponse.json(payload, { headers });
+    return withApiVersion(NextResponse.json(payload, { headers }));
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';

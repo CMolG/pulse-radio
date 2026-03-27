@@ -1,4 +1,4 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import type { MessageKey } from '@/lib/i18n/locales';
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import type { MessageKey } from '@/lib/i18n';
 export const STORAGE_KEYS = {
   FAVORITES: 'radio-favorites',
   RECENT: 'radio-recent',

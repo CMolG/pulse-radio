@@ -44,12 +44,12 @@ export async function GET(request: NextRequest) {
 
   const degraded = database !== 'ok' || radioBrowser !== 'ok';
 
-  return NextResponse.json(
+  return withApiVersion(NextResponse.json(
     {
       ...base,
       status: degraded ? 'degraded' : 'healthy',
       checks: { database, radioBrowser },
     },
     { status: 200 },
-  );
+  ));
 }

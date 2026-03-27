@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeUrl } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
+import { withApiVersion } from '@/lib/api-versioning';
 
 export const runtime = 'nodejs';
 
