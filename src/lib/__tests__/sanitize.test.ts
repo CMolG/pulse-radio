@@ -38,8 +38,8 @@ describe('stripPrototypeKeys', () => {
   it('processes arrays and their elements', () => {
     const obj = {
       items: [
-        { __proto__: { polluted: true }, id: 1 },
-        { constructor: { polluted: true }, id: 2 },
+        { __proto__: { polluted: true }, id: 1 } as any,
+        { constructor: { polluted: true }, id: 2 } as any,
       ],
     };
     const result = stripPrototypeKeys(obj);
