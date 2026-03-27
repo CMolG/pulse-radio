@@ -3,7 +3,7 @@ task_id: ARCH-077
 target_agent: auto-optimizer-finite
 target_module: next.config.ts
 priority: medium
-status: pending
+status: completed
 ---
 
 # Enable Next.js Image Optimization

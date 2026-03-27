@@ -493,7 +493,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               />
             ) : (
               <div className="size-full flex items-center justify-center">
-                <Music size={48} className="text-dim" />
+                <Music size={48} className="text-white/50" />
               </div>
             )}
           </div>
@@ -502,19 +502,19 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             <p className="text-[14px] font-semibold text-white line-clamp-2">
               {selectedHistory.title}
             </p>
-            <p className="text-[13px] text-secondary line-clamp-1">
+            <p className="text-[13px] text-white/60 line-clamp-1">
               {selectedHistory.artist}
             </p>
             {selectedHistory.album && (
-              <p className="text-[11px] text-dim line-clamp-1">
+              <p className="text-[11px] text-white/50 line-clamp-1">
                 {selectedHistory.album}
               </p>
             )}
           </div>
           {/* Footer */}
           <div className="px-4 pb-3 flex items-center gap-1.5">
-            <RadioIcon size={10} className="text-dim flex-shrink-0" />
-            <p className="text-[10px] text-dim truncate">
+            <RadioIcon size={10} className="text-white/50 flex-shrink-0" />
+            <p className="text-[10px] text-white/50 truncate">
               Emitido por {selectedHistory.stationName}
             </p>
           </div>
@@ -600,10 +600,10 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         {!theaterMode && (
           <div className="relative z-20 flex-shrink-0">
             {/* Top row: menu + title + actions */}
-            <div className="flex-row-2 px-3 pt-2 pb-1">
+            <div className="flex items-center gap-2 px-3 pt-2 pb-1">
               <button
                 onClick={() => setMobileDrawer((d) => !d)}
-                className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-secondary"
+                className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-white/60"
               >
                 {mobileDrawer ? <X size={16} /> : <Menu size={16} />}
               </button>
@@ -611,14 +611,14 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 <p className="text-[13px] font-medium text-white truncate">
                   {enrichedTrack?.title || radio.station?.name || "Radio"}
                 </p>
-                <p className="text-[10px] text-secondary truncate">
+                <p className="text-[10px] text-white/60 truncate">
                   {enrichedTrack?.artist || ""}
                 </p>
               </div>
               {!miniMode && (
                 <button
                   onClick={() => setMiniMode((m) => !m)}
-                  className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-secondary"
+                  className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-white/60"
                   title="Minimize"
                 >
                   <Minimize2 size={14} />
@@ -627,7 +627,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               {miniMode && (
                 <button
                   onClick={() => setMiniMode(false)}
-                  className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-secondary"
+                  className="p-1.5 rounded-lg bg-surface-2 hover:bg-surface-5 text-white/60"
                   title="Expand"
                 >
                   <Maximize2 size={14} />
@@ -636,7 +636,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
             </div>
             {/* Search bar */}
             <form onSubmit={handleMobileSearchSubmit} className="px-3 pb-2">
-              <div className="flex-row-1.5 px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.06]">
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.06]">
                 <Search size={14} className="text-white/30 flex-shrink-0" />
                 <input
                   type="text"
@@ -718,7 +718,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-white/50 hover:text-white/60 hover:bg-surface-2"}`}
                   >
                     {tab.icon}
                     {tab.label}
@@ -757,7 +757,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               </div>
             </div>
           ) : radio.station ? (
-            <div className="flex-row-3 px-4 py-3 flex-1">
+            <div className="flex items-center gap-3 px-4 py-3 flex-1">
               {albumArt.artworkUrl && (
                 <img
                   src={albumArt.artworkUrl}
@@ -769,7 +769,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                 <p className="text-[13px] font-medium text-white truncate">
                   {enrichedTrack?.title || radio.station.name}
                 </p>
-                <p className="text-[11px] text-muted truncate">
+                <p className="text-[11px] text-white/55 truncate">
                   {enrichedTrack?.artist || "Internet Radio"}
                 </p>
               </div>
@@ -863,7 +863,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
         )}
 
         {/* Main content */}
-        <div className="col-fill min-w-0">
+        <div className="flex flex-col flex-1 min-w-0">
           <AnimatePresence mode="wait">
             {theaterMode && radio.station && !miniMode ? (
               <motion.div
@@ -911,15 +911,15 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-dim hover:text-white/60 hover:bg-surface-2"}`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors ${activeTab === tab.id ? "bg-surface-6 text-white" : "text-white/50 hover:text-white/60 hover:bg-surface-2"}`}
                     >
                       {tab.icon}
                       {tab.label}
                       {tab.id === "history" && songHistory.history.length > 0 && (
-                        <span className="text-[9px] text-dim ml-0.5">{songHistory.history.length}</span>
+                        <span className="text-[9px] text-white/50 ml-0.5">{songHistory.history.length}</span>
                       )}
                       {tab.id === "favorites" && favSongs.songs.length > 0 && (
-                        <span className="text-[9px] text-dim ml-0.5">{favSongs.songs.length}</span>
+                        <span className="text-[9px] text-white/50 ml-0.5">{favSongs.songs.length}</span>
                       )}
                     </button>
                   ))}
@@ -981,7 +981,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
               </React.Fragment>
             ) : (
               radio.station && (
-                <div key="mini" className="flex-row-4 px-6 py-4 flex-1">
+                <div key="mini" className="flex items-center gap-4 px-6 py-4 flex-1">
                   {albumArt.artworkUrl ? (
                     <img
                       src={albumArt.artworkUrl}
@@ -995,7 +995,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
                     <p className="text-[14px] font-medium text-white truncate">
                       {enrichedTrack?.title || radio.station.name}
                     </p>
-                    <p className="text-[12px] text-muted truncate">
+                    <p className="text-[12px] text-white/55 truncate">
                       {enrichedTrack?.artist || "Internet Radio"}
                     </p>
                   </div>
@@ -1037,7 +1037,7 @@ export default function RadioShell({ isPip: isPipProp }: { isPip?: boolean }) {
       <div className="relative z-10">
         <button
           onClick={() => setMiniMode((m) => !m)}
-          className="absolute -top-8 right-3 z-10 p-1 rounded bg-surface-2 hover:bg-surface-5 text-muted-hover"
+          className="absolute -top-8 right-3 z-10 p-1 rounded bg-surface-2 hover:bg-surface-5 text-white/55 hover:text-white/70 transition-colors"
           title={miniMode ? "Expand" : "Minimize"}
         >
           {miniMode ? <Maximize2 size={12} /> : <Minimize2 size={12} />}

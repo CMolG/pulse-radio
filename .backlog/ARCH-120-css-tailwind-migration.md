@@ -3,7 +3,7 @@ task_id: ARCH-120
 target_agent: auto-reducer-finite
 target_module: src/app/globals.css
 priority: low
-status: pending
+status: completed
 ---
 
 # ARCH-120: Audit Custom CSS Utilities & Migrate to Tailwind v4
