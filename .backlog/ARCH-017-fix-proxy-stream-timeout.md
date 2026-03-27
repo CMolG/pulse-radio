@@ -3,7 +3,7 @@ task_id: ARCH-017
 target_agent: auto-optimizer-finite
 target_module: src/app/api/proxy-stream/route.ts
 priority: critical
-status: pending
+status: completed
 ---
 
 # Re-enable Stream Proxy Timeout Protection
@@ -25,8 +25,8 @@ Every other API route has an 8-10s timeout. The stream proxy is the most resourc
 
 ## Acceptance Criteria
 
-- [ ] `MAX_DURATION_MS` is a positive value (≥15000, ≤30000)
-- [ ] Timeout guard condition `if (MAX_DURATION_MS > 0)` now evaluates to true
-- [ ] Stream requests that hang are terminated after the timeout
-- [ ] Client disconnect still properly cleans up the stream
-- [ ] `npm run build` passes with zero errors
+- [x] `MAX_DURATION_MS` is a positive value (≥15000, ≤30000)
+- [x] Timeout guard condition `if (MAX_DURATION_MS > 0)` now evaluates to true
+- [x] Stream requests that hang are terminated after the timeout
+- [x] Client disconnect still properly cleans up the stream
+- [x] `npm run build` passes with zero errors
