@@ -39,15 +39,15 @@ export function timedQuery<T>(label: string, fn: () => T): T {
   return result;
 }
 
-function recordCacheHit() {
+export function recordCacheHit() {
   cacheStats.hits++;
 }
 
-function recordCacheMiss() {
+export function recordCacheMiss() {
   cacheStats.misses++;
 }
 
-function recordCacheWrite() {
+export function recordCacheWrite() {
   cacheStats.writes++;
 }
 
@@ -120,6 +120,3 @@ export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
 });
 
 export { schema };
-
-// Export cache monitoring functions
-export { getCacheStats, timedQuery, recordCacheHit, recordCacheMiss, recordCacheWrite };
