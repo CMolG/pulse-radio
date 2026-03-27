@@ -26,6 +26,7 @@ async function apiFetch(
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
@@ -36,8 +37,9 @@ const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
   const limited = rateLimit(req, RATE_LIMITS.itunes);
   if (limited) return limited;
 
-  const term = req.nextUrl.searchParams.get('term');
-  if (!term || term.length > 200) {
+  const rawTerm = req.nextUrl.searchParams.get('term');
+  const term = rawTerm ? sanitizeSearchQuery(rawTerm) : '';
+  if (!term) {
     return NextResponse.json(_ERR_400, { status: 400 });
   }
   const isPodcast = req.nextUrl.searchParams.get('media') === 'podcast';

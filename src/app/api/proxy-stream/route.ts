@@ -1,6 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest } from 'next/server';
 import { isStationBlacklisted, recordStationFailure, clearStationFailures } from '@/lib/server-cache';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { sanitizeUrl } from '@/lib/sanitize';
 const _IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 const _IPV6_MAPPED_RE = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i;
 const _IPV6_BRACKETS_RE = /^\[|\]$/g;
@@ -57,8 +58,8 @@ export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.proxyStream);
   if (limited) return limited;
 
-  const streamUrl = req.nextUrl.searchParams.get('url');
-  if (!streamUrl || streamUrl.length > 2048) {
+  const streamUrl = sanitizeUrl(req.nextUrl.searchParams.get('url') ?? '');
+  if (!streamUrl) {
     return new Response(_ERR_MISSING_URL, {
       status: 400,
       headers: _JSON_HDRS,

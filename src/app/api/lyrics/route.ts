@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export const runtime = 'nodejs';
 const LRCLIB_BASE = 'https://lrclib.net/api';
@@ -82,8 +83,8 @@ export async function GET(req: NextRequest) {
   if (limited) return limited;
 
   const { searchParams } = req.nextUrl;
-  const artist = searchParams.get('artist')?.trim() ?? '';
-  const title = searchParams.get('title')?.trim() ?? '';
+  const artist = sanitizeSearchQuery(searchParams.get('artist') ?? '');
+  const title = sanitizeSearchQuery(searchParams.get('title') ?? '');
   const album = searchParams.get('album')?.trim() ?? '';
   const durationParam = searchParams.get('duration');
   const duration = durationParam ? parseFloat(durationParam) : undefined;

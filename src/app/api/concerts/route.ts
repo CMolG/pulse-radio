@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheResolve } from '@/lib/services/CacheRepository';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
+import { sanitizeSearchQuery } from '@/lib/sanitize';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
@@ -117,8 +118,8 @@ export async function GET(req: NextRequest) {
   const limited = rateLimit(req, RATE_LIMITS.concerts);
   if (limited) return limited;
 
-  const artist = req.nextUrl.searchParams.get('artist')?.trim() ?? '';
-  if (!artist || artist.length > 200) {
+  const artist = sanitizeSearchQuery(req.nextUrl.searchParams.get('artist') ?? '');
+  if (!artist) {
     return NextResponse.json({ error: 'Missing or invalid artist parameter' }, { status: 400 });
   }
 
