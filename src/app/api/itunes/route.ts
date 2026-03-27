@@ -10,6 +10,7 @@ import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { apiError } from '@/lib/api-response';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
+import { safeErrorResponse } from '@/lib/api-error-sanitizer';
 export const runtime = 'nodejs';
 const _ERR_400 = { error: 'Missing or invalid term parameter', results: [] };
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
@@ -31,7 +32,7 @@ const _NOOP = () => {};
   const isPodcast = media === 'podcast';
   const entity = isPodcast ? 'podcast' : (validated.data.entity ?? 'song');
   const limit = isPodcast ? '20' : '3';
-  const cacheKey = `${media}:${term.toLowerCase().trim()}`;
+  const cacheKey = itunesKey(term, media);
   try {
     const data = await cacheResolve<unknown>({
       namespace: 'itunes',
@@ -65,10 +66,12 @@ const _NOOP = () => {};
     const isTimeout = e instanceof DOMException && e.name === 'AbortError';
     const status = isTimeout ? 504 : 500;
     reqLog.done(status);
+    if (!isTimeout) console.error('[itunes] Search request failed:', e);
     return NextResponse.json(
       {
-        error: isTimeout ? 'Request timed out' : e instanceof Error ? e.message : 'Internal error',
+        error: isTimeout ? 'Request timed out' : 'Search request failed',
         results: [],
+        ...(process.env.NODE_ENV !== 'production' && e instanceof Error && { debug: e.message }),
       },
       { status },
     );

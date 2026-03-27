@@ -1,5 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { create } from 'zustand';
+'use client';
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
+import {
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ ('use client');
 type MeterRef = React.RefObject<{ peak: number; rms: number }>;
 const ATTACK_MS = 80;
@@ -342,10 +348,6 @@ const LiquidGlassButton = React.memo(function LiquidGlassButton({
   );
 });
 
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'motion/react';
-import {
   Minimize2,
   Maximize2,
   Radio as RadioIcon,

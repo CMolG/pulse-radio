@@ -2,13 +2,15 @@
   NextRequest,
   NextResponse,
 } from 'next/server';
-import { cacheResolve } from '@/lib/services/CacheRepository';
+import { getCachedOrFetch } from '@/lib/services/CacheRepository';
+import { ArtistInfoSchema } from '@/lib/schemas/api-responses';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { logError } from '@/lib/error-logger';
 import { validateRequest } from '@/lib/validate-request';
 import { artistInfoSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
+import { artistInfoKey } from '@/lib/cache-keys';
 import { readJsonWithLimit } from '@/lib/fetch-utils';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
@@ -108,7 +110,7 @@ export async function GET(req: NextRequest) {
   if (!validated.success) return validated.error;
   const artist = sanitizeSearchQuery(validated.data.artist);
   if (!artist) return NextResponse.json(_ERR_400, { status: 400 });
-  const cacheKey = artist.toLowerCase().trim();
+  const cacheKey = artistInfoKey(artist);
   try {
     const payload = await cacheResolve<unknown>({
       namespace: 'artist-info',

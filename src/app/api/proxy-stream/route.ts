@@ -91,6 +91,14 @@ export async function GET(req: NextRequest) {
         headers: _JSON_HDRS,
       });
     }
+    try {
+      await resolveDnsAndValidate(parsed.hostname);
+    } catch {
+      return new Response(_ERR_PRIVATE_IP, {
+        status: 400,
+        headers: _JSON_HDRS,
+      });
+    }
   } catch {
     return new Response(_ERR_INVALID_URL, {
       status: 400,
@@ -131,6 +139,14 @@ export async function GET(req: NextRequest) {
           });
         }
       } catch {}
+    } else {
+      if (timeout) clearTimeout(timeout);
+      upstream.body?.cancel().catch(_NOOP);
+      decrementStreamCount(clientIp);
+      return new Response(JSON.stringify({ error: 'Redirect target unknown' }), {
+        status: 400,
+        headers: _JSON_HDRS,
+      });
     }
     if (!upstream.ok || !upstream.body) {
       if (timeout) clearTimeout(timeout);

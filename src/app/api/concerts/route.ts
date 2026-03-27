@@ -8,7 +8,9 @@ import { validateRequest } from '@/lib/validate-request';
 import { concertsSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { env } from '@/lib/env';
+import { concertsKey } from '@/lib/cache-keys';
 import { apiError } from '@/lib/api-response';
+import { readJsonWithLimit } from '@/lib/fetch-utils';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
@@ -54,16 +56,6 @@ function encodeBandsintownArtist(name: string): string {
     .replace(/%22/gi, '%2522');
 }
 
-function normKey(s: string): string {
-  return s
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
-
 function mapEvent(e: BandsintownEvent): ConcertEvent {
   const ticketOffer = e.offers?.find((o) => o.type === 'Tickets' && o.status === 'available');
   return {
@@ -106,12 +98,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
       logError(new Error(`[concerts] events ${res.status}`), { artist, artistId, body: body.slice(0, 200) });
       return [];
     }
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(_NOOP);
-      return [];
-    }
-    const data: BandsintownEvent[] = await res.json();
+    const data: BandsintownEvent[] | null = await readJsonWithLimit<BandsintownEvent[]>(res, 512 * 1024, eventsUrl);
     if (!Array.isArray(data)) return [];
     return data.slice(0, MAX_EVENTS).map(mapEvent);
   } catch {
@@ -129,7 +116,7 @@ export async function GET(req: NextRequest) {
   const artist = sanitizeSearchQuery(validated.data.artist);
   if (!artist) return apiError('Missing or invalid artist parameter', 'INVALID_PARAM', 400);
 
-  const cacheKey = normKey(artist);
+  const cacheKey = concertsKey(artist);
   try {
     const events = await cacheResolve<ConcertEvent[]>({
       namespace: 'concerts',

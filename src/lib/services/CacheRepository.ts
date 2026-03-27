@@ -17,6 +17,7 @@ import {
   lyricsCache,
 } from '@/lib/db/schema';
 import { cacheGet, cacheSet, type Namespace } from '@/lib/server-cache';
+import { safeJsonParse } from '@/lib/sanitize';
 import { eq, sql } from 'drizzle-orm';
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
 import { logger } from '@/lib/logger';
@@ -100,8 +101,98 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
   return fresh;
 }
 
+interface CacheOptionsWithSchema<T> {
+  /** server-cache namespace */
+  namespace: Namespace;
+  /** normalized cache key */
+  key: string;
+  /** TTL in milliseconds for both LRU and SQLite */
+  ttlMs: number;
+  /** Zod schema to validate cached data */
+  schema: z.ZodType<T>;
+  /** Async function that fetches from the external API. Return null for "no data". */
+  fetcher: () => Promise<T | null>;
+}
+
 /**
- * Returns all stale records from a given namespace table.
+ * Cache resolver with Zod schema validation (ARCH-073).
+ * Validates deserialized cache data; if validation fails, treats as cache miss and re-fetches.
+ * Never crashes on schema mismatch — just logs a warning and refreshes.
+ */
+export async function getCachedOrFetch<T>(
+  opts: CacheOptionsWithSchema<T>,
+): Promise<T | null> {
+  const { namespace, key, ttlMs, schema, fetcher } = opts;
+
+  // ── Tier 1: In-memory LRU ──
+  const mem = cacheGet<T>(namespace, key);
+  if (mem !== undefined) return mem;
+
+  // ── Tier 2: SQLite persistent cache ──
+  const table = TABLE_MAP[namespace];
+  if (table) {
+    try {
+      const row = db.select().from(table).where(eq(table.key, key)).get() as
+        | { key: string; payload: string; fetchedAt: number; ttlMs: number }
+        | undefined;
+
+      if (row) {
+        const age = Date.now() - row.fetchedAt;
+        if (age < row.ttlMs) {
+          // Still fresh — validate before returning
+          const parsed = JSON.parse(row.payload);
+          const validation = schema.safeParse(parsed);
+
+          if (validation.success) {
+            cacheSet(namespace, key, validation.data, row.ttlMs - age);
+            return validation.data;
+          }
+
+          // Schema validation failed — log warning and treat as cache miss
+          logger.warn('cache_schema_validation_failed', {
+            namespace,
+            key,
+            error: validation.error.message,
+          });
+          // Delete stale entry to avoid re-validating it
+          try {
+            db.delete(table).where(eq(table.key, key)).run();
+          } catch (delErr) {
+            logger.error('cache_delete_failed', delErr, { namespace, key });
+          }
+        }
+        // Stale or invalid — re-fetch
+      }
+    } catch (e) {
+      logger.error('cache_read_failed', e, { namespace, key });
+    }
+  }
+
+  // ── Tier 3: External API ──
+  const fresh = await fetcher();
+
+  // Persist into both tiers (even null results to avoid repeated lookups)
+  const payload = JSON.stringify(fresh);
+  cacheSet(namespace, key, fresh, ttlMs);
+
+  if (table) {
+    try {
+      db.insert(table)
+        .values({ key, payload, fetchedAt: Date.now(), ttlMs })
+        .onConflictDoUpdate({
+          target: table.key,
+          set: { payload, fetchedAt: Date.now(), ttlMs },
+        })
+        .run();
+    } catch (e) {
+      logger.error('cache_write_failed', e, { namespace, key });
+    }
+  }
+
+  return fresh;
+}
+
+/**
  * Used by the cron sync endpoint to know what needs refreshing.
  */
 export function getStaleKeys(namespace: Namespace): string[] {

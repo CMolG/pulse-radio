@@ -1,5 +1,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
+import { safeJsonParse } from './sanitize';
+
 /**
  * Reads a Response body as JSON with a hard byte-level size limit.
  * Protects against OOM from chunked, compressed, or oversized responses.
@@ -32,5 +34,5 @@ export async function readJsonWithLimit<T>(
   }
 
   const text = new TextDecoder().decode(Buffer.concat(chunks));
-  return JSON.parse(text) as T;
+  return safeJsonParse<T>(text);
 }

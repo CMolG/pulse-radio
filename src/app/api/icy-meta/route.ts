@@ -10,6 +10,7 @@ import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';
 import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
 import { safeErrorResponse } from '@/lib/api-error-sanitizer';
+import { fetchWithRetry } from '@/lib/fetch-with-retry';
 const _TRAILING_NULLS_RE = /\0+$/;
 const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 export const runtime = 'nodejs';
@@ -87,8 +88,8 @@ export async function GET(req: NextRequest) {
       res.body?.cancel().catch(_NOOP);
       return NextResponse.json({
         streamTitle: null,
-        icyName: icyName || null,
-        icyGenre: icyGenre || null,
+        icyName: icyName ? sanitizeTextContent(icyName) : null,
+        icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null,
         icyBr: icyBr || null,
       }, { headers: _CACHE_OK });
     }
@@ -97,7 +98,7 @@ export async function GET(req: NextRequest) {
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
       clearTimeout(timeout);
       res.body.cancel().catch(_NOOP);
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
+      return NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK });
     }
     const reader = res.body.getReader();
     const chunks: Uint8Array[] = [];
@@ -121,10 +122,10 @@ export async function GET(req: NextRequest) {
       offset += chunk.length;
     }
     if (buffer.length <= metaint)
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
+      return NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK });
     const metaLength = buffer[metaint] * 16;
     if (metaLength === 0 || buffer.length < metaint + 1 + metaLength) {
-      return NextResponse.json({ streamTitle: null, icyName, icyGenre, icyBr }, { headers: _CACHE_OK });
+      return NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK });
     }
     const metaBytes = buffer.slice(metaint + 1, metaint + 1 + metaLength);
     const metaString = _UTF8_DECODER.decode(metaBytes).replace(_TRAILING_NULLS_RE, '');
@@ -137,7 +138,7 @@ export async function GET(req: NextRequest) {
       recordStationFailure(streamUrl);
       return NextResponse.json({ error: 'Request timed out' }, { status: 504, headers: _CACHE_ERR });
     }
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500, headers: _CACHE_ERR });
+    console.error('[icy-meta] Metadata fetch failed:', err);
+    return NextResponse.json(safeErrorResponse('Metadata fetch failed', err), { status: 500, headers: _CACHE_ERR });
   }
 }

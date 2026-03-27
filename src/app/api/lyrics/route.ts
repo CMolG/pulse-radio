@@ -40,16 +40,6 @@ async function fetchLrcLib<T>(url: string, signal: AbortSignal): Promise<T | nul
   }
 }
 
-function normKey(s: string): string {
-  return s
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
-
 async function fetchLyrics(
   artist: string,
   title: string,
