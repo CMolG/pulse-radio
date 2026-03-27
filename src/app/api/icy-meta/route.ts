@@ -77,6 +77,10 @@ export async function GET(req: NextRequest) {
       } catch {
         /* URL parse failed — continue */
       }
+    } else {
+      clearTimeout(timeout);
+      res.body?.cancel().catch(_NOOP);
+      return NextResponse.json({ error: 'Redirect target unknown' }, { status: 400, headers: _CACHE_BAD_REQ });
     }
     if (!res.ok) {
       clearTimeout(timeout);

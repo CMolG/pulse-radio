@@ -76,8 +76,9 @@ const itunesCircuit = createCircuitBreaker('itunes-lookup');
     const status = isTimeout ? 504 : 500;
     const code = isTimeout ? 'TIMEOUT' : 'UPSTREAM_ERROR';
     reqLog.done(status);
+    if (!isTimeout) console.error('[itunes-lookup] Lookup request failed:', e);
     return apiError(
-      isTimeout ? 'Request timed out' : e instanceof Error ? e.message : 'Internal error',
+      isTimeout ? 'Request timed out' : 'Lookup request failed',
       code,
       status,
     );

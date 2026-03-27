@@ -6,21 +6,11 @@ import { sanitizeUrl, sanitizeHeaderValue } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { proxyStreamSchema } from '@/lib/validation-schemas';
-import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
-import { safeErrorResponse } from '@/lib/api-error-sanitizer';
+import { isPrivateHost, ALLOWED_PROTOCOLS, resolveDnsAndValidate } from '@/lib/ssrf';
+import { apiError } from '@/lib/api-response';
 export const runtime = 'nodejs';
 const MAX_DURATION_MS = 25_000;
-const _JSON_HDRS = { 'Content-Type': 'application/json' } as const;
-const _JSON_R3_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '3' } as const;
-const _JSON_R5_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '5' } as const;
-const _JSON_BL_HDRS = { 'Content-Type': 'application/json', 'X-Station-Blacklisted': 'true' } as const;
 const _UPSTREAM_HDRS = { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0' } as const;
-const _ERR_MISSING_URL = JSON.stringify({ error: 'Missing or invalid url parameter' });
-const _ERR_INVALID_PROTOCOL = JSON.stringify({ error: 'Invalid protocol' });
-const _ERR_INVALID_URL = JSON.stringify({ error: 'Invalid URL' });
-const _ERR_PRIVATE_IP = JSON.stringify({ error: 'Redirect to private IP not allowed' });
-const _ERR_TIMEOUT = JSON.stringify({ error: 'Stream timed out' });
-const _ERR_BLACKLISTED = JSON.stringify({ error: 'Station temporarily unavailable', blacklisted: true });
 const _NOOP = () => {};
 const _EVT_ONCE = { once: true } as const;
 
@@ -28,9 +18,7 @@ const _EVT_ONCE = { once: true } as const;
 const MAX_STREAMS_PER_IP = 5;
 const MAX_STREAMS_TOTAL = 200;
 const BACKPRESSURE_LIMIT = 256 * 1024; // 256KB (4 × 64KB chunks)
-const _ERR_LIMIT_IP = JSON.stringify({ error: 'Too many concurrent streams from this IP' });
-const _ERR_LIMIT_TOTAL = JSON.stringify({ error: 'Server stream capacity reached' });
-const _JSON_R10_HDRS = { 'Content-Type': 'application/json', 'Retry-After': '10' } as const;
+
 
 const ipStreamCounts = new Map<string, number>();
 let totalActiveStreams = 0;
@@ -72,45 +60,33 @@ export async function GET(req: NextRequest) {
 
   const clientIp = getClientIp(req);
   if ((ipStreamCounts.get(clientIp) ?? 0) >= MAX_STREAMS_PER_IP) {
-    return new Response(_ERR_LIMIT_IP, { status: 503, headers: _JSON_R10_HDRS });
+    return apiError('Too many concurrent streams from this IP', 'RATE_LIMITED', 503, { 'Retry-After': '10' });
   }
   if (totalActiveStreams >= MAX_STREAMS_TOTAL) {
-    return new Response(_ERR_LIMIT_TOTAL, { status: 503, headers: _JSON_R10_HDRS });
+    return apiError('Server stream capacity reached', 'RATE_LIMITED', 503, { 'Retry-After': '10' });
   }
 
   const validated = validateRequest(proxyStreamSchema, req.nextUrl.searchParams);
-  if (!validated.success) return new Response(_ERR_MISSING_URL, { status: 400, headers: _JSON_HDRS });
+  if (!validated.success) return apiError('Missing or invalid url parameter', 'INVALID_PARAM', 400);
   const streamUrl = sanitizeUrl(validated.data.url);
-  if (!streamUrl) return new Response(_ERR_MISSING_URL, { status: 400, headers: _JSON_HDRS });
+  if (!streamUrl) return apiError('Missing or invalid url parameter', 'INVALID_PARAM', 400);
   let parsed: URL;
   try {
     parsed = new URL(streamUrl);
     if (!ALLOWED_PROTOCOLS.has(parsed.protocol)) {
-      return new Response(_ERR_INVALID_PROTOCOL, {
-        status: 400,
-        headers: _JSON_HDRS,
-      });
+      return apiError('Invalid protocol', 'INVALID_PARAM', 400);
     }
     try {
       await resolveDnsAndValidate(parsed.hostname);
     } catch {
-      return new Response(_ERR_PRIVATE_IP, {
-        status: 400,
-        headers: _JSON_HDRS,
-      });
+      return apiError('Redirect to private IP not allowed', 'INVALID_PARAM', 400);
     }
   } catch {
-    return new Response(_ERR_INVALID_URL, {
-      status: 400,
-      headers: _JSON_HDRS,
-    });
+    return apiError('Invalid URL', 'INVALID_PARAM', 400);
   }
   // Blacklist check: reject immediately if station has repeated failures
   if (isStationBlacklisted(streamUrl) || isUnhealthy(streamUrl)) {
-    return new Response(_ERR_BLACKLISTED, {
-      status: 503,
-      headers: _JSON_BL_HDRS,
-    });
+    return apiError('Station temporarily unavailable', 'BLACKLISTED', 503, { 'X-Station-Blacklisted': 'true' });
   }
   incrementStreamCount(clientIp);
   const controller = new AbortController();
@@ -133,20 +109,14 @@ export async function GET(req: NextRequest) {
           if (timeout) clearTimeout(timeout);
           upstream.body?.cancel().catch(_NOOP);
           decrementStreamCount(clientIp);
-          return new Response(_ERR_PRIVATE_IP, {
-            status: 403,
-            headers: _JSON_HDRS,
-          });
+          return apiError('Redirect to private IP not allowed', 'INVALID_PARAM', 403);
         }
       } catch {}
     } else {
       if (timeout) clearTimeout(timeout);
       upstream.body?.cancel().catch(_NOOP);
       decrementStreamCount(clientIp);
-      return new Response(JSON.stringify({ error: 'Redirect target unknown' }), {
-        status: 400,
-        headers: _JSON_HDRS,
-      });
+      return apiError('Redirect target unknown', 'UPSTREAM_ERROR', 400);
     }
     if (!upstream.ok || !upstream.body) {
       if (timeout) clearTimeout(timeout);
@@ -154,10 +124,7 @@ export async function GET(req: NextRequest) {
       recordStationFailure(streamUrl);
       recordFailure(streamUrl);
       decrementStreamCount(clientIp);
-      return new Response(JSON.stringify({ error: `Upstream ${upstream.status}` }), {
-        status: 502,
-        headers: _JSON_R3_HDRS,
-      });
+      return apiError(`Upstream ${upstream.status}`, 'UPSTREAM_ERROR', 502, { 'Retry-After': '3' });
     }
     // Successful connection — clear any previous failure count
     clearStationFailures(streamUrl);
@@ -206,15 +173,12 @@ export async function GET(req: NextRequest) {
     if (isTimeout) {
       recordStationFailure(streamUrl);
       recordFailure(streamUrl);
-      return new Response(_ERR_TIMEOUT, {
-        status: 504,
-        headers: _JSON_HDRS,
-      });
+      return apiError('Stream timed out', 'TIMEOUT', 504);
     }
     recordStationFailure(streamUrl);
     recordFailure(streamUrl);
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
+    console.error('[proxy-stream] Connection failed:', err);
+    return new Response(JSON.stringify(safeErrorResponse('Stream connection failed', err)), {
       status: 502,
       headers: _JSON_R5_HDRS,
     });
