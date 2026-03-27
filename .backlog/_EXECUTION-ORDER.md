@@ -79,6 +79,13 @@ ARCH-023, 025, 026, 030, 049, 059, 086, 120, 121, 122, 136, 137
 | ARCH-125 | high | ARCH-115 (podcast API) |
 | ARCH-126 | high | ARCH-116 (audiobook API) |
 
+## Iteration 24 — Monitoring Pass (Stable)
+
+- 142 ARCH-*.md files verified, all `status: pending`
+- _EXECUTION-ORDER.md consistent: 142 cards, 17 deps, 3 waves
+- No source code changes detected
+- 1 trivial TODO in RadioShell.tsx:6047 (image optimization note) — not actionable
+
 ## Iteration 23 — Cross-Cutting Utilities
 
 - **ARCH-141** (NEW): Debounce & throttle utility — needed by 5+ cards (high)
