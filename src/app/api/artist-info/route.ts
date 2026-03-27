@@ -9,6 +9,7 @@ import { logError } from '@/lib/error-logger';
 import { validateRequest } from '@/lib/validate-request';
 import { artistInfoSchema } from '@/lib/validation-schemas';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
+import { readJsonWithLimit } from '@/lib/fetch-utils';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -30,12 +31,7 @@ async function fetchJson<T>(url: string, headers: Record<string, string>): Promi
       await res.text().catch(_NOOP);
       return null;
     }
-    const cl = res.headers.get('content-length');
-    if (cl && parseInt(cl, 10) > 2 * 1024 * 1024) {
-      await res.body?.cancel().catch(_NOOP);
-      return null;
-    }
-    return await res.json();
+    return await readJsonWithLimit<T>(res, 2 * 1024 * 1024, url);
   } catch {
     return null;
   }
@@ -136,6 +132,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(payload, { headers });
   } catch (err) {
     logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
-    return NextResponse.json(_ERR_500, { status: 500 });
+    const isTimeout = err instanceof DOMException && err.name === 'AbortError';
+    return NextResponse.json(
+      { error: isTimeout ? 'timeout' : 'internal' },
+      { status: isTimeout ? 504 : 500 },
+    );
   }
 }
