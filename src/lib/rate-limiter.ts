@@ -82,11 +82,11 @@ export function rateLimit(
 
 /** Pre-built configs for each API route (per IP, per minute). */
 export const RATE_LIMITS = {
-  proxyStream: { limit: 10, windowMs: 60_000 },
-  icyMeta: { limit: 60, windowMs: 60_000 },
-  itunes: { limit: 30, windowMs: 60_000 },
-  lyrics: { limit: 30, windowMs: 60_000 },
-  artistInfo: { limit: 20, windowMs: 60_000 },
-  concerts: { limit: 20, windowMs: 60_000 },
+  proxyStream: { limit: 120, windowMs: 60_000 },
+  icyMeta: { limit: 200, windowMs: 60_000 },
+  itunes: { limit: 120, windowMs: 60_000 },
+  lyrics: { limit: 120, windowMs: 60_000 },
+  artistInfo: { limit: 60, windowMs: 60_000 },
+  concerts: { limit: 60, windowMs: 60_000 },
   cronSync: { limit: 2, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimitConfig>;

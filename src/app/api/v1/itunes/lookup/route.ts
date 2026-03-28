@@ -30,6 +30,7 @@ import { sanitizeForLog } from '@/lib/sanitize';
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { itunesLookupSchema } from '@/lib/validation-schemas';
+import { ItunesSearchResultSchema } from '@/lib/schemas/api-responses';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { apiError } from '@/lib/api-response';
 import { withApiVersion } from '@/lib/api-versioning';

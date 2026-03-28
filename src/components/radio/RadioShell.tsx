@@ -427,7 +427,7 @@ import {
 } from './constants';
 import { useLocale } from '@/context/LocaleContext';
 import { COUNTRY_BY_CODE, isSovereignCountryCode, SOVEREIGN_COUNTRIES } from '@/lib/i18n/countries';
-import { loadFromStorage, saveToStorage } from '@/lib/storageUtils';
+import { loadFromStorage, loadHistoryFromStorage, saveToStorage } from '@/lib/storageUtils';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ErrorBoundary } from '@/components/radio/components/ErrorBoundary';
@@ -7181,7 +7181,7 @@ function useHistory(
   track: NowPlayingTrack | null,
 ) {
   const [history, setHistory] = useState<HistoryEntry[]>(() => {
-    const loaded = loadFromStorage<HistoryEntry[]>(STORAGE_KEYS.HISTORY, []);
+    const loaded = loadHistoryFromStorage(STORAGE_KEYS.HISTORY, []);
     const seen = new Set<string>();
     return loaded.filter((e) => {
       if (!e.id || seen.has(e.id)) return false;
@@ -7200,7 +7200,6 @@ function useHistory(
     if (stationUuid !== lastStationRef.current) {
       lastStationRef.current = stationUuid;
       lastTrackRef.current = '';
-      return;
     }
     const key = `${stationUuid}::${track.artist}::${track.title}`;
     if (key === lastTrackRef.current) return;

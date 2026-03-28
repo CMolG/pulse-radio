@@ -9,7 +9,7 @@ import { sanitizeUrl, sanitizeTextContent, sanitizeForLog } from '@/lib/sanitize
 import { logRequest } from '@/lib/logger';
 import { validateRequest } from '@/lib/validate-request';
 import { icyMetaSchema } from '@/lib/validation-schemas';
-import { isPrivateHost, ALLOWED_PROTOCOLS, resolveDnsAndValidate } from '@/lib/ssrf';
+import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
 import { fetchWithRetry } from '@/lib/fetch-with-retry';
 import { withApiVersion } from '@/lib/api-versioning';
 const _TRAILING_NULLS_RE = /\0+$/;
@@ -38,11 +38,6 @@ export async function GET(req: NextRequest) {
     }
     if (isPrivateHost(url.hostname))
       return apiError('Private/internal URLs not allowed', 'INVALID_PARAM', 400, _CACHE_BAD_REQ);
-    try {
-      await resolveDnsAndValidate(url.hostname);
-    } catch {
-      return apiError('Private/internal URLs not allowed', 'INVALID_PARAM', 400, _CACHE_BAD_REQ);
-    }
   } catch {
     return apiError('Invalid URL', 'INVALID_PARAM', 400, _CACHE_BAD_REQ);
   }
@@ -63,7 +58,6 @@ export async function GET(req: NextRequest) {
       try {
         const finalUrl = new URL(res.url);
         if (isPrivateHost(finalUrl.hostname)) {
-          clearTimeout(timeout);
           res.body?.cancel().catch(_NOOP);
       return apiError('Redirect to private IP not allowed', 'INVALID_PARAM', 403, _CACHE_BAD_REQ);
         }
@@ -71,12 +65,10 @@ export async function GET(req: NextRequest) {
         /* URL parse failed — continue */
       }
     } else {
-      clearTimeout(timeout);
       res.body?.cancel().catch(_NOOP);
       return apiError('Redirect target unknown', 'UPSTREAM_ERROR', 400, _CACHE_BAD_REQ);
     }
     if (!res.ok) {
-      clearTimeout(timeout);
       res.body?.cancel().catch(_NOOP);
       recordStationFailure(streamUrl);
       return apiError(`Upstream ${res.status}`, 'UPSTREAM_ERROR', 502, _CACHE_ERR);
@@ -86,7 +78,6 @@ export async function GET(req: NextRequest) {
     const icyGenre = res.headers.get('icy-genre');
     const icyBr = res.headers.get('icy-br');
     if (!icyMetaint || !res.body) {
-      clearTimeout(timeout);
       res.body?.cancel().catch(_NOOP);
       return withApiVersion(NextResponse.json({
         streamTitle: null,
@@ -98,7 +89,6 @@ export async function GET(req: NextRequest) {
     const metaint = parseInt(icyMetaint, 10);
     const MAX_METAINT = 131072;
     if (isNaN(metaint) || metaint <= 0 || metaint > MAX_METAINT) {
-      clearTimeout(timeout);
       res.body.cancel().catch(_NOOP);
       return withApiVersion(NextResponse.json({ streamTitle: null, icyName: icyName ? sanitizeTextContent(icyName) : null, icyGenre: icyGenre ? sanitizeTextContent(icyGenre) : null, icyBr }, { headers: _CACHE_OK }));
     }
@@ -114,7 +104,6 @@ export async function GET(req: NextRequest) {
         totalRead += value.length;
       }
     } finally {
-      clearTimeout(timeout);
       reader.cancel().catch(_NOOP);
     }
     const buffer = new Uint8Array(totalRead);
@@ -134,7 +123,6 @@ export async function GET(req: NextRequest) {
     const match = metaString.match(_STREAM_TITLE_RE);    const streamTitle = match?.[1]?.trim() || null;
     return withApiVersion(NextResponse.json({ streamTitle, icyName, icyGenre, icyBr }, { headers: _CACHE_OK }));
   } catch (err) {
-    clearTimeout(timeout);
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     if (isTimeout) {
       recordStationFailure(streamUrl);

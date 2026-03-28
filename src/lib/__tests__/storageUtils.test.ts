@@ -4,6 +4,7 @@ import {
   saveToStorage,
   loadStringFromStorage,
   saveStringToStorage,
+  loadHistoryFromStorage,
   ensureStorageVersion,
   updateStorage,
   wrapWithTimestamp,
@@ -68,6 +69,49 @@ describe('storageUtils', () => {
         throw err;
       });
       expect(saveToStorage('full', 'data')).toBe(false);
+    });
+  });
+
+  describe('loadHistoryFromStorage', () => {
+    it('loads valid history entries', () => {
+      const valid = [
+        {
+          id: 'h1',
+          stationName: 'Station One',
+          stationUuid: 'uuid-1',
+          artist: 'Artist',
+          title: 'Song',
+          timestamp: Date.now(),
+        },
+      ];
+      store.set('radio-history', JSON.stringify(valid));
+      expect(loadHistoryFromStorage('radio-history', [])).toEqual(valid);
+    });
+
+    it('normalizes legacy stationuuid field while filtering malformed entries', () => {
+      const mixed = [
+        {
+          id: 'legacy-1',
+          stationName: 'Legacy Station',
+          stationuuid: 'legacy-uuid',
+          artist: 'Legacy Artist',
+          title: 'Legacy Song',
+          timestamp: Date.now(),
+        },
+        {
+          id: 'invalid-1',
+          stationName: 'Invalid Station',
+          stationUuid: 'bad-uuid',
+          artist: '',
+          title: 'Missing Artist',
+          timestamp: Date.now(),
+        },
+      ];
+      store.set('radio-history', JSON.stringify(mixed));
+      const loaded = loadHistoryFromStorage('radio-history', []);
+      expect(loaded).toHaveLength(1);
+      expect(loaded[0].id).toBe('legacy-1');
+      expect(loaded[0].stationUuid).toBe('legacy-uuid');
     });
   });
 

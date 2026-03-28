@@ -64,7 +64,8 @@ function mergeArrays(existing: unknown[], incoming: unknown[], keyProp?: string)
 function getDeduplicationKey(storageKey: string): string | undefined {
   if (storageKey === 'radio-favorites') return 'stationuuid';
   if (storageKey === 'radio-favorite-songs') return undefined; // JSON dedup
-  if (storageKey === 'radio-history' || storageKey === 'radio-recent') return 'stationuuid';
+  if (storageKey === 'radio-history') return 'id';
+  if (storageKey === 'radio-recent') return 'stationuuid';
   return undefined;
 }
 

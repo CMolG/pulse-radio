@@ -20,6 +20,8 @@ export const STORAGE_KEYS = {
   ONBOARDING_DONE: 'radio-onboarding-done',
   EFFECTS_ENABLED: 'radio-effects-enabled',
   EQ_PRESET_NAME: 'radio-eq-preset-name',
+  QUALITY_MIGRATION: 'radio-quality-migration',
+  STATION_QUEUE: 'radio-station-queue',
 } as const;
 export const MAX_RECENT = 15;
 export const MAX_HISTORY = 100;

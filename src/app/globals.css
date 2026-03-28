@@ -311,6 +311,30 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   @apply flex-1 overflow-y-auto;
 }
 
+.text-muted {
+  @apply text-white/55;
+}
+
+.text-subtle {
+  @apply text-white/50;
+}
+
+.text-secondary {
+  @apply text-white/60;
+}
+
+.text-dim {
+  @apply text-white/50;
+}
+
+.text-soft {
+  @apply text-white/70;
+}
+
+.icon-md {
+  @apply w-4 h-4;
+}
+
 @keyframes ambient-drift {
   0% {
     transform: scale(1.05) translate(0px, 0px);
@@ -337,9 +361,108 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   inherits: false;
 }
 
-/* Custom utility classes kept for complex styling that cannot be easily represented inline */
+.flex-center-col {
+  @apply flex flex-col items-center justify-center;
+}
+
+.flex-center-row {
+  @apply flex items-center justify-center;
+}
+
+.flex-between {
+  @apply flex items-center justify-between;
+}
+
+.dot-1\.5 {
+  @apply w-1.5 h-1.5 rounded-full;
+}
+
+.dot-2 {
+  @apply w-2 h-2 rounded-full;
+}
+
+.dot-10 {
+  @apply w-10 h-10 rounded-full;
+}
+
+.flex-row-0\.5 {
+  @apply flex items-center gap-0.5;
+}
+
+.flex-row-1 {
+  @apply flex items-center gap-1;
+}
+
+.flex-row-1\.5 {
+  @apply flex items-center gap-1.5;
+}
+
+.flex-row-2 {
+  @apply flex items-center gap-2;
+}
+
+.flex-row-2\.5 {
+  @apply flex items-center gap-2.5;
+}
+
+.flex-row-3 {
+  @apply flex items-center gap-3;
+}
+
+.flex-row-4 {
+  @apply flex items-center gap-4;
+}
+
+.col-fill {
+  @apply flex-1 flex flex-col;
+}
+
+.flex-wrap-1 {
+  @apply flex flex-wrap gap-1;
+}
+
+.flex-wrap-1\.5 {
+  @apply flex flex-wrap gap-1.5;
+}
+
+.abs-fill {
+  @apply absolute inset-0;
+}
+
+.col-center {
+  @apply flex flex-col items-center;
+}
+
 .glass-blur {
   @apply bg-sys-surface/80 backdrop-blur-xl backdrop-saturate-150;
+}
+
+.text-muted-hover {
+  @apply text-white/55 hover:text-white/70 transition-colors;
+}
+
+.text-subtle-hover {
+  @apply text-white/50 hover:text-white/60 transition-colors;
+}
+
+.pad-xs {
+  @apply px-1.5 py-0.5 rounded;
+}
+
+.pad-xs-full {
+  @apply px-1.5 py-0.5 rounded-full;
+}
+
+.bdr-b {
+  @apply border-b border-border-subtle;
+}
+
+.bdr {
+  @apply border border-border-subtle;
+}
+
+.flex-fill {
+  @apply flex-1 min-w-0;
 }
 
 .dawn-gradient {

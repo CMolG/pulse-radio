@@ -5,6 +5,7 @@ import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 import { sanitizeSearchQuery } from '@/lib/sanitize';
 import { validateRequest } from '@/lib/validate-request';
 import { lyricsSchema } from '@/lib/validation-schemas';
+import { LyricsResponseSchema } from '@/lib/schemas/api-responses';
 import { createCircuitBreaker } from '@/lib/circuit-breaker';
 import { lyricsKey } from '@/lib/cache-keys';
 import { apiError } from '@/lib/api-response';

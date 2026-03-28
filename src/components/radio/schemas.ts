@@ -38,9 +38,24 @@ export const SongDetailDataSchema = TrackFieldsSchema.extend({
 
 export const HistoryEntrySchema = SongDetailDataSchema.extend({
   id: z.string().min(1, 'ID is required'),
-  stationUuid: z.string().min(1, 'Station UUID is required'),
+  stationUuid: z.string().min(1, 'Station UUID is required').optional(),
+  stationuuid: z.string().min(1, 'Station UUID is required').optional(),
   timestamp: z.number().int().min(0, 'Timestamp must be non-negative'),
-});
+})
+  .transform((entry) => {
+    const { stationuuid: _legacyStationUuid, ...rest } = entry;
+    return {
+      ...rest,
+      stationUuid: entry.stationUuid ?? _legacyStationUuid,
+    };
+  })
+  .pipe(
+    SongDetailDataSchema.extend({
+      id: z.string().min(1, 'ID is required'),
+      stationUuid: z.string().min(1, 'Station UUID is required'),
+      timestamp: z.number().int().min(0, 'Timestamp must be non-negative'),
+    }),
+  );
 
 export const FavoriteSongSchema = HistoryEntrySchema;
 
