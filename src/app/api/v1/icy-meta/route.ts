@@ -2,16 +2,16 @@
   NextRequest,
   NextResponse,
 } from 'next/server';
-import { isStationBlacklisted, recordStationFailure } from '@/lib/server-cache';
-import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { apiError } from '@/lib/api-response';
-import { sanitizeUrl, sanitizeTextContent, sanitizeForLog } from '@/lib/sanitize';
-import { logRequest } from '@/lib/logger';
-import { validateRequest } from '@/lib/validate-request';
-import { icyMetaSchema } from '@/lib/validation-schemas';
-import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
-import { fetchWithRetry } from '@/lib/fetch-with-retry';
-import { withApiVersion } from '@/lib/api-versioning';
+import { isStationBlacklisted, recordStationFailure } from '@/logic/server-cache';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { apiError } from '@/logic/api-response';
+import { sanitizeUrl, sanitizeTextContent, sanitizeForLog } from '@/logic/sanitize';
+import { logRequest } from '@/logic/logger';
+import { validateRequest } from '@/logic/validate-request';
+import { icyMetaSchema } from '@/logic/validation-schemas';
+import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/logic/ssrf';
+import { fetchWithRetry } from '@/logic/fetch-with-retry';
+import { withApiVersion } from '@/logic/api-versioning';
 const _TRAILING_NULLS_RE = /\0+$/;
 const _STREAM_TITLE_RE = /StreamTitle='([^']*)'/;
 export const runtime = 'nodejs';

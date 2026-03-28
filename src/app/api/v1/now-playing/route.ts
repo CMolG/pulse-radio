@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, schema } from '@/lib/db';
+import { db, schema } from '@/logic/db';
 import { sql } from 'drizzle-orm';
-import { rateLimit } from '@/lib/rate-limiter';
-import { withApiVersion } from '@/lib/api-versioning';
+import { rateLimit } from '@/logic/rate-limiter';
+import { withApiVersion } from '@/logic/api-versioning';
 
 export const runtime = 'nodejs';
 

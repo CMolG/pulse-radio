@@ -1,18 +1,18 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
-import { getCachedOrFetch } from '@/lib/services/CacheRepository';
-import { ConcertEventsSchema } from '@/lib/schemas/api-responses';
-import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeSearchQuery, sanitizeForLog } from '@/lib/sanitize';
-import { logError } from '@/lib/error-logger';
-import { validateRequest } from '@/lib/validate-request';
-import { concertsSchema } from '@/lib/validation-schemas';
-import { createCircuitBreaker } from '@/lib/circuit-breaker';
-import { env } from '@/lib/env';
-import { concertsKey } from '@/lib/cache-keys';
-import { apiError } from '@/lib/api-response';
-import { readJsonWithLimit } from '@/lib/fetch-utils';
-import { withApiVersion } from '@/lib/api-versioning';
+import { getCachedOrFetch } from '@/logic/services/cache-repository';
+import { ConcertEventsSchema } from '@/logic/schemas/api-responses';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { sanitizeSearchQuery, sanitizeForLog } from '@/logic/sanitize';
+import { logger } from '@/logic/logger';
+import { validateRequest } from '@/logic/validate-request';
+import { concertsSchema } from '@/logic/validation-schemas';
+import { createCircuitBreaker } from '@/logic/circuit-breaker';
+import { env } from '@/logic/env';
+import { concertsKey } from '@/logic/cache-keys';
+import { apiError } from '@/logic/api-response';
+import { readJsonWithLimit } from '@/logic/fetch-utils';
+import { withApiVersion } from '@/logic/api-versioning';
 
 export const runtime = 'nodejs';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
@@ -82,7 +82,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     const artistRes = await fetch(artistUrl, { signal: controller.signal });
     if (!artistRes.ok) {
       const body = await artistRes.text().catch(() => '');
-      logError(new Error(`[concerts] artist lookup ${artistRes.status}`), { artist: sanitizeForLog(artist), body: sanitizeForLog(body.slice(0, 200)) });
+      logger.error('concerts_artist_lookup_failed', new Error(`[concerts] artist lookup ${artistRes.status}`), { artist: sanitizeForLog(artist), body: sanitizeForLog(body.slice(0, 200)) });
       return [];
     }
     const artistData = await artistRes.json();
@@ -97,7 +97,7 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     clearTimeout(timer);
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      logError(new Error(`[concerts] events ${res.status}`), { artist: sanitizeForLog(artist), artistId, body: sanitizeForLog(body.slice(0, 200)) });
+      logger.error('concerts_events_fetch_failed', new Error(`[concerts] events ${res.status}`), { artist: sanitizeForLog(artist), artistId, body: sanitizeForLog(body.slice(0, 200)) });
       return [];
     }
     const data: BandsintownEvent[] | null = await readJsonWithLimit<BandsintownEvent[]>(res, 512 * 1024, eventsUrl);

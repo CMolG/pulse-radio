@@ -6,17 +6,17 @@
  */
 import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { getStaleKeys, persistToDb } from '@/lib/services/CacheRepository';
-import { cacheSet, type Namespace } from '@/lib/server-cache';
-import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { logRequest } from '@/lib/logger';
-import { safeJsonParse } from '@/lib/sanitize';
-import { env } from '@/lib/env';
+import { getStaleKeys, persistToDb } from '@/logic/services/cache-repository';
+import { cacheSet, type Namespace } from '@/logic/server-cache';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { logRequest } from '@/logic/logger';
+import { safeJsonParse } from '@/logic/sanitize';
+import { env } from '@/logic/env';
 import {
   isShuttingDown,
   registerAbortController,
   unregisterAbortController,
-} from '@/lib/shutdown';
+} from '@/logic/shutdown';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // allow up to 5 minutes

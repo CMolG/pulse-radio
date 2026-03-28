@@ -8,9 +8,9 @@ import {
   translate,
   type MessageKey,
   type SupportedLocale,
-} from '@/lib/i18n';
-import { COUNTRY_BY_CODE } from '@/lib/i18n';
-import { loadStringFromStorage, saveStringToStorage } from '@/lib/storageUtils';
+} from '@/logic/i18n';
+import { COUNTRY_BY_CODE } from '@/logic/i18n';
+import { loadStringFromStorage, saveStringToStorage } from '@/logic/storage-utils';
 import { STORAGE_KEYS } from '@/components/radio/constants';
 const COUNTRY_LOCALE_OVERRIDES: Partial<Record<string, SupportedLocale>> = {
   BR: 'pt-BR',

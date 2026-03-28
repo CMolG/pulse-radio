@@ -1,10 +1,10 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest } from 'next/server';
-import { isStationBlacklisted, recordStationFailure, clearStationFailures } from '@/lib/server-cache';
-import { sanitizeUrl, sanitizeHeaderValue, sanitizeForLog } from '@/lib/sanitize';
-import { validateRequest } from '@/lib/validate-request';
-import { proxyStreamSchema } from '@/lib/validation-schemas';
-import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/lib/ssrf';
-import { apiError } from '@/lib/api-response';
+import { isStationBlacklisted, recordStationFailure, clearStationFailures } from '@/logic/server-cache';
+import { sanitizeUrl, sanitizeHeaderValue, sanitizeForLog } from '@/logic/sanitize';
+import { validateRequest } from '@/logic/validate-request';
+import { proxyStreamSchema } from '@/logic/validation-schemas';
+import { isPrivateHost, ALLOWED_PROTOCOLS } from '@/logic/ssrf';
+import { apiError } from '@/logic/api-response';
 export const runtime = 'nodejs';
 const MAX_DURATION_MS = 0;
 const _UPSTREAM_HDRS = { 'User-Agent': 'JavadabaRadio/1.0', 'Icy-MetaData': '0' } as const;

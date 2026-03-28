@@ -15,7 +15,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import type { Station, NowPlayingTrack, PlaybackStatus } from '../constants';
-import { ErrorBoundary } from './ErrorBoundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import {
   LiquidGlassButton,
   UiImage,
@@ -25,7 +25,7 @@ import {
   buildStationShareUrl,
   _SAFE_AREA_BOTTOM_STYLE,
 } from '../RadioShell';
-import { shareContent } from './SongDetailModal';
+import { shareContent } from './modals/SongDetailModal';
 import type { StreamQuality } from '../RadioShell';
 
 type NowPlayingBarProps = {

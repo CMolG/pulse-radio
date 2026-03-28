@@ -3,6 +3,12 @@
 export type {
   Station,
   NowPlayingTrack,
+  SongDetailData,
+  HistoryEntry,
+  FavoriteSong,
+} from './schemas';
+
+export type {
   LyricLine,
   LyricsData,
   PlaybackStatus,
@@ -12,9 +18,6 @@ export type {
   BrowseCategory,
   ViewState,
   LrcLibResponse,
-  SongDetailData,
-  HistoryEntry,
-  FavoriteSong,
   ArtistInfo,
   NoiseReductionMode,
   StationListenTime,

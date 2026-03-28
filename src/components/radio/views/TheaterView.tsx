@@ -10,7 +10,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Station, NowPlayingTrack, LyricsData } from '../types';
-import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import LyricsReel from '../components/LyricsReel';
 import {
   AnimatedBars,

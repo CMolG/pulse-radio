@@ -2,18 +2,18 @@
   NextRequest,
   NextResponse,
 } from 'next/server';
-import { getCachedOrFetch } from '@/lib/services/CacheRepository';
-import { ArtistInfoSchema } from '@/lib/schemas/api-responses';
-import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeSearchQuery } from '@/lib/sanitize';
-import { logError } from '@/lib/error-logger';
-import { validateRequest } from '@/lib/validate-request';
-import { artistInfoSchema } from '@/lib/validation-schemas';
-import { createCircuitBreaker } from '@/lib/circuit-breaker';
-import { artistInfoKey } from '@/lib/cache-keys';
-import { readJsonWithLimit } from '@/lib/fetch-utils';
-import { apiError } from '@/lib/api-response';
-import { withApiVersion } from '@/lib/api-versioning';
+import { getCachedOrFetch } from '@/logic/services/cache-repository';
+import { ArtistInfoSchema } from '@/logic/schemas/api-responses';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { sanitizeSearchQuery } from '@/logic/sanitize';
+import { logger } from '@/logic/logger';
+import { validateRequest } from '@/logic/validate-request';
+import { artistInfoSchema } from '@/logic/validation-schemas';
+import { createCircuitBreaker } from '@/logic/circuit-breaker';
+import { artistInfoKey } from '@/logic/cache-keys';
+import { readJsonWithLimit } from '@/logic/fetch-utils';
+import { apiError } from '@/logic/api-response';
+import { withApiVersion } from '@/logic/api-versioning';
 export const runtime = 'nodejs';
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
@@ -134,7 +134,7 @@ export async function GET(req: NextRequest) {
       headers['X-Circuit-State'] = artistInfoCircuit.state.toLowerCase();
     return withApiVersion(NextResponse.json(payload, { headers }));
   } catch (err) {
-    logError(err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
+    logger.error('artist_info_failed', err instanceof Error ? err : new Error(String(err)), { route: 'artist-info' });
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';
     return apiError(
       isTimeout ? 'Request timed out' : 'Internal error',

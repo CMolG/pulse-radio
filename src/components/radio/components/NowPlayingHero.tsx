@@ -4,25 +4,10 @@ import React, { useState, useMemo } from 'react';
 import { Radio as RadioIcon, Maximize2 } from 'lucide-react';
 import type { Station, NowPlayingTrack } from '../constants';
 import { UiImage } from './UiImage';
-import { AnimatedBars } from './animations/AnimatedBars';
-import ParallaxAlbumBackground from './ParallaxAlbumBackground';
+import { AnimatedBars } from '@/components/radio/components/visuals/AnimatedBars';
+import ParallaxAlbumBackground from '@/components/radio/components/visuals/ParallaxAlbumBackground';
 import { stationInitials } from '../RadioShell';
-
-function _tagsDisplay(tags: string | undefined): string {
-  if (!tags) return 'Internet RadioIcon';
-  let result = '';
-  let count = 0;
-  let start = 0;
-  for (let i = 0; i <= tags.length; i++) {
-    if (i === tags.length || tags[i] === ',') {
-      if (count > 0) result += ' · ';
-      result += tags.slice(start, i);
-      if (++count === 3) return result;
-      start = i + 1;
-    }
-  }
-  return result;
-}
+import { _tagsDisplay } from '@/logic/format-utils';
 
 type NowPlayingHeroProps = {
   station: Station;

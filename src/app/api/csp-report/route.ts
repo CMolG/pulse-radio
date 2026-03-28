@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { rateLimit } from '@/lib/rate-limiter';
-import { logger } from '@/lib/logger';
+import { rateLimit } from '@/logic/rate-limiter';
+import { logger } from '@/logic/logger';
 
 const CSP_RATE_LIMIT = { limit: 100, windowMs: 60_000 };
 

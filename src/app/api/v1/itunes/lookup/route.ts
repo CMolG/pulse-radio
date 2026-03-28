@@ -24,16 +24,16 @@ async function apiFetch(
   }
 }
 import { NextRequest, NextResponse } from 'next/server';
-import { getCachedOrFetch } from '@/lib/services/CacheRepository';
-import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeForLog } from '@/lib/sanitize';
-import { logRequest } from '@/lib/logger';
-import { validateRequest } from '@/lib/validate-request';
-import { itunesLookupSchema } from '@/lib/validation-schemas';
-import { ItunesSearchResultSchema } from '@/lib/schemas/api-responses';
-import { createCircuitBreaker } from '@/lib/circuit-breaker';
-import { apiError } from '@/lib/api-response';
-import { withApiVersion } from '@/lib/api-versioning';
+import { getCachedOrFetch } from '@/logic/services/cache-repository';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { sanitizeForLog } from '@/logic/sanitize';
+import { logRequest } from '@/logic/logger';
+import { validateRequest } from '@/logic/validate-request';
+import { itunesLookupSchema } from '@/logic/validation-schemas';
+import { ItunesSearchResultSchema } from '@/logic/schemas/api-responses';
+import { createCircuitBreaker } from '@/logic/circuit-breaker';
+import { apiError } from '@/logic/api-response';
+import { withApiVersion } from '@/logic/api-versioning';
 export const runtime = 'nodejs';
 const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour

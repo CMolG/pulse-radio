@@ -12,7 +12,7 @@ import {
   CheckCircle,
   Share2,
 } from 'lucide-react';
-import { loadFromStorage, saveToStorage } from '@/logic/storageUtils';
+import { loadFromStorage, saveToStorage } from '@/logic/storage-utils';
 import { STORAGE_KEYS } from '../../constants';
 
 const _IOS_UA_RE = /iPad|iPhone|iPod/;

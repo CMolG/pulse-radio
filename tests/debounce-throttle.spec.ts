@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { debounce } from '../src/lib/debounce';
-import { throttle } from '../src/lib/throttle';
+import { debounce } from '../src/logic/debounce';
+import { throttle } from '../src/logic/throttle';
 
 test.describe('Debounce & Throttle Utilities (ARCH-141)', () => {
   test('debounce delays execution until idle', async () => {

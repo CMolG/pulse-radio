@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, schema } from '@/lib/db';
+import { db, schema } from '@/logic/db';
 import { sql } from 'drizzle-orm';
-import { env } from '@/lib/env';
-import { withApiVersion } from '@/lib/api-versioning';
-import { apiError } from '@/lib/api-response';
+import { env } from '@/logic/env';
+import { withApiVersion } from '@/logic/api-versioning';
+import { apiError } from '@/logic/api-response';
 
 export const runtime = 'nodejs';
 

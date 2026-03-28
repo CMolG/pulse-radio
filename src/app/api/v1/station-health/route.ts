@@ -1,9 +1,9 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 import { NextRequest, NextResponse } from 'next/server';
-import { getScores } from '@/lib/station-health';
-import { rateLimit } from '@/lib/rate-limiter';
-import { withApiVersion } from '@/lib/api-versioning';
-import { apiError } from '@/lib/api-response';
+import { getScores } from '@/logic/station-health';
+import { rateLimit } from '@/logic/rate-limiter';
+import { withApiVersion } from '@/logic/api-versioning';
+import { apiError } from '@/logic/api-response';
 
 export const runtime = 'nodejs';
 

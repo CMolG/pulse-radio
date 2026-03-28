@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
-import { rateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
-import { sanitizeUrl } from '@/lib/sanitize';
-import { logRequest } from '@/lib/logger';
-import { withApiVersion } from '@/lib/api-versioning';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { sanitizeUrl } from '@/logic/sanitize';
+import { logRequest } from '@/logic/logger';
+import { withApiVersion } from '@/logic/api-versioning';
 
 export const runtime = 'nodejs';
 

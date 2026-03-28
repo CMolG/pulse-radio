@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRY_CODES } from '@/lib/i18n';
+import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRY_CODES } from '@/logic/i18n';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
