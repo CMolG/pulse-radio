@@ -6,8 +6,19 @@ import type {
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ServiceWorkerRegistrar } from './ServiceWorkerRegistrar';
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
-const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
+import { WebVitalsReporter } from '@/components/WebVitalsReporter';
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+});
 const SITE_URL = 'https://www.pulse-radio.online';
 const SITE_TITLE = 'Pulse Radio — Free Internet Radio with Visualizer';
 const SITE_DESCRIPTION =
@@ -49,7 +60,7 @@ export const metadata: Metadata = {
     siteName: 'Pulse Radio',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: '/android-chrome-512x512.png', width: 512, height: 512, alt: 'Pulse Radio' }],
+    images: [{ url: '/android-chrome-512x512.png', width: 512, height: 512, alt: 'Pulse Radio', type: 'image/png' }],
   },
   twitter: {
     card: 'summary',
@@ -85,6 +96,11 @@ const _JSON_LD_SCHEMA = JSON.stringify({
   browserRequirements: 'Requires JavaScript. Requires HTML5.',
   softwareVersion: '1.0',
   screenshot: `${SITE_URL}/android-chrome-512x512.png`,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/?search={search_term_string}` },
+    'query-input': 'required name=search_term_string',
+  },
 });
 function JsonLd() {
   return (
@@ -97,11 +113,17 @@ function JsonLd() {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
-      lang="en"
-      dir="ltr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}
     >
       <body className="h-full bg-[#0a0f1a] text-white">
+        <noscript>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem', fontFamily: 'system-ui, sans-serif', color: '#ffffff' }}>
+            <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Pulse Radio</h1>
+            <p>JavaScript is required to run this application.</p>
+            <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Please enable JavaScript in your browser settings and reload the page.</p>
+          </div>
+        </noscript>
+        <WebVitalsReporter />
         <JsonLd /> {children} <ServiceWorkerRegistrar />
       </body>
     </html>

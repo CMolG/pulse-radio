@@ -1,0 +1,77 @@
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import { NextRequest, NextResponse } from 'next/server';
+import { getCachedOrFetch } from '@/logic/services/cache-repository';
+import { ItunesSearchResultSchema } from '@/logic/schemas/api-responses';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { sanitizeSearchQuery, sanitizeForLog } from '@/logic/sanitize';
+import { logRequest } from '@/logic/logger';
+import { validateRequest } from '@/logic/validate-request';
+import { itunesSchema } from '@/logic/validation-schemas';
+import { createCircuitBreaker } from '@/logic/circuit-breaker';
+import { fetchWithRetry } from '@/logic/fetch-with-retry';
+import { apiError } from '@/logic/api-response';
+import { readJsonWithLimit } from '@/logic/fetch-utils';
+import { itunesKey } from '@/logic/cache-keys';
+import { withApiVersion } from '@/logic/api-versioning';
+export const runtime = 'nodejs';
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const itunesCircuit = createCircuitBreaker('itunes');
+const _NOOP = () => {};
+/* Server-side proxy for iTunes Search API. Avoids any browser-side CORS/CSP issues and allows server caching. */ export async function GET(
+  req: NextRequest,
+) {
+  const limited = rateLimit(req, RATE_LIMITS.itunes);
+  if (limited) return limited;
+  const reqLog = logRequest(req);
+
+  const validated = validateRequest(itunesSchema, req.nextUrl.searchParams);
+  if (!validated.success) return validated.error;
+  const term = sanitizeSearchQuery(validated.data.term);
+  if (!term) return apiError('Missing or invalid term parameter', 'INVALID_PARAM', 400);
+  const media = validated.data.media ?? 'music';
+  const isPodcast = media === 'podcast';
+  const entity = isPodcast ? 'podcast' : (validated.data.entity ?? 'song');
+  const limit = isPodcast ? '20' : '3';
+  const cacheKey = itunesKey(term, media);
+  try {
+    const data = await getCachedOrFetch({
+      namespace: 'itunes',
+      key: cacheKey,
+      ttlMs: CACHE_TTL_MS,
+      schema: ItunesSearchResultSchema,
+      fetcher: async () => {
+        const { data } = await itunesCircuit.call(async () => {
+          const url = `https://itunes.apple.com/search?${new URLSearchParams({ term, media, entity, limit })}`;
+          // iTunes route: 8s timeout, 2 retries
+          const res = await fetchWithRetry(url, {
+            timeout: 8000,
+            retries: 2,
+            retryOn: (status, error) => {
+              if (error?.name === 'AbortError') return true;
+              return status ? status >= 500 : false;
+            },
+          });
+          if (!res.ok) {
+            throw new Error(`iTunes API returned ${res.status}`);
+          }
+          return await readJsonWithLimit<unknown>(res, 1 * 1024 * 1024, url);
+        }, { resultCount: 0, results: [] });
+        return data;
+      },
+    });
+    reqLog.done(200);
+    const headers: Record<string, string> = { ..._CACHE_HDRS };
+    if (itunesCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = itunesCircuit.state.toLowerCase();
+    return withApiVersion(NextResponse.json(data, { headers }));
+  } catch (e) {
+    const isTimeout = e instanceof DOMException && e.name === 'AbortError';
+    const status = isTimeout ? 504 : 500;
+    reqLog.done(status);
+    if (!isTimeout) console.error('[itunes] Search request failed:', sanitizeForLog(e instanceof Error ? e.message : String(e)));
+    return apiError(
+      isTimeout ? 'Request timed out' : 'Search request failed',
+      isTimeout ? 'TIMEOUT' : 'UPSTREAM_ERROR',
+      status,
+    );
+  }
+}

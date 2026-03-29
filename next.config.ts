@@ -5,13 +5,26 @@
  */
 
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
+
+// Run `npm run analyze` to open bundle size visualization
+const analyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.radio-browser.info' },
+      { protocol: 'https', hostname: 'is1-ssl.mzstatic.com' },
+      { protocol: 'https', hostname: 'images.sk-static.com' },
+    ],
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [390, 640, 750, 1080],
+    minimumCacheTTL: 86400,
   },
 };
 
-export default nextConfig;
+export default analyzer(nextConfig);

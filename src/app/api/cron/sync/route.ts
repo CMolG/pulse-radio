@@ -4,33 +4,60 @@
  * Protected by CRON_SECRET env var — call from VPS cron:
  *   curl -H "Authorization: Bearer $CRON_SECRET" https://yourhost/api/cron/sync
  */
+import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { getStaleKeys, persistToDb } from '@/lib/services/CacheRepository';
-import { cacheSet, type Namespace } from '@/lib/server-cache';
+import { getStaleKeys, persistToDb } from '@/logic/services/cache-repository';
+import { cacheSet, type Namespace } from '@/logic/server-cache';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { logRequest } from '@/logic/logger';
+import { safeJsonParse } from '@/logic/sanitize';
+import { env } from '@/logic/env';
+import {
+  isShuttingDown,
+  registerAbortController,
+  unregisterAbortController,
+} from '@/logic/shutdown';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // allow up to 5 minutes
 
-const CRON_SECRET = process.env.CRON_SECRET;
+/* ── Mutex gate: prevent concurrent / too-frequent sync runs ── */
+let syncInProgress = false;
+let lastSyncTimestamp = 0;
+const MIN_SYNC_INTERVAL_MS = 60_000; // 1 minute minimum between syncs
+
 const _NOOP = () => {};
 
-const BANDSINTOWN_APP_ID = process.env.BANDSINTOWN_APP_ID || 'js_1dhsfh3t4';
+/** Constant-time string comparison to prevent timing attacks on secret tokens. */
+function safeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
+
 const TIMEOUT_MS = 10_000;
 
-async function safeFetch(url: string): Promise<any | null> {
+async function safeFetch(url: string, signal?: AbortSignal): Promise<Record<string, unknown> | null> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-    if (!res.ok) { await res.text().catch(_NOOP); return null; }
-    return await res.json();
+    const timeoutSignal = AbortSignal.timeout(TIMEOUT_MS);
+    const combinedSignal = signal
+      ? AbortSignal.any([signal, timeoutSignal])
+      : timeoutSignal;
+    const res = await fetch(url, { signal: combinedSignal });
+    if (!res.ok) {
+      await res.text().catch(_NOOP);
+      return null;
+    }
+    const text = await res.text();
+    return safeJsonParse<Record<string, unknown>>(text);
   } catch {
     return null;
   }
 }
 
-type SyncFn = (key: string) => Promise<{ data: unknown; ttlMs: number } | null>;
+type SyncFn = (key: string, signal?: AbortSignal) => Promise<{ data: unknown; ttlMs: number } | null>;
 
 const syncers: Record<string, SyncFn> = {
-  itunes: async (key) => {
+  itunes: async (key, signal) => {
     // key format: "media:term"
     const [media, ...termParts] = key.split(':');
     const term = termParts.join(':');
@@ -39,21 +66,43 @@ const syncers: Record<string, SyncFn> = {
     const limit = media === 'podcast' ? '20' : '3';
     const data = await safeFetch(
       `https://itunes.apple.com/search?${new URLSearchParams({ term, media: media || 'music', entity, limit })}`,
+      signal,
     );
     return data ? { data, ttlMs: 60 * 60 * 1000 } : null;
   },
 
-  'artist-info': async (key) => {
+  'artist-info': async (key, signal) => {
     // Re-fetch via internal route would be circular; fetch externally
     const MB_BASE = 'https://musicbrainz.org/ws/2';
     const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
     const hdrs = { 'User-Agent': 'PulseRadio/1.0 (https://pulse-radio.online)' };
 
-    const mbData = await safeFetch(`${MB_BASE}/artist/?query=artist:${encodeURIComponent(key)}&fmt=json&limit=1`);
-    const mb = mbData?.artists?.[0] ?? null;
-    const wiki = await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`);
+    interface ArtistInfo {
+      name?: string;
+      type?: string;
+      country?: string;
+      disambiguation?: string;
+      'begin-area'?: { name?: string };
+      'life-span'?: Record<string, unknown>;
+      tags?: Array<{ count: number; name: string }>;
+    }
 
-    const tags = mb?.tags?.filter((t: any) => t.count > 0)?.sort((a: any, b: any) => b.count - a.count)?.slice(0, 8)?.map((t: any) => t.name) ?? [];
+    const mbData = (await safeFetch(
+      `${MB_BASE}/artist/?query=artist:${encodeURIComponent(key)}&fmt=json&limit=1`,
+      signal,
+    )) as { artists?: ArtistInfo[] } | null;
+    const mb = mbData?.artists?.[0] ?? null;
+    const wiki = (await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`, signal)) as {
+      extract?: string;
+      thumbnail?: { source?: string };
+      content_urls?: { desktop?: { page?: string } };
+    } | null;
+
+    const tags = (mb?.tags ?? [])
+      .filter((t) => t.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8)
+      .map((t) => t.name);
     const payload = {
       name: mb?.name ?? key,
       disambiguation: mb?.disambiguation ?? null,
@@ -69,73 +118,153 @@ const syncers: Record<string, SyncFn> = {
     return { data: payload, ttlMs: 24 * 60 * 60 * 1000 };
   },
 
-  concerts: async (key) => {
+  concerts: async (key, signal) => {
     const raw = await safeFetch(
-      `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${BANDSINTOWN_APP_ID}&date=upcoming`,
+      `https://rest.bandsintown.com/artists/${encodeURIComponent(key)}/events?app_id=${env.BANDSINTOWN_APP_ID}&date=upcoming`,
+      signal,
     );
     if (!Array.isArray(raw)) return { data: [], ttlMs: 12 * 60 * 60 * 1000 };
-    const events = raw.slice(0, 5).map((e: any) => ({
+    const events = raw.slice(0, 5).map((e: Record<string, unknown>) => ({
       id: e.id,
       date: e.datetime,
-      venue: e.venue?.name,
-      city: e.venue?.city,
-      country: e.venue?.country,
+      venue: (e.venue as Record<string, unknown>)?.name,
+      city: (e.venue as Record<string, unknown>)?.city,
+      country: (e.venue as Record<string, unknown>)?.country,
       lineup: e.lineup ?? [],
-      ticketUrl: e.offers?.find((o: any) => o.type === 'Tickets' && o.status === 'available')?.url ?? e.url ?? null,
+      ticketUrl:
+        (e.offers as Array<Record<string, unknown>>)?.find(
+          (o) => o.type === 'Tickets' && o.status === 'available',
+        )?.url ??
+        e.url ??
+        null,
     }));
     return { data: events, ttlMs: 12 * 60 * 60 * 1000 };
   },
 
-  lyrics: async (key) => {
+  lyrics: async (key, signal) => {
     // key format: "artist|title"
     const [artist, title] = key.split('|');
     if (!artist || !title) return null;
     const data = await safeFetch(
       `https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`,
+      signal,
     );
-    const result = Array.isArray(data) ? data[0] ?? null : null;
+    const result = Array.isArray(data) ? (data[0] ?? null) : null;
     const hasLyrics = !!(result?.syncedLyrics || result?.plainLyrics);
     return { data: hasLyrics ? result : null, ttlMs: 24 * 60 * 60 * 1000 };
   },
 };
 
 export async function GET(req: NextRequest) {
-  // Auth check
-  if (CRON_SECRET) {
+  if (isShuttingDown()) {
+    return NextResponse.json({ error: 'Server is shutting down' }, { status: 503 });
+  }
+
+  // Mutex check: prevent concurrent sync executions
+  if (syncInProgress) {
+    const nextAllowedAt = new Date(lastSyncTimestamp + MIN_SYNC_INTERVAL_MS);
+    return NextResponse.json(
+      { error: 'Sync already in progress', nextAllowedAt: nextAllowedAt.toISOString() },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(MIN_SYNC_INTERVAL_MS / 1000)) } },
+    );
+  }
+
+  // Minimum interval check: prevent re-syncing too soon
+  if (Date.now() - lastSyncTimestamp < MIN_SYNC_INTERVAL_MS) {
+    const nextAllowedAt = new Date(lastSyncTimestamp + MIN_SYNC_INTERVAL_MS);
+    const waitMs = lastSyncTimestamp + MIN_SYNC_INTERVAL_MS - Date.now();
+    return NextResponse.json(
+      { error: 'Too soon since last sync', nextAllowedAt: nextAllowedAt.toISOString() },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(waitMs / 1000)) } },
+    );
+  }
+
+  const limited = rateLimit(req, RATE_LIMITS.cronSync);
+  if (limited) return limited;
+  logRequest(req);
+
+  // Auth check — timing-safe comparison (see ARCH-032 for rate limiting)
+  const cronSecret = env.CRON_SECRET;
+  if (cronSecret) {
     const auth = req.headers.get('authorization');
-    if (auth !== `Bearer ${CRON_SECRET}`) {
+    if (!safeCompare(auth ?? '', `Bearer ${cronSecret}`)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   }
 
+  // Acquire mutex
+  syncInProgress = true;
+  lastSyncTimestamp = Date.now();
+
+  // Register an AbortController so the shutdown coordinator can cancel in-flight requests
+  const ac = new AbortController();
+  registerAbortController(ac);
+
   const namespaces: Namespace[] = ['itunes', 'artist-info', 'concerts', 'lyrics'];
   const summary: Record<string, { stale: number; synced: number; failed: number }> = {};
+  let aborted = false;
+  let totalSynced = 0;
+  let totalFailed = 0;
+  const startTime = Date.now();
 
-  for (const ns of namespaces) {
-    const staleKeys = getStaleKeys(ns);
-    const syncer = syncers[ns];
-    let synced = 0;
-    let failed = 0;
+  try {
+    for (const ns of namespaces) {
+      if (ac.signal.aborted) {
+        console.log('[cron/sync] Shutdown signal received, completing partial sync.');
+        aborted = true;
+        break;
+      }
 
-    for (const key of staleKeys) {
-      try {
-        const result = syncer ? await syncer(key) : null;
-        if (result) {
-          persistToDb(ns, key, result.data, result.ttlMs);
-          cacheSet(ns, key, result.data, result.ttlMs);
-          synced++;
-        } else {
+      const staleKeys = getStaleKeys(ns);
+      const syncer = syncers[ns];
+      let synced = 0;
+      let failed = 0;
+
+      for (const key of staleKeys) {
+        if (ac.signal.aborted) {
+          console.log('[cron/sync] Shutdown signal received, completing partial sync.');
+          aborted = true;
+          break;
+        }
+
+        try {
+          const result = syncer ? await syncer(key, ac.signal) : null;
+          if (result) {
+            persistToDb(ns, key, result.data, result.ttlMs);
+            cacheSet(ns, key, result.data, result.ttlMs);
+            synced++;
+          } else {
+            failed++;
+          }
+        } catch {
           failed++;
         }
-      } catch {
-        failed++;
       }
-    }
 
-    summary[ns] = { stale: staleKeys.length, synced, failed };
+      summary[ns] = { stale: staleKeys.length, synced, failed };
+      totalSynced += synced;
+      totalFailed += failed;
+    }
+  } finally {
+    syncInProgress = false;
+    unregisterAbortController(ac);
   }
 
-  return NextResponse.json({ ok: true, summary }, {
-    headers: { 'Cache-Control': 'no-cache, no-store' },
-  });
+  const durationMs = Date.now() - startTime;
+  const nextAllowedAt = new Date(lastSyncTimestamp + MIN_SYNC_INTERVAL_MS);
+
+  return NextResponse.json(
+    {
+      ok: true,
+      partial: aborted,
+      synced: totalSynced,
+      failed: totalFailed,
+      duration_ms: durationMs,
+      next_allowed_at: nextAllowedAt.toISOString(),
+      summary,
+    },
+    {
+      headers: { 'Cache-Control': 'no-cache, no-store' },
+    },
+  );
 }

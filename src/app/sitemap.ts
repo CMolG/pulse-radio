@@ -1,5 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import type { MetadataRoute } from 'next';
-import { SOVEREIGN_COUNTRY_CODES } from '@/lib/i18n/countries';
+import { SOVEREIGN_COUNTRY_CODES } from '@/logic/i18n';
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const base: MetadataRoute.Sitemap = [

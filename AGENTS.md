@@ -14,23 +14,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Visual change verification
 
-Always verify visual/UI changes with Playwright before considering them done.
-Run the relevant Playwright tests (or write new ones) to confirm that CSS properties,
-layout behavior, and visual appearance match expectations. Screenshots should be
-reviewed for any regression. The Playwright config is at `playwright.config.ts` and
+Playwright tests are available for verifying UI changes. Run them when explicitly
+requested by the user. The Playwright config is at `playwright.config.ts` and
 tests live in `tests/`.
-
-### Mandatory Playwright checks
-
-1. **Every UI change must have a corresponding Playwright test** — never trust that CSS
-   changes work without running them in a real browser. Take screenshots and inspect them.
-2. **Test in mobile viewport (390×844)** — this project is mobile-first. Use the
-   `mobile-chrome` project. Always verify on this viewport before considering done.
-3. **Test interactive flows end-to-end** — clicking buttons, opening panels, playing audio.
-   Verify the resulting UI state (e.g., panel visible, button state changed, audio element
-   has src set).
-4. **After confirming visually, run all tests** (`npx playwright test --project=mobile-chrome`)
-   to ensure no regressions.
 
 ### Design and responsiveness rules
 

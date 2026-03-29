@@ -1,8 +1,8 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ 'use client';
 import dynamic from 'next/dynamic';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { STORAGE_KEYS } from './constants';
-import { ensureStorageVersion } from '@/lib/storageUtils';
+import { ensureStorageVersion } from '@/logic/storage-utils';
 import { LocaleProvider } from '@/context/LocaleContext';
 ensureStorageVersion(Object.values(STORAGE_KEYS));
 const RadioShell = dynamic(() => import('./RadioShell'), { ssr: false });

@@ -1,28 +1,15 @@
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ import type { MessageKey } from '@/lib/i18n/locales';
-export const STORAGE_KEYS = {
-  FAVORITES: 'radio-favorites',
-  RECENT: 'radio-recent',
-  VOLUME: 'radio-volume',
-  EQ_BANDS: 'radio-eq-bands',
-  LYRICS_CACHE: 'radio-lyrics-cache',
-  CUSTOM_EQ_PRESETS: 'radio-custom-eq-presets',
-  HISTORY: 'radio-history',
-  FAVORITE_SONGS: 'radio-favorite-songs',
-  NORMALIZER_ENABLED: 'radio-normalizer-enabled',
-  STEREO_WIDTH: 'radio-stereo-width',
-  BASS_ENHANCE: 'radio-bass-enhance',
-  COMPRESSOR_ENABLED: 'radio-compressor-enabled',
-  COMPRESSOR_AMOUNT: 'radio-compressor-amount',
-  NOISE_REDUCTION_MODE: 'radio-noise-reduction-mode',
-  REALTIME_LYRICS_ENABLED: 'radio-realtime-lyrics-enabled',
-  LOCALE: 'radio-locale',
-  USAGE_STATS: 'radio-usage-stats',
-  ONBOARDING_DONE: 'radio-onboarding-done',
-  EFFECTS_ENABLED: 'radio-effects-enabled',
-  EQ_PRESET_NAME: 'radio-eq-preset-name',
-} as const;
-export const MAX_RECENT = 15;
-export const MAX_HISTORY = 100;
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
+import type { MessageKey } from '@/logic/i18n';
+import type {
+  Station,
+  TrackFields,
+  NowPlayingTrack,
+  SongDetailData,
+  HistoryEntry,
+  FavoriteSong,
+} from './schemas';
+
+export { STORAGE_KEYS, MAX_RECENT, MAX_HISTORY } from '@/logic/storage-constants';
 export const GENRE_CATEGORIES: BrowseCategory[] = [
   { id: 'pop', label: 'Pop', tag: 'pop', gradient: 'from-pink-500 to-rose-600' },
   { id: 'rock', label: 'Rock', tag: 'rock', gradient: 'from-red-600 to-orange-600' },
@@ -85,18 +72,6 @@ export const EQ_PRESETS: EqPreset[] = [
   { name: 'Electronic', gains: [5, 3, -1, 2, 6] },
   { name: 'Acoustic', gains: [0, 1, -1, 2, 0] },
 ];
-const _flagCache = new Map<string, string>();
-export function countryFlag(code: string): string {
-  if (!code || code.length !== 2) return '🌐';
-  const cached = _flagCache.get(code);
-  if (cached) return cached;
-  const upper = code.toUpperCase();
-  const c0 = upper.charCodeAt(0), c1 = upper.charCodeAt(1);
-  if (c0 < 65 || c0 > 90 || c1 < 65 || c1 > 90) return '🌐';
-  const flag = String.fromCodePoint(0x1f1e6 + c0 - 65, 0x1f1e6 + c1 - 65);
-  _flagCache.set(code, flag);
-  return flag;
-}
 export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
   trending: 'genreTrending',
   pop: 'genrePop',
@@ -114,33 +89,7 @@ export const GENRE_LABEL_KEYS: Record<string, MessageKey> = {
   local: 'genreLocal',
   world: 'genreWorld',
 };
-/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ export type Station = {
-  stationuuid: string;
-  name: string;
-  url_resolved: string;
-  favicon: string;
-  country: string;
-  countrycode: string;
-  tags: string;
-  votes: number;
-  codec: string;
-  bitrate: number;
-  language?: string;
-  homepage?: string;
-};
-type TrackFields = {
-  title: string;
-  artist: string;
-  album?: string;
-  artworkUrl?: string;
-  itunesUrl?: string;
-  durationMs?: number;
-  genre?: string;
-  releaseDate?: string;
-  trackNumber?: number;
-  trackCount?: number;
-};
-export type NowPlayingTrack = TrackFields;
+export type { Station, TrackFields, NowPlayingTrack, SongDetailData, HistoryEntry, FavoriteSong };
 export type LyricLine = { time: number; text: string };
 export type LyricsData = {
   trackName: string;
@@ -197,9 +146,6 @@ export type LrcLibResponse = {
   plainLyrics: string | null;
   syncedLyrics: string | null;
 };
-export type SongDetailData = TrackFields & { stationName: string };
-export type HistoryEntry = SongDetailData & { id: string; stationUuid: string; timestamp: number };
-export type FavoriteSong = HistoryEntry;
 export type ArtistInfo = {
   name: string;
   disambiguation: string | null;
@@ -213,3 +159,13 @@ export type ArtistInfo = {
   wikipediaUrl: string | null;
 };
 export type NoiseReductionMode = 'off' | 'low' | 'medium' | 'high';
+export type StationListenTime = { name: string; uuid: string; totalMs: number };
+export type SongPlayCount = {
+  title: string;
+  artist: string;
+  count: number;
+  artworkUrl?: string;
+  genre?: string;
+};
+export type ArtistPlayCount = { name: string; count: number };
+export type GenrePlayCount = { genre: string; count: number };

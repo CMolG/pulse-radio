@@ -1,0 +1,18 @@
+{
+  "files": [
+    {
+      "path": ".next/static/chunks/**/*.js",
+      "maxSize": "150KB",
+      "compression": "gzip"
+    },
+    {
+      "path": ".next/static/css/**/*.css",
+      "maxSize": "30KB",
+      "compression": "gzip"
+    }
+  ],
+  "ci": {
+    "trackBranches": ["main"]
+  },
+  "defaultCompression": "gzip"
+}

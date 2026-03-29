@@ -53,3 +53,6 @@ playwright-report/
 
 # SQLite cache database
 .data/
+.next/analyze/
+.env.local
+.env*.local

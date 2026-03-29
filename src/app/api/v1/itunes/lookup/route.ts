@@ -1,0 +1,89 @@
+/* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */ const _NOOP = () => {};
+async function apiFetch(
+  url: string,
+  opts: { timeoutMs: number; maxBytes?: number; init?: RequestInit; label?: string },
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
+  try {
+    const res = await fetch(url, { ...opts.init, signal: controller.signal });
+    if (!res.ok) {
+      await res.text().catch(_NOOP);
+      throw new Error(`${opts.label ?? 'Upstream'} returned ${res.status}`);
+    }
+    if (opts.maxBytes) {
+      const cl = res.headers.get('content-length');
+      if (cl && parseInt(cl, 10) > opts.maxBytes) {
+        await res.body?.cancel().catch(_NOOP);
+        throw new Error('Response too large');
+      }
+    }
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+import { NextRequest, NextResponse } from 'next/server';
+import { getCachedOrFetch } from '@/logic/services/cache-repository';
+import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
+import { sanitizeForLog } from '@/logic/sanitize';
+import { logRequest } from '@/logic/logger';
+import { validateRequest } from '@/logic/validate-request';
+import { itunesLookupSchema } from '@/logic/validation-schemas';
+import { ItunesSearchResultSchema } from '@/logic/schemas/api-responses';
+import { createCircuitBreaker } from '@/logic/circuit-breaker';
+import { apiError } from '@/logic/api-response';
+import { withApiVersion } from '@/logic/api-versioning';
+export const runtime = 'nodejs';
+const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400' };
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const itunesCircuit = createCircuitBreaker('itunes-lookup');
+/* Server-side proxy for iTunes Lookup API. Returns songs for a given collectionId. */ export async function GET(
+  req: NextRequest,
+) {
+  const limited = rateLimit(req, RATE_LIMITS.itunes);
+  if (limited) return limited;
+  const reqLog = logRequest(req);
+
+  const validated = validateRequest(itunesLookupSchema, req.nextUrl.searchParams);
+  if (!validated.success) return validated.error;
+  const { id } = validated.data;
+  const cacheKey = `lookup:${id}`;
+  try {
+    const data = await getCachedOrFetch({
+      namespace: 'itunes',
+      key: cacheKey,
+      ttlMs: CACHE_TTL_MS,
+      schema: ItunesSearchResultSchema,
+      fetcher: async () => {
+        const { data } = await itunesCircuit.call(async () => {
+          const url = `https://itunes.apple.com/lookup?${new URLSearchParams({ id, entity: 'song' })}`;
+          const res = await apiFetch(url, {
+            timeoutMs: 8_000,
+            maxBytes: 2 * 1024 * 1024,
+            label: 'iTunes Lookup API',
+          });
+          const json = await res.json();
+          // Filter out the album entry (wrapperType=collection), keep only tracks
+          return { ...json, results: (json.results ?? []).filter((r: { wrapperType?: string }) => r.wrapperType === 'track') };
+        }, { resultCount: 0, results: [] });
+        return data;
+      },
+    });
+    reqLog.done(200);
+    const headers: Record<string, string> = { ..._CACHE_HDRS };
+    if (itunesCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = itunesCircuit.state.toLowerCase();
+    return withApiVersion(NextResponse.json(data, { headers }));
+  } catch (e) {
+    const isTimeout = e instanceof DOMException && e.name === 'AbortError';
+    const status = isTimeout ? 504 : 500;
+    const code = isTimeout ? 'TIMEOUT' : 'UPSTREAM_ERROR';
+    reqLog.done(status);
+    if (!isTimeout) console.error('[itunes-lookup] Lookup request failed:', sanitizeForLog(e instanceof Error ? e.message : String(e)));
+    return apiError(
+      isTimeout ? 'Request timed out' : 'Lookup request failed',
+      code,
+      status,
+    );
+  }
+}

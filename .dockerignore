@@ -1,0 +1,8 @@
+node_modules/
+.git/
+.next/
+test-results/
+.data/
+*.md
+.env*
+!.env.example

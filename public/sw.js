@@ -4,20 +4,31 @@
  * Created by Carlos Molina Galindo (CMolG on GitHub).
  */
 
-const CACHE = "pulse-radio-v1";
+const CACHE = "pulse-radio-v2";
 const STATIC_ASSETS = [
+  "/",
   "/offline.html",
   "/android-chrome-192x192.png",
   "/android-chrome-512x512.png",
 ];
 
+// API routes eligible for network-first caching (not streaming)
+const CACHEABLE_API = ["/api/itunes", "/api/lyrics", "/api/artist-info", "/api/concerts"];
+const API_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const STATIC_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting()),
+      .then((cache) => cache.addAll(STATIC_ASSETS)),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 const MAX_CACHE_ENTRIES = 150;
@@ -47,15 +58,51 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
 
-  // Never intercept API routes or audio streams — they must always hit the network
+  // Never intercept streaming routes, sw.js, or audio
   if (
-    url.pathname.startsWith("/api/") ||
+    url.pathname === "/api/proxy-stream" ||
+    url.pathname === "/api/icy-meta" ||
     url.pathname === "/sw.js" ||
     req.destination === "audio" ||
     url.searchParams.has("url") // proxy-stream and icy-meta use ?url=
   ) {
     return;
   }
+
+  // Cacheable API routes: network-first with cache fallback
+  if (CACHEABLE_API.some((p) => url.pathname.startsWith(p))) {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE);
+        try {
+          const fresh = await fetch(req);
+          if (fresh.ok) {
+            const clone = fresh.clone();
+            // Store with timestamp header for TTL checking
+            const headers = new Headers(clone.headers);
+            headers.set("X-SW-Cached-At", String(Date.now()));
+            const body = await clone.arrayBuffer();
+            cache.put(req, new Response(body, { status: clone.status, headers }));
+          }
+          return fresh;
+        } catch {
+          const cached = await cache.match(req);
+          if (cached) {
+            const cachedAt = Number(cached.headers.get("X-SW-Cached-At") || 0);
+            if (Date.now() - cachedAt < API_CACHE_TTL) return cached;
+          }
+          return new Response(JSON.stringify({ error: "Offline" }), {
+            status: 503,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      })(),
+    );
+    return;
+  }
+
+  // Other API routes: pass through to network
+  if (url.pathname.startsWith("/api/")) return;
 
   // HTML navigation: network-first with offline fallback
   if (
@@ -72,6 +119,7 @@ self.addEventListener("fetch", (event) => {
         } catch {
           const cache = await caches.open(CACHE);
           return (
+            (await cache.match(req)) ||
             (await cache.match("/offline.html")) ||
             new Response("Offline", { status: 503 })
           );
@@ -81,7 +129,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: stale-while-revalidate (serve cached, refresh in background)
+  // Static assets: cache-first with 7-day max age
   if (
     url.origin === self.location.origin &&
     ["image", "style", "script", "font"].includes(req.destination)
@@ -90,16 +138,35 @@ self.addEventListener("fetch", (event) => {
       (async () => {
         const cache = await caches.open(CACHE);
         const cached = await cache.match(req);
-        const fetchPromise = fetch(req).then((res) => {
-          if (res.ok) cache.put(req, res.clone());
-          return res;
-        }).catch(() => null);
         if (cached) {
-          void fetchPromise; // refresh in background
-          return cached;
+          const cachedAt = Number(cached.headers.get("X-SW-Cached-At") || 0);
+          if (!cachedAt || Date.now() - cachedAt < STATIC_CACHE_TTL) {
+            // Background refresh
+            fetch(req).then((res) => {
+              if (res.ok) {
+                const headers = new Headers(res.headers);
+                headers.set("X-SW-Cached-At", String(Date.now()));
+                res.arrayBuffer().then((body) => {
+                  cache.put(req, new Response(body, { status: res.status, headers }));
+                });
+              }
+            }).catch(() => {});
+            return cached;
+          }
         }
-        const fresh = await fetchPromise;
-        return fresh || new Response("Offline", { status: 503 });
+        try {
+          const fresh = await fetch(req);
+          if (fresh.ok) {
+            const clone = fresh.clone();
+            const headers = new Headers(clone.headers);
+            headers.set("X-SW-Cached-At", String(Date.now()));
+            const body = await clone.arrayBuffer();
+            cache.put(req, new Response(body, { status: clone.status, headers }));
+          }
+          return fresh;
+        } catch {
+          return cached || new Response("Offline", { status: 503 });
+        }
       })(),
     );
   }
