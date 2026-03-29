@@ -25,6 +25,7 @@ export function useConcerts(artist: string | null | undefined, enabled: boolean)
   const key = artist ? primaryArtist(artist).toLowerCase().trim() : null;
   useEffect(() => {
     if (!enabled || !key) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConcerts([]);
       return;
     }

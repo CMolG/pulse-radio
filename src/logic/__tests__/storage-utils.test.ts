@@ -28,6 +28,7 @@ const localStorageMock = {
   get length() {
     return store.size;
   },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   key: vi.fn((_i: number) => null),
 };
 
@@ -161,17 +162,25 @@ describe('storageUtils', () => {
   describe('updateStorage (read-modify-write transaction)', () => {
     it('consolidates read-modify-write into single synchronous block', () => {
       saveToStorage('counter', { count: 5 });
-      const result = updateStorage('counter', (current) => {
-        return { count: current.count + 1 };
-      }, { count: 0 });
+      const result = updateStorage(
+        'counter',
+        (current) => {
+          return { count: current.count + 1 };
+        },
+        { count: 0 },
+      );
       expect(result).toEqual({ count: 6 });
       expect(loadFromStorage('counter', null)).toEqual({ count: 6 });
     });
 
     it('uses default value when key is missing', () => {
-      const result = updateStorage('newkey', (current) => {
-        return current + 1;
-      }, 0);
+      const result = updateStorage(
+        'newkey',
+        (current) => {
+          return current + 1;
+        },
+        0,
+      );
       expect(result).toBe(1);
       expect(loadFromStorage('newkey', null)).toBe(1);
     });

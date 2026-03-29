@@ -1,6 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { stripPrototypeKeys, safeJsonParse } from '../sanitize';
 
 describe('stripPrototypeKeys', () => {
@@ -8,7 +8,7 @@ describe('stripPrototypeKeys', () => {
     const obj = { __proto__: { polluted: true }, safe: 'value' };
     const result = stripPrototypeKeys(obj);
     expect(result).toEqual({ safe: 'value' });
-    expect((result as any).polluted).toBeUndefined();
+    expect((result as Record<string, unknown>).polluted).toBeUndefined();
   });
 
   it('removes constructor from flat objects', () => {
@@ -38,8 +38,8 @@ describe('stripPrototypeKeys', () => {
   it('processes arrays and their elements', () => {
     const obj = {
       items: [
-        { __proto__: { polluted: true }, id: 1 } as any,
-        { constructor: { polluted: true }, id: 2 } as any,
+        { __proto__: { polluted: true }, id: 1 } as Record<string, unknown>,
+        { constructor: { polluted: true }, id: 2 } as Record<string, unknown>,
       ],
     };
     const result = stripPrototypeKeys(obj);
@@ -75,28 +75,28 @@ describe('safeJsonParse', () => {
 
   it('prevents prototype pollution via __proto__', () => {
     // Before calling safeJsonParse, verify Object.prototype is clean
-    expect((({} as any).polluted)).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
 
     safeJsonParse('{"__proto__":{"polluted":true}}');
 
     // After safeJsonParse, Object.prototype should remain clean
-    expect((({} as any).polluted)).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 
   it('prevents prototype pollution via constructor', () => {
-    expect((({} as any).polluted)).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
 
     safeJsonParse('{"constructor":{"prototype":{"polluted":true}}}');
 
-    expect((({} as any).polluted)).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 
   it('prevents prototype pollution via nested paths', () => {
-    expect((({} as any).polluted)).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
 
     safeJsonParse('{"data":{"__proto__":{"polluted":true}}}');
 
-    expect((({} as any).polluted)).toBeUndefined();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 
   it('preserves legitimate data in parsed result', () => {
@@ -106,7 +106,7 @@ describe('safeJsonParse', () => {
     expect(result.name).toBe('Artist');
     expect(result.tags).toEqual(['rock', 'indie']);
     expect(Object.prototype.hasOwnProperty.call(result, '__proto__')).toBe(false);
-    expect((result as any).hacked).toBeUndefined();
+    expect((result as Record<string, unknown>).hacked).toBeUndefined();
   });
 
   it('throws on invalid JSON', () => {

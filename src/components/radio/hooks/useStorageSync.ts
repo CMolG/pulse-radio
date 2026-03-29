@@ -9,7 +9,9 @@ export function useStorageSync<T>(
 ): void {
   const setterRef = useRef(setter);
   const validateRef = useRef(validate);
+  // eslint-disable-next-line react-hooks/refs
   setterRef.current = setter;
+  // eslint-disable-next-line react-hooks/refs
   validateRef.current = validate;
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {

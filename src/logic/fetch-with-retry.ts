@@ -39,7 +39,7 @@ interface RetryContext {
  */
 function composeAbortSignals(
   parentSignal: AbortSignal | undefined,
-  timeoutMs: number
+  timeoutMs: number,
 ): AbortSignal {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -51,7 +51,7 @@ function composeAbortSignals(
       cleanup();
       controller.abort();
     } else {
-      parentSignal.addEventListener("abort", () => {
+      parentSignal.addEventListener('abort', () => {
         cleanup();
         controller.abort();
       });
@@ -65,11 +65,7 @@ function composeAbortSignals(
  * Calculates exponential backoff with jitter.
  * Formula: delay * 2^attempt + random(0, delay/2)
  */
-function calculateBackoff(
-  baseDelay: number,
-  attempt: number,
-  maxBackoff: number
-): number {
+function calculateBackoff(baseDelay: number, attempt: number, maxBackoff: number): number {
   const exponential = baseDelay * Math.pow(2, attempt);
   const jitter = Math.random() * (baseDelay / 2);
   return Math.min(exponential + jitter, maxBackoff);
@@ -79,7 +75,7 @@ function calculateBackoff(
  * Default retry predicate: retry on 5xx status codes and timeout errors.
  */
 function defaultRetryOn(status?: number, error?: Error): boolean {
-  if (error?.name === "AbortError") {
+  if (error?.name === 'AbortError') {
     return true; // Retry on timeout (AbortError from timeout signal)
   }
   return status ? status >= 500 : false;
@@ -115,7 +111,7 @@ function defaultRetryOn(status?: number, error?: Error): boolean {
  */
 export async function fetchWithRetry(
   url: string,
-  options: FetchRetryOptions & { init?: RequestInit } = {}
+  options: FetchRetryOptions & { init?: RequestInit } = {},
 ): Promise<Response> {
   const {
     timeout = 8000,
@@ -138,7 +134,8 @@ export async function fetchWithRetry(
   };
 
   let lastError: Error | undefined;
-  let lastResponse: Response | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let _lastResponse: Response | undefined;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     context.attempt = attempt;
@@ -153,10 +150,7 @@ export async function fetchWithRetry(
       }
 
       // Check if we should retry
-      if (
-        attempt < retries &&
-        context.retryOn(response.status, undefined)
-      ) {
+      if (attempt < retries && context.retryOn(response.status, undefined)) {
         const delay = calculateBackoff(backoff, attempt, maxBackoff);
         await new Promise((resolve) => setTimeout(resolve, delay));
         continue;
@@ -184,7 +178,7 @@ export async function fetchWithRetry(
   }
 
   // This should not be reached, but for safety
-  throw lastError || new Error("Fetch failed after all retries");
+  throw lastError || new Error('Fetch failed after all retries');
 }
 
 /**

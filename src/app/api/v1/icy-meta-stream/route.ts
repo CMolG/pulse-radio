@@ -2,7 +2,6 @@ import { NextRequest } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/logic/rate-limiter';
 import { sanitizeUrl } from '@/logic/sanitize';
 import { logRequest } from '@/logic/logger';
-import { withApiVersion } from '@/logic/api-versioning';
 
 export const runtime = 'nodejs';
 
@@ -95,7 +94,11 @@ export async function GET(req: NextRequest) {
 
       const maxTimer = setTimeout(() => {
         closed = true;
-        try { controller.close(); } catch { /* already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       }, MAX_SSE_DURATION);
 
       const heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
@@ -108,7 +111,9 @@ export async function GET(req: NextRequest) {
             lastTitle = title;
             sendEvent(JSON.stringify({ title }));
           }
-        } catch { /* continue polling */ }
+        } catch {
+          /* continue polling */
+        }
       }, POLL_INTERVAL);
 
       // Initial fetch
@@ -118,14 +123,20 @@ export async function GET(req: NextRequest) {
           lastTitle = title;
           sendEvent(JSON.stringify({ title }));
         }
-      } catch { /* continue */ }
+      } catch {
+        /* continue */
+      }
 
       req.signal.addEventListener('abort', () => {
         closed = true;
         clearTimeout(maxTimer);
         clearInterval(heartbeatTimer);
         clearInterval(pollTimer);
-        try { controller.close(); } catch { /* already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       });
     },
   });

@@ -26,10 +26,12 @@ test.describe('Circuit Breaker (ARCH-037)', () => {
   });
 
   test('circuit breaker module exports are correct', async ({ page }) => {
-    const result = await page.evaluate(async () => {
-      const mod = await import('/api/v1/health');
-      return true;
-    }).catch(() => true);
+    const result = await page
+      .evaluate(async () => {
+        await import('/api/v1/health');
+        return true;
+      })
+      .catch(() => true);
     // Just verify the routes still work end-to-end
     expect(result).toBeTruthy();
   });

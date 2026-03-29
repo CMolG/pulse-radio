@@ -4,7 +4,10 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 const PRESETS_MIN = [15, 30, 60] as const;
 const FADE_DURATION_MS = 30_000;
 
-export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<HTMLAudioElement | null>) {
+export function useSleepTimer(
+  onExpire: () => void,
+  audioRef?: React.RefObject<HTMLAudioElement | null>,
+) {
   const [remainingMin, setRemainingMin] = useState<number | null>(null);
   const [isFading, setIsFading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -25,6 +28,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
       savedVolumeRef.current = null;
     }
     setIsFading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const clear = useCallback(() => {
     if (timerRef.current) {
@@ -59,6 +63,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         fadeTimerRef.current = null;
       }
     }, 200);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const start = useCallback(
     (minutes: number) => {
@@ -79,6 +84,7 @@ export function useSleepTimer(onExpire: () => void, audioRef?: React.RefObject<H
         }
       }, 1000);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [clear, stopFade, startFade],
   );
   const cycle = useCallback(() => {

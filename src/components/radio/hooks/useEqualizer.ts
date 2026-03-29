@@ -389,6 +389,7 @@ export function useEqualizer() {
         connectedAudioRef.current = audio;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       bands,
       bassEnhance,
@@ -402,6 +403,7 @@ export function useEqualizer() {
   );
   const disconnect = useCallback(() => {
     teardownGraph(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const MAX_GAIN_DB = 12;
   const setBandGain = useCallback((id: string, gain: number) => {

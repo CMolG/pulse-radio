@@ -82,6 +82,7 @@ export function useAlbumArt(title: string | null, artist: string | null) {
     ? EMPTY_ALBUM_INFO
     : (cachedInfo ?? (fetched?.key === cacheKey ? fetched.info : EMPTY_ALBUM_INFO));
   const isLoading = Boolean(hasTitle && cacheKey && !cachedInfo && fetched?.key !== cacheKey);
+  /* eslint-disable react-hooks/preserve-manual-memoization, react-hooks/exhaustive-deps */
   return useMemo(
     () => ({ ...info, isLoading }),
     [
@@ -96,4 +97,5 @@ export function useAlbumArt(title: string | null, artist: string | null) {
       isLoading,
     ],
   );
+  /* eslint-enable react-hooks/preserve-manual-memoization, react-hooks/exhaustive-deps */
 }

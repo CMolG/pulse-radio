@@ -1,10 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const IOS_UA =
-  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1';
-const ANDROID_UA =
-  'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36';
-
 test.describe('iOS Background Audio (ARCH-101)', () => {
   test('iOS: AudioContext is NOT created on initial play when effects are off', async ({
     page,
@@ -26,7 +21,7 @@ test.describe('iOS Background Audio (ARCH-101)', () => {
 
     // Verify no AudioContext is created before any interaction (effects off by default)
     const ctxCount = await page.evaluate(() => {
-      return (window as any).__audioContextCount ?? 0;
+      return (window as Record<string, unknown>).__audioContextCount ?? 0;
     });
     // Should be 0 or at most the shared context (lazy-created), but NOT a MediaElementSource
     expect(ctxCount).toBeLessThanOrEqual(1);
@@ -84,13 +79,12 @@ test.describe('iOS Background Audio (ARCH-101)', () => {
     // Test iPhone
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'userAgent', {
-        get: () =>
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15',
+        get: () => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15',
         configurable: true,
       });
     });
     await page.goto('/');
-    let isIOS = await page.evaluate(() => /iPad|iPhone|iPod/.test(navigator.userAgent));
+    const isIOS = await page.evaluate(() => /iPad|iPhone|iPod/.test(navigator.userAgent));
     expect(isIOS).toBe(true);
 
     // Test iPad Pro (MacIntel with touch)
@@ -110,9 +104,7 @@ test.describe('iOS Background Audio (ARCH-101)', () => {
     });
     await page.goto('/');
     const isIPadPro = await page.evaluate(() => {
-      return (
-        navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
-      );
+      return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
     });
     expect(isIPadPro).toBe(true);
   });

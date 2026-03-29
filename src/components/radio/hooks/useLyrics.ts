@@ -2,7 +2,12 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { normalizeText, primaryArtist, cleanFeatFromTitle } from '@/logic/format-utils';
-import type { NowPlayingTrack, LyricsData, LrcLibResponse, LyricLine } from '@/components/radio/constants';
+import type {
+  NowPlayingTrack,
+  LyricsData,
+  LrcLibResponse,
+  LyricLine,
+} from '@/components/radio/constants';
 import { STORAGE_KEYS } from '@/components/radio/constants';
 import { loadFromStorage, saveToStorage } from '@/logic/storage-utils';
 
@@ -658,7 +663,6 @@ function parseLrc(lrcText: string): LyricLine[] {
   return sorted ? lines : lines.sort((a, b) => a.time - b.time);
 }
 
-const LRCLIB_BASE = 'https://lrclib.net/api';
 const LYRICS_FETCH_TIMEOUT_MS = 8_000;
 
 function isTransientError(err: unknown): boolean {
@@ -890,6 +894,7 @@ export function useLyrics(
       controller.abort();
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.artist, track?.title, track?.album, stationName]);
   const retry = () => {
     if (!track?.title) return;

@@ -16,10 +16,7 @@ export interface CircuitBreaker {
 
 const DEFAULTS = { failureThreshold: 5, resetTimeoutMs: 30_000, successThreshold: 2 };
 
-export function createCircuitBreaker(
-  name: string,
-  config?: CircuitBreakerConfig,
-): CircuitBreaker {
+export function createCircuitBreaker(name: string, config?: CircuitBreakerConfig): CircuitBreaker {
   const opts = { ...DEFAULTS, ...config };
   let state: CircuitState = 'CLOSED';
   let failures = 0;
@@ -58,7 +55,8 @@ export function createCircuitBreaker(
         }
 
         return { data, state: breaker.state };
-      } catch (err) {
+      } catch (_err) {
+        // eslint-disable-line @typescript-eslint/no-unused-vars
         failures++;
         lastFailureTime = Date.now();
 

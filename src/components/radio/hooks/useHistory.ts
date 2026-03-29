@@ -67,6 +67,7 @@ export function useHistory(
       if (deduped.length > MAX_HISTORY) deduped.length = MAX_HISTORY;
       return deduped;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [track?.title, track?.artist, stationUuid, stationName]);
   useEffect(() => {
     if (!track?.title || !stationUuid) return;

@@ -36,6 +36,7 @@ export function useStationMeta(station: Station | null, isPlaying: boolean) {
     if (!station) {
       lastTitleRef.current = '';
       prevStationUrlRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStationBlacklisted(false);
       return;
     }

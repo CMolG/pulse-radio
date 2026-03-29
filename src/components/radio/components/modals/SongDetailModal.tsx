@@ -88,7 +88,7 @@ type SongDetailModalProps = {
   onRemoveFromFavorites?: () => void;
 };
 const _SKELETON_WIDTHS = ['w-full', 'w-11/12', 'w-10/12', 'w-9/12', 'w-8/12', 'w-10/12', 'w-7/12'];
-function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailModalProps) {
+function SongDetailModalInner({ song, onClose, onRemoveFromFavorites }: SongDetailModalProps) {
   const { info, loading } = useArtistInfo(song?.artist ?? null);
   const { concerts } = useConcerts(song?.artist ?? null, !!song);
   const albumMeta = useAlbumArt(song?.title ?? null, song?.artist ?? null);
@@ -261,7 +261,9 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
                     {song.title}
                   </h2>{' '}
                   <p className="text-[14px] text-white/60 mt-1">{song.artist}</p>{' '}
-                  {resolvedAlbum && <p className="text-[12px] text-white/50 mt-0.5">{resolvedAlbum}</p>}{' '}
+                  {resolvedAlbum && (
+                    <p className="text-[12px] text-white/50 mt-0.5">{resolvedAlbum}</p>
+                  )}{' '}
                   {/* Extended metadata: corner-style row + release line + context badges */}{' '}
                   {(resolvedDurationMs ||
                     resolvedTrackNumber != null ||
@@ -582,4 +584,4 @@ function _SongDetailModal({ song, onClose, onRemoveFromFavorites }: SongDetailMo
     </AnimatePresence>
   );
 }
-export const SongDetailModal = React.memo(_SongDetailModal);
+export const SongDetailModal = React.memo(SongDetailModalInner);

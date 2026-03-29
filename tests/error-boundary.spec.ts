@@ -8,9 +8,7 @@ import { test, expect } from '@playwright/test';
  * Playwright-controlled page and asserting on the resulting DOM.
  */
 test.describe('Error boundary page', () => {
-  test('root error.tsx renders recovery UI with correct elements', async ({
-    page,
-  }) => {
+  test('root error.tsx renders recovery UI with correct elements', async ({ page }) => {
     // Inject the error boundary component into an isolated page via
     // JavaScript that simulates the props Next.js would provide.
     await page.goto('/');
@@ -19,7 +17,7 @@ test.describe('Error boundary page', () => {
     // through React's error boundary mechanism. We trigger a JS error on
     // purpose inside the page context and then check the DOM produced by
     // the error.tsx boundary.
-    const hasErrorBoundary = await page.evaluate(async () => {
+    await page.evaluate(async () => {
       // Dynamically import the error module to verify it exists and exports
       try {
         const mod = await import('/src/app/error');
@@ -48,15 +46,13 @@ test.describe('Error boundary page', () => {
       document.body.appendChild(errorDiv);
     });
 
-    const alert = page.locator('[role="alert"]');
+    page.locator('[role="alert"]');
     // The real error boundary would show on actual error; we verified build passes.
     // For static analysis, just confirm the page loaded without crash.
     await expect(page).toHaveURL('/');
   });
 
-  test('error boundary files exist and are valid modules', async ({
-    page,
-  }) => {
+  test('error boundary files exist and are valid modules', async ({ page }) => {
     // Verify that navigating to the app doesn't crash (no error boundary triggered on clean load)
     const response = await page.goto('/');
     expect(response?.status()).toBeLessThan(500);

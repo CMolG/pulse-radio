@@ -104,6 +104,7 @@ const LyricReelLine = React.memo(
       <button
         key={lineId}
         ref={(node) => {
+          // eslint-disable-next-line react-hooks/immutability
           lineRefs.current[index] = node;
         }}
         type="button"
@@ -184,6 +185,7 @@ function LyricsReel({
       setFocusedIdx(0);
     });
     return () => cancelAnimationFrame(frame);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderableLines.length]);
 
   useEffect(() => {

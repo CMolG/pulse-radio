@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  parseM3U,
-  parsePLS,
-  exportM3U,
-  parsePlaylist,
-  PlaylistParseError,
-} from '../parsers/playlist-parser';
+import { parseM3U, parsePLS, exportM3U, parsePlaylist } from '../parsers/playlist-parser';
 
 describe('parseM3U', () => {
   it('parses basic M3U with URLs only', () => {

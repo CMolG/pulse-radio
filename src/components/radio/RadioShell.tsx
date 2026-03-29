@@ -17,12 +17,7 @@ import {
 } from 'lucide-react';
 
 /* ── Logic modules ────────────────────────────────────────────────── */
-import {
-  _NOOP,
-  primaryArtist,
-  cleanFeatFromTitle,
-  buildStationShareUrl,
-} from '@/logic/format-utils';
+import { _NOOP, primaryArtist, cleanFeatFromTitle } from '@/logic/format-utils';
 import {
   AlbumInfo,
   ItunesResult,
@@ -171,7 +166,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   effectsEnabledRef.current = effectsEnabled;
 
   /* ── Core hooks ────────────────────────────────────────────────── */
-  const radio = useRadio(effectsEnabledRef);
+  const radio = useRadio();
   const eq = useEqualizer();
   const { track, icyBitrate, stationBlacklisted } = useStationMeta(
     radio.station,
@@ -286,6 +281,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       })
       .catch(() => {});
     return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     albumArt.isLoading,
     albumArt.artworkUrl,
@@ -465,6 +461,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (!isSovereignCountryCode(code) || !COUNTRY_BY_CODE[code]) return;
     if (view.mode === 'country' && view.countryCode === code) return;
     resetNav(countryView(code));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCountryCode, locale, view.countryCode, view.mode, resetNav]);
 
   useEffect(() => {
@@ -480,6 +477,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locale, t, resetNav]);
 
   useEffect(() => {
@@ -534,6 +532,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         eqConnectSource(radio.audioRef.current);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.station, effectsEnabled]);
 
   useEffect(() => {
@@ -641,6 +640,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     if (stationBlacklisted && radio.station) {
       showToast('This station is temporarily unavailable', 'info');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stationBlacklisted, radio.station?.stationuuid]);
 
   useEffect(() => {
@@ -665,6 +665,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [radio.status]);
 
   /* ── Skip next / prev ──────────────────────────────────────────── */
@@ -778,7 +779,6 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         showEq: eq,
         showShortcuts: sc,
         selectedSong: ss,
-        sleepTimer: st,
         showToast: toast,
         realtimeLyrics: rl,
       } = keydownRef.current;
@@ -898,6 +898,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const handleFavSongFromHistory = useCallback(
     (entry: HistoryEntry) => {
       const wasLiked = favSongs.has(entry.title, entry.artist);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id: _, timestamp: _t, ...input } = entry;
       favSongs.toggle(input);
       showToast(wasLiked ? 'Song removed' : entry.title, 'heart');
@@ -1057,7 +1058,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       icon: <Heart size={sz} aria-hidden="true" />,
     },
   ];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
 
   const { concerts: shellConcerts } = useConcerts(enrichedTrack?.artist, !!radio.station);

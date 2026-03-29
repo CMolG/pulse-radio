@@ -36,12 +36,13 @@ function safeCompare(a: string, b: string): boolean {
 
 const TIMEOUT_MS = 10_000;
 
-async function safeFetch(url: string, signal?: AbortSignal): Promise<Record<string, unknown> | null> {
+async function safeFetch(
+  url: string,
+  signal?: AbortSignal,
+): Promise<Record<string, unknown> | null> {
   try {
     const timeoutSignal = AbortSignal.timeout(TIMEOUT_MS);
-    const combinedSignal = signal
-      ? AbortSignal.any([signal, timeoutSignal])
-      : timeoutSignal;
+    const combinedSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
     const res = await fetch(url, { signal: combinedSignal });
     if (!res.ok) {
       await res.text().catch(_NOOP);
@@ -54,7 +55,10 @@ async function safeFetch(url: string, signal?: AbortSignal): Promise<Record<stri
   }
 }
 
-type SyncFn = (key: string, signal?: AbortSignal) => Promise<{ data: unknown; ttlMs: number } | null>;
+type SyncFn = (
+  key: string,
+  signal?: AbortSignal,
+) => Promise<{ data: unknown; ttlMs: number } | null>;
 
 const syncers: Record<string, SyncFn> = {
   itunes: async (key, signal) => {
@@ -75,7 +79,8 @@ const syncers: Record<string, SyncFn> = {
     // Re-fetch via internal route would be circular; fetch externally
     const MB_BASE = 'https://musicbrainz.org/ws/2';
     const WIKI_BASE = 'https://en.wikipedia.org/api/rest_v1';
-    const hdrs = { 'User-Agent': 'PulseRadio/1.0 (https://pulse-radio.online)' };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _hdrs = { 'User-Agent': 'PulseRadio/1.0 (https://pulse-radio.online)' };
 
     interface ArtistInfo {
       name?: string;
@@ -92,7 +97,10 @@ const syncers: Record<string, SyncFn> = {
       signal,
     )) as { artists?: ArtistInfo[] } | null;
     const mb = mbData?.artists?.[0] ?? null;
-    const wiki = (await safeFetch(`${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`, signal)) as {
+    const wiki = (await safeFetch(
+      `${WIKI_BASE}/page/summary/${encodeURIComponent(key)}`,
+      signal,
+    )) as {
       extract?: string;
       thumbnail?: { source?: string };
       content_urls?: { desktop?: { page?: string } };

@@ -34,20 +34,15 @@ const contentSecurityPolicy = cspDirectives.join('; ');
 
 const securityHeaders: ReadonlyArray<[string, string]> = [
   ['Content-Security-Policy', contentSecurityPolicy],
-  [
-    'Strict-Transport-Security',
-    'max-age=63072000; includeSubDomains; preload',
-  ],
+  ['Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload'],
   ['X-Content-Type-Options', 'nosniff'],
   ['X-Frame-Options', 'SAMEORIGIN'],
   ['Referrer-Policy', 'strict-origin-when-cross-origin'],
-  [
-    'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), payment=(), autoplay=(self)',
-  ],
+  ['Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), autoplay=(self)'],
 ];
 
-export function proxy(request: NextRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function proxy(_request: NextRequest) {
   const response = NextResponse.next();
 
   for (const [key, value] of securityHeaders) {

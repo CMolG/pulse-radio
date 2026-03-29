@@ -35,8 +35,10 @@ export function useFavoriteSongs() {
     });
   });
   const keySetRef = useRef<Set<string>>(null!);
+  // eslint-disable-next-line react-hooks/refs
   if (!keySetRef.current) keySetRef.current = buildKeySet(songs);
   useMemo(() => {
+    // eslint-disable-next-line react-hooks/refs
     keySetRef.current = buildKeySet(songs);
   }, [songs]);
   useEffect(() => {

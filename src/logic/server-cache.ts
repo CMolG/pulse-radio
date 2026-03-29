@@ -33,6 +33,7 @@ function estimateBytes(value: unknown): number {
   return JSON.stringify(value).length * 2; // Rough: 2 bytes per char in V8
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function _evict(store: Map<string, CacheEntry<unknown>>, ns: Namespace): void {
   const now = Date.now();
   // First pass: remove expired entries
@@ -106,7 +107,9 @@ export function cacheSet<T>(ns: Namespace, key: string, value: T, ttlMs: number)
   // Log warning at 80% capacity
   const byteUsage = _bytesByNs[ns] ?? 0;
   if (byteUsage > MAX_BYTES_PER_NS * 0.8) {
-    console.warn(`[server-cache] Namespace "${ns}" at ${(byteUsage / MAX_BYTES_PER_NS * 100).toFixed(0)}% capacity`);
+    console.warn(
+      `[server-cache] Namespace "${ns}" at ${((byteUsage / MAX_BYTES_PER_NS) * 100).toFixed(0)}% capacity`,
+    );
   }
 }
 
@@ -177,32 +180,32 @@ function startCleanupSweep() {
 export function isStationBlacklisted(stationUrl: string): boolean {
   const entry = stationBlacklistMap.get(stationUrl);
   if (!entry) return false;
-  
+
   const now = Date.now();
   const ttl = getTTLForFailCount(entry.failCount);
   const isExpired = now - entry.failedAt > ttl;
-  
+
   if (isExpired) {
     // TTL expired; allow retry on next request (remove from blacklist)
     stationBlacklistMap.delete(stationUrl);
     return false;
   }
-  
+
   return true;
 }
 
 /** Record a failure for a station URL. Returns true if it is now blacklisted. */
 export function recordStationFailure(stationUrl: string): boolean {
   startCleanupSweep();
-  
+
   const existing = stationBlacklistMap.get(stationUrl);
   const failCount = (existing?.failCount ?? 0) + 1;
-  
+
   stationBlacklistMap.set(stationUrl, {
     failedAt: Date.now(),
     failCount,
   });
-  
+
   // Blacklist only if failCount >= 3
   return failCount >= 3;
 }

@@ -13,20 +13,17 @@
  * a single in-flight Promise to avoid duplicate API calls.
  */
 import { db, timedQuery, recordCacheHit, recordCacheMiss, recordCacheWrite } from '@/logic/db';
-import {
-  itunesCache,
-  artistInfoCache,
-  concertsCache,
-  lyricsCache,
-} from '@/logic/db/schema';
+import { itunesCache, artistInfoCache, concertsCache, lyricsCache } from '@/logic/db/schema';
 import { cacheGet, cacheSet, type Namespace } from '@/logic/server-cache';
-import { safeJsonParse } from '@/logic/sanitize';
 import { eq, sql } from 'drizzle-orm';
-import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core';
 import { logger } from '@/logic/logger';
 import { z } from 'zod';
 
-type CacheTable = typeof itunesCache | typeof artistInfoCache | typeof concertsCache | typeof lyricsCache;
+type CacheTable =
+  | typeof itunesCache
+  | typeof artistInfoCache
+  | typeof concertsCache
+  | typeof lyricsCache;
 
 const TABLE_MAP: Record<string, CacheTable> = {
   itunes: itunesCache,
@@ -64,10 +61,12 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
   const table = TABLE_MAP[namespace];
   if (table) {
     try {
-      const row = timedQuery(`cache_read_${namespace}`, () =>
-        db.select().from(table).where(eq(table.key, key)).get() as
-          | { key: string; payload: string; fetchedAt: number; ttlMs: number }
-          | undefined
+      const row = timedQuery(
+        `cache_read_${namespace}`,
+        () =>
+          db.select().from(table).where(eq(table.key, key)).get() as
+            | { key: string; payload: string; fetchedAt: number; ttlMs: number }
+            | undefined,
       );
 
       if (row) {
@@ -91,11 +90,11 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
   // ── Tier 3: External API (with request deduplication) ──
   const inflightKey = `${namespace}:${key}`;
   const existing = inflight.get(inflightKey);
-  
+
   let fresh: T | null;
   if (existing) {
     // An identical request is already in-flight; share the Promise
-    fresh = await existing as T | null;
+    fresh = (await existing) as T | null;
   } else {
     // Start new fetch and track it
     const fetchPromise = (async () => {
@@ -106,7 +105,7 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
         inflight.delete(inflightKey);
       }
     })();
-    
+
     inflight.set(inflightKey, fetchPromise);
     fresh = await fetchPromise;
   }
@@ -118,13 +117,14 @@ export async function cacheResolve<T>(opts: CacheOptions<T>): Promise<T | null> 
   if (table) {
     try {
       timedQuery(`cache_write_${namespace}`, () =>
-        db.insert(table)
+        db
+          .insert(table)
           .values({ key, payload, fetchedAt: Date.now(), ttlMs })
           .onConflictDoUpdate({
             target: table.key,
             set: { payload, fetchedAt: Date.now(), ttlMs },
           })
-          .run()
+          .run(),
       );
       recordCacheWrite();
     } catch (e) {
@@ -154,9 +154,7 @@ interface CacheOptionsWithSchema<T> {
  * Never crashes on schema mismatch — just logs a warning and refreshes.
  * Request deduplication (ARCH-053) applies to Tier 3 fetches.
  */
-export async function getCachedOrFetch<T>(
-  opts: CacheOptionsWithSchema<T>,
-): Promise<T | null> {
+export async function getCachedOrFetch<T>(opts: CacheOptionsWithSchema<T>): Promise<T | null> {
   const { namespace, key, ttlMs, schema, fetcher } = opts;
 
   // ── Tier 1: In-memory LRU ──
@@ -167,10 +165,12 @@ export async function getCachedOrFetch<T>(
   const table = TABLE_MAP[namespace];
   if (table) {
     try {
-      const row = timedQuery(`cache_read_${namespace}`, () =>
-        db.select().from(table).where(eq(table.key, key)).get() as
-          | { key: string; payload: string; fetchedAt: number; ttlMs: number }
-          | undefined
+      const row = timedQuery(
+        `cache_read_${namespace}`,
+        () =>
+          db.select().from(table).where(eq(table.key, key)).get() as
+            | { key: string; payload: string; fetchedAt: number; ttlMs: number }
+            | undefined,
       );
 
       if (row) {
@@ -211,11 +211,11 @@ export async function getCachedOrFetch<T>(
   // ── Tier 3: External API (with request deduplication) ──
   const inflightKey = `${namespace}:${key}`;
   const existing = inflight.get(inflightKey);
-  
+
   let fresh: T | null;
   if (existing) {
     // An identical request is already in-flight; share the Promise
-    fresh = await existing as T | null;
+    fresh = (await existing) as T | null;
   } else {
     // Start new fetch and track it
     const fetchPromise = (async () => {
@@ -226,7 +226,7 @@ export async function getCachedOrFetch<T>(
         inflight.delete(inflightKey);
       }
     })();
-    
+
     inflight.set(inflightKey, fetchPromise);
     fresh = await fetchPromise;
   }
@@ -238,13 +238,14 @@ export async function getCachedOrFetch<T>(
   if (table) {
     try {
       timedQuery(`cache_write_${namespace}`, () =>
-        db.insert(table)
+        db
+          .insert(table)
           .values({ key, payload, fetchedAt: Date.now(), ttlMs })
           .onConflictDoUpdate({
             target: table.key,
             set: { payload, fetchedAt: Date.now(), ttlMs },
           })
-          .run()
+          .run(),
       );
       recordCacheWrite();
     } catch (e) {
@@ -267,7 +268,7 @@ export function getStaleKeys(namespace: Namespace): string[] {
         .select({ key: table.key })
         .from(table)
         .where(sql`${table.fetchedAt} + ${table.ttlMs} < ${Date.now()}`)
-        .all()
+        .all(),
     );
     return rows.map((r) => r.key);
   } catch (e) {
@@ -285,13 +286,14 @@ export function persistToDb<T>(namespace: Namespace, key: string, value: T, ttlM
   const payload = JSON.stringify(value);
   try {
     timedQuery(`cache_persist_${namespace}`, () =>
-      db.insert(table)
+      db
+        .insert(table)
         .values({ key, payload, fetchedAt: Date.now(), ttlMs })
         .onConflictDoUpdate({
           target: table.key,
           set: { payload, fetchedAt: Date.now(), ttlMs },
         })
-        .run()
+        .run(),
     );
     recordCacheWrite();
   } catch (e) {

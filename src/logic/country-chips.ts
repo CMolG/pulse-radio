@@ -1,7 +1,11 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
-import { COUNTRY_BY_CODE, isSovereignCountryCode, SOVEREIGN_COUNTRIES } from '@/logic/i18n/countries';
-import { LANG3_TO_LOCALE, LOCALE_SELF_CANDIDATES, type SupportedLocale } from '@/logic/i18n/locales';
+import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRIES } from '@/logic/i18n/countries';
+import {
+  LANG3_TO_LOCALE,
+  LOCALE_SELF_CANDIDATES,
+  type SupportedLocale,
+} from '@/logic/i18n/locales';
 import { countryFlag } from '@/logic/format-utils';
 
 export type CountryChip = {

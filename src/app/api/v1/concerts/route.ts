@@ -18,8 +18,13 @@ export const runtime = 'nodejs';
 const BANDSINTOWN_BASE = 'https://rest.bandsintown.com';
 const TIMEOUT_MS = 8_000;
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
-const _CACHE_HDRS = { 'Cache-Control': 'public, max-age=14400, s-maxage=43200, stale-while-revalidate=86400' };
-const _NO_CACHE_HDRS = { 'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200' };
+const _CACHE_HDRS = {
+  'Cache-Control': 'public, max-age=14400, s-maxage=43200, stale-while-revalidate=86400',
+};
+const _NO_CACHE_HDRS = {
+  'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200',
+};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _NOOP = () => {};
 const MAX_EVENTS = 5;
 const concertsCircuit = createCircuitBreaker('bandsintown');
@@ -82,25 +87,35 @@ async function fetchConcerts(artist: string): Promise<ConcertEvent[]> {
     const artistRes = await fetch(artistUrl, { signal: controller.signal });
     if (!artistRes.ok) {
       const body = await artistRes.text().catch(() => '');
-      logger.error('concerts_artist_lookup_failed', new Error(`[concerts] artist lookup ${artistRes.status}`), { artist: sanitizeForLog(artist), body: sanitizeForLog(body.slice(0, 200)) });
+      logger.error(
+        'concerts_artist_lookup_failed',
+        new Error(`[concerts] artist lookup ${artistRes.status}`),
+        { artist: sanitizeForLog(artist), body: sanitizeForLog(body.slice(0, 200)) },
+      );
       return [];
     }
     const artistData = await artistRes.json();
     const artistId: string | number | undefined = artistData?.id;
 
     // Step 2: Fetch events — prefer by ID so name-encoding edge-cases don't matter.
-    const eventsPath = artistId
-      ? `/artists/id_${artistId}/events`
-      : `/artists/${encoded}/events`;
+    const eventsPath = artistId ? `/artists/id_${artistId}/events` : `/artists/${encoded}/events`;
     const eventsUrl = `${BANDSINTOWN_BASE}${eventsPath}?app_id=${env.BANDSINTOWN_APP_ID}&date=upcoming`;
     const res = await fetch(eventsUrl, { signal: controller.signal });
     clearTimeout(timer);
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      logger.error('concerts_events_fetch_failed', new Error(`[concerts] events ${res.status}`), { artist: sanitizeForLog(artist), artistId, body: sanitizeForLog(body.slice(0, 200)) });
+      logger.error('concerts_events_fetch_failed', new Error(`[concerts] events ${res.status}`), {
+        artist: sanitizeForLog(artist),
+        artistId,
+        body: sanitizeForLog(body.slice(0, 200)),
+      });
       return [];
     }
-    const data: BandsintownEvent[] | null = await readJsonWithLimit<BandsintownEvent[]>(res, 512 * 1024, eventsUrl);
+    const data: BandsintownEvent[] | null = await readJsonWithLimit<BandsintownEvent[]>(
+      res,
+      512 * 1024,
+      eventsUrl,
+    );
     if (!Array.isArray(data)) return [];
     return data.slice(0, MAX_EVENTS).map(mapEvent);
   } catch {
@@ -126,16 +141,14 @@ export async function GET(req: NextRequest) {
       ttlMs: CACHE_TTL_MS,
       schema: ConcertEventsSchema,
       fetcher: async () => {
-        const { data } = await concertsCircuit.call(
-          () => fetchConcerts(artist),
-          [],
-        );
+        const { data } = await concertsCircuit.call(() => fetchConcerts(artist), []);
         return data;
       },
     });
     const list = events ?? [];
     const headers: Record<string, string> = { ...(list.length > 0 ? _CACHE_HDRS : _NO_CACHE_HDRS) };
-    if (concertsCircuit.state !== 'CLOSED') headers['X-Circuit-State'] = concertsCircuit.state.toLowerCase();
+    if (concertsCircuit.state !== 'CLOSED')
+      headers['X-Circuit-State'] = concertsCircuit.state.toLowerCase();
     return withApiVersion(NextResponse.json(list, { headers }));
   } catch (err) {
     const isTimeout = err instanceof DOMException && err.name === 'AbortError';

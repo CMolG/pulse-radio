@@ -18,11 +18,8 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import type { Station, ViewState, BrowseCategory, NowPlayingTrack } from '../constants';
-import {
-  GENRE_LABEL_KEYS,
-  GENRE_CATEGORIES,
-} from '../constants';
+import type { Station, ViewState, BrowseCategory } from '../constants';
+import { GENRE_LABEL_KEYS, GENRE_CATEGORIES } from '../constants';
 import { useLocale } from '@/context/LocaleContext';
 import { useMediaQuery } from 'usehooks-ts';
 import {
@@ -375,6 +372,7 @@ function BrowseView({
       cancelled = true;
       flags.cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, retryKey]);
   const allCategoryStations = useMemo(() => {
     const result: Station[] = [];

@@ -112,7 +112,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
   },
 ];
 type UsageGuideProps = { onClose: () => void };
-function _UsageGuide({ onClose }: UsageGuideProps) {
+function UsageGuideBase({ onClose }: UsageGuideProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   return (
     <motion.div
@@ -206,7 +206,7 @@ function _UsageGuide({ onClose }: UsageGuideProps) {
     </motion.div>
   );
 }
-const UsageGuide = React.memo(_UsageGuide);
+const UsageGuide = React.memo(UsageGuideBase);
 type MobileSettingsPanelProps = {
   onClose: () => void;
   eq: {

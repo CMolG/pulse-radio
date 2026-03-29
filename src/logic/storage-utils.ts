@@ -4,7 +4,6 @@ import { safeJsonParse } from './sanitize';
 import type { Station, HistoryEntry } from '../components/radio/schemas';
 import {
   validateStation,
-  validateHistoryEntry,
   validateStations,
   validateHistoryEntries,
 } from '../components/radio/schemas';
@@ -36,9 +35,7 @@ export function storageMode(): 'persistent' | 'memory-only' {
   return getCachedAvailability() ? 'persistent' : 'memory-only';
 }
 
-function tryLoad(
-  key: string,
-): string | null {
+function tryLoad(key: string): string | null {
   if (typeof window === 'undefined') return null;
   try {
     return localStorage.getItem(key);
@@ -73,7 +70,9 @@ function trySave(key: string, raw: string): boolean {
     return defaultValue;
   }
 }
-/** Save a JSON value to localStorage. Returns false if quota is exceeded. */ export function saveToStorage<T>(key: string, value: T): boolean {
+/** Save a JSON value to localStorage. Returns false if quota is exceeded. */ export function saveToStorage<
+  T,
+>(key: string, value: T): boolean {
   const raw = JSON.stringify(value);
   const saved = trySave(key, raw);
   if (!saved) {
@@ -84,7 +83,10 @@ function trySave(key: string, raw: string): boolean {
 }
 /** Load a plain string value from localStorage with fallback */ export const loadStringFromStorage =
   (key: string, defaultValue = '') => tryLoad(key) ?? _memoryFallback.get(key) ?? defaultValue;
-/** Save a plain string value to localStorage. Returns false if quota is exceeded. */ export function saveStringToStorage(key: string, value: string): boolean {
+/** Save a plain string value to localStorage. Returns false if quota is exceeded. */ export function saveStringToStorage(
+  key: string,
+  value: string,
+): boolean {
   const saved = trySave(key, value);
   if (!saved) {
     _memoryFallback.set(key, value);
@@ -209,11 +211,7 @@ type StorageValue<T> = {
  * This consolidates the pattern and makes it atomic within a single tab,
  * reducing race condition window for cross-tab updates.
  */
-export function updateStorage<T>(
-  key: string,
-  updater: (current: T) => T,
-  defaultValue: T,
-): T {
+export function updateStorage<T>(key: string, updater: (current: T) => T, defaultValue: T): T {
   const current = loadFromStorage<T>(key, defaultValue);
   const updated = updater(current);
   saveToStorage(key, updated);
@@ -234,15 +232,8 @@ export function wrapWithTimestamp<T>(value: T): StorageValue<T> {
 /**
  * Unwraps a timestamped value, returning the value and timestamp separately.
  */
-export function unwrapTimestamp<T>(
-  stored: unknown,
-): { value: T; timestamp: number } | null {
-  if (
-    stored !== null &&
-    typeof stored === 'object' &&
-    '_ts' in stored &&
-    'value' in stored
-  ) {
+export function unwrapTimestamp<T>(stored: unknown): { value: T; timestamp: number } | null {
+  if (stored !== null && typeof stored === 'object' && '_ts' in stored && 'value' in stored) {
     return {
       value: (stored as StorageValue<T>).value,
       timestamp: (stored as StorageValue<T>)._ts,
@@ -313,11 +304,7 @@ export function listenForStorageUpdates(
   if (!channel) return () => {};
 
   const handler = (event: MessageEvent) => {
-    if (
-      event.data &&
-      event.data.type === 'storage-updated' &&
-      event.data.key
-    ) {
+    if (event.data && event.data.type === 'storage-updated' && event.data.key) {
       callback(event.data.key, event.data.timestamp || Date.now());
     }
   };
@@ -349,7 +336,10 @@ export function loadStationsFromStorage(key: string, defaultValue: Station[] = [
  * Load and validate history entries from storage.
  * Filters out invalid entries gracefully without crashing.
  */
-export function loadHistoryFromStorage(key: string, defaultValue: HistoryEntry[] = []): HistoryEntry[] {
+export function loadHistoryFromStorage(
+  key: string,
+  defaultValue: HistoryEntry[] = [],
+): HistoryEntry[] {
   try {
     const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
     if (!raw) return defaultValue;
@@ -366,7 +356,10 @@ export function loadHistoryFromStorage(key: string, defaultValue: HistoryEntry[]
  * Load and validate a single station from storage.
  * Returns null if validation fails.
  */
-export function loadStationFromStorage(key: string, defaultValue: Station | null = null): Station | null {
+export function loadStationFromStorage(
+  key: string,
+  defaultValue: Station | null = null,
+): Station | null {
   try {
     const raw = tryLoad(key) ?? _memoryFallback.get(key) ?? null;
     if (!raw) return defaultValue;

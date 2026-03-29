@@ -1,7 +1,6 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type React from 'react';
 import type { Station, PlaybackStatus } from '@/components/radio/constants';
 import { STORAGE_KEYS } from '@/components/radio/constants';
 import { loadFromStorage, saveToStorage } from '@/logic/storage-utils';
@@ -11,7 +10,7 @@ import { _NOOP, _uid } from '@/logic/format-utils';
 
 export type StreamQuality = 'good' | 'fair' | 'poor' | 'offline';
 
-export function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
+export function useRadio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retryRef = useRef(0);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
