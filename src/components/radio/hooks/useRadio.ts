@@ -46,9 +46,6 @@ export function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   const mutedRef = useRef(muted);
   volumeRef.current = volume;
   mutedRef.current = muted;
-  /** When effects chain is active, audio.volume must stay at 1 (full signal into the pipeline). */
-  const resolveAudioVolume = () =>
-    effectsEnabledRef.current ? 1 : mutedRef.current ? 0 : volumeRef.current;
   const userPausedRef = useRef(false);
   const bcRef = useRef<BroadcastChannel | null>(null);
   const tabIdRef = useRef<string>(null!);
@@ -354,15 +351,7 @@ export function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.VOLUME, volume);
     const audio = audioRef.current;
-    if (audio && !fadeTimerRef.current) {
-      if (effectsEnabledRef.current) {
-        // Effects active: keep audio.volume at 1 for full signal into processing chain;
-        // actual volume is controlled via the output gain node at the end of the chain.
-        audio.volume = 1;
-      } else {
-        audio.volume = muted ? 0 : volume;
-      }
-    }
+    if (audio && !fadeTimerRef.current) audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
   const play = useCallback(
     (s: Station) => {
@@ -396,12 +385,12 @@ export function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
           if (step >= steps) {
             clearInterval(fadeTimerRef.current!);
             fadeTimerRef.current = null;
-            audio.volume = resolveAudioVolume();
+            audio.volume = mutedRef.current ? 0 : volumeRef.current;
             startPlayback(audio, s.url_resolved, handlePlayRejected);
           }
         }, interval);
       } else {
-        audio.volume = resolveAudioVolume();
+        audio.volume = mutedRef.current ? 0 : volumeRef.current;
         startPlayback(audio, s.url_resolved, handlePlayRejected);
       }
     },
@@ -417,7 +406,7 @@ export function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
     const audio = audioRef.current;
     if (audio) {
       resumeAudioContext(audio);
-      audio.volume = resolveAudioVolume();
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
     }
     audio?.play().catch(_NOOP);
   }, []);
@@ -427,7 +416,7 @@ export function useRadio(effectsEnabledRef: React.RefObject<boolean>) {
     if (audio.paused) {
       userPausedRef.current = false;
       resumeAudioContext(audio);
-      audio.volume = resolveAudioVolume();
+      audio.volume = mutedRef.current ? 0 : volumeRef.current;
       audio.play().catch(_NOOP);
     } else {
       userPausedRef.current = true;

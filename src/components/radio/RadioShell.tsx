@@ -1,5 +1,5 @@
 'use client';
-/* eslint-disable react-hooks/rules-of-hooks */
+
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -17,7 +17,12 @@ import {
 } from 'lucide-react';
 
 /* ── Logic modules ────────────────────────────────────────────────── */
-import { _NOOP, primaryArtist, cleanFeatFromTitle, buildStationShareUrl } from '@/logic/format-utils';
+import {
+  _NOOP,
+  primaryArtist,
+  cleanFeatFromTitle,
+  buildStationShareUrl,
+} from '@/logic/format-utils';
 import {
   AlbumInfo,
   ItunesResult,
@@ -133,18 +138,11 @@ const _EQ_ALLOWED_KEYS = new Set([
 
 type LayoutMode = 'desktop' | 'mobile' | 'pip';
 
-function buildFavInput(
-  t: NowPlayingTrack,
-  s: Station,
-): Omit<FavoriteSong, 'id' | 'timestamp'> {
+function buildFavInput(t: NowPlayingTrack, s: Station): Omit<FavoriteSong, 'id' | 'timestamp'> {
   return { ...t, artist: t.artist ?? '', stationName: s.name, stationUuid: s.stationuuid };
 }
 
-function mkView(
-  mode: ViewState['mode'],
-  label: string,
-  overrides?: Partial<ViewState>,
-): ViewState {
+function mkView(mode: ViewState['mode'], label: string, overrides?: Partial<ViewState>): ViewState {
   return { mode, query: '', tag: '', countryCode: '', countryQueryName: '', label, ...overrides };
 }
 
@@ -530,28 +528,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
 
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
-      const ios = isIOSDevice();
-      if (!ios || effectsEnabled) {
-        analyser.connectAudio(radio.audioRef.current);
-      }
+      analyser.connectAudio(radio.audioRef.current);
       if (effectsEnabled) {
-        analyser.disablePassthrough();
         eqConnectSource(radio.audioRef.current);
-      } else {
-        analyser.enablePassthrough(radio.audioRef.current);
       }
     }
   }, [radio.station, effectsEnabled]);
 
   useEffect(() => {
-    if (effectsEnabled) {
-      setOutputVolume(radio.volume, radio.muted);
-      const audio = radio.audioRef.current;
-      if (audio) audio.volume = 1;
-    } else {
-      setOutputVolume(1, false);
-    }
-  }, [setOutputVolume, effectsEnabled, radio.volume, radio.muted]);
+    setOutputVolume(1, false);
+  }, [setOutputVolume]);
 
   // iOS: resume AudioContext when returning to foreground
   useEffect(() => {
@@ -581,9 +567,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       analyser: an,
     } = handlePlayRef.current;
     const audio = r.ensureAudio();
-    if (!isIOSDevice() || effectsEnabledRef.current) {
-      an.connectAudio(audio);
-    }
+    an.connectAudio(audio);
     if (effectsEnabledRef.current) {
       eqSrc(audio);
     }
@@ -633,15 +617,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       const audio = r.audioRef.current;
       if (next) {
         if (audio) {
-          an.disablePassthrough();
           eqSrc(audio);
           an.connectAudio(audio);
         }
       } else {
         eq.disconnect();
-        if (audio) {
-          an.reconnect(audio);
-        }
       }
       return next;
     });
@@ -1610,8 +1590,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           </AnimatePresence>
         </div>
       </div>{' '}
-      {eqPanelElement}{' '}
-      <AnimatePresence>{toastElement}</AnimatePresence>
+      {eqPanelElement} <AnimatePresence>{toastElement}</AnimatePresence>
       {shellConcerts.length > 0 && (
         <ConcertMobileBanner concerts={shellConcerts} onClick={() => setShowConcertModal(true)} />
       )}

@@ -14,9 +14,6 @@ interface UseAudioAnalyserReturn {
   meterRef: React.RefObject<{ peak: number; rms: number }>;
   isActive: boolean;
   disconnect: () => void;
-  disablePassthrough: () => void;
-  enablePassthrough: (audio: HTMLAudioElement) => void;
-  reconnect: (audio: HTMLAudioElement) => void;
 }
 
 const _EMPTY_ANALYSER_OPTS: UseAudioAnalyserOptions = {};
@@ -32,7 +29,6 @@ export function useAudioAnalyser(
   const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 });
   const [isActive, setIsActive] = useState(false);
-  const passthroughRef = useRef<GainNode | null>(null);
   const connectAudio = useCallback(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
@@ -47,14 +43,6 @@ export function useAudioAnalyser(
           source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
-        // Create passthrough gain so audio reaches speakers even without EQ chain
-        if (!passthroughRef.current) {
-          const gain = ctx.createGain();
-          gain.gain.value = 1;
-          passthroughRef.current = gain;
-        }
-        source.connect(passthroughRef.current);
-        passthroughRef.current.connect(ctx.destination);
         const binCount = analyserRef.current.frequencyBinCount;
         const fftLen = analyserRef.current.fftSize;
         if (!frequencyDataRef.current || frequencyDataRef.current.length !== binCount)
@@ -100,51 +88,11 @@ export function useAudioAnalyser(
     frequencyDataRef.current = null;
     waveDataRef.current = null;
   }, []);
-  const disablePassthrough = useCallback(() => {
-    try {
-      passthroughRef.current?.disconnect();
-    } catch {
-      /* ok */
-    }
-  }, []);
-  const enablePassthrough = useCallback((audio: HTMLAudioElement) => {
-    try {
-      const { ctx, source } = getOrCreateAudioSource(audio);
-      if (!passthroughRef.current) {
-        const gain = ctx.createGain();
-        gain.gain.value = 1;
-        passthroughRef.current = gain;
-      }
-      source.connect(passthroughRef.current);
-      passthroughRef.current.connect(ctx.destination);
-    } catch {
-      /* ok */
-    }
-  }, []);
-  const reconnect = useCallback((audio: HTMLAudioElement) => {
-    try {
-      const { source } = getOrCreateAudioSource(audio);
-      if (analyserRef.current) source.connect(analyserRef.current);
-      if (passthroughRef.current) source.connect(passthroughRef.current);
-    } catch {
-      /* ok */
-    }
-  }, []);
   useEffect(
     () => () => {
       cancelAnimationFrame(rafRef.current);
     },
     [],
   );
-  return {
-    connectAudio,
-    frequencyDataRef,
-    waveDataRef,
-    meterRef,
-    isActive,
-    disconnect,
-    disablePassthrough,
-    enablePassthrough,
-    reconnect,
-  };
+  return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect };
 }
