@@ -14,6 +14,10 @@ interface UseAudioAnalyserReturn {
   meterRef: React.RefObject<{ peak: number; rms: number }>;
   isActive: boolean;
   disconnect: () => void;
+  /** Set passthrough gain (0 = muted when EQ active, 1 = audible when EQ off). Never disconnects the node. */
+  setPassthroughGain: (gain: number) => void;
+  /** Re-connect source → analyser + passthrough after an external node has called source.disconnect(). */
+  rewire: (audio: HTMLAudioElement) => void;
 }
 
 const _EMPTY_ANALYSER_OPTS: UseAudioAnalyserOptions = {};
@@ -29,6 +33,7 @@ export function useAudioAnalyser(
   const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const meterRef = useRef<{ peak: number; rms: number }>({ peak: 0, rms: 0 });
   const [isActive, setIsActive] = useState(false);
+  const passthroughRef = useRef<GainNode | null>(null);
   const connectAudio = useCallback(
     (audio: HTMLAudioElement) => {
       if (connectedRef.current === audio && analyserRef.current) return;
@@ -43,6 +48,15 @@ export function useAudioAnalyser(
           source.connect(analyser);
           analyserRef.current = analyser;
         } else source.connect(analyserRef.current);
+        // Passthrough routes audio to speakers when EQ chain is not active.
+        // It is never disconnected — only its gain value is toggled (0/1) to avoid timing gaps.
+        if (!passthroughRef.current) {
+          const gain = ctx.createGain();
+          gain.gain.value = 1;
+          passthroughRef.current = gain;
+          passthroughRef.current.connect(ctx.destination);
+        }
+        source.connect(passthroughRef.current);
         const binCount = analyserRef.current.frequencyBinCount;
         const fftLen = analyserRef.current.fftSize;
         if (!frequencyDataRef.current || frequencyDataRef.current.length !== binCount)
@@ -88,11 +102,34 @@ export function useAudioAnalyser(
     frequencyDataRef.current = null;
     waveDataRef.current = null;
   }, []);
+  const setPassthroughGain = useCallback((gain: number) => {
+    if (passthroughRef.current) passthroughRef.current.gain.value = gain;
+  }, []);
+  const rewire = useCallback((audio: HTMLAudioElement) => {
+    // Called after eq.disconnect() severs the shared MediaElementAudioSourceNode.
+    // Re-connects source → analyser and source → passthrough without the early-exit guard.
+    try {
+      const { source } = getOrCreateAudioSource(audio);
+      if (analyserRef.current) source.connect(analyserRef.current);
+      if (passthroughRef.current) source.connect(passthroughRef.current);
+    } catch {
+      /* ok — duplicate connections are silently ignored by Web Audio */
+    }
+  }, []);
   useEffect(
     () => () => {
       cancelAnimationFrame(rafRef.current);
     },
     [],
   );
-  return { connectAudio, frequencyDataRef, waveDataRef, meterRef, isActive, disconnect };
+  return {
+    connectAudio,
+    frequencyDataRef,
+    waveDataRef,
+    meterRef,
+    isActive,
+    disconnect,
+    setPassthroughGain,
+    rewire,
+  };
 }

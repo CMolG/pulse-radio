@@ -529,6 +529,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   useEffect(() => {
     if (radio.station && radio.audioRef.current) {
       analyser.connectAudio(radio.audioRef.current);
+      analyser.setPassthroughGain(effectsEnabled ? 0 : 1);
       if (effectsEnabled) {
         eqConnectSource(radio.audioRef.current);
       }
@@ -568,6 +569,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     } = handlePlayRef.current;
     const audio = r.ensureAudio();
     an.connectAudio(audio);
+    an.setPassthroughGain(effectsEnabledRef.current ? 0 : 1);
     if (effectsEnabledRef.current) {
       eqSrc(audio);
     }
@@ -616,12 +618,19 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       if (!station || r.status === 'idle') return next;
       const audio = r.audioRef.current;
       if (next) {
+        // Turning ON: connect EQ first, then mute passthrough — no gap
         if (audio) {
           eqSrc(audio);
           an.connectAudio(audio);
+          an.setPassthroughGain(0);
         }
       } else {
+        // Turning OFF: unmute passthrough, disconnect EQ, then rewire source → analyser + passthrough.
+        // eq.disconnect() calls source.disconnect() internally (severs shared source from all nodes),
+        // so rewire() must run after to restore the analyser and passthrough connections.
+        an.setPassthroughGain(1);
         eq.disconnect();
+        if (audio) an.rewire(audio);
       }
       return next;
     });
