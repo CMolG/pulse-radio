@@ -27,13 +27,26 @@ export async function generateMetadata({ params }: CountryPageProps): Promise<Me
     title,
     description,
     alternates: { canonical, languages },
-    openGraph: { title, description, type: 'website', url: canonical, siteName: 'Pulse Radio', locale: 'en_US' },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: canonical,
+      siteName: 'Pulse Radio',
+      locale: 'en_US',
+    },
     other: { 'geo.region': countryCode, 'geo.placename': country.name },
-    twitter: { card: 'summary', title, description },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
-function BreadcrumbJsonLd({ countryName, countryCode }: { countryName: string; countryCode: string }) {
+function BreadcrumbJsonLd({
+  countryName,
+  countryCode,
+}: {
+  countryName: string;
+  countryCode: string;
+}) {
   const schema = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -51,9 +64,22 @@ export default async function CountryPage({ params }: CountryPageProps) {
   if (!COUNTRY_BY_CODE[countryCode]) notFound();
   const country = COUNTRY_BY_CODE[countryCode];
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative">
       <BreadcrumbJsonLd countryName={country.name} countryCode={countryCode} />
-      <Radio initialCountryCode={countryCode} />
+      <div className="absolute inset-0 z-0 flex flex-col items-center justify-center p-6 text-center bg-[#0a0f1a]">
+        <h1 className="text-4xl font-bold mb-4 text-white">Radio Stations in {country.name}</h1>
+        <p className="text-white/70 max-w-2xl text-lg leading-relaxed mb-4">
+          Listen to live internet radio stations broadcasting from {country.name}. Discover popular
+          genres, trending stations, and local broadcasts from the {country.subregion} region.
+        </p>
+        <p className="text-white/50 max-w-xl text-sm leading-relaxed">
+          Pulse Radio lets you explore radio from {country.name} and {country.region} with a
+          real-time audio visualizer, album art, song history, and favorites.
+        </p>
+      </div>
+      <div className="relative z-10 h-full">
+        <Radio initialCountryCode={countryCode} />
+      </div>
     </div>
   );
 }

@@ -1,26 +1,10 @@
 import { ImageResponse } from 'next/og';
-import { COUNTRY_BY_CODE, SOVEREIGN_COUNTRY_CODES } from '@/logic/i18n';
 
-export const alt = 'Pulse Radio — Listen to radio stations worldwide';
+export const alt = 'Pulse Radio — Free Internet Radio with Visualizer';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-export function generateStaticParams() {
-  return SOVEREIGN_COUNTRY_CODES.map((countryCode) => ({ countryCode }));
-}
-
-function getFlagEmoji(countryCode: string): string {
-  const cc = countryCode.toUpperCase();
-  return [...cc].map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65)).join('');
-}
-
-export default async function OGImage({ params }: { params: Promise<{ countryCode: string }> }) {
-  const { countryCode } = await params;
-  const cc = countryCode.toUpperCase();
-  const country = COUNTRY_BY_CODE[cc];
-  const countryName = country?.name || cc;
-  const flag = getFlagEmoji(cc);
-
+export default function OGImage() {
   return new ImageResponse(
     <div
       style={{
@@ -34,13 +18,12 @@ export default async function OGImage({ params }: { params: Promise<{ countryCod
         fontFamily: 'sans-serif',
       }}
     >
-      <div style={{ fontSize: 96, marginBottom: 16, display: 'flex' }}>{flag}</div>
       <div
         style={{
-          fontSize: 48,
+          fontSize: 64,
           fontWeight: 700,
           color: '#ffffff',
-          marginBottom: 12,
+          marginBottom: 16,
           display: 'flex',
         }}
       >
@@ -51,16 +34,25 @@ export default async function OGImage({ params }: { params: Promise<{ countryCod
           fontSize: 28,
           color: 'rgba(255,255,255,0.7)',
           display: 'flex',
+          marginBottom: 8,
         }}
       >
-        Listen to radio in {countryName}
+        Free Internet Radio with Visualizer
       </div>
-      {/* decorative wave lines */}
+      <div
+        style={{
+          fontSize: 20,
+          color: 'rgba(255,255,255,0.5)',
+          display: 'flex',
+        }}
+      >
+        Stream thousands of stations worldwide
+      </div>
       <div
         style={{
           display: 'flex',
           gap: 8,
-          marginTop: 32,
+          marginTop: 40,
           alignItems: 'flex-end',
         }}
       >

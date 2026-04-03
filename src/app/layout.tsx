@@ -1,8 +1,5 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
-import type {
-  Metadata,
-  Viewport,
-} from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ServiceWorkerRegistrar } from './ServiceWorkerRegistrar';
@@ -60,13 +57,11 @@ export const metadata: Metadata = {
     siteName: 'Pulse Radio',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: '/android-chrome-512x512.png', width: 512, height: 512, alt: 'Pulse Radio', type: 'image/png' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ['/android-chrome-512x512.png'],
   },
   robots: {
     index: true,
@@ -104,23 +99,34 @@ const _JSON_LD_SCHEMA = JSON.stringify({
 });
 function JsonLd() {
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: _JSON_LD_SCHEMA }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: _JSON_LD_SCHEMA }} />
   );
 }
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-[#0a0f1a]`}
     >
       <body className="h-full bg-[#0a0f1a] text-white">
+        <link rel="preconnect" href="https://de2.api.radio-browser.info" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://de2.api.radio-browser.info" />
+        <link rel="preconnect" href="https://is1-ssl.mzstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://is1-ssl.mzstatic.com" />
         <noscript>
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', fontFamily: 'system-ui, sans-serif', color: '#ffffff' }}>
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '3rem 1rem',
+              fontFamily: 'system-ui, sans-serif',
+              color: '#ffffff',
+            }}
+          >
             <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Pulse Radio</h1>
             <p>JavaScript is required to run this application.</p>
-            <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>Please enable JavaScript in your browser settings and reload the page.</p>
+            <p style={{ marginTop: '0.5rem', opacity: 0.7 }}>
+              Please enable JavaScript in your browser settings and reload the page.
+            </p>
           </div>
         </noscript>
         <WebVitalsReporter />
