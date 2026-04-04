@@ -291,6 +291,7 @@ export default function TheaterView({
                 className={`p-2 rounded-full backdrop-blur-md border transition-all ${pipEnabled ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-400' : 'bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50'}`}
                 aria-label={pipEnabled ? 'Disable Mini Player' : 'Enable Mini Player'}
                 aria-pressed={!!pipEnabled}
+                data-testid="pip-toggle-btn"
               >
                 <MonitorSmartphone size={16} />
               </button>

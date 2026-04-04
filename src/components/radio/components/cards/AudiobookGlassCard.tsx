@@ -30,6 +30,7 @@ const AudiobookGlassCard = React.memo(function AudiobookGlassCard({
   return (
     <div
       className="flex-shrink-0 w-44 sm:w-48 rounded-xl border border-white/10 overflow-hidden snap-start"
+      data-testid="audiobook-card"
       style={{
         background: 'rgba(255,255,255,0.06)',
         backdropFilter: 'blur(16px)',

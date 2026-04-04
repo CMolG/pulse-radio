@@ -179,8 +179,15 @@ export default async function StationPage({ params }: StationPageProps) {
       <RadioStationJsonLd station={station} />
 
       {/* ── Server-rendered SEO content ────────────────────────────── */}
-      <div className="absolute inset-0 z-0 flex flex-col items-center justify-center p-6 text-center bg-[#0a0f1a]">
-        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-white/50">
+      <div
+        className="absolute inset-0 z-0 flex flex-col items-center justify-center p-6 text-center bg-[#0a0f1a]"
+        data-testid="station-seo-content"
+      >
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-4 text-sm text-white/50"
+          data-testid="station-breadcrumb"
+        >
           <Link href="/" className="hover:text-white/80 underline">
             Home
           </Link>

@@ -59,7 +59,10 @@ export default function BooksView({
   const { t } = useLocale();
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto px-4 py-3 space-y-4">
+    <div
+      className="flex flex-col h-full overflow-y-auto px-4 py-3 space-y-4"
+      data-testid="books-view"
+    >
       {/* Search bar */}
       <form onSubmit={(e) => e.preventDefault()} className="flex-shrink-0">
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.06] border border-white/[0.05]">

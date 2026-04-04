@@ -199,6 +199,7 @@ export default function BookTheaterView({
     <div
       ref={containerRef}
       className="fixed inset-0 z-50 flex flex-col"
+      data-testid="book-theater"
       style={{
         background: theme.bg,
         backdropFilter: 'blur(24px)',

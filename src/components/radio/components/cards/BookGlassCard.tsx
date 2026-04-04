@@ -23,6 +23,7 @@ export const BookGlassCard = React.memo(function BookGlassCard({
   return (
     <div
       className="group flex-shrink-0 w-[180px] sm:w-[200px] rounded-2xl border border-white/10 overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]"
+      data-testid="book-card"
       style={{
         background: 'rgba(30, 30, 50, 0.55)',
         backdropFilter: 'blur(16px)',

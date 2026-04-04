@@ -94,7 +94,7 @@ const AudiobooksView = React.memo(function AudiobooksView({
     .slice(0, 10);
 
   return (
-    <div className="flex flex-col min-h-0">
+    <div className="flex flex-col min-h-0" data-testid="audiobooks-view">
       {/* Search bar */}
       <div className="flex-shrink-0 px-4 pb-3">
         <form onSubmit={handleSubmit}>
