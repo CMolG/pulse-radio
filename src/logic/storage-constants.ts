@@ -23,6 +23,11 @@ export const STORAGE_KEYS = {
   EQ_PRESET_NAME: 'radio-eq-preset-name',
   QUALITY_MIGRATION: 'radio-quality-migration',
   STATION_QUEUE: 'radio-station-queue',
+  AUDIOBOOK_RECENTS: 'radio-audiobook-recents',
+  PIP_ENABLED: 'radio-pip-enabled',
+  BOOK_RECENTS: 'radio-book-recents',
+  BOOK_PROGRESS: 'radio-book-progress',
+  BOOK_READER_PREFS: 'radio-book-reader-prefs',
 } as const;
 
 export const MAX_RECENT = 15;

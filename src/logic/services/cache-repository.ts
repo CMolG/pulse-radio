@@ -13,7 +13,14 @@
  * a single in-flight Promise to avoid duplicate API calls.
  */
 import { db, timedQuery, recordCacheHit, recordCacheMiss, recordCacheWrite } from '@/logic/db';
-import { itunesCache, artistInfoCache, concertsCache, lyricsCache } from '@/logic/db/schema';
+import {
+  itunesCache,
+  artistInfoCache,
+  concertsCache,
+  lyricsCache,
+  librivoxCache,
+  gutenbergCache,
+} from '@/logic/db/schema';
 import { cacheGet, cacheSet, type Namespace } from '@/logic/server-cache';
 import { eq, sql } from 'drizzle-orm';
 import { logger } from '@/logic/logger';
@@ -23,13 +30,17 @@ type CacheTable =
   | typeof itunesCache
   | typeof artistInfoCache
   | typeof concertsCache
-  | typeof lyricsCache;
+  | typeof lyricsCache
+  | typeof librivoxCache
+  | typeof gutenbergCache;
 
 const TABLE_MAP: Record<string, CacheTable> = {
   itunes: itunesCache,
   'artist-info': artistInfoCache,
   concerts: concertsCache,
   lyrics: lyricsCache,
+  librivox: librivoxCache,
+  gutenberg: gutenbergCache,
 };
 
 // ARCH-053: In-flight request deduplication tracker (module-scoped singleton)
