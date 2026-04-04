@@ -19,6 +19,7 @@
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "format:check": "prettier --check 'src/**/*.{ts,tsx}'",
     "seo:audit": "node scripts/seo-audit.js",
+    "station:catalog": "tsx scripts/station-catalog.ts",
     "prepare": "husky"
   },
   "dependencies": {
