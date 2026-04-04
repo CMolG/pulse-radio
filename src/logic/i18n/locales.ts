@@ -231,6 +231,7 @@ export const LOCALE_SELF_CANDIDATES: Record<SupportedLocale, SupportedLocale[]> 
   genreLocal: 'Local',
   genreWorld: 'World',
   seeMore: 'See more',
+  usersPlayingNow: 'Users Playing Now',
 } as const;
 export type MessageKey = keyof typeof BASE_MESSAGES;
 export type MessageBundle = Record<MessageKey, string>;
@@ -279,6 +280,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     genreLocal: 'Local',
     genreWorld: 'Mundial',
     seeMore: 'Ver más',
+    usersPlayingNow: 'Escuchando ahora',
   },
   fr: {
     topStations: 'Stations populaires',
@@ -324,6 +326,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     genreLocal: 'Local',
     genreWorld: 'Monde',
     seeMore: 'Voir plus',
+    usersPlayingNow: 'En écoute maintenant',
   },
   de: {
     topStations: 'Top-Sender',
@@ -367,6 +370,7 @@ const DEEP_MESSAGES: Partial<Record<SupportedLocale, Partial<MessageBundle>>> = 
     genreLocal: 'Lokal',
     genreWorld: 'Weltmusik',
     seeMore: 'Mehr anzeigen',
+    usersPlayingNow: 'Jetzt gehört',
   },
   'pt-BR': {
     topStations: 'Estações populares',

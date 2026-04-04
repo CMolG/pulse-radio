@@ -15,6 +15,13 @@
       "when": 1774611760513,
       "tag": "0001_left_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1775246917249,
+      "tag": "0002_careful_piledriver",
+      "breakpoints": true
     }
   ]
 }

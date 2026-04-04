@@ -2,7 +2,7 @@ import { defineConfig } from 'drizzle-kit';
 import { join } from 'node:path';
 
 export default defineConfig({
-  schema: './src/lib/db/schema.ts',
+  schema: './src/logic/db/schema.ts',
   out: './drizzle',
   dialect: 'sqlite',
   dbCredentials: {

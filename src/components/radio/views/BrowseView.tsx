@@ -15,10 +15,12 @@ import {
   ScanSearch,
   Sparkles,
   Star,
+  Users,
   X,
   Zap,
 } from 'lucide-react';
 import type { Station, ViewState, BrowseCategory } from '../constants';
+import type { PopularStation } from '../hooks/usePopularStations';
 import { GENRE_LABEL_KEYS, GENRE_CATEGORIES } from '../constants';
 import { useLocale } from '@/context/LocaleContext';
 import { useMediaQuery } from 'usehooks-ts';
@@ -95,6 +97,7 @@ type BrowseViewProps = {
   ) => void;
   onGoHome?: () => void;
   userGenreOrder?: string[];
+  popularStations?: PopularStation[];
 };
 
 type LiveInfo = {
@@ -202,6 +205,7 @@ function BrowseView({
   onSelectCountry,
   onGoHome,
   userGenreOrder,
+  popularStations,
 }: BrowseViewProps) {
   const { t, locale } = useLocale();
   const countryChips = useMemo(() => getCountryChipsForLocale(locale), [locale]);
@@ -657,6 +661,83 @@ function BrowseView({
                   >
                     {renderScrollStations(recent)}
                   </ScrollRow>
+                )}{' '}
+                {/* Users Playing Now row */}{' '}
+                {popularStations && popularStations.length > 0 && (
+                  <div className="mb-4">
+                    <div
+                      className={`flex items-center justify-between mb-2 ${isMobile ? 'px-4' : ''}`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="inline-flex items-center justify-center w-5 h-5 rounded-full"
+                          style={{
+                            background: 'linear-gradient(135deg, #22d3ee, #8b5cf6, #d946ef)',
+                            boxShadow: '0 0 8px rgba(139, 92, 246, 0.5)',
+                          }}
+                          aria-hidden="true"
+                        >
+                          <Users size={11} className="text-white" />
+                        </span>
+                        <h3
+                          className="text-[13px] font-semibold"
+                          style={{
+                            background: 'linear-gradient(90deg, #22d3ee, #a78bfa, #e879f9)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          {t('usersPlayingNow')}
+                        </h3>
+                      </div>
+                    </div>
+                    <div
+                      className={`relative rounded-xl p-[1px] ${isMobile ? 'mx-4' : ''}`}
+                      style={{
+                        background:
+                          'linear-gradient(135deg, rgba(34,211,238,0.3), rgba(139,92,246,0.3), rgba(217,70,239,0.2))',
+                      }}
+                    >
+                      <div
+                        className="rounded-xl overflow-hidden"
+                        style={{
+                          background: 'rgba(15, 12, 28, 0.7)',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                        }}
+                      >
+                        <div
+                          className={`flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3 pt-3 px-3 [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]`}
+                          role="region"
+                          aria-roledescription="carousel"
+                          aria-label={t('usersPlayingNow')}
+                          tabIndex={0}
+                        >
+                          {popularStations.map(({ station, liveTrack }) => (
+                            <div
+                              key={station.stationuuid}
+                              className={`snap-start shrink-0 ${itemWidth}`}
+                            >
+                              <StationCard
+                                station={station}
+                                isCurrent={station.stationuuid === currentStation?.stationuuid}
+                                isPlaying={
+                                  isPlaying && station.stationuuid === currentStation?.stationuuid
+                                }
+                                isFavorite={isFavorite(station.stationuuid)}
+                                onPlay={() => onPlay(station)}
+                                onToggleFav={() => onToggleFav(station)}
+                                onPrefetch={() => onPrefetch?.(station.url_resolved)}
+                                liveStatus="loaded"
+                                liveTrack={liveTrack}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}{' '}
                 {effectiveBrowseOrder.map((catId) => {
                   const cat = categoryById.get(catId);

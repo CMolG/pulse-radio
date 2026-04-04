@@ -69,6 +69,7 @@ import { useWakeLock } from './hooks/useWakeLock';
 import { useStationQueue } from './hooks/useStationQueue';
 import { useContainerSize } from './hooks/useContainerSize';
 import { useAudioReactiveBackground } from './hooks/useAudioReactiveBackground';
+import { usePopularStations } from './hooks/usePopularStations';
 
 /* ── Components ───────────────────────────────────────────────────── */
 import { NowPlayingBar } from './components/NowPlayingBar';
@@ -194,6 +195,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     analyser.isActive,
   );
   const albumArt = useAlbumArt(track?.title ?? null, track?.artist ?? null);
+  const popularStations = usePopularStations();
 
   /* ── Lyrics → iTunes fallback ──────────────────────────────────── */
   const [lyricsRetryArt, setLyricsRetryArt] = useState<AlbumInfo | null>(null);
@@ -578,6 +580,14 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     setTheaterMode(true);
     const nextIdx = sq.queue.findIndex((s) => s.stationuuid === station.stationuuid) + 1;
     if (nextIdx > 0 && nextIdx < sq.queue.length) r.prefetchStream(sq.queue[nextIdx].url_resolved);
+    // Record play for "Users Playing Now" popularity tracking (fire-and-forget)
+    if (station.stationuuid) {
+      fetch('/api/v1/station-play', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ station }),
+      }).catch(_NOOP);
+    }
   }, []);
 
   /* ── Auto-tune from URL ────────────────────────────────────────── */
@@ -1135,6 +1145,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       onSelectCountry={handleSelectCountry}
       onGoHome={handleGoHome}
       userGenreOrder={usageStats.genreOrder}
+      popularStations={popularStations.stations}
     />
   );
 

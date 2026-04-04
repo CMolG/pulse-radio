@@ -74,3 +74,17 @@ export const nowPlaying = sqliteTable('now_playing', {
   country: text('country'),
   genre: text('genre'),
 });
+
+export const stationPlays = sqliteTable('station_plays', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  stationUuid: text('station_uuid').notNull(),
+  stationName: text('station_name').notNull(),
+  stationUrl: text('station_url').notNull(),
+  stationFavicon: text('station_favicon'),
+  stationCountry: text('station_country'),
+  stationCountrycode: text('station_countrycode'),
+  stationTags: text('station_tags'),
+  stationCodec: text('station_codec'),
+  stationBitrate: integer('station_bitrate', { mode: 'number' }),
+  playedAt: integer('played_at', { mode: 'number' }).notNull(),
+});
