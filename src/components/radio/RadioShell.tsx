@@ -1783,6 +1783,22 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           />
         )}
       </AnimatePresence>
+      {readingBook && (
+        <BookTheaterView
+          pages={bookReader.pages}
+          currentPage={bookReader.currentPage}
+          totalPages={bookReader.totalPages}
+          loading={bookReader.loading}
+          error={bookReader.error}
+          bookTitle={readingBook.title}
+          preferences={bookReader.preferences}
+          onGoToPage={bookReader.goToPage}
+          onNextPage={bookReader.nextPage}
+          onPrevPage={bookReader.prevPage}
+          onSetPreferences={bookReader.setPreferences}
+          onClose={() => setReadingBook(null)}
+        />
+      )}
       {devApiConsoleElement}
       {sharedModals}
       {pipPortal}
