@@ -7,7 +7,15 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ArrowLeft, Radio, Star, Heart, ExternalLink, Clock } from 'lucide-react';
+import {
+  ArrowLeft,
+  Radio,
+  Star,
+  Heart,
+  ExternalLink,
+  Clock,
+  MonitorSmartphone,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Station, NowPlayingTrack, LyricsData } from '../types';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -44,6 +52,10 @@ type Props = {
   lyricsVariant?: 'mobile' | 'desktop';
   compact?: boolean;
   concerts?: unknown;
+  pipSupported?: boolean;
+  pipEnabled?: boolean;
+  onEnablePiP?: () => void;
+  onDisablePiP?: () => void;
 };
 
 const _colorCache = new Map<string, Promise<[string, string, string]>>();
@@ -139,6 +151,10 @@ export default function TheaterView({
   syncMode,
   lyricsVariant = 'mobile',
   compact,
+  pipSupported,
+  pipEnabled,
+  onEnablePiP,
+  onDisablePiP,
 }: Props) {
   const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
   const [colors, setColors] = useState<[string, string, string]>(FALLBACK_COLORS);
@@ -267,6 +283,17 @@ export default function TheaterView({
                 aria-pressed={!!isSongLiked}
               >
                 <Heart size={16} className={isSongLiked ? 'fill-pink-400' : ''} />
+              </button>
+            )}
+            {pipSupported && (onEnablePiP || onDisablePiP) && (
+              <button
+                onClick={pipEnabled ? onDisablePiP : onEnablePiP}
+                className={`p-2 rounded-full backdrop-blur-md border transition-all ${pipEnabled ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-400' : 'bg-black/30 border-white/10 text-soft hover:text-white hover:bg-black/50'}`}
+                aria-label={pipEnabled ? 'Disable Mini Player' : 'Enable Mini Player'}
+                aria-pressed={!!pipEnabled}
+                data-testid="pip-toggle-btn"
+              >
+                <MonitorSmartphone size={16} />
               </button>
             )}
           </div>

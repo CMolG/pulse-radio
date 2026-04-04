@@ -32,3 +32,29 @@ export function artistInfoKey(artist: string): string {
 export function itunesKey(term: string, media: string): string {
   return `${media}:${term.toLowerCase().trim()}`;
 }
+
+export function gutenbergBooksKey(params: Record<string, string | undefined>): string {
+  const parts = ['search', 'topic', 'language', 'page']
+    .map((k) => (params[k] ? `${k}:${normalizeCacheKey(params[k]!)}` : ''))
+    .filter(Boolean);
+  return parts.join('|') || 'popular';
+}
+
+export function gutenbergBookKey(id: string): string {
+  return `book:${id}`;
+}
+
+export function gutenbergContentKey(id: string, format: string, pageSize: number): string {
+  return `content:${id}:${format}:${pageSize}`;
+}
+
+export function librivoxAudiobooksKey(params: Record<string, string | undefined>): string {
+  const parts = ['title', 'author', 'genre', 'id', 'since', 'limit', 'offset']
+    .map((k) => (params[k] ? `${k}:${normalizeCacheKey(params[k]!)}` : ''))
+    .filter(Boolean);
+  return parts.join('|') || 'all';
+}
+
+export function librivoxAudiotracksKey(projectId: string): string {
+  return `tracks:${projectId}`;
+}

@@ -12,7 +12,9 @@ export type Namespace =
   | 'lyrics'
   | 'station-blacklist'
   | 'popular-icy'
-  | 'popular-stations';
+  | 'popular-stations'
+  | 'librivox'
+  | 'gutenberg';
 
 interface CacheEntry<T> {
   value: T;

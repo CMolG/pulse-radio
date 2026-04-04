@@ -75,6 +75,20 @@ export const nowPlaying = sqliteTable('now_playing', {
   genre: text('genre'),
 });
 
+export const librivoxCache = sqliteTable('librivox_cache', {
+  key: text('key').primaryKey(),
+  payload: text('payload').notNull(),
+  fetchedAt: integer('fetched_at', { mode: 'number' }).notNull(),
+  ttlMs: integer('ttl_ms', { mode: 'number' }).notNull(),
+});
+
+export const gutenbergCache = sqliteTable('gutenberg_cache', {
+  key: text('key').primaryKey(),
+  payload: text('payload').notNull(),
+  fetchedAt: integer('fetched_at', { mode: 'number' }).notNull(),
+  ttlMs: integer('ttl_ms', { mode: 'number' }).notNull(),
+});
+
 export const stationPlays = sqliteTable('station_plays', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   stationUuid: text('station_uuid').notNull(),

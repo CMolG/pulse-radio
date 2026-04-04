@@ -40,10 +40,7 @@ function getClientIp(request: NextRequest): string {
  * Check rate limit for a request. Returns null if allowed,
  * or a 429 Response if the limit has been exceeded.
  */
-export function rateLimit(
-  request: NextRequest,
-  config: RateLimitConfig,
-): Response | null {
+export function rateLimit(request: NextRequest, config: RateLimitConfig): Response | null {
   const { limit, windowMs } = config;
   const now = Date.now();
   const ip = getClientIp(request);
@@ -62,19 +59,14 @@ export function rateLimit(
   entry.count++;
 
   if (entry.count > limit) {
-    const retryAfter = Math.ceil(
-      (entry.windowStart + windowMs - now) / 1000,
-    );
-    return new Response(
-      JSON.stringify({ error: 'Too many requests' }),
-      {
-        status: 429,
-        headers: {
-          'Content-Type': 'application/json',
-          'Retry-After': String(retryAfter),
-        },
+    const retryAfter = Math.ceil((entry.windowStart + windowMs - now) / 1000);
+    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(retryAfter),
       },
-    );
+    });
   }
 
   return null;
@@ -89,4 +81,6 @@ export const RATE_LIMITS = {
   artistInfo: { limit: 60, windowMs: 60_000 },
   concerts: { limit: 60, windowMs: 60_000 },
   cronSync: { limit: 2, windowMs: 60_000 },
+  librivox: { limit: 60, windowMs: 60_000 },
+  gutenberg: { limit: 60, windowMs: 60_000 },
 } as const satisfies Record<string, RateLimitConfig>;

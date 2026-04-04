@@ -3,6 +3,7 @@
 /* Copyright (c) 2026 Carlos Molina Galindo. Open source: Pulse Radio. */
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -14,6 +15,8 @@ import {
   Settings,
   Minimize2,
   Maximize2,
+  Headphones,
+  BookOpen,
 } from 'lucide-react';
 
 /* ── Logic modules ────────────────────────────────────────────────── */
@@ -70,6 +73,7 @@ import { useStationQueue } from './hooks/useStationQueue';
 import { useContainerSize } from './hooks/useContainerSize';
 import { useAudioReactiveBackground } from './hooks/useAudioReactiveBackground';
 import { usePopularStations } from './hooks/usePopularStations';
+import { usePiPTheaterOrchestrator } from './hooks/usePiPTheaterOrchestrator';
 
 /* ── Components ───────────────────────────────────────────────────── */
 import { NowPlayingBar } from './components/NowPlayingBar';
@@ -86,6 +90,7 @@ import { ConcertMobileBanner } from './components/concerts/ConcertMobileBanner';
 import { ConcertModal } from './components/concerts/ConcertModal';
 import DevApiConsole from './components/dev/DevApiConsole';
 import ApiPlayground from './components/dev/ApiPlayground';
+import PiPTheaterFrame from './components/PiPTheaterFrame';
 
 /* ── Views ────────────────────────────────────────────────────────── */
 import BrowseView from './views/BrowseView';
@@ -93,6 +98,14 @@ import TheaterView from './views/TheaterView';
 import MobileSettingsPanel from './views/MobileSettingsPanel';
 import FavoriteSongsView from './views/FavoriteSongsView';
 import HistoryGridView from './views/HistoryGridView';
+import AudiobooksView from './views/AudiobooksView';
+import { useAudiobooks } from './hooks/useAudiobooks';
+import { useAudiobookRecents } from './hooks/useAudiobookRecents';
+import BooksView from './views/BooksView';
+import BookTheaterView from './views/BookTheaterView';
+import { useBooks } from './hooks/useBooks';
+import { useBookReader } from './hooks/useBookReader';
+import type { BookItem } from '@/logic/gutenberg-api';
 
 /* ── Re-exports for backwards compatibility ───────────────────────── */
 export {
@@ -375,6 +388,25 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const [miniMode, setMiniMode] = useState(false);
   const [theaterMode, setTheaterMode] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+
+  /* ── Picture-in-Picture mini player ─────────────────────────────── */
+  const [pipEnabled, setPipEnabled] = useState(() =>
+    loadFromStorage<boolean>(STORAGE_KEYS.PIP_ENABLED, false),
+  );
+  const pip = usePiPTheaterOrchestrator({
+    isPlaying: radio.status === 'playing',
+    isTheaterMode: theaterMode,
+    isPiPEnabled: pipEnabled,
+  });
+  const handleEnablePiP = useCallback(() => {
+    setPipEnabled(true);
+    saveToStorage(STORAGE_KEYS.PIP_ENABLED, true);
+  }, []);
+  const handleDisablePiP = useCallback(() => {
+    setPipEnabled(false);
+    saveToStorage(STORAGE_KEYS.PIP_ENABLED, false);
+    pip.disablePiP();
+  }, [pip]);
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== 'undefined' ? navigator.onLine : true,
   );
@@ -423,7 +455,9 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   }, []);
 
   /* ── Navigation state ──────────────────────────────────────────── */
-  const [activeTab, setActiveTab] = useState<'discover' | 'history' | 'favorites'>('discover');
+  const [activeTab, setActiveTab] = useState<
+    'discover' | 'history' | 'favorites' | 'audiobooks' | 'books'
+  >('discover');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState<SongDetailData | null>(null);
 
@@ -1067,6 +1101,16 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       label: t('favorites'),
       icon: <Heart size={sz} aria-hidden="true" />,
     },
+    {
+      id: 'audiobooks' as const,
+      label: t('audiobooks'),
+      icon: <Headphones size={sz} aria-hidden="true" />,
+    },
+    {
+      id: 'books' as const,
+      label: t('books'),
+      icon: <BookOpen size={sz} aria-hidden="true" />,
+    },
   ];
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const navTabs14 = useMemo(() => mkNavTabs(14), [t]);
@@ -1074,6 +1118,15 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
   const navTabs13 = useMemo(() => mkNavTabs(13), [t]);
 
   const { concerts: shellConcerts } = useConcerts(enrichedTrack?.artist, !!radio.station);
+
+  /* ── Audiobooks ────────────────────────────────────────────────── */
+  const audiobooksHook = useAudiobooks();
+  const audiobookRecents = useAudiobookRecents();
+
+  /* ── Books (Gutenberg) ──────────────────────────────────────────── */
+  const booksHook = useBooks();
+  const [readingBook, setReadingBook] = useState<BookItem | null>(null);
+  const bookReader = useBookReader(readingBook);
 
   /* ── Prop bundles ──────────────────────────────────────────────── */
   const theaterBaseProps = {
@@ -1096,6 +1149,10 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     onBack: () => setTheaterMode(false),
     onToggleFav: radio.station ? handleToggleFav : undefined,
     isFavorite: radio.station ? favs.has(radio.station.stationuuid) : false,
+    pipSupported: pip.isSupported,
+    pipEnabled,
+    onEnablePiP: handleEnablePiP,
+    onDisablePiP: handleDisablePiP,
   };
 
   const nowPlayingBaseProps = {
@@ -1169,6 +1226,32 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
     />
   );
 
+  const audiobooksViewElement = (
+    <AudiobooksView
+      books={audiobooksHook.books}
+      loading={audiobooksHook.loading}
+      error={audiobooksHook.error}
+      hasMore={audiobooksHook.hasMore}
+      query={audiobooksHook.query}
+      onSearch={audiobooksHook.search}
+      onLoadMore={audiobooksHook.loadMore}
+      recents={audiobookRecents.recents}
+      onAddRecent={audiobookRecents.addRecent}
+      t={t}
+    />
+  );
+
+  const booksViewElement = (
+    <BooksView
+      books={booksHook.books}
+      loading={booksHook.loading}
+      error={booksHook.error}
+      search={booksHook.search}
+      onSearchChange={booksHook.setSearch}
+      onOpenReader={setReadingBook}
+    />
+  );
+
   const primaryGenre = useMemo(() => {
     const t = radio.station?.tags;
     if (!t) return undefined;
@@ -1203,6 +1286,33 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
       {songDetailModal} {shortcutsOverlay} {offlineBanner} <OnboardingModal />
     </>
   );
+
+  const pipPortal =
+    pip.pipState === 'open' && pip.pipWindow
+      ? createPortal(
+          <PiPTheaterFrame
+            station={
+              radio.station ? { name: radio.station.name, favicon: radio.station.favicon } : null
+            }
+            track={
+              enrichedTrack
+                ? {
+                    title: enrichedTrack.title,
+                    artist: enrichedTrack.artist,
+                    artworkUrl: enrichedTrack.artworkUrl,
+                  }
+                : null
+            }
+            isPlaying={radio.status === 'playing'}
+            onTogglePlay={radio.togglePlay}
+            onReturn={() => {
+              window.focus();
+              pip.pipWindow?.close();
+            }}
+          />,
+          pip.pipWindow.document.body,
+        )
+      : null;
 
   const devApiConsoleElement =
     process.env.NODE_ENV === 'development' ? (
@@ -1285,6 +1395,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           compact
         />{' '}
         {sharedModals}
+        {pipPortal}
       </div>
     );
   }
@@ -1405,7 +1516,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                   ? browseViewElement
                   : activeTab === 'history'
                     ? historyViewElement
-                    : favsViewElement}{' '}
+                    : activeTab === 'audiobooks'
+                      ? audiobooksViewElement
+                      : activeTab === 'books'
+                        ? booksViewElement
+                        : favsViewElement}{' '}
               </div>
             </main>
           )}
@@ -1453,6 +1568,7 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
         </div>
         {devApiConsoleElement}
         {sharedModals}
+        {pipPortal}
       </div>
     );
   }
@@ -1563,7 +1679,11 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
                         ? [viewKey, browseViewElement, '']
                         : activeTab === 'history'
                           ? ['history-tab', historyViewElement, ' overflow-y-auto']
-                          : ['favorites-tab', favsViewElement, ' overflow-y-auto'];
+                          : activeTab === 'audiobooks'
+                            ? ['audiobooks-tab', audiobooksViewElement, ' overflow-y-auto']
+                            : activeTab === 'books'
+                              ? ['books-tab', booksViewElement, ' overflow-y-auto']
+                              : ['favorites-tab', favsViewElement, ' overflow-y-auto'];
                     return (
                       <motion.div
                         key={key}
@@ -1663,8 +1783,25 @@ export default function RadioShell({ isPip: isPipProp, initialCountryCode }: Rad
           />
         )}
       </AnimatePresence>
+      {readingBook && (
+        <BookTheaterView
+          pages={bookReader.pages}
+          currentPage={bookReader.currentPage}
+          totalPages={bookReader.totalPages}
+          loading={bookReader.loading}
+          error={bookReader.error}
+          bookTitle={readingBook.title}
+          preferences={bookReader.preferences}
+          onGoToPage={bookReader.goToPage}
+          onNextPage={bookReader.nextPage}
+          onPrevPage={bookReader.prevPage}
+          onSetPreferences={bookReader.setPreferences}
+          onClose={() => setReadingBook(null)}
+        />
+      )}
       {devApiConsoleElement}
       {sharedModals}
+      {pipPortal}
     </div>
   );
 }
